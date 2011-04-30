@@ -247,109 +247,128 @@ class App(wx.App, MiscEventSourceMixin):
             # We create a "password" so that no other user can send commands to this
             # WikidPad instance.
             appCookie = createRandomString(30).encode("ascii")
-
-            port = Ipc.createCommandServer(appCookie)
-
-            # True if this is the single existing instance which should write
-            # a new "AppLock.lock" file which either didn't exist or was invalid
-
-            singleInstance = True
-
-            # TODO maybe more secure method to ensure atomic exist. check and
-            #   writing of file
-            if os.path.exists(pathEnc(os.path.join(
-                    self.globalConfigSubDir, "AppLock.lock"))):
-                singleInstance = False
-                # There seems to be(!) another instance already
-                # TODO Try to send commandline
-                appLockContent = loadEntireFile(os.path.join(
-                        self.globalConfigSubDir, "AppLock.lock"))
-#                 f = open(), "r")
-#                 f.read()
-#                 f.close()
-                
-                lines = appLockContent.split("\n")
-                if len(lines) != 3:
-                    sys.stderr.write(_(u"Invalid AppLock.lock file.\n"
-                            u"Ensure that WikidPad is not running,\n"
-                            u"then delete file \"%s\" if present yet.\n") %
-                                (os.path.join(self.globalConfigSubDir,
-                                "AppLock.lock")))
-                    return True # TODO Error handling!!!
-
-                appCookie = lines[0]
-                remotePort = int(lines[1])
-
-                if port != remotePort:
-                    # Everything ok so far
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.settimeout(10.0)
-                    try:
+            
+            try:
+                port = Ipc.createCommandServer(appCookie)
+    
+                # True if this is the single existing instance which should write
+                # a new "AppLock.lock" file which either didn't exist or was invalid
+    
+                singleInstance = True
+    
+                # TODO maybe more secure method to ensure atomic exist. check and
+                #   writing of file
+                if os.path.exists(pathEnc(os.path.join(
+                        self.globalConfigSubDir, "AppLock.lock"))):
+                    singleInstance = False
+                    # There seems to be(!) another instance already
+                    # TODO Try to send commandline
+                    appLockContent = loadEntireFile(os.path.join(
+                            self.globalConfigSubDir, "AppLock.lock"))
+    #                 f = open(), "r")
+    #                 f.read()
+    #                 f.close()
+                    
+                    lines = appLockContent.split("\n")
+                    if len(lines) != 3:
+                        sys.stderr.write(_(u"Invalid AppLock.lock file.\n"
+                                u"Ensure that WikidPad is not running,\n"
+                                u"then delete file \"%s\" if present yet.\n") %
+                                    (os.path.join(self.globalConfigSubDir,
+                                    "AppLock.lock")))
+                        return True # TODO Error handling!!!
+    
+                    appCookie = lines[0]
+                    remotePort = int(lines[1])
+    
+                    if port != remotePort:
+                        # Everything ok so far
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        sock.settimeout(10.0)
                         try:
-                            sock.connect(("127.0.0.1", remotePort))
-                            greet = self._readSocketLine(sock)
-                            if greet == "WikidPad_command_server 1.0":
-                                sock.send("cmdline\n" + appCookie + "\n")
-                                
-                                ack = self._readSocketLine(sock)
-                                if ack[0] == "+":
-                                    # app cookie ok
-                                    sst = SerializeStream(stringBuf="", readMode=False)
-                                    sst.serArrString(sys.argv[1:])
-                                    sock.send(sst.getBytes())
-                                
-                                    return True
-    
-                            # Reaching this point means something went wrong
-                            singleInstance = True  # TODO More fine grained reaction
-                        except socket.timeout, e:
-                            singleInstance = True
-                        except socket.error, e:
-                            if (e.args[0] == 10061 or e.args[0] == 111):
-                                # Connection refused (port not bound to a server)
+                            try:
+                                sock.connect(("127.0.0.1", remotePort))
+                                greet = self._readSocketLine(sock)
+                                if greet == "WikidPad_command_server 1.0":
+                                    sock.send("cmdline\n" + appCookie + "\n")
+                                    
+                                    ack = self._readSocketLine(sock)
+                                    if ack[0] == "+":
+                                        # app cookie ok
+                                        sst = SerializeStream(stringBuf="", readMode=False)
+                                        sst.serArrString(sys.argv[1:])
+                                        sock.send(sst.getBytes())
+                                    
+                                        return True
+        
+                                # Reaching this point means something went wrong
+                                singleInstance = True  # TODO More fine grained reaction
+                            except socket.timeout, e:
                                 singleInstance = True
-                            else:
-                                raise
-                    finally:
-                        sock.close()
+                            except socket.error, e:
+                                if (e.args[0] == 10061 or e.args[0] == 111):
+                                    # Connection refused (port not bound to a server)
+                                    singleInstance = True
+                                else:
+                                    raise
+                        finally:
+                            sock.close()
+        
+                    else:
+                        # Sure indicator that AppLock file is invalid if newly
+                        # created server opened a port which is claimed to be used
+                        # already by previously started instance.
+                        singleInstance = True
     
+                if not singleInstance:
+                    return False
+    
+                if self.globalConfig.getboolean("main", "zombieCheck", True):
+                    otherProcIds = OsAbstract.checkForOtherInstances()
+                    if len(otherProcIds) > 0:
+                        procIdString = u", ".join([unicode(procId)
+                                for procId in otherProcIds])
+                        result = wx.MessageBox(
+                                _(u"Other WikidPad process(es) seem(s) to run already\n"
+                                "Process identifier(s): %s\nContinue?") % procIdString,
+                                _(u"Continue?"),
+                                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
+    
+                        if result == wx.NO:
+                            return False
+
+                if port != -1:
+                    # Server is connected, start it
+                    Ipc.startCommandServer()
+        
+                    appLockContent = appCookie + "\n" + str(port) + "\n"
+                    appLockPath = os.path.join(self.globalConfigSubDir,
+                            "AppLock.lock")
+    
+                    writeEntireFile(appLockPath, appLockContent)
+    
+                    self.removeAppLockOnExit = True
+    
+                    Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
                 else:
-                    # Sure indicator that AppLock file is invalid if newly
-                    # created server opened a port which is claimed to be used
-                    # already by previously started instance.
-                    singleInstance = True
-
-            if not singleInstance:
-                return False
-
-            if self.globalConfig.getboolean("main", "zombieCheck", True):
-                otherProcIds = OsAbstract.checkForOtherInstances()
-                if len(otherProcIds) > 0:
-                    procIdString = u", ".join([unicode(procId)
-                            for procId in otherProcIds])
                     result = wx.MessageBox(
-                            _(u"Other WikidPad process(es) seem(s) to run already\n"
-                            "Process identifier(s): %s\nContinue?") % procIdString,
+                            _(u"WikidPad couldn't detect if other processes are "
+                            "already running.\nContinue anyway?"),
                             _(u"Continue?"),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
                     if result == wx.NO:
                         return False
+                    
+            except socket.error, e:
+                result = wx.MessageBox(
+                        _(u"WikidPad couldn't detect if other processes are "
+                        "already running.\nSocket error: %s\nContinue anyway?") %
+                        unicode(e), _(u"Continue?"),
+                        wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
-
-            if port != -1:
-                # Server is connected, start it
-                Ipc.startCommandServer()
-    
-                appLockContent = appCookie + "\n" + str(port) + "\n"
-                appLockPath = os.path.join(self.globalConfigSubDir,
-                        "AppLock.lock")
-
-                writeEntireFile(appLockPath, appLockContent)
-
-                self.removeAppLockOnExit = True
-
-                Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
+                if result == wx.NO:
+                    return False
 
 
         # Build icon cache

@@ -40,6 +40,13 @@ else:
         return s
 
 
+def wxToGtkLabel(s):
+    """
+    The message catalog for internationalization should only contain
+    labels with wx style ('&' to tag shortcut character)
+    """
+    return s.replace("&", "_")
+
 
 class LinkConverterForPreviewWk:
     """
@@ -111,8 +118,10 @@ class WikiHtmlViewWK(wx.Panel):
                 # file without anchors
 
         self.anchor = None  # Name of anchor to jump to when view gets visible
+        self.lastAnchor = None  
         self.on_link = None # Link overwhich the mouse currently resides
         self.passNavigate = 0
+        self.freezeCount = 0
 
         # TODO Should be changed to presenter as controller
         self.exporterInstance = PluginManager.getExporterTypeDict(
@@ -204,6 +213,7 @@ class WikiHtmlViewWK(wx.Panel):
             self.html.ctrl.connect("populate-popup", self.__on_populate_popup)
 
             self.html.ctrl.connect("focus-in-event", self.__on_focus_in_event)
+            self.html.ctrl.connect("expose-event", self.__on_expose_event)
 
             self.loaded = True
             self.passNavigate = 0
@@ -218,6 +228,11 @@ class WikiHtmlViewWK(wx.Panel):
                 lx, ly = self.deferredScrollPos
                 self.deferredScrollPos = None
                 self.scrollDeferred(lx, ly)
+            else:
+                wikiPage = self.presenter.getDocPage()
+                lx, ly = wikiPage.getPresentation()[3:5]
+                self.scrollDeferred(lx, ly)
+
 
 
     def __on_button_press_event(self, view, gtkEvent):
@@ -232,18 +247,18 @@ class WikiHtmlViewWK(wx.Panel):
         Handles default (webkit) navigation requests
         """
         uri = flexibleUrlUnquote(request.get_uri())
+
+        # iframes have a parent
+        # let them load normally if set in options (otherwise they are 
+        # opened by the external launcher as the page is loaded)
+        if frame.get_parent() is not None and \
+                self.presenter.getConfig().getboolean("main",
+                "html_preview_ieShowIframes", True):
+            return False
+
         # Return True to block navigation, i.e. launching a url
         return self._activateLink(uri, tabMode=0)
 
-#         #if request.get_uri().startswith
-#         uri = flexibleUrlUnquote(request.get_uri())
-# 
-#         # Stop navigation if we are launching a url
-#         halt = self._activateLink(uri, 2)
-# 
-#         if halt:
-#             # return 1 stops navigation
-#             return 1
 
     def __on_hovering_over_link(self, view, title, status):
         """
@@ -252,16 +267,19 @@ class WikiHtmlViewWK(wx.Panel):
         
         if status is None:
             self.on_link = None
+            self.updateStatus(u"")
         else:
             # flexibleUrlUnquote seems to fail on unicode links
-            status = unicode(urllib.unquote(status))
+            # unquote shouldn't happen here for self.on_link (MB 2011-04-15)
             self.on_link = status
-        self.updateStatus(status)
+            self.updateStatus(unicode(urllib.unquote(status)))
 
 
     def __on_selection_received(self, widget, selection_data, data):
-        if str(selection_data.type) == "STRING":
+        if str(selection_data.type) == "STRING" and widget.has_selection():
             self.selectedText = selection_data.get_text()
+        else:
+            self.selectedText = None
 
         return False
 
@@ -275,7 +293,7 @@ class WikiHtmlViewWK(wx.Panel):
         """
 
         #Scroll to last position if no anchor
-        if self.anchor is None:
+        if self.lastAnchor is None:
             wikiPage = self.presenter.getDocPage()
             lx, ly = wikiPage.getPresentation()[3:5]
 
@@ -289,16 +307,15 @@ class WikiHtmlViewWK(wx.Panel):
         but i'm not sure how
         """
 
+        internaljumpPrefix = u"http://internaljump/"
+        link = self.on_link
+
         for i in menu.get_children():
             # Fix for some webkitgtk?? versions
             try:
                 action = i.get_children()[0].get_label()
             except:
                 continue
-
-            internaljumpPrefix = u"http://internaljump/"
-
-            link = self.on_link
 
             if action == u"_Back":
                 menu.remove(i)
@@ -317,13 +334,17 @@ class WikiHtmlViewWK(wx.Panel):
                 if link and link.startswith(internaljumpPrefix):
                     menu.remove(i)
 
-                # Add item to copy selection (doesn't normally exist in
-                # webkit apparently)
-                copy_menu_item = gtk.ImageMenuItem(gtk.STOCK_COPY)
-                copy_menu_item.get_children()[0].set_label(
-                                                    'Copy _Selected Text')
-                copy_menu_item.connect("activate", self.OnClipboardCopy)
-                menu.append(copy_menu_item)
+                # Doesn't work as selection get lost if a link is
+                # is rightclicked on
+
+                ## Add item to copy selection (doesn't normally exist in
+                ## webkit apparently)
+                #if self.getSelectedText() is not None:
+                #    copy_menu_item = gtk.ImageMenuItem(gtk.STOCK_COPY)
+                #    copy_menu_item.get_children()[0].set_label(
+                #            wxToGtkLabel(_('Copy &Selected Text')))
+                #    copy_menu_item.connect("activate", self.OnClipboardCopy)
+                #    menu.append(copy_menu_item)
             elif action == u"Open _Image in New Window":
                 menu.remove(i)
             elif action == u"Sa_ve Image As":
@@ -331,10 +352,15 @@ class WikiHtmlViewWK(wx.Panel):
             elif action == u"_Download Linked File":
                 menu.remove(i)
             elif action == u"_Open Link":
-                if link and not link.startswith(internaljumpPrefix):
-                    i.get_children()[0].set_label("Open Link (External)")
+                if link:
+                    if not link.startswith(internaljumpPrefix):
+                        i.get_children()[0].set_label(
+                                wxToGtkLabel(_("Open Link (External)")))
+                    else:
+                        i.get_children()[0].set_label(
+                                wxToGtkLabel(_("Follow &Link")))
                 else:
-                    i.get_children()[0].set_label("Follow _Link")
+                    menu.remove(i)
 
             elif action == u"Open Link in New _Window":
                 menu.remove(i)
@@ -344,14 +370,14 @@ class WikiHtmlViewWK(wx.Panel):
                     # New tab (forground)
                     open_new_tab_menu_item = gtk.ImageMenuItem(gtk.STOCK_OPEN)
                     open_new_tab_menu_item.get_children()[0].set_label(
-                                                        'Follow Link in New _Tab')
+                            wxToGtkLabel(_('Follow Link in New &Tab')))
                     open_new_tab_menu_item.connect("activate", self.OnOpenLinkInNewTab)
                     menu.append(open_new_tab_menu_item)
 
                     # New tab (background)
                     open_new_tab_background_menu_item = gtk.ImageMenuItem(gtk.STOCK_OPEN)
                     open_new_tab_background_menu_item.get_children()[0].set_label(
-                                                        'Follow Link in New Back_ground Tab')
+                            wxToGtkLabel(_('Follow Link in New Back&ground Tab')))
                     open_new_tab_background_menu_item.connect("activate", self.OnOpenLinkInNewBackgroundTab)
                     menu.append(open_new_tab_background_menu_item)
             elif action == u"_Download Linked File":
@@ -394,6 +420,18 @@ class WikiHtmlViewWK(wx.Panel):
     def __on_focus_in_event(self, widget, evt):
         if self.visible:
             self.refresh()
+
+    def Freeze(self):
+        self.freezeCount += 1
+        
+    def Thaw(self):
+        self.freezeCount = max(0, self.freezeCount - 1)
+        if self.freezeCount == 0:
+            self.Refresh(False)
+
+    def __on_expose_event(self, view, *params):
+        return self.freezeCount > 0
+
 
     def OnOpenLinkInNewTab(self, gtkEvent):
         uri = self.on_link
@@ -606,7 +644,9 @@ class WikiHtmlViewWK(wx.Panel):
 
         else:  # Not outOfSync
             if self.anchor is not None:
-                self.passNavigate += 1
+                # Webkit seems not to send "navigation-policy-decision-requested"
+                # if only anchor changes
+#                 self.passNavigate += 1
                 self.html.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
                 self.lastAnchor = self.anchor
             else:
@@ -689,9 +729,10 @@ class WikiHtmlViewWK(wx.Panel):
             self.refresh()
 
     def onUpdatedWikiPage(self, miscevt):
-        self.outOfSync = True
-        if self.visible:
-            self.refresh()
+        #self.outOfSync = True
+        #if self.visible:
+        #    self.refresh()
+        pass
             
     def onChangedLiveText(self, miscevt):
         self.outOfSync = True
@@ -771,12 +812,13 @@ class WikiHtmlViewWK(wx.Panel):
     def _activateLink(self, href, tabMode=0):
         """
         tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
+        Returns True if link was processed here and doesn't need further processing
         """
 
 #         decision.use()
         if self.passNavigate:
             self.passNavigate -= 1
-            return 0
+            return False
 
         internaljumpPrefix = u"http://internaljump/"
 
@@ -819,13 +861,13 @@ class WikiHtmlViewWK(wx.Panel):
 
 
             #decision.ignore()
-            return False
+            return True
 
         elif href == (internaljumpPrefix + u"action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()
             #decision.ignore()
-            return False
+            return True
 
         elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
             # None affect current tab so return false
@@ -857,7 +899,8 @@ class WikiHtmlViewWK(wx.Panel):
             #decision.ignore()
             return True
 
-        return True
+        # Should never be reached
+        return False
 
 
 

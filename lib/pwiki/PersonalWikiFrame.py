@@ -362,6 +362,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.hotKeyDummyWindow = None
         self._refreshHotKeys()
 
+        self.windowLayouter.layout()
+
         # State here: GUI construction finished, but frame is hidden yet
 
         # if a wiki to open is set, open it

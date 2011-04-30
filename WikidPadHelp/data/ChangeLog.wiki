@@ -1,5 +1,26 @@
 ﻿++ Change Log
 
+May 01, 2011 (2.2beta03)
+
+    * Support for Webkit if necessary libraries pyGtk and
+      pyWebkitGtk available (many thanks to Ross).
+      See [Options HTML preview_export#*Preview renderer*]
+    * Option to colorize search fragments in wiki links separately.
+      They become black if search text can't be found on target page.
+      See [OptionsDialog#*Colorize search fragments of links]
+
+    * Handle multi-screen configuration with negative coordinate
+      values (screen 2 to the left of screen 1)
+    * Gray out history icons if respective history direction not
+      possible
+
+    * Bug fixed: Failure on opening wiki if wiki config corrupted
+
+    * Internal: Added plugin type "Exporters" and moved HTML exporter
+      from core to plugin
+
+
+
 Mar. 27, 2011 (2.2beta02)
 
     * File cleanup dialog to find orphaned files in file storage and

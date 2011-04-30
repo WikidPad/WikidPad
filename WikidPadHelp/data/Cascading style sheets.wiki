@@ -1,6 +1,6 @@
 ﻿++ Cascading style sheets
 
-Cascading style sheets (in short: CSS) are a way to control the rendering of an HTML file in great detail. When exporting HTML from WikidPad, certain CSS files are copied to the export directory and referenced by the generated HTML page(s). They are also respected for the external IE preview, the internal preview ignores them.
+Cascading style sheets (in short: CSS) are a way to control the rendering of an HTML file in great detail. When exporting HTML from WikidPad, certain CSS files are copied to the export directory and referenced by the generated HTML page(s). They are also respected by the external previews, the internal preview ignores them.
 
 WikidPad searches in the following places for CSS files to copy and reference:
 

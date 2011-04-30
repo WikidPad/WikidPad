@@ -170,6 +170,9 @@ When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you c
 This provides some workaround to synchronize scroll position in HTML preview with the position in editor.
 If this option is checked, you can select some text in the preview and when switching back to the editor, the first occurrence of the selected text is searched and selected in editor, too.
 
+*Colorize search fragments of links separately*
+When checked the search fragments (part after '#' at the end of a wiki link) are shown in black if the search string can't be found on target page (or, as usual, if target page doesn't exist). Using this option makes syntax highlighting slightly slower.
+
 *Tab width*
 How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
 

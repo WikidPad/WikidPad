@@ -731,7 +731,6 @@ GLOBALDEFAULTS = {
             # use "system" otherwise ))
     ("main", "tempHandling_tempDir"): u"", # Path to directory for temporary files. Only valid if
             # "tempHandling_tempMode" is set to "given".
-    ("main", "single_process"): "True", # Ensure that only a single process runs per user  
     ("main", "wikiPathes_relative"): "False", # If True, pathes to last recently used wikis
             # are stored relative to application dir.
     ("main", "openWikiWordDialog_sortOrder"): "0", # Sort order in "Open Wiki Word" dialog

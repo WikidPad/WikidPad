@@ -419,6 +419,118 @@ class MultiPageTextAddOptPanel(wx.Panel):
 
 
 
+class _SeparatorFoundException(Exception): pass
+
+class _SeparatorWatchUtf8Writer(utf8Writer):
+    def __init__(self, stream, separator, errors="strict"):
+        utf8Writer.__init__(self, stream, errors)
+        self.separator = separator
+#         self.separatorRe = re.compile(u"^" + re.escape(separator) + u"$",
+#                 re.MULTILINE | re.UNICODE)
+        self.buffer = []
+        self.firstSeparatorCallDone = False
+
+    def write(self, object):
+        self.buffer.append(object)
+        utf8Writer.write(self, object)
+
+    def writelines(self, list):
+        self.buffer += list
+        utf8Writer.writelines(self, list)
+
+    def clearBuffer(self):
+        self.buffer = []
+    
+    def checkAndClearBuffer(self):
+#         if self.separatorRe.search(u"".join(self.buffer)):
+        if u"".join(self.buffer).find(u"\n%s\n" % self.separator) > -1:
+            raise _SeparatorFoundException()
+
+        self.clearBuffer()
+
+
+    def writeSeparator(self):
+        self.checkAndClearBuffer()
+
+        if self.firstSeparatorCallDone:
+            utf8Writer.write(self, u"\n%s\n" % self.separator)
+        else:
+            self.firstSeparatorCallDone = True
+
+
+
+
+class MultiPageTextWikiPageWriter(object):
+    """
+    Exports in multipage text format
+    """
+    def __init__(self, wikiDocument, exportFile, writeVersionData=True,
+            formatVer=1):
+        self.wikiDocument = wikiDocument
+        self.exportFile = exportFile
+        self.writeVersionData = writeVersionData
+        self.formatVer = formatVer
+
+
+    def _writeHintedDatablock(self, unifName, useB64):
+        sh = self.wikiDocument.guessDataBlockStoreHint(unifName)
+        if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
+            shText = u"extern"
+        else:
+            shText = u"intern"
+
+        self.exportFile.write(unifName + u"\n")
+        if useB64:
+            datablock = self.wikiDocument.retrieveDataBlock(unifName)
+
+            self.exportFile.write(u"important/encoding/base64  storeHint/%s\n" %
+                    shText)
+            self.exportFile.write(base64BlockEncode(datablock))
+        else:
+            content = self.wikiDocument.retrieveDataBlockAsText(unifName)
+
+            self.exportFile.write(u"important/encoding/text  storeHint/%s\n" %
+                    shText)
+            self.exportFile.write(content)
+
+
+    def exportWikiWord(self, word):
+        page = self.wikiDocument.getWikiPage(word)
+
+        self.exportFile.writeSeparator()
+        if self.formatVer == 0:
+            self.exportFile.write(u"%s\n" % word)
+        else:
+            self.exportFile.write(u"wikipage/%s\n" % word)
+            # modDate, creaDate, visitDate
+            timeStamps = page.getTimestamps()[:3]
+
+            # Do not use StringOps.strftimeUB here as its output
+            # relates to local time, but we need UTC here.
+            timeStrings = [unicode(time.strftime(
+                    "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+                    for ts in timeStamps]
+
+            self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
+
+        self.exportFile.write(page.getLiveText())
+
+        # Write version data for this word
+        if self.writeVersionData:
+            verOvw = page.getExistingVersionOverview()
+            if verOvw is not None:
+                unifName = verOvw.getUnifiedName()
+
+                self.exportFile.writeSeparator()
+                self._writeHintedDatablock(unifName, False)
+
+                for unifName in verOvw.getDependentDataBlocks(
+                        omitSelf=True):
+                    self.exportFile.writeSeparator()
+                    self._writeHintedDatablock(unifName, True)
+
+
+
 class MultiPageTextExporter(AbstractExporter):
     """
     Exports in multipage text format
@@ -542,49 +654,6 @@ class MultiPageTextExporter(AbstractExporter):
         ctrls.cbWriteVersionData.SetValue(writeVersionData != 0)
 
 
-
-    # TODO Check also wiki func pages and versions and and and ....!!!
-    def _checkPossibleSeparator(self, sep):
-        """
-        Run search operation to test if separator string sep
-        (without trailing newline) is already in use.
-        Returns True if sep doesn't appear as line in any page from
-        self.wordList
-        """
-        searchOp = SearchReplaceOperation()
-        searchOp.searchStr = u"^" + re.escape(sep) + u"$"
-        searchOp.booleanOp = False
-        searchOp.caseSensitive = True
-        searchOp.wholeWord = False
-        searchOp.cycleToStart = False
-        searchOp.wildCard = 'regex'
-        searchOp.wikiWide = True
-
-        wpo = ListWikiPagesOperation()
-        wpo.setSearchOpTree(ListItemWithSubtreeWikiPagesNode(wpo, self.wordList,
-                level=0))
-
-        searchOp.listWikiPagesOp = wpo
-
-        foundPages = self.mainControl.getWikiDocument().searchWiki(searchOp)
-
-        return len(foundPages) == 0
-
-
-    def _findSeparator(self):
-        """
-        Find a separator (=something not used as line in a page to export)
-        """
-        # Try random strings (35 tries)
-        for i in xrange(35):
-            sep = u"-----%s-----" % createRandomString(25)
-            if self._checkPossibleSeparator(sep):
-                return sep
-
-        # Give up
-        return None
-
-
     def _writeHintedDatablock(self, unifName, useB64):
         sh = self.wikiDocument.guessDataBlockStoreHint(unifName)
         if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
@@ -606,13 +675,35 @@ class MultiPageTextExporter(AbstractExporter):
                     shText)
             self.exportFile.write(content)
 
-
-
-    def _writeSeparator(self):
-        if self.firstSeparatorCallDone:
-            self.exportFile.write("\n%s\n" % self.separator)
+    @staticmethod
+    def _writeHintedDatablock(wikiDocument, exportFile, unifName, useB64):
+        sh = wikiDocument.guessDataBlockStoreHint(unifName)
+        if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
+            shText = u"extern"
         else:
-            self.firstSeparatorCallDone = True
+            shText = u"intern"
+
+        exportFile.write(unifName + u"\n")
+        if useB64:
+            datablock = wikiDocument.retrieveDataBlock(unifName)
+
+            exportFile.write(u"important/encoding/base64  storeHint/%s\n" %
+                    shText)
+            exportFile.write(base64BlockEncode(datablock))
+        else:
+            content = wikiDocument.retrieveDataBlockAsText(unifName)
+
+            exportFile.write(u"important/encoding/text  storeHint/%s\n" %
+                    shText)
+            exportFile.write(content)
+
+#     def _writeSeparator(self):
+#         self.exportFile.checkAndClearBuffer()
+# 
+#         if self.firstSeparatorCallDone:
+#             self.exportFile.writeSeparator()
+#         else:
+#             self.firstSeparatorCallDone = True
 
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
@@ -641,104 +732,85 @@ class MultiPageTextExporter(AbstractExporter):
         self.writeSavedSearches = addOpt[2] and (self.formatVer > 0)
         self.writeVersionData = addOpt[3] and (self.formatVer > 0)
 
-        
-        # The hairy thing first: find a separator that doesn't appear
-        # as a line in one of the pages to export
-        self.separator = self._findSeparator()
-        if self.separator is None:
-            # _findSeparator gave up
-            raise ExportException(_(u"No usable separator found"))
         try:
-            try:
-                self.rawExportFile = open(pathEnc(self.exportDest), "w")
+            for tryNumber in range(35):
+                self.separator = u"-----%s-----" % createRandomString(25)
+                try:
+                    self.rawExportFile = open(pathEnc(self.exportDest), "w")
+        
+                    # Only UTF-8 mode currently
+                    self.rawExportFile.write(BOM_UTF8)
+                    self.exportFile = _SeparatorWatchUtf8Writer(
+                            self.rawExportFile, self.separator, "replace")
+
+                    self.wikiPageWriter = MultiPageTextWikiPageWriter(
+                            self.wikiDocument, self.exportFile,
+                            self.writeVersionData, self.formatVer)
+
+                    # Identifier line with file format
+                    self.exportFile.write(u"Multipage text format %i\n" %
+                            self.formatVer)
+                    # Separator line
+                    self.exportFile.write(u"Separator: %s\n" % self.separator)
     
-                # Only UTF-8 mode currently
-                self.rawExportFile.write(BOM_UTF8)
-                self.exportFile = utf8Writer(self.rawExportFile, "replace")
-                
-                # Identifier line with file format
-                self.exportFile.write(u"Multipage text format %i\n" %
-                        self.formatVer)
-                # Separator line
-                self.exportFile.write(u"Separator: %s\n" % self.separator)
+    
+                    # Write wiki-bound functional pages
+                    if self.writeWikiFuncPages:
+                        # Only wiki related functional pages
+                        wikiFuncTags = [ft for ft in DocPages.getFuncTags()
+                                if ft.startswith("wiki/")]
+                        
+                        for ft in wikiFuncTags:
+                            self.writeSeparator()
+                            self.exportFile.write(u"funcpage/%s\n" % ft)
+                            page = self.wikiDocument.getFuncPage(ft)
+                            self.exportFile.write(page.getLiveText())
+    
+    
+                    # Write saved searches
+                    if self.writeSavedSearches:
+                        wikiData = self.wikiDocument.getWikiData()
+                        unifNames = wikiData.getDataBlockUnifNamesStartingWith(
+                                u"savedsearch/")
+    
+                        for un in unifNames:
+                            self.writeSeparator()
+                            self.exportFile.write(un + u"\n")
+                            datablock = wikiData.retrieveDataBlock(un)
+    
+                            self.exportFile.write(base64BlockEncode(datablock))
+    
+                    locale.setlocale(locale.LC_ALL, '')
+    
+                    # Write actual wiki words
+                    for word in self.wordList:
+                        self.wikiPageWriter.exportWikiWord(word)
+                        self.exportFile.checkAndClearBuffer()
+                    break
 
+                except _SeparatorFoundException:
+                    if self.exportFile is not None:
+                        self.exportFile.flush()
+                        self.exportFile = None
+        
+                    if self.rawExportFile is not None:
+                        self.rawExportFile.close()
+                        self.rawExportFile = None
 
-                # Write wiki-bound functional pages
-                if self.writeWikiFuncPages:
-                    # Only wiki related functional pages
-                    wikiFuncTags = [ft for ft in DocPages.getFuncTags()
-                            if ft.startswith("wiki/")]
-                    
-                    for ft in wikiFuncTags:
-                        self._writeSeparator()
-                        self.exportFile.write(u"funcpage/%s\n" % ft)
-                        page = self.wikiDocument.getFuncPage(ft)
-                        self.exportFile.write(page.getLiveText())
-
-
-                # Write saved searches
-                if self.writeSavedSearches:
-                    wikiData = self.wikiDocument.getWikiData()
-#                     searchTitles = wikiData.getSavedSearchTitles()
-                    unifNames = wikiData.getDataBlockUnifNamesStartingWith(
-                            u"savedsearch/")
-
-                    for un in unifNames:
-                        self._writeSeparator()
-#                         self.exportFile.write(u"savedsearch/%s\n" % st)
-#                         datablock = wikiData.getSearchDatablock(st)
-                        self.exportFile.write(un + u"\n")
-                        datablock = wikiData.retrieveDataBlock(un)
-
-                        self.exportFile.write(base64BlockEncode(datablock))
-
-                locale.setlocale(locale.LC_ALL, '')
-
-                # Write actual wiki words
-                for word in self.wordList:
-                    page = self.wikiDocument.getWikiPage(word)
-
-                    self._writeSeparator()
-                    if self.formatVer == 0:
-                        self.exportFile.write(u"%s\n" % word)
-                    else:
-                        self.exportFile.write(u"wikipage/%s\n" % word)
-                        # modDate, creaDate, visitDate
-                        timeStamps = page.getTimestamps()[:3]
-
-                        # Do not use StringOps.strftimeUB here as its output
-                        # relates to local time, but we need UTC here.
-                        timeStrings = [unicode(time.strftime(
-                                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-                                for ts in timeStamps]
-
-                        self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
-
-                    self.exportFile.write(page.getLiveText())
-
-                    # Write version data for this word
-                    if self.writeVersionData:
-                        verOvw = page.getExistingVersionOverview()
-                        if verOvw is not None:
-                            unifName = verOvw.getUnifiedName()
-
-                            self._writeSeparator()
-                            self._writeHintedDatablock(unifName, False)
-
-                            for unifName in verOvw.getDependentDataBlocks(
-                                    omitSelf=True):
-                                self._writeSeparator()
-                                self._writeHintedDatablock(unifName, True)
-
-            except Exception, e:
-                traceback.print_exc()
-                raise ExportException(unicode(e))
+                    continue
+                except Exception, e:
+                    traceback.print_exc()
+                    raise ExportException(unicode(e))
+            else:
+                raise ExportException(_(u"No usable separator found"))
         finally:
             if self.exportFile is not None:
                 self.exportFile.flush()
+                self.exportFile = None
 
             if self.rawExportFile is not None:
                 self.rawExportFile.close()
+                self.rawExportFile = None
 
 
 
