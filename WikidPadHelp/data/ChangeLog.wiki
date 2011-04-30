@@ -1,5 +1,13 @@
 ﻿++ Change Log
 
+May 01, 2011 (2.1rc03)
+
+    * Handle multi-screen configuration with negative coordinate
+      values (screen 2 to the left of screen 1)
+
+    * Bug fixed: Failure on opening wiki if wiki config corrupted
+
+
 
 Mar. 27, 2011 (2.1rc02)
 
