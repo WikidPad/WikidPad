@@ -114,7 +114,8 @@ class WrappedPluginAPI(object):
     
     The keys of the arguments are the function names exposed as attributes by
     the API object. The values can be either:
-        None  to call function of same name in module(s)
+        None  to call function of same name in module(s) as SimplePluginAPI
+            does
         a string  to call function of this name in module(s)
         a wrapper function  to call with module object and parameters from
                 original function call
@@ -188,9 +189,15 @@ class PluginAPIAggregation(object):
         
         for f in list(fctNames):
             funcList = [getattr(api, f) for api in apis if api.hasFunctionName(f)]
-            helper = lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
-                    [fun(*args, **kwargs) for fun in funcList])
-            setattr(self,f, helper)
+            setattr(self, f, PluginAPIAggregation.__createHelper(funcList))
+
+
+    @staticmethod
+    def __createHelper(funcList):
+        return lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
+                [fun(*args, **kwargs) for fun in funcList])
+
+
 
 
 
@@ -322,8 +329,7 @@ class PluginManager(object):
                     if module:
                         setattr(package, moduleName, module)
                         if hasattr(module, "WIKIDPAD_PLUGIN"):
-                            if self.registerPlugin(module):
-                                exclusions.append(name)
+                            self.registerPlugin(module)
                 except:
                     traceback.print_exc()
             del sys.path[-1]

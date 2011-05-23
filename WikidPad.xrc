@@ -864,7 +864,7 @@
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Preview renderer:</label>
+              <label>Preview renderer*:</label>
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
@@ -958,6 +958,17 @@
         </object>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>* Needs WikidPad restart</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
       </object>
     </object>
   </object>
@@ -3527,6 +3538,13 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
+        <object class="wxPanel" name="pnImagePreviewContainer"/>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|</flag>
+        <border>5</border>
+        <minsize>300,150</minsize>
+      </object>
+      <object class="sizeritem">
         <object class="wxBoxSizer">
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
@@ -3549,7 +3567,7 @@
         </object>
       </object>
     </object>
-    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
+    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|wxMAXIMIZE_BOX</style>
   </object>
   <object class="wxDialog" name="FilePasteDialog">
     <title>Paste File</title>
@@ -5380,7 +5398,9 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="unknown" name="gridDetails"/>
+        <object class="wxStaticBox" name="gridDetails">
+          <label></label>
+        </object>
         <option>2</option>
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
@@ -5706,7 +5726,9 @@
                   <border>5</border>
                 </object>
                 <object class="sizeritem">
-                  <object class="unknown" name="gridOrphaned"/>
+                  <object class="wxStaticBox" name="gridOrphaned">
+                    <label></label>
+                  </object>
                   <option>1</option>
                   <flag>wxALL|wxEXPAND</flag>
                   <border>5</border>
@@ -5751,7 +5773,9 @@
                   <object class="wxBoxSizer">
                     <orient>wxHORIZONTAL</orient>
                     <object class="sizeritem">
-                      <object class="unknown" name="gridMissing"/>
+                      <object class="wxStaticBox" name="gridMissing">
+                        <label></label>
+                      </object>
                       <option>2</option>
                       <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>

@@ -1904,7 +1904,7 @@ class WikiData:
                 raise DbReadAccessError(e)
 
 
-    def retrieveDataBlockAsText(self, unifName, default=u""):
+    def retrieveDataBlockAsText(self, unifName, default=""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).

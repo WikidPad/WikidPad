@@ -742,3 +742,27 @@ def filterIdenticalItem(seq, i):
     return result
 
 
+def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight):
+    """
+    For an image with dimensions  width  and  height, calculate new dimension
+    which optimally fill bounding box given by  bbWidth  and  bbHeight  so that
+    aspect ratio (AR) is not changed.
+    Returns tuple (newWidth, newHeight).
+    """
+    assert bbWidth > 0 and bbHeight > 0, "Invalid bounding box values"
+    assert width > 0 and height > 0, "Invalid image size values"
+    
+    # Mathematically equal to bbWidth / width < bbHeight / height
+    # but without floating point arithmetic
+    if bbWidth * height < bbHeight * width:
+        # Scaling factor is (bbWidth / width)
+        newWidth = bbWidth
+        newHeight = (height * bbWidth) // width
+    else:
+        # Scaling factor is (bbHeight / height)
+        newWidth = (width * bbHeight) // height
+        newHeight = bbHeight
+
+    return (newWidth, newHeight)
+
+

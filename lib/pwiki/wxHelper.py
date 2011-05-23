@@ -675,8 +675,6 @@ class IconCache:
         """
         Fills or refills the self.iconLookupCache (if createIconImageList is
         false, self.iconImageList must exist already)
-        If createIconImageList is true, self.iconImageList is also
-        built
         """
 
         # create the image icon list

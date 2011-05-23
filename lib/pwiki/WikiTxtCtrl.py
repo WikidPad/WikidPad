@@ -1,13 +1,17 @@
+from __future__ import with_statement
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import traceback, codecs
 from cStringIO import StringIO
-import string, itertools
+import string, itertools, contextlib
 import re # import pwiki.srePersistent as re
 import threading
 
-from os.path import exists, dirname
+import subprocess
+
+from os.path import exists, dirname, isfile, join, basename
+from os import rename, unlink
 
 from time import time, sleep
 
@@ -16,7 +20,8 @@ import wx, wx.stc
 from Consts import FormatTypes
 
 #from Utilities import *  # TODO Remove this
-from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
+from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, \
+        calcResizeArIntoBoundingBox
 
 from .wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
@@ -41,11 +46,13 @@ from . import Configuration
 from . import AdditionalDialogs
 from . import WikiTxtDialogs
 
+# image stuff
+import imghdr
 
 
 # import WikiFormatting
 from . import DocPages
-from . import UserActionCoord
+from . import UserActionCoord, WindowLayout
 
 from .SearchAndReplace import SearchReplaceOperation
 from . import StringOps
@@ -131,12 +138,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         self.loadedDocPage = None
         self.lastFont = None
         self.ignoreOnChange = False
+        self.dwellLockCounter = 0  # Don't process dwell start messages if >0
         self.wikiLanguageHelper = None
         self.templateIdRecycler = wxHelper.IdRecycler()
 
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word
         self.autoCompBackBytesMap = {} # Maps selected word to number of backbytes
+
+        # Inline image
+        self.tooltip_image = None
 
         # configurable editor settings
         config = self.presenter.getConfig()
@@ -200,6 +211,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # i plan on lexing myself
         self.SetLexer(wx.stc.STC_LEX_CONTAINER)
+
 
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
@@ -350,6 +362,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
                 self.OnOpenContainingFolderThis)
 
+        wx.EVT_MENU(self, GUI_ID.CMD_DELETE_FILE,
+                self.OnDeleteFile)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_RENAME_FILE,
+                self.OnRenameFile)
+
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
                 self.OnClipboardCopyUrlToThisAnchor)
 
@@ -431,8 +449,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if self.presenter.getConfig().getboolean("main",
                     "editor_imagePaste_askOnEachPaste", True):
                 # Options say to present dialog on an image paste operation
+                # Send image so it can be used for preview
                 dlg = WikiTxtDialogs.ImagePasteDialog(
-                        self.presenter.getMainControl(), -1, imgsav)
+                        self.presenter.getMainControl(), -1, imgsav, img)
                 try:
                     dlg.ShowModal()
                     imgsav = dlg.getImagePasteSaver()
@@ -1382,9 +1401,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
             item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
             if item: item.Enable(self.CanPaste())
 
+        # Dwell lock to avoid image popup while context menu is shown
+        with self.dwellLock():
+            # Show menu
+            self.PopupMenu(menu)
 
-        # Show menu
-        self.PopupMenu(menu)
         self.contextMenuTokens = None
         self.contextMenuSpellCheckSuggestions = None
         menu.Destroy()
@@ -1590,7 +1611,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wikiDoc = self.presenter.getWikiDocument()
         stylebytes = StyleCollector(FormatTypes.Default,
                 text, self.bytelenSct)
-
 
         def process(pageAst, stack):
             for node in pageAst.iterFlatNamed():
@@ -2165,6 +2185,116 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             pass   # Error message?
 
                     break
+
+    def OnDeleteFile(self, evt):
+         if self.contextMenuTokens:
+            for node in self.contextMenuTokens:
+                if node.name == "urlLink":
+                    link = self.presenter.getWikiDocument().makeFileUrlAbsPath(
+                            node.url)
+                    if link is None:
+                        continue
+                    
+#                     link = node.url
+# 
+#                     if link.startswith(u"rel://"):
+#                         link = StringOps.pathnameFromUrl(self.presenter.getMainControl().makeRelUrlAbsolute(link))
+#                     else:
+#                         break
+
+#                     path = dirname(link)
+
+                    if not isfile(link):
+                        self.presenter.displayErrorMessage(
+                                _(u"File does not exist"))
+                        return
+
+                    filename = basename(link)
+
+                    choice = wx.MessageBox(
+                            _("Are you sure you want to delete the file: %s") %
+                            filename, _("Delete File"),
+                            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+
+                    if choice == wx.YES:
+                        OsAbstract.deleteFile(link)
+                        self.replaceTextAreaByCharPos(u"", node.pos,
+                                node.pos + node.strLength)
+                    return
+
+        
+    def OnRenameFile(self, evt):
+        if not self.contextMenuTokens:
+            return
+
+        for node in self.contextMenuTokens:
+            if node.name == "urlLink":
+                link = self.presenter.getWikiDocument().makeFileUrlAbsPath(
+                        node.url)
+                if link is not None:
+                    break
+        else:
+            return
+
+
+#                 link = node.url
+# 
+#                 if link.startswith(u"rel://"):
+#                     link = StringOps.pathnameFromUrl(self.presenter.getMainControl().makeRelUrlAbsolute(link))
+#                 else:
+#                     break
+
+        if not isfile(link):
+            self.presenter.displayErrorMessage(_(u"File does not exist"))
+            return
+
+        path = dirname(link)
+        filename = basename(link)
+
+        newName = filename
+        while True:
+            newName = wx.GetTextFromUser(_(u"Enter new name"),
+                    _(u"Rename File"), newName, self)
+            if not newName:
+                # User cancelled
+                return
+
+            newfile = join(path, newName)
+            
+            if exists(newfile):
+                if not isfile(newfile):
+                    self.presenter.displayErrorMessage(
+                            _(u"Target is not a file"))
+                    continue
+
+                choice = wx.MessageBox(
+                        _("Target file exists already. Overwrite?"),
+                        _("Overwrite File"),
+                        wx.YES_NO | wx.CANCEL  | wx.NO_DEFAULT | wx.ICON_QUESTION,
+                        self)
+                if choice == wx.CANCEL:
+                    return
+                elif choice == wx.NO:
+                    continue
+
+            # Either file doesn't exist or user allowed overwrite
+            
+            OsAbstract.moveFile(link, newfile)
+            
+            if node.url.startswith(u"rel://"):
+                # Relative URL/path
+                newUrl = self.presenter.getWikiDocument().makeAbsPathRelUrl(
+                        newfile)
+            else:
+                # Absolute URL/path
+                newUrl = u"file:" + StringOps.urlFromPathname(newfile)
+
+            self.replaceTextAreaByCharPos(newUrl, node.coreNode.pos,
+                    node.coreNode.pos + node.coreNode.strLength)
+
+            return
+
+
 
     def convertUrlAbsoluteRelative(self, tokenList):
         for node in tokenList:
@@ -3218,11 +3348,32 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if node.name == "wikiWord":
                     threadstop.testRunning()
                     wikiWord = wikiDocument.getUnAliasedWikiWord(node.wikiWord)
+
+                    # Set status to wikipage
+                    callInMainThread(self.presenter.getMainControl().showStatusMessage, _(u"Link to page: %s") % wikiWord, -1)
+
                     if wikiWord is not None:
                         propList = wikiDocument.getAttributeTriples(
                                 wikiWord, u"short_hint", None)
                         if len(propList) > 0:
                             callTip = propList[-1][2]
+                            break
+                elif node.name == "urlLink":
+                    # If link is a picture display it as a tooltip
+                    pic_types = ["jpg", "jpeg", "png", "gif"]
+                    if node.url.split(".")[-1].lower() in pic_types:
+                        path = self.presenter.getWikiDocument()\
+                                .makeFileUrlAbsPath(node.url)
+
+                        if path is not None and isfile(path):
+                            if imghdr.what(path):
+                                def SetImageTooltip(path):
+                                    self.tooltip_image = ImageTooltipPanel(self, path)
+                                threadstop.testRunning()
+                                callInMainThread(SetImageTooltip, path)
+                            else:
+                                 self.presenter.displayErrorMessage(
+                                    _(u"Not a valid image"))
                             break
 
             if callTip:
@@ -3232,8 +3383,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
         except NotCurrentThreadException:
             pass
 
+    @contextlib.contextmanager
+    def dwellLock(self):
+        if self.dwellLockCounter == 0:
+            self.OnDwellEnd(None)
+        
+        self.dwellLockCounter += 1
+        yield
+        self.dwellLockCounter -= 1
+
 
     def OnDwellStart(self, evt):
+        if self.dwellLockCounter > 0:
+            return
+
         wikiDocument = self.presenter.getWikiDocument()
         if wikiDocument is None:
             return
@@ -3249,9 +3412,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     def OnDwellEnd(self, evt):
+        if self.dwellLockCounter > 0:
+            return
+
         self.calltipThreadHolder.setThread(None)
         self.CallTipCancel()
 
+        # Set status back to nothing
+        callInMainThread(self.presenter.getMainControl().showStatusMessage, "", -1)
+        # And close any shown pic
+        if self.tooltip_image:
+            self.tooltip_image.Close()
+            self.tooltip_image = None
 
     @staticmethod
     def userActionPasteFiles(unifActionName, paramDict):
@@ -3550,6 +3722,8 @@ u"""
 -
 Convert Absolute/Relative File URL;CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS
 Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER_THIS
+Rename file;CMD_RENAME_FILE
+Delete file;CMD_DELETE_FILE
 """
 
 
@@ -3609,6 +3783,8 @@ if False:
 
     N_(u"Convert Absolute/Relative File URL")
     N_(u"Open Containing Folder")
+    N_(u"Rename file")
+    N_(u"Delete file")
 
     N_(u"Copy anchor URL to clipboard")
 
@@ -3628,77 +3804,53 @@ if False:
 
 
 
-# Default mapping based on Scintilla's "KeyMap.cxx" file
-_DEFAULT_STC_KEYS = (
-        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEDOWN),
-        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEDOWNEXTEND),
-        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLDOWN),
-        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
-        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEUP),
-        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEUPEXTEND),
-        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLUP),
-        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEUPRECTEXTEND),
-#         (ord('['),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARAUP),
-#         (ord('['),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARAUPEXTEND),
-#         (ord(']'),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARADOWN),
-#         (ord(']'),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARADOWNEXTEND),
-        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARLEFT),
-        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARLEFTEXTEND),
-        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFT),
-        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFTEXTEND),
-        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARRIGHT),
-        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARRIGHTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHT),
-        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
-#         (ord('/'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTLEFT),
-#         (ord('/'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
-#         (ord('\\'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTRIGHT),
-#         (ord('\\'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
-        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_VCHOME),
-        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_VCHOMEEXTEND),
-        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTART),
-        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
-        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_HOMEDISPLAY),
-        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_VCHOMERECTEXTEND),
-        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEEND),
-        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_LINEENDEXTEND),
-        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTEND),
-        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTENDEXTEND),
-        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_LINEENDDISPLAY),
-        (wx.stc.STC_KEY_END,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEENDRECTEXTEND),
-        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_PAGEUP),
-        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEUPEXTEND),
-        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEUPRECTEXTEND),
-        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_PAGEDOWN),
-        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEDOWNEXTEND),
-        (wx.stc.STC_KEY_NEXT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
-        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CLEAR),
-        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELWORDRIGHT),
-        (wx.stc.STC_KEY_DELETE,    wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINERIGHT),
-        (wx.stc.STC_KEY_INSERT,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
-        (wx.stc.STC_KEY_ESCAPE,      wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CANCEL),
-        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_DELETEBACK),
-        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_DELETEBACK),
-        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DELWORDLEFT),
-        (wx.stc.STC_KEY_BACK,         wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_UNDO),
-        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINELEFT),
-        (ord('Z'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UNDO),
-        (ord('Y'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_REDO),
-        (ord('A'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTALL),
-        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_TAB),
-        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_BACKTAB),
-        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_NEWLINE),
-        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_NEWLINE),
-        (wx.stc.STC_KEY_ADD,         wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMIN),
-        (wx.stc.STC_KEY_SUBTRACT,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMOUT),
-#         (wx.stc.STC_KEY_DIVIDE,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SETZOOM),
-#         (ord('L'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECUT),
-#         (ord('L'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINEDELETE),
-#         (ord('T'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECOPY),
-#         (ord('T'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINETRANSPOSE),
-#         (ord('D'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTIONDUPLICATE),
-#         (ord('U'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LOWERCASE),
-#         (ord('U'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UPPERCASE),
-    )
+# TODO: Thumbnail size configurable
+class ImageTooltipPanel(wx.Frame):
+    """Quick panel for image tooltips"""
+    def __init__(self, pWiki, filePath, maxWidth=200, maxHeight=200):
+        wx.Frame.__init__(self, pWiki, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR|wx.FRAME_FLOAT_ON_PARENT)
+
+        self.url = filePath
+        self.pWiki = pWiki
+        
+        img = wx.Image(filePath, wx.BITMAP_TYPE_ANY)
+
+        origWidth = img.GetWidth()
+        origHeight = img.GetHeight()
+
+        if maxWidth > 0 and maxHeight > 0 and origWidth > 0 and origHeight > 0:
+            self.width, self.height = calcResizeArIntoBoundingBox(origWidth,
+                    origHeight, maxWidth, maxHeight)
+            
+            img.Rescale(self.width, self.height, quality = wx.IMAGE_QUALITY_HIGH)
+        else:
+            self.width = origWidth
+            self.height = origHeight
+
+        img = img.ConvertToBitmap()
+
+        self.SetSize((self.width, self.height))
+
+        self.bmp = wx.StaticBitmap(self, -1, img, (0, 0), (img.GetWidth(), img.GetHeight()))
+        self.bmp.Bind(wx.EVT_LEFT_DOWN, self.OnLeftClick)
+        self.bmp.Bind(wx.EVT_RIGHT_DOWN, self.OnRightClick)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
+        WindowLayout.setWindowPos(self, wx.GetMousePosition(), fullVisible=True)
+
+        self.Show()
+
+    def Close(self, event=None):
+        self.Destroy()
+
+    def OnLeftClick(self, event=None):
+        self.Close()
+
+    def OnRightClick(self, event=None):
+        self.Close()
+
+    def OnKeyDown(self, event):
+        kc = event.GetKeyCode()
+
+        if kc == wx.WXK_ESCAPE:
+            self.Close()

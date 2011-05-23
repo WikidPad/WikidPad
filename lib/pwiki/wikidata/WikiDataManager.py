@@ -741,6 +741,20 @@ class WikiDataManager(MiscEventSourceMixin):
             wikiConfig.set("main", "wiki_readOnly", "False")
 
 
+    def makeFileUrlAbsPath(self, fileurl):
+        """
+        Convert a relative or absolute file URL to an absolute path.
+        Returns None if fileurl isn't "file:" or "rel:" protocol
+        """
+        if fileurl.startswith(u"rel://"):
+            relpath = pathnameFromUrl(fileurl[6:], False)
+            return os.path.abspath(os.path.join(os.path.dirname(
+                    self.getWikiConfigPath()), relpath))
+        elif fileurl.startswith(u"file:"):
+            return os.path.abspath(pathnameFromUrl(fileurl))
+        else:
+            return None
+
 
     def makeRelUrlAbsolute(self, relurl, addSafe=''):
         """
@@ -1082,7 +1096,7 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         return self.wikiData.retrieveDataBlock(unifName, default=default)
 
-    def retrieveDataBlockAsText(self, unifName, default=u""):
+    def retrieveDataBlockAsText(self, unifName, default=""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).
@@ -1515,7 +1529,7 @@ class WikiDataManager(MiscEventSourceMixin):
             _openDocuments[renamedConfigPath] = self
 
         oldWikiPage.renameVersionData(toWikiWord)
-        oldWikiPage.removeFromSearchIndex()
+        oldWikiPage.queueRemoveFromSearchIndex()
         oldWikiPage.informRenamedWikiPage(toWikiWord)
         del self.wikiPageDict[wikiWord]
 
@@ -1809,19 +1823,22 @@ class WikiDataManager(MiscEventSourceMixin):
 #             self.updateExecutor.start()
 
 
-    def removeFromSearchIndex(self, unifName):
-        if not self.isSearchIndexEnabled():
-            return
-        try:
-            searchIdx = self.getSearchIndex()
-            writer = searchIdx.writer()
-            
-            writer.delete_by_term("unifName", unifName)
-        except:
-            writer.cancel()
-            raise
-
-        writer.commit()
+#     def removeFromSearchIndex(self, unifName):
+#         if not self.isSearchIndexEnabled():
+#             return
+#         
+#         writer = None
+#         try:
+#             searchIdx = self.getSearchIndex()
+#             writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
+# 
+#             writer.delete_by_term("unifName", unifName)
+#         except:
+#             if writer is not None:
+#                 writer.cancel()
+#             raise
+# 
+#         writer.commit()
 
 
     def getWikiDefaultWikiPageFormatDetails(self):
@@ -2103,7 +2120,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-                miscevt.getSource().removeFromSearchIndex()  # TODO: Check for possible failure!!!
+                miscevt.getSource().queueRemoveFromSearchIndex()  # TODO: Check for possible failure!!!
                 # TODO: Add new on rename
             elif miscevt.has_key("updated wiki page"):
                 self.autoLinkRelaxInfo = None

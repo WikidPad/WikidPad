@@ -1,5 +1,7 @@
+from __future__ import with_statement
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
+from __future__ import division
 
 import traceback
 
@@ -8,12 +10,14 @@ import wx, wx.xrc
 # from Utilities import *  # TODO Remove this
 
 from wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
-        runDialogModalFactory
+        runDialogModalFactory, WindowUpdateLocker
 
 
 from StringOps import unescapeForIni
 
 import SystemInfo
+
+import Utilities
 
 
 try:
@@ -395,7 +399,7 @@ class ImagePasteSaver:
 
 
 class ImagePasteDialog(wx.Dialog):
-    def __init__(self, pWiki, ID, imgpastesaver, title=None,
+    def __init__(self, pWiki, ID, imgpastesaver, img, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -413,6 +417,12 @@ class ImagePasteDialog(wx.Dialog):
         self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
         self.ctrls.tfEditorImagePasteQuality.SetValue(unicode(
                 imgpastesaver.quality))
+        
+        self.origImage = img
+        self.origImgWidth, self.origImgHeight = img.GetSize()
+        
+        self.bitmapControl = wx.StaticBitmap(self.ctrls.pnImagePreviewContainer,
+                -1, wx.NullBitmap)
 
         self.imgpastesaver = ImagePasteSaver()
 
@@ -420,6 +430,7 @@ class ImagePasteDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.OnFileTypeChoice(None)
+        self.OnSizePreviewBitmapContainer(None)
         
         # Fixes focus bug under Linux
         self.SetFocus()
@@ -427,6 +438,9 @@ class ImagePasteDialog(wx.Dialog):
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnFileTypeChoice)
+
+        wx.EVT_SIZE(self.ctrls.pnImagePreviewContainer,
+                self.OnSizePreviewBitmapContainer)
 
 
     def getImagePasteSaver(self):
@@ -453,3 +467,16 @@ class ImagePasteDialog(wx.Dialog):
             self.EndModal(wx.ID_OK)
 
 
+    def OnSizePreviewBitmapContainer(self, evt):
+        bbWidth, bbHeight = self.ctrls.pnImagePreviewContainer.GetSizeTuple()
+
+        newWidth, newHeight = Utilities.calcResizeArIntoBoundingBox(
+                self.origImgWidth, self.origImgHeight, bbWidth, bbHeight)
+                
+        img_resize = self.origImage.Scale(newWidth, newHeight,
+                quality = wx.IMAGE_QUALITY_HIGH)
+
+        bmp = wx.BitmapFromImage(img_resize)
+        with WindowUpdateLocker(self):
+            self.bitmapControl.SetPosition((0,0))
+            self.bitmapControl.SetBitmap(bmp)

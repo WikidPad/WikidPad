@@ -639,8 +639,13 @@ class App(wx.App, MiscEventSourceMixin):
         wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
                 self.globalConfigDir, self.globalConfigSubDir, clAction)
 
+        self.fireMiscEventProps({"adding wiki frame": True,
+                "wiki frame": wikiFrame})
         self.SetTopWindow(wikiFrame)
         self.mainFrameSet.add(wikiFrame)
+        self.fireMiscEventProps({"added wiki frame": True,
+                "wiki frame": wikiFrame})
+
         ## _prof.stop()
 
         # set the icon of the app
@@ -656,7 +661,12 @@ class App(wx.App, MiscEventSourceMixin):
 
 
     def unregisterMainFrame(self, wikiFrame):
+        self.fireMiscEventProps({"removing wiki frame": True,
+                "wiki frame": wikiFrame})
         self.mainFrameSet.discard(wikiFrame)
+        self.fireMiscEventProps({"removed wiki frame": True,
+                "wiki frame": wikiFrame})
+
         
     def describeExporters(self, mainControl):
         return reduce(lambda a, b: a+list(b),

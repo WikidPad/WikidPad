@@ -1861,11 +1861,13 @@ class HtmlExporter(AbstractExporter):
             urlAsImage = False
         elif not self.asHtmlPreview and self.addOpt[0]:
             urlAsImage = False
-        elif lowerLink.endswith(".jpg") or \
-                lowerLink.endswith(".gif") or \
-                lowerLink.endswith(".png") or \
-                lowerLink.endswith(".tif") or \
-                lowerLink.endswith(".bmp"):
+        elif lowerlink.split(".")[-1] in ("jpg", "jpeg", "gif", "png", "tif",
+                "bmp"):
+#         lowerLink.endswith(".jpg") or \
+#                 lowerLink.endswith(".gif") or \
+#                 lowerLink.endswith(".png") or \
+#                 lowerLink.endswith(".tif") or \
+#                 lowerLink.endswith(".bmp"):
             urlAsImage = True
         else:
             urlAsImage = False

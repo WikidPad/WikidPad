@@ -32,7 +32,6 @@ CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"
 
 
 
-# TODO Remove this soon!!!
 DEADBLOCKTIMEOUT = 1800
 
 

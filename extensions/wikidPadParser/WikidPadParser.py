@@ -28,6 +28,8 @@ from pwiki.WikiPyparsing import *
 
 WIKIDPAD_PLUGIN = (("WikiParser", 1),)
 
+WIKI_LANGUAGE_NAME = "wikidpad_default_2_0"
+WIKI_HR_LANGUAGE_NAME = u"WikidPad default 2.0"
 
 
 LETTERS = UPPERCASE + LOWERCASE
@@ -1218,7 +1220,7 @@ class _TheParser(object):
         Return the internal name of the wiki language implemented by this
         parser.
         """
-        return "wikidpad_default_2_0"
+        return WIKI_LANGUAGE_NAME
 
 
 
@@ -1362,7 +1364,7 @@ class WikiLanguageDetails(object):
 
     @staticmethod
     def getWikiLanguageName():
-        return "wikidpad_default_2_0"
+        return WIKI_LANGUAGE_NAME
 
 
     def isEquivTo(self, details):
@@ -1600,7 +1602,7 @@ class _TheHelper(object):
 
     @staticmethod
     def getWikiLanguageName():
-        return "wikidpad_default_2_0"
+        return WIKI_LANGUAGE_NAME
 
 
     # TODO More descriptive error messages (which character(s) is/are wrong?)
@@ -2323,7 +2325,7 @@ def describeWikiLanguage(ver, app):
     app -- wxApp object
     """
 
-    return (("wikidpad_default_2_0", u"WikidPad default 2.0", parserFactory,
+    return ((WIKI_LANGUAGE_NAME, WIKI_HR_LANGUAGE_NAME, parserFactory,
              True, languageHelperFactory, True),)
 
 

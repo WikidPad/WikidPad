@@ -253,10 +253,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         plm = self.pluginManager # Make it shorter
 
-        self.hooks = plm.registerSimplePluginAPI(("hooks",1),
-            ["startup", "newWiki", "createdWiki", "openWiki", "openedWiki", 
-             "openWikiWord", "newWikiWord", "openedWikiWord", "savingWikiWord",
-             "savedWikiWord", "renamedWikiWord", "deletedWikiWord", "exit"] )
+        pluginDummyFct = lambda module, *args, **kwargs: None
+
+        self.hooks = PluginManager.PluginAPIAggregation(
+                plm.registerSimplePluginAPI(("hooks", 2),
+                    ["startup", "newWiki", "createdWiki", "openWiki",
+                    "openedWiki", "openWikiWord", "newWikiWord",
+                    "openedWikiWord", "savingWikiWord", "savedWikiWord",
+                    "renamedWikiWord", "deletedWikiWord", "exit",
+                    "closingWiki", "droppingWiki", "closedWiki"
+                    ] ),
+
+                plm.registerWrappedPluginAPI(("hooks", 1),
+                    startup=None, newWiki=None, createdWiki=None,
+                    openWiki=None, openedWiki=None, openWikiWord=None,
+                    newWikiWord=None, openedWikiWord=None, savingWikiWor=None,
+                    savedWikiWord=None, renamedWikiWord=None,
+                    deletedWikiWord=None, exit=None,
+                    closingWiki=pluginDummyFct, droppingWiki=pluginDummyFct,
+                    closedWiki=pluginDummyFct
+                    )
+                )
+
         # interfaces for menu and toolbar plugins
         self.menuFunctions = plm.registerSimplePluginAPI(("MenuFunctions",1), 
                                 ("describeMenuItems",))
@@ -3327,13 +3345,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
 
-        if self.getWikiConfigPath():
+        wikiConfigPath = self.getWikiConfigPath()
+
+        if wikiConfigPath:
             wd = self.getWikiDocument()
             # Do not require access here, otherwise the user will not be able to
             # close a disconnected wiki
             if not wd.getReadAccessFailed() and not wd.getWriteAccessFailed():
                 try:
                     self.fireMiscEventKeys(("closing current wiki",))
+                    self.hooks.closingWiki(self, wikiConfigPath)
 
                     if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
@@ -3344,13 +3365,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     else:
                         traceback.print_exc()
                         self.fireMiscEventKeys(("dropping current wiki",))
+                        self.hooks.droppingWiki(self, wikiConfigPath)
 
                 if self.continuousExporter is not None:
                     self.continuousExporter.stopContinuousExport()
                     self.continuousExporter = None
 
                 try:
-
                     self.lastAccessedWiki(self.getWikiConfigPath())
                     if self.getWikiData():
                         wd.release()
@@ -3366,6 +3387,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     raise LossyWikiCloseDeniedException
                 
                 self.fireMiscEventKeys(("dropping current wiki",))
+                self.hooks.droppingWiki(self, wikiConfigPath)
 
                 self.wikiData = None
                 if self.wikiDataManager is not None:
@@ -3379,6 +3401,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.clipboardInterceptor.catchOff()
 
             self.fireMiscEventKeys(("closed current wiki",))
+            self.hooks.closedWiki(self, wikiConfigPath)
+
             self.resetGui()
 
 
@@ -3769,7 +3793,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         import warnings
         warnings.warn("PersonalWikiFrame.makeRelUrlAbsolute() deprecated, use "
-                "WikiDocument.makeRelUrlAbsolute()", DeprecationWarning)
+                "WikiDocument.makeRelUrlAbsolute()", DeprecationWarning,
+                stacklevel=2)
 
         return self.getWikiDocument().makeRelUrlAbsolute(relurl, addSafe=addSafe)
 

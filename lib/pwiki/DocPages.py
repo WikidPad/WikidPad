@@ -1413,7 +1413,7 @@ class WikiPage(AbstractWikiPage):
                 vo.delete()
                 self.versionOverview = UNDEFINED
         
-            self.removeFromSearchIndex()   # TODO: Check for (dead-)locks
+            self.queueRemoveFromSearchIndex()   # TODO: Check for (dead-)locks
 
             wx.CallAfter(self.fireMiscEventKeys,
                     ("deleted page", "deleted wiki page"))
@@ -1760,7 +1760,7 @@ class WikiPage(AbstractWikiPage):
         writer = None
         try:
             searchIdx = self.getWikiDocument().getSearchIndex()
-            writer = searchIdx.writer()
+            writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
 
             unifName = self.getUnifiedPageName()
 
@@ -1786,20 +1786,36 @@ class WikiPage(AbstractWikiPage):
                 return True
 
     def removeFromSearchIndex(self):
+        """
+        Remove this page from search index. Direct calling is not recommended,
+        call queueRemoveFromSearchIndex() instead.
+        """
+        if not self.getWikiDocument().isSearchIndexEnabled() or self.isInvalid():
+            return
+
         unifName = self.getUnifiedPageName()
         
-        if not self.getWikiDocument().isSearchIndexEnabled():
-            return
+        writer = None
         try:
             searchIdx = self.getWikiDocument().getSearchIndex()
-            writer = searchIdx.writer()
-            
+            writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
             writer.delete_by_term("unifName", unifName)
         except:
-            writer.cancel()
+            if writer is not None:
+                writer.cancel()
             raise
 
         writer.commit()
+
+
+    def queueRemoveFromSearchIndex(self):
+        if not self.getWikiDocument().isSearchIndexEnabled():
+            return
+
+        wikiDoc = self.getWikiDocument()
+        
+        wikiDoc.getUpdateExecutor().executeAsync(wikiDoc.UEQUEUE_INDEX,
+                self.removeFromSearchIndex)
 
 
 #     def update(self):

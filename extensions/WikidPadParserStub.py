@@ -12,6 +12,9 @@ from pwiki.OptionsDialog import PluginOptionsPanel
 
 WIKIDPAD_PLUGIN = (("WikiParser", 1), ("Options", 1))
 
+WIKI_LANGUAGE_NAME = "wikidpad_default_2_0"
+WIKI_HR_LANGUAGE_NAME = u"WikidPad default 2.0"
+
 
 def describeWikiLanguage(ver, app):
     """
@@ -40,7 +43,7 @@ def describeWikiLanguage(ver, app):
     app -- wxApp object
     """
 
-    return (("wikidpad_default_2_0", u"WikidPad default 2.0", parserFactory,
+    return ((WIKI_LANGUAGE_NAME, WIKI_HR_LANGUAGE_NAME, parserFactory,
              True, languageHelperFactory, True),)
 
 
@@ -102,7 +105,7 @@ def registerOptions(ver, app):
 
     # Register panel in options dialog
     app.addWikiWikiLangOptionsDlgPanel(WikiLangOptionsPanel,
-            u"WikidPad default 2.0")
+            WIKI_HR_LANGUAGE_NAME)
 
 
 class WikiLangOptionsPanel(PluginOptionsPanel):

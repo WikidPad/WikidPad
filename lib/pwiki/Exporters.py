@@ -518,7 +518,7 @@ class MultiPageTextWikiPageWriter(object):
         # Write version data for this word
         if self.writeVersionData:
             verOvw = page.getExistingVersionOverview()
-            if verOvw is not None:
+            if verOvw is not None and not verOvw.isNotInDatabase():
                 unifName = verOvw.getUnifiedName()
 
                 self.exportFile.writeSeparator()
@@ -761,7 +761,7 @@ class MultiPageTextExporter(AbstractExporter):
                                 if ft.startswith("wiki/")]
                         
                         for ft in wikiFuncTags:
-                            self.writeSeparator()
+                            self.exportFile.writeSeparator()
                             self.exportFile.write(u"funcpage/%s\n" % ft)
                             page = self.wikiDocument.getFuncPage(ft)
                             self.exportFile.write(page.getLiveText())
@@ -774,7 +774,7 @@ class MultiPageTextExporter(AbstractExporter):
                                 u"savedsearch/")
     
                         for un in unifNames:
-                            self.writeSeparator()
+                            self.exportFile.writeSeparator()
                             self.exportFile.write(un + u"\n")
                             datablock = wikiData.retrieveDataBlock(un)
     

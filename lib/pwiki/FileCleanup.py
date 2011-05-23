@@ -14,7 +14,7 @@ from wxHelper import GUI_ID, wxKeyFunctionSink, XrcControls, \
 from .OsAbstract import normalizePath, deleteFile
 from . import StringOps, WindowLayout
 
-from EnhancedGrid import EnhancedGrid
+from . import EnhancedGrid
 
 from .ConnectWrapPysqlite import ConnectWrapSyncCommit
 from .DocPages import AliasWikiPage
@@ -501,7 +501,7 @@ class InfoDatabase:
 
 
 
-class _OrphanedGrid(EnhancedGrid):
+class _OrphanedGrid(EnhancedGrid.EnhancedGrid):
     # Because these contain localized strings, creation must be delayed
     ACTIONCHOICELIST = None
     CALCACTIONNAMES = None
@@ -521,8 +521,8 @@ class _OrphanedGrid(EnhancedGrid):
     COL_COUNT = 4
 
 
-    def __init__(self, parent, db, wikiDocument, collator, id=-1):
-        EnhancedGrid.__init__(self, parent, id)
+    def __init__(self, parent, dialog, db, wikiDocument, collator, id=-1):
+        EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _OrphanedGrid.ACTIONCHOICELIST is None:
             _OrphanedGrid.ACTIONCHOICELIST = [_(u"Default"), _(u"Keep"),
@@ -530,7 +530,7 @@ class _OrphanedGrid(EnhancedGrid):
             _OrphanedGrid.CALCACTIONNAMES = [_(u""), _(u"Keep"),
                     _(u"Delete"), _(u"Collect")]
 
-        self.fileCleanupDialog = parent
+        self.fileCleanupDialog = dialog
         self.db = db
         self.wikiDocument = wikiDocument
         self.collator = collator
@@ -663,7 +663,7 @@ class _OrphanedGrid(EnhancedGrid):
 
 
 
-class _MissingGrid(EnhancedGrid):
+class _MissingGrid(EnhancedGrid.EnhancedGrid):
     # Because these contain localized strings, creation must be delayed
     ACTIONCHOICELIST = None
 
@@ -679,14 +679,14 @@ class _MissingGrid(EnhancedGrid):
     COL_COUNT = 1
 
 
-    def __init__(self, parent, db, wikiDocument, collator, id=-1):
-        EnhancedGrid.__init__(self, parent, id)
+    def __init__(self, parent, dialog, db, wikiDocument, collator, id=-1):
+        EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _MissingGrid.ACTIONCHOICELIST is None:
             _MissingGrid.ACTIONCHOICELIST = [_(u"Default"), _(u"Keep"),
                     _(u"Delete")]
 
-        self.fileCleanupDialog = parent
+        self.fileCleanupDialog = dialog
         self.db = db
         self.wikiDocument = wikiDocument
         self.collator = collator
@@ -1279,15 +1279,19 @@ class FileCleanupDialog(wx.Dialog):
 
         self.ctrls = XrcControls(self)
 
-        orphanedGrid = _OrphanedGrid(self, self.db, mainControl.getWikiDocument(),
-                mainControl.getCollator())
+        orphanedGrid = _OrphanedGrid(self.ctrls.panelOrphaned, self, self.db,
+                mainControl.getWikiDocument(), mainControl.getCollator())
 
-        res.AttachUnknownControl("gridOrphaned", orphanedGrid, self)
+#         res.AttachUnknownControl("gridOrphaned", orphanedGrid, self)
+        EnhancedGrid.replaceStandIn(self.ctrls.panelOrphaned,
+                self.ctrls.gridOrphaned, orphanedGrid)
         
-        missingGrid = _MissingGrid(self, self.db, mainControl.getWikiDocument(),
-                mainControl.getCollator())
+        missingGrid = _MissingGrid(self.ctrls.panelMissing, self, self.db,
+                mainControl.getWikiDocument(), mainControl.getCollator())
 
-        res.AttachUnknownControl("gridMissing", missingGrid, self)
+#         res.AttachUnknownControl("gridMissing", missingGrid, self)
+        EnhancedGrid.replaceStandIn(self.ctrls.panelMissing,
+                self.ctrls.gridMissing, missingGrid)
 
         htmllbMissingLinkingPages = _MissingLinkingPagesListBox(self, self.db,
                 mainControl, mainControl.getCollator(),
