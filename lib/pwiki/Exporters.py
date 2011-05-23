@@ -2711,7 +2711,7 @@ class MultiPageTextExporter(AbstractExporter):
                     # Write version data for this word
                     if self.writeVersionData:
                         verOvw = page.getExistingVersionOverview()
-                        if verOvw is not None:
+                        if verOvw is not None and not verOvw.isNotInDatabase():
                             unifName = verOvw.getUnifiedName()
 
                             self._writeSeparator()

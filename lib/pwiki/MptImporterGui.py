@@ -12,7 +12,9 @@ import Utilities
 
 from . import WindowLayout
 
-from EnhancedGrid import EnhancedGrid
+from . import EnhancedGrid
+
+# from EnhancedGrid import EnhancedGrid, ScrollPanel
 import DocPages
 
 # from timeView import Versioning
@@ -144,7 +146,7 @@ class RequestGridRow(object):
 
 
 
-class _RequestGrid(EnhancedGrid):
+class _RequestGrid(EnhancedGrid.EnhancedGrid):
     # Because these contain localized strings, creation must be delayed
     IMPORTCHOICELIST = None
     VERSIONCHOICELIST = None
@@ -164,7 +166,7 @@ class _RequestGrid(EnhancedGrid):
     COL_COUNT = 7
 
     def __init__(self, parent, db, wikiDocument, collator, id=-1):
-        EnhancedGrid.__init__(self, parent, id)
+        EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _RequestGrid.IMPORTCHOICELIST is None:
             _RequestGrid.IMPORTCHOICELIST = [_(u"Default"), _(u"Yes"),
@@ -537,8 +539,7 @@ class MultiPageTextImporterDialog(wx.Dialog):
         grid = _RequestGrid(self, db, mainControl.getWikiDocument(),
                 mainControl.getCollator())
 
-        res.AttachUnknownControl("gridDetails", grid, self)
-#         res.AttachUnknownControl("gridDataBlocks", gridDataBlocks, self)
+        EnhancedGrid.replaceStandIn(self, self.ctrls.gridDetails, grid)
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)

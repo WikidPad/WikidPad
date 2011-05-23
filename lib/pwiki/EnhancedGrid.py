@@ -6,7 +6,31 @@ import wx, wx.grid
 
 from WikiExceptions import *
 
+from . import SystemInfo
+
 from .wxHelper import WindowUpdateLocker, isDeepChildOf
+
+
+
+def replaceStandIn(container, standIn, grid):
+    """
+    The default wxXmlResource::AttachUnknownControl doesn't work well for
+    wxGrid on wxGTK. Instead of an unknown control, something else like
+    wxStaticBox is placed as standIn and replaced with grid when container
+    (usually a dialog or a panel in it) is opened
+    """
+    standInId = standIn.GetId()
+    grid.SetId(standInId)
+    
+    result = container.GetSizer().Replace(standIn, grid, recursive=True)
+    
+    if result:
+        standIn.Destroy()
+        container.GetSizer().Layout()
+    else:
+        raise InternalError(("Can't replace standin. Container: %s, standIn: %s,"
+                "replacement: %s") % (repr(container), repr(standIn), repr(grid)))
+
 
 
 
@@ -44,11 +68,25 @@ class EnhancedGrid(wx.grid.Grid):
         if self._isDirectEdit(evt.GetRow(), evt.GetCol()):
             wx.CallAfter(self._runEditor)
 
-    def _runEditor(self):
-#         if self.__closed:
-#             return
-        if self.CanEnableCellControl():
-            self.EnableCellEditControl()
+
+    if SystemInfo.isLinux():
+
+        def _runEditor(self):
+            if self.CanEnableCellControl():
+                sx, sy = self.GetViewStart()
+                # This call may trigger unwanted scrolling on wxGTK
+                # Therefore it is scrolled back afterwards
+                self.EnableCellEditControl()
+                self.Scroll(sx, sy)
+                # Just in case scrolling was wrong
+                self.MakeCellVisible(self.GetGridCursorRow(),
+                        self.GetGridCursorCol())
+
+    else:  # TODO: What is right for MacOS?
+        
+        def _runEditor(self):
+            if self.CanEnableCellControl():
+                self.EnableCellEditControl()
 
 
     def __OnGridEditorCreated(self, evt):

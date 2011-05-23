@@ -859,7 +859,7 @@
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Preview renderer:</label>
+              <label>Preview renderer*:</label>
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
@@ -955,6 +955,17 @@
         </object>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>* Needs WikidPad restart</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
       </object>
     </object>
   </object>
@@ -5352,7 +5363,9 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="unknown" name="gridDetails"/>
+        <object class="wxStaticBox" name="gridDetails">
+          <label></label>
+        </object>
         <option>2</option>
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>

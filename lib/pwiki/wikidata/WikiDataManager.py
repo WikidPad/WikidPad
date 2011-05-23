@@ -1082,7 +1082,7 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         return self.wikiData.retrieveDataBlock(unifName, default=default)
 
-    def retrieveDataBlockAsText(self, unifName, default=u""):
+    def retrieveDataBlockAsText(self, unifName, default=""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).
@@ -1515,7 +1515,7 @@ class WikiDataManager(MiscEventSourceMixin):
             _openDocuments[renamedConfigPath] = self
 
         oldWikiPage.renameVersionData(toWikiWord)
-        oldWikiPage.removeFromSearchIndex()
+        oldWikiPage.queueRemoveFromSearchIndex()
         oldWikiPage.informRenamedWikiPage(toWikiWord)
         del self.wikiPageDict[wikiWord]
 
@@ -1809,19 +1809,22 @@ class WikiDataManager(MiscEventSourceMixin):
 #             self.updateExecutor.start()
 
 
-    def removeFromSearchIndex(self, unifName):
-        if not self.isSearchIndexEnabled():
-            return
-        try:
-            searchIdx = self.getSearchIndex()
-            writer = searchIdx.writer()
-            
-            writer.delete_by_term("unifName", unifName)
-        except:
-            writer.cancel()
-            raise
-
-        writer.commit()
+#     def removeFromSearchIndex(self, unifName):
+#         if not self.isSearchIndexEnabled():
+#             return
+#         
+#         writer = None
+#         try:
+#             searchIdx = self.getSearchIndex()
+#             writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
+# 
+#             writer.delete_by_term("unifName", unifName)
+#         except:
+#             if writer is not None:
+#                 writer.cancel()
+#             raise
+# 
+#         writer.commit()
 
 
     def getWikiDefaultWikiPageFormatDetails(self):
@@ -2102,7 +2105,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-                miscevt.getSource().removeFromSearchIndex()  # TODO: Check for possible failure!!!
+                miscevt.getSource().queueRemoveFromSearchIndex()  # TODO: Check for possible failure!!!
                 # TODO: Add new on rename
             elif miscevt.has_key("updated wiki page"):
                 self.autoLinkRelaxInfo = None
