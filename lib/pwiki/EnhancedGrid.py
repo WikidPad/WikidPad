@@ -114,11 +114,13 @@ class EnhancedGrid(wx.grid.Grid):
             self.SetGridCursor(0, 0)
 
 
-    CURSORKEY_TO_DIR = {wx.WXK_LEFT: "left", wx.WXK_NUMPAD_LEFT: "left",
-            wx.WXK_RIGHT: "right", wx.WXK_NUMPAD_RIGHT: "right",
-            wx.WXK_UP: "up", wx.WXK_NUMPAD_UP: "up",
-            wx.WXK_DOWN: "down", wx.WXK_NUMPAD_DOWN: "down"}
+#     CURSORKEY_TO_DIR = {wx.WXK_UP: "up", wx.WXK_NUMPAD_UP: "up",
+#             wx.WXK_DOWN: "down", wx.WXK_NUMPAD_DOWN: "down"}
 
+#             wx.WXK_LEFT: "left", wx.WXK_NUMPAD_LEFT: "left",
+#             wx.WXK_RIGHT: "right", wx.WXK_NUMPAD_RIGHT: "right",
+
+            
     def __OnKeyDown(self, evt):
         if evt.ControlDown() or evt.AltDown() or evt.MetaDown():
             evt.Skip()
@@ -176,6 +178,21 @@ class EnhancedGrid(wx.grid.Grid):
                 if self._isMoveTarget(self.GetGridCursorRow(),
                         self.GetGridCursorCol()):
                     break
+
+#         elif direction == "down":
+#             while True:
+#                 success = self.MoveCursorDwon(False)
+#                 if not success:
+#                     newCol = self.GetGridCursorCol() + 1
+#                     if newCol < self.GetTable().GetNumberCols():
+#                         self.SetGridCursor(0, newCol)
+#                         self.MakeCellVisible(0, newCol)
+#                     else:
+#                         break
+# 
+#                 if self._isMoveTarget(self.GetGridCursorRow(),
+#                         self.GetGridCursorCol()):
+#                     break
 
 
 

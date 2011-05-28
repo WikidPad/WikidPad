@@ -68,8 +68,9 @@ The following keys and values are built into WikidPad (further are possible by p
       "Security" options page to make it work.
     * *self* Shows the name of the current page.
 
+++++ Lists of wiki links
 
-For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendix "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
+For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendix *"columns 123"* where 123 stands for the number of columns the list should have. By default, there is only one column.
 
 By default such a multi-column table is sorted rightwards:
 
@@ -79,13 +80,17 @@ D E F
 G H I
 >>
 
-With the appendix "coldir down" it is sorted downwards:
+With the appendix *"coldir down"* it is sorted downwards:
 
 <<pre
 A D G
 B E H
 C F I
 >>
+
+Appendix *"aslist"* shows a comma-separated list instead of a table. All other settings for link list are meaningless with this option.
+*"colwidth equal"* ensures that all columns have equal width (as far as this is possible).
+Appendix *"table_border_width 1"* shows a visible grid.
 
 
 +++ Examples
@@ -96,6 +101,9 @@ It is recommended to switch to preview to see the effect of the tags:
 
 *\[:rel: parents]*
 [:rel: parents]
+
+*\[:rel: parents; aslist]*
+[:rel: parents; aslist]
 
 *\[:rel: children]*
 [:rel: children]
@@ -108,6 +116,10 @@ It is recommended to switch to preview to see the effect of the tags:
 
 *\[:savedsearch: nanny; columns 4]*  (all pages containing "any")
 [:savedsearch: nanny; columns 4]
+
+*\[:savedsearch: nanny; columns 4; colwidth equal; table_border_width 1]*  (all pages containing "any")
+[:savedsearch: nanny; columns 4; colwidth equal; table_border_width 1]
+
 
 *\[:toc:]*
 [:toc:]

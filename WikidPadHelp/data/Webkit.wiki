@@ -1,0 +1,65 @@
+﻿++ Webkit
+
+If you are using wxGTK (normally on Linux only) you have the option to use Webkit as HTML preview renderer.
+
+
+++ Prerequisites
+
+You need the pyGtk and pyWebkitGtk libraries which can normally be installed with a package manager for your Linux variant.
+
+If you installed everything correctly you can start WikidPad, in menu "Extra"->"Options" open options dialog, options page "HTML preivew/renderer" and you should see for entry "Preview renderer" the possibilities "Internal" and "Webkit".
+
+You can now choose "Webkit" and restart WikidPad. After that Webkit is used for the HTML preview.
+
+
+++ Additional features
+
+The Webkit renderer supports some features not provided by the internal renderer (even more than the IE renderer on Windows). As main component of full-fledged web browsers it supports [Cascading style sheets] and JavaScript.
+
+Moreover it supports [IncrementalSearch] and some vi like shortcut keys for navigation (optional).
+
+
++++ Vi shortcut keys
+
+If you activated support for vi keys (options dialog, options page "HTML preivew/renderer", checkbox "Use vi keys in Webkit preview") the following shortcuts are supported:
+
+
+<<pre
+                key(s)  :       action  
+        --------------------------------------------------------
+        (count) j       : scroll down (same as down arrow)
+        (count) k       : scroll up (same as up arrow)
+        (count) h       : scroll left (same as left arrow)
+        (count) l       : scroll right (same as right arrow)
+                
+        (count) G       : scroll to (count)% of page
+                            defaults to bottom of page
+        (count) gg      : scroll to (count)% of page
+                            defaults to top of page
+
+                gh      : goto home page
+                gH      : open home in new forground tab
+
+        (count) gt      : cycles to next tab
+                          if (count) goes to (count) next tab
+        (count) gT      : cycles to previous tab
+                          if (count) goes to (count) previous tab
+
+        (count) H       : go back in history count times
+        (count) L       : go forward in history count times
+
+                gu      : display parents dialog (Ctrl + Up)
+
+                o       : open wikipage (Ctrl + o)
+
+                /       : start incremental search (Ctrl + f)
+
+                dd      : close current tab (as opposed to single 
+                          "d" in pentadactyl)
+
+                return  : follow link (if selected)
+
+        Ctrl+[ or Esc   : clear selection (and/or count/modifier)
+>>
+
+where (count) should be replaced by a number between 0 and 10000 (including).

@@ -566,13 +566,14 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern_is_excluding"): u"False",  # Same for HTML exporting
     ("main", "html_preview_pics_as_links"): u"False",  # Show only links to pictures in HTML preview
     ("main", "html_export_pics_as_links"): u"False",  # Same for HTML exporting
-    ("main", "html_preview_renderer"): u"0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla; 3: Webkit
-    ("main", "html_preview_ieShowIframes"): u"False",  # Show iframes with external sources inside IE preview?
     ("main", "export_table_of_contents"): u"0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
     ("main", "html_toc_title"): u"Table of Contents",  # title of table of contents
     ("main", "html_export_singlePage_sepLineCount"): u"10",  # How many empty lines to separate
             # two wiki pages in a single HTML page
+    ("main", "html_preview_renderer"): u"0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla; 3: Webkit
+    ("main", "html_preview_ieShowIframes"): u"False",  # Show iframes with external sources inside IE preview?
+    ("main", "html_preview_webkitViKeys"): u"False",  # Allow shortcut keys of vi editor to move around in Webkit preview
 
     ("main", "html_body_link"): u"",  # for HTML preview/export, color for link or "" for default
     ("main", "html_body_alink"): u"",  # for HTML preview/export, color for active link or "" for default
@@ -597,6 +598,9 @@ GLOBALDEFAULTS = {
             # separately in syntax coloring (by default blue if present, black if not). May slow down highlighting.
     ("main", "editor_tabWidth"): "4",  # How many spaces should a tab be wide?
     ("main", "editor_onlineSpellChecker_active"): "False",  # Online-spellchecker (check as you type)?
+    ("main", "editor_imageTooltips_localUrls"): "True",  # Show image preview as tooltip for local image URL
+    ("main", "editor_imageTooltips_maxWidth"): "200",  # Maximum width for image tooltip
+    ("main", "editor_imageTooltips_maxHeight"): "200",  # Maximum height for image tooltip
 
     ("main", "editor_imagePaste_filenamePrefix"): "",  # Prefix to put before the filename.
     ("main", "editor_imagePaste_fileType"): "1",  # When pasting images into WikidPad, which file type

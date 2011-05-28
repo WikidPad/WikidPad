@@ -1,0 +1,74 @@
+﻿++ File Cleanup Dialog
+
+If you use WikidPad for a longer time your wiki may contain some links to files which were deleted or moved in the meantime (missing files) or maybe you have placed files in the FileStorage but deleted all links to them because you don't need them any longer (orphaned files).
+
+The file cleanup utility is here to find and handle such cases.
+
+
++++ Start
+With menu "Wiki"->"Maintenance"->"File cleanup" you can bring up the pre-scan dialog to set options for the following scan of the wiki.
+
+*Referencing directory in filestorage keeps everything in it*
+If this is checked and the wiki contains a link to a directory in the filestorage (or a link to the main filestorage directory "files") then all files and subdirectories in the directory are not considered as orphaned and won't be listed in the final result table.
+
+
++++ Scan 
+When you close the pre-scan dialog WikidPad starts to scan the wiki for links to files and searches for files and directories in the file storage. If this is finished the dialog with the final results appears.
+
+
++++ The results dialog
+The dialog consists of two tabs "Orphaned files" and "Missing files" which behave rather differently.
+
+
+++++ Orphaned files
+At the top of the tab you can set some general options for all the files
+
+*Default action*
+    * Keep: Keep them untouched as they are
+    * Delete: Delete them
+    * Collect: Keep them and place a link on the collector page
+
+*Collector page*
+If you want to collect one or more links on a wiki page you can give its name here. If the page exists, the links are appended, if not, the page is created. The page name must have valid wiki link syntax, otherwise the text field is shown with a red background when you try to close the dialog with OK.
+
+If there are no links to collect the content of the text field doesn't matter.
+
+
+*Keeping directory in filestorage keeps everything in it*
+Will be explained with "the rules".
+
+
+Below these general settings there is the details table which contains for each orphaned file or directory an entry.
+    Path: Path of the file/directory
+    Type: If it is a file or a directory
+    Action: Here you can choose for some items another handling than the default one
+    Calc. \action: Action calculated by WikidPad for this item. If it differs from action the background of the field is red
+
+
+*The rules*
+In most cases the action or default action you choose for the items is equal to the action WikidPad will really apply to them (the calculated action) but there are cases where this is not possible or desired.
+
+WikidPad uses the following rules to calculate the action:
+
+    * If an item is kept (or collected) its containing directory is kept as well as the directory containing that directory and so on upward
+    * If a directory is deleted everything in it is deleted as well
+    * If a directory is kept (or collected) and "Keeping directory in filestorage keeps everything in it" is set then everything contained in the directory is kept as well (including subdirectories and everything in them and so on)
+    * Explicit action (for a particular item) wins over default action (e.g. if you by default keep all items but explicitly delete a directory then everything in it which is set to default action is deleted as well)
+    * Keep wins over delete
+
+
+You can always use the "Test" button at the bottom of the dialog to see or update the calculated actions without really executing them.
+
+
+++++ Missing files
+The left side of the tab consists of a list of paths from links found in the wiki for which no file exists. Clicking on one of the paths shows at the right side a list of wiki pages in which the link was found. Double-clicking on an entry in the right list opens the wiki page in the main window. For convenience double-clicking an entry in the left list is same as double-clicking the first corresponding entry in the right list.
+
+You can edit the page now while the dialog stays open (it is "non-modal"). If you save the modified page (or just by opening another page) the lists in the "Missing files" tab are updated automatically to reflect the changes (for large wiki pages this may slow down reaction time of WikidPad).
+
+
++++ Further remarks
+Under Windows deleted orphaned files are placed into the recycle bin while the deleted directories are not. But that doesn't matter as WikidPad never deletes a directory which is not empty (maybe after deleting all files and empty directories in it). If you e.g. open the file cleanup dialog and then place new files into a directory designated for deletion then WikidPad will not delete the newly added files and will not delete the containing directory.
+
+For the missing files the "Test" button has no function and "OK" and "Cancel" will both close the dialog with no difference in result (but orphaned files may be affected of course).
+
+The cleanup only recognizes links in normal text (with or without brackets) but not in HTML tags (e.g. IMG tag) or other places where the wiki language doesn't allow links (e.g. in a "pre" area).

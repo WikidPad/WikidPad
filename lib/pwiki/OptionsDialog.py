@@ -443,13 +443,15 @@ class OptionsDialog(wx.Dialog):
             ("html_export_proppattern", "tfHtmlExportProppattern", "tre"),
             ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
-            ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
-            ("html_preview_ieShowIframes", "cbHtmlPreviewIeShowIframes", "b"),
 
             ("export_table_of_contents", "chTableOfContents", "seli"),
             ("html_toc_title", "tfHtmlTocTitle", "t"),
             ("html_export_singlePage_sepLineCount",
                     "tfHtmlExportSinglePageSepLineCount", "i0+"),
+
+            ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
+            ("html_preview_ieShowIframes", "cbHtmlPreviewIeShowIframes", "b"),
+            ("html_preview_webkitViKeys", "cbHtmlPreviewWebkitViKeys", "b"),
 
 
             ("html_body_link", "tfHtmlLinkColor", "color0",
@@ -477,6 +479,12 @@ class OptionsDialog(wx.Dialog):
             ("editor_colorizeSearchFragments", "cbEditorColorizeSearchFragments", "b"),
             ("editor_tabWidth", "scEditorTabWidth", "spin"),
 
+            ("editor_imageTooltips_localUrls", "cbEditorImageTooltipsLocalUrls",
+                "b"),
+            ("editor_imageTooltips_maxWidth", "scEditorImageTooltipsMaxWidth",
+                "spin"),
+            ("editor_imageTooltips_maxHeight", "scEditorImageTooltipsMaxHeight",
+                "spin"),
 
             ("editor_imagePaste_filenamePrefix", "tfEditorImagePasteFilenamePrefix", "t"),
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
@@ -977,6 +985,8 @@ class OptionsDialog(wx.Dialog):
         wx.EVT_CHOICE(self, GUI_ID.chTempHandlingTempMode,
                 self.OnUpdateUiAfterChange)
 
+        wx.EVT_CHECKBOX(self, GUI_ID.cbEditorImageTooltipsLocalUrls,
+                self.OnUpdateUiAfterChange)
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnUpdateUiAfterChange)
                 
@@ -1210,6 +1220,12 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.tfTempHandlingTempDir.Enable(enabled)
         self.ctrls.btnSelectTempHandlingTempDir.Enable(enabled)
 
+        # Dimensions of image preview tooltips can only be set if tooltips are 
+        # enabled
+        enabled = self.ctrls.cbEditorImageTooltipsLocalUrls.GetValue()
+        self.ctrls.scEditorImageTooltipsMaxWidth.Enable(enabled)
+        self.ctrls.scEditorImageTooltipsMaxHeight.Enable(enabled)
+
         # If image should be pasted as JPEG, quality can be set
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
         self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
@@ -1227,6 +1243,8 @@ class OptionsDialog(wx.Dialog):
         # If single process mode checked, allow to check for other
         # WikidPad processes already running
         self.ctrls.cbZombieCheck.Enable(self.ctrls.cbSingleProcess.GetValue())
+
+
 
 
 

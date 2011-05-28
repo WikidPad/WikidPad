@@ -3336,21 +3336,23 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             pageAst = docPage.getLivePageAst(threadstop=threadstop)
 
-            nodes = pageAst.findNodesForCharPos(charPos)
+            astNodes = pageAst.findNodesForCharPos(charPos)
 
             if charPos > 0:
                 # Maybe a token left to the cursor was meant, so check
                 # one char to the left
-                nodes += pageAst.findNodesForCharPos(charPos - 1)
+                astNodes += pageAst.findNodesForCharPos(charPos - 1)
 
             callTip = None
-            for node in nodes:
-                if node.name == "wikiWord":
+            for astNode in astNodes:
+                if astNode.name == "wikiWord":
                     threadstop.testRunning()
-                    wikiWord = wikiDocument.getUnAliasedWikiWord(node.wikiWord)
+                    wikiWord = wikiDocument.getUnAliasedWikiWord(astNode.wikiWord)
 
                     # Set status to wikipage
-                    callInMainThread(self.presenter.getMainControl().showStatusMessage, _(u"Link to page: %s") % wikiWord, -1)
+                    callInMainThread(
+                            self.presenter.getMainControl().showStatusMessage,
+                            _(u"Link to page: %s") % wikiWord, 0)
 
                     if wikiWord is not None:
                         propList = wikiDocument.getAttributeTriples(
@@ -3358,22 +3360,55 @@ class WikiTxtCtrl(SearchableScintillaControl):
                         if len(propList) > 0:
                             callTip = propList[-1][2]
                             break
-                elif node.name == "urlLink":
+                elif astNode.name == "urlLink":
+                    # Should we show image preview tooltips for local URLs?
+                    if not self.presenter.getConfig().getboolean("main",
+                            "editor_imageTooltips_localUrls", True):
+                        continue
+
+                    # Decision code taken from HtmlExporter.HtmlExporter._processUrlLink
+                    if astNode.appendixNode is None:
+                        appendixDict = {}
+                    else:
+                        appendixDict = dict(astNode.appendixNode.entries)
+            
+                    # Decide if this is an image link
+                    if appendixDict.has_key("l"):
+                        urlAsImage = False
+                    elif appendixDict.has_key("i"):
+                        urlAsImage = True
+#                     elif self.asHtmlPreview and \
+#                             self.mainControl.getConfig().getboolean(
+#                             "main", "html_preview_pics_as_links"):
+#                         urlAsImage = False
+#                     elif not self.asHtmlPreview and self.addOpt[0]:
+#                         urlAsImage = False
+                    elif astNode.url.lower().split(".")[-1] in \
+                            ("jpg", "jpeg", "gif", "png", "tif", "bmp"):
+                        urlAsImage = True
+                    else:
+                        urlAsImage = False
+
                     # If link is a picture display it as a tooltip
-                    pic_types = ["jpg", "jpeg", "png", "gif"]
-                    if node.url.split(".")[-1].lower() in pic_types:
+                    if urlAsImage:
                         path = self.presenter.getWikiDocument()\
-                                .makeFileUrlAbsPath(node.url)
+                                .makeFileUrlAbsPath(astNode.url)
 
                         if path is not None and isfile(path):
                             if imghdr.what(path):
+                                config = self.presenter.getConfig()
+                                maxWidth = config.getint("main",
+                                        "editor_imageTooltips_maxWidth", 200)
+                                maxHeight = config.getint("main",
+                                        "editor_imageTooltips_maxHeight", 200)
+
                                 def SetImageTooltip(path):
-                                    self.tooltip_image = ImageTooltipPanel(self, path)
+                                    self.tooltip_image = ImageTooltipPanel(self,
+                                            path, maxWidth, maxHeight)
                                 threadstop.testRunning()
                                 callInMainThread(SetImageTooltip, path)
                             else:
-                                 self.presenter.displayErrorMessage(
-                                    _(u"Not a valid image"))
+                                callTip = _(u"Not a valid image")
                             break
 
             if callTip:
@@ -3419,7 +3454,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.CallTipCancel()
 
         # Set status back to nothing
-        callInMainThread(self.presenter.getMainControl().showStatusMessage, "", -1)
+        callInMainThread(self.presenter.getMainControl().showStatusMessage, "",
+                0)
         # And close any shown pic
         if self.tooltip_image:
             self.tooltip_image.Close()
@@ -3818,7 +3854,13 @@ class ImageTooltipPanel(wx.Frame):
         origWidth = img.GetWidth()
         origHeight = img.GetHeight()
 
-        if maxWidth > 0 and maxHeight > 0 and origWidth > 0 and origHeight > 0:
+        # Set defaults for invalid values
+        if maxWidth <= 0:
+            maxWidth = 200
+        if maxHeight <= 0:
+            maxHeight = 200
+
+        if origWidth > 0 and origHeight > 0:
             self.width, self.height = calcResizeArIntoBoundingBox(origWidth,
                     origHeight, maxWidth, maxHeight)
             
@@ -3836,7 +3878,12 @@ class ImageTooltipPanel(wx.Frame):
         self.bmp.Bind(wx.EVT_RIGHT_DOWN, self.OnRightClick)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        WindowLayout.setWindowPos(self, wx.GetMousePosition(), fullVisible=True)
+        mousePos = wx.GetMousePosition()
+        # If possible the frame shouldn't be exactly under mouse pointer
+        # so doubleclicking on link works
+        mousePos.x += 1
+        mousePos.y += 1
+        WindowLayout.setWindowPos(self, mousePos, fullVisible=True)
 
         self.Show()
 
@@ -3844,7 +3891,15 @@ class ImageTooltipPanel(wx.Frame):
         self.Destroy()
 
     def OnLeftClick(self, event=None):
+#         scrPos = self.ClientToScreen(evt.GetPosition())
         self.Close()
+#         wnd = wx.FindWindowAtPoint(scrPos)
+#         print "--OnLeftClick1", repr((self, wnd))
+#         if wnd is not None:
+#             cliPos = wnd.ScreenToClient(scrPos)
+#             evt.m_x = cliPos.x
+#             evt.m_y = cliPos.y
+#             wnd.ProcessEvent(evt)
 
     def OnRightClick(self, event=None):
         self.Close()

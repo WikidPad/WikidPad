@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-03-28
+# Last modified (format YYYY-MM-DD): 2011-05-26
 
 
 import locale, pprint, time, sys, string, traceback
@@ -642,11 +642,11 @@ WikiWordCcPAT = (ur"(?:[" +
         ur"]+)")
 
 
-UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+UrlPAT = ur'(?:(?:https?|ftp|rel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
         ur'(?:(?![.,;:!?)]+(?:["\s]|$))[^"\s|\]<>])*'
 
 
-UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+UrlInBracketsPAT = ur'(?:(?:https?|ftp|rel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
         ur'(?:(?![ \t]+[|\]])(?: |[^"\s|\]<>]))*'
 
 

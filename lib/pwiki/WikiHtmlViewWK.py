@@ -30,6 +30,11 @@ import gtk, gtk.gdk
 # pywebkitgtk (http://code.google.com/p/pywebkitgtk/)
 import webkit
 
+# used in search
+import SystemInfo
+
+from HTMLParser import HTMLParser
+
 if wx.Platform == '__WXMSW__':
     from WindowsHacks import getLongPath
 else:
@@ -46,6 +51,171 @@ def wxToGtkLabel(s):
     labels with wx style ('&' to tag shortcut character)
     """
     return s.replace("&", "_")
+
+# Search
+class WebkitSearchDialog(wx.Frame):
+# Base on WikiTxtDialogs.IncrementalSearchDialog
+# Would it be better to inherit?
+    
+    COLOR_YELLOW = wx.Colour(255, 255, 0);
+    COLOR_GREEN = wx.Colour(0, 255, 0);
+    
+    def __init__(self, parent, id, webkitCtrl, rect, font, mainControl, searchInit=None):
+        # Frame title is invisible but is helpful for workarounds with
+        # third-party tools
+        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+                rect.GetPosition(), rect.GetSize(),
+                wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
+
+        self.webkitCtrl = webkitCtrl
+        self.mainControl = mainControl
+        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
+                _(u"Incremental search (ENTER/ESC to finish)"),
+                style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
+
+        self.tfInput.SetFont(font)
+        self.tfInput.SetBackgroundColour(WebkitSearchDialog.COLOR_YELLOW)
+        mainsizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainsizer.Add(self.tfInput, 1, wx.ALL | wx.EXPAND, 0)
+
+        self.SetSizer(mainsizer)
+        self.Layout()
+        self.tfInput.SelectAll()  #added for Mac compatibility
+        self.tfInput.SetFocus()
+
+        config = self.mainControl.getConfig()
+
+        self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
+                0)  # Milliseconds to close or 0 to deactivate
+
+        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
+        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
+        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
+        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
+                self.OnTimerIncSearchClose)
+        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+
+        if searchInit:
+            self.tfInput.SetValue(searchInit)
+            self.tfInput.SetSelection(-1, -1)
+
+        if self.closeDelay:
+            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
+            self.closeTimer.Start(self.closeDelay, True)
+
+#     def Close(self):
+#         wx.Frame.Close(self)
+#         self.txtCtrl.SetFocus()
+
+
+    def OnKillFocus(self, evt):
+        self.webkitCtrl.forgetIncrementalSearch()
+        self.Close()
+
+    def OnText(self, evt):
+        self.webkitCtrl.searchStr = self.tfInput.GetValue()
+        foundPos = self.webkitCtrl.executeIncrementalSearch(self.tfInput.GetValue())
+
+        if foundPos == False:
+            # Nothing found
+            self.tfInput.SetBackgroundColour(WebkitSearchDialog.COLOR_YELLOW)
+        else:
+            # Found
+            self.tfInput.SetBackgroundColour(WebkitSearchDialog.COLOR_GREEN)
+
+    def OnMouseAnyInput(self, evt):
+#         if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
+
+        # Workaround for name clash in wx.MouseEvent.Button:
+        if wx._core_.MouseEvent_Button(evt, wx.MOUSE_BTN_ANY) and self.closeDelay:
+            # If a mouse button was pressed/released, restart timer
+            self.closeTimer.Start(self.closeDelay, True)
+
+        evt.Skip()
+
+
+    def OnKeyDownInput(self, evt):
+        if self.closeDelay:
+            self.closeTimer.Start(self.closeDelay, True)
+
+        key = evt.GetKeyCode()
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
+
+        searchString = self.tfInput.GetValue()
+
+        foundPos = -2
+        if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
+                (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
+            # Return pressed
+            self.webkitCtrl.endIncrementalSearch()
+            self.Close()
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE):
+            # Esc -> Abort inc. search, go back to start
+            self.webkitCtrl.resetIncrementalSearch()
+            self.Close()
+        elif matchesAccelPair("ContinueSearch", accP):
+            foundPos = self.webkitCtrl.executeIncrementalSearch(searchString)
+        # do the next search on another ctrl-f
+        elif matchesAccelPair("StartIncrementalSearch", accP):
+            foundPos = self.webkitCtrl.executeIncrementalSearch(searchString)
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+            foundPos = self.webkitCtrl.executeIncrementalSearch(searchString)
+        elif matchesAccelPair("BackwardSearch", accP):
+            foundPos = self.webkitCtrl.executeIncrementalSearchBackward(searchString)
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+            foundPos = self.webkitCtrl.executeIncrementalSearchBackward(searchString)
+        elif matchesAccelPair("ActivateLink", accP):
+            # ActivateLink is normally Ctrl-L
+            self.webkitCtrl.endIncrementalSearch()
+            self.Close()
+            self.webkitCtrl.OnKeyDown(evt)
+        elif matchesAccelPair("ActivateLinkNewTab", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.webkitCtrl.endIncrementalSearch()
+            self.Close()
+            self.webkitCtrl.OnKeyDown(evt)
+        elif matchesAccelPair("ActivateLink2", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.webkitCtrl.endIncrementalSearch()
+            self.Close()
+            self.webkitCtrl.OnKeyDown(evt)
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.webkitCtrl.endIncrementalSearch()
+            self.Close()
+            self.webkitCtrl.OnKeyDown(evt)
+        # handle the other keys
+        else:
+            evt.Skip()
+
+        if foundPos == False:
+            # Nothing found
+            self.tfInput.SetBackgroundColour(WebkitSearchDialog.COLOR_YELLOW)
+        else:
+            # Found
+            self.tfInput.SetBackgroundColour(WebkitSearchDialog.COLOR_GREEN)
+
+        # Else don't change
+
+    if SystemInfo.isOSX():
+        # Fix focus handling after close
+        def Close(self):
+            wx.Frame.Close(self)
+            wx.CallAfter(self.webkitCtrl.SetFocus)
+
+    def OnTimerIncSearchClose(self, evt):
+        self.webkitCtrl.endIncrementalSearch()  # TODO forgetIncrementalSearch() instead?
+        self.Close()
+
 
 
 class LinkConverterForPreviewWk:
@@ -64,17 +234,22 @@ class LinkConverterForPreviewWk:
 class WikiHtmlViewWK(wx.Panel):
     def __init__(self, presenter, parent, ID):
         # Must be set before calling base class constructor
-        self.loaded = False
+        self.webkitCtrlLoaded = False
 
         wx.Panel.__init__(self, parent, ID, style=wx.FRAME_NO_TASKBAR|wx.FRAME_FLOAT_ON_PARENT)
 
         self.html = WKHtmlWindow(self)
         self.scrolled_window = None
+        self.keyProcessWxWindow = KeyProcessWxWindow(self, self)
 
         self.box = wx.BoxSizer(wx.VERTICAL)
         self.box.Add(self.html, 1, wx.EXPAND)
+        self.box.Add(self.keyProcessWxWindow, 0, wx.EXPAND)
         self.SetSizer(self.box)
-
+        
+        self.vi = None # Contains ViFunctions instance if vi key handling enabled
+        self.keyEventConn = None # GTK key press event connection
+        self.focusEventConn = None # GTK focus-in-event event connection
 
         # Window must be shown for pizza stuff to work
         self.Bind(wx.EVT_WINDOW_CREATE, self.OnShow)
@@ -112,6 +287,7 @@ class WikiHtmlViewWK(wx.Panel):
         self.deferredScrollPos = None  # Used by scrollDeferred()
         
         self.selectedText = u""
+        self.selectedHTML = u""
 
         self.currentLoadedWikiWord = None
         self.currentLoadedUrl = None  # Contains the URL of the temporary HTML
@@ -184,14 +360,11 @@ class WikiHtmlViewWK(wx.Panel):
         #wx.EVT_MOTION(self, self.OnMouseMotion)
 
     def OnShow(self, evt):
-        self._realizeIfNeeded()
+        self.realizeIfNeeded()
         evt.Skip()
 
-    def _realizeIfNeeded(self):
-        if self.loaded:
-            return
-
-        if self.html.PizzaMagic():
+    def realizeIfNeeded(self):
+        if not self.webkitCtrlLoaded and self.html.PizzaMagic():
             self.scrolled_window = self.html.scrolled_window
             #self.html.ctrl.connect("load-started", self.__on_load_started)
             self.html.ctrl.connect("load-finished", self.__on_load_finished)
@@ -206,16 +379,34 @@ class WikiHtmlViewWK(wx.Panel):
             self.html.ctrl.connect("button_press_event", 
                     self.__on_button_press_event)
 
+            use_vi_navigation = self.presenter.getConfig().getboolean("main",
+                    "html_preview_webkitViKeys", False)
+
+            if use_vi_navigation:
+
+                self.vi = ViFunctions(self) 
+
+                self.keyEventConn = self.html.ctrl.connect("key-press-event",
+                        self.__on_key_press_event_vi)
+            else:
+                self.vi = None
+                
+                self.keyEventConn = self.html.ctrl.connect("key-press-event",
+                        self.__on_key_press_event)
+
             self.html.ctrl.connect("scroll_event", self.__on_scroll_event)
 
             self.html.ctrl.connect("selection_received", 
                     self.__on_selection_received)
             self.html.ctrl.connect("populate-popup", self.__on_populate_popup)
 
-            self.html.ctrl.connect("focus-in-event", self.__on_focus_in_event)
+            self.focusEventConn = self.html.ctrl.connect("focus-in-event",
+                    self.__on_focus_in_event)
             self.html.ctrl.connect("expose-event", self.__on_expose_event)
 
-            self.loaded = True
+            #self.html.ctrl.connect("set-scroll-adjustments", self.__on_scroll_adjustment)
+
+            self.webkitCtrlLoaded = True
             self.passNavigate = 0
             
             # Set zoom factor
@@ -233,6 +424,7 @@ class WikiHtmlViewWK(wx.Panel):
                 lx, ly = wikiPage.getPresentation()[3:5]
                 self.scrollDeferred(lx, ly)
 
+        self.keyProcessWxWindow.realize()
 
 
     def __on_button_press_event(self, view, gtkEvent):
@@ -241,6 +433,204 @@ class WikiHtmlViewWK(wx.Panel):
         """
         if gtkEvent.button == 2: # 2 is middle button
             return self.OnMiddleDown(gtkEvent)
+
+    def __on_key_press_event(self, view, gtkEvent):
+        key = gtkEvent.keyval
+
+        # Pass modifier keys on
+        if key in (65505, 65507, 65513):
+            return False
+
+        control_mask = False
+        if gtkEvent.state & gtk.gdk.CONTROL_MASK: # Ctrl
+            control_mask = True
+
+#         # Search is started on Ctrl + f
+#         if control_mask:
+#             if key == 102: # f
+#                 self.startIncrementalSearch()
+#             elif key == 108: # l
+#                 self.FollowLinkIfSelected()
+
+        if key == 65307: # Escape
+            self.html.ClearSelection()
+
+        # Now send to  self.keyProcessWxWindow  to let wxPython translate
+        # and process the key event
+        if self.scrolled_window:
+            gtkEvent = gtkEvent.copy()
+            self.html.ctrl.handler_block(self.focusEventConn)
+            try:
+                self.keyProcessWxWindow.gtkMyself.grab_focus()
+                self.keyProcessWxWindow.gtkMyself.emit("key-press-event", gtkEvent)
+                self.html.ctrl.grab_focus()
+            finally:
+                self.html.ctrl.handler_unblock(self.focusEventConn)
+            return True #False?
+
+
+    def __on_key_press_event_vi(self, view, gtkEvent):
+        """
+        Allows navigation with vi like commands (as used by
+        pentadactyl/vimperator). Statusbar field zero is used
+        to display counts / primary key.
+
+        Counts are limited to 10000. 
+        Default count value is 1. 
+        Counts must preceed command.
+
+        Some commands have been implemented but don't work as 
+        there shortcuts are currently used by wikipad (e.g. 
+        Ctrl+o, Ctrl+d, etc...). Reassigning (or removing) the
+        shortcuts will allow them to function.
+
+
+        Current implemented commands:
+
+                key(s)  :       action  
+        --------------------------------------------------------
+        (count) j       : scroll down (same as down arrow)
+        (count) k       : scroll up (same as up arrow)
+        (count) h       : scroll left (same as left arrow)
+        (count) l       : scroll right (same as right arrow)
+                
+        (count) G       : scroll to (count)% of page
+                            defaults to bottom of page
+        (count) gg      : scroll to (count)% of page
+                            defaults to top of page
+
+                gh      : goto home page
+                gH      : open home in new forground tab
+
+        (count) gt      : cycles to next tab
+                          if (count) goes to (count) next tab
+        (count) gT      : cycles to previous tab
+                          if (count) goes to (count) previous tab
+
+        (count) H       : go back in history count times
+        (count) L       : go forward in history count times
+
+                gu      : display parents dialog (Ctrl + Up)
+
+                o       : open wikipage (Ctrl + o)
+
+                /       : start incremental search (Ctrl + f)
+
+                dd      : close current tab (as opposed to single 
+                          "d" in pentadactyl)
+
+                return  : follow link (if selected)
+
+        Ctrl+[ or Esc   : clear selection (and/or count/modifier)
+
+        TODO:   link navigation on f and F
+                move functions out of here!!!
+        """
+        self.realizeIfNeeded()
+
+        vi = self.vi
+        key = gtkEvent.keyval
+
+        # Pass modifier keys on
+        if key in (65505, 65507, 65513):
+            return False
+
+        control_mask = False
+        if gtkEvent.state & gtk.gdk.CONTROL_MASK: # Ctrl
+            control_mask = True
+
+#         if control_mask:
+#             if key == 102: # f
+#                 self.startIncrementalSearch()
+
+        if key == 65307: # Escape
+            self.html.ClearSelection()
+            vi.key_modifier = []
+            vi.key_number_modifier = []
+        
+
+        if 48 <= key <= 57: # Normal
+            self.vi.SetNumber(key-48)
+            return True
+        elif 65456 <= key <= 65465: # Numpad
+            self.vi.SetNumber(key-65456)
+            return True
+
+
+        # Currently only supports single modifier (i.e. 2 key commands)
+        if len(vi.key_modifier) == 0 and key in vi.key_mods:
+            vi.key_modifier.append(key)
+            vi.updateViStatus()
+            return True
+
+        # Set count to be used
+        vi.count = 1
+        vi.true_count = False # True if count is specified
+        if len(vi.key_number_modifier) > 0:
+            vi.count = int("".join(map(str, vi.key_number_modifier)))
+
+            # Set a max count
+            if vi.count > 10000:
+                vi.count = 10000
+            vi.true_count = True
+
+        # Double key commands, e.g. gg, gU
+        if len(vi.key_modifier) == 1:
+
+            vi.key_modifier.append(key)
+
+            key = tuple(vi.key_modifier)
+
+            vi.updateViStatus()
+
+        # If control add it to keys
+        if control_mask:
+            key = ("ctrl", key)
+
+        if key in vi.keys:
+            vi.RunFunction(key)
+            return True
+
+        # If we've reached this point key hasn't been recogised so
+        # clear buffers
+        vi.key_modifier = []
+        vi.key_number_modifier = []
+        vi.updateViStatus()
+        
+        # Now send to  self.keyProcessWxWindow  to let wxPython translate
+        # and process the key event
+        if self.scrolled_window:
+            gtkEvent = gtkEvent.copy()
+            self.html.ctrl.handler_block(self.focusEventConn)
+            try:
+                self.keyProcessWxWindow.gtkMyself.grab_focus()
+                self.keyProcessWxWindow.gtkMyself.emit("key-press-event", gtkEvent)
+                self.html.ctrl.grab_focus()
+            finally:
+                self.html.ctrl.handler_unblock(self.focusEventConn)
+            return True #False?
+
+
+    def FollowLinkIfSelected(self):
+        """
+        A bit of a hack (there must be a better way to achieve
+        the same results)
+
+        Should be able to select link (as with tab navigation)
+
+        Gets selected html, parses it and opens the first link
+        found.
+        """
+        html = self.getSelectedHTML()
+
+        if len(html) > 0:
+
+            parser = ExtractUrlFromHTML()
+            parser.feed(html)
+            urls = parser.GetUrls()
+            if len(urls) > 0:
+                self._activateLink(urls[0], tabMode=0)
+
 
     def __on_navigate(self, view, frame, request, action, decision):
         """
@@ -264,11 +654,16 @@ class WikiHtmlViewWK(wx.Panel):
         """
         Called on link mouseover
         """
-        
+
         if status is None:
             self.on_link = None
-            self.updateStatus(u"")
+
+            # Prevent problem if we pass over 2 links quickly
+            if self.old_status.startswith(u"Link to page:"):
+                self.old_status = u""
+            self.updateStatus(self.old_status)
         else:
+            self.old_status = self.presenter.getMainControl().statusBar.GetStatusText()
             # flexibleUrlUnquote seems to fail on unicode links
             # unquote shouldn't happen here for self.on_link (MB 2011-04-15)
             self.on_link = status
@@ -276,10 +671,16 @@ class WikiHtmlViewWK(wx.Panel):
 
 
     def __on_selection_received(self, widget, selection_data, data):
-        if str(selection_data.type) == "STRING" and widget.has_selection():
-            self.selectedText = selection_data.get_text()
-        else:
-            self.selectedText = None
+        if widget.has_selection():
+            if str(selection_data.type) == "STRING":
+                self.selectedText = selection_data.get_text()
+            else:
+                self.selectedText = u""
+
+            if str(selection_data.type) == "text/html":
+                self.selectedHTML = selection_data.data
+            else:
+                self.selectedHTML = u""
 
         return False
 
@@ -432,6 +833,83 @@ class WikiHtmlViewWK(wx.Panel):
     def __on_expose_event(self, view, *params):
         return self.freezeCount > 0
 
+    def startIncrementalSearch(self, initSearch=None):
+#         # Should this be defined here or ealier?
+#         selected_text = self.getSelectedText()
+#         if len(selected_text) > 0:
+#             initSearch = selected_text
+
+        sb = self.presenter.getMainControl().GetStatusBar()
+
+        # Save scroll position
+        x, y = self.GetViewStart()
+        
+        self.searchStartScrollPosition = x, y
+
+        rect = sb.GetFieldRect(0)
+        if SystemInfo.isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+
+        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+
+        dlg = WebkitSearchDialog(self, -1, self, rect,
+                sb.GetFont(), self.presenter.getMainControl(), initSearch)
+        dlg.Show()
+
+
+    def executeIncrementalSearch(self, text):
+        """
+        Run incremental search
+
+        search_text arguments:
+            (string to search for, case_sensitive, forward, wrap)
+        """
+
+        if len(text) > 0:
+            return self.html.getWebkitWebView().search_text(text, False, True, True)
+        else:
+            self.html.ClearSelection()
+            
+        return False
+
+
+    def executeIncrementalSearchBackward(self, text):
+        """
+        Run incremental search backwards
+        """
+        if len(text) > 0:
+            return self.html.getWebkitWebView().search_text(text, False, False, True)
+        else:
+            self.html.ClearSelection()
+
+        return False
+
+    def forgetIncrementalSearch(self):
+        """
+        Called if user just leaves the inc. search field.
+        """
+        pass
+
+    def resetIncrementalSearch(self):
+        """
+        Called by WebkitSearchDialog before aborting an inc. search.
+        Called when search was explicitly aborted by user (with escape key)
+        TODO: Make vi keybinding "Ctrl + [" call this as well
+        """
+        self.html.ClearSelection()
+
+        # To remain consitent with the textctrl incremental search we scroll
+        # back to where the search was started 
+        x, y = self.searchStartScrollPosition
+        self.Scroll(x, y)
+
+    def endIncrementalSearch(self):
+        """
+        Called if incremental search ended successfully.
+        """
+        pass
+
 
     def OnOpenLinkInNewTab(self, gtkEvent):
         uri = self.on_link
@@ -446,10 +924,14 @@ class WikiHtmlViewWK(wx.Panel):
         return False
 
     def OnGoBackInHistory(self, gtkEvent):
-        self.presenter.getMainControl().goBrowserBack()
+        """
+        using self.presenter.getMainControl().goBrowserBack()
+        results in scrolling issues
+        """
+        self.presenter.getPageHistory().goInHistory(-1)
 
     def OnGoForwardInHistory(self, gtkEvent):
-        self.presenter.getMainControl().goBrowserForward()
+        self.presenter.getPageHistory().goInHistory(+1)
 
     def updateStatus(self, status):
         if self.visible:
@@ -494,7 +976,7 @@ class WikiHtmlViewWK(wx.Panel):
         Bridge gtk to wx's ScrolledWindow.
         May return None if underlying webkit window isn't realized yet.
         """
-        if not self.loaded:
+        if not self.webkitCtrlLoaded:
             return None
 
         x = self.scrolled_window.get_hadjustment().value
@@ -506,17 +988,8 @@ class WikiHtmlViewWK(wx.Panel):
         """
         Bridge gtk to wx's ScrolledWindow
         """
-        
-        # I don't know how to create a gtk adjustment so just modify one
-        hAdjustment = self.scrolled_window.get_hadjustment()
-        hAdjustment.set_all(x)
-
-        vAdjustment = self.scrolled_window.get_vadjustment()
-        vAdjustment.set_all(y)
-
-        self.scrolled_window.set_hadjustment(hAdjustment)
-        self.scrolled_window.set_vadjustment(vAdjustment)
-
+        self.scrolled_window.get_hadjustment().set_value(x)
+        self.scrolled_window.get_vadjustment().set_value(y)
 
     def setLayerVisible(self, vis, scName=""):
         """
@@ -551,6 +1024,7 @@ class WikiHtmlViewWK(wx.Panel):
         self.__sinkDocPage.disconnect()
 
     def refresh(self):
+
         ## _prof.start()
 
 
@@ -656,6 +1130,11 @@ class WikiHtmlViewWK(wx.Panel):
         self.anchor = None
         self.outOfSync = False
 
+        if self.scrolled_window != None and not self.html.ctrl.is_focus():
+            self.SetFocus()
+            self.html.ctrl.grab_focus()
+            #self.grab_focus()
+
 
         ## _prof.stop()
 
@@ -665,10 +1144,18 @@ class WikiHtmlViewWK(wx.Panel):
         if self.visible:
             self.refresh()
             
-    
+    def getSelectedHTML(self):
+        """
+        Returns the HTML of the currently selected text
+
+        __on_selection_received is called and sets self.selectedHTML
+        """
+        ret = self.html.getWebkitWebView().selection_convert("PRIMARY", "text/html")
+        return self.selectedHTML
+
     def getSelectedText(self):
         """
-        Works but probably not the best solution
+        Returns the currently selected text (plain)
 
         __on_selection_received is called and sets self.selectedText
         """
@@ -725,6 +1212,24 @@ class WikiHtmlViewWK(wx.Panel):
     def onOptionsChanged(self, miscevt):
         self.outOfSync = True
         self._updateTempFilePrefPath()
+        
+        # To allow switching vi keys on and off without restart
+        if self.keyEventConn is not None:
+            self.html.ctrl.disconnect(self.keyEventConn)
+            use_vi_navigation = self.presenter.getConfig().getboolean("main",
+                    "html_preview_webkitViKeys", False)
+            if use_vi_navigation:
+    
+                self.vi = ViFunctions(self) 
+    
+                self.keyEventConn = self.html.ctrl.connect("key-press-event",
+                        self.__on_key_press_event_vi)
+            else:
+                self.vi = None
+                
+                self.keyEventConn = self.html.ctrl.connect("key-press-event",
+                        self.__on_key_press_event)
+
         if self.visible:
             self.refresh()
 
@@ -739,8 +1244,8 @@ class WikiHtmlViewWK(wx.Panel):
 
 
     def scrollDeferred(self, lx, ly):
-        
-        if not self.loaded or self.deferredScrollPos is not None:
+
+        if not self.webkitCtrlLoaded or self.deferredScrollPos is not None:
             # WebkitWebView not realized yet or
             # an unprocessed _scrollAndThaw is in the message queue yet ->
             # just change scrollPos
@@ -805,6 +1310,7 @@ class WikiHtmlViewWK(wx.Panel):
 
             tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
 
+            # TODO: Fix for aliased wikiwords (will try and create a new page)
             self._activateLink(self.on_link, tabMode=tabMode)
             return True
         return False
@@ -920,6 +1426,20 @@ class WikiHtmlViewWK(wx.Panel):
 #    N_(u"Activate New Tab")
 #    N_(u"Activate New Tab Backgrd.")
 
+class ExtractUrlFromHTML(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.urls = []
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+
+        if tag == "a" and "href" in attributes:
+            self.urls.append(attributes['href'])
+
+    def GetUrls(self):
+        return self.urls
+
 class WKHtmlWindow(wx.Window):
     def __init__(self, *args, **kwargs):
         wx.Window.__init__(self, *args, **kwargs)
@@ -935,7 +1455,6 @@ class WKHtmlWindow(wx.Window):
         # break if window not shown
         if whdl == 0:
             return False
-
 
         window = gtk.gdk.window_lookup(whdl)
 
@@ -979,3 +1498,338 @@ class WKHtmlWindow(wx.Window):
     def StopLoading(self):
         self.ctrl.stop_loading() 
 
+    def ClearSelection(self):
+        """
+        Webkit API is currently missing a way to clear the selection
+        directly so we have to use some javascript
+        """
+        self.ctrl.execute_script('window.getSelection().removeAllRanges()')
+
+
+class ViFunctions():
+    def __init__(self, view):
+        self.view = view
+
+        self.key_modifier = []
+        self.key_number_modifier = []
+
+        # Should probably automate this
+        self.key_map = { # used to display modifiers 
+                    72  : "H",
+                    84  : "T",
+                    90  : "Z",
+                    100 : "d",
+                    103 : "g",
+                    104 : "h",
+                    116 : "t",
+                    117 : "u" 
+                    }
+
+        # Holds keys which can be used as primary modifiers (e.g. g)
+        self.key_mods = [90, 103, 100]
+
+        self.keys = {
+        # Format is
+        # key combination : (function to call, function arguments)
+                    (103, 103) : (self.DocumentNavigation, (103, 103)), # gg
+                    (103, 117) : (self.ViewParents, None), # gu
+                    (103, 116) : (self.SwitchTabs, None), # gt
+                    (103, 84)  : (self.SwitchTabs, True), # gT
+                    (103, 104) : (self.OpenHomePage, False), # gh
+                    (103, 72) : (self.OpenHomePage, True), # gH
+
+                    (100, 100) : (self.CloseCurrentTab, None), # dd
+
+                    (90, 90) : (self.view.presenter.getMainControl().exitWiki, None), # ZZ
+
+                # ctrl +
+
+                ("ctrl", 91) : (self.view.html.ClearSelection, None), # Ctrl + [
+                ("ctrl", 100) : (self.HalfPageJumpDown, None), # Ctrl + d
+                ("ctrl", 117) : (self.HalfPageJumpUp, None), # Ctrl + u
+
+                # single keys
+                (47)  : (self.view.startIncrementalSearch, None), # /
+                (72)  : (self.GoBackwardInHistory, None), # H
+                (76)  : (self.GoForwardInHistory, None), # L
+                (111) : (self.view.presenter.getMainControl().showWikiWordOpenDialog, None), # o
+                (79) : (self.view.presenter.getMainControl().showWikiWordOpenDialog, None), # O
+                (106) : (self.DocumentNavigation, 106), # j
+                (107) : (self.DocumentNavigation, 107), # k
+                (104) : (self.DocumentNavigation, 104), # h
+                (108) : (self.DocumentNavigation, 108), # l
+                (71)  : (self.DocumentNavigation, 71), # G
+                (65293)  : (self.view.FollowLinkIfSelected, None), # return
+        }
+
+        self.count = 1
+        self.true_count = False
+
+
+    # Vi Helper functions
+    def RunFunction(self, key):
+        """
+        Called when a key command is run
+
+        keys is a dictionary which holds the "key" and its
+        respective function.
+
+        key and count buffers are always cleared
+        """
+        keys = self.keys
+        func, args = keys[key]
+
+        if type(args) == dict:
+            ret = func(**args)
+        elif args is not None:
+            ret = func(args)
+        else:
+            ret = func()
+
+        if ret is True:
+            return True
+
+        self.key_modifier = []
+        self.key_number_modifier = []
+        self.updateViStatus()
+
+    def GoForwardInHistory(self):
+        self.view.presenter.getPageHistory().goInHistory(self.count)
+
+    def GoBackwardInHistory(self):
+        self.view.presenter.getPageHistory().goInHistory(-self.count)
+
+    def ViewParents(self):
+        self.view.presenter.getMainControl().viewParents(
+                                            self.view.currentLoadedWikiWord)
+
+    def SwitchTabs(self, left=False):
+        """
+        Switch to n(th) tab.
+        Positive numbers go right, negative left.
+
+        If tab end is reached will wrap around
+        """
+        n = self.count
+
+        if left: n = -n
+
+        mainAreaPanel = self.view.presenter.getMainControl().getMainAreaPanel()
+        pageCount = mainAreaPanel.GetPageCount()
+        currentTabNum = mainAreaPanel.GetSelection() + 1
+
+        if currentTabNum + n > pageCount:
+            newTabNum = currentTabNum + n % pageCount
+            if newTabNum > pageCount:
+                newTabNum -= pageCount
+        elif currentTabNum + n < 1:
+            newTabNum = currentTabNum - (pageCount - n % pageCount)
+            if newTabNum < 1:
+                newTabNum += pageCount
+        else:
+            newTabNum = currentTabNum + n
+
+        # Switch tab
+        mainAreaPanel.SetSelection(newTabNum-1)
+        mainAreaPanel.presenters[mainAreaPanel.GetSelection()].SetFocus()
+
+    def CloseCurrentTab(self):
+        """
+        Closes currently focused tab
+        """
+        mainAreaPanel = self.view.presenter.getMainControl().getMainAreaPanel()
+        mainAreaPanel.closePresenterTab(mainAreaPanel.getCurrentPresenter())
+        return True
+
+    def OpenHomePage(self, inNewTab=False):
+        """
+        Opens home page.
+
+        If inNewTab=True opens in a new forground tab
+        """
+        presenter = self.view.presenter
+        
+        wikiword = presenter.getMainControl().getWikiDocument().getWikiName()
+
+        if inNewTab:
+            presenter = self.view.presenter.getMainControl().\
+                    createNewDocPagePresenterTab()
+            presenter.switchSubControl("preview", False)
+
+
+        # Now open wiki
+        presenter.openWikiPage(wikiword, forceTreeSyncFromRoot=True)
+        presenter.getMainControl().getMainAreaPanel().\
+                    showPresenter(presenter)
+        presenter.SetFocus()
+
+    # Document navigation
+    def HalfPageJumpDown(self):
+        adj = self.view.scrolled_window.get_vadjustment()
+        y = adj.get_value()
+
+        if y+adj.get_page_size()/2 < adj.upper():
+            self.view.adj.set_value(y+adj.get_page_size()/2)
+        else:
+            self.view.adj.set_value(adj.upper()-adj.get_page_size())
+            
+    def HalfPageJumpUp(self):
+        adj = self.view.scrolled_window.get_vadjustment()
+        y = adj.get_value()
+
+        if y-adj.get_page_size()/2 > adj.upper():
+            self.view.adj.set_value(y-adj.get_page_size()/2)
+        else:
+            self.view.adj.set_value(adj.upper()+adj.get_page_size())
+
+    def DocumentNavigation(self, key):
+        """
+        function to handle most navigation commonds
+
+        currently handles: j, k, h, l, G
+        """
+        step_incr = self.view.scrolled_window.get_vadjustment().get_step_increment()
+        page_incr = self.view.scrolled_window.get_vadjustment().get_page_increment()
+
+        vadj = self.view.scrolled_window.get_vadjustment()
+        hadj = self.view.scrolled_window.get_hadjustment()
+
+        y = vadj.get_value()
+        x = hadj.get_value()
+
+        y_upper = vadj.get_upper()
+        x_upper = hadj.get_upper()
+
+        y_lower = vadj.get_lower()
+        x_lower = hadj.get_lower()
+
+        y_page_size = vadj.get_page_size()
+        x_page_size = hadj.get_page_size()
+
+        c = self.count
+
+
+        if key == 106: # j
+            if y+c*step_incr < y_upper-y_page_size:   mod = y+c*step_incr
+            else:                                     mod = y_upper-y_page_size
+            vadj.set_value(mod)
+
+        elif key == 107: # k
+            if y-c*step_incr > y_lower:               mod = y-c*step_incr
+            else:                                     mod = y_lower
+            vadj.set_value(mod)
+
+        elif key == 104: # h
+            if x-c*step_incr > x_lower:               mod = x-c*step_incr
+            else:                                     mod = x_lower
+            hadj.set_value(mod)
+
+        elif key == 108: # l
+            if x+c*step_incr < x_upper-x_page_size:   mod = x+c*step_incr
+            else:                                     mod = x_upper-x_page_size
+            hadj.set_value(mod)
+
+        # If count is specified go to (count)% of page
+        elif (key == 71 or key == (103, 103)) and self.true_count: # gg or G
+            if c > 100: c == 100 # 100% is the max
+            vadj.set_value(int((y_upper-y_page_size)/100*c))
+
+        # G defaults to 100%
+        elif key == 71: # G
+            vadj.set_value(y_upper-y_page_size)
+
+        # gg to 0%
+        elif key == (103, 103): # gg
+            vadj.set_value(y_lower)
+            
+    def updateViStatus(self, force=False):
+        # can this be right aligned?
+        # TODO: sort this out
+        text = u""
+        if (len(self.key_modifier) == 1 and self.key_modifier[0] in self.key_mods) \
+                or tuple(self.key_modifier) in self.keys or force:
+                    text = uniToGui(u"{0}{1}".format(u"".join(
+                        map(str, self.key_number_modifier)), 
+                        u"".join(self.key_map[i] for i in self.key_modifier)))
+
+        self.view.presenter.getMainControl().statusBar.SetStatusText(text , 0)
+    # Numbers
+    def SetNumber(self, n):
+        self.key_number_modifier.append(n)
+        self.key_modifier = []
+        self.updateViStatus(True)
+
+
+class KeyProcessWxWindow(wx.Panel):
+    def __init__(self, parent, htmlView, id=-1):
+        wx.Panel.__init__(self, parent, id, size=(0,0))
+        
+        self.htmlView = htmlView
+
+        self.Show()
+        
+        self.realized = False
+
+    def realize(self):
+        if self.realized:
+            return
+
+        whdl = self.GetHandle()
+
+        # break if window not shown
+        if whdl == 0:
+            return False
+
+        window = gtk.gdk.window_lookup(whdl)
+
+        # We must keep a reference of "pizza". Otherwise we get a crash.
+        self.pizza = pizza = window.get_user_data()
+
+        self.gtkMyself = self.pizza   # .get_children()[0]
+        
+        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        
+        self.realized = True
+
+
+    def OnKeyDown(self, evt):
+#         evt.Skip()
+        key = evt.GetKeyCode()
+
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.htmlView.presenter.getMainControl().keyBindings.\
+                matchesAccelPair
+
+        if matchesAccelPair("ActivateLink", accP):
+            # ActivateLink is normally Ctrl-L
+            # There is also a shortcut for it. This can only happen
+            # if OnKeyDown is called indirectly
+            # from IncrementalSearchDialog.OnKeyDownInput
+            self.htmlView.FollowLinkIfSelected()
+
+        elif matchesAccelPair("ActivateLink2", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.htmlView.FollowLinkIfSelected()
+
+#         elif matchesAccelPair("ActivateLinkBackground", accP):
+#             # ActivateLink2 is normally Ctrl-Return
+#             self.htmlView.activateLink(tabMode=3)
+# 
+#         elif matchesAccelPair("ContinueSearch", accP):
+#             # ContinueSearch is normally F3
+#             self.htmlView.startIncrementalSearch()  # self.htmlView.searchStr)
+# #             evt.Skip()
+
+        elif matchesAccelPair("StartIncrementalSearch", accP) or \
+                matchesAccelPair("ContinueSearch", accP):
+            # StartIncrementalSearch is normally Ctrl-F
+            # ContinueSearch is normally F3
+            # Start incremental search
+            # First get selected text and prepare it as default value
+            text = self.htmlView.getSelectedText()
+            text = text.split("\n", 1)[0]
+#             text = re.escape(text[:30])
+            text = text[:30]
+            self.htmlView.startIncrementalSearch(text)
+        else:
+            evt.Skip()

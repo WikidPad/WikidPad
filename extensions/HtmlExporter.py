@@ -1637,6 +1637,8 @@ class HtmlExporter(AbstractExporter):
                 cols = 1
                 coldirDown = False
                 asList = False
+                colwidth = None
+                tableBorderWidth = 0
 
                 for ap in appendices:
                     if ap.startswith(u"columns "):
@@ -1647,17 +1649,60 @@ class HtmlExporter(AbstractExporter):
                         except ValueError:
                             pass
                     elif ap == "aslist":
+                        # No table but comma-separated list
                         asList = True
                     elif ap == u"coldir down":
+                        # Order in table goes downward first then right
+                        # Default is right first then downward
                         coldirDown = True
+                    elif ap == u"colwidth equal":
+                        # All columns will have same width
+                        colwidth = u"equal"
+                    elif ap.startswith(u"table_border_width "):
+                        try:
+                            v = int(ap[18:])
+                            if v >= 0:
+                                tableBorderWidth = v
+                        except ValueError:
+                            pass
+
+                # To ensure that the sum of percentages is 100 there is a bit
+                # work to do. On the other hand this means that the columns
+                # don't have exactly equal width
+                if colwidth == u"equal":
+                    colwidth = []
+                    usedPerc = 0
+                    for i in range(1, cols + 1):
+                        cw = i * 100 // cols - usedPerc
+                        usedPerc += cw
+                        colwidth.append(u"%i%%" % cw)
 
                 self.mainControl.getCollator().sort(wordList)
     
-                # TODO: Generate ready-made HTML content
-                if cols > 1:
+                if asList:
+                    firstWord = True
+                    for word in wordList:
+                        if firstWord:
+                            firstWord = False
+                        else:
+                            self.outAppend(", ")
+                        self._processWikiWord(word)
+                else:
+#                 if cols > 1:
+                    # Convert colwidth to HTML attribute
+                    if colwidth is None:
+                        colwidthAttr = [u""] * cols
+                    else:
+                        colwidthAttr = [u' width="%s"' % cw for cw in colwidth]
+                    
+                    tableAttrs = u""
+                    if tableBorderWidth > 0:
+                        tableAttrs += u' border="%s"' % tableBorderWidth
+                    
                     # We need a table for the wordlist
-                    self.outAppend(u"<table>\n")
+                    self.outAppend(u"<table%s>\n" % tableAttrs)
                     colpos = 0
+                    firstRow = True
 
                     if coldirDown:
                         # Reorder words for downwards direction
@@ -1675,7 +1720,11 @@ class HtmlExporter(AbstractExporter):
                             # Start table row
                             self.outAppend(u"<tr>")
                             
-                        self.outAppend(u'<td valign="top">')
+                        if firstRow:
+                            self.outAppend(u'<td valign="top"%s>' %
+                                    colwidthAttr[colpos])
+                        else:
+                            self.outAppend(u'<td valign="top">')
                         self._processWikiWord(word)
                         self.outAppend(u'</td>')
                         
@@ -1683,38 +1732,38 @@ class HtmlExporter(AbstractExporter):
                         if colpos == cols:
                             # At the end of a row
                             colpos = 0
+                            firstRow = False
                             self.outAppend(u"</tr>\n")
                             
                     # Fill the last incomplete row with empty cells if necessary
                     if colpos > 0:
-                        while colpos < cols:
-                            self.outAppend(u"<td></td>")
-                            colpos += 1
+                        if firstRow:
+                            while colpos < cols:
+                                self.outAppend(u"<td%s></td>" %
+                                        colwidthAttr[colpos])
+                                colpos += 1
+                        else:
+                            while colpos < cols:
+                                self.outAppend(u"<td></td>")
+                                colpos += 1
     
                         self.outAppend(u"</tr>\n")
                     
                     self.outAppend(u"</table>")
-                elif asList:
-                    
-                    firstWord = True
-                    for word in wordList:
-                        if firstWord:
-                            firstWord = False
-                        else:
-                            self.outAppend(", ")
-                        self._processWikiWord(word)
 
-                else:   # cols == 1 and not asList
-                    firstWord = True
-                    for word in wordList:
-                        if firstWord:
-                            firstWord = False
-                        else:
-                            self.outAppend("<br />\n")
-                            
-                        self.outAppend(u'<td valign="top">')
-                        self._processWikiWord(word)
-                        self.outAppend(u'</td>')
+
+#                 else:   # cols == 1 and not asList
+#                     firstWord = True
+#                     for word in wordList:
+#                         if firstWord:
+#                             firstWord = False
+#                         else:
+#                             self.outAppend("<br />\n")
+#                         
+#                         # TODO:  td  without  table ?
+#                         self.outAppend(u'<td valign="top">')
+#                         self._processWikiWord(word)
+#                         self.outAppend(u'</td>')
                     
                 return
 
@@ -1861,7 +1910,7 @@ class HtmlExporter(AbstractExporter):
             urlAsImage = False
         elif not self.asHtmlPreview and self.addOpt[0]:
             urlAsImage = False
-        elif lowerlink.split(".")[-1] in ("jpg", "jpeg", "gif", "png", "tif",
+        elif lowerLink.split(".")[-1] in ("jpg", "jpeg", "gif", "png", "tif",
                 "bmp"):
 #         lowerLink.endswith(".jpg") or \
 #                 lowerLink.endswith(".gif") or \

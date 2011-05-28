@@ -109,6 +109,7 @@ WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
 WikidPadHelp/data/ExternalGraphicalApplications.wiki -text
 WikidPadHelp/data/FavoriteWikis.wiki -text
+WikidPadHelp/data/FileCleanupDialog.wiki -text
 WikidPadHelp/data/FileStorage.wiki -text
 WikidPadHelp/data/Folding.wiki -text
 WikidPadHelp/data/Footnotes.wiki -text
@@ -330,6 +331,7 @@ WikidPadHelp/data/WIKIWORDATTRS.grl -text
 WikidPadHelp/data/WIKIWORDMATCHTERMS.grl -text
 WikidPadHelp/data/WIKIWORDPROPS.grl -text
 WikidPadHelp/data/WIKIWORDS.grl -text
+WikidPadHelp/data/Webkit.wiki -text
 WikidPadHelp/data/WhereIsTheDataStored.wiki -text
 WikidPadHelp/data/WikiBookmarks.wiki -text
 WikidPadHelp/data/WikiDocumentAttributes.wiki -text

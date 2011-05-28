@@ -1,7 +1,8 @@
 ﻿++ Incremental Search
 
 When in a document type CTRL-F or F3 to start an incremental search in
-the left field of the status bar.
+the left field of the status bar. This works for the editor and for the Webkit HTML preview with small differences.
+
 When in incremental search mode anything you type becomes a search
 string, and as you type you are brought to matches in the current
 text. Typing CTRL-F, or F3 again or typing CURSOR DOWN or PAGE DOWN
@@ -10,7 +11,7 @@ backwards.
 
 To exit incremental search mode type ENTER.
 
-Incremental search supports regex. For example: To match the
+Incremental search for editor supports regex. For example: To match the
 word "incremental" or the word "search" in this document, type:
 
 CTRL-F
@@ -20,17 +21,31 @@ Then type CTRL-F again to cycle through the matches.
 
 Further details of the behavior of inc. search:
 
-    * Ctrl-F while text is selected in editor copies it to search
+For editor and Webkit:
+
+    * Ctrl-F while text is selected copies it to search
       field up to the first newline or up to 30 characters
+    * Clicking outside of the search field terminates search
+    * If search pattern is found search field is green
+    * If search pattern is not found search field is yellow
+
+For editor only:
+
+    * Entered search string is taken as regular expression
     * F3 starts search field with last search entered
     * Search starts at cursor position (1.8beta5 and prior started
       always at page beginning)
     * ENTER terminates search and keeps last found text selected (if any)
     * ESC terminates search and goes back where search began
-    * Clicking outside of the search field terminates search
-    * If search pattern is found search field is green
-    * If search pattern is not found search field is yellow
     * If search pattern is an invalid regex, color doesn't change
+
+For Webkit only:
+
+    * Entered search string is taken as plain text (but search is
+      case-insensitive)
+    * F3 is same as Ctrl-F
+    * ENTER terminates search
+    * ESC terminates search
 
 
 In the options dialog, page "Searching" there is also an option

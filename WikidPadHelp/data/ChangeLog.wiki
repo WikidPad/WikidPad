@@ -1,5 +1,36 @@
 ﻿++ Change Log
 
+May 28, 2011 (2.2beta04)
+
+	* Changes to editor (thanks to Ross):
+		* Rename and delete files from context menu
+		* Display page linked to in status bar when hovering over an
+		  internal link
+		* Display pictures as tooltips when hovering over their links
+		* Display preview picture in image pasting dialog
+	* Webkit preview: Incremental search and optional vi shortcut keys
+	  (thanks to Ross). See [Webkit]
+
+	* Additional options for result tables in insertions
+	  ("colwidth equal" and "table_border_width <integer>").
+	  See [Insertions#+ Lists of wiki links]
+
+	* Bugs fixed: Error in error handling in search index processing,
+	  lock error when renaming page
+	* Bug fixed: Linux/GTK: Too long grids if too many data to show
+	  (for grid in MPT-import and file cleanup)
+	* Bug fixed: Failure when exporting versioning data to MPT format
+	* Bug fixed: No start of "wiki:" URLs if it should be opened in
+	  new window and no "wiki:" protocol handler installed (mainly
+	  Linux problem)
+	* Bug fixed: "user_extensions/WikidPadHooks.py" not called because
+	  of same file name as "extensions/WikidPadHooks.py"
+
+	* Internal: New "hooks" plugin API version 2 which adds functions
+	  to handle closing of a wiki
+
+
+
 May 01, 2011 (2.2beta03)
 
     * Support for Webkit if necessary libraries pyGtk and
