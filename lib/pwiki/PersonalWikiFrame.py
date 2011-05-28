@@ -3736,37 +3736,49 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def launchUrl(self, link):
-        if self.configuration.getint(
-                "main", "new_window_on_follow_wiki_url") == 1 or \
-                not link.startswith(u"wiki:"):
-
+        if not link.startswith(u"wiki:"):
             if link.startswith(u"rel://"):
                 # This is a relative link
                 link = self.getWikiDocument().makeRelUrlAbsolute(link)
 
             try:
                 OsAbstract.startFile(self, link)
+                return True
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(_(u"Couldn't start file"), e)
                 return False
-
-            return True
-        elif self.configuration.getint(
-                "main", "new_window_on_follow_wiki_url") != 1:
-
+        else:
+            # Open wiki
             filePath, wikiWordToOpen, anchorToOpen = StringOps.wikiUrlToPathWordAndAnchor(
                     link)
-            if exists(filePath):
+            if not os.path.exists(filePath):
+                self.statusBar.SetStatusText(
+                        uniToGui(_(u"Couldn't open wiki: %s") % link), 0)
+                return False
+
+            if self.configuration.getint(
+                    "main", "new_window_on_follow_wiki_url") != 1:
+                # Same window
                 self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                         anchorToOpen=anchorToOpen)  # ?
                 return True
             else:
-                self.statusBar.SetStatusText(
-                        uniToGui(_(u"Couldn't open wiki: %s") % link), 0)
-                return False
-        return False
+                # New window
+                try:
+                    clAction = CmdLineAction([])
+                    clAction.inheritFrom(self.getCmdLineAction())
+                    clAction.setWikiToOpen(link)
+                    clAction.frameToOpen = 1  # Open in new frame
+                    wx.GetApp().startPersonalWikiFrame(clAction)
+                    return True
+                except Exception, e:
+                    traceback.print_exc()
+                    self.displayErrorMessage(_(u'Error while starting new '
+                            u'WikidPad instance'), e)
+                    return False
 
+        return False
 
 
     def refreshPageStatus(self, docPage = None):
