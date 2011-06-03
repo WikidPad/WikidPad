@@ -3530,6 +3530,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+        if not self.requireReadAccess():
+            return
+
         try:
             ## _prof.start()
 
@@ -3543,7 +3546,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             self.getMainAreaPanel().showPresenter(dpp)
             ## _prof.stop()
-        except WikiFileNotFoundException, e:
+        except (WikiFileNotFoundException, IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             return None
 
