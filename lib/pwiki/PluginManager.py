@@ -69,32 +69,32 @@ class SimplePluginAPI(object):
 
     def __init__(self, descriptor, functions):
         self.descriptor = descriptor
-        self.__functionNames = functions
-        self.__plugins = {}
-        for f in self.__functionNames:
+        self._functionNames = functions
+        self._plugins = {}
+        for f in self._functionNames:
             pluginlist = []
-            self.__plugins[f] = pluginlist
-            helper = self.__createHelper( pluginlist )
+            self._plugins[f] = pluginlist
+            helper = self._createHelper( pluginlist )
             setattr(self,f, helper)
 
     def getFunctionNames(self):
-        return self.__functionNames
+        return self._functionNames
 
     def hasFunctionName(self, fctName):
-        return fctName in self.__functionNames
+        return fctName in self._functionNames
 
 
     @staticmethod
-    def __createHelper(funcList):
+    def _createHelper(funcList):
         return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in funcList]
 
 
     def registerModule(self, module):
         registered = False
         if self.descriptor in module.WIKIDPAD_PLUGIN:
-            for f in self.__functionNames:
+            for f in self._functionNames:
                 if hasattr(module, f):
-                    self.__plugins[f].append(getattr(module,f))
+                    self._plugins[f].append(getattr(module,f))
                     registered = True
             if not registered:
                 sys.stderr.write("plugin " + module.__name__ + " exposes " +
@@ -103,9 +103,9 @@ class SimplePluginAPI(object):
         return registered
 
 #     def deleteModule(self, module):
-#         for f in self.__functionNames:
+#         for f in self._functionNames:
 #             if hasattr(module, f):
-#                 self.__plugins[f].remove(getattr(module,f))
+#                 self._plugins[f].remove(getattr(module,f))
 
 
 class WrappedPluginAPI(object):
@@ -123,25 +123,25 @@ class WrappedPluginAPI(object):
 
     def __init__(self, descriptor, **wrappedFunctions):
         self.descriptor = descriptor
-        self.__functionNames = wrappedFunctions.keys()
-        self.__wrappedFunctions = wrappedFunctions
-        self.__plugins = {}
-        for f in self.__functionNames:
+        self._functionNames = wrappedFunctions.keys()
+        self._wrappedFunctions = wrappedFunctions
+        self._plugins = {}
+        for f in self._functionNames:
             pluginlist = [] # List containing either modules if wrappedFunctions[f]
                     # is not None or functions if wrappedFunctions[f] is None
-            self.__plugins[f] = pluginlist
-            helper = self.__createHelper(wrappedFunctions[f], pluginlist)
+            self._plugins[f] = pluginlist
+            helper = self._createHelper(wrappedFunctions[f], pluginlist)
             setattr(self,f, helper)
             
     def getFunctionNames(self):
-        return self.__functionNames
+        return self._functionNames
 
     def hasFunctionName(self, fctName):
-        return fctName in self.__functionNames
+        return fctName in self._functionNames
 
 
     @staticmethod
-    def __createHelper(wrapFct, list):
+    def _createHelper(wrapFct, list):
         if wrapFct is None or isinstance(wrapFct, (str, unicode)):
             return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in list]
         else:
@@ -150,50 +150,49 @@ class WrappedPluginAPI(object):
 
 
     def registerModule(self, module):
-        if self.descriptor in module.WIKIDPAD_PLUGIN:
-            for f in self.__functionNames:
-                if self.__wrappedFunctions[f] is None:
-                    if hasattr(module, f):
-                        self.__plugins[f].append(getattr(module,f))
-                        return True
-                    else:
-                        sys.stderr.write("plugin " + module.__name__ + " exposes " +
-                                self.descriptor + 
-                                " but does not support any interface methods!")
-                        return False
-                elif isinstance(self.__wrappedFunctions[f], (str, unicode)):
-                    realF = self.__wrappedFunctions[f]
-                    if hasattr(module, realF):
-                        self.__plugins[f].append(getattr(module,realF))
-                        return True
-                    else:
-                        sys.stderr.write("plugin " + module.__name__ + " exposes " +
-                                self.descriptor + 
-                                " but does not support any interface methods!")
-                        return False
-                else:
-                    self.__plugins[f].append(module)
-                    return True
+        if not self.descriptor in module.WIKIDPAD_PLUGIN:
+            return False
 
-        return False
+        registered = False
+        for f in self._functionNames:
+            if self._wrappedFunctions[f] is None:
+                if hasattr(module, f):
+                    self._plugins[f].append(getattr(module,f))
+                    registered = True
+            elif isinstance(self._wrappedFunctions[f], (str, unicode)):
+                realF = self._wrappedFunctions[f]
+                if hasattr(module, realF):
+                    self._plugins[f].append(getattr(module,realF))
+                    registered = True
+            else:
+                self._plugins[f].append(module)
+                # An internal wrapper function doesn't count as "registered"
+#                 registered = True
+
+        if not registered:
+            sys.stderr.write("plugin " + module.__name__ + " exposes " +
+                    str(self.descriptor) + 
+                    " but does not support any interface methods!")
+
+        return registered
 
 
 
 class PluginAPIAggregation(object):
     def __init__(self, *apis):
-        self.__apis = apis
+        self._apis = apis
 
         fctNames = set()
-        for api in self.__apis:
+        for api in self._apis:
             fctNames.update(api.getFunctionNames())
         
         for f in list(fctNames):
             funcList = [getattr(api, f) for api in apis if api.hasFunctionName(f)]
-            setattr(self, f, PluginAPIAggregation.__createHelper(funcList))
+            setattr(self, f, PluginAPIAggregation._createHelper(funcList))
 
 
     @staticmethod
-    def __createHelper(funcList):
+    def _createHelper(funcList):
         return lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
                 [fun(*args, **kwargs) for fun in funcList])
 

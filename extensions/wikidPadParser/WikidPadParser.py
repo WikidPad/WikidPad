@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-05-26
+# Last modified (format YYYY-MM-DD): 2011-06-02
 
 
 import locale, pprint, time, sys, string, traceback
@@ -157,7 +157,7 @@ tableContentInCell = Forward().setResultsNameNoCopy("tableCell")
 headingContent = Forward().setResultsNameNoCopy("headingContent")
 todoContent = Forward().setResultsNameNoCopy("value")
 titleContent = Forward().setResultsNameNoCopy("title")
-
+characterAttributionContent = Forward().setResultsNameNoCopy("title")
 
 whitespace = buildRegex(ur"[ \t]*")
 whitespace = whitespace.setParseAction(actionHideOnEmpty)
@@ -197,7 +197,7 @@ italicsStart = italicsStart.setParseStartAction(createCheckNotIn(("italics",)))
 
 italicsEnd = buildRegex(ur"_\b")
 
-italics = italicsStart + content + italicsEnd
+italics = italicsStart + characterAttributionContent + italicsEnd
 italics = italics.setResultsNameNoCopy("italics").setName("italics")
 
 boldStart = buildRegex(ur"\*(?=\S)")
@@ -205,7 +205,7 @@ boldStart = boldStart.setParseStartAction(createCheckNotIn(("bold",)))
 
 boldEnd = buildRegex(ur"\*")
 
-bold = boldStart + content + boldEnd
+bold = boldStart + characterAttributionContent + boldEnd
 bold = bold.setResultsNameNoCopy("bold").setName("bold")
 
 
@@ -1095,6 +1095,11 @@ endToken = Choice([stringEnd]+TOKEN_TO_END.values(), chooseEndToken)
 
 endTokenInTable = endToken | newCell | newRow
 
+endTokenInTitle = endToken | buildRegex(ur"\n")
+
+endTokenInCharacterAttribution = endToken | heading
+
+
 
 # -------------------- Content definitions --------------------
 
@@ -1109,9 +1114,6 @@ temp = ZeroOrMore(NotAny(endTokenInTable) + findMarkupInCell)
 temp = temp.leaveWhitespace().parseWithTabs()
 tableContentInCell << temp
 
-
-
-endTokenInTitle = endToken | buildRegex(ur"\n")
 
 
 findMarkupInTitle = FindFirst([bold, italics, noExportSingleLine,
@@ -1141,7 +1143,7 @@ headingContent << temp
 
 findMarkupInTodo = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
-        urlRef, attribute, insertion, escapedChar, footnote, wikiWord,   # wikiWordNcc, wikiWordCc,
+        urlRef, attribute, insertion, escapedChar, footnote, wikiWord,
         htmlTag, htmlEntity], endToken)
 findMarkupInTodo = findMarkupInTodo.setPseudoParseAction(
         pseudoActionFindMarkup)
@@ -1150,6 +1152,26 @@ temp = OneOrMore(NotAny(endToken) + findMarkupInTodo)
 temp = temp.leaveWhitespace().parseWithTabs()
 todoContent << temp
 oneLineContent << temp
+
+
+
+findMarkupInCharacterAttribution = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine, urlRef,
+        attribute, insertion, escapedChar, footnote, wikiWord,
+        newLinesParagraph, newLineLineBreak, newLineWhitespace,
+        todoEntry, anchorDef, preHtmlTag, htmlTag,
+        htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
+        indentedText, table, preBlock, noExportMultipleLines,
+        suppressHighlightingMultipleLines, equivalIndentation],
+        endTokenInCharacterAttribution)
+findMarkupInCharacterAttribution = findMarkupInCharacterAttribution\
+        .setPseudoParseAction(pseudoActionFindMarkup)
+
+temp = ZeroOrMore(NotAny(endTokenInCharacterAttribution) +
+        findMarkupInCharacterAttribution)
+temp = temp.leaveWhitespace().parseWithTabs()
+characterAttributionContent << temp
+
 
 
 findMarkup = FindFirst([bold, italics, noExportSingleLine,

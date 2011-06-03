@@ -29,8 +29,7 @@ from . import wxHelper
 
 from . import OsAbstract
 
-from .WikiExceptions import WikiFileNotFoundException, \
-        NotCurrentThreadException, NoPageAstException
+from .WikiExceptions import *
 
 from .SystemInfo import isUnicode, isOSX, isLinux, isWindows
 
@@ -3214,7 +3213,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
                 return
 
-            wikiPage.checkFileSignatureAndMarkDirty()
+            try:
+                wikiPage.checkFileSignatureAndMarkDirty()
+            except (IOError, OSError, DbAccessError), e:
+                self.presenter.getMainControl().lostAccess(e)
+
+
     else:
         def OnSetFocus(self, evt):
             self.presenter.makeCurrent()
@@ -3227,7 +3231,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
                 return
 
-            wikiPage.checkFileSignatureAndMarkDirty()
+            try:
+                wikiPage.checkFileSignatureAndMarkDirty()
+            except (IOError, OSError, DbAccessError), e:
+                self.presenter.getMainControl().lostAccess(e)
+
+
 
 
     def OnUserListSelection(self, evt):
