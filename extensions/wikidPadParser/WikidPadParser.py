@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-06-02
+# Last modified (format YYYY-MM-DD): 2011-06-04
 
 
 import locale, pprint, time, sys, string, traceback
@@ -157,7 +157,7 @@ tableContentInCell = Forward().setResultsNameNoCopy("tableCell")
 headingContent = Forward().setResultsNameNoCopy("headingContent")
 todoContent = Forward().setResultsNameNoCopy("value")
 titleContent = Forward().setResultsNameNoCopy("title")
-characterAttributionContent = Forward().setResultsNameNoCopy("title")
+characterAttributionContent = Forward()
 
 whitespace = buildRegex(ur"[ \t]*")
 whitespace = whitespace.setParseAction(actionHideOnEmpty)
