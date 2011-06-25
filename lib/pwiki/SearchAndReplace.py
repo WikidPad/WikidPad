@@ -1759,6 +1759,8 @@ class SearchReplaceOperation:
 #                 return AttributeValueNode(self, node.prefixedTerm)
             elif tname == "todoTerm":
                 return TodoNode(self, node.key, node.value)
+            elif tname == "pageTerm":
+                return RegexWikiPageNode(self, node.pageName)
 
 
 

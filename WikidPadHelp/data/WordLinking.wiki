@@ -20,9 +20,17 @@ anchor: exclude_from_linking
 +++ Exclude wiki words from linking
 
 To exclude a wiki word from being interpreted as link, you can precede
-it with a backslash \ (e.g. \WikiWord) or enter it in the global or
-wiki-wide camelcase blacklist (open the "Views" node in the tree on
-the left, open therein the "Func. pages" node and click on 
-"Global cc. blacklist" or "Wiki cc. blacklist". Then enter the word on
-a line of its own in the list (e.g. URLs is in the "Wiki cc.
-blacklist").
+it with a backslash \ (e.g. \WikiWord) or enter it in one of the
+blacklists (open the "Views" node in the tree on the left, open therein
+the "Func. pages" node to see all of them).
+
+WikidPad recognizes CamelCase words as links (without brackets). To
+ignore one of these words enter it in a cc. (=camelcase) blacklist,
+each on a line of its own.
+
+Words in [brackets] can also be wiki links. To ignore one of these
+enter it in a ncc. (non-camelcase) blacklist *without the brackets*.
+
+The "Global" variant of each blacklist is stored as user setting and
+affects all wikis opened by the user while the "Wiki" variant is
+stored for the wiki.

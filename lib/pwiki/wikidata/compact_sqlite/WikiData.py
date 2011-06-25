@@ -370,6 +370,46 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
+    def setWikiWordReadOnly(self, word, flag):
+        """
+        Set readonly flag of a wikiword. Warning: Methods in WikiData do not
+        respect this flag.
+        word -- wikiword to modify (must exist, aliases must be resolved
+                beforehand)
+        flag -- integer value. 0: Readwrite; &1: Readonly
+        """
+        try:
+            data = self.connWrap.execSqlQuery("select word from wikiwordcontent "
+                    "where word = ?", (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        try:
+            if len(data) < 1:
+                raise WikiFileNotFoundException
+            else:
+                self.connWrap.execSql("update wikiwordcontent set readonly = ? "
+                        "where word = ?", (flag, word))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+        
+
+    def getWikiWordReadOnly(self, word):
+        """
+        Returns readonly flag of a wikiword. Warning: Methods in WikiData do not
+        respect this flag.
+        """
+        try:
+            return self.connWrap.execSqlQuerySingleItem(
+                    "select readonly from wikiwordcontent where word = ?",
+                    (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
     def getExistingWikiWordInfo(self, wikiWord, withFields=()):
         """
         Get information about an existing wiki word
@@ -384,6 +424,7 @@ class WikiData:
                 "modified": Modification date of page
                 "created": Creation date of page
                 "visited": Last visit date of page
+                "readonly": Read only flag
                 "firstcharpos": Dummy returning very high value
         """
         if withFields is None:
@@ -402,6 +443,9 @@ class WikiData:
             elif field == "visited":
                 addFields += ", visited"
                 converters.append(float)
+            elif field == "readonly":
+                addFields += ", readonly"
+                converters.append(int)
             elif field == "firstcharpos":
                 # Fake character position. TODO More elegantly
                 addFields += ", 0"

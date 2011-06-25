@@ -295,7 +295,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.refresh()
             
     
-    def getSelectedText(self):
+    def GetSelectedText(self):
         return self.SelectionToText()
 
 

@@ -231,7 +231,7 @@ class App(wx.App, MiscEventSourceMixin):
                 OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
 
         self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
-                ("changed configuration", self.onGlobalConfigurationChanged),
+                ("changed configuration", self.onChangedGlobalConfiguration),
         )), False)
 
         Localization.loadLangList(self.wikiAppDir)
@@ -568,7 +568,7 @@ class App(wx.App, MiscEventSourceMixin):
     def resumeBackgroundThreads(self):
         self.fireMiscEventKeys(("resume background threads",))
 
-    def onGlobalConfigurationChanged(self, miscevt):
+    def onChangedGlobalConfiguration(self, miscevt):
         self._rereadGlobalConfig()
         
 

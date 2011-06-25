@@ -273,6 +273,9 @@ class DocPage(object, MiscEventSourceMixin):
         Write current text to database and initiate update of meta-data.
         """
         with self.textOperationLock:
+            if self.isReadOnlyEffect():
+                return
+
             s, u = self.getDirty()
             if s:
                 if text is None:
@@ -282,7 +285,7 @@ class DocPage(object, MiscEventSourceMixin):
             elif u:
                 self.initiateUpdate(fireEvent=fireEvent)
             else:
-                if self.getMetaDataState(self.wikiWord) < \
+                if self.getMetaDataState() < \
                         self.getWikiDocument().getFinalMetaDataState():
                     self.updateDirtySince = time.time()
                     self.initiateUpdate(fireEvent=fireEvent)
@@ -439,6 +442,9 @@ class DataCarryingPage(DocPage):
 
     def setEditorText(self, text, dirty=True):
         with self.textOperationLock:
+            if self.isReadOnlyEffect():
+                return
+
             super(DataCarryingPage, self).setEditorText(text)
             if text is None:
                 if self.saveDirtySince is not None:
@@ -969,12 +975,6 @@ class AbstractWikiPage(DataCarryingPage):
 #         with self.livePageAstBuildLock:   # TODO: Timeout?
         threadstop.testRunning()
         
-        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
-        if spellSession is None:
-            return
-            
-        spellSession.setCurrentDocPage(self)
-
         with self.textOperationLock:
             text = self.getLiveText()
             liveTextPlaceHold = self.liveTextPlaceHold
@@ -994,11 +994,19 @@ class AbstractWikiPage(DataCarryingPage):
                         lambda: origThreadstop.isRunning() and 
                         liveTextPlaceHold is self.liveTextPlaceHold)
 
+        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
+        if spellSession is None:
+            return
+            
+        spellSession.setCurrentDocPage(self)
+
         if len(text) == 0:
             unknownWords = []
         else:
             unknownWords = spellSession.buildUnknownWordList(text,
                     threadstop=threadstop)
+
+        spellSession.close()
 
         with self.textOperationLock:
             threadstop.testRunning()
@@ -1109,6 +1117,7 @@ class WikiPage(AbstractWikiPage):
         AbstractWikiPage.__init__(self, wikiDocument, wikiWord)
 
         self.versionOverview = UNDEFINED
+        self.pageReadOnly = None
 
 
     def getVersionOverview(self):
@@ -1172,7 +1181,7 @@ class WikiPage(AbstractWikiPage):
         startPos -- start position in the presentation tuple which should be
                 overwritten with data.
         """
-        if self.isReadOnlyEffect():
+        if self.wikiDocument.isReadOnlyEffect():
             return
 
         if self.wikiDocument.getReadAccessFailed() or \
@@ -1397,7 +1406,7 @@ class WikiPage(AbstractWikiPage):
                 ("pseudo-deleted page", "pseudo-deleted wiki page"))
 
 
-    def deletePage(self):
+    def deletePage(self, fireEvent=True):
         """
         Deletes the page from database
         """
@@ -1415,8 +1424,26 @@ class WikiPage(AbstractWikiPage):
         
             self.queueRemoveFromSearchIndex()   # TODO: Check for (dead-)locks
 
-            wx.CallAfter(self.fireMiscEventKeys,
-                    ("deleted page", "deleted wiki page"))
+            if fireEvent:
+                wx.CallAfter(self.fireMiscEventKeys,
+                        ("deleted page", "deleted wiki page"))
+
+
+    def deletePageToTrashcan(self, fireEvent=True):
+        with self.textOperationLock:
+            if self.isReadOnlyEffect():
+                return
+    
+            if not self.isDefined():
+                return
+
+            wikiDoc = self.getWikiDocument()
+            if wikiDoc.getWikiConfig().getint("main", "trashcan_maxNoOfBags",
+                    200) > 0:
+                # Trashcan is enabled
+                wikiDoc.getTrashcan().storeWikiWord(self.getWikiWord())
+            
+            self.deletePage(fireEvent=fireEvent)
 
 
     def renameVersionData(self, newWord):
@@ -1543,7 +1570,7 @@ class WikiPage(AbstractWikiPage):
         """
         Refresh those match terms which must be refreshed synchronously
         """
-        if self.isReadOnlyEffect():
+        if self.wikiDocument.isReadOnlyEffect():
             return
 
         WORD_TYPE = Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK | \
@@ -1560,7 +1587,7 @@ class WikiPage(AbstractWikiPage):
         Update properties (aka attributes) only.
         This is step one in update/rebuild process.
         """
-        if self.isReadOnlyEffect():
+        if self.wikiDocument.isReadOnlyEffect():
             return True  # TODO Error?
 
         langHelper = wx.GetApp().createWikiLanguageHelper(
@@ -1620,7 +1647,7 @@ class WikiPage(AbstractWikiPage):
         Update everything else (todos, relations).
         This is step two in update/rebuild process.
         """
-        if self.isReadOnlyEffect():
+        if self.wikiDocument.isReadOnlyEffect():
             return True   # return True or False?
 
         todos = []
@@ -1825,7 +1852,7 @@ class WikiPage(AbstractWikiPage):
         with self.textOperationLock:
             if not self.isDefined():
                 return False
-            if self.isReadOnlyEffect():
+            if self.wikiDocument.isReadOnlyEffect():
                 return False
 
             liveTextPlaceHold = self.liveTextPlaceHold
@@ -1928,6 +1955,45 @@ class WikiPage(AbstractWikiPage):
             # Clear timestamp cache
             self.modified = None
 
+
+    def getPageReadOnly(self):
+        if self.pageReadOnly is None:
+            wikiWordReadOnly = self.getWikiData().getWikiWordReadOnly(
+                    self.getNonAliasPage().getWikiWord())
+
+            if wikiWordReadOnly is None:
+                self.pageReadOnly = False
+            else:
+                self.pageReadOnly = bool(wikiWordReadOnly & 1)
+
+        return self.pageReadOnly
+
+
+    def setPageReadOnly(self, readOnly):
+        if self.wikiDocument.isReadOnlyEffect() or \
+                self.pageReadOnly == readOnly or \
+                not self.isDefined():
+            return
+
+        if readOnly:
+            self.writeToDatabase()  # Write to db before becoming read only
+            self.getWikiData().setWikiWordReadOnly(self.getNonAliasPage()
+                    .getWikiWord(), 1)
+        else:
+            self.getWikiData().setWikiWordReadOnly(self.getNonAliasPage()
+                    .getWikiWord(), 0)
+                    
+        self.pageReadOnly = None
+        self.fireMiscEventKeys(("changed read only flag",))
+
+
+
+    def isReadOnlyEffect(self):
+        """
+        Return true if page is effectively read-only, this means
+        "for any reason", regardless if error or intention.
+        """
+        return self.getPageReadOnly() or super(WikiPage, self).isReadOnlyEffect()
 
 
 
@@ -2292,10 +2358,11 @@ class FunctionalPage(DataCarryingPage):
 
     def getContent(self):
         if self.funcTag in (u"global/TextBlocks", u"global/PWL",
-                u"global/CCBlacklist", u"global/FavoriteWikis"):
+                u"global/CCBlacklist", u"global/NCCBlacklist",
+                u"global/FavoriteWikis"):
             return self._loadGlobalPage(self.funcTag[7:])
         elif self.funcTag in (u"wiki/TextBlocks", u"wiki/PWL",
-                u"wiki/CCBlacklist"):
+                u"wiki/CCBlacklist", u"wiki/NCCBlacklist"):
             return self._loadDbSpecificPage(self.funcTag)
 
 
@@ -2380,10 +2447,11 @@ class FunctionalPage(DataCarryingPage):
             # text = self.getLiveText()
     
             if self.funcTag in (u"global/TextBlocks", u"global/PWL",
-                    u"global/CCBlacklist", u"global/FavoriteWikis"):
+                    u"global/CCBlacklist", u"global/NCCBlacklist",
+                    u"global/FavoriteWikis"):
                 self._saveGlobalPage(text, self.funcTag[7:])
             elif self.funcTag in (u"wiki/TextBlocks", u"wiki/PWL",
-                    u"wiki/CCBlacklist"):
+                    u"wiki/CCBlacklist", u"wiki/NCCBlacklist"):
                 self._saveDbSpecificPage(text, self.funcTag)
 
             self.saveDirtySince = None
@@ -2396,7 +2464,8 @@ class FunctionalPage(DataCarryingPage):
         Here it is done directly in initiateUpdate() because it doesn't need
         much work.
         """
-        if self.isReadOnlyEffect():
+        # For "global/*" functional pages self.wikiDocument is None
+        if self.wikiDocument is not None and self.wikiDocument.isReadOnlyEffect():
             return
 
         with self.textOperationLock:
@@ -2423,6 +2492,11 @@ class FunctionalPage(DataCarryingPage):
                     # was updated
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
                             "reread cc blacklist needed"))
+                elif self.funcTag in (u"global/NCCBlacklist", u"wiki/NCCBlacklist"):
+                    # The blacklist of non-camelcase words not to mark as wiki links
+                    # was updated
+                    evtSource.fireMiscEventKeys(("updated func page", "updated page",
+                            "reread ncc blacklist needed"))
                 elif self.funcTag == u"global/FavoriteWikis":
                     # The list of favorite wikis was updated (there is no
                     # wiki-bound version of favorite wikis
@@ -2490,6 +2564,8 @@ _FUNCTAG_TO_HR_NAME_MAP = {
             u"wiki/PWL": N_(u"Wiki spell list"),
             u"global/CCBlacklist": N_(u"Global cc. blacklist"),
             u"wiki/CCBlacklist": N_(u"Wiki cc. blacklist"),
+            u"global/NCCBlacklist": N_(u"Global ncc. blacklist"),
+            u"wiki/NCCBlacklist": N_(u"Wiki ncc. blacklist"),
             u"global/FavoriteWikis": N_(u"Favorite wikis"),
         }
 

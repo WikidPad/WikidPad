@@ -209,6 +209,7 @@ class OpenWikiWordDialog(wx.Dialog):
         wx.EVT_TEXT(self, ID, self.OnText)
         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
+        wx.EVT_KEY_DOWN(self.ctrls.lb, self.OnKeyDownListBox)
         wx.EVT_LISTBOX(self, ID, self.OnListBox)
         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
@@ -387,6 +388,14 @@ class OpenWikiWordDialog(wx.Dialog):
         else:
             evt.Skip()
             
+    def OnKeyDownListBox(self, evt):
+        accP = getAccelPairFromKeyDown(evt)
+        if accP in ((wx.ACCEL_NORMAL, wx.WXK_DELETE),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DELETE)):
+            self.OnDelete(evt)
+        else:
+            evt.Skip()
+
             
     def OnCreate(self, evt):
         """
@@ -418,13 +427,14 @@ class OpenWikiWordDialog(wx.Dialog):
     def OnDelete(self, evt):
         sellen = len(self.ctrls.lb.GetSelections())
         if sellen > 0:
-            answer = wx.MessageBox(
-                    _(u"Do you want to delete %i wiki page(s)?") % sellen,
-                    (u"Delete Wiki Page(s)"),
-                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-
-            if answer != wx.YES:
-                return
+            if self.pWiki.getConfig().getboolean("main", "trashcan_askOnDelete",
+                    True):
+                answer = wx.MessageBox(
+                        _(u"Do you want to delete %i wiki page(s)?") % sellen,
+                        (u"Delete Wiki Page(s)"),
+                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+                if answer != wx.YES:
+                    return
 
             self.pWiki.saveAllDocPages()
             for s in self.ctrls.lb.GetSelections():
@@ -434,7 +444,7 @@ class OpenWikiWordDialog(wx.Dialog):
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)
-                    page.deletePage()
+                    page.deletePageToTrashcan()
                     
                     # self.pWiki.getWikiData().deleteWord(delword)
         
@@ -511,13 +521,15 @@ class ChooseWikiWordDialog(wx.Dialog):
     def OnDelete(self, evt):
         sellen = len(self.ctrls.lb.GetSelections())
         if sellen > 0:
-            answer = wx.MessageBox(
-                    _(u"Do you want to delete %i wiki page(s)?") % sellen,
-                    (u"Delete Wiki Page(s)"),
-                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-
-            if answer != wx.YES:
-                return
+            if self.pWiki.getConfig().getboolean("main", "trashcan_askOnDelete",
+                    True):
+                answer = wx.MessageBox(
+                        _(u"Do you want to delete %i wiki page(s)?") % sellen,
+                        (u"Delete Wiki Page(s)"),
+                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+    
+                if answer != wx.YES:
+                    return
 
             self.pWiki.saveAllDocPages()
             for s in self.ctrls.lb.GetSelections():
@@ -527,7 +539,7 @@ class ChooseWikiWordDialog(wx.Dialog):
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)
-                    page.deletePage()
+                    page.deletePageToTrashcan()
                     
                     # self.pWiki.getWikiData().deleteWord(delword)
         

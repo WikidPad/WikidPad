@@ -3,6 +3,7 @@ import sys, os, string, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext
 from calendar import timegm
+from cStringIO import StringIO
 import urllib_red as urllib
 
 import wx, wx.xrc
@@ -154,21 +155,27 @@ class MultiPageTextImporter:
 
 
     def doImport(self, wikiDocument, importType, importSrc,
-            compatFilenames, addOpt):
+            compatFilenames, addOpt, importData=None):
         """
         Run import operation.
         
         wikiDocument -- WikiDataManager object
         importType -- string tag to identify how to import
-        importDest -- Path to source directory or file to import from
+        importSrc -- Path to source directory or file to import from
         compatFilenames -- Should the filenames be decoded from the lowest
                            level compatible?
         addOpt -- additional options returned by getAddOpt()
+        importData -- if not None contains data to import as bytestring.
+                importSrc is ignored in this case. Needed for trashcan.
+        returns True if import was done (needed for trashcan)
         """
-        try:
-            self.rawImportFile = open(pathEnc(importSrc), "rU")
-        except IOError:
-            raise ImportException(_(u"Opening import file failed"))
+        if importData is not None:
+            self.rawImportFile = StringIO(importData)
+        else:
+            try:
+                self.rawImportFile = open(pathEnc(importSrc), "rU")
+            except IOError:
+                raise ImportException(_(u"Opening import file failed"))
             
         self.wikiDocument = wikiDocument
         self.tempDb = None
@@ -193,11 +200,11 @@ class MultiPageTextImporter:
                     decode = utf8Dec
 
                 line = decode(self.rawImportFile.readline())[0]
-                if line.startswith("#!"):
+                if line.startswith(u"#!"):
                     # Skip initial line with #! to allow execution as shell script
                     line = decode(self.rawImportFile.readline())[0]
 
-                if not line.startswith("Multipage text format "):
+                if not line.startswith(u"Multipage text format "):
                     raise ImportException(
                             _(u"Bad file format, header not detected"))
 
@@ -212,7 +219,7 @@ class MultiPageTextImporter:
 
                 # Next is the separator line
                 line = decode(self.rawImportFile.readline())[0]
-                if not line.startswith("Separator: "):
+                if not line.startswith(u"Separator: "):
                     raise ImportException(
                             _(u"Bad file format, header not detected"))
 
@@ -274,11 +281,9 @@ class MultiPageTextImporter:
 
                         # Now ask user if necessary
                         if showImportTableAlways or self._isUserNeeded():
-                            if not MultiPageTextImporterDialog.runModal(
-                                    self.mainControl, self.tempDb,
-                                    self.mainControl):
+                            if not self._doUserDecision():
                                 # Canceled by user
-                                return
+                                return False
 
                         # Further logical processing after possible user editing
                         self._markNonImportedVersionsData()
@@ -291,7 +296,8 @@ class MultiPageTextImporter:
                         self.rawImportFile.seek(startPos)
                         self.importFile = decodingReader(self.rawImportFile, "replace")
                         self._doImportVer1Pass2()
-
+                        
+                        return True
                     finally:
                         self.tempDb.close()
                         self.tempDb = None
@@ -423,6 +429,17 @@ class MultiPageTextImporter:
                     self.tempDb.execSql("""
                         update entries set renameImportTo=? where unifName = ?
                         """, (newName, depUnifName))
+
+
+    def _doUserDecision(self):
+        """
+        Called to present GUI to user for deciding what to do.
+        This method is overwritten for trashcan GUI.
+        Returns False if user canceled operation
+        """
+        return MultiPageTextImporterDialog.runModal(
+                self.mainControl, self.tempDb,
+                self.mainControl)
 
 
     def _isUserNeeded(self):
@@ -620,11 +637,11 @@ class MultiPageTextImporter:
                 """
                 select substr(unifName, 10)
                 from entries where unifName glob 'wikipage/*' and 
-                renamePresentTo == '' and not dontImport and importVersionData
+                renameImportTo == '' and not dontImport and importVersionData
                 union
-                select substr(renamePresentTo, 10)
+                select substr(renameImportTo, 10)
                 from entries where unifName glob 'wikipage/*' and 
-                renamePresentTo glob 'wikipage/*' and not dontImport and 
+                renameImportTo glob 'wikipage/*' and not dontImport and 
                 importVersionData
                 """):
             if not wikiDoc.isDefinedWikiPage(wikiWord):
@@ -780,7 +797,8 @@ class MultiPageTextImporter:
     def _importHintedDatablockVer1Pass2(self, unifName):
         """
         A hinted datablock starts with an extra line defining encoding
-        (text or B64) and storage hint
+        (text or B64) and storage hint. It was introduced later therefore
+        only versioning packets use this while saved searches don't.
         """
         hintStrings, content = self._readHintedDatablockVer1()
         if hintStrings is None:

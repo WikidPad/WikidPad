@@ -632,7 +632,11 @@ class OptionsDialog(wx.Dialog):
 
             ("wiki_icon", "tfWikiIcon", "t"),
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
-            ("wiki_wikiLanguage", "chWikiWikiLanguage", "wikilang"),
+
+            ("trashcan_maxNoOfBags", "tfTrashcanMaxNoOfBags", "i0+"),
+            ("trashcan_askOnDelete", "cbTrashcanAskOnDelete", "b"),
+            ("trashcan_storageLocation", "chTrashcanStorageLocation", "seli"),
+
 
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
             ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
@@ -641,6 +645,8 @@ class OptionsDialog(wx.Dialog):
 
             ("versioning_storageLocation", "chVersioningStorageLocation", "seli"),
             ("versioning_completeSteps", "tfVersioningCompleteSteps", "i0+"),
+
+            ("wiki_wikiLanguage", "chWikiWikiLanguage", "wikilang"),
 
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
@@ -938,8 +944,11 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.cbWikiPageFilesAsciiOnly.Enable(fppCap is not None)
             self.ctrls.cbWikiPageFilesGracefulOutsideAddAndRemove.Enable(
                     fppCap is not None)
+            self.ctrls.chTrashcanStorageLocation.Enable(
+                    fppCap is not None)
             self.ctrls.chVersioningStorageLocation.Enable(
                     fppCap is not None)
+
 
         self.OnUpdateUiAfterChange(None)
 

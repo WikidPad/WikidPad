@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-06-04
+# Last modified (format YYYY-MM-DD): 2011-06-22
 
 
 import locale, pprint, time, sys, string, traceback
@@ -642,11 +642,11 @@ WikiWordCcPAT = (ur"(?:[" +
         ur"]+)")
 
 
-UrlPAT = ur'(?:(?:https?|ftp|rel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
+UrlPAT = ur'(?:(?:https?|ftp|rel|wikirel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
         ur'(?:(?![.,;:!?)]+(?:["\s]|$))[^"\s|\]<>])*'
 
 
-UrlInBracketsPAT = ur'(?:(?:https?|ftp|rel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
+UrlInBracketsPAT = ur'(?:(?:https?|ftp|rel|wikirel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
         ur'(?:(?![ \t]+[|\]])(?: |[^"\s|\]<>]))*'
 
 
@@ -699,11 +699,16 @@ def resolveWikiWordLink(link, basePage):
 def actionWikiWordNcc(s, l, st, t):
     t.wikiWord = t.findFlatByName("word")
     if t.wikiWord is not None:
+        wikiFormatDetails = st.dictStack["wikiFormatDetails"]
+
         t.wikiWord = resolveWikiWordLink(t.wikiWord.getString(),
                 st.dictStack["wikiFormatDetails"].basePage)
 
         if t.wikiWord == u"":
             raise ParseException(s, l, "Subpage resolution of wikiword failed")
+
+        if t.wikiWord in wikiFormatDetails.wikiDocument.getNccWordBlacklist():
+            raise ParseException(s, l, "Non-CamelCase word is in blacklist")
 
     t.titleNode = t.findFlatByName("title")
 
@@ -1880,21 +1885,29 @@ class _TheHelper(object):
         return relPath.getLinkCore()
 
     @staticmethod
-    def createUrlLinkFromPath(wikiDocument, path, relative=False, bracketed=False):
+    def createUrlLinkFromPath(wikiDocument, path, relative=False,
+            bracketed=False, protocol=None):
         if bracketed:
             addSafe = ' '
         else:
             addSafe = ''
 
-        if relative: 
+        if relative:
             url = wikiDocument.makeAbsPathRelUrl(path, addSafe=addSafe)
 
             if url is None:
                 # Relative not possible -> absolute instead
+                relative = False
+            else:
+                if protocol == "wiki":
+                    url = u"wiki" + url  # Combines to "wikirel://"
+
+        if not relative:
+            if protocol == "wiki":
+                url = u"wiki:" + urlFromPathname(path, addSafe=addSafe)
+            else:
                 url = u"file:" + urlFromPathname(path, addSafe=addSafe)
-        else:
-            url = u"file:" + urlFromPathname(path, addSafe=addSafe)
-        
+
         if bracketed:
             url = BracketStart + url + BracketEnd
         

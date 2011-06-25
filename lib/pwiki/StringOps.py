@@ -1048,7 +1048,7 @@ def ntPathnameFromUrl(url, testFileType=True):
             throw RuntimeError if not.
     """
     import string
-    if url.startswith("file:"):
+    if url.startswith("file:") or url.startswith("wiki:"):
         url = url[5:]
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
@@ -1104,7 +1104,7 @@ def macPathnameFromUrl(url, testFileType=True):
     # XXXX The .. handling should be fixed...
     #
     tp = urllib.splittype(url)[0]
-    if tp and tp != 'file':
+    if tp and tp != 'file' and tp != 'wiki':
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
     # Turn starting /// into /, an empty hostname means current host
     if url[:3] == '///':
@@ -1149,9 +1149,9 @@ def elsePathnameFromUrl(url, testFileType=True):
     #
     # XXXX The .. handling should be fixed...
     #
-    if url.startswith("file:///"):
+    if url.startswith("file:///") or url.startswith("wiki:///"):
         url = url[7:]   # Third '/' remains
-    elif url.startswith("file:"):
+    elif url.startswith("file:") or url.startswith("wiki:"):
         url = url[5:]
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'

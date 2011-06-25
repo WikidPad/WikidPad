@@ -514,7 +514,6 @@ GLOBALDEFAULTS = {
     ("main", "wikiOpenNew_defaultDir"): u"",   # Default directory to show when opening
             # or creating a wiki. If entry is empty, a built-in default is used.
 
-
     ("main", "wikiLockFile_ignore"): u"False",  # Ignore the lock file created by another instance
             # when opening a wiki?
     ("main", "wikiLockFile_create"): u"True",  # Create a lock file when opening a wiki?
@@ -761,6 +760,14 @@ WIKIDEFAULTS = {
     ("main", "tabs_maxCharacters"): u"0", # Maximum number of characters to show on a tab (0: inifinite)
     ("main", "template_pageNamesRE"): u"^template/",  # Regular expression pattern for pages which should be seen as templates
             # Especially they will be listed in text editor context menu on new pages
+
+    ("main", "trashcan_maxNoOfBags"): u"200",   # Maximum number of trashbags. If more are present
+            # oldest are removed
+    ("main", "trashcan_askOnDelete"): u"True",   # When deleting an element ask before it is
+            # put to trashbag
+    ("main", "trashcan_storageLocation"): "0",  # Where to store trashcan data? 0: Intern in database;
+            # 1: extern in files (not supported for Compact Sqlite DB)
+
     
     ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree

@@ -9,7 +9,7 @@ Rename current page. After chosing the new you are also asked if you want WikidP
 Be aware that this process is only a simple text search and replace which may produce wrong results under some circumstances.
 
 ++ Delete
-Delete current page.
+Move current page to trashcan
 
 ++ Set as Root
 Set current page as root of the tree.
@@ -36,4 +36,7 @@ Copy "wiki:" URL of current wiki page to clipboard.
 If you right click on an "anchor:" definition in editor and choose "Copy Anchor URL to clipboard" the URL contains also a link to the particular anchor.
 
 ++ Add version
-Add a new version 
+Add a new version
+
+++ Page read only
+Set/unset current page read-only. Be aware that versions of WikidPad prior to 2.2beta05 ignore this setting and allow to modify the page nevertheless

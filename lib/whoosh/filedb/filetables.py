@@ -21,6 +21,9 @@ D. J. Bernstein's CDB format (http://cr.yp.to/cdb.html).
 
 from sys import byteorder
 from array import array
+import ctypes
+from hashlib import md5
+# from zlib import crc32
 from collections import defaultdict
 from cPickle import loads, dumps
 from struct import Struct
@@ -57,7 +60,17 @@ HEADER_SIZE = 256 * header_entry_size
 
 #def _hash(value):
 #    return abs(hash(value))
-_hash = hash
+
+def md5_hash(key):
+    # Very little bit faster than commented out variant
+    return ctypes.c_uint.from_buffer_copy(md5(key).digest()[:4]).value
+#     return int(md5(key).hexdigest(), 16) & 0xffffffff
+
+
+# def crc32_hash(key):
+#     return crc32(key) & 0xffffffff
+ 
+_hash = md5_hash
 
 # Table classes
 

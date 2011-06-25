@@ -73,3 +73,16 @@ attr:Mary and attr:lamb   Find pages having an attribute with key containing "Ma
 <<
 todo:grass and garden   Find pages having a todo item containing "grass" in the key and the text "garden" somewhere.
 >>
+
+
+++++ page:
+Search for a pages whose names match the regular expression following after the prefix. The regex is matched at the beginning of the page name and is always case-sensitive (may change later).
+
+
+Examples
+
+<<
+page:Wiki   Find all pages with names beginning with "Wiki"
+
+page:.*Wiki   Find all pages with names containing "Wiki"
+>>

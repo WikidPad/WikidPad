@@ -29,6 +29,7 @@ from .. import AttributeHandling
 from ..SearchAndReplace import SearchReplaceOperation
 
 from .. import SpellChecker
+from .. import Trashcan
 
 import DbBackendUtils, FileStorage
 
@@ -399,6 +400,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         # Set of camelcase words not to see as wiki words
         self.ccWordBlacklist = None
+        self.nccWordBlacklist = None
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
@@ -463,7 +465,8 @@ class WikiDataManager(MiscEventSourceMixin):
         GetApp().getMiscEvent().addListener(self)
 
         self._updateCcWordBlacklist()
-        
+        self._updateNccWordBlacklist()
+
         self.readAccessFailed = False
         self.writeAccessFailed = False
         self.noAutoSaveFlag = False # Flag is set (by PersonalWikiFrame),
@@ -479,8 +482,11 @@ class WikiDataManager(MiscEventSourceMixin):
             self.writeAccessFailed = True
             raise writeException
             
-        self.updateExecutor.start()
-
+        self.trashcan = Trashcan.Trashcan(self)
+        
+        if self.trashcan.isInDatabase():
+            self.trashcan.readOverview()
+            
         if self.isSearchIndexEnabled() and self.getWikiConfig().getint(
                 "main", "indexSearch_formatNo", 1) != Consts.SEARCHINDEX_FORMAT_NO:
             # Search index rebuild needed
@@ -500,7 +506,9 @@ class WikiDataManager(MiscEventSourceMixin):
             self.removeSearchIndex()
 
         self.pushDirtyMetaDataUpdate()
-        
+        self.updateExecutor.start()
+
+
 #         if not self.isReadOnlyEffect():
 #             words = self.getWikiData().getWikiWordsForMetaDataState(0)
 #             for word in words:
@@ -567,6 +575,10 @@ class WikiDataManager(MiscEventSourceMixin):
             self.refCount = 0
             self.updateExecutor.end(hardEnd=True)  # TODO Inform user as this may take some time
 
+            self.trashcan.writeOverview()
+            self.trashcan.close()
+            self.trashcan = None
+
             # Invalidate all cached pages to prevent yet running threads from
             # using them
             for page in self.wikiPageDict.values():
@@ -624,6 +636,9 @@ class WikiDataManager(MiscEventSourceMixin):
         
     def getCollator(self):
         return GetApp().getCollator()
+        
+    def getTrashcan(self):
+        return self.trashcan
         
     def getWikiDefaultWikiLanguage(self):
         """
@@ -760,13 +775,22 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         Return the absolute file: URL for a rel: URL
         """
-        relpath = pathnameFromUrl(relurl[6:], False)
+        if relurl.startswith(u"rel://"):
+            relpath = pathnameFromUrl(relurl[6:], False)
 
-        url = u"file:" + urlFromPathname(
-                os.path.abspath(os.path.join(os.path.dirname(
-                        self.getWikiConfigPath()), relpath)), addSafe=addSafe)
+            url = u"file:" + urlFromPathname(
+                    os.path.abspath(os.path.join(os.path.dirname(
+                            self.getWikiConfigPath()), relpath)), addSafe=addSafe)
 
-        return url
+            return url
+        elif relurl.startswith(u"wikirel://"):
+            relpath = pathnameFromUrl(relurl[10:], False)
+
+            url = u"wiki:" + urlFromPathname(
+                    os.path.abspath(os.path.join(os.path.dirname(
+                            self.getWikiConfigPath()), relpath)), addSafe=addSafe)
+
+            return url
 
 
     def makeAbsPathRelUrl(self, absPath, addSafe=''):
@@ -1289,6 +1313,8 @@ class WikiDataManager(MiscEventSourceMixin):
 #         progresshandler.update(0, _(u"Waiting for update thread to end"))
 
 
+        self.fireMiscEventKeys(("begin foreground update", "begin update"))
+
         # re-save all of the pages
         try:
             step = 1
@@ -1394,6 +1420,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         finally:
             progresshandler.close()
+            self.fireMiscEventKeys(("end foreground update",))
             self.updateExecutor.start()
 
 
@@ -1913,6 +1940,9 @@ class WikiDataManager(MiscEventSourceMixin):
     def getCcWordBlacklist(self):
         return self.ccWordBlacklist
 
+    def getNccWordBlacklist(self):
+        return self.nccWordBlacklist
+
     def _updateCcWordBlacklist(self):
         """
         Update the blacklist of camelcase words which should show up as normal
@@ -1923,6 +1953,17 @@ class WikiDataManager(MiscEventSourceMixin):
         pg = self.getFuncPage("wiki/CCBlacklist")
         bls.update(pg.getLiveText().split("\n"))
         self.ccWordBlacklist = bls
+
+    def _updateNccWordBlacklist(self):
+        """
+        Update the blacklist of non-camelcase (=bracketed) words which should
+        show up as normal text.
+        """
+        pg = self.getFuncPage("global/NCCBlacklist")
+        bls = set(pg.getLiveText().split("\n"))
+        pg = self.getFuncPage("wiki/NCCBlacklist")
+        bls.update(pg.getLiveText().split("\n"))
+        self.nccWordBlacklist = bls
 
 
     def getUnAliasedWikiWord(self, word):
@@ -2106,6 +2147,8 @@ class WikiDataManager(MiscEventSourceMixin):
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
+            elif miscevt.has_key("reread ncc blacklist needed"):
+                self._updateNccWordBlacklist()
             elif miscevt.has_key("pause background threads"):
                 self.updateExecutor.pause()
             elif miscevt.has_key("resume background threads"):
@@ -2133,6 +2176,12 @@ class WikiDataManager(MiscEventSourceMixin):
 #                 miscevt.getSource().putIntoSearchIndex()
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
+
+                attrs = miscevt.getProps().copy()
+                attrs["funcPage"] = miscevt.getSource()
+                self.fireMiscEventProps(attrs)
+            elif miscevt.has_key("reread ncc blacklist needed"):
+                self._updateNccWordBlacklist()
 
                 attrs = miscevt.getProps().copy()
                 attrs["funcPage"] = miscevt.getSource()

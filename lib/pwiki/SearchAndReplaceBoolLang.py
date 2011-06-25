@@ -100,6 +100,10 @@ def actionAttributeTerm(s, l, st, t):
         t.value = ptt.parameterTerm
 
 
+def actionPageTerm(s, l, st, t):
+    t.pageName = t.findFlatByName("pageName").parameterTerm
+
+
 
 def actionOneOp(s, l, st, t):
     t.op = t.findFlatByName("op")
@@ -131,10 +135,11 @@ keyOr = buildRegex(ur"[oO][rR]") + whitespaceOrEnd
 # keyPrefixValue = buildRegex(ur"val(?:ue)?:")
 keyPrefixAtt = buildRegex(ur"att(?:r)?:")
 keyPrefixTodo = buildRegex(ur"todo:")
+keyPrefixPage = buildRegex(ur"page:")
 
 
 keyWord = keyParenOpen | keyParenClose | keyNot | keyAnd | keyOr | \
-        keyPrefixAtt | keyPrefixTodo
+        keyPrefixAtt | keyPrefixTodo | keyPrefixPage
 
 
 valueQuote = buildRegex(u"\"+|'+|/+", name=u"quoting")
@@ -171,21 +176,30 @@ parameterTerm = parameterTerm.setResultsNameNoCopy("parameterTerm")\
 
 
 attributeTerm = keyPrefixAtt + buildRegex(ur" ?") + \
-        parameterTermOpt.setResultsNameNoCopy("key") + optWhitespace + \
+        parameterTermOpt.setResultsName("key") + optWhitespace + \
         Optional( buildRegex(ur": ?") + 
-        parameterTerm.setResultsNameNoCopy("value") + optWhitespace )
+        parameterTerm.setResultsName("value") + optWhitespace )
 
 attributeTerm = attributeTerm.setResultsNameNoCopy("attributeTerm")\
         .setParseAction(actionAttributeTerm)
 
 
 todoTerm = keyPrefixTodo + buildRegex(ur" ?") + \
-        parameterTermOpt.setResultsNameNoCopy("key") + optWhitespace + \
+        parameterTermOpt.setResultsName("key") + optWhitespace + \
         Optional( buildRegex(ur": ?") + 
-        parameterTerm.setResultsNameNoCopy("value") + optWhitespace )
+        parameterTerm.setResultsName("value") + optWhitespace )
 
 todoTerm = todoTerm.setResultsNameNoCopy("todoTerm")\
         .setParseAction(actionAttributeTerm)
+
+
+pageTerm = keyPrefixPage + buildRegex(ur" ?") + \
+        parameterTerm.setResultsName("pageName") + optWhitespace
+
+pageTerm = pageTerm.setResultsNameNoCopy("pageTerm")\
+        .setParseAction(actionPageTerm)
+
+
 
 
 # todoTerm = keyPrefixTodo + buildRegex(ur" ?") + \
@@ -213,7 +227,7 @@ notExpression = notExpression.setResultsNameNoCopy("notExpression")\
         .setParseAction(actionOneOp)
 
 exprLevel1 << (notExpression | parensExpression | attributeTerm | todoTerm |
-        regexTerm)
+        pageTerm | regexTerm)
 
 
 orExpression = exprLevel1.setResultsName("op1") + keyOr + Group(searchExpression).setResultsName("op2")

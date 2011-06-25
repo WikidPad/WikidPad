@@ -369,7 +369,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             if self.mainControl.getConfig().getboolean("main",
                     "editor_sync_byPreviewSelection", False) and \
                     presenter.getCurrentSubControlName() == "preview":
-                selText = presenter.getCurrentSubControl().getSelectedText()
+                selText = presenter.getCurrentSubControl().GetSelectedText()
 
                 presenter.switchSubControl("textedit", gainFocus=True)
 

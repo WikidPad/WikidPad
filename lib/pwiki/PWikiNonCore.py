@@ -13,6 +13,9 @@ import wx
 
 from . import wxHelper, StringOps
 
+from . import Trashcan
+
+
 
 class PWikiNonCore:
     def __init__(self, mainControl, dlgParent):
@@ -74,6 +77,35 @@ class PWikiNonCore:
                 progresshandler)
 
 
+    def OnTogglePageReadOnly(self, evt):
+        docPage = self.mainControl.getCurrentDocPage()
+        if docPage is None:
+            return
+
+        docPage.setPageReadOnly(evt.IsChecked())
+    
+    
+    def OnTogglePageReadOnlyUpdate(self, evt):
+        if not evt.GetEnabled():
+            evt.Check(False)
+            return
+
+        docPage = self.mainControl.getCurrentDocPage()
+        if docPage is None or not docPage.isDefined():
+            evt.Enable(False)
+            evt.Check(False)
+            return
+    
+        evt.Check(docPage.getPageReadOnly())
+
+
+    def OnOpenTrashcan(self, evt):
+        from .TrashcanGui import TrashcanDialog
+
+        self.mainControl.saveAllDocPages()
+        TrashcanDialog.runModal(self.mainControl, self.mainControl)
+
+
     def _buildDescriptorDict(self):
         """
         Builds and returns a dictionary of tuples to describe the menu items,
@@ -111,9 +143,22 @@ class PWikiNonCore:
                 kb.InsertDate, "date", None,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit,
                     mc.OnUpdateDisNotWikiPage)),
+
             "showFileCleanupDialog": (self.OnShowFileCleanup,
                 _(u'File cleanup...'), _(u'Remove orphaned files and dead links'),
                 kb.FileCleanup, None, None,
+                None),
+
+            "togglePageReadOnly": (self.OnTogglePageReadOnly,
+                _(u'Page read only'), _(u'Set current page read only'),
+                kb.TogglePageReadOnly, None, None,
+                (mc.OnUpdateDisReadOnlyWiki, mc.OnUpdateDisNotWikiPage,
+                self.OnTogglePageReadOnlyUpdate),
+                wx.ITEM_CHECK),
+
+            "openTrashcan": (self.OnOpenTrashcan, _(u'Open trashcan'),
+                _(u'Open trashcan'),
+                kb.OpenTrashcan, None, None,
                 None),
             }
 

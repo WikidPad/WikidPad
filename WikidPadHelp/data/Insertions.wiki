@@ -55,6 +55,21 @@ The following keys and values are built into WikidPad (further are possible by p
           on export)
     * *savedsearch* lists all wiki words found by the saved search
       with the name given as value.
+    * *search* lists all wiki words found by the search string given
+      as value. It supports the following appendices:
+        * *type boolean*: Boolean regex search (default)
+        * *type regex*: Simple regex search
+        * *type asis*: Search "As is"
+        * *type index*: Index based search (ignored if index not
+          available)
+        * *casesensitive*: Search case sensitive (default is
+          insensitive)
+        * *wholewordsonly*: Search whole words only 
+        * *removeself*: Page on which the insertion is placed is
+          omitted from search result (if you e.g. place a search
+          insertion for "foo" on a page this page itself would be
+          found just because it contains the search insertion
+          with "foo" in it)
     * *toc* shows a little table of contents with the headings of 
       the current page. In HTML preview/export you can click on
       the lines to go to the actual headings. The value of this

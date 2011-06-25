@@ -501,6 +501,21 @@ Set here the name of icon to use in the system tray instead of the default icon.
 Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
 
 
++++++ Trashcan
+Controls behavior of the trashcan which temporarily stores deleted wiki pages to undo their deletion
+
+*Max. number of entries*
+Number of pages to store before the oldest (earliest trashed) ones are irreversibly deleted. To switch of trashcan set this to 0.
+
+*Where to store*
+Set where trashcan information should be stored, either in the main "Database" files or as "Separate files" which creates one file for each trashcan element to save and additionally one file for the overview list of trashed items. "Database" is the recommended option.
+
+The database backend "Compact Sqlite" only supports storing in database so this option is grayed out for such wikis.
+
+*Ask before deletion of wiki word*
+If you switch this off wiki words will be moved to trashcan or deleted without previously asking if you are sure. The maximum number of entries in trashcan should be reasonably high (recommended: 200) if you switch this off.
+
+
 ++++ Headings
 
 *Heading prefix*

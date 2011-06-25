@@ -30,6 +30,8 @@ import gtk, gtk.gdk
 # pywebkitgtk (http://code.google.com/p/pywebkitgtk/)
 import webkit
 
+from ViHelper import ViHintDialog, ViHelper
+
 # used in search
 import SystemInfo
 
@@ -425,6 +427,7 @@ class WikiHtmlViewWK(wx.Panel):
                 self.scrollDeferred(lx, ly)
 
         self.keyProcessWxWindow.realize()
+        self.html.ctrl.grab_focus()
 
 
     def __on_button_press_event(self, view, gtkEvent):
@@ -466,7 +469,9 @@ class WikiHtmlViewWK(wx.Panel):
                 self.html.ctrl.grab_focus()
             finally:
                 self.html.ctrl.handler_unblock(self.focusEventConn)
-            return True #False?
+            # Return False if not handled otherwise no default gtk
+            # bindings (such as arrow keys) will word
+            return False 
 
 
     def __on_key_press_event_vi(self, view, gtkEvent):
@@ -486,6 +491,7 @@ class WikiHtmlViewWK(wx.Panel):
 
 
         Current implemented commands:
+        NOTE: this list is not upto date
 
                 key(s)  :       action  
         --------------------------------------------------------
@@ -498,6 +504,14 @@ class WikiHtmlViewWK(wx.Panel):
                             defaults to bottom of page
         (count) gg      : scroll to (count)% of page
                             defaults to top of page
+        {count} %       : scroll to {count}% of page
+
+                0       : scrolls to absolute left of document
+        (count) ^       : scrolls to (count)% of document
+                          horizontally. Defaults to 0% (same as
+                          0)
+        (count) $       : scrolls to (count)% of document
+                          horizontally. Defaults to 100%
 
                 gh      : goto home page
                 gH      : open home in new forground tab
@@ -511,6 +525,11 @@ class WikiHtmlViewWK(wx.Panel):
         (count) L       : go forward in history count times
 
                 gu      : display parents dialog (Ctrl + Up)
+        (count) gU      : same as gu but if only one parent defined
+                          skip the dialog and open it directly. If
+                          count keep going until no or more than one
+                          parent reached (intervening pages are not
+                          recorded in history).
 
                 o       : open wikipage (Ctrl + o)
 
@@ -519,12 +538,13 @@ class WikiHtmlViewWK(wx.Panel):
                 dd      : close current tab (as opposed to single 
                           "d" in pentadactyl)
 
-                return  : follow link (if selected)
+                Return  : follow link (if selected)
 
         Ctrl+[ or Esc   : clear selection (and/or count/modifier)
+        
+                y       : copy selected wikiword to clipboard (not implemented)
+                Y       : copy selected text to clipboard
 
-        TODO:   link navigation on f and F
-                move functions out of here!!!
         """
         self.realizeIfNeeded()
 
@@ -539,40 +559,31 @@ class WikiHtmlViewWK(wx.Panel):
         if gtkEvent.state & gtk.gdk.CONTROL_MASK: # Ctrl
             control_mask = True
 
-#         if control_mask:
-#             if key == 102: # f
-#                 self.startIncrementalSearch()
-
         if key == 65307: # Escape
             self.html.ClearSelection()
-            vi.key_modifier = []
-            vi.key_number_modifier = []
+            vi.FlushBuffers()
         
+        m = vi.mode
 
         if 48 <= key <= 57: # Normal
-            self.vi.SetNumber(key-48)
-            return True
+            if self.vi.SetNumber(key-48):
+                return True
         elif 65456 <= key <= 65465: # Numpad
-            self.vi.SetNumber(key-65456)
-            return True
+            if self.vi.SetNumber(key-65456):
+                return True
 
+        # If control add it to keys
+        if control_mask:
+            key = ("ctrl", key)
 
         # Currently only supports single modifier (i.e. 2 key commands)
-        if len(vi.key_modifier) == 0 and key in vi.key_mods:
+        if len(vi.key_modifier) == 0 and key in vi.key_mods[m]:
             vi.key_modifier.append(key)
             vi.updateViStatus()
             return True
 
         # Set count to be used
-        vi.count = 1
-        vi.true_count = False # True if count is specified
-        if len(vi.key_number_modifier) > 0:
-            vi.count = int("".join(map(str, vi.key_number_modifier)))
-
-            # Set a max count
-            if vi.count > 10000:
-                vi.count = 10000
-            vi.true_count = True
+        vi.SetCount()
 
         # Double key commands, e.g. gg, gU
         if len(vi.key_modifier) == 1:
@@ -583,11 +594,8 @@ class WikiHtmlViewWK(wx.Panel):
 
             vi.updateViStatus()
 
-        # If control add it to keys
-        if control_mask:
-            key = ("ctrl", key)
 
-        if key in vi.keys:
+        if key in vi.keys[m]:
             vi.RunFunction(key)
             return True
 
@@ -600,23 +608,27 @@ class WikiHtmlViewWK(wx.Panel):
         # Now send to  self.keyProcessWxWindow  to let wxPython translate
         # and process the key event
         if self.scrolled_window:
-            gtkEvent = gtkEvent.copy()
-            self.html.ctrl.handler_block(self.focusEventConn)
-            try:
-                self.keyProcessWxWindow.gtkMyself.grab_focus()
-                self.keyProcessWxWindow.gtkMyself.emit("key-press-event", gtkEvent)
-                self.html.ctrl.grab_focus()
-            finally:
-                self.html.ctrl.handler_unblock(self.focusEventConn)
-            return True #False?
-
+#             #
+#             # NOTE: The following code causes the webkit ctrl to loose focus
+#             #       and I can't work out how to gain it again
+#             #
+#             gtkEvent = gtkEvent.copy()
+#             self.html.ctrl.handler_block(self.focusEventConn)
+#             try:
+#                 self.keyProcessWxWindow.gtkMyself.grab_focus()
+#                 self.keyProcessWxWindow.gtkMyself.emit("key-press-event", gtkEvent)
+#                 # Seems to work but doesn't always according to Ross (MB):
+#                 self.html.ctrl.grab_focus()
+#             finally:
+#                 self.html.ctrl.handler_unblock(self.focusEventConn)
+            return False
 
     def FollowLinkIfSelected(self):
         """
-        A bit of a hack (there must be a better way to achieve
-        the same results)
-
-        Should be able to select link (as with tab navigation)
+        Only necessary if we want custom keybindings (e.g. ctrl-l)
+        to be able to follow link. May be better to remap them to
+        activate selected element (like return does - I don't know
+        how to do this at the moment) or to rewrite with javascript?
 
         Gets selected html, parses it and opens the first link
         found.
@@ -644,8 +656,10 @@ class WikiHtmlViewWK(wx.Panel):
         if frame.get_parent() is not None and \
                 self.presenter.getConfig().getboolean("main",
                 "html_preview_ieShowIframes", True):
-            return False
-
+            # Yeah this is probably not the best way to do this...
+            if str(action.get_reason()) == "<enum WEBKIT_WEB_NAVIGATION_REASON_OTHER of type WebKitWebNavigationReason>":
+                return False
+ 
         # Return True to block navigation, i.e. launching a url
         return self._activateLink(uri, tabMode=0)
 
@@ -740,7 +754,7 @@ class WikiHtmlViewWK(wx.Panel):
 
                 ## Add item to copy selection (doesn't normally exist in
                 ## webkit apparently)
-                #if self.getSelectedText() is not None:
+                #if self.GetSelectedText() is not None:
                 #    copy_menu_item = gtk.ImageMenuItem(gtk.STOCK_COPY)
                 #    copy_menu_item.get_children()[0].set_label(
                 #            wxToGtkLabel(_('Copy &Selected Text')))
@@ -809,6 +823,11 @@ class WikiHtmlViewWK(wx.Panel):
         menu.show_all()
 
     def __on_scroll_event(self, widget, evt):
+        
+        if self.vi is not None and self.vi.hintDialog is not None:
+            self.vi.clearHints()
+            self.vi.hintDialog.Close()
+
         # If ctrl is pressed
         if evt.state & gtk.gdk.CONTROL_MASK:
             if evt.direction == gtk.gdk.SCROLL_UP:
@@ -834,10 +853,6 @@ class WikiHtmlViewWK(wx.Panel):
         return self.freezeCount > 0
 
     def startIncrementalSearch(self, initSearch=None):
-#         # Should this be defined here or ealier?
-#         selected_text = self.getSelectedText()
-#         if len(selected_text) > 0:
-#             initSearch = selected_text
 
         sb = self.presenter.getMainControl().GetStatusBar()
 
@@ -864,10 +879,26 @@ class WikiHtmlViewWK(wx.Panel):
 
         search_text arguments:
             (string to search for, case_sensitive, forward, wrap)
+
+        Focuses selected elements
         """
 
         if len(text) > 0:
-            return self.html.getWebkitWebView().search_text(text, False, True, True)
+            result = self.html.getWebkitWebView().search_text(text, False, True, True)
+
+            # Focus selected elements
+            # Might this fail is some cases?
+            self.html.getWebkitWebView().execute_script('''
+                var selectionRange = window.getSelection ();
+
+                if (selectionRange.rangeCount > 0) {
+                    var range = selectionRange.getRangeAt (0);
+                    container = range.commonAncestorContainer;
+                }
+
+                container.parentNode.focus();
+                ''')
+            return result
         else:
             self.html.ClearSelection()
             
@@ -1133,7 +1164,6 @@ class WikiHtmlViewWK(wx.Panel):
         if self.scrolled_window != None and not self.html.ctrl.is_focus():
             self.SetFocus()
             self.html.ctrl.grab_focus()
-            #self.grab_focus()
 
 
         ## _prof.stop()
@@ -1153,7 +1183,8 @@ class WikiHtmlViewWK(wx.Panel):
         ret = self.html.getWebkitWebView().selection_convert("PRIMARY", "text/html")
         return self.selectedHTML
 
-    def getSelectedText(self):
+    # NOTE: capitalized to maintain consistency with WikiTxtCtrl
+    def GetSelectedText(self):
         """
         Returns the currently selected text (plain)
 
@@ -1427,6 +1458,7 @@ class WikiHtmlViewWK(wx.Panel):
 #    N_(u"Activate New Tab Backgrd.")
 
 class ExtractUrlFromHTML(HTMLParser):
+    """HTML Parser designed to extract urls from html"""
     def __init__(self):
         HTMLParser.__init__(self)
         self.urls = []
@@ -1506,193 +1538,115 @@ class WKHtmlWindow(wx.Window):
         self.ctrl.execute_script('window.getSelection().removeAllRanges()')
 
 
-class ViFunctions():
+class ViFunctions(ViHelper):
     def __init__(self, view):
-        self.view = view
+        ViHelper.__init__(self, view)
 
-        self.key_modifier = []
-        self.key_number_modifier = []
+        # Currently we only have one mode whilst in preview
+        self.keys = { 0 : {
+            (103, 117) : (0, (self.ViewParents, False), 0), # gu
+            (103, 85) : (0, (self.ViewParents, True), 0), # gU
+            (103, 116) : (0, (self.SwitchTabs, None), 0), # gt
+            (103, 84)  : (0, (self.SwitchTabs, True), 0), # gT
+            (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
+            (103, 82) : (0, (self.OpenHomePage, True), 0), # gR
 
-        # Should probably automate this
-        self.key_map = { # used to display modifiers 
-                    72  : "H",
-                    84  : "T",
-                    90  : "Z",
-                    100 : "d",
-                    103 : "g",
-                    104 : "h",
-                    116 : "t",
-                    117 : "u" 
-                    }
+            (100, 100) : (0, (self.CloseCurrentTab, None), 0), # dd
 
-        # Holds keys which can be used as primary modifiers (e.g. g)
-        self.key_mods = [90, 103, 100]
+            (90, 90) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0), # ZZ
 
-        self.keys = {
-        # Format is
-        # key combination : (function to call, function arguments)
-                    (103, 103) : (self.DocumentNavigation, (103, 103)), # gg
-                    (103, 117) : (self.ViewParents, None), # gu
-                    (103, 116) : (self.SwitchTabs, None), # gt
-                    (103, 84)  : (self.SwitchTabs, True), # gT
-                    (103, 104) : (self.OpenHomePage, False), # gh
-                    (103, 72) : (self.OpenHomePage, True), # gH
+            # ctrl +
 
-                    (100, 100) : (self.CloseCurrentTab, None), # dd
+            ("ctrl", 91) : (0, (self.ctrl.html.ClearSelection, None), 0), # Ctrl + [
+            ("ctrl", 100) : (0, (self.HalfPageJumpDown, None), 0), # Ctrl + d
+            ("ctrl", 117) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
+            ("ctrl", 108) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
 
-                    (90, 90) : (self.view.presenter.getMainControl().exitWiki, None), # ZZ
+            47  : (0, (self.StartSearch, None), 0), # /
+            # H and L are equivelent to gh and gl in preview mode
+            72  : (0, (self.GoBackwardInHistory, None), 0), # H
+            76  : (0, (self.GoForwardInHistory, None), 0), # L
+            (103, 72)  : (0, (self.GoBackwardInHistory, None), 0), # gH
+            (103, 76)  : (0, (self.GoForwardInHistory, None), 0), # gL
+            (103, 104)  : (0, (self.GoBackwardInHistory, None), 0), # gh
+            (103, 108)  : (0, (self.GoForwardInHistory, None), 0), # gl
 
-                # ctrl +
+            72  : (0, (self.GoBackwardInHistory, None), 0), # H
+            76  : (0, (self.GoForwardInHistory, None), 0), # L
+            111 : (0, (self.ctrl.presenter.getMainControl()). \
+                                    showWikiWordOpenDialog, None, 0), # o
+            79 : (0, (self.ctrl.presenter.getMainControl()). \
+                                    showWikiWordOpenDialog, None, 0), # O
+            106 : (0, (self.DocumentNavigation, 106), 0), # j
+            107 : (0, (self.DocumentNavigation, 107), 0), # k
+            104 : (0, (self.DocumentNavigation, 104), 0), # h
+            108 : (0, (self.DocumentNavigation, 108), 0), # l
+            (103, 103) : (0, (self.DocumentNavigation, (103, 103)), 0), # gg
+            71  : (0, (self.DocumentNavigation, 71), 0), # G
+            37  : (0, (self.DocumentNavigation, 37), 0), # %
+            36  : (0, (self.DocumentNavigation, 36), 0), # $
+            94  : (0, (self.DocumentNavigation, 94), 0), # ^
+            48  : (0, (self.DocumentNavigation, 48), 0), # 0
+            102 : (0, (self.startFollowHint, 0), 0), # f
+            70 : (0, (self.startFollowHint, 2), 0), # F
+            89  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
+            117 : (0, (self.CopyWikiWord, None), 0), # y
+            #65293  : (self.ctrl.FollowLinkIfSelected, None), # return
 
-                ("ctrl", 91) : (self.view.html.ClearSelection, None), # Ctrl + [
-                ("ctrl", 100) : (self.HalfPageJumpDown, None), # Ctrl + d
-                ("ctrl", 117) : (self.HalfPageJumpUp, None), # Ctrl + u
-
-                # single keys
-                (47)  : (self.view.startIncrementalSearch, None), # /
-                (72)  : (self.GoBackwardInHistory, None), # H
-                (76)  : (self.GoForwardInHistory, None), # L
-                (111) : (self.view.presenter.getMainControl().showWikiWordOpenDialog, None), # o
-                (79) : (self.view.presenter.getMainControl().showWikiWordOpenDialog, None), # O
-                (106) : (self.DocumentNavigation, 106), # j
-                (107) : (self.DocumentNavigation, 107), # k
-                (104) : (self.DocumentNavigation, 104), # h
-                (108) : (self.DocumentNavigation, 108), # l
-                (71)  : (self.DocumentNavigation, 71), # G
-                (65293)  : (self.view.FollowLinkIfSelected, None), # return
+            (103, 115)  : (0, (self.SwitchEditorPreview, None), 0), # gs
+            (103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
+            (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
+            (65470)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
+            (65471)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
+    
+        }
         }
 
-        self.count = 1
-        self.true_count = False
-
+        # Generate possible key modifiers
+        self.key_mods = self.GenerateKeyModifiers(self.keys)
 
     # Vi Helper functions
-    def RunFunction(self, key):
+    def SetMode(self, mode):
         """
-        Called when a key command is run
+        Dummy function for now
 
-        keys is a dictionary which holds the "key" and its
-        respective function.
-
-        key and count buffers are always cleared
+        May be used in the future
         """
-        keys = self.keys
-        func, args = keys[key]
-
-        if type(args) == dict:
-            ret = func(**args)
-        elif args is not None:
-            ret = func(args)
-        else:
-            ret = func()
-
-        if ret is True:
-            return True
-
-        self.key_modifier = []
-        self.key_number_modifier = []
-        self.updateViStatus()
-
-    def GoForwardInHistory(self):
-        self.view.presenter.getPageHistory().goInHistory(self.count)
-
-    def GoBackwardInHistory(self):
-        self.view.presenter.getPageHistory().goInHistory(-self.count)
-
-    def ViewParents(self):
-        self.view.presenter.getMainControl().viewParents(
-                                            self.view.currentLoadedWikiWord)
-
-    def SwitchTabs(self, left=False):
-        """
-        Switch to n(th) tab.
-        Positive numbers go right, negative left.
-
-        If tab end is reached will wrap around
-        """
-        n = self.count
-
-        if left: n = -n
-
-        mainAreaPanel = self.view.presenter.getMainControl().getMainAreaPanel()
-        pageCount = mainAreaPanel.GetPageCount()
-        currentTabNum = mainAreaPanel.GetSelection() + 1
-
-        if currentTabNum + n > pageCount:
-            newTabNum = currentTabNum + n % pageCount
-            if newTabNum > pageCount:
-                newTabNum -= pageCount
-        elif currentTabNum + n < 1:
-            newTabNum = currentTabNum - (pageCount - n % pageCount)
-            if newTabNum < 1:
-                newTabNum += pageCount
-        else:
-            newTabNum = currentTabNum + n
-
-        # Switch tab
-        mainAreaPanel.SetSelection(newTabNum-1)
-        mainAreaPanel.presenters[mainAreaPanel.GetSelection()].SetFocus()
-
-    def CloseCurrentTab(self):
-        """
-        Closes currently focused tab
-        """
-        mainAreaPanel = self.view.presenter.getMainControl().getMainAreaPanel()
-        mainAreaPanel.closePresenterTab(mainAreaPanel.getCurrentPresenter())
-        return True
-
-    def OpenHomePage(self, inNewTab=False):
-        """
-        Opens home page.
-
-        If inNewTab=True opens in a new forground tab
-        """
-        presenter = self.view.presenter
-        
-        wikiword = presenter.getMainControl().getWikiDocument().getWikiName()
-
-        if inNewTab:
-            presenter = self.view.presenter.getMainControl().\
-                    createNewDocPagePresenterTab()
-            presenter.switchSubControl("preview", False)
-
-
-        # Now open wiki
-        presenter.openWikiPage(wikiword, forceTreeSyncFromRoot=True)
-        presenter.getMainControl().getMainAreaPanel().\
-                    showPresenter(presenter)
-        presenter.SetFocus()
 
     # Document navigation
     def HalfPageJumpDown(self):
-        adj = self.view.scrolled_window.get_vadjustment()
+        adj = self.ctrl.scrolled_window.get_vadjustment()
         y = adj.get_value()
 
-        if y+adj.get_page_size()/2 < adj.upper():
-            self.view.adj.set_value(y+adj.get_page_size()/2)
+        jump = self.count*adj.get_page_size()/2
+
+        if y+jump < adj.get_upper():
+            adj.set_value(y+jump)
         else:
-            self.view.adj.set_value(adj.upper()-adj.get_page_size())
+            adj.set_value(adj.get_upper()-adj.get_page_size())
             
     def HalfPageJumpUp(self):
-        adj = self.view.scrolled_window.get_vadjustment()
+        adj = self.ctrl.scrolled_window.get_vadjustment()
         y = adj.get_value()
 
-        if y-adj.get_page_size()/2 > adj.upper():
-            self.view.adj.set_value(y-adj.get_page_size()/2)
+        jump = self.count*adj.get_page_size()/2
+
+        if y-jump > adj.get_lower():
+            adj.set_value(y-jump)
         else:
-            self.view.adj.set_value(adj.upper()+adj.get_page_size())
+            adj.set_value(adj.get_lower())
 
     def DocumentNavigation(self, key):
         """
         function to handle most navigation commonds
 
-        currently handles: j, k, h, l, G
+        currently handles: j, k, h, l, G, gg, 0, $
         """
-        step_incr = self.view.scrolled_window.get_vadjustment().get_step_increment()
-        page_incr = self.view.scrolled_window.get_vadjustment().get_page_increment()
+        step_incr = self.ctrl.scrolled_window.get_vadjustment().get_step_increment()
+        page_incr = self.ctrl.scrolled_window.get_vadjustment().get_page_increment()
 
-        vadj = self.view.scrolled_window.get_vadjustment()
-        hadj = self.view.scrolled_window.get_hadjustment()
+        vadj = self.ctrl.scrolled_window.get_vadjustment()
+        hadj = self.ctrl.scrolled_window.get_hadjustment()
 
         y = vadj.get_value()
         x = hadj.get_value()
@@ -1730,7 +1684,7 @@ class ViFunctions():
             hadj.set_value(mod)
 
         # If count is specified go to (count)% of page
-        elif (key == 71 or key == (103, 103)) and self.true_count: # gg or G
+        elif (key == 71 or key == (103, 103) or key == 37) and self.true_count: # gg or G
             if c > 100: c == 100 # 100% is the max
             vadj.set_value(int((y_upper-y_page_size)/100*c))
 
@@ -1741,23 +1695,237 @@ class ViFunctions():
         # gg to 0%
         elif key == (103, 103): # gg
             vadj.set_value(y_lower)
-            
-    def updateViStatus(self, force=False):
-        # can this be right aligned?
-        # TODO: sort this out
-        text = u""
-        if (len(self.key_modifier) == 1 and self.key_modifier[0] in self.key_mods) \
-                or tuple(self.key_modifier) in self.keys or force:
-                    text = uniToGui(u"{0}{1}".format(u"".join(
-                        map(str, self.key_number_modifier)), 
-                        u"".join(self.key_map[i] for i in self.key_modifier)))
 
-        self.view.presenter.getMainControl().statusBar.SetStatusText(text , 0)
+        elif (key == 48 or key == 94) and self.true_count: # count + $ or ^
+            if c > 100: c == 100 # 100% is the max
+            hadj.set_value(int((x_upper-x_page_size)/100*c))
+
+        elif key == 36: # $
+            hadj.set_value(x_upper-x_page_size)
+
+        elif key == 94: # ^
+            hadj.set_value(x_lower)
+
+        elif key == 48: # 0
+            hadj.set_value(x_lower)
+            
     # Numbers
     def SetNumber(self, n):
+
+        # If 0 is first modifier it is a command
+        if len(self.key_number_modifier) < 1 and n == 0:
+            return False
         self.key_number_modifier.append(n)
         self.key_modifier = []
         self.updateViStatus(True)
+        return True
+
+    def clearHints(self):
+        """
+        Loop through all links and remove any custom formating
+
+        Currently if a background was previously set it will be lost
+        """
+
+        self.ctrl.html.getWebkitWebView().execute_script(
+        '''
+        //START JAVASCRIPT CODE
+        var all_links = document.links;
+
+        for (var i=0; i<all_links.length; i++) {
+            if (all_links[i].style.backgroundColor == "rgb(253, 255, 71)" || all_links[i].style.backgroundColor == "rgb(0, 255, 0)") {
+        all_links[i].style.backgroundColor = "";
+            }
+        }
+
+        hints = document.getElementsByName("quick-hints");
+
+
+        var arr = Array.prototype.slice.call( hints )
+        
+
+        for (var i=0; i<hints.length; i++) {
+            hints[i].innerHTML = "";
+        }
+        //END JAVASCRIPT CODE
+        ''')
+
+    def highlightLinks(self, string=None, number=None):
+        # TODO: Text based link selection
+        self.clearHints()
+
+        # Label hints
+        if string is None: string = u""
+        if number is None: number = u""
+
+
+        # Hack to retrieve selected url from title
+        self.ctrl.html.getWebkitWebView().execute_script('oldtitle=document.title;')
+
+        # The javascript code to handle link highlighting
+        self.ctrl.html.getWebkitWebView().execute_script('''
+//START JAVASCRIPT CODE
+// double {{'s are needed as we are using string.format() to insert formating
+var string = "{0}";
+var number = "{1}";
+
+function checkInput(i, element) {{
+    if (number.length == 0) {{
+        return true
+    }}
+    if (i.toString().substr(0, number.length) === number) {{
+        return true;
+    }}
+    return false;
+}}
+
+
+function isElementInViewport(element) {{
+    var top = element.offsetTop;
+    var left = element.offsetLeft;
+    var width = element.offsetWidth;
+    var height = element.offsetHeight;
+
+    while(element.offsetParent) {{
+        element = element.offsetParent;
+        top += element.offsetTop;
+        left += element.offsetLeft;
+        }}
+
+    return (
+        top < (window.pageYOffset + window.innerHeight) &&
+        left < (window.pageXOffset + window.innerWidth) &&
+        (top + height) > window.pageYOffset &&
+        (left + width) > window.pageXOffset
+        );
+    }}
+
+var all_links = document.links;
+
+var visible_links=new Array();
+var links_selected=new Array();
+
+for (var i=0; i<all_links.length; i++) {{
+
+    if (isElementInViewport(all_links[i])) {{
+        visible_links.push(all_links[i]);
+        }}
+
+    }}
+
+primary = false;
+for (var i=0; i<visible_links.length; i++) {{
+    visible_links[i].style.backgroundColor = "";
+    if (checkInput(i, visible_links[i])) {{
+        links_selected.push(visible_links[i]);
+        visible_links[i].innerHTML = "<span name='quick-hints'>["+i+"]</span>" + visible_links[i].innerHTML;
+
+        if (!primary) {{
+            visible_links[i].style.backgroundColor = "rgb(0,255,0)";
+            primary = true;
+        }} else {{
+            visible_links[i].style.backgroundColor = "#FDFF47";
+        }}
+
+        }}
+    }}
+
+hints = document.getElementsByName("quick-hints")
+
+//Format the hints
+for (var i=0; i<hints.length; i++) {{
+    hints[i].style.backgroundColor = "gray";
+    hints[i].style.color = "black";
+    hints[i].style.fontWeight = "bold";
+    hints[i].style.fontSize = "x-small";
+    hints[i].style.zIndex = 1;
+    hints[i].style.position = "absolute";
+    }}
+
+document.title = links_selected.length;
+//END JAVASCRIPT CODE
+        '''.format(string, number))
+
+        link_number = int(self.ctrl.html.getWebkitWebView(). \
+                                get_main_frame().get_title())
+
+        self.ctrl.html.getWebkitWebView(). \
+                    execute_script('document.title=links_selected[0];')
+
+        if link_number > 0:
+            primary_link = self.ctrl.html.getWebkitWebView().get_main_frame().get_title()
+        else:
+            primary_link = None
+            
+        self.ctrl.html.getWebkitWebView().execute_script('document.title=oldtitle;')
+
+        return link_number, primary_link
+
+    def startFollowHint(self, tabMode=0):
+        """
+        Called to start hint mode.
+
+        Creates the hint dialog and calls highlightLinks() to format
+        the links.
+
+        If not links are present in the viewport the dialog is not opened, 
+        if a single is present it is activated automatically
+        """
+
+        link_number, link = self.highlightLinks()
+        # If only a single link is present we can launch that and finish
+        if link_number == 1:
+            self.ctrl._activateLink(link, tabMode=tabMode)
+            return
+        # Or if no links visible on page
+        elif link_number < 1:
+            self.visualBell()
+            return
+
+        sb = self.ctrl.presenter.getMainControl().GetStatusBar()
+
+        rect = sb.GetFieldRect(0)
+        if SystemInfo.isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+
+        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+
+        self.hintDialog = ViHintDialog(self.ctrl, -1, self, rect,
+                sb.GetFont(), self.ctrl.presenter.getMainControl(), tabMode, link)
+        self.hintDialog.Show()
+
+
+    def executeFollowHint(self, text):
+        """
+        Processes input text
+        """
+
+        return self.highlightLinks(None, text)
+
+    def forgetFollowHint(self):
+        """
+        Called if user just leaves the hint field.
+        """
+        self.clearHints()
+        self.hintDialog = None
+
+    def resetFollowHint(self):
+        """
+        Called by WebkitSearchDialog before aborting an inc. search.
+        Called when search was explicitly aborted by user (with escape key)
+        TODO: Make vi keybinding "Ctrl + [" call this as well
+        """
+        #self.ctrl.html.ClearSelection()
+        self.clearHints()
+        self.hintDialog = None
+
+    def endFollowHint(self):
+        """
+        Called if incremental search ended successfully.
+        """
+        self.clearHints()
+        self.hintDialog = None
 
 
 class KeyProcessWxWindow(wx.Panel):
@@ -1826,10 +1994,11 @@ class KeyProcessWxWindow(wx.Panel):
             # ContinueSearch is normally F3
             # Start incremental search
             # First get selected text and prepare it as default value
-            text = self.htmlView.getSelectedText()
+            text = self.htmlView.GetSelectedText()
             text = text.split("\n", 1)[0]
 #             text = re.escape(text[:30])
             text = text[:30]
             self.htmlView.startIncrementalSearch(text)
         else:
             evt.Skip()
+

@@ -849,6 +849,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.addMenuItem(wikiMenu, _(u'Print...') + u'\t' + self.keyBindings.Print,
                     _(u'Show the print dialog'), self.OnShowPrintMainDialog)
 
+            self.addMenuItemByUnifNameTable(wikiMenu,
+                    """
+                    menuItem/mainControl/builtin/openTrashcan
+                    """
+                    )
+
             wikiMenu.AppendSeparator()
 
             self.addMenuItem(wikiMenu, _(u'&Properties...'),
@@ -864,7 +870,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _(u'Rebuild this wiki and its cache completely'),
                         lambda evt: self.rebuildWiki(onlyDirty=False),
                         menuID=GUI_ID.MENU_REBUILD_WIKI,
-                        updatefct=self.OnUpdateDisReadOnlyWiki)
+                        updatefct=(self.OnUpdateDisReadOnlyWiki,))
                 
 #                 if wikiData.checkCapability("filePerPage") == 1:
 #                     self.addMenuItem(maintenanceMenu,
@@ -879,20 +885,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _(u'Update cache where marked as not up to date'),
                         lambda evt: self.rebuildWiki(onlyDirty=True),
                         menuID=GUI_ID.MENU_UPDATE_WIKI_CACHE,
-                        updatefct=self.OnUpdateDisReadOnlyWiki)
+                        updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
                 self.addMenuItem(maintenanceMenu, _(u'&Initiate update...'),
                         _(u'Initiate full cache update which is done mainly '
                         u'in background'),
                         lambda evt: self.initiateFullUpdate(),
                         menuID=GUI_ID.MENU_INITATE_UPDATE_WIKI_CACHE,
-                        updatefct=self.OnUpdateDisReadOnlyWiki)
+                        updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
                 self.addMenuItemByUnifNameTable(maintenanceMenu,
                         """
                         menuItem/mainControl/builtin/showFileCleanupDialog
                         """
                         )
+
+
 
             # TODO: Test for wikiDocument.isSearchIndexEnabled()
 #             self.addMenuItem(maintenanceMenu, _(u'Re&index Wiki...'),
@@ -907,6 +915,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.OnCmdShowWikiJobDialog)
                     
             maintenanceMenu.AppendSeparator()
+
 
         self.addMenuItem(maintenanceMenu, _(u'Open as &Type...'),
                 _(u'Open wiki with a specified wiki database type'),
@@ -924,14 +933,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _(u'Free unused space in database'),
                         lambda evt: self.vacuumWiki(),
                         menuID=GUI_ID.MENU_VACUUM_WIKI,
-                        updatefct=self.OnUpdateDisReadOnlyWiki)
+                        updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
 
             if wikiData.checkCapability("plain text import") == 1:
                 self.addMenuItem(maintenanceMenu, _(u'&Copy .wiki files to database'),
                         _(u'Copy .wiki files to database'),
                         self.OnImportFromPagefiles,
-                        updatefct=self.OnUpdateDisReadOnlyWiki)
+                        updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
@@ -1352,7 +1361,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(editMenu, _(u'Copy to Sc&ratchPad') + u'\t' + \
                 self.keyBindings.CopyToScratchPad,
                 _(u'Copy selected text to ScratchPad'), lambda evt: self.getActiveEditor().snip(),
-                "tb_copy", updatefct=self.OnUpdateDisReadOnlyWiki)
+                "tb_copy", updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
         self.textBlocksMenu = wx.Menu()
         self.fillTextBlocksMenu(self.textBlocksMenu)
@@ -1360,7 +1369,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         editMenu.AppendMenu(GUI_ID.MENU_TEXT_BLOCKS, _(u'Paste T&extblock'),
                 self.textBlocksMenu)
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_TEXT_BLOCKS,
-                self.OnUpdateDisReadOnlyPage)
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
         
 
         if self.clipboardInterceptor is not None:
@@ -1623,9 +1632,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 lambda evt: (self.saveAllDocPages(),
                 self.getWikiData().commit()), "tb_save",
                 menuID=GUI_ID.CMD_SAVE_WIKI,
-                updatefct=self.OnUpdateDisReadOnlyWiki)
+                updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
-        # TODO More fine grained check for en-/disabling of rename and delete?
+        # TODO: More fine grained check for en-/disabling of rename and delete?
         self.addMenuItem(wikiPageMenu, _(u'&Rename') + u'\t' + self.keyBindings.Rename,
                 _(u'Rename current wiki word'), lambda evt: self.showWikiWordRenameDialog(),
                 "tb_rename",
@@ -1682,6 +1691,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
                 )
 
+        self.addMenuItemByUnifNameTable(wikiPageMenu,
+                """
+                menuItem/mainControl/builtin/togglePageReadOnly
+                """
+                )
+
 
         formatMenu = wx.Menu()
         
@@ -1712,7 +1727,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.RewrapText,
                 _(u'Rewrap Text'),
                 lambda evt: self.getActiveEditor().rewrapText(),
-                updatefct=self.OnUpdateDisReadOnlyPage)
+                updatefct=(self.OnUpdateDisReadOnlyPage,))
 
         convertMenu = wx.Menu()
         formatMenu.AppendMenu(wx.NewId(), _(u'&Convert'), convertMenu)
@@ -1728,7 +1743,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.ReplaceTextByWikiword,
                 _(u'Put selected text in a new or existing wiki word'),
                 lambda evt: self.showReplaceTextByWikiwordDialog(),
-                updatefct=self.OnUpdateDisReadOnlyPage)
+                updatefct=(self.OnUpdateDisReadOnlyPage,))
 
 
         self.addMenuItem(convertMenu, _(u'Absolute/Relative &File URL') + u'\t' + 
@@ -1749,7 +1764,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_NAME,
                 _(u'&Icon Name'), iconsMenu)
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_NAME,
-                self.OnUpdateDisReadOnlyPage)
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
 
         self.cmdIdToInsertString = cmdIdToIconName
         
@@ -1761,7 +1776,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.AppendMenu(GUI_ID.MENU_ADD_STRING_NAME,
                 _(u'&Color Name'), colorsMenu)
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_STRING_NAME,
-                self.OnUpdateDisReadOnlyPage)
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
 
         self.cmdIdToInsertString.update(cmdIdToColorName)
 
@@ -1778,7 +1793,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
                 _(u'&Icon Attribute'), iconsMenu)
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
-                self.OnUpdateDisReadOnlyPage)
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
 
         # Build submenu for color attributes
         colorsMenu, self.cmdIdToColorNameForAttribute = AttributeHandling.buildColorsSubmenu()
@@ -1788,7 +1803,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
                 _(u'&Color Attribute'), colorsMenu)
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
-                self.OnUpdateDisReadOnlyPage)
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
 
         # TODO: Bold attribute
 
@@ -1872,7 +1887,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(extraMenu, _(u'&Export...'),
                 _(u'Open general export dialog'), self.OnCmdExportDialog,
-                updatefct=self.OnUpdateDisNoWiki)
+                updatefct=(self.OnUpdateDisNoWiki,))
 
         self.addMenuItem(extraMenu, _(u'&Continuous Export...'),
                 _(u'Open export dialog for continuous export of changes'),
@@ -1883,7 +1898,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(extraMenu, _(u'&Import...'),
                 _(u'Import dialog'), self.OnCmdImportDialog,
-                updatefct=self.OnUpdateDisReadOnlyWiki)
+                updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
         extraMenu.AppendSeparator()
 
@@ -3725,11 +3740,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def deleteWikiWord(self, wikiWord):
+        wikiDoc = self.getWikiDocument()
+
         if wikiWord and self.requireWriteAccess():
             try:
-                if self.getWikiDocument().isDefinedWikiLink(wikiWord):
-                    page = self.getWikiDocument().getWikiPage(wikiWord)
-                    page.deletePage()
+                if wikiDoc.isDefinedWikiLink(wikiWord):
+                    page = wikiDoc.getWikiPage(wikiWord)
+                    page.deletePageToTrashcan()
             except (IOError, OSError, DbAccessError), e:
                 self.lostAccess(e)
                 raise
@@ -3818,11 +3835,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def launchUrl(self, link):
+        if link.startswith(u"wikirel://"):
+            # Relative wiki link
+            link = self.getWikiDocument().makeRelUrlAbsolute(link)
+        elif link.startswith(u"rel://"):
+            # Relative link
+            link = self.getWikiDocument().makeRelUrlAbsolute(link)
+        
         if not link.startswith(u"wiki:"):
-            if link.startswith(u"rel://"):
-                # This is a relative link
-                link = self.getWikiDocument().makeRelUrlAbsolute(link)
-
             try:
                 OsAbstract.startFile(self, link)
                 return True
@@ -4396,21 +4416,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.isReadOnlyPage():
             return   # TODO Error message
 
-        dlg = wx.MessageDialog(self,
-                uniToGui(_(u"Are you sure you want to delete wiki word '%s'?") % wikiWord),
-                _(u'Delete Wiki Word'), wx.YES_NO | wx.NO_DEFAULT)
-        result = dlg.ShowModal()
-        if result == wx.ID_YES:
-            try:
-                self.saveAllDocPages()
-                self.deleteWikiWord(wikiWord)
-            except (IOError, OSError, DbAccessError), e:
-                self.lostAccess(e)
-                raise
-            except WikiDataException, e:
-                self.displayErrorMessage(unicode(e))
+        if self.getConfig().getboolean("main", "trashcan_askOnDelete", True):
+            result = wx.MessageBox(
+                    _(u"Are you sure you want to delete wiki word '%s'?") %
+                    wikiWord, _(u'Delete Wiki Word'),
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-        dlg.Destroy()
+            if result == wx.NO:
+                return
+
+        try:
+            self.saveAllDocPages()
+            self.deleteWikiWord(wikiWord)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
+        except WikiDataException, e:
+            self.displayErrorMessage(unicode(e))
 
 
     def showSearchReplaceDialog(self):
@@ -5387,24 +5409,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return (docPage is None) or docPage.isReadOnlyEffect()
                 
 
+    # All OnUpdateDis* methods only disable a menu/toolbar item, they
+    # never enable. This allows to build chains of them where each
+    # condition is checked which may disable the item (before running the
+    # chain the item is enabled by _buildChainedUpdateEventFct()
+
     def OnUpdateDisNoWiki(self, evt):
         """
         Called for ui-update to disable menu item if no wiki loaded.
         """
-        evt.Enable(self.isWikiLoaded())
-
+        if not self.isWikiLoaded():
+            evt.Enable(False)
 
     def OnUpdateDisReadOnlyWiki(self, evt):
         """
         Called for ui-update to disable menu item if wiki is read-only.
         """
-        evt.Enable(not self.isReadOnlyWiki())
+        if self.isReadOnlyWiki():
+            evt.Enable(False)
+
 
     def OnUpdateDisReadOnlyPage(self, evt):
         """
         Called for ui-update to disable menu item if page is read-only.
         """
-        evt.Enable(not self.isReadOnlyPage())
+        if self.isReadOnlyPage():
+            evt.Enable(False)
 
     def OnUpdateDisNotTextedit(self, evt):
         """

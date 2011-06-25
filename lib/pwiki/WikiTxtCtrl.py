@@ -62,6 +62,9 @@ from . import SpellChecker
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 
+from ViHelper import ViHintDialog, ViHelper
+from collections import defaultdict
+
 try:
     import WindowsHacks
 except:
@@ -140,6 +143,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.dwellLockCounter = 0  # Don't process dwell start messages if >0
         self.wikiLanguageHelper = None
         self.templateIdRecycler = wxHelper.IdRecycler()
+        self.vi = None  # Contains ViHandler instance if vi key handling enabled
 
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word
@@ -279,7 +283,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.wikiPageSink = wxKeyFunctionSink((
                 ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
-                ("modified spell checker session", self.OnStyleNeeded)  # ???
+                ("modified spell checker session", self.OnStyleNeeded),  # ???
+                ("changed read only flag", self.onPageChangedReadOnlyFlag)
         ))
 
 
@@ -295,7 +300,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        # Not necessary, self.onOptionsChanged() is called below (MB)
+#         use_vi_navigation = self.presenter.getConfig().getboolean("main",
+#                     "html_preview_webkitViKeys", False)
+# 
+#         if use_vi_navigation:
+#             self.vi = ViHandler(self)
+#             wx.EVT_KEY_DOWN(self, self.vi.OnViKeyDown)
+#         else:
+#             wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+#             self.vi = None
+
+
         if config.getboolean("main", "editor_useImeWorkaround", False):
             wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
 
@@ -399,8 +415,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         wx.EVT_IDLE(self, self.OnIdle)
 
 
-    def Copy(self):
-        text = self.GetSelectedText()
+    def Copy(self, text=None):
+        if text is None:
+            text = self.GetSelectedText()
+
         if len(text) == 0:
             return
 
@@ -1014,6 +1032,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return wx.Colour(*coltuple)
 
 
+    def onPageChangedReadOnlyFlag(self, miscevt):
+        self._checkForReadOnly()
+
+
     def onOptionsChanged(self, miscevt):
         faces = self.presenter.getDefaultFontFaces().copy()
 
@@ -1056,6 +1078,24 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.SetIndent(tabWidth)
         self.SetTabWidth(tabWidth)
+
+
+        # To allow switching vi keys on and off without restart
+        use_vi_navigation = self.presenter.getConfig().getboolean("main",
+                "html_preview_webkitViKeys", False)
+
+        self.Unbind(wx.EVT_KEY_DOWN)
+
+        if use_vi_navigation:
+            if self.vi is None:
+                self.vi = ViHandler(self)
+
+            self.Bind(wx.EVT_KEY_DOWN, self.vi.OnViKeyDown)
+        else:
+            if self.vi is not None:
+                self.vi.TurnOff()
+                self.vi = None
+            self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
 
     def onChangedConfiguration(self, miscevt):
@@ -1314,6 +1354,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.contextMenuTokens = nodes
             addActivateItem = False
             addFileUrlItem = False
+            addWikiUrlItem = False
             addUrlToClipboardItem = False
             unknownWord = None
             for node in nodes:
@@ -1324,6 +1365,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     if node.url.startswith(u"file:") or \
                             node.url.startswith(u"rel://"):
                         addFileUrlItem = True
+                    elif node.url.startswith(u"wiki:") or \
+                            node.url.startswith(u"wikirel://"):
+                        addWikiUrlItem = True
                 elif node.name == "insertion" and node.key == u"page":
                     addActivateItem = True
                 elif node.name == "anchorDef":
@@ -1339,6 +1383,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if spellCheckerSession:
                     # Show suggestions if available (up to first 5)
                     suggestions = spellCheckerSession.suggest(unknownWord)[:5]
+                    spellCheckerSession.close()
 
                     if len(suggestions) > 0:
                         for s, mid in zip(suggestions, self.SUGGESTION_CMD_IDS):
@@ -1361,6 +1406,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                 if addFileUrlItem:
                     appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_FILE_URL)
+                elif addWikiUrlItem:
+                    appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_WIKI_URL)
 
             if addUrlToClipboardItem:
                 appendToMenuByMenuDesc(menu,
@@ -2166,11 +2213,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if node.name == "urlLink":
                     link = node.url
 
-                    if link.startswith(u"rel://"):
+                    if link.startswith(u"rel://") or link.startswith(u"wikirel://"):
                         link = self.presenter.getWikiDocument()\
                                 .makeRelUrlAbsolute(link)
 
-                    if link.startswith(u"file:"):
+                    if link.startswith(u"file:") or link.startswith(u"wiki:"):
                         try:
                             path = dirname(StringOps.pathnameFromUrl(link))
                             if not exists(StringOps.longPathEnc(path)):
@@ -2305,7 +2352,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 else:
                     addSafe = ''
 
-                if link.startswith(u"rel://"):
+                if link.startswith(u"rel://") or link.startswith(u"wikirel://"):
                     link = self.presenter.getWikiDocument()\
                             .makeRelUrlAbsolute(link, addSafe=addSafe)
 
@@ -2315,6 +2362,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             link), addSafe=addSafe)
                     if link is None:
                         continue # TODO Message?
+                elif link.startswith(u"wiki:"):
+                    link = self.presenter.getWikiDocument()\
+                            .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
+                            link), addSafe=addSafe)
+                    if link is None:
+                        continue # TODO Message?
+                    else:
+                        link = u"wiki" + link  # Combines to "wikirel://"
+
                 else:
                     continue
 
@@ -2651,222 +2707,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
         super(WikiTxtCtrl, self).endIncrementalSearch()
 
         self.ensureSelectionExpanded()
-
-
-
-
-
-#     def startIncrementalSearch(self, initSearch=None):
-#         sb = self.presenter.getStatusBar()
-#
-#         self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
-#         self.incSearchPreviousHiddenLines = None
-#         self.incSearchPreviousHiddenStartLine = -1
-#
-#         rect = sb.GetFieldRect(0)
-#         if isOSX():
-#             # needed on Mac OSX to avoid cropped text
-#             rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
-#
-#         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
-#
-#         dlg = WikiTxtDialogs.IncrementalSearchDialog(self, -1, self, rect,
-#                 sb.GetFont(), self.presenter, initSearch)
-#         dlg.Show()
-#
-#
-#     def executeIncrementalSearch(self, next=False):
-#         """
-#         Run incremental search, called only by IncrementalSearchDialog
-#         """
-#         text = self.GetText()
-#         if len(self.searchStr) > 0:
-#             if next:
-#                 charStartPos = self.GetSelectionCharPos()[1]
-#             else:
-#                 charStartPos = self.incSearchCharStartPos
-#
-#             regex = None
-#             try:
-#                 regex = re.compile(self.searchStr, re.IGNORECASE | \
-#                         re.MULTILINE | re.UNICODE)
-#             except:
-#                 # Regex error
-#                 return charStartPos   # ?
-#
-#             match = regex.search(text, charStartPos, len(text))
-#             if not match and charStartPos > 0:
-#                 match = regex.search(text, 0, charStartPos)
-#
-#             if match:
-# #                 matchbytestart = self.bytelenSct(text[:match.start()])
-# #                 matchbyteend = matchbytestart + \
-# #                         self.bytelenSct(text[match.start():match.end()])
-#
-#                 self.setSelectionForIncSearchByCharPos(
-#                         match.start(), match.end())
-#
-#                 return match.end()
-#
-#         self.setSelectionForIncSearchByCharPos(-1, -1)
-#         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-#
-#         return -1
-#
-#
-#     def executeIncrementalSearchBackward(self):
-#         """
-#         Run incremental search, called only by IncrementalSearchDialog
-#         """
-#         text = self.GetText()
-#         if len(self.searchStr) > 0:
-#             charStartPos = self.GetSelectionCharPos()[0]
-#
-#             regex = None
-#             try:
-#                 regex = re.compile(self.searchStr, re.IGNORECASE | \
-#                         re.MULTILINE | re.UNICODE)
-#             except:
-#                 # Regex error
-#                 return charStartPos   # ?
-#
-#             match = regex.search(text, 0, len(text))
-#             if match:
-#                 if match.end() > charStartPos:
-#                     # First match already reached -> find last
-#                     while True:
-#                         matchNext = regex.search(text, match.end(), len(text))
-#                         if not matchNext:
-#                             break
-#                         match = matchNext
-#
-#                 else:
-#                     while True:
-#                         matchNext = regex.search(text, match.end(), len(text))
-#                         if matchNext.end() > charStartPos:
-#                             break
-#                         match = matchNext
-#
-#                 self.setSelectionForIncSearchByCharPos(match.start(), match.end())
-#
-#                 return match.start()
-#
-#         self.setSelectionForIncSearchByCharPos(-1, -1)
-#         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-#
-#         return -1
-#
-#
-#     def forgetIncrementalSearch(self):
-#         """
-#         Called by IncrementalSearchDialog if user just leaves the inc. search
-#         field.
-#         """
-#         pass
-#
-#     def resetIncrementalSearch(self):
-#         """
-#         Called by IncrementalSearchDialog before aborting an inc. search.
-#         Called when search was explicitly aborted by user (with escape key)
-#         """
-#         self.setSelectionForIncSearchByCharPos(-1, -1)
-#         self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
-#
-#
-#     def endIncrementalSearch(self):
-#         """
-#         Called if incremental search ended successfully.
-#         """
-#         byteStart = self.GetSelectionStart()
-#         byteEnd = self.GetSelectionEnd()
-#
-#         self.setSelectionForIncSearchByCharPos(-1, -1)
-#
-#         self.SetSelection(byteStart, byteEnd)
-#         self.ensureSelectionExpanded()
-#
-#
-#     def getContinuePosForSearch(self, sarOp):
-#         """
-#         Return the character position where to continue the given
-#         search operation sarOp. It always continues at beginning
-#         or end of current selection.
-#
-#         If sarOp uses a regular expression, this function may throw
-#         a re.error exception.
-#         """
-#         range = self.GetSelectionCharPos()
-#
-# #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
-#         if sarOp.matchesPart(self.GetText(), range) is not None:
-#             # currently selected text matches search operation
-#             # -> continue searching at the end of selection
-#             return range[1]
-#         else:
-#             # currently selected text does not match search
-#             # -> continue searching at the beginning of selection
-#             return range[0]
-#
-#
-#     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
-#         """
-#         Returns a tuple with a least two elements (<start>, <after end>)
-#         containing start and after end char positions of the found occurrence
-#         or (-1, -1) if not found.
-#         """
-#         if sarOp.booleanOp:
-#             return (-1, -1)  # Not possible
-#
-#         if searchCharStartPos == -2:
-#             searchCharStartPos = self.getContinuePosForSearch(sarOp)
-#
-#         text = self.GetText()
-#         if len(sarOp.searchStr) > 0:
-#             charStartPos = searchCharStartPos
-#             if next:
-#                 charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
-#             try:
-#                 found = sarOp.searchText(text, charStartPos)
-#                 start, end = found[:2]
-#             except:
-#                 # Regex error
-#                 return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
-#
-#             if start is not None:
-#                 self.showSelectionByCharPos(start, end)
-#
-#                 return found    # self.anchorCharPosition
-#
-#         self.SetSelection(-1, -1)
-#         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
-#
-#         return (-1, -1)
-#
-#
-#     def executeReplace(self, sarOp):
-#         """
-#         Returns char position after replacement or -1 if replacement wasn't
-#         possible
-#         """
-# #         seltext = self.GetSelectedText()
-#         text = self.GetText()
-# #         found = sarOp.matchesPart(seltext)
-#         range = self.GetSelectionCharPos()
-#
-# #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
-#         found = sarOp.matchesPart(text, range)
-#
-#         if found is None:
-#             return -1
-#
-#         replacement = sarOp.replace(text, found)
-#         bytestart = self.GetSelectionStart()
-#         self.ReplaceSelection(replacement)
-#         selByteEnd = bytestart + self.bytelenSct(replacement)
-#         selCharEnd = len(self.GetTextRange(0, selByteEnd))
-#
-#         return selCharEnd
-
 
 
     def rewrapText(self):
@@ -3522,12 +3362,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
             modeToStorage = True
             modeRelativeUrl = False
-
-
-#         elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
-#             modeToStorage = True
-#             modeRelativeUrl = False
-#             moveToStorage = True
+            moveToStorage = True
         else:
             return
 
@@ -3553,31 +3388,59 @@ class WikiTxtCtrl(SearchableScintillaControl):
         urls = []
 
         for fn in filenames:
+            protocol = None
             if fn.endswith(u".wiki"):
-                urls.append(u"wiki:%s" % StringOps.urlFromPathname(fn))
-            else:
-                toStorage = False
-                if modeToStorage:
-                    # Copy file into file storage
-                    fs = editor.presenter.getWikiDocument().getFileStorage()
-                    try:
-                        fn = fs.createDestPath(fn, move=moveToStorage)
-                        toStorage = True
-                    except Exception, e:
-                        traceback.print_exc()
-                        editor.presenter.getMainControl().displayErrorMessage(
-                                _(u"Couldn't copy file"), e)
-                        return
+                protocol = "wiki"
 
-                urls.append(editor.wikiLanguageHelper.createUrlLinkFromPath(
-                        editor.presenter.getWikiDocument(), fn,
-                        relative=modeRelativeUrl or toStorage,
-                        bracketed=dlgParams.bracketedUrl))
+            toStorage = False
+            if modeToStorage and protocol is None:
+                # Copy file into file storage
+                fs = editor.presenter.getWikiDocument().getFileStorage()
+                try:
+                    fn = fs.createDestPath(fn, move=moveToStorage)
+                    toStorage = True
+                except Exception, e:
+                    traceback.print_exc()
+                    editor.presenter.getMainControl().displayErrorMessage(
+                            _(u"Couldn't copy file"), e)
+                    return
+
+            urls.append(editor.wikiLanguageHelper.createUrlLinkFromPath(
+                    editor.presenter.getWikiDocument(), fn,
+                    relative=modeRelativeUrl or toStorage,
+                    bracketed=dlgParams.bracketedUrl, protocol=protocol))
 
         editor.handleDropText(x, y, prefix + middle.join(urls) + suffix)
 
 
+    def GetEOLChar(self):
+        """
+        Gets the end of line char currently being used
+        """
+        m_id = self.GetEOLMode()
+        if m_id == wx.stc.STC_EOL_CR:
+            return u'\r'
+        elif m_id == wx.stc.STC_EOL_CRLF:
+            return u'\r\n'
+        else:
+            return u'\n'
 
+    def GetLastVisibleLine(self):
+        """
+        Returns line number of the first visible line in viewport
+        """
+        return self.GetFirstVisibleLine() + self.LinesOnScreen() - 1
+
+    def GetMiddleVisibleLine(self):
+        """
+        Returns line number of the middle visible line in viewport
+        """
+        fl = self.GetFirstVisibleLine()
+        if self.LinesOnScreen() < self.GetLineCount():
+            mid = (fl + (self.LinesOnScreen() // 2))
+        else:
+            mid = (fl + (self.GetLineCount() // 2))
+        return mid
 
     # TODO
 #     def setMouseCursor(self):
@@ -3605,7 +3468,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             else:
 #                 self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
 #                 return False
-
 
 
 class WikiTxtCtrlDropTarget(wx.PyDropTarget):
@@ -3693,6 +3555,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
 
+
 # User actions to register
 # _ACTION_EDITOR_PASTE_FILES_ABSOLUTE = UserActionCoord.SimpleAction("",
 #         u"action/editor/this/paste/files/insert/url/absolute",
@@ -3760,6 +3623,13 @@ u"""
 Follow Link;CMD_ACTIVATE_THIS
 Follow Link New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Follow Link New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+"""
+
+_CONTEXT_MENU_INTEXT_WIKI_URL = \
+u"""
+-
+Convert Absolute/Relative File URL;CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS
+Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER_THIS
 """
 
 _CONTEXT_MENU_INTEXT_FILE_URL = \
@@ -3848,15 +3718,27 @@ if False:
     N_(u"Fold everything in current editor")
 
 
+# I will move this to wxHelper later (MB)
+try:
+    class wxPopupOrFrame(wx.PopupWindow):
+        def __init__(self, parent, id=-1, style=None):
+            wx.PopupWindow.__init__(self, parent)
 
-# TODO: Thumbnail size configurable
-class ImageTooltipPanel(wx.Frame):
+except AttributeError:
+    class wxPopupOrFrame(wx.Frame):
+        def __init__(self, parent, id=-1,
+                style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR|wx.FRAME_FLOAT_ON_PARENT):
+            wx.Frame.__init__(self, parent, id, style=style)
+
+
+class ImageTooltipPanel(wxPopupOrFrame):
     """Quick panel for image tooltips"""
     def __init__(self, pWiki, filePath, maxWidth=200, maxHeight=200):
-        wx.Frame.__init__(self, pWiki, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR|wx.FRAME_FLOAT_ON_PARENT)
+        wxPopupOrFrame.__init__(self, pWiki, -1)
 
         self.url = filePath
         self.pWiki = pWiki
+        self.firstMove = True
         
         img = wx.Image(filePath, wx.BITMAP_TYPE_ANY)
 
@@ -3885,6 +3767,7 @@ class ImageTooltipPanel(wx.Frame):
         self.bmp = wx.StaticBitmap(self, -1, img, (0, 0), (img.GetWidth(), img.GetHeight()))
         self.bmp.Bind(wx.EVT_LEFT_DOWN, self.OnLeftClick)
         self.bmp.Bind(wx.EVT_RIGHT_DOWN, self.OnRightClick)
+        self.bmp.Bind(wx.EVT_MOTION, self.OnMouseMotion)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         mousePos = wx.GetMousePosition()
@@ -3895,6 +3778,8 @@ class ImageTooltipPanel(wx.Frame):
         WindowLayout.setWindowPos(self, mousePos, fullVisible=True)
 
         self.Show()
+        # Works for Windows (but not for GTK), maybe also for Mac (MB)
+        self.GetParent().SetFocus()  
 
     def Close(self, event=None):
         self.Destroy()
@@ -3913,8 +3798,1253 @@ class ImageTooltipPanel(wx.Frame):
     def OnRightClick(self, event=None):
         self.Close()
 
+    def OnMouseMotion(self, evt):
+        if self.firstMove:
+            self.firstMove = False
+            evt.Skip()
+            return
+
+        self.Close()
+
+
     def OnKeyDown(self, event):
         kc = event.GetKeyCode()
 
         if kc == wx.WXK_ESCAPE:
             self.Close()
+
+
+class ViHandler(ViHelper):
+    # TODO: Add search commands
+    #       Fix long line inconsistency?
+    #       Brace matching - finish % cmd
+    #       Find a way to monitor selection (to enter visual mode from mouse selecttion)
+    
+    def __init__(self, stc):
+        ViHelper.__init__(self, stc)
+
+        wx.CallAfter(self.SetDefaultCaretColour)
+        # Set default mode
+        wx.CallAfter(self.SetMode, ViHelper.NORMAL)
+
+        """
+        pre_keys holds all the keys that can be used as "power" modifiers
+            i.e. they can be followed by other commands (or a range of
+                 inputs)
+
+        In general there are three types,
+            1. those that can be followed by any motion commands
+                e.g. dyc<>
+            2. those that can be followed by a wide range of inputs
+                e.g. mr
+            3. same as 2 but can be prefixed by commands in 1 (they
+               are motion commands themselves)
+                e.g. '`ft
+        """
+        self.pre_keys = {
+                        0 : {
+                            60  : (1, self.DedentSingle, 1), # <
+                            62  : (1, self.IndentSingle, 1), # >
+                            99  : (1, self.EndDeleteInsert, 2), # c
+                            100 : (1, self.EndDelete, 1), # d
+                            121 : (1, self.Yank, 0), # y
+                            39  : (3, self.GotoMark, 0), # '
+                            96  : (3, self.GotoMarkIndent, 0), # `
+                            109 : (2, self.Mark, 0), # m
+                            102 : (3, self.FindNextChar, 0), # f
+                            70  : (3, self.FindNextCharBackwards, 0), # F
+                            116 : (3, self.FindUpToNextChar, 0), # t
+                            84  : (3, self.FindUpToNextCharBackwards, 0), # T
+                            114 : (2, self.ReplaceChar, 2), # r
+                            },
+                        2 : {
+                            # In visual mode a number of keys no longer
+                            # act as modifiers
+                            39  : (3, self.GotoMark, 0), # '
+                            96  : (3, self.GotoMarkIndent, 0), # `
+                            109 : (2, self.Mark, 0), # m
+                            102 : (3, self.FindNextChar, 0), # f
+                            70  : (3, self.FindNextCharBackwards, 0), # F
+                            116 : (3, self.FindUpToNextChar, 0), # t
+                            84  : (3, self.FindUpToNextCharBackwards, 0), # T
+                            114 : (2, self.ReplaceChar, 2), # r
+                    }
+                }
+
+        self.pre_motion_keys = defaultdict(dict)
+        for j in self.pre_keys:
+            self.pre_motion_keys[j] = \
+                    [i for i in self.pre_keys[j] if self.pre_keys[j][i][0] == 1]
+
+        self.keys = {
+            0 : {
+            # Normal mode
+    (105) : (0, (self.Insert, None), 2), # i
+    (97) : (0, (self.Append, None), 2), # a
+    (73) : (0, (self.InsertAtLineStart, None), 2), # I
+    (65) : (0, (self.AppendAtLineEnd, None), 2), # A
+    (111) : (0, (self.OpenNewLine, False), 2), # o
+    (79) : (0, (self.OpenNewLine, True), 2), # O
+    (67) : (0, (self.TruncateLineAndInsert, None), 2), # C
+    (68) : (0, (self.TruncateLine, None), 2), # D
+
+    (120) : (0, (self.DeleteRight, None), 1), # x
+    (88) : (0, (self.DeleteLeft, None), 1), # X
+
+    (115) : (0, (self.DeleteRightAndInsert, None), 2), # s
+    (83) : (0, (self.DeleteLinesAndIndentInsert, None), 2), # S
+
+    (119) : (1, (self.MoveCaretNextWord, None), 0), # w
+    (87) : (1, (self.MoveCaretNextWORD, None), 0), # W
+    (101) : (1, (self.MoveCaretWordEnd, None), 0), # e
+    (69) : (1, (self.MoveCaretWordEND, None), 0), # E
+    (98) : (1, (self.MoveCaretBackWord, None), 0), # b
+    (66) : (1, (self.MoveCaretBackWORD, None), 0), # B
+
+    (105, 119) : (1, (self.SelectInWord, None), 0), # iw
+    (105, 108) : (1, (self.SelectInLink, None), 0), # il
+    (105, 91) : (1, (self.SelectInLink, None), 0), # i[
+    (105, 93) : (1, (self.SelectInLink, None), 0), # i]
+
+    (123) : (1, (self.Repeat, self.ctrl.ParaUp), 0), # {
+    (125) : (1, (self.Repeat, self.ctrl.ParaDown), 0), # }
+
+    # TODO: Technically search is a motion but it will require a custom
+    # implementation in order to achieve that.
+    47  : (0, (self.StartSearch, None), 0), # /
+    # NOTE: at the moment searching does not mimic vi very well
+    110 : (0, (self.StartSearch, None), 0), # n
+    # 78  : (0, (self.StartSearch, None)), # N
+
+    # Basic movement
+    (104) : (1, (self.MoveCaretLeft, None), 0), # h
+    (107) : (1, (self.MoveCaretUp, None), 0), # k
+    (108) : (1, (self.MoveCaretRight, None), 0), # l
+    (106) : (1, (self.MoveCaretDown, None), 0), # j
+    # Arrow keys
+    (65361) : (1, (self.MoveCaretLeft, None), 0), # left 
+    (65362) : (1, (self.MoveCaretUp, None), 0), # up
+    (65363) : (1, (self.MoveCaretRight, None), 0), # right
+    (65364) : (1, (self.MoveCaretDown, None), 0), # down
+
+    (65293) : (1, (self.MoveCaretDownAndIndent, None), 0), # enter
+    (65293) : (1, (self.MoveCaretDownAndIndent, None), 0), # return
+
+    # Line movement
+    (36)  : (1, (self.GotoLineEnd, None), 0), # 0
+    (48)  : (1, (self.GotoLineStart, None), 0), # $
+    (94)  : (1, (self.GotoLineIndent, None), 0), # ^
+    (124) : (1, (self.GotoColumn, None), 0), # |
+
+    # Page scroll control
+    (103, 103)  : (1, (self.DocumentNavigation, (103, 103)), 0), # gg
+    (71)        : (1, (self.DocumentNavigation, 71), 0), # G
+    (37)        : (1, (self.DocumentNavigation, 37), 0), # %
+
+    (72)        : (1, (self.GotoViewportTop, None), 0), # H
+    (76)        : (1, (self.GotoViewportBottom, None), 0), # L
+    (77)        : (1, (self.GotoViewportMiddle, None), 0), # M
+
+    (122, 122)  : (0, (self.ScrollViewportMiddle, None), 0), # zz
+    (122, 116)  : (0, (self.ScrollViewportTop, None), 0), # zt
+    (122, 98)   : (0, (self.ScrollViewportBottom, None), 0), # zb
+
+    (90, 90)    : (0, (self.ctrl.presenter.getMainControl().\
+                                        exitWiki, None), 0), # ZZ
+
+    (117)           : (0, (self.Undo, None), 0), # u
+    ("ctrl", 114)   : (0, (self.Redo, None), 0), # ctrl-r (already bound)
+
+    # These two are motions
+    (59)   : (1, (self.RepeatLastForwardFindCharCmd, None), 0), # ;
+    (44)   : (1, (self.RepeatLastBackwardFindCharCmd, None), 0), # ,
+
+    # Replace ?
+    #(114)   : (1, (self.ReplaceChar, None)), # r
+    # repeatable?
+    (82)   : (0, (self.StartReplaceMode, None), 0), # R
+
+    (118)   : (2, (self.EnterVisualMode, None), 0), # v
+    (86)   : (2, (self.EnterLineVisualMode, None), 0), # V
+
+    (74)   : (0, (self.JoinLines, None), 1), # J
+
+    (126)   : (0, (self.SwapCase, None), 0), # ~
+
+    (121, 121)  : (0, (self.YankLine, None), 0), # yy
+    (89)        : (0, (self.YankLine, None), 0), # Y
+    (112)       : (0, (self.Put, False), 0), # p
+    (80)        : (0, (self.Put, True), 0), # P
+
+    (100, 100)  : (0, (self.DeleteLine, None), 1), # dd
+
+    (62, 62)    : (0, (self.Indent, True), 1), # >>
+    (60, 60)    : (0, (self.Indent, False), 1), # <<
+
+    (46)    : (0, (self.RepeatCmd, None), 0), # .
+
+    # Wikipage navigation
+    # As some command (e.g. HL) are already being used in most cases
+    # these navigation commands have been prefixed by "g".
+    # TODO: different repeat command for these?
+    (103, 102)  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0), # gf
+    (103, 70)   : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0), # gF
+    (103, 98)   : (0, (self.ctrl.activateLink, { "tabMode" : 3 }), 0), # gb
+    # This might be going a bit overboard with history nagivaiton!
+    (103, 72)   : (0, (self.GoBackwardInHistory, None), 0), # gH
+    (103, 76)   : (0, (self.GoForwardInHistory, None), 0), # gL
+    (103, 104)  : (0, (self.GoBackwardInHistory, None), 0), # gh
+    (103, 108)  : (0, (self.GoForwardInHistory, None), 0), # gl
+    (91)        : (0, (self.GoBackwardInHistory, None), 0), # [
+    (93)        : (0, (self.GoForwardInHistory, None), 0), # ]
+    (103, 116) : (0, (self.SwitchTabs, None), 0), # gt
+    (103, 84)  : (0, (self.SwitchTabs, True), 0), # gT
+    (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
+    (103, 82) : (0, (self.OpenHomePage, True), 0), # gR
+    (103, 117) : (0, (self.ViewParents, False), 0), # gu
+    (103, 85) : (0, (self.ViewParents, True), 0), # gU
+    (103, 111) : (0, (self.ctrl.presenter.getMainControl()). \
+                                    showWikiWordOpenDialog, None, 0), # go
+    # TODO: rewrite open dialog so it can be opened with new tab as default
+    (103, 79): (0, (self.ctrl.presenter.getMainControl()). \
+                                    showWikiWordOpenDialog, None, 0), # gO
+
+    (103, 115)  : (0, (self.SwitchEditorPreview, None), 0), # gs
+    (103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
+    (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
+    (65470)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
+    (65471)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
+            }
+            }
+
+        # Rather than rewrite all the keys for other modes it is easier just
+        # to modify those that need to be changed
+        self.keys[2] = self.keys[0].copy()
+        self.keys[2].update({
+                99  : (0, (self.DeleteSelectionAndInsert, None), 2), # c
+                100  : (0, (self.DeleteSelection, None), 1), # d
+                120  : (0, (self.DeleteSelection, None), 1), # x
+                121 : (0, (self.YankSelection, None), 0), # y
+                60 : (0, (self.Indent, {"forward":False, "visual":True}), 0), # <
+                62 : (0, (self.Indent, {"forward":True, "visual":True}), 0), # >
+                (117) : (0, (self.LowerCase, None), 0), # u
+                (85) : (0, (self.UpperCase, None), 0), # U
+                #(105, 119) : (1, (self.SelectInWord, None), 0), # iw
+            })
+        # And delete a few so our key mods are correct
+        # These are keys that who do not serve the same function in visual mode
+        # as in normal mode (and it most cases are replaced by other function)
+        del self.keys[2][(100, 100)] # dd
+        del self.keys[2][(121, 121)] # yy
+        del self.keys[2][(105)] # i
+
+
+        self.key_mods = self.GenerateKeyModifiers(self.keys)
+
+    def SetNumber(self, n):
+        # If 0 is first modifier it is a command
+        if len(self.key_number_modifier) < 1 and n == 0:
+            return False
+        self.key_number_modifier.append(n)
+        self.key_modifier = []
+        self.updateViStatus(True)
+        return True
+
+
+    def SetMode(self, mode):
+        """
+        It would be nice to set caret alpha but i don't think its
+        possible at the moment
+        """
+        # If switching from insert mode vi does a few things
+        if self.mode == ViHelper.INSERT:
+            # Move back one pos if not at the start of a line
+            if self.ctrl.GetCurrentPos() != \
+                    self.GetLineStartPos(self.ctrl.GetCurrentLine()):
+                self.ctrl.CharLeft()
+
+            if self.mode == ViHelper.INSERT:
+                # If current line only contains whitespace remove it
+                if self.ctrl.GetCurLine()[0].strip() == u"":
+                    self.ctrl.LineDelete()
+                    self.ctrl.AddText(self.ctrl.GetEOLChar())
+                    self.ctrl.CharLeft()
+        
+        self.mode = mode
+
+        # Save caret position
+        self.ctrl.ChooseCaretX()
+
+        if mode == ViHelper.NORMAL:
+            # Set block caret
+            #self.ctrl.SendMsg(2512, 2)
+            #self.ctrl.SetSelectionMode(0)
+            self.RemoveSelection()
+            self.ctrl.SetCaretForeground(wx.Colour(255, 0, 0))
+            self.ctrl.SetCaretWidth(40)
+            self.ctrl.SetOvertype(False)
+        elif mode == ViHelper.VISUAL:
+            self.ctrl.SetCaretWidth(40)
+            self.ctrl.SetCaretForeground(wx.Colour(250, 250, 210))
+            self.ctrl.SetOvertype(False)
+        elif mode == ViHelper.INSERT:
+            self.insert_action = []
+            self.ctrl.SetCaretWidth(1)
+            self.ctrl.SetCaretForeground(self.default_caret_colour)
+            self.ctrl.SetOvertype(False)
+        elif mode == ViHelper.REPLACE:
+            self.ctrl.SetCaretWidth(1)
+            self.ctrl.SetCaretForeground(self.default_caret_colour)
+            self.ctrl.SetOvertype(True)
+
+    def OnMouseLeftUp(self, evt):
+        if len(self.ctrl.GetSelectedText()) > 0:
+            self.EnterVisualMode()
+
+    def OnViKeyDown(self, evt):
+        """
+        Handle keypresses when in Vi mode
+        """
+
+        key = evt.GetRawKeyCode()
+
+        print key, unichr(key)
+
+        # Pass modifier keys on
+        if key in (65505, 65507, 65513):
+            return
+
+        accP = getAccelPairFromKeyDown(evt)
+
+
+#         if control_mask:
+#             if key == 102: # f
+#                 self.startIncrementalSearch()
+
+        if key == 65307 or accP == (2, 91): # Escape
+            # TODO: Move into ViHandler?
+            self.SetMode(ViHandler.NORMAL)
+            self.FlushBuffers()
+            return
+
+        # There might be a better way to monitor for selection changed
+        if len(self.ctrl.GetSelectedText()) > 0:
+            self.EnterVisualMode()
+
+        if self.mode in [1, 3]: # Insert mode, replace mode, 
+            # Store each keyevent
+            # NOTE: this may be terribly inefficient (i'm not sure)
+            # It would be possbile to just store the text that is inserted
+            # however then actions would be ignored
+            self.insert_action.append(key)
+            if key in [65362, 65362]:
+                self.insert_action = []
+            evt.Skip()
+            return
+
+        m = self.mode
+
+        # As soon as a non-motion pre command has been set the next
+        # key must be valid or the input will be lost
+        # As with self. counts have to be specified prior to this
+        if self.pre_key is not None:
+            # TODO: make these commands repeatable
+            # If self.pre_motion_key is also set we need to prepare for the motion
+            if self.pre_motion_key is not None and self.pre_keys[m][self.pre_key][0] == 3:
+                self.StartSelection()
+                # Run the motion
+                self.pre_keys[m][self.pre_key][1](key)
+                # Post pre_motion_key action
+                self.pre_keys[m][self.pre_motion_key][1]()
+                self.FlushBuffers()
+                return
+
+            # Otherwise we just run it normally
+            else:
+                self.pre_keys[m][self.pre_key][1](key)
+                self.FlushBuffers()
+                return
+
+        control_mask = False
+        if accP[0] == 2: # Ctrl
+            control_mask = True
+
+        if 48 <= key <= 57: # Normal
+            if self.SetNumber(key-48):
+                return
+        elif 65456 <= key <= 65465: # Numpad
+            if self.SetNumber(key-65456):
+                return
+
+        self.SetCount()
+
+        # First check if key is one one that can prefix motion commands
+        if not self.block_pre_keys:
+            if self.pre_motion_key is None and key in self.pre_motion_keys[m]:
+                self.pre_motion_key = key
+                self.updateViStatus(True)
+                return
+            # If not is it one of the other pre keys?
+            elif key in self.pre_keys[m] and key not in self.pre_motion_keys[m]:
+                self.pre_key = key
+                self.updateViStatus(True)
+                return
+
+        self.key_modifier.append(key)
+        if len(self.key_modifier) > 1:
+            key = tuple(self.key_modifier)
+
+
+
+        ## Double key commands, e.g. gg, gU
+        #if len(self.key_modifier) > 1:
+
+        #    self.key_modifier.append(key)
+
+        #    key = tuple(self.key_modifier)
+
+        self.updateViStatus()
+
+        if key in self.keys[m]:
+            self.RunFunction(key, self.pre_motion_key)
+            return 
+        elif key in self.key_mods[m]:
+            self.block_pre_keys = True
+
+            if self.pre_motion_key is not None:
+                temp_key = (self.pre_motion_key, key)
+
+                if temp_key in self.keys[m]:
+                    self.RunFunction(temp_key, None)
+
+            return
+
+        # If we've reached this point key hasn't been recogised so
+        # clear buffers
+        self.FlushBuffers()
+
+    def TurnOff(self):
+        self.ctrl.SetCaretWidth(1)
+
+    def GetChar(self, length=1):
+        """
+        Retrieves text from under caret
+        @param length: the number of characters to get
+        """
+        pos = self.ctrl.GetCurrentPos()
+        start, end = self.minmax(pos, pos + length)
+        start = max(0, start)
+        end = min(end, self.ctrl.GetLength())
+        return self.ctrl.GetTextRange(start, end)
+
+    def EmulateKeypresses(self, actions):
+        if len(actions) > 0:
+
+            eol = self.ctrl.GetEOLChar()
+            
+            for i in actions:
+                if i == 65361:
+                    self.ctrl.CharLeft()
+                elif i == 65363:
+                    self.ctrl.CharRight()
+                elif i == 65288:
+                    self.ctrl.DeleteBackNotLine()
+                elif i in [65535, 65439]:
+                    self.ctrl.CharRight()
+                    self.ctrl.DeleteBack()
+                elif i in [65293, 65421]: # enter, return
+                    self.ctrl.InsertText(self.ctrl.GetCurrentPos(), eol)
+                    self.ctrl.CharRight()
+                elif i == 65289: # tab
+                    self.ctrl.InsertText(self.ctrl.GetCurrentPos(), "\t")
+                    self.ctrl.CharRight()
+                else:
+                    self.ctrl.InsertText(self.ctrl.GetCurrentPos(), unichr(i))
+                    self.ctrl.CharRight()
+        
+    
+    def RepeatCmd(self):
+        # TODO: clean this up
+        if self.last_cmd is not None:
+            self.visualBell("GREEN")
+            self.ctrl.BeginUndoAction()
+            cmd_type, key, count, pre_motion_key = self.last_cmd
+
+            self.count = count
+            actions = self.insert_action
+            # NOTE: Is "." only going to repeat editable commands as in vim?
+            if cmd_type == 1:
+                self.RunFunction(key, pre_motion_key)
+            elif cmd_type == 2: # + insertion
+                self.RunFunction(key, pre_motion_key)
+                # Emulate keypresses
+                # Return to normal mode
+                self.EmulateKeypresses(actions)
+                self.SetMode(ViHandler.NORMAL)
+            elif cmd_type == 3:
+                self.ReplaceChar(key)
+            elif cmd_type == 4: # reverse repeat
+                self.pre_motion_key = pre_motion_key
+                self.StartSelection()
+                self.RepeatLastBackwardFindCharCmd()
+                pre_key_type = self.pre_keys[self.mode][pre_motion_key][2] 
+                self.pre_keys[self.mode][pre_motion_key][1]()
+                if pre_key_type == 2:
+                    self.EmulateKeypresses(actions)
+                    self.SetMode(ViHandler.NORMAL)
+            elif cmd_type == 5: # forward repeat
+                self.pre_motion_key = pre_motion_key
+                self.StartSelection()
+                self.RepeatLastForwardFindCharCmd()
+                pre_key_type = self.pre_keys[self.mode][pre_motion_key][2] 
+                self.pre_keys[self.mode][pre_motion_key][1]()
+                print "hello"
+                if pre_key_type == 2:
+                    print self.insert_action
+                    self.EmulateKeypresses(actions)
+                    self.SetMode(ViHandler.NORMAL)
+            self.ctrl.EndUndoAction()
+            self.insert_action = actions
+        else:
+            self.visualBell("RED")
+
+
+#--------------------------------------------------------------------
+# Misc stuff
+#--------------------------------------------------------------------
+    def ExtendSelectionToLineEnds(self):
+        start_pos = self.GetSelectionStart()
+        end_pos = self.GetSelectionEnd()
+
+    def JoinLines(self):
+        text = self.ctrl.GetSelectedText()
+        start_line = self.ctrl.GetCurrentLine()
+        if len(text) < 1:
+            # We need at least 2 lines to be able to join
+            count = self.count if self.count > 1 else 2
+            self.SelectLines(start_line, min(self.ctrl.GetLineCount(), \
+                                                    start_line - 1 + count))
+        else:
+            start_line, end_line = self._GetSelectedLines()
+            self.SelectLines(start_line, end_line)
+
+        text = self.ctrl.GetSelectedText()
+
+        eol_char = self.ctrl.GetEOLChar()
+
+        # Probably not the most efficient way to do this
+        # We need to lstrip every line except the first
+        lines = text.split(eol_char)
+        new_text = []
+        for i in range(len(lines)):
+            if lines[i] == u"": # Leave out empty lines
+                continue
+            if i == 0:
+                new_text.append(lines[i])
+            else:   
+                new_text.append(lines[i].lstrip())
+            
+        self.ctrl.ReplaceSelection(" ".join(new_text))
+
+    def DeleteSelection(self):
+        self.ctrl.Clear()
+
+    def DeleteSelectionAndInsert(self):
+        self.DeleteSelection()
+        self.Insert()
+
+
+    def RemoveSelection(self):
+        """
+        Removes the selection.
+
+        TODO: don't goto selection start pos
+        """
+        pos = self.ctrl.GetAnchor()
+        self.ctrl.SetSelection(pos,pos)
+
+    def StartSelection(self):
+        """ Saves the current position to be used for selection start """
+        self._anchor = self.ctrl.GetCurrentPos()
+
+    def StartSelectionAtAnchor(self):
+        """
+        Saves the current position to be used for selection start using
+        the anchor as the selection start.
+        """
+        if len(self.ctrl.GetSelectedText()) > 0:
+            self._anchor = self.ctrl.GetAnchor()
+        else:
+            self._anchor = self.ctrl.GetCurrentPos()
+
+    def SelectInWord(self):
+        self.MoveCaretBackWord()
+        self.StartSelection()
+        self.MoveCaretWordEnd()
+        self.SelectSelection()
+
+    def SelectInLink(self):
+        pos = self.ctrl.GetCurrentPos()
+        start_pos = self.FindChar(91, True, 0, 1, False)
+        self.StartSelection()
+        end_pos = self.FindChar(93, False, -1, 1, False)
+
+        if start_pos and end_pos:
+            self.SelectSelection()
+
+    def SelectSelection(self):
+        self.ctrl.SetSelection(self._anchor, self.ctrl.GetCurrentPos())
+
+    def SelectionOnSingleLine(self):
+        """
+        Assume that if an EOL char is present we have mutiple lines
+        """
+        if self.ctrl.GetEOLChar() in self.ctrl.GetSelectedText():
+            return False
+        else:
+            return True
+
+    def DeleteSelection(self):
+        """Yank selection and delete it"""
+        start, end = self._GetSelectionRange()
+        self.ctrl.BeginUndoAction()
+        self.YankSelection()
+        self.ctrl.Clear()
+        self.ctrl.GotoPos(start)
+        self.ctrl.EndUndoAction()
+
+    def _GetSelectionRange(self):
+        """Get the range of selection such that the start is the visual start
+        of the selection, not the logical start.
+
+        """
+        start, end = self.minmax(self.ctrl.GetSelectionStart(),
+                            self.ctrl.GetSelectionEnd())
+        return start, end
+
+    def _GetSelectedLines(self):
+        """Get the first and last line (exclusive) of selection"""
+        start, end = self._GetSelectionRange()
+        start_line, end_line = (self.ctrl.LineFromPosition(start),
+                                self.ctrl.LineFromPosition(end - 1) + 1)
+        return start_line, end_line
+
+    def HasSelection(self):
+        """
+        Detects if there's anything selected
+        @rtype: bool
+        """
+        return len(self.ctrl.GetSelectedText()) > 0
+
+    def InsertText(self, text):
+        self.ctrl.InsertText(self.ctrl.GetCurrentPos(), text)
+        self.MoveCaretPos(len(text))
+
+    def SelectLines(self, start, end):
+        """
+        Selects lines
+
+        @param start: start line
+        @param end: end line
+        """
+        start_pos = self.GetLineStartPos(start)
+        end_pos = self.ctrl.GetLineEndPosition(end)
+
+        self.ctrl.SetSelection(start_pos, end_pos)
+
+    def SwapCase(self):
+        self.ctrl.BeginUndoAction()
+        text = self.ctrl.GetSelectedText()
+        if len(text) == 0:
+            self.StartSelection()
+            self.MoveCaretRight()
+            self.SelectSelection()
+            text = self.ctrl.GetSelectedText()
+        self.ctrl.ReplaceSelection(text.swapcase())
+        self.ctrl.EndUndoAction()
+
+    def UpperCase(self):
+        self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().upper())
+
+    def LowerCase(self):
+        self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().lower())
+
+    def Indent(self, forward=True, repeat=1, visual=False):
+        if visual == True:
+            repeat = self.count
+
+        self.ctrl.BeginUndoAction()
+        # If no selected text we work on lines as specified by count
+        if len(self.ctrl.GetSelectedText()) < 1:
+            start_line = self.ctrl.GetCurrentLine()
+            if self.count > 1:
+                self.SelectLines(start_line, min(self.ctrl.GetLineCount(), \
+                                                start_line - 1 + self.count))
+        else:
+            start_line, end = self._GetSelectedLines()
+
+        if self.SelectionOnSingleLine():
+            self.GotoLineIndent()
+
+        for i in range(repeat):
+            if forward:
+                self.ctrl.Tab()
+            else:
+                self.ctrl.BackTab()
+
+        self.ctrl.GotoLine(start_line)
+        self.GotoLineIndent()
+        self.ctrl.EndUndoAction()
+
+    def _PositionViewport(self, n):
+        """
+        Positions the viewport around caret position
+        """
+        lines = self.ctrl.LinesOnScreen() - 1
+        current = self.ctrl.GetCurrentLine()
+        diff = int(lines * n)
+        self.ctrl.ScrollToLine(current - diff)
+
+
+    def IndentSingle(self):
+        self.SelectSelection()
+        self.Indent(True)
+
+    def DedentSingle(self):
+        self.SelectSelection()
+        self.Indent(False)
+
+    #--------------------------------------------------------------------
+    # Visual mode
+    #--------------------------------------------------------------------
+
+    def EnterLineVisualMode(self):
+        print "VISUAL"
+        #self.ctrl.SetSelectionMode(1)
+        print self.ctrl.GetSelectionMode()
+        #if self.mode != ViHelper.VISUAL:
+        #    self.SetMode(ViHelper.VISUAL)
+        #    self.StartSelectionAtAnchor()
+
+        #    if self.ctrl.GetSelectedText() > 0:
+        #        self.MoveCaretRight()
+        self.ctrl.SetSelectionMode(1)
+        print self.ctrl.GetSelectionMode()
+
+    def EnterVisualMode(self):
+        """
+        Change to visual (selection) mode
+        
+        Will do nothing if already in visual mode
+        """
+        if self.mode != ViHelper.VISUAL:
+            self.SetMode(ViHelper.VISUAL)
+            self.StartSelectionAtAnchor()
+
+            if self.ctrl.GetSelectedText() > 0:
+                self.MoveCaretRight()
+
+    #--------------------------------------------------------------------
+    # Searching
+    #--------------------------------------------------------------------
+
+    def FindChar(self, code=None, reverse=False, offset=0, count=1, \
+                                                            repeat=True):
+        """
+        Searches current line for specified character. Will move the
+        caret to this place (+/- any offset supplied).
+        """
+        if code is None:
+            return
+        char = unichr(code)
+        text, cur_pos = self.ctrl.GetCurLine()
+
+        pos = cur_pos
+        
+        if reverse: # Search backwards
+            if repeat:
+                # First save cmd so it can be repeated later
+                # Vim doesn't save the count so a new one can be used next time
+                self.last_backward_find_cmd = \
+                            {"code":code,"reverse":reverse,"offset":offset}
+                # Also save it for the "." repeats
+                if self.pre_motion_key is not None and \
+                            self.pre_keys[self.mode][self.pre_motion_key][2] in (1,2):
+                    self.last_cmd = 4, code, self.count, self.pre_motion_key
+            for i in range(count):
+                pos = text.rfind(char, 0, pos)
+                # Vim won't move the caret if all occurences are not found
+                if pos == -1:
+                    return
+
+        else: # Search forwards
+            if repeat:
+                self.last_forward_find_cmd = {"code":code,"reverse":reverse,"offset":offset,"count":count}
+                if self.pre_motion_key is not None and \
+                            self.pre_keys[self.mode][self.pre_motion_key][2] in (1,2):
+                    self.last_cmd = 5, code, self.count, self.pre_motion_key
+            for i in range(count):
+                pos = text.find(char, pos+1)
+                if pos == -1:
+                    return
+         
+        new_pos = pos + offset
+
+        # Hack to make deleting forward consistent with vim behavoir
+        # same thing if in visual mode
+        if self.pre_motion_key is not None and not reverse \
+                                    or self.mode == ViHelper.VISUAL:
+            new_pos += 1
+        
+        if -1 < new_pos < len(text):
+            to_move = new_pos - cur_pos
+            self.MoveCaretPos(to_move)
+
+            # If in visual mode we need to select the text
+            if self.mode == ViHelper.VISUAL:
+                self.SelectSelection()
+
+            return to_move
+        return False
+
+            
+    def FindNextChar(self, keycode):
+        self.FindChar(keycode, count=self.count)
+        
+    def FindNextCharBackwards(self, keycode):
+        cmd = self.FindChar(keycode, count=self.count, reverse=True)
+
+    def FindUpToNextChar(self, keycode):
+        cmd = self.FindChar(keycode, count=self.count, offset=-1)
+        
+    def FindUpToNextCharBackwards(self, keycode):
+        cmd = self.FindChar(keycode, count=self.count, reverse=True, offset=1)
+
+    def GetLastForwardFindCharCmd(self):
+        return self.last_forward_find_cmd
+
+    def GetLastBackwardFindCharCmd(self):
+        return self.last_backward_find_cmd
+
+    def RepeatLastForwardFindCharCmd(self):
+        args = self.GetLastForwardFindCharCmd()
+        if args is not None: 
+            # Set the new count
+            args["count"] = self.count
+            self.FindChar(**args)
+        # If no previous command has been found break any other functions
+        # that might be running
+        else: self.pre_motion_key = None
+        
+    def RepeatLastBackwardFindCharCmd(self):
+        args = self.GetLastBackwardFindCharCmd()
+        if args is not None: 
+            args["count"] = self.count
+            self.FindChar(**args)
+        else: self.pre_motion_key = None
+
+    def MatchBraces(self):
+        """
+        Brace highlighting is possible though might be a bit
+        excessive
+        """
+        pos = self.ctrl.GetCurrentPos()
+        char = self.ctrl.GetCharAt(pos)
+        
+        if char in (40, 41):
+            self.ctrl.GotoPos(self.ctrl.BraceMatch(pos))
+        else:
+            # Vim appears to only search forward for a closing brace
+            self.FindChar(41, False, 0, 1, False)
+    #--------------------------------------------------------------------
+    # Replace
+    #--------------------------------------------------------------------
+    
+    def ReplaceChar(self, keycode):
+        """
+        Replaces character under caret
+
+        Contains some custom code to allow repeating
+        """
+        # TODO: visual indication
+        char = unichr(keycode)
+
+        # If in visual mode use the seletion we have (not the count)
+        if self.mode == ViHelper.VISUAL:
+            sel_start, sel_end = self._GetSelectionRange()
+            count = sel_end - sel_start
+            self.ctrl.GotoPos(self_start)
+        else:
+            count = self.count
+
+        # Replace does not wrap lines and fails if you try and replace 
+        # non existent chars
+        line, pos = self.ctrl.GetCurLine()
+        if pos + count > len(line)-1:
+            return
+
+        self.last_cmd = 3, keycode, count, None
+
+        self.ctrl.BeginUndoAction()
+        self.StartSelection()
+        self.ctrl.GotoPos(self.ctrl.GetCurrentPos()+count)
+        self.EndDelete()
+        self.Repeat(self.InsertText, arg=char)
+        self.ctrl.EndUndoAction()
+        self.MoveCaretPos(-1)
+
+    def StartReplaceMode(self):
+        # TODO: visual indication
+        self.SetMode(ViHelper.REPLACE)
+
+    #--------------------------------------------------------------------
+    # Marks
+    #--------------------------------------------------------------------
+
+    def _SetMark(self, code):
+        """
+        Not called directly (call self.Mark instead)
+        """
+        page = self.ctrl.presenter.getWikiWord()
+        self.marks[page][code] = self.ctrl.GetCurrentPos()
+
+    def GotoMark(self, char):
+        page = self.ctrl.presenter.getWikiWord()
+        if char in self.marks[page]:
+            pos = self.marks[page][char]
+
+            # If mark is set past the end of the document just
+            # go to the end
+            pos = min(self.ctrl.GetLength(), pos)
+
+            self.ctrl.GotoPos(pos)
+            self.visualBell("GREEN")
+            return True
+
+        self.visualBell("RED")
+        return False
+
+    def GotoMarkIndent(self, char):
+        if self.GotoMark(char):
+            self.GotoLineIndent()
+
+    #--------------------------------------------------------------------
+    # Copy and Paste commands
+    #--------------------------------------------------------------------
+
+    def YankLine(self):
+        """Copy the current line text to the clipboard"""
+
+        line_no = self.ctrl.GetCurrentLine()
+        max_line = min(line_no+self.count-1, self.ctrl.GetLineCount())
+        start = self.GetLineStartPos(line_no)
+        end = self.ctrl.GetLineEndPosition(max_line)
+
+        text = self.ctrl.GetTextRange(start, end) + self.ctrl.GetEOLChar()
+
+        self.ctrl.Copy(text)
+
+    def YankSelection(self):
+        """Copy the current selection to the clipboard"""
+        self.ctrl.Copy()
+
+    def Yank(self):
+        self.SelectSelection()
+        self.YankSelection()
+        start, end = self._GetSelectionRange()
+        self.ctrl.GotoPos(start)
+
+    def Put(self, before, count=None):
+        text = getTextFromClipboard()
+
+        # If its not text paste as normal for now
+        if not text:
+            self.ctrl.Paste()
+
+        # Test for line as they are handled differently
+        eol = self.ctrl.GetEOLChar()
+        eol_len = len(eol)
+        if len(text) > eol_len:
+            is_line = text[-len(eol):] == eol
+        else:
+            is_line = False
+
+        self.ctrl.BeginUndoAction()
+
+        if is_line:
+            if not before:  
+                # If pasting a line we have to goto the end before moving caret 
+                # down to handle long lines correctly
+                self.GotoLineEnd()
+                self.MoveCaretDown(1)
+            self.GotoLineStart()
+
+        if self.HasSelection():
+            self.ctrl.Clear()
+
+        self.Repeat(self.InsertText, arg=text)
+
+        if is_line:
+            self.MoveCaretUp(1)
+            self.GotoLineIndent()
+
+        self.ctrl.EndUndoAction()
+                
+    #--------------------------------------------------------------------
+    # Deletion commands
+    #--------------------------------------------------------------------
+
+    def EndDelete(self):
+        self.SelectSelection()
+        self.DeleteSelection()
+
+    def EndDeleteInsert(self):
+        self.SelectSelection()
+        self.DeleteSelection()
+        self.Insert()
+
+    def DeleteRight(self):
+        # TODO: make this less complicated
+        self.ctrl.BeginUndoAction()
+        self.StartSelection()
+        self.MoveCaretRight()
+        self.SelectSelection()
+        self.DeleteSelection()
+        self.ctrl.EndUndoAction()
+
+    def DeleteLeft(self):
+        self.ctrl.BeginUndoAction()
+        self.StartSelection()
+        self.MoveCaretLeft()
+        self.SelectSelection()
+        self.DeleteSelection()
+        self.ctrl.EndUndoAction()
+
+    def DeleteRightAndInsert(self):
+        self.DeleteRight()
+        self.Insert()
+
+    def DeleteLinesAndIndentInsert(self):
+        self.ctrl.BeginUndoAction()
+        indent = self.ctrl.GetLineIndentation(self.ctrl.GetCurrentLine())
+        self.DeleteLine()
+        self.OpenNewLine(True, indent=indent)
+        self.ctrl.EndUndoAction()
+
+    def DeleteLine(self):
+        line_no = self.ctrl.GetCurrentLine()
+        max_line = min(line_no+self.count-1, self.ctrl.GetLineCount())
+        start = self.GetLineStartPos(line_no)
+        end = self.ctrl.GetLineEndPosition(max_line)+1
+        self.ctrl.SetSelection(start, end)
+        self.DeleteSelection()
+        
+
+    #--------------------------------------------------------------------
+    # Movement commands
+    #--------------------------------------------------------------------
+
+    def GetLineStartPos(self, line):
+        return self.ctrl.GetLineIndentPosition(line) - \
+                                    self.ctrl.GetLineIndentation(line)
+
+    def GotoLineStart(self):
+        self.ctrl.Home()
+
+    def GotoLineEnd(self):
+        self.ctrl.LineEnd()
+
+    def GotoLineIndent(self, line=None):
+        if line is None: line = self.ctrl.GetCurrentLine()
+        self.ctrl.GotoPos(self.ctrl.GetLineIndentPosition(line))
+        self.ctrl.ChooseCaretX()
+
+    def GotoColumn(self):
+        line = self.ctrl.GetCurrentLine()
+        lstart = self.ctrl.PositionFromLine(line)
+        lend = self.ctrl.GetLineEndPosition(line)
+        line_len = lend - lstart
+        column = min(line_len, self.count)
+        self.ctrl.GotoPos(lstart + column)
+
+        self.ctrl.ChooseCaretX()
+
+    def MoveCaretRight(self):
+        self.MoveCaretPos(self.count)
+
+    def MoveCaretUp(self, count=None):
+        self.Repeat(self.ctrl.LineUp, count)
+
+    def MoveCaretDown(self, count=None):
+        self.Repeat(self.ctrl.LineDown, count)
+
+    def MoveCaretDownAndIndent(self, count=None):
+        self.Repeat(self.ctrl.LineDown, count)
+        self.GotoLineIndent()
+
+    def MoveCaretLeft(self):
+        self.MoveCaretPos(-self.count)
+
+    def MoveCaretPos(self, offset):
+        """
+        Move caret by a given offset
+        """
+        #pos = max(self.ctrl.GetCurrentPos() + offset, 0)
+        #pos = min(pos, self.ctrl.GetLength())
+        line, line_pos = self.ctrl.GetCurLine()
+        line_no = self.ctrl.GetCurrentLine()
+        pos = max(line_pos + offset, 0)
+        pos = min(pos, self.ctrl.LineLength(line_no)-1)
+        self.ctrl.GotoPos(self.GetLineStartPos(line_no) + pos)
+        self.ctrl.ChooseCaretX()
+
+    def MoveCaretLinePos(self, offset):
+        """
+        Move caret line position by a given offset
+
+        Faster but does not maintain line position
+        """
+        line = max(self.ctrl.GetCurrentLine() + offset, 0)
+        line = min(line, self.ctrl.GetLineCount())
+        self.ctrl.GotoLine(line)
+        self.ctrl.ChooseCaretX()
+
+    def MoveCaretToLinePos(self, line, index):
+        line = max(line, 0)
+        line = min(line, self.ctrl.GetLineCount())
+        self.ctrl.GotoLine(line)
+        line_start_pos = self.ctrl.GetCurrentPos()
+        pos = max(index, 0)
+        pos = min(pos, self.ctrl.GetLineEndPosition(line)-line_start_pos)
+        self.ctrl.GotoPos(line_start_pos+pos)
+
+# word-motions
+
+    def MoveCaretNextWord(self, count=None):
+        self.Repeat(self.ctrl.WordRight, count)
+
+    def MoveCaretWordEnd(self, count=None):
+        self.Repeat(self.ctrl.WordRightEnd, count)
+
+    def MoveCaretBackWord(self, count=None):
+        self.Repeat(self.ctrl.WordLeft, count)
+
+    def MoveCaretNextWORD(self, count=None):
+        """Wordbreaks are spaces"""
+        def func():
+            self.ctrl.WordRight()
+            while self.GetChar(-1) and not self.GetChar(-1).isspace():
+                self.ctrl.WordRight()
+        self.Repeat(func, count)
+
+    def MoveCaretWordEND(self, count=None):
+        def func():
+            self.ctrl.WordRightEnd()
+            while self.GetChar(-1) and not self.GetChar(-1).isspace():
+                self.ctrl.WordRightEnd()
+        self.Repeat(func, count)
+
+    def MoveCaretBackWORD(self, count=None):
+        def func():
+            self.ctrl.WordRightEnd()
+            while self.GetChar(-1) and not self.GetChar(-1).isspace():
+                self.ctrl.WordRightEnd()
+        self.Repeat(func, count)
+
+    def DocumentNavigation(self, key):
+        
+        # %, G or gg
+        if self.true_count:
+            if key in [71, (103, 103)]:
+                # Correct for line 0
+                self.MoveCaretToLinePos(self.count-1, self.ctrl.GetCurLine()[1])
+            elif key == 37: # %
+                max_lines = self.ctrl.GetLineCount()
+                # Same as   int(self.count / 100 * max_lines)  but needs only
+                #   integer arithmetic
+                line_percentage = (self.count * max_lines) // 100
+                self.MoveCaretToLinePos(line_percentage, self.ctrl.GetCurLine()[1])
+
+        elif key == 37:
+            # If key is % but no count it is used for brace matching
+            self.MatchBraces()
+
+        elif key == (103, 103):
+            self.ctrl.GotoLine(0)
+
+        elif key == (71):
+            self.ctrl.GotoLine(self.ctrl.GetLineCount())
+
+    def GotoViewportTop(self):
+        self.GotoLineIndent(self.ctrl.GetFirstVisibleLine())
+        
+    def GotoViewportMiddle(self):
+        self.GotoLineIndent(self.ctrl.GetMiddleVisibleLine())
+
+    def GotoViewportBottom(self):
+        self.GotoLineIndent(self.ctrl.GetLastVisibleLine())
+
+    def ScrollViewportTop(self):
+        self._PositionViewport(0)
+
+    def ScrollViewportMiddle(self):
+        self._PositionViewport(0.5)
+
+    def ScrollViewportBottom(self):
+        self._PositionViewport(1)
+
+    def Undo(self, count=None):
+        if self.ctrl.CanUndo():
+            self.visualBell("GREEN")
+            self.Repeat(self.ctrl.Undo, count)
+        else:
+            self.visualBell("RED")
+
+    def Redo(self, count=None):
+        if self.ctrl.CanRedo():
+            self.visualBell("GREEN")
+            self.Repeat(self.ctrl.Redo, count)
+        else:
+            self.visualBell("RED")
+
+# The following commands are basic ways to enter insert mode
+    def Insert(self):
+        self.SetMode(ViHelper.INSERT)
+
+    def Append(self):
+        if self.ctrl.GetCurrentPos() != self.ctrl.GetLineEndPosition(self.ctrl.GetCurrentLine()):
+            self.ctrl.CharRight()
+        self.Insert()
+
+    def InsertAtLineStart(self):
+        # Goto line places the caret at the start of the line
+        self.GotoLineIndent(self.ctrl.GetCurrentLine())
+        self.ctrl.ChooseCaretX()
+        self.Insert()
+
+    def AppendAtLineEnd(self):
+        self.ctrl.GotoPos(self.ctrl.GetLineEndPosition(
+                                    self.ctrl.GetCurrentLine()))
+        self.Append()
+
+    def OpenNewLine(self, above, indent=None):
+        self.ctrl.BeginUndoAction()
+
+        if indent is None:
+            indent = self.ctrl.GetLineIndentation(self.ctrl.GetCurrentLine())
+
+        if above:
+            self.MoveCaretUp(1)
+        self.GotoLineEnd()
+        self.ctrl.AddText(self.ctrl.GetEOLChar())
+        self.ctrl.SetLineIndentation(self.ctrl.GetCurrentLine(), indent)
+        self.ctrl.EndUndoAction()
+        self.AppendAtLineEnd()
+
+    def TruncateLine(self):
+        self.ctrl.LineEndExtend()
+        self.DeleteSelection()
+
+    def TruncateLineAndInsert(self):
+        self.TruncateLine()
+        self.Insert()

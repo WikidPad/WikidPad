@@ -445,7 +445,8 @@ class HtmlExporter(AbstractExporter):
         elif exportType == u"html_single":
             browserFile = self._exportHtmlSingleFiles(self.wordList)
 
-        # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
+        # Other supported types: html_previewWX, html_previewIE, html_previewMOZ,
+        #   html_previewWK
         # are not handled in this function
 
         wx.GetApp().getInsertionPluginManager().taskEnd()
@@ -1510,6 +1511,55 @@ class HtmlExporter(AbstractExporter):
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
                 wordList = self.wikiDocument.searchWiki(searchOp)
+        elif key == u"search":
+            searchOp = SearchReplaceOperation()
+            searchOp.replaceOp = False
+            searchOp.searchStr = value
+            
+            searchType = Consts.SEARCHTYPE_BOOLEANREGEX
+            removeSelf = False
+            # Based on
+            # SearchAndReplaceDialogs.SearchWikiDialog._buildSearchReplaceOperation
+            for ap in appendices:
+                if ap == "type boolean" or ap == "type bool":
+                    searchType = Consts.SEARCHTYPE_BOOLEANREGEX
+                elif ap == "type regex":
+                    searchType = Consts.SEARCHTYPE_REGEX
+                elif ap == "type asis" or ap == "type plain":
+                    searchType = Consts.SEARCHTYPE_ASIS
+                elif ap == "type index" and \
+                        self.wikiDocument.isSearchIndexEnabled():
+                    searchType = Consts.SEARCHTYPE_INDEX
+                elif ap == "casesensitive":
+                    searchOp.caseSensitive = True
+                elif ap == "wholewordsonly":
+                    searchOp.wholeWord = True
+                elif ap == "removeself" or ap == "removethis":
+                    removeSelf = True
+
+            searchOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
+            searchOp.indexSearch = 'no' if searchType != Consts.SEARCHTYPE_INDEX \
+                    else 'default'
+            searchOp.wildCard = 'regex' if searchType != Consts.SEARCHTYPE_ASIS \
+                    else 'no'
+
+            wordList = self.wikiDocument.searchWiki(searchOp)
+
+            # Because a simple search for "foo" includes the page containing
+            # the insertion searching for "foo" there is option "removeself"
+            # to remove the page containing the insertion from the list
+            if removeSelf and self.optsStack["innermostPageUnifName"]\
+                    .startswith(u"wikipage/"):
+                
+                selfPageName = self.wikiDocument.getUnAliasedWikiWordOrAsIs(
+                        self.optsStack["innermostPageUnifName"][9:])
+                try:
+                    wordList.remove(selfPageName)
+                except ValueError:
+                    pass
+                    
+
+
         elif key == u"toc" and value == u"":
             pageAst = self.getBasePageAst()
 #             pageAst = self.optsStack["innermostFullPageAst"]

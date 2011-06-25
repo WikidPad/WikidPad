@@ -27,6 +27,9 @@ You can also use "Other Export" to show a dialog to set more precisely what to e
 ++ Print
 Start print dialog for a plain text print of some or all wiki pages. See [Printing].
 
+++ Open trashcan
+Show list of items stored to the trashcan of the wiki and allow to restore or finally delete them.
+
 ++ Properties
 Shows internal name of database backend (may be needed for support requests) and the number of wiki pages in the wiki.
 

@@ -301,7 +301,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             self.outOfSync = True
             self.refresh()
 
-    def getSelectedText(self):
+    def GetSelectedText(self):
         return self.GetStringSelection(False)
 
 

@@ -8,16 +8,17 @@ Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Flags: recursesubdirs
 Source: dist\license.txt; DestDir: {app}
 Source: dist\python26.dll; DestDir: {app}
 Source: dist\sqlite3.dll; DestDir: {app}
+Source: dist\wxbase28uh_net_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
+Source: dist\wxbase28uh_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
+Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\wxmsw28uh_adv_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\wxmsw28uh_core_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\wxmsw28uh_html_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\wxmsw28uh_stc_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\wxmsw28uh_xrc_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
-Source: dist\wxbase28uh_net_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
-Source: dist\wxbase28uh_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
-Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Check: ShouldInstallWxRuntime
 Source: dist\_ctypes.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\_hashlib.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
+Source: dist\_multiprocessing.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\pyexpat.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\_sqlite3.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\_socket.pyd; DestDir: {app}; Flags: replacesameversion ignoreversion
@@ -50,8 +51,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.2beta04_2"
-#define verNo "002.002.104.002"
+#define verStr "2.2beta05"
+#define verNo "002.002.105.000"
 
 SolidCompression=true
 AppName=WikidPad

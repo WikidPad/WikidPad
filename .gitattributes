@@ -673,8 +673,10 @@ lib/pwiki/StringOps.py -text
 lib/pwiki/SystemInfo.py -text
 lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
+lib/pwiki/Trashcan.py -text
 lib/pwiki/UserActionCoord.py -text
 lib/pwiki/Utilities.py -text
+lib/pwiki/ViHelper.py -text
 lib/pwiki/WikiDocument.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiHtmlView.py -text

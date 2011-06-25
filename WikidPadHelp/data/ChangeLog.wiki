@@ -1,5 +1,43 @@
 ﻿++ Change Log
 
+Jun. 25, 2011 (2.2beta05)
+
+    * Trashcan support. See [Menu Wiki#++ Open trashcan],
+      [OptionsDialog#+++++ Trashcan]
+    * New insertion "search" to create arbitrary searches.
+      See [Insertions#* *search* ]
+    * Added "page:" prefix for boolean regex search to search for
+      page name. See [SearchingTheWiki/BooleanRegex#++++ page:]
+    * Support for "wikirel:" protocol to support relative links to
+      other wikis. See [UrlLinking#++ Relative URLs]
+    * Support to set readonly per wiki page.
+      See [Menu Wiki Page#++ Page read only]
+    * Black lists (global and wiki-dependent) for non-camelcase
+      (=bracketed) wikiwords added.
+      See [WordLinking!exclude_from_linking]
+
+    * Basic Vi emulation for editor (thanks to Ross)
+    * Grammar change to forbid bold and italics to span over a heading
+    * Activation (double click or press return) on collapsed todo or
+      attribute tree item with one child which represents a wiki page
+      opens this wiki page
+
+    * Internal: New function wxHelper.getHtmlFromClipboard()
+
+    * Bug fixed: WikidPad can't be closed if volume access lost
+      during session
+    * Bug fixed: Crash when rebuilding sqlite wiki on 64 bit Linux
+    * Bug fixed: Search index from 64bit Python not compatible with
+      32bit Python (due to hash function). Changed index format
+      number from 2 to 3
+    * Bug fixed: "Move to file storage" failed
+
+    * Internal: Bug fixed: Error in error handling for plugins
+    * Internal: Bug fixed: Some functions in plugins were not
+      registered for calling
+
+
+
 May 28, 2011 (2.2beta04)
 
 	* Changes to editor (thanks to Ross):

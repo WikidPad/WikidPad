@@ -16,17 +16,17 @@ To create an absolute URL to a file you can also use "Add file URL" in "Editor" 
 
 To show a different title in the HTML preview/export as a link, use e.g.
 
-[ftp://ftp.whereever.com/ |Go somewhere]
+[ftp://ftp.whereever.com/|Go somewhere]
 
 Switch to preview to see the "Go somewhere" only. You can also use an image URL (see below) as title to show a clickable image:
 
-[https://somewheresecure.com |rel://files/testimg.gif>r40% ]
+[https://somewheresecure.com|rel://files/testimg.gif>r40%]
 
 
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.
 
-You can drag a file from Windows Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
+You can drag a file from Windows Explorer while holding shift key to create a relative URL (in default configuration). For files ending with ".wiki", the "wikirel:" protocol is used instead of "rel:".
 
 Example:
 
@@ -34,7 +34,7 @@ rel://../above/andBelow.txt
 
 
 ++ Converting between relative and absolute URL
-If you right-click on a "file:" or "rel:" URL and choose "Convert Absolute/Relative File URL" you can change an URL from one type to the other. Alternatively you can place the text cursor in such an URL and select from regular menu "Format"->"Convert"->"Absolute/Relative File URL".
+If you right-click on a "file:"/"wiki:" or "rel:"/"wikirel:" URL and choose "Convert Absolute/Relative File URL" you can change an URL from one type to the other. Alternatively you can place the text cursor in such an URL and select from regular menu "Format"->"Convert"->"Absolute/Relative File URL".
 
 Converting a relative URL to an absolute one is always possible, but there may be absolute URLs (especially on Windows if pointing to a different drive than the one the wiki is on) that can't be converted to relative URLs. In this case nothing happens.
 
@@ -58,19 +58,19 @@ For controlling of individual URLs, see "URL Appendix" below.
 ++ Wiki: URLs
 To link from one wiki to another you can create links beginning with "wiki:", e.g.
 
-wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki
+wiki:///C:/Documents%20and%20Settings/foowiki/foowiki.wiki
 
 
 You can add parameter "page" to specify the wiki page to open (replace spaces by "%20"):
 
-wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces
+wiki:///C:/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces
 
 You can also specify an anchor on the page to jump to:
 
-wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here
+wiki:///C:/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here
 
 
-To create these URLs you can also use in menu "Wiki Words" the function "Copy URL to clipboard" and then paste the URL where you like.
+To create these URLs you can also use in menu "Wiki Page" the function "Copy URL to clipboard" and then paste the URL where you like.
 
 The above menu entry is also available in context menus for wiki word tree items, tabs and for "anchor: ..." lines in the editor. In the last case the URL contains also the anchor you clicked on.
 

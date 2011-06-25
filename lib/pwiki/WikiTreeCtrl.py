@@ -69,20 +69,24 @@ class AbstractNode(object):
     """
     
     __slots__ = ("__weakref__",   # just in case...
-            "treeCtrl", "parentNode", "unifiedName")
+            "treeCtrl", "wxItemId", "parentNode", "unifiedName")
             
     def __init__(self, tree, parentNode):
         self.treeCtrl = tree
         self.parentNode = parentNode
+        self.wxItemId = -1
         # self.unifiedName = None
-    
+
     def setRoot(self, flag = True):
         """
         Sets if this node is a logical root of the tree or not
         (currently the physical root is the one and only logical root)
         """
         pass
-        
+    
+    def setWxItemId(self, wxItemId):
+        self.wxItemId = wxItemId
+
     def getParentNode(self):
         return self.parentNode
 
@@ -113,12 +117,19 @@ class AbstractNode(object):
         """
         return ()
 
-    def onActivate(self):
+    def onSelected(self):
         """
-        React on activation
+        React on selection of the item
         """
         pass
         
+    def onActivated(self):
+        """
+        React on activation (double click). Returns True if event should be
+        consumed (not handled further)
+        """
+        return False
+
     def prepareContextMenu(self, menu):
         """
         Return a context menu for this item or None
@@ -413,7 +424,7 @@ class WikiWordNode(AbstractNode):
         return result
 
 
-    def onActivate(self):
+    def onSelected(self):
 #         tracer.runctx('self.treeCtrl.pWiki.openWikiPage(self.wikiWord)', globals(), locals())
         self.treeCtrl.pWiki.openWikiPage(self.wikiWord)
 
@@ -501,9 +512,9 @@ class WikiWordSearchNode(WikiWordRelabelNode):
 
         self.searchOp = searchOp
 
-    def onActivate(self):
-        # WikiWordNode.onActivate(self)
-        WikiWordRelabelNode.onActivate(self)
+    def onSelected(self):
+        # WikiWordNode.onSelected(self)
+        WikiWordRelabelNode.onSelected(self)
         if self.searchOp:
             self.treeCtrl.pWiki.getActiveEditor().executeSearch(self.searchOp, 0)   # TODO
 
@@ -607,6 +618,19 @@ class TodoNode(AbstractNode):
         return style
 
 
+    def onActivated(self):
+        children = self.listChildren()
+        if len(children) == 1 and \
+                isinstance(children[0], WikiWordTodoSearchNode) and \
+                not self.treeCtrl.IsExpanded(self.wxItemId):
+            children[0].onSelected()
+            
+#             if self.treeCtrl.IsExpanded(self.wxItemId):
+#                 return True
+
+        return super(TodoNode, self).onActivated()
+
+
     def listChildren(self):
         """
         Returns a sequence of Nodes for the children of this node.
@@ -705,8 +729,8 @@ class WikiWordTodoSearchNode(WikiWordRelabelNode):
         self.todoValue = todoValue
 
 
-    def onActivate(self):
-        super(WikiWordTodoSearchNode, self).onActivate()
+    def onSelected(self):
+        super(WikiWordTodoSearchNode, self).onSelected()
 
         editor = self.treeCtrl.pWiki.getActiveEditor()
         try:
@@ -792,10 +816,21 @@ class AttrCategoryNode(AbstractNode):
                 result[0].getValue().lower() == u"true":
             result = result[0].listChildren()
 
-        
-
         return result
         
+
+    def onActivated(self):
+        children = self.listChildren()
+        if len(children) == 1 and \
+                isinstance(children[0], WikiWordAttributeSearchNode) and \
+                not self.treeCtrl.IsExpanded(self.wxItemId):
+            children[0].onSelected()
+
+#             if self.treeCtrl.IsExpanded(self.wxItemId):
+#                 return True
+
+        return super(AttrCategoryNode, self).onActivated()
+
 
     def nodeEquality(self, other):
         """
@@ -842,6 +877,15 @@ class AttrValueNode(AbstractNode):
                 key, self.value) for w in words]
 
 
+    def onActivated(self):
+        children = self.listChildren()
+        if len(children) == 1 and \
+                not self.treeCtrl.IsExpanded(self.wxItemId):
+            children[0].onSelected()
+
+        return super(AttrValueNode, self).onActivated()
+
+
     def nodeEquality(self, other):
         """
         Test for node equality
@@ -867,8 +911,8 @@ class WikiWordAttributeSearchNode(WikiWordRelabelNode):
         self.propValue = propValue
 
 
-    def onActivate(self):
-        super(WikiWordAttributeSearchNode, self).onActivate()
+    def onSelected(self):
+        super(WikiWordAttributeSearchNode, self).onSelected()
 
         editor = self.treeCtrl.pWiki.getActiveEditor()
         try:
@@ -1123,6 +1167,8 @@ class MainFuncPagesNode(AbstractNode):
                 FuncPageNode(self.treeCtrl, self, u"wiki/PWL"),
                 FuncPageNode(self.treeCtrl, self, u"global/CCBlacklist"),
                 FuncPageNode(self.treeCtrl, self, u"wiki/CCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, u"global/NCCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, u"wiki/NCCBlacklist"),
                 FuncPageNode(self.treeCtrl, self, u"global/FavoriteWikis")
                 ]
 
@@ -1151,9 +1197,9 @@ class FuncPageNode(AbstractNode):
 
         return style
 
-    def onActivate(self):
+    def onSelected(self):
         """
-        React on activation
+        React on selection
         """
         self.treeCtrl.pWiki.openFuncPage(self.funcTag)
 
@@ -1196,6 +1242,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.refreshGeneratorLastCallTime = time.clock()  # Initial value
         self.refreshGeneratorLastCallMinDelay = 0.1
         self.refreshExecutor = Utilities.SingleThreadExecutor(1)
+        self.refreshStartLock = False  # Disallows starting of refresh (mainly
+                # during wiki rebuild
 #        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
         self.sizeVisible = True
         # Descriptor pathes of all expanded nodes to remember or None
@@ -1205,17 +1253,15 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         
         self.onOptionsChanged(None)
 
-
-        # EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
-        # EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
+        wx.EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
         wx.EVT_RIGHT_UP(self, self.OnRightButtonUp)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
         wx.EVT_SIZE(self, self.OnSize)
 
-        self._bindActivation()
+        self._bindSelection()
 
-        wx.EVT_TREE_BEGIN_RDRAG(self, ID, self.OnTreeBeginRDrag)
+#         wx.EVT_TREE_BEGIN_RDRAG(self, ID, self.OnTreeBeginRDrag)
         wx.EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
         wx.EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
         wx.EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
@@ -1302,7 +1348,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 ("renamed wiki page", self.onRenamedWikiPage),
                 ("deleted wiki page", self.onDeletedWikiPage),
                 ("updated wiki page", self.onWikiPageUpdated),
-                ("changed wiki configuration", self.onChangedWikiConfiguration)
+                ("changed wiki configuration", self.onChangedWikiConfiguration),
+                ("begin foreground update", self.onBeginForegroundUpdate),
+                ("end foreground update", self.onEndForegroundUpdate),
         ), self.pWiki.getCurrentWikiDocumentProxyEvent(), self)
 
         self.__sinkApp = wxKeyFunctionSink((
@@ -1313,12 +1361,12 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.refreshExecutor.start()
 
 
-    def _bindActivation(self):
-        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeItemActivated)
-        self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnTreeItemSelChanging)
+    def _bindSelection(self):
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeItemSelected)
+#         self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnTreeItemSelChanging)
 
-    def _unbindActivation(self):
-        self.Unbind(wx.EVT_TREE_SEL_CHANGING)
+    def _unbindSelection(self):
+#         self.Unbind(wx.EVT_TREE_SEL_CHANGING)
         self.Unbind(wx.EVT_TREE_SEL_CHANGED)
         
     def close(self):
@@ -1413,9 +1461,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         if parentnode.representsWikiWord() and \
                                 (parentnode.getWikiWord() == \
                                 self.pWiki.getCurrentWikiWord()):
-                            self._unbindActivation()
+                            self._unbindSelection()
                             self.SelectItem(parentnodeid)
-                            self._bindActivation()
+                            self._bindSelection()
                             self._storeMainTreePositionHint(currentDpp,
                                     parentnodeid)
                             return
@@ -1430,9 +1478,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         child = self.findChildTreeNodeByWikiWord(currentNode,
                                 self.pWiki.getCurrentWikiWord())
                         if child:
-                            self._unbindActivation()
+                            self._unbindSelection()
                             self.SelectItem(child)
-                            self._bindActivation()
+                            self._bindSelection()
                             self._storeMainTreePositionHint(currentDpp, child)
                             return
 #                         else:
@@ -1525,14 +1573,40 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         return False
 
 
+    def joinItemIdToNode(self, treeItemId, nodeObj):
+        self.SetPyData(treeItemId, nodeObj)
+        nodeObj.setWxItemId(treeItemId)
+
+    def _startBackgroundRefresh(self):
+        if self.refreshStartLock:
+            return
+        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
+                self.GetRootItem())
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+    def _stopBackgroundRefresh(self):
+        self.Unbind(wx.EVT_IDLE)
+        self.refreshGenerator = None
+        
+
+    def onEndForegroundUpdate(self, miscEvt):
+        self.refreshStartLock = False
+        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
+                self.GetRootItem())
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+    def onBeginForegroundUpdate(self, miscEvt):
+        self._stopBackgroundRefresh()
+        self.refreshStartLock = True
+
+
+
 
     def onWikiPageUpdated(self, miscevt):
         if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
-        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
-                self.GetRootItem())
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self._startBackgroundRefresh()
 
 
 
@@ -1541,9 +1615,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
-        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
-                self.GetRootItem())
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self._startBackgroundRefresh()
         
     
     def _addExpandedNodesToPathSet(self, parentNodeId):
@@ -1588,9 +1660,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.refreshGeneratorLastCallMinDelay = config.getfloat("main",
                 "tree_updateGenerator_minDelay", 0.1)
 
-        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
-                self.GetRootItem())
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self._startBackgroundRefresh()
 
 
 
@@ -1716,7 +1786,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         # Old and new don't match -> Insert new child
                         newnodeid = self.InsertItemBefore(parentnodeid, tci, "")
                         tci += 1
-                        self.SetPyData(newnodeid, c)
+                        self.joinItemIdToNode(newnodeid, c)
 
                         retObj = self.refreshExecutor.executeAsync(0,
                                 c.getNodePresentation)
@@ -1733,7 +1803,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     # No more nodes in tree, but some in new children list
                     # -> append one to tree
                     newnodeid = self.AppendItem(parentnodeid, "")
-                    self.SetPyData(newnodeid, c)
+                    self.joinItemIdToNode(newnodeid, c)
                     
                     retObj = self.refreshExecutor.executeAsync(0,
                             c.getNodePresentation)
@@ -1803,9 +1873,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
-        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
-                self.GetRootItem())
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self._startBackgroundRefresh()
 #         self.collapse()   # TODO?
 
 
@@ -1829,15 +1897,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     "tree_expandedNodes_descriptorPathes_" + self.treeType,
                     u"")
 
-        self.refreshGenerator = None
+        self._stopBackgroundRefresh()
         self.refreshExecutor.end(hardEnd=True)
         self.refreshExecutor.start()
 
 
     def onClosedCurrentWiki(self, miscevt):
 #         self.refreshExecutor.end(hardEnd=True)
-#         self.refreshGenerator = None
-        self.Unbind(wx.EVT_IDLE)
+        self._stopBackgroundRefresh()
         if self.expandedNodePathes is not None:
             self.expandedNodePathes = StringPathSet()
 
@@ -1986,12 +2053,12 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if doexpand:
                     self.EnsureVisible(currentNode)
                 if selectNode:
-                    self._unbindActivation()
+                    self._unbindSelection()
                     self.SelectItem(currentNode, send_events=False)
                     currentDpp = self.pWiki.getCurrentDocPagePresenter()
                     self._storeMainTreePositionHint(currentDpp, currentNode)
                     self.EnsureVisible(currentNode)
-                    self._bindActivation()
+                    self._bindSelection()
                 
                 return True
         
@@ -2031,7 +2098,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         nodeobj = self.createNodeObjectByUnifiedName(unifName)
         nodeobj.setRoot(True)
         root = self.AddRoot(u"")
-        self.SetPyData(root, nodeobj)
+        self.joinItemIdToNode(root, nodeobj)
         self.setNodePresentation(root, nodeobj.getNodePresentation())
         if self.expandedNodePathes is not None:
             self.expandedNodePathes = StringPathSet()
@@ -2130,12 +2197,12 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         event.SetEventType(wx.wxEVT_COMMAND_TREE_SEL_CHANGED)
         self.GetEventHandler().ProcessEvent(event)
 
-        
-    def OnTreeItemActivated(self, event):
+
+    def OnTreeItemSelected(self, event):
         item = event.GetItem()
         if item is not None and item.IsOk():
             node = self.GetPyData(item)
-            node.onActivate()
+            node.onSelected()
 
             self._storeMainTreePositionHint(
                     self.pWiki.getCurrentDocPagePresenter(), item)
@@ -2148,12 +2215,23 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.Refresh()
 
 
-    def OnTreeItemSelChanging(self, evt):
-        pass
+    def OnTreeItemActivated(self, event):
+        item = event.GetItem()
+        if item is not None and item.IsOk():
+            node = self.GetPyData(item)
+            if not node.onActivated():
+                event.Skip()
+
+        # Is said to fix a selection redraw problem
+        self.Refresh()
 
 
-    def OnTreeBeginRDrag(self, evt):
-        pass
+#     def OnTreeItemSelChanging(self, evt):
+#         pass
+
+
+#     def OnTreeBeginRDrag(self, evt):
+#         pass
 
     def OnTreeItemExpand(self, event):
         ## _prof.start()
@@ -2171,7 +2249,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         try:
             for ch in childnodes:
                 newit = self.AppendItem(item, u"")
-                self.SetPyData(newit, ch)
+                self.joinItemIdToNode(newit, ch)
                 nodeStyle = ch.getNodePresentation()
                 self.setNodePresentation(newit, nodeStyle)
                 
@@ -2261,20 +2339,20 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if menu is not None:
             self.selectedNodeWhileContext = selnode
             
-            self._unbindActivation()
+            self._unbindSelection()
             self.SelectItem(item)
-            self._bindActivation()
+            self._bindSelection()
 
             self.PopupMenuXY(menu, event.GetX(), event.GetY())
 
             selnode = self.selectedNodeWhileContext
 
-            self._unbindActivation()
+            self._unbindSelection()
             if selnode is None:
                 self.Unselect()
             else:
                 self.SelectItem(selnode, expand_if_necessary=False)
-            self._bindActivation()
+            self._bindSelection()
 
             newsel = self.GetSelection()
             if selnode != newsel:
@@ -2332,7 +2410,6 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #             self.SelectItem(item)
 
 
-
     def OnIdle(self, event):
         gen = self.refreshGenerator
         if gen is not None:
@@ -2341,6 +2418,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 # May happen under special circumstances (e.g. after hibernation)
                 self.refreshGeneratorLastCallTime = cl
             elif (cl - self.refreshGeneratorLastCallTime) < self.refreshGeneratorLastCallMinDelay:
+                event.Skip()
                 return
 
             try:
@@ -2352,6 +2430,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
                     self.Unbind(wx.EVT_IDLE)
+        else:
+            event.Skip()
+            self.Unbind(wx.EVT_IDLE)
 
 
     def isVisibleEffect(self):

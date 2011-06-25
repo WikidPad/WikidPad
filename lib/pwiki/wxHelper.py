@@ -8,7 +8,14 @@ import wx
 from WikiExceptions import *
 
 from .MiscEvent import KeyFunctionSink
-from . import SystemInfo
+from . import SystemInfo, StringOps
+
+
+# try:
+#     import gtk, gobject
+# except:
+#     gtk = None
+#     gobject = None
 
 
 def _unescapeWithRe(text):
@@ -188,21 +195,138 @@ def getTextFromClipboard():
             else:
                 return u""
         return None
-
-# DO NOT DELETE! Useful later for retrieving HTML URL source
-#         dataob = wx.CustomDataObject(wx.CustomDataFormat("HTML Format"))
-# 
-#         print "--getTextFromClipboard5"
-#         if cb.GetData(dataob):
-#             print "--getTextFromClipboard6"
-#             if dataob.GetSize() > 0:
-#                 print "--getTextFromClipboard7", repr(dataob.GetData()[:800])
-#                 return lineendToInternal(dataob.GetData())
-#             else:
-#                 return u""
-#         return None
     finally:
         cb.Close()
+
+
+if SystemInfo.isWindows():
+    # Windows variant
+    def getHtmlFromClipboard():
+        """
+        Retrieve HTML source from clipboard. Returns a tuple (source, URL)
+        where source is the HTML sourcecode and URL is the URL where it came
+        from. Both or one of the items may be None.
+        """
+        from StringOps import lineendToInternal, mbcsDec
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = wx.CustomDataObject(wx.CustomDataFormat("HTML Format"))
+    
+            if cb.GetData(dataob):
+                if dataob.GetSize() > 0:
+                    raw = dataob.GetData()
+                    
+                    # Windows HTML clipboard format contains a header with additional
+                    # information
+                    start = None
+                    end = None
+                    sourceUrl = None
+                    
+                    canBreak = lambda : start is not None and end is not None \
+                            and sourceUrl is not None
+
+                    pos = 0
+                    try:
+                        for line in raw.split("\r\n"):
+                            if line.startswith("StartFragment:"):
+                                start = int(line[14:])
+                                if canBreak():
+                                    break
+                            elif line.startswith("EndFragment:"):
+                                end = int(line[14:])
+                                if canBreak():
+                                    break
+                            elif line.startswith("SourceURL:"):
+                                sourceUrl = line[10:]
+                                if canBreak():
+                                    break
+                            pos += len(line) + 2
+                            if start is not None and pos >= start:
+                                break
+
+                    except ValueError:
+                        return (None, None)
+                                
+                    if start is None or end is None:
+                        return (None, None)
+                    
+                    return (lineendToInternal(dataob.GetData()[start:end]).decode(
+                            "utf-8", "replace"), sourceUrl)
+
+            return (None, None)
+        finally:
+            cb.Close()
+
+# elif gtk is not None and gobject is not None:
+#     # GTK variant
+#     def getHtmlFromClipboard():
+#         """
+#         Retrieve HTML source from clipboard. Returns a tuple (source, URL)
+#         where source is the HTML sourcecode and URL is the URL where it came
+#         from. Both or one of the items may be None. For GTK second item is always
+#         None.
+#         """
+#         clipboard = gtk.Clipboard()
+#         targets = clipboard.wait_for_targets()
+#     
+#         if "text/html" in targets:
+#             contents = clipboard.wait_for_contents("text/html")
+#             if contents:
+#     
+#                 # Firefox data needs to be formated first
+#                 if "text/_moz_htmlinfo" in targets:
+#                     d = contents.data.decode('utf_16').replace(u'\x00', u'').strip()
+#                 else:
+#                     d = contents.data.strip()
+#     
+#                 text = d  # getData(d)
+#                 return (text, None)
+#     
+#         return (None, None)
+
+
+else:
+    # GTK variant
+    def getHtmlFromClipboard():
+        """
+        Retrieve HTML source from clipboard. Returns a tuple (source, URL)
+        where source is the HTML sourcecode and URL is the URL where it came
+        from. Both or one of the items may be None. For GTK second item is always
+        None.
+        """
+        from StringOps import lineendToInternal, mbcsDec
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = wx.CustomDataObject(wx.CustomDataFormat("text/html"))
+            if cb.GetData(dataob):
+                if dataob.GetSize() > 0:
+                    raw = dataob.GetData()
+                    return (lineendToInternal(StringOps.fileContentToUnicode(
+                            raw)), None)
+        finally:
+            cb.Close()
+
+        return (None, None)
+
+# else:
+#     # Dummy variant
+#     def getHtmlFromClipboard():
+#         """
+#         Retrieve HTML source from clipboard. Returns a tuple (source, URL)
+#         where source is the HTML sourcecode and URL is the URL where it came
+#         from. Both or one of the items may be None. For the dummy implementation
+#         both are always None.
+#         """
+#         return (None, None)
+
+
+# For testing
+# getTextFromClipboard = lambda : getHtmlFromClipboard()[0]
+
 
 
 def textToDataObject(text=None):

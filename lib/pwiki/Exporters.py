@@ -530,6 +530,37 @@ class MultiPageTextWikiPageWriter(object):
                     self._writeHintedDatablock(unifName, True)
 
 
+def getSingleWikiWordPacket(wikiDocument, word, writeVersionData=True,
+        formatVer=1):
+    """
+    Helper function for the trashcan to create a trash bag packet for a
+    single wiki word (including versions). Returns it as a utf8-encoded
+    bytestring.
+    """
+    for tryNumber in range(35):
+        stream = StringIO()
+        stream.write(BOM_UTF8)
+        separator = u"-----%s-----" % createRandomString(25)
+        exportFile = _SeparatorWatchUtf8Writer(stream, separator)
+        wikiPageWriter = MultiPageTextWikiPageWriter(wikiDocument, exportFile,
+                writeVersionData, formatVer)
+
+        exportFile.write(u"Multipage text format %i\n" % formatVer)
+        # Separator line
+        exportFile.write(u"Separator: %s\n" % separator)
+
+        try:
+            wikiPageWriter.exportWikiWord(word)
+            exportFile.checkAndClearBuffer()
+
+            return stream.getvalue()
+        except _SeparatorFoundException:
+            continue
+    else:
+        raise ExportException(_(u"No usable separator found"))
+
+
+
 
 class MultiPageTextExporter(AbstractExporter):
     """

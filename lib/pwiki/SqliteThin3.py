@@ -656,7 +656,7 @@ class _Context:
     """
     
     def __init__(self, ptr):
-        self._contextpointer = ptr
+        self._contextpointer = c_void_p(ptr)
 
     def result_blob(self, data):
         """
@@ -722,7 +722,7 @@ class _Value:
     """
     
     def __init__(self, ptr):
-        self._valuepointer = ptr
+        self._valuepointer = c_void_p(ptr)
 
 
     def value_blob(self):
@@ -788,8 +788,7 @@ FUNC_CALLBACK_TYPE = CFUNCTYPE(None, c_void_p, c_int, POINTER(c_void_p))
 _dll.sqlite3_user_data.restype = c_uint
 
 def _pyFuncCallback(contextptr, nValues, valueptrptr):
-    
-    realfunc = _sqliteTransObjects[_dll.sqlite3_user_data(contextptr)]
+    realfunc = _sqliteTransObjects[_dll.sqlite3_user_data(c_void_p(contextptr))]
     values = [_Value(valueptrptr[i]) for i in xrange(nValues)]
     # print "_pyFuncCallback", repr(realfunc), repr(values), id(realfunc), sys.getrefcount(realfunc)
     try:

@@ -2,8 +2,8 @@ Sorry, these instructions are very Windows specific.
 
 --- Setup for dev ---
 
-Install Python (recommended: 2.6, should also work: 2.5, may work: 2.7,
-        will not work: 2.4 or less, 3.0 or later)
+Install Python (recommended: 2.6, may work: 2.7,
+        will not work: 2.5 or less, 3.0 or later)
 http://www.python.org/
 
 
@@ -81,7 +81,7 @@ The "dist" directory contains the final product, "build" contains intermediate
 cache files and is not needed for the actual program.
 
 
---- To create a WikidPad.exe distribution ---
+--- To create a WikidPad.exe Windows binary installer ---
 
 Modify version number and version string of WikidPad (additionally to above
 adjustments) in wikidpad_unicode.iss. Find
