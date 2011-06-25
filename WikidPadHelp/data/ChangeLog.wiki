@@ -1,5 +1,20 @@
 ﻿++ Change Log
 
+Jun. 25, 2011 (2.1rc05)
+
+    * Bug fixed: WikidPad can't be closed if volume access lost
+      during session
+    * Bug fixed: Crash when rebuilding sqlite wiki on 64 bit Linux
+    * Bug fixed: Search index from 64bit Python not compatible with
+      32bit Python (due to hash function). Changed index format
+      number from 2 to 3
+
+    * Internal: Bug fixed: Error in error handling for plugins
+    * Internal: Bug fixed: Some functions in plugins were not
+      registered for calling
+
+
+
 May 28, 2011 (2.1rc04)
 
 	* Bugs fixed: Error in error handling in search index processing,

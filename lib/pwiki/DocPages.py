@@ -969,12 +969,6 @@ class AbstractWikiPage(DataCarryingPage):
 #         with self.livePageAstBuildLock:   # TODO: Timeout?
         threadstop.testRunning()
         
-        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
-        if spellSession is None:
-            return
-            
-        spellSession.setCurrentDocPage(self)
-
         with self.textOperationLock:
             text = self.getLiveText()
             liveTextPlaceHold = self.liveTextPlaceHold
@@ -994,11 +988,19 @@ class AbstractWikiPage(DataCarryingPage):
                         lambda: origThreadstop.isRunning() and 
                         liveTextPlaceHold is self.liveTextPlaceHold)
 
+        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
+        if spellSession is None:
+            return
+            
+        spellSession.setCurrentDocPage(self)
+
         if len(text) == 0:
             unknownWords = []
         else:
             unknownWords = spellSession.buildUnknownWordList(text,
                     threadstop=threadstop)
+
+        spellSession.close()
 
         with self.textOperationLock:
             threadstop.testRunning()

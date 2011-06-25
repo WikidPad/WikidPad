@@ -25,7 +25,7 @@ class MiscEventSourceMixin:
             del self._MiscEventSourceMixin__miscevent
 
 
-    def fireMiscEventProps(self, props, first=None):
+    def fireMiscEventProps(self, props, first=None, shareListenerList=False):
         """
         props -- Dictionary {key: value} with properties
         first -- first object to call its miscEventHappened method
@@ -33,10 +33,11 @@ class MiscEventSourceMixin:
                  
         return:  create clone event
         """
-        return self.getMiscEvent().createCloneAddProps(props).processSend(first)
+        return self.getMiscEvent().createCloneAddProps(props,
+                shareListenerList=shareListenerList).processSend(first)
 
 
-    def fireMiscEventKeys(self, keys, first=None):
+    def fireMiscEventKeys(self, keys, first=None, shareListenerList=False):
         """
         keys -- Sequence with key strings
         first -- first object to call its miscEventHappened method
@@ -44,18 +45,32 @@ class MiscEventSourceMixin:
 
         return:  create clone event
         """
-        return self.getMiscEvent().createCloneAddKeys(keys).processSend(first)
+        return self.getMiscEvent().createCloneAddKeys(keys,
+                shareListenerList=shareListenerList).processSend(first)
 
 
 
 class ListenerList(object):
-    __slots__ = ("__weakref__", "listeners", "userCount", "cleanupFlag")
+    __slots__ = ("__weakref__", "listeners", "userCount", "cleanupFlag",
+            "parentList")
 
     def __init__(self):
         self.listeners = []
         self.userCount = 0
         self.cleanupFlag = False
+        self.parentList = None  # Don't know yet what it's good for
         
+    def clone(self):
+        result = ListenerList()
+        result.listeners = self.listeners[:]
+        result.userCount = 0
+        result.parentList = self
+        if self.cleanupFlag:
+            result.cleanDeadRefs()
+
+        return result
+
+
     def addListener(self, listener, isWeak=True):
         """
         isWeak -- Iff true, store weak reference to listener instead
@@ -244,15 +259,18 @@ class MiscEvent(object):
         """
         return self.parent
 
-    def clone(self):
+    def clone(self, shareListenerList=False):
         """
         Normally you shouldn't call this method directly,
         call createClone() instead
         """
         result = MiscEvent()
 
-        result.listenerList = self.listenerList
-        
+        if shareListenerList:
+            result.listenerList = self.listenerList
+        else:
+            result.listenerList = self.listenerList.clone()
+
         if self.properties is not None:
             result.properties = self.properties.copy()
 
@@ -311,7 +329,7 @@ class MiscEvent(object):
 #             parent.cleanDeadRefs()
 
 
-    def processSend(self, first = None):
+    def processSend(self, first=None):
         """
         Called on the clone to dispatch itself to first, then to all listeners.
         <B>Can't be called on an original MiscEvent, must be a clone.</B>
@@ -356,7 +374,7 @@ class MiscEvent(object):
         return self
             
             
-    def createClone(self):
+    def createClone(self, shareListenerList=False):
         """
         Creates a clone with the appropriate data, so dispatching can be done later.<BR>
         Some methods can be called only on a cloned MiscEvent.
@@ -364,7 +382,7 @@ class MiscEvent(object):
 
         _source -- The object which will dispatch the event
         """
-        event = self.clone()
+        event = self.clone(shareListenerList=shareListenerList)
         if event.properties is None:
             event.properties = {}
 
@@ -404,25 +422,25 @@ class MiscEvent(object):
         return self
         
 
-    def createCloneAddProps(self, addprops):
+    def createCloneAddProps(self, addprops, shareListenerList=False):
         """
         Creates a clone with the appropriate data, so dispatching can be done later.<BR>
         Some methods can be called only on a cloned MiscEvent.
 
         @param addprops  Dictionary with additional properties
         """
-        event = self.createClone()
+        event = self.createClone(shareListenerList=shareListenerList)
         event.properties.update(addprops)
         return event
 
-    def createCloneAddKeys(self, addkeys):
+    def createCloneAddKeys(self, addkeys, shareListenerList=False):
         """
         Creates a clone with the appropriate data, so dispatching can be done later.<BR>
         Some methods can be called only on a cloned MiscEvent.
 
         @param addkeys  Sequence with additional keys for properties
         """
-        event = self.createClone()
+        event = self.createClone(shareListenerList=shareListenerList)
         for k in addkeys:
             event.properties[k] = True
         return event

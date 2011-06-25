@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 1, 204, 1)
-VERSION_STRING = "wikidPad 2.1rc04_1"
+VERSION_TUPLE = ("wikidPad", 2, 1, 205, 0)
+VERSION_STRING = "wikidPad 2.1rc05"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -100,7 +100,7 @@ SEARCHTYPE_INDEX = 3
 
 # Version number of the current searchindex. If number doesn't match with
 # number in configuration file, index must be rebuild
-SEARCHINDEX_FORMAT_NO = 2
+SEARCHINDEX_FORMAT_NO = 3
 
 
 

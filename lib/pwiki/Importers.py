@@ -620,11 +620,11 @@ class MultiPageTextImporter:
                 """
                 select substr(unifName, 10)
                 from entries where unifName glob 'wikipage/*' and 
-                renamePresentTo == '' and not dontImport and importVersionData
+                renameImportTo == '' and not dontImport and importVersionData
                 union
-                select substr(renamePresentTo, 10)
+                select substr(renameImportTo, 10)
                 from entries where unifName glob 'wikipage/*' and 
-                renamePresentTo glob 'wikipage/*' and not dontImport and 
+                renameImportTo glob 'wikipage/*' and not dontImport and 
                 importVersionData
                 """):
             if not wikiDoc.isDefinedWikiPage(wikiWord):
