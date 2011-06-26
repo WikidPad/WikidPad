@@ -674,6 +674,7 @@ lib/pwiki/SystemInfo.py -text
 lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
 lib/pwiki/Trashcan.py -text
+lib/pwiki/TrashcanGui.py -text
 lib/pwiki/UserActionCoord.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/ViHelper.py -text
