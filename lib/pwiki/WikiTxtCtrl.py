@@ -1085,12 +1085,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 "html_preview_webkitViKeys", False)
 
         self.Unbind(wx.EVT_KEY_DOWN)
+        self.Unbind(wx.EVT_LEFT_UP)
 
         if use_vi_navigation:
             if self.vi is None:
                 self.vi = ViHandler(self)
 
             self.Bind(wx.EVT_KEY_DOWN, self.vi.OnViKeyDown)
+            self.Bind(wx.EVT_LEFT_UP, self.vi.OnLeftMouseUp)
         else:
             if self.vi is not None:
                 self.vi.TurnOff()
@@ -1613,7 +1615,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             (-1, -1) if search is not applicable
         """
         unaliasedTarget = self.presenter.getWikiDocument()\
-                .getUnAliasedWikiWordOrAsIs(linkNode.wikiWord)
+                .getWikiPageNameForLinkTermOrAsIs(linkNode.wikiWord)
 
         docPage = self.getLoadedDocPage()
         if docPage is None:
@@ -2003,7 +2005,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     suggNewPageTitle = node.titleNode.getString()
 
                 unaliasedTarget = self.presenter.getWikiDocument()\
-                        .getUnAliasedWikiWordOrAsIs(node.wikiWord)
+                        .getWikiPageNameForLinkTermOrAsIs(node.wikiWord)
 
                 docPage = self.getLoadedDocPage()
 
@@ -3196,7 +3198,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
             for astNode in astNodes:
                 if astNode.name == "wikiWord":
                     threadstop.testRunning()
-                    wikiWord = wikiDocument.getUnAliasedWikiWord(astNode.wikiWord)
+                    wikiWord = wikiDocument.getWikiPageNameForLinkTerm(
+                            astNode.wikiWord)
 
                     # Set status to wikipage
                     callInMainThread(
@@ -3436,10 +3439,19 @@ class WikiTxtCtrl(SearchableScintillaControl):
         Returns line number of the middle visible line in viewport
         """
         fl = self.GetFirstVisibleLine()
-        if self.LinesOnScreen() < self.GetLineCount():
-            mid = (fl + (self.LinesOnScreen() // 2))
-        else:
-            mid = (fl + (self.GetLineCount() // 2))
+        ll = self.GetLastVisibleLine()
+
+        lines = ll - fl
+
+        mid = fl + lines // 2
+        print fl, ll
+        # TODO: Fix this for long lines
+
+        #if self.LinesOnScreen() < self.GetLineCount():
+        #    # This may return a float with .5  Really wanted? (MB)
+        #    mid = (fl + (self.LinesOnScreen() / 2))
+        #else:
+        #    mid = (fl + (self.GetLineCount() / 2))
         return mid
 
     # TODO
@@ -3876,6 +3888,25 @@ class ViHandler(ViHelper):
             self.pre_motion_keys[j] = \
                     [i for i in self.pre_keys[j] if self.pre_keys[j][i][0] == 1]
 
+    # Format
+    # key code : (command type, (function, arguments), repeatable)
+
+    # command type -
+    #               0 : Normal
+    #               1 : Motion
+    #               2 : Mode change
+
+    # function : function to call on keypress
+
+    # arguments : arguments can be None, a single argument or a dictionary
+
+    # repeatable - repeat types
+    #               0 : Not repeatable
+    #               1 : Normal repeat
+    #               2 : Repeat with insertion (i.e. i/a/etc)
+    #               3 : Replacet
+    #               4 : Find reverse
+    #               5 : Find forward
         self.keys = {
             0 : {
             # Normal mode
@@ -3909,12 +3940,18 @@ class ViHandler(ViHelper):
     (123) : (1, (self.Repeat, self.ctrl.ParaUp), 0), # {
     (125) : (1, (self.Repeat, self.ctrl.ParaDown), 0), # }
 
-    # TODO: Technically search is a motion but it will require a custom
-    # implementation in order to achieve that.
+    # TODO: complete search
+    # Search should use a custom implementation of wikidpads incremental search
     47  : (0, (self.StartSearch, None), 0), # /
-    # NOTE: at the moment searching does not mimic vi very well
-    110 : (0, (self.StartSearch, None), 0), # n
-    # 78  : (0, (self.StartSearch, None)), # N
+    #47  : (0, (self.StartSearchReverse, None), 0), # /
+    110 : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0), # n
+    78 : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0), # N
+
+    42 : (1, (self.Repeat, self.SearchCaretWordForwards), 0), # *
+    35 : (1, (self.Repeat, self.SearchCaretWordBackwards), 0), # #
+
+    (103, 42)  : (1, (self.Repeat, self.SearchPartialCaretWordForwards), 0), # g*
+    (103, 35)  : (1, (self.Repeat, self.SearchPartialCaretWordBackwards), 0), # g#
 
     # Basic movement
     (104) : (1, (self.MoveCaretLeft, None), 0), # h
@@ -4019,12 +4056,15 @@ class ViHandler(ViHelper):
 
         # Rather than rewrite all the keys for other modes it is easier just
         # to modify those that need to be changed
+
+        # VISUAL MODE
         self.keys[2] = self.keys[0].copy()
         self.keys[2].update({
                 99  : (0, (self.DeleteSelectionAndInsert, None), 2), # c
                 100  : (0, (self.DeleteSelection, None), 1), # d
                 120  : (0, (self.DeleteSelection, None), 1), # x
                 121 : (0, (self.YankSelection, None), 0), # y
+                89 : (0, (self.YankSelection, True), 0), # Y
                 60 : (0, (self.Indent, {"forward":False, "visual":True}), 0), # <
                 62 : (0, (self.Indent, {"forward":True, "visual":True}), 0), # >
                 (117) : (0, (self.LowerCase, None), 0), # u
@@ -4083,6 +4123,7 @@ class ViHandler(ViHelper):
             self.ctrl.SetCaretForeground(wx.Colour(255, 0, 0))
             self.ctrl.SetCaretWidth(40)
             self.ctrl.SetOvertype(False)
+            self.SetSelMode("NORMAL")
         elif mode == ViHelper.VISUAL:
             self.ctrl.SetCaretWidth(40)
             self.ctrl.SetCaretForeground(wx.Colour(250, 250, 210))
@@ -4097,9 +4138,13 @@ class ViHandler(ViHelper):
             self.ctrl.SetCaretForeground(self.default_caret_colour)
             self.ctrl.SetOvertype(True)
 
-    def OnMouseLeftUp(self, evt):
+    def OnLeftMouseUp(self, evt):
+        """Enter visual mode if text is selected by mouse"""
         if len(self.ctrl.GetSelectedText()) > 0:
-            self.EnterVisualMode()
+            self.EnterVisualMode(True)
+        else:
+            self.LeaveVisualMode()
+        evt.Skip()
 
     def OnViKeyDown(self, evt):
         """
@@ -4193,15 +4238,6 @@ class ViHandler(ViHelper):
         self.key_modifier.append(key)
         if len(self.key_modifier) > 1:
             key = tuple(self.key_modifier)
-
-
-
-        ## Double key commands, e.g. gg, gU
-        #if len(self.key_modifier) > 1:
-
-        #    self.key_modifier.append(key)
-
-        #    key = tuple(self.key_modifier)
 
         self.updateViStatus()
 
@@ -4298,9 +4334,7 @@ class ViHandler(ViHelper):
                 self.RepeatLastForwardFindCharCmd()
                 pre_key_type = self.pre_keys[self.mode][pre_motion_key][2] 
                 self.pre_keys[self.mode][pre_motion_key][1]()
-                print "hello"
                 if pre_key_type == 2:
-                    print self.insert_action
                     self.EmulateKeypresses(actions)
                     self.SetMode(ViHandler.NORMAL)
             self.ctrl.EndUndoAction()
@@ -4312,9 +4346,29 @@ class ViHandler(ViHelper):
 #--------------------------------------------------------------------
 # Misc stuff
 #--------------------------------------------------------------------
-    def ExtendSelectionToLineEnds(self):
-        start_pos = self.GetSelectionStart()
-        end_pos = self.GetSelectionEnd()
+    def SelectFullLines(self):
+        """
+        Could probably be replaced by SetSectionMode,
+        if it can be made to work.
+        """
+        start_line, end_line = self._GetSelectedLines()
+        print start_line, end_line
+        if self.ctrl.GetCurrentPos() >= self.visual_line_start_pos:
+            reverse = False
+
+            # Hack needed if selection is started on empty line
+            if len(self.ctrl.GetLine(start_line)) > 1:
+                text, pos = self.ctrl.GetCurLine()
+                if len(text) > 1:
+                    end_line -= 1
+
+        else:
+            reverse = True
+            end_line -= 1
+
+        cur_line = self.ctrl.GetCurrentLine()
+        self.SelectLines(start_line, end_line, reverse)
+
 
     def JoinLines(self):
         text = self.ctrl.GetSelectedText()
@@ -4378,9 +4432,11 @@ class ViHandler(ViHelper):
             self._anchor = self.ctrl.GetCurrentPos()
 
     def SelectInWord(self):
-        self.MoveCaretBackWord()
+        pos = self.ctrl.GetCurrentPos()
+        if pos > 0 and re.match("\W", unichr(self.ctrl.GetCharAt(pos-1))) is None:
+            self.MoveCaretBackWord(1)
         self.StartSelection()
-        self.MoveCaretWordEnd()
+        self.MoveCaretWordEnd(1)
         self.SelectSelection()
 
     def SelectInLink(self):
@@ -4440,17 +4496,21 @@ class ViHandler(ViHelper):
         self.ctrl.InsertText(self.ctrl.GetCurrentPos(), text)
         self.MoveCaretPos(len(text))
 
-    def SelectLines(self, start, end):
+    def SelectLines(self, start, end, reverse=False):
         """
         Selects lines
 
         @param start: start line
         @param end: end line
+        @param reverse: if true selection is reversed
         """
         start_pos = self.GetLineStartPos(start)
         end_pos = self.ctrl.GetLineEndPosition(end)
 
-        self.ctrl.SetSelection(start_pos, end_pos)
+        if reverse:
+            self.ctrl.SetSelection(end_pos, start_pos)
+        else:
+            self.ctrl.SetSelection(start_pos, end_pos)
 
     def SwapCase(self):
         self.ctrl.BeginUndoAction()
@@ -4519,19 +4579,24 @@ class ViHandler(ViHelper):
     #--------------------------------------------------------------------
 
     def EnterLineVisualMode(self):
-        print "VISUAL"
-        #self.ctrl.SetSelectionMode(1)
-        print self.ctrl.GetSelectionMode()
-        #if self.mode != ViHelper.VISUAL:
-        #    self.SetMode(ViHelper.VISUAL)
-        #    self.StartSelectionAtAnchor()
+        self.SetSelMode("LINE")
+        text, pos = self.ctrl.GetCurLine()
+        if pos == 0:
+            self.MoveCaretRight()
+        self.visual_line_start_pos = self.ctrl.GetCurrentPos()
+        if self.mode != ViHelper.VISUAL:
+            self.SetMode(ViHelper.VISUAL)
+            self.StartSelectionAtAnchor()
 
-        #    if self.ctrl.GetSelectedText() > 0:
-        #        self.MoveCaretRight()
-        self.ctrl.SetSelectionMode(1)
-        print self.ctrl.GetSelectionMode()
+            #if self.ctrl.GetSelectedText() > 0:
+            #    self.MoveCaretRight()
 
-    def EnterVisualMode(self):
+    def LeaveVisualMode(self):
+        """Helper function to end visual mode"""
+        self.SetSelMode("NORMAL")
+        self.SetMode(ViHelper.NORMAL)
+
+    def EnterVisualMode(self, mouse=False):
         """
         Change to visual (selection) mode
         
@@ -4539,10 +4604,12 @@ class ViHandler(ViHelper):
         """
         if self.mode != ViHelper.VISUAL:
             self.SetMode(ViHelper.VISUAL)
-            self.StartSelectionAtAnchor()
 
-            if self.ctrl.GetSelectedText() > 0:
-                self.MoveCaretRight()
+            if not mouse:
+                self.StartSelectionAtAnchor()
+
+                if self.ctrl.GetSelectedText() > 0:
+                    self.MoveCaretRight()
 
     #--------------------------------------------------------------------
     # Searching
@@ -4656,6 +4723,103 @@ class ViHandler(ViHelper):
         else:
             # Vim appears to only search forward for a closing brace
             self.FindChar(41, False, 0, 1, False)
+
+    # TODO: vim like searching
+    def _SearchText(self, text, forward=True, match_case=True, wrap=True, whole_word=True):
+        """
+        Searches for next occurance of 'text'
+
+        @param text: text to search for
+        @param forward: if true searches forward in text, else
+                        search in reverse
+        @param match_case: should search be case sensitive?  
+        """
+        self.AddSearchPosition(self.ctrl.GetCurrentPos())
+
+        search_cmd = self.ctrl.SearchNext if forward else self.ctrl.SearchPrev
+        
+        # There must be a better way to do this
+        if whole_word and match_case:
+            flags = wx.stc.STC_FIND_WHOLEWORD|wx.stc.STC_FIND_MATCHCASE
+        elif whole_word:
+            flags = wx.stc.STC_FIND_WHOLEWORD
+        elif match_case:
+            flags = wx.stc.STC_FIND_MATCHCASE
+
+        pos = search_cmd(flags, text)
+
+        if pos == -1 and wrap:
+            if forward:
+                self.ctrl.GotoLine(0)
+            else:
+                self.ctrl.GotoLine(self.ctrl.GetLineCount())
+            self.ctrl.SearchAnchor()
+            pos = search_cmd(flags, text)
+        if pos != -1:
+            self.ctrl.GotoPos(pos)
+
+    def _SearchCaretWord(self, forward=True, whole_word=True):
+        """
+        Searches for next occurance of word currently under
+        the caret
+
+        @param forward: if true searches forward in text, else
+                        search in reverse
+        @param match_case: should search be case sensitive?  
+        """ 
+        self.SelectInWord()
+        text = self.ctrl.GetSelectedText()
+        offset = 1 if forward else -1
+        self.MoveCaretPos(offset)
+        self.ctrl.SearchAnchor()
+        self._SearchText(text, forward, wrap=True, whole_word=whole_word)
+
+        self.last_search_args = {'text' : text, 'forward' : forward, 
+                                 'match_case' : True, 
+                                 'whole_word' : whole_word}
+
+    def SearchCaretWordForwards(self):
+        """Helper function to allow repeats"""
+        self._SearchCaretWord(True, True)
+
+    def SearchPartialCaretWordForwards(self):
+        self._SearchCaretWord(True, False)
+
+    def SearchCaretWordBackwards(self):
+        """Helper function to allow repeats"""
+        self._SearchCaretWord(False, True)
+
+    def SearchPartialCaretWordBackwards(self):
+        self._SearchCaretWord(False, False)
+
+    def ContinueLastSearch(self, reverse):
+        """
+        Repeats last search command
+        """
+        args = self.last_search_args
+        if args is not None:
+            # If "N" we need to reverse the search direction
+            if reverse:
+                args['forward'] = not args['forward']
+
+            offset = 1 if args['forward'] else -1
+            self.MoveCaretPos(offset)
+            self.ctrl.SearchAnchor()
+
+            self._SearchText(**args)
+
+            # Restore search direction (could use copy())
+            if reverse:
+                args['forward'] = not args['forward']
+
+    def ContinueLastSearchSameDirection(self):
+        """Helper function to allow repeats"""
+        self.ContinueLastSearch(False)
+
+    def ContinueLastSearchReverseDirection(self):
+        """Helper function to allow repeats"""
+        self.ContinueLastSearch(True)
+
     #--------------------------------------------------------------------
     # Replace
     #--------------------------------------------------------------------
@@ -4744,8 +4908,17 @@ class ViHandler(ViHelper):
 
         self.ctrl.Copy(text)
 
-    def YankSelection(self):
+    def YankSelection(self, lines=False):
         """Copy the current selection to the clipboard"""
+        if lines:
+            self.SelectFullLines()
+            self.ctrl.CharRightExtend()
+        elif self.GetSelMode() == "LINE":
+            # Selection needs to be the correct way round
+            start, end = self._GetSelectionRange()
+            self.ctrl.SetSelection(start, end)
+            self.ctrl.CharRightExtend()
+
         self.ctrl.Copy()
 
     def Yank(self):
@@ -4755,6 +4928,7 @@ class ViHandler(ViHelper):
         self.ctrl.GotoPos(start)
 
     def Put(self, before, count=None):
+        count = count if count is not None else self.count
         text = getTextFromClipboard()
 
         # If its not text paste as normal for now
@@ -4782,10 +4956,12 @@ class ViHandler(ViHelper):
         if self.HasSelection():
             self.ctrl.Clear()
 
-        self.Repeat(self.InsertText, arg=text)
+        #self.Repeat(self.InsertText, arg=text)
+        self.InsertText(count * text)
 
         if is_line:
-            self.MoveCaretUp(1)
+            #if before:
+            #    self.MoveCaretUp(1)
             self.GotoLineIndent()
 
         self.ctrl.EndUndoAction()
@@ -4836,7 +5012,7 @@ class ViHandler(ViHelper):
         max_line = min(line_no+self.count-1, self.ctrl.GetLineCount())
         start = self.GetLineStartPos(line_no)
         end = self.ctrl.GetLineEndPosition(max_line)+1
-        self.ctrl.SetSelection(start, end)
+        self.ctrl.SetSelection(end, start)
         self.DeleteSelection()
         
 
@@ -4872,10 +5048,26 @@ class ViHandler(ViHelper):
     def MoveCaretRight(self):
         self.MoveCaretPos(self.count)
 
+    #def MoveCaretLineUp(self, count=None):
+    #    """Make long lines behave as in vim"""
+    #    count = count if count is not None else self.count
+    #    new_line_number = max(0, self.ctrl.GetCurrentLine()-count)
+    #    self.ctrl.GotoLine(new_line_number)
+
+    #def MoveCaretLineDown(self, count=None):
+    #    """Make long lines behave as in vim"""
+    #    count = count if count is not None else self.count
+    #    new_line_number = min(self.ctrl.GetLineCount(), self.ctrl.GetCurrentLine()+count)
+    #    self.ctrl.GotoLine(new_line_number)
+
     def MoveCaretUp(self, count=None):
+        #count = count if count is not None else self.count
+        #self.MoveCaretToLinePos(-count)
+        #self.MoveCaretLineUp(count)
         self.Repeat(self.ctrl.LineUp, count)
 
     def MoveCaretDown(self, count=None):
+        #self.MoveCaretLineDown(count)
         self.Repeat(self.ctrl.LineDown, count)
 
     def MoveCaretDownAndIndent(self, count=None):
@@ -4904,10 +5096,16 @@ class ViHandler(ViHelper):
 
         Faster but does not maintain line position
         """
+        self.ctrl.ChooseCaretX()
         line = max(self.ctrl.GetCurrentLine() + offset, 0)
         line = min(line, self.ctrl.GetLineCount())
         self.ctrl.GotoLine(line)
-        self.ctrl.ChooseCaretX()
+        line_start_pos = self.ctrl.GetCurrentPos()
+
+        pos = max(index, 0)
+        pos = min(pos, self.ctrl.GetLineEndPosition(line)-line_start_pos)
+        self.ctrl.GotoPos(line_start_pos+pos)
+        #self.ctrl.ChooseCaretX()
 
     def MoveCaretToLinePos(self, line, index):
         line = max(line, 0)
@@ -4917,6 +5115,11 @@ class ViHandler(ViHelper):
         pos = max(index, 0)
         pos = min(pos, self.ctrl.GetLineEndPosition(line)-line_start_pos)
         self.ctrl.GotoPos(line_start_pos+pos)
+
+    def SaveCaretPos(self):
+        page = self.ctrl.presenter.getWikiWord()
+        self.previous_positions[page].append(self.ctrl.GetCurrentPos())
+        self.future_positions[page] = []
 
 # word-motions
 

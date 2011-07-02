@@ -47,7 +47,7 @@ class WikiData:
     def __init__(self, wikiDocument, dataDir, tempDir):
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
-        self.cachedContentNames = None
+        self.cachedWikiPageLinkTermDict = None
 
         dbfile = join(dataDir, "wiki.sli")
 
@@ -166,7 +166,7 @@ class WikiData:
             self._createTempTables()
 
             # reset cache
-            self.cachedContentNames = None
+            self.cachedWikiPageLinkTermDict = None
             self.cachedGlobalAttrs = None
             self.getGlobalAttributes()
         except (IOError, OSError, sqlite.Error), e:
@@ -243,7 +243,7 @@ class WikiData:
     def setContent(self, word, content, moddate = None, creadate = None):
         """
         Sets the content, does not modify the cache information
-        except self.cachedContentNames
+        except self.cachedWikiPageLinkTermDict
         """
         if not content: content = u""  # ?
         
@@ -252,7 +252,7 @@ class WikiData:
         content = self.contentUniInputToDb(content)
         self.setContentRaw(word, content, moddate, creadate)
 
-        self.cachedContentNames = None
+        self.cachedWikiPageLinkTermDict = None
 
 
     def setContentRaw(self, word, content, moddate = None, creadate = None):
@@ -301,14 +301,14 @@ class WikiData:
     def _renameContent(self, oldWord, newWord):
         """
         The content which was stored under oldWord is stored
-        after the call under newWord. The self.cachedContentNames
+        after the call under newWord. The self.cachedWikiPageLinkTermDict
         dictionary is updated, other caches won't be updated.
         """
         try:
             self.connWrap.execSql("update wikiwordcontent set word = ? "
                     "where word = ?", (newWord, oldWord))
     
-            self.cachedContentNames = None
+            self.cachedWikiPageLinkTermDict = None
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -317,7 +317,7 @@ class WikiData:
     def _deleteContent(self, word):
         try:
             self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
-            self.cachedContentNames = None
+            self.cachedWikiPageLinkTermDict = None
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -564,14 +564,14 @@ class WikiData:
     _METADATASTATE_NUMCOPARE_TO_SQL = {"==": "=", ">=": "<=", "<=": ">=",
             "!=": "!=", ">": "<", "<": ">"}
 
-    def getWikiWordsForMetaDataState(self, state, compare="=="):
+    def getWikiPageNamesForMetaDataState(self, state, compare="=="):
         """
         Retrieve a list of all words with a particular meta-data processing
         state.
         """
         sqlCompare = self._METADATASTATE_NUMCOPARE_TO_SQL.get(compare)
         if sqlCompare is None:
-            raise InternalError(u"getWikiWordsForMetaDataState: Bad compare '%s'" %
+            raise InternalError(u"getWikiPageNamesForMetaDataState: Bad compare '%s'" %
                     compare)
 
         try:
@@ -583,7 +583,7 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def validateFileSignatureForWord(self, word, setMetaDataDirty=False, 
+    def validateFileSignatureForWikiPageName(self, word, setMetaDataDirty=False, 
             refresh=False):
         """
         Returns True if file signature stored in DB matches the file
@@ -593,7 +593,7 @@ class WikiData:
         return True
 
 
-    def refreshFileSignatureForWord(self, word):
+    def refreshFileSignatureForWikiPageName(self, word):
         """
         Sets file signature to match current file.
         For compact_sqlite it does nothing.
@@ -677,7 +677,7 @@ class WikiData:
         Function must work for read-only wiki.
         """
         # Parents of the real word
-        realWord = self.getUnAliasedWikiWord(wikiWord)
+        realWord = self.getWikiPageNameForLinkTerm(wikiWord)
         if realWord is None:
             realWord = wikiWord
         try:
@@ -780,7 +780,7 @@ class WikiData:
         Function must work for read-only wiki.
         """
         checkList = [(w, 0)
-                for w in (self.getUnAliasedWikiWord(w) for w in words)
+                for w in (self.getWikiPageNameForLinkTerm(w) for w in words)
                 if w is not None]
         checkList.reverse()
         
@@ -801,7 +801,7 @@ class WikiData:
             children = self.getChildRelationships(toCheck, existingonly=True,
                     selfreference=False)
                     
-            children = [(self.getUnAliasedWikiWord(c), chLevel + 1)
+            children = [(self.getWikiPageNameForLinkTerm(c), chLevel + 1)
                     for c in children]
             children.reverse()
             checkList += children
@@ -874,9 +874,9 @@ class WikiData:
 
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
 
-    def getAllDefinedContentNames(self):
+    def getAllDefinedWikiPageNames(self):
         """
-        get the names of all the content elements in the db, no aliases
+        Get the names of all wiki pages in the db, no aliases
         Function must work for read-only wiki.
         """
         try:
@@ -887,10 +887,16 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    getAllDefinedWikiPageNames = getAllDefinedContentNames
+    def isDefinedWikiPageName(self, word):
+        try:
+            return bool(self.connWrap.execSqlQuerySingleItem(
+                    "select 1 from wikiwordcontent where word = ?", (word,)))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
-    def refreshDefinedContentNames(self):
+    def refreshWikiPageLinkTerms(self):
         """
         Refreshes the internal list of defined pages which
         may be different from the list of pages for which
@@ -902,48 +908,39 @@ class WikiData:
         so it must not rely on the presence of other cache
         information (e.g. relations).
 
-        The self.cachedContentNames is invalidated.
+        The self.cachedWikiPageLinkTermDict is invalidated.
         """
-        self.cachedContentNames = None
+        self.cachedWikiPageLinkTermDict = None
 
 
-    def _getCachedContentNames(self):
+    def _getCachedWikiPageLinkTermDict(self):
         """
         Function works for read-only wiki.
         """
         try:
-            if self.cachedContentNames is None:
-                self.cachedContentNames = dict(self.connWrap.execSqlQuery(
+            if self.cachedWikiPageLinkTermDict is None:
+                self.cachedWikiPageLinkTermDict = dict(self.connWrap.execSqlQuery(
                         "select word, word from wikiwordcontent union "
                         "select matchterm, word from wikiwordmatchterms "
                         "where (type & 2) != 0 and not matchterm in "
                         "(select word from wikiwordcontent)"))
                 # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 
-            return self.cachedContentNames
+            return self.cachedWikiPageLinkTermDict
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
 
-    def isDefinedWikiPage(self, word):
-        try:
-            return bool(self.connWrap.execSqlQuerySingleItem(
-                    "select 1 from wikiwordcontent where word = ?", (word,)))
-        except (IOError, OSError, sqlite.Error), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-
-
-    def isDefinedWikiLink(self, word):
+    def isDefinedWikiLinkTerm(self, word):
         "check if a word is a valid wikiword (page name or alias)"
-        return bool(self.getUnAliasedWikiWord(word))
+        return bool(self.getWikiPageNameForLinkTerm(word))
 
 
 #     # TODO More reliably esp. for aliases
 #     def isDefinedWikiWord(self, word):
 #         "check if a word is a valid wikiword (page name or alias)"
-#         return self._getCachedContentNames().has_key(word)
+#         return self._getCachedWikiPageLinkTermDict().has_key(word)
 
 
     def getAllProducedWikiLinks(self):
@@ -951,13 +948,14 @@ class WikiData:
         Return all links stored by production (in contrast to resolution)
         Function must work for read-only wiki.
         """
-        return self._getCachedContentNames().keys()
+        return self._getCachedWikiPageLinkTermDict().keys()
 
 
-
-    def getWikiLinksStartingWith(self, thisStr, includeAliases=False,
-            caseNormed=False):
-        "get the list of words starting with thisStr. used for autocompletion."
+    def getWikiPageLinkTermsStartingWith(self, thisStr, caseNormed=False):
+        """
+        Get the list of wiki page link terms (page names or aliases)
+        starting with thisStr. Used for autocompletion.
+        """
         if caseNormed:
             thisStr = sqlite.escapeForGlob(thisStr.lower())   # TODO More general normcase function
 
@@ -992,7 +990,7 @@ class WikiData:
                 raise DbReadAccessError(e)
 
 
-    def getWikiWordsModifiedWithin(self, startTime, endTime):
+    def getWikiPageNamesModifiedWithin(self, startTime, endTime):
         """
         Function must work for read-only wiki.
         startTime and endTime are floating values as returned by time.time()
@@ -1043,7 +1041,7 @@ class WikiData:
             return tuple(result[0])
 
 
-    def getWikiWordsBefore(self, stampType, stamp, limit=None):
+    def getWikiPageNamesBefore(self, stampType, stamp, limit=None):
         """
         Get a list of tuples of wiki words and dates related to a particular
         time before stamp.
@@ -1069,7 +1067,7 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def getWikiWordsAfter(self, stampType, stamp, limit=None):
+    def getWikiPageNamesAfter(self, stampType, stamp, limit=None):
         """
         Get a list of of tuples of wiki words and dates related to a particular
         time after OR AT stamp.
@@ -1095,9 +1093,9 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def getFirstWikiWord(self):
+    def getFirstWikiPageName(self):
         """
-        Returns the name of the "first" wiki word. See getNextWikiWord()
+        Returns the name of the "first" wiki word. See getNextWikiPageName()
         for details. Returns either an existing wiki word or None if no
         wiki words in database.
         """
@@ -1110,11 +1108,11 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def getNextWikiWord(self, currWord):
+    def getNextWikiPageName(self, currWord):
         """
         Returns the "next" wiki word after currWord or None if no
         next word exists. If you begin with the first word returned
-        by getFirstWikiWord() and then use getNextWikiWord() to
+        by getFirstWikiPageName() and then use getNextWikiPageName() to
         go to the next word until no more words are available
         and if the list of existing wiki words is not modified during
         iteration, it is guaranteed that you have visited all real
@@ -1234,8 +1232,7 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
-    
-    
+
     def getWordsForAttributeName(self, key):
         """
         Function must work for read-only wiki.
@@ -1248,8 +1245,6 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
-    
-    
 
     def getAttributesForWord(self, word):
         """
@@ -1263,7 +1258,6 @@ class WikiData:
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
-
 
 
     def _setAttribute(self, word, key, value):
@@ -1287,8 +1281,6 @@ class WikiData:
         self.cachedGlobalAttrs = None   # reset global attributes cache
 
 
-
-
     def updateCachedGlobalAttrs(self):
         """
         TODO: Should become part of public API!
@@ -1310,8 +1302,6 @@ class WikiData:
         return globalMap
 
 
-
-
     def deleteAttributes(self, word):
         try:
             self.connWrap.execSql("delete from wikiwordattrs where word = ?",
@@ -1321,8 +1311,7 @@ class WikiData:
             raise DbWriteAccessError(e)
 
     
-    # TODO remove "property"-compatibility
-
+    # TODO: 2.3: remove "property"-compatibility
     getPropertyNames = getAttributeNames  
     getPropertyNamesStartingWith = getAttributeNamesStartingWith
     getGlobalProperties = getGlobalAttributes
@@ -1335,16 +1324,39 @@ class WikiData:
     deleteProperties = deleteAttributes
 
 
-
     # ---------- Alias handling ----------
 
-    def getUnAliasedWikiWord(self, alias):
+    def getWikiPageNameForLinkTerm(self, alias):
         """
+        Return real page name for wiki page link term which may be
+        a real page name or an alias. Returns None if term not found.
         Function should only be called by WikiDocument as some methods
         of unaliasing must be performed in WikiDocument.
         Function must work for read-only wiki.
         """
-        return self._getCachedContentNames().get(alias, None)
+        return self._getCachedWikiPageLinkTermDict().get(alias, None)
+
+
+    # TODO: 2.4: Remove compatibility definitions
+    getAllDefinedContentNames = getAllDefinedWikiPageNames
+    isDefinedWikiPage = isDefinedWikiPageName
+    refreshDefinedContentNames = refreshWikiPageLinkTerms
+    getUnAliasedWikiWord = getWikiPageNameForLinkTerm
+    isDefinedWikiLink = isDefinedWikiLinkTerm
+    getWikiWordsModifiedWithin = getWikiPageNamesModifiedWithin
+    getWikiWordsBefore = getWikiPageNamesBefore
+    getWikiWordsAfter = getWikiPageNamesAfter
+    getFirstWikiWord = getFirstWikiPageName
+    getNextWikiWord = getNextWikiPageName
+    getWikiWordsForMetaDataState = getWikiPageNamesForMetaDataState
+    validateFileSignatureForWord = validateFileSignatureForWikiPageName
+    refreshFileSignatureForWord = refreshFileSignatureForWikiPageName
+    def getWikiLinksStartingWith(self, thisStr, includeAliases=False,
+            caseNormed=False):
+        """
+        For compatibility. Use getWikiPageLinkTermsStartingWith() instead.
+        """
+        return self.getWikiPageLinkTermsStartingWith(thisStr, caseNormed)
 
 
     # ---------- Todo cache handling ----------
@@ -1493,7 +1505,7 @@ class WikiData:
         try:
             self.connWrap.execSql("delete from wikiwordmatchterms where "
                     "word = ?" + addSql, (word,))
-            self.cachedContentNames = None
+            self.cachedWikiPageLinkTermDict = None
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1665,7 +1677,7 @@ class WikiData:
         DbStructure.recreateCacheTables(self.connWrap)
         self.connWrap.syncCommit()
 
-        self.cachedContentNames = None
+        self.cachedWikiPageLinkTermDict = None
         self.cachedGlobalAttrs = None
 
 
@@ -1956,14 +1968,14 @@ class WikiData:
 
 
 #         # recreate word caches
-#         self.cachedContentNames = {}
-#         for word in self.getAllDefinedContentNames():
-#             self.cachedContentNames[word] = 1
+#         self.cachedWikiPageLinkTermDict = {}
+#         for word in self.getAllDefinedWikiPageNames():
+#             self.cachedWikiPageLinkTermDict[word] = 1
 # 
 #         # cache aliases
 #         aliases = self.getAllAliases()
 #         for alias in aliases:
-#             self.cachedContentNames[alias] = 2
+#             self.cachedWikiPageLinkTermDict[alias] = 2
 
 
 #         finally:            

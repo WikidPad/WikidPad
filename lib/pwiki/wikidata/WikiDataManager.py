@@ -498,7 +498,7 @@ class WikiDataManager(MiscEventSourceMixin):
             wikiData.commit()
             finalState = Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED
 
-            for wikiWord in wikiData.getWikiWordsForMetaDataState(
+            for wikiWord in wikiData.getWikiPageNamesForMetaDataState(
                     finalState, "<"):
                 wikiData.setMetaDataState(wikiWord, finalState)
 
@@ -510,7 +510,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
 #         if not self.isReadOnlyEffect():
-#             words = self.getWikiData().getWikiWordsForMetaDataState(0)
+#             words = self.getWikiData().getWikiPageNamesForMetaDataState(0)
 #             for word in words:
 #                 self.updateExecutor.executeAsync(1, self._runDatabaseUpdate,
 #                         word)
@@ -822,7 +822,7 @@ class WikiDataManager(MiscEventSourceMixin):
         
     def pushDirtyMetaDataUpdate(self):
         """
-        Push all words for which meta-data is set dirty in the queue
+        Push all words for which meta-data is set dirty into the queue
         of the update executor
         """
         if not self.isReadOnlyEffect():
@@ -845,9 +845,9 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.getWikiData().setDbSettingsValue(
                         "syncWikiWordMatchtermsUpToDate", "1")
 
-            words0 = self.getWikiData().getWikiWordsForMetaDataState(
+            words0 = self.getWikiData().getWikiPageNamesForMetaDataState(
                     Consts.WIKIWORDMETADATA_STATE_DIRTY)
-            words1 = self.getWikiData().getWikiWordsForMetaDataState(
+            words1 = self.getWikiData().getWikiPageNamesForMetaDataState(
                     Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
 
             with self.updateExecutor.getDequeCondition():
@@ -860,7 +860,7 @@ class WikiDataManager(MiscEventSourceMixin):
                             word, Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
             
             if self.isSearchIndexEnabled():
-                words2 = self.getWikiData().getWikiWordsForMetaDataState(
+                words2 = self.getWikiData().getWikiPageNamesForMetaDataState(
                         Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
 
                 with self.updateExecutor.getDequeCondition():
@@ -893,22 +893,23 @@ class WikiDataManager(MiscEventSourceMixin):
         # TODO send message?
 
 
-    def isDefinedWikiPage(self, wikiWord):
+    def isDefinedWikiPageName(self, wikiWord):
         """
         Check if a page with this name exists (no aliases)
         """
-        return self.wikiData.isDefinedWikiPage(wikiWord)
+        return self.wikiData.isDefinedWikiPageName(wikiWord)
 
 
-    def isDefinedWikiLink(self, wikiWord):
+    def isDefinedWikiLinkTerm(self, wikiWord):
         """
         check if a word is a valid wikiword (page name or alias)
         """
-        return self.wikiData.isDefinedWikiLink(wikiWord)
+        return self.wikiData.isDefinedWikiLinkTerm(wikiWord)
 
 
     # For plugin compatibility
-    isDefinedWikiWord = isDefinedWikiLink
+    isDefinedWikiWord = isDefinedWikiLinkTerm
+    isDefinedWikiLink = isDefinedWikiLinkTerm
 
     def isCreatableWikiWord(self, wikiWord):
         """
@@ -916,14 +917,14 @@ class WikiDataManager(MiscEventSourceMixin):
         check against regular expression of wiki language, but checks if word
         already exists or (if document is in caseless mode) if word with
         different case but otherwise the same already exists.
-        If this returns False, self.getUnAliasedWikiWord(wikiWord) must be able to
+        If this returns False, self.getWikiPageNameForLinkTerm(wikiWord) must be able to
         return the existing word whose existence prevents creation of wikiWord
 
         TODO: Check against existing aliases
         """
         # TODO: Caseless mode
 #         return not self.wikiData.isDefinedWikiWord(wikiWord)
-        return not self.getUnAliasedWikiWord(wikiWord)
+        return not self.getWikiPageNameForLinkTerm(wikiWord)
 
 
     def getNormcasedWikiWord(self, word):
@@ -948,7 +949,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if word doesn't exist
         """
         with self.pageRetrievingLock:
-            if not self.isDefinedWikiLink(wikiWord):
+            if not self.isDefinedWikiLinkTerm(wikiWord):
                 raise WikiWordNotFoundException(
                         _(u"Word '%s' not in wiki") % wikiWord)
     
@@ -969,7 +970,7 @@ class WikiDataManager(MiscEventSourceMixin):
 #             if value is not None and isinstance(value, AliasWikiPage):
 #                 # Check if existing alias page is up to date
 #                 realWikiWord1 = value.getNonAliasPage().getWikiWord()
-#                 realWikiWord2 = self.wikiData.getUnAliasedWikiWord(wikiWord)
+#                 realWikiWord2 = self.wikiData.getWikiPageNameForLinkTerm(wikiWord)
 # 
 #                 if realWikiWord1 != realWikiWord2:
 #                     # if not, retrieve new page
@@ -977,7 +978,7 @@ class WikiDataManager(MiscEventSourceMixin):
 # 
 #             if value is None:
 #                 # No active page available
-#                 realWikiWord = self.getUnAliasedWikiWordOrAsIs(wikiWord)
+#                 realWikiWord = self.getWikiPageNameForLinkTermOrAsIs(wikiWord)
 #                 if wikiWord == realWikiWord:
 #                     # no alias
 #                     value = WikiPage(self, wikiWord)
@@ -1011,7 +1012,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if value is not None and isinstance(value, AliasWikiPage):
                 # Check if existing alias page is up to date
                 realWikiWord1 = value.getNonAliasPage().getWikiWord()
-                realWikiWord2 = self.wikiData.getUnAliasedWikiWord(wikiWord)
+                realWikiWord2 = self.wikiData.getWikiPageNameForLinkTerm(wikiWord)
                 
                 if realWikiWord1 != realWikiWord2:
                     # if not, retrieve new page
@@ -1019,7 +1020,7 @@ class WikiDataManager(MiscEventSourceMixin):
             
             if value is None:
                 # No active page available
-                realWikiWord = self.getUnAliasedWikiWordOrAsIs(wikiWord)
+                realWikiWord = self.getWikiPageNameForLinkTermOrAsIs(wikiWord)
                 if wikiWord == realWikiWord:
                     # no alias
                     value = WikiPage(self, wikiWord)
@@ -1108,7 +1109,7 @@ class WikiDataManager(MiscEventSourceMixin):
         but does not return aliases in this case
         """
         if unifName.startswith(u"wikipage/"):
-            return self.isDefinedWikiPage(unifName[9:])
+            return self.isDefinedWikiPageName(unifName[9:])
             
         # TODO Create native method in WikiData classes
         return self.guessDataBlockStoreHint(unifName) is not None
@@ -1179,7 +1180,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     # TODO Remove if not needed
-    def checkFileSignatureForWikiWordAndMarkDirty(self, word):
+    def checkFileSignatureForWikiPageNameAndMarkDirty(self, word):
         """
         First checks if file signature is valid, if not, the
         "metadataprocessed" field of the word is set to 0 to mark
@@ -1198,12 +1199,12 @@ class WikiDataManager(MiscEventSourceMixin):
         if proxyAccessLock is not None:
             proxyAccessLock.acquire()
         try:
-            valid = wikiData.validateFileSignatureForWord(word)
+            valid = wikiData.validateFileSignatureForWikiPageName(word)
 
             if not valid:
                 wikiData.setMetaDataState(word,
                         Consts.WIKIWORDMETADATA_STATE_DIRTY)
-                wikiData.refreshFileSignatureForWord(word)
+                wikiData.refreshFileSignatureForWikiPageName(word)
 
                 wikiPage = self.wikiPageDict.get(word)
                 if wikiPage is not None:
@@ -1214,7 +1215,8 @@ class WikiDataManager(MiscEventSourceMixin):
             if proxyAccessLock is not None:
                 proxyAccessLock.release()
 
-    def checkFileSignatureForAllWikiWordsAndMarkDirty(self):
+
+    def checkFileSignatureForAllWikiPageNamesAndMarkDirty(self):
         if self.isReadOnlyEffect():
             return True  # TODO Error message?
 
@@ -1225,10 +1227,10 @@ class WikiDataManager(MiscEventSourceMixin):
             proxyAccessLock.acquire()
         try:
             for word in self.getAllDefinedWikiPageNames():
-                if not wikiData.validateFileSignatureForWord(word):
+                if not wikiData.validateFileSignatureForWikiPageName(word):
                     wikiData.setMetaDataState(word,
                             Consts.WIKIWORDMETADATA_STATE_DIRTY)
-                    wikiData.refreshFileSignatureForWord(word)
+                    wikiData.refreshFileSignatureForWikiPageName(word)
 
                     wikiPage = self.wikiPageDict.get(word)
                     if wikiPage is not None:
@@ -1241,7 +1243,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def initiateFullUpdate(self, progresshandler):
         self.updateExecutor.end(hardEnd=True)
-        self.getWikiData().refreshDefinedContentNames()
+        self.getWikiData().refreshWikiPageLinkTerms()
 
         # get all of the wikiWords
         wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
@@ -1292,14 +1294,14 @@ class WikiDataManager(MiscEventSourceMixin):
             PersonalWikiFrame.GuiProgressHandler protocol
         """
         self.updateExecutor.end(hardEnd=True)
-        self.getWikiData().refreshDefinedContentNames()
+        self.getWikiData().refreshWikiPageLinkTerms()
 
         if onlyDirty:
-#             wikiWords = self.getWikiData().getWikiWordsForMetaDataState(
+#             wikiWords = self.getWikiData().getWikiPageNamesForMetaDataState(
 #                     Consts.WIKIWORDMETADATA_STATE_DIRTY) + \
-#                     self.getWikiData().getWikiWordsForMetaDataState(
+#                     self.getWikiData().getWikiPageNamesForMetaDataState(
 #                     Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
-            wikiWords = self.getWikiData().getWikiWordsForMetaDataState(
+            wikiWords = self.getWikiData().getWikiPageNamesForMetaDataState(
                     self.getFinalMetaDataState(), ">")
         else:
             # get all of the wikiWords
@@ -1348,7 +1350,8 @@ class WikiDataManager(MiscEventSourceMixin):
             #   define how the rest has to be interpreted, therefore they
             #   must be processed first.
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update attributes of %s") % wikiWord)
+                progresshandler.update(step, _(u"Update attributes of %s") %
+                        wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
@@ -1361,7 +1364,8 @@ class WikiDataManager(MiscEventSourceMixin):
                     wikiPage.refreshSyncUpdateMatchTerms()
                     pageAst = wikiPage.getLivePageAst()
 
-                    self.getWikiData().refreshFileSignatureForWord(wikiWord)
+                    self.getWikiData().refreshFileSignatureForWikiPageName(
+                            wikiWord)
                     wikiPage.refreshAttributesFromPageAst(pageAst)
                 except:
                     traceback.print_exc()
@@ -1426,7 +1430,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def getWikiWordSubpages(self, wikiWord):
-        return self.getWikiData().getWikiLinksStartingWith(wikiWord + u"/")
+        return self.getWikiData().getWikiPageLinkTermsStartingWith(
+                wikiWord + u"/")
 
 
     def buildRenameSeqWithSubpages(self, fromWikiWord, toWikiWord):
@@ -1450,7 +1455,7 @@ class WikiDataManager(MiscEventSourceMixin):
         # Build dictionary of renames
         renameDict = {}
 
-        if self.isDefinedWikiPage(fromWikiWord):
+        if self.isDefinedWikiPageName(fromWikiWord):
             # If fromWikiWord exists (not mandatory) it must be renamed, too
             renameDict[fromWikiWord] = toWikiWord
 
@@ -1464,7 +1469,7 @@ class WikiDataManager(MiscEventSourceMixin):
         sameToSet = set()
         
         for key, value in renameDict.iteritems():
-            if self.isDefinedWikiPage(value):
+            if self.isDefinedWikiPageName(value):
                 errorRenames.append((key, value,
                         RenameWikiWordException.PRB_TO_ALREADY_EXISTS))
 
@@ -1503,7 +1508,7 @@ class WikiDataManager(MiscEventSourceMixin):
             raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") %
                     (toWikiWord, errMsg))
 
-        if self.isDefinedWikiLink(toWikiWord):
+        if self.isDefinedWikiLinkTerm(toWikiWord):
             raise WikiDataException(
                     _(u"Cannot rename '%s' to '%s', '%s' already exists") %
                     (wikiWord, toWikiWord, toWikiWord))
@@ -1814,7 +1819,7 @@ class WikiDataManager(MiscEventSourceMixin):
 #             return
 # 
 #         self.updateExecutor.pause()
-#         self.getWikiData().refreshDefinedContentNames()
+#         self.getWikiData().refreshWikiPageLinkTerms()
 # 
 #         # get all of the wikiWords
 #         wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
@@ -1919,22 +1924,24 @@ class WikiDataManager(MiscEventSourceMixin):
                 )
 
 
-    def getWikiWordsModifiedWithin(self, startTime, endTime):
+    def getWikiPageNamesModifiedWithin(self, startTime, endTime):
         """
         startTime and endTime are floating values as returned by time.time()
         startTime is inclusive, endTime is exclusive
         """
-        return self.getWikiData().getWikiWordsModifiedWithin(startTime, endTime)
+        return self.getWikiData().getWikiPageNamesModifiedWithin(startTime,
+                endTime)
 
 
-    def getWikiWordsModifiedLastDays(self, days):
+    def getWikiPageNamesModifiedLastDays(self, days):
         """
         Return wiki words modified during the last number of days.
         """
         endTime = time.time()
         startTime = float(endTime-(86400*days))
         
-        return self.getWikiData().getWikiWordsModifiedWithin(startTime, endTime)
+        return self.getWikiData().getWikiPageNamesModifiedWithin(startTime,
+                endTime)
 
 
     def getCcWordBlacklist(self):
@@ -1966,21 +1973,21 @@ class WikiDataManager(MiscEventSourceMixin):
         self.nccWordBlacklist = bls
 
 
-    def getUnAliasedWikiWord(self, word):
+    def getWikiPageNameForLinkTerm(self, word):
         """
         Resolve links to wiki words. Returns None if it can't be resolved
         """
         # TODO: Resolve properly in caseless mode
-        return self.getWikiData().getUnAliasedWikiWord(word)
+        return self.getWikiData().getWikiPageNameForLinkTerm(word)
 
     
-    def getUnAliasedWikiWordOrAsIs(self, word):
+    def getWikiPageNameForLinkTermOrAsIs(self, word):
         """
         return the real word if word is an alias.
         returns word itself if word isn't an alias (may mean it's a real word
                 or doesn't exist!)
         """
-        result = self.getWikiData().getUnAliasedWikiWord(word)
+        result = self.getWikiData().getWikiPageNameForLinkTerm(word)
 
         if result is None:
             return word
@@ -2034,16 +2041,11 @@ class WikiDataManager(MiscEventSourceMixin):
         vals.update(biVals)
         
         return list(vals)
-        
-        
             
         
 #         s = set(v for w, k, v in
 #                 self.getWikiData().getAttributeTriples(None, key, None))
 #         return list(s)
-
-    getDistinctPropertyValuesByKey = getDistinctAttributeValuesByKey  # TODO remove "property"-compatibility
-
 
     def getAttributeTriples(self, word, key, value):
         """
@@ -2052,9 +2054,6 @@ class WikiDataManager(MiscEventSourceMixin):
         wildcard.
         """
         return self.getWikiData().getAttributeTriples(word, key, value)
-
-    getPropertyTriples = getAttributeTriples  # TODO remove "property"-compatibility
-
 
 
     def getGlobalAttributeValue(self, attribute, default=None):
@@ -2066,8 +2065,6 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiData().getGlobalAttributes().get(
                 u"global." + attribute, default)
         
-    getGlobalPropertyValue = getGlobalAttributeValue  # TODO remove "property"-compatibility
-
 
     def reconnect(self):
         """
@@ -2124,7 +2121,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 wikiData.commit()
                 finalState = self.getFinalMetaDataState()
                 
-                for wikiWord in wikiData.getWikiWordsForMetaDataState(
+                for wikiWord in wikiData.getWikiPageNamesForMetaDataState(
                         finalState, "<"):
                     wikiData.setMetaDataState(wikiWord, finalState)
                 wikiData.commit()
@@ -2201,3 +2198,18 @@ class WikiDataManager(MiscEventSourceMixin):
 #                     self.onlineSpellCheckerSession = \
 #                             SpellChecker.SpellCheckerSession(self)
 
+
+    # TODO: 2.3: Remove "property"-compatibility
+    getDistinctPropertyValuesByKey = getDistinctAttributeValuesByKey
+    getPropertyTriples = getAttributeTriples
+    getGlobalPropertyValue = getGlobalAttributeValue
+
+
+    # TODO: 2.4: Remove compatibility definitions
+    isDefinedWikiPage = isDefinedWikiPageName
+    getUnAliasedWikiWord = getWikiPageNameForLinkTerm
+    getUnAliasedWikiWordOrAsIs = getWikiPageNameForLinkTermOrAsIs
+    getWikiWordsModifiedWithin = getWikiPageNamesModifiedWithin
+    getWikiWordsModifiedLastDays = getWikiPageNamesModifiedLastDays
+    checkFileSignatureForAllWikiWordsAndMarkDirty = \
+            checkFileSignatureForAllWikiPageNamesAndMarkDirty

@@ -1396,7 +1396,7 @@ class ListWikiPagesOperation:
             return []
 
         return [w for w in self.searchOpTree.getRootWords() 
-                if self.wikiDocument.isDefinedWikiLink(w)]
+                if self.wikiDocument.isDefinedWikiLinkTerm(w)]
 
 
     def applyOrdering(self, wordSet, coll):

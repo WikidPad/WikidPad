@@ -95,7 +95,8 @@ class SelectWikiWordDialog(wx.Dialog):
         else:
             self.wikiWord = guiToUni(self.ctrls.text.GetValue())
     
-            if not self.pWiki.getWikiDocument().isDefinedWikiLink(self.wikiWord):
+            if not self.pWiki.getWikiDocument().isDefinedWikiLinkTerm(
+                    self.wikiWord):
                 self._fillListContent(self.wikiWord)
                 if len(self.listContent) > 0:
                     self.wikiWord = self.listContent[0][2]
@@ -270,17 +271,18 @@ class OpenWikiWordDialog(wx.Dialog):
                 # continue, so return True
                 return True
 
-            if not self.pWiki.getWikiDocument().isDefinedWikiLink(entered):
+            if not self.pWiki.getWikiDocument().isDefinedWikiLinkTerm(entered):
                 langHelper = wx.GetApp().createWikiLanguageHelper(
                         self.pWiki.getWikiDefaultWikiLanguage())
                 wikiWord = langHelper.extractWikiWordFromLink(entered,
                         self.pWiki.getWikiDocument())
 
                 if wikiWord is not None and \
-                        self.pWiki.getWikiDocument().isDefinedWikiLink(wikiWord):
+                        self.pWiki.getWikiDocument().isDefinedWikiLinkTerm(
+                                wikiWord):
                     self.value = ((wikiWord, 0,
                             self.pWiki.getWikiDocument()\
-                            .getUnAliasedWikiWord(wikiWord), -1),)
+                            .getWikiPageNameForLinkTerm(wikiWord), -1),)
                 else:
                     self._fillListContent(entered)
                     if len(self.listContent) > 0:
@@ -440,7 +442,8 @@ class OpenWikiWordDialog(wx.Dialog):
             for s in self.ctrls.lb.GetSelections():
                 delword = self.listContent[s][2]
                 # Un-alias word
-                delword = self.pWiki.getWikiDocument().getUnAliasedWikiWord(delword)
+                delword = self.pWiki.getWikiDocument()\
+                        .getWikiPageNameForLinkTerm(delword)
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)
@@ -535,7 +538,8 @@ class ChooseWikiWordDialog(wx.Dialog):
             for s in self.ctrls.lb.GetSelections():
                 delword = self.words[s]
                 # Un-alias word
-                delword = self.pWiki.getWikiDocument().getUnAliasedWikiWord(delword)
+                delword = self.pWiki.getWikiDocument()\
+                        .getWikiPageNameForLinkTerm(delword)
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)

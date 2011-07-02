@@ -1061,9 +1061,9 @@ class ModifiedWithinNode(AbstractNode):
 
     def listChildren(self):
 #         wikiData = self.treeCtrl.pWiki.getWikiData()
-#         words = wikiData.getWikiWordsModifiedLastDays(self.daySpan)
+#         words = wikiData.getWikiPageNamesModifiedLastDays(self.daySpan)
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
-        words = wikiDocument.getWikiWordsModifiedLastDays(self.daySpan)
+        words = wikiDocument.getWikiPageNamesModifiedLastDays(self.daySpan)
         self.treeCtrl.pWiki.getCollator().sort(words)
 
         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
@@ -1445,7 +1445,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             node = self.GetPyData(currentNode)
             if node.representsWikiWord():                    
                 if self.pWiki.getWikiDocument()\
-                        .getUnAliasedWikiWordOrAsIs(node.getWikiWord()) ==\
+                        .getWikiPageNameForLinkTermOrAsIs(node.getWikiWord()) ==\
                         currentWikiWord and currentWikiWord is not None:
                     return  # Is already on word -> nothing to do
                 if currentWikiWord is None:
@@ -1716,7 +1716,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 #         if nodeObj.representsWikiWord():
 #             retObj = self.refreshExecutor.executeAsync(
-#                     0, wikiData.getUnAliasedWikiWord, nodeObj.getWikiWord())
+#                     0, wikiData.getWikiPageNameForLinkTerm, nodeObj.getWikiWord())
 #             while retObj.state == 0:  # Dangerous!
 #                 yield None
 #             wikiWord = retObj.getReturn() 
@@ -2070,8 +2070,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             nodeobj = self.GetPyData(child)
 #             if nodeobj.representsFamilyWikiWord() and nodeobj.getWikiWord() == findWord:
             if nodeobj.representsFamilyWikiWord() and \
-                    self.pWiki.getWikiDocument().getUnAliasedWikiWord(nodeobj.getWikiWord())\
-                    == findWord:
+                    self.pWiki.getWikiDocument().getWikiPageNameForLinkTerm(
+                    nodeobj.getWikiWord()) == findWord:
                 return child
             
             (child, cookie) = self.GetNextChild(fromNode, cookie)

@@ -64,8 +64,7 @@ _testRE = re.compile(ur"^New[0-9]{6}$")
 
 def autoNewNumbered(wiki, evt):
     wiki.saveAllDocPages()
-    candidates = wiki.getWikiData().getWikiLinksStartingWith(u"New",
-            includeAliases=True)
+    candidates = wiki.getWikiData().getWikiPageLinkTermsStartingWith(u"New")
             
     candidates = filter(lambda w: _testRE.match(w), candidates)
     numbers = map(lambda w: int(w[3:]), candidates)

@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-06-22
+# Last modified (format YYYY-MM-DD): 2011-06-26
 
 
 import locale, pprint, time, sys, string, traceback
@@ -2000,7 +2000,7 @@ class _TheHelper(object):
             # We don't want prefixes here
             if prefix == u"":
                 ccBlacklist = wikiDocument.getCcWordBlacklist()
-                for word in wikiData.getWikiLinksStartingWith(tofind, True, True):
+                for word in wikiData.getWikiPageLinkTermsStartingWith(tofind, True):
                     if not _TheHelper.isCcWikiWord(word[silence:]) or word in ccBlacklist:
                         continue
 
@@ -2024,8 +2024,8 @@ class _TheHelper(object):
                     tofind[len(BracketStart):], docPage)
             
             if prefix is not None:
-                for word in wikiData.getWikiLinksStartingWith(
-                        link, True, True):
+                for word in wikiData.getWikiPageLinkTermsStartingWith(
+                        link, True):
                     backStepMap[BracketStart + prefix + word[silence:] +
                             wordBracketEnd] = backstep
 

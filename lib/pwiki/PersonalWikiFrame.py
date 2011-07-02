@@ -3225,7 +3225,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 lastRoot = self.getConfig().get("main", "tree_last_root_wiki_word",
                         None)
                 if not (lastRoot and
-                        self.getWikiDocument().isDefinedWikiLink(lastRoot)):
+                        self.getWikiDocument().isDefinedWikiLinkTerm(lastRoot)):
                     lastRoot = self.wikiName
                     
                 self.tree.setRootByWord(lastRoot)
@@ -3250,12 +3250,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # Remove/Replace undefined wiki words
                 wwo = []
                 for word, subCtrl in zip(wikiWordsToOpen, lastTabsSubCtrls):
-                    if self.getWikiDocument().isDefinedWikiLink(word):
+                    if self.getWikiDocument().isDefinedWikiLinkTerm(word):
                         wwo.append((word, subCtrl))
                         continue
     
-                    wordsStartingWith = self.getWikiData().getWikiLinksStartingWith(
-                            word, True)
+                    wordsStartingWith = self.getWikiData().getWikiPageLinkTermsStartingWith(
+                            word)
                     if len(wordsStartingWith) > 0:
                         word = wordsStartingWith[0]
                         wwo.append((word, subCtrl))
@@ -3342,7 +3342,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
         try:
             if word is not None and \
-                    self.getWikiDocument().isDefinedWikiLink(word):
+                    self.getWikiDocument().isDefinedWikiLinkTerm(word):
                 self.tree.setRootByWord(word)
                 self.tree.expandRoot()
                 self.getConfig().set("main", "tree_last_root_wiki_word", word)
@@ -3744,7 +3744,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if wikiWord and self.requireWriteAccess():
             try:
-                if wikiDoc.isDefinedWikiLink(wikiWord):
+                if wikiDoc.isDefinedWikiLinkTerm(wikiWord):
                     page = wikiDoc.getWikiPage(wikiWord)
                     page.deletePageToTrashcan()
             except (IOError, OSError, DbAccessError), e:
@@ -4314,7 +4314,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord is not None:
-            wikiWord = self.getWikiDocument().getUnAliasedWikiWord(wikiWord)
+            wikiWord = self.getWikiDocument().getWikiPageNameForLinkTerm(wikiWord)
 
         if wikiWord is None:
             self.displayErrorMessage(_(u"No real wiki word selected to rename"))
@@ -4387,7 +4387,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord is not None:
-            actualWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
+            actualWikiWord = self.getWikiDocument().getWikiPageNameForLinkTerm(
                     wikiWord)
 
             if actualWikiWord is None:
@@ -4396,8 +4396,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 if page.getDirty()[0]:
                     # Page was changed already
                         self.saveAllDocPages()
-                        actualWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
-                            wikiWord)
+                        actualWikiWord = self.getWikiDocument()\
+                                .getWikiPageNameForLinkTerm(wikiWord)
                 else:
                     # Unchanged unsaved page -> (pseudo-)delete without further request
                     page.pseudoDeletePage()
@@ -4487,8 +4487,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 print "--showReplaceTextByWikiwordDialog23", repr((validWikiLinkCore, langHelper.resolveWikiWordLink(validWikiLinkCore,
 #                             self.getCurrentDocPage())))
 
-                knownWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
-                        validWikiWord)
+                knownWikiWord = self.getWikiDocument()\
+                        .getWikiPageNameForLinkTerm(validWikiWord)
 
                 if knownWikiWord is not None:
                     result = wx.MessageBox(uniToGui(_(
@@ -4921,7 +4921,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         # TODO Progresshandler?
-        self.getWikiDocument().checkFileSignatureForAllWikiWordsAndMarkDirty()
+        self.getWikiDocument().checkFileSignatureForAllWikiPageNamesAndMarkDirty()
         self.getWikiDocument().pushDirtyMetaDataUpdate()
 
 
@@ -5013,7 +5013,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         else:
             try:
                 # self.saveCurrentDocPage()
-                if self.getWikiDocument().isDefinedWikiLink(wikiWord):
+                if self.getWikiDocument().isDefinedWikiLinkTerm(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
                     attr = langHelper.createAttributeFromComponents(key, value,
                             page)

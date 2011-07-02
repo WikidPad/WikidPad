@@ -358,7 +358,7 @@ class AttributeCheckAlias(AbstractAttributeCheck):
 
         targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
 
-        if wikiDocument.isDefinedWikiPage(targetWikiWord):
+        if wikiDocument.isDefinedWikiPageName(targetWikiWord):
             # Word exists and isn't an alias
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"A real wikiword with the alias name exists already: "
@@ -368,7 +368,8 @@ class AttributeCheckAlias(AbstractAttributeCheck):
             return
 
 
-        # TODO: Currently deactivated, needs resolving of all links
+        # TODO: Check for existing alias
+        # Currently deactivated, needs resolving of all links
 
 #         words = [w for w,k,v in wikiDocument
 #                 .getAttributeTriples(None, "alias", attrValue)]
@@ -420,7 +421,7 @@ class AttributeCheckTemplate(AbstractAttributeCheck):
 
         targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
 
-        if not wikiDocument.isDefinedWikiLink(targetWikiWord):
+        if not wikiDocument.isDefinedWikiLinkTerm(targetWikiWord):
             # Word doesn't exist
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"Template value isn't an existing wikiword: "

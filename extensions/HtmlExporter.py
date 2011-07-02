@@ -85,7 +85,7 @@ class BasicLinkConverter(object):
 
 class LinkConverterForHtmlSingleFilesExport(BasicLinkConverter):
     def getLinkForWikiWord(self, word, default = None):
-        relUnAlias = self.wikiDocument.getUnAliasedWikiWord(word)
+        relUnAlias = self.wikiDocument.getWikiPageNameForLinkTerm(word)
         if relUnAlias is None:
             return default
         if not self.htmlExporter.shouldExport(word):
@@ -97,7 +97,7 @@ class LinkConverterForHtmlSingleFilesExport(BasicLinkConverter):
 
 class LinkConverterForHtmlMultiPageExport(BasicLinkConverter):
     def getLinkForWikiWord(self, word, default = None):
-        relUnAlias = self.wikiDocument.getUnAliasedWikiWord(word)
+        relUnAlias = self.wikiDocument.getWikiPageNameForLinkTerm(word)
         if relUnAlias is None:
             return default
         if not self.htmlExporter.shouldExport(word):
@@ -379,7 +379,7 @@ class HtmlExporter(AbstractExporter):
 
         self.wordList = []
         for w in wordList:
-            if self.wikiDocument.isDefinedWikiLink(w):
+            if self.wikiDocument.isDefinedWikiLinkTerm(w):
                 self.wordList.append(w)
 
         if len(self.wordList) == 0:
@@ -1551,7 +1551,7 @@ class HtmlExporter(AbstractExporter):
             if removeSelf and self.optsStack["innermostPageUnifName"]\
                     .startswith(u"wikipage/"):
                 
-                selfPageName = self.wikiDocument.getUnAliasedWikiWordOrAsIs(
+                selfPageName = self.wikiDocument.getWikiPageNameForLinkTermOrAsIs(
                         self.optsStack["innermostPageUnifName"][9:])
                 try:
                     wordList.remove(selfPageName)
@@ -1847,11 +1847,12 @@ class HtmlExporter(AbstractExporter):
         selfLink = False
 
         if link:
-            linkTo = self.wikiDocument.getUnAliasedWikiWord(wikiWord)
+            linkTo = self.wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
             # Test if link to same page itself (maybe with an anchor fragment)
             if not self.exportType in (u"html_multi", u"xml"):
-                linkFrom = self.wikiDocument.getUnAliasedWikiWord(self.wikiWord)
+                linkFrom = self.wikiDocument.getWikiPageNameForLinkTerm(
+                        self.wikiWord)
                 if linkTo is not None and linkTo == linkFrom:
                     # Page links to itself
                     selfLink = True

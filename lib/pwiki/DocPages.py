@@ -348,7 +348,7 @@ class AliasWikiPage(DocPage):
         the real one, otherwise return self
         """
         return self.realWikiPage
-#         word = self.wikiDocument.getWikiData().getUnAliasedWikiWord(self.wikiWord)
+#         word = self.wikiDocument.getWikiData().getWikiPageNameForLinkTerm(self.wikiWord)
 #         return self.wikiDocument.getWikiPageNoError(word)
 
     def getContent(self):
@@ -478,7 +478,7 @@ class AbstractWikiPage(DataCarryingPage):
     Abstract base for WikiPage and Versioning.WikiPageSnapshot
     """
 
-    def __init__(self, wikiDocument, wikiWord):
+    def __init__(self, wikiDocument, wikiPageName):
         DataCarryingPage.__init__(self, wikiDocument)
 
         self.livePageBasePlaceHold = None   # liveTextPlaceHold object on which
@@ -500,7 +500,7 @@ class AbstractWikiPage(DataCarryingPage):
 #         self.metaDataProcessLock = threading.RLock()  # lock while processing
 #                 # meta-data
 
-        self.wikiWord = wikiWord
+        self.wikiPageName = wikiPageName
         self.childRelations = None
         self.childRelationSet = set()
         self.todos = None
@@ -509,15 +509,26 @@ class AbstractWikiPage(DataCarryingPage):
         self.suggNewPageTitle = None  # Title to use for page if it is
                 # newly created
 
-#         if self.getWikiData().getMetaDataState(self.wikiWord) != 1:
+#         if self.getWikiData().getMetaDataState(self.wikiPageName) != 1:
 #             self.updateDirtySince = time.time()
 
     def invalidate(self):
         super(AbstractWikiPage, self).invalidate()
         self.__sinkWikiDocumentSpellSession.setEventSource(None)
 
+    # TODO: Replace getWikiWord by getWikiPageName where appropriate
     def getWikiWord(self):
-        return self.wikiWord
+        """
+        Overwritten by AliasPage to return the alias name
+        """
+        return self.wikiPageName
+
+    def getWikiPageName(self):
+        """
+        This returns the real page name even for an AliasPage
+        """
+        return self.wikiPageName
+
 
     def getTitle(self):
         """
@@ -532,7 +543,7 @@ class AbstractWikiPage(DataCarryingPage):
         "wikipage/" + the wiki word for wiki pages or the functional tag
         for functional pages.
         """
-        return u"wikipage/" + self.wikiWord
+        return u"wikipage/" + self.wikiPageName
 
     def getWikiDocument(self):
         return self.wikiDocument
@@ -541,7 +552,7 @@ class AbstractWikiPage(DataCarryingPage):
         return self.wikiDocument.getWikiData()
         
     def getMetaDataState(self):
-        return self.getWikiData().getMetaDataState(self.wikiWord)
+        return self.getWikiData().getMetaDataState(self.wikiPageName)
 
     def addTxtEditor(self, txted):
         """
@@ -576,7 +587,7 @@ class AbstractWikiPage(DataCarryingPage):
         """
         if self.modified is None:
             self.modified, self.created, self.visited = \
-                    self.getWikiData().getTimestamps(self.wikiWord)
+                    self.getWikiData().getTimestamps(self.wikiPageName)
                     
         if self.modified is None:
             ti = time.time()
@@ -591,7 +602,7 @@ class AbstractWikiPage(DataCarryingPage):
         timestamps = timestamps[:3]
         self.modified, self.created, self.visited = timestamps
         
-        self.getWikiData().setTimestamps(self.wikiWord, timestamps)
+        self.getWikiData().setTimestamps(self.wikiPageName, timestamps)
 
 
     def getSuggNewPageTitle(self):
@@ -601,7 +612,7 @@ class AbstractWikiPage(DataCarryingPage):
         self.suggNewPageTitle = suggNewPageTitle
 
     def getParentRelationships(self):
-        return self.getWikiData().getParentRelationships(self.wikiWord)
+        return self.getWikiData().getParentRelationships(self.wikiPageName)
 
 
     def getChildRelationships(self, existingonly=False, selfreference=True,
@@ -632,7 +643,7 @@ class AbstractWikiPage(DataCarryingPage):
             if withFields is None:
                 withFields = ()
     
-            relations = wikiData.getChildRelationships(self.wikiWord,
+            relations = wikiData.getChildRelationships(self.wikiPageName,
                     existingonly, selfreference, withFields=withFields)
     
             if len(excludeSet) > 0:
@@ -646,11 +657,11 @@ class AbstractWikiPage(DataCarryingPage):
                 # First unalias wiki pages and remove non-existing ones
                 clearedIncSet = set()
                 for w in includeSet:
-                    w = wikiDocument.getUnAliasedWikiWord(w)
+                    w = wikiDocument.getWikiPageNameForLinkTerm(w)
                     if w is None:
                         continue
 
-#                     if not wikiDocument.isDefinedWikiLink(w):
+#                     if not wikiDocument.isDefinedWikiLinkTerm(w):
 #                         continue
     
                     clearedIncSet.add(w)
@@ -677,7 +688,7 @@ class AbstractWikiPage(DataCarryingPage):
             if self.attrs is not None:
                 return self.attrs
             
-            data = self.getWikiData().getAttributesForWord(self.wikiWord)
+            data = self.getWikiData().getAttributesForWord(self.wikiPageName)
 
 #         with self.textOperationLock:
 #             if self.attrs is not None:
@@ -729,7 +740,7 @@ class AbstractWikiPage(DataCarryingPage):
 #     def getTodos(self):
 #         with self.textOperationLock:
 #             if self.todos is None:
-#                 self.todos = self.getWikiData().getTodosForWord(self.wikiWord)
+#                 self.todos = self.getWikiData().getTodosForWord(self.wikiPageName)
 #                         
 #             return self.todos
 
@@ -792,7 +803,7 @@ class AbstractWikiPage(DataCarryingPage):
 
 
     def isDefined(self):
-        return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+        return self.getWikiDocument().isDefinedWikiPageName(self.getWikiWord())
 
 
     @staticmethod
@@ -1302,7 +1313,7 @@ class WikiPage(AbstractWikiPage):
         """
         content = None
         try:
-            content = self.getWikiData().getContent(self.wikiWord)
+            content = self.getWikiData().getContent(self.wikiPageName)
         except WikiFileNotFoundException, e:
             # Create initial content of new page
 
@@ -1322,7 +1333,8 @@ class WikiPage(AbstractWikiPage):
                                 parentPage.getAttribute("template"),
                                 parentPage)
                         if templateWord is not None and \
-                                self.wikiDocument.isDefinedWikiLink(templateWord):
+                                self.wikiDocument.isDefinedWikiLinkTerm(
+                                        templateWord):
                             if templateSource is None:
                                 templateSource = templateWord
                                 templateParentPage = parentPage
@@ -1342,7 +1354,7 @@ class WikiPage(AbstractWikiPage):
                     
                     templateWord = globalAttrs.get(u"global.template")
                     if templateWord is not None and \
-                            self.wikiDocument.isDefinedWikiLink(templateWord):
+                            self.wikiDocument.isDefinedWikiLinkTerm(templateWord):
                         templateSource = templateWord
                         templateParentPage = self.wikiDocument.getWikiPage(
                                 parents[0])
@@ -1394,7 +1406,7 @@ class WikiPage(AbstractWikiPage):
 
 
 #     def isDefined(self):
-#         return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+#         return self.getWikiDocument().isDefinedWikiPageName(self.getWikiWord())
 
 
     def pseudoDeletePage(self):
@@ -1504,20 +1516,20 @@ class WikiPage(AbstractWikiPage):
                 return True  # TODO Error message?
     
             wikiData = self.getWikiData()
-            word = self.wikiWord
+            word = self.wikiPageName
 
             proxyAccessLock = getattr(wikiData, "proxyAccessLock", None)
             if proxyAccessLock is not None:
                 proxyAccessLock.acquire()
             try:
-                valid = wikiData.validateFileSignatureForWord(word)
+                valid = wikiData.validateFileSignatureForWikiPageName(word)
                 
                 if valid:
                     return True
     
                 wikiData.setMetaDataState(word,
                         Consts.WIKIWORDMETADATA_STATE_DIRTY)
-                wikiData.refreshFileSignatureForWord(word)
+                wikiData.refreshFileSignatureForWikiPageName(word)
                 self.markTextChanged()
             finally:
                 if proxyAccessLock is not None:
@@ -1537,7 +1549,7 @@ class WikiPage(AbstractWikiPage):
 
 
     def markMetaDataDirty(self):
-        self.getWikiData().setMetaDataState(self.wikiWord,
+        self.getWikiData().setMetaDataState(self.wikiPageName,
                 Consts.WIKIWORDMETADATA_STATE_DIRTY)
 
 
@@ -1577,8 +1589,8 @@ class WikiPage(AbstractWikiPage):
                 Consts.WIKIWORDMATCHTERMS_TYPE_FROM_WORD | \
                 Consts.WIKIWORDMATCHTERMS_TYPE_SYNCUPDATE
 
-        matchTerms = [(self.wikiWord, WORD_TYPE, self.wikiWord, -1, 0)]
-        self.getWikiData().updateWikiWordMatchTerms(self.wikiWord, matchTerms,
+        matchTerms = [(self.wikiPageName, WORD_TYPE, self.wikiPageName, -1, 0)]
+        self.getWikiData().updateWikiWordMatchTerms(self.wikiPageName, matchTerms,
                 syncUpdate=True)
 
 
@@ -1616,7 +1628,7 @@ class WikiPage(AbstractWikiPage):
             self.attrs = None
 
         try:
-            self.getWikiData().updateAttributes(self.wikiWord, attrs)
+            self.getWikiData().updateAttributes(self.wikiPageName, attrs)
         except WikiWordNotFoundException:
             return False
 
@@ -1632,7 +1644,7 @@ class WikiPage(AbstractWikiPage):
                 threadstop.testRunning()
                 # clear the dirty flag
 
-                self.getWikiData().setMetaDataState(self.wikiWord,
+                self.getWikiData().setMetaDataState(self.wikiPageName,
                         Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
 
                 valid = True
@@ -1692,13 +1704,13 @@ class WikiPage(AbstractWikiPage):
                 self.getWikiLanguageName())
 
         for w, k, v in self.getWikiDocument().getAttributeTriples(
-                self.wikiWord, u"alias", None):
+                self.wikiPageName, u"alias", None):
             threadstop.testRunning()
             if not langHelper.checkForInvalidWikiLink(v,
                     self.getWikiDocument()):
-#                 matchTerms.append((v, ALIAS_TYPE, self.wikiWord, -1, -1))
+#                 matchTerms.append((v, ALIAS_TYPE, self.wikiPageName, -1, -1))
                 matchTerms.append((langHelper.resolveWikiWordLink(v, self),
-                        ALIAS_TYPE, self.wikiWord, -1, -1))
+                        ALIAS_TYPE, self.wikiPageName, -1, -1))
 
         # Add headings to match terms if wanted
         depth = self.wikiDocument.getWikiConfig().getint(
@@ -1715,7 +1727,7 @@ class WikiPage(AbstractWikiPage):
                 if title.endswith(u"\n"):
                     title = title[:-1]
                 
-                matchTerms.append((title, HEADALIAS_TYPE, self.wikiWord,
+                matchTerms.append((title, HEADALIAS_TYPE, self.wikiPageName,
                         node.pos + node.strLength, 0))
 
         with self.textOperationLock:
@@ -1725,11 +1737,13 @@ class WikiPage(AbstractWikiPage):
             self.childRelations = None
             self.childRelationSet = set()
         try:
-            self.getWikiData().updateTodos(self.wikiWord, todos)
+            self.getWikiData().updateTodos(self.wikiPageName, todos)
             threadstop.testRunning()
-            self.getWikiData().updateChildRelations(self.wikiWord, childRelations)
+            self.getWikiData().updateChildRelations(self.wikiPageName,
+                    childRelations)
             threadstop.testRunning()
-            self.getWikiData().updateWikiWordMatchTerms(self.wikiWord, matchTerms)
+            self.getWikiData().updateWikiWordMatchTerms(self.wikiPageName,
+                    matchTerms)
             threadstop.testRunning()
         except WikiWordNotFoundException:
             return False
@@ -1745,7 +1759,7 @@ class WikiPage(AbstractWikiPage):
 
         valid = False
         with self.textOperationLock:
-#             print "--refreshMainDbCacheFromPageAst43", repr((self.wikiWord, self.saveDirtySince,
+#             print "--refreshMainDbCacheFromPageAst43", repr((self.wikiPageName, self.saveDirtySince,
 #                     self.livePageBasePlaceHold is self.liveTextPlaceHold,
 #                     self.livePageBaseFormatDetails is not None,
 # #                     self.getFormatDetails().isEquivTo(self.livePageBaseFormatDetails),
@@ -1760,7 +1774,7 @@ class WikiPage(AbstractWikiPage):
                 # clear the dirty flag
                 self.updateDirtySince = None
 
-                self.getWikiData().setMetaDataState(self.wikiWord,
+                self.getWikiData().setMetaDataState(self.wikiPageName,
                         Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
                 valid = True
 
@@ -1808,7 +1822,7 @@ class WikiPage(AbstractWikiPage):
                 return False
             else:
                 writer.commit()
-                self.getWikiData().setMetaDataState(self.wikiWord,
+                self.getWikiData().setMetaDataState(self.wikiPageName,
                         Consts.WIKIWORDMETADATA_STATE_INDEXED)
                 return True
 
@@ -1879,7 +1893,7 @@ class WikiPage(AbstractWikiPage):
                         return False
 #             elif step == -2:
 #                 for i in range(15):   # while True  is too dangerous
-#                     metaState = self.getWikiData().getMetaDataState(self.wikiWord)
+#                     metaState = self.getWikiData().getMetaDataState(self.wikiPageName)
 # 
 #                     if not liveTextPlaceHold is self.liveTextPlaceHold:
 #                         return False
@@ -1939,12 +1953,13 @@ class WikiPage(AbstractWikiPage):
             return
         
         with self.textOperationLock:
-            if not self.getWikiDocument().isDefinedWikiPage(self.wikiWord):
+            if not self.getWikiDocument().isDefinedWikiPageName(
+                    self.wikiPageName):
                 # Pages isn't yet in database  -> fire event
                 # The event may be needed to invalidate a cache
                 self.fireMiscEventKeys(("saving new wiki page",))
 
-            self.getWikiData().setContent(self.wikiWord, text)
+            self.getWikiData().setContent(self.wikiPageName, text)
             self.refreshSyncUpdateMatchTerms()
             self.saveDirtySince = None
 #             self.dbContentPlaceHold = object()
@@ -2203,7 +2218,7 @@ class WikiPage(AbstractWikiPage):
         resetdepth -- if entry outreaches maxdepth it is inserted later
                 with level  resetdepth  (-1: entry isn't inserted anymore)
         """
-        getUnAliasedWikiWord = self.getWikiDocument().getUnAliasedWikiWord
+        getWikiPageNameForLinkTerm = self.getWikiDocument().getWikiPageNameForLinkTerm
 
         checkList = [(self.getWikiWord(), self.getNonAliasPage().getWikiWord(),
                 0)]
@@ -2256,7 +2271,7 @@ class WikiPage(AbstractWikiPage):
             page = self.getWikiDocument().getWikiPage(nonAliasWord)
             children = page.getChildRelationshipsTreeOrder(existingonly=True)
 
-            children = [(c, getUnAliasedWikiWord(c), chLevel + 1)
+            children = [(c, getWikiPageNameForLinkTerm(c), chLevel + 1)
                     for c in children]
             children.reverse()
             checkList += children

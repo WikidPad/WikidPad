@@ -353,7 +353,7 @@ class MultiPageTextImporter:
                 "and not dontImport"):
             wpName = wikipageUnifName[9:]
         
-            if not self.wikiDocument.isDefinedWikiPage(wpName):
+            if not self.wikiDocument.isDefinedWikiPageName(wpName):
                 continue
 
             self.tempDb.execSql("update entries set collisionWithPresent = ? "
@@ -618,7 +618,7 @@ class MultiPageTextImporter:
                 from entries where unifName glob 'wikipage/*' and 
                 renamePresentTo glob 'wikipage/*'
                 """):
-            if wikiDoc.isDefinedWikiPage(pageFrom):
+            if wikiDoc.isDefinedWikiPageName(pageFrom):
                 wikiDoc.renameWikiWord(pageFrom, pageTo, False)  # TODO How to handle rename of home page?
 
         # Then remaining data blocks
@@ -644,7 +644,7 @@ class MultiPageTextImporter:
                 renameImportTo glob 'wikipage/*' and not dontImport and 
                 importVersionData
                 """):
-            if not wikiDoc.isDefinedWikiPage(wikiWord):
+            if not wikiDoc.isDefinedWikiPageName(wikiWord):
                 continue
 
             page = wikiDoc.getWikiPage(wikiWord)
@@ -701,7 +701,7 @@ class MultiPageTextImporter:
                 from entries where unifName glob 'wikipage/*' and 
                 renamePresentTo glob 'wikipage/*' and importVersionData
                 """):
-            if not wikiDoc.isDefinedWikiPage(wikiWord):
+            if not wikiDoc.isDefinedWikiPageName(wikiWord):
                 continue
 
             page = wikiDoc.getWikiPage(wikiWord)

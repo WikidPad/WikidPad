@@ -28,7 +28,7 @@ WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("MenuFunctions", 1), ("Options", 1))
 
 
 def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
-    currWord = wikiDocument.getUnAliasedWikiWord(currWord)
+    currWord = wikiDocument.getWikiPageNameForLinkTerm(currWord)
     firstDef = u""
     graph = []
 
@@ -151,7 +151,7 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
 
     # Unalias wikiwords/remove non-wikiwords in attribute values
     for p in word_relations:
-        word = wikiDocument.getUnAliasedWikiWord(p[2])
+        word = wikiDocument.getWikiPageNameForLinkTerm(p[2])
         if word is None:
             continue
 
@@ -183,7 +183,7 @@ def buildChildGraphSource(wikiDocument, currWord, config):
     for word in allWords:
         for child in wikiData.getChildRelationships(word, existingonly=True,
                 selfreference=False):
-            child = wikiDocument.getUnAliasedWikiWord(child)
+            child = wikiDocument.getWikiPageNameForLinkTerm(child)
 
             conns.add((word, child))
 

@@ -222,7 +222,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
         # The "if" ensures that existing pages can be opened even
         # if the syntax is (or became) incompatible
-        if not self.getWikiDocument().isDefinedWikiPage(wikiWord):
+        if not self.getWikiDocument().isDefinedWikiPageName(wikiWord):
             errMsg = langHelper.checkForInvalidWikiWord(wikiWord,
                     self.getWikiDocument())
 
@@ -248,7 +248,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
             # check if this is an alias
             wikiDoc = self.getMainControl().getWikiDocument()
-            wikiWord = wikiDoc.getUnAliasedWikiWordOrAsIs(wikiWord)
+            wikiWord = wikiDoc.getWikiPageNameForLinkTermOrAsIs(wikiWord)
 
             # fetch the page info from the database
             try:

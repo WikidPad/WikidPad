@@ -118,11 +118,11 @@ class SpellCheckerDialog(wx.Dialog):
             return False
 
         startWikiWord = self.mainControl.getWikiDocument()\
-                .getUnAliasedWikiWordOrAsIs(startWikiWord)
+                .getWikiPageNameForLinkTermOrAsIs(startWikiWord)
 
         firstCheckedWikiWord = startWikiWord
 
-        if not self.mainControl.getWikiDocument().isDefinedWikiPage(
+        if not self.mainControl.getWikiDocument().isDefinedWikiPageName(
                 firstCheckedWikiWord):
 
             # This can happen if startWikiWord is a newly created, not yet
@@ -453,10 +453,10 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
     def findAndLoadNextWikiPage(self, firstCheckedWikiWord, checkedWikiWord):
         while True:
             #Go to next page
-            nw = self.wikiDocument.getWikiData().getNextWikiWord(
+            nw = self.wikiDocument.getWikiData().getNextWikiPageName(
                     checkedWikiWord)
             if nw is None:
-                nw = self.wikiDocument.getWikiData().getFirstWikiWord()
+                nw = self.wikiDocument.getWikiData().getFirstWikiPageName()
 
             if nw is None or nw == firstCheckedWikiWord:
                 # Something went wrong or we are where we started

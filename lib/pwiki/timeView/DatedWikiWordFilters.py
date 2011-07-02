@@ -138,7 +138,7 @@ class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
         startTime = day.GetTicks()
         endTime = float(startTime + 86400 * self.getDayResolution())
 
-        return wikiDocument.getWikiWordsModifiedWithin(startTime,
+        return wikiDocument.getWikiPageNamesModifiedWithin(startTime,
                 endTime)
 
     def getMinMaxDay(self):
@@ -147,7 +147,7 @@ class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
 
 
     def getDaysBefore(self, day, limit=None):
-        wtList = self.getWikiDocument().getWikiData().getWikiWordsBefore(
+        wtList = self.getWikiDocument().getWikiData().getWikiPageNamesBefore(
                 0, day.GetTicks(), limit)
         wtList.reverse()
 
@@ -155,7 +155,7 @@ class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
 
 
     def getDaysAfter(self, day, limit=None):
-        wtList = self.getWikiDocument().getWikiData().getWikiWordsAfter(
+        wtList = self.getWikiDocument().getWikiData().getWikiPageNamesAfter(
                 0, (day + wx.TimeSpan_Day()).GetTicks(), limit)
 
         return self._getDayListFromTimeList(wtList)

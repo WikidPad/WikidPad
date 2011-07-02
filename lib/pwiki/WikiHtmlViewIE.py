@@ -60,7 +60,7 @@ class LinkConverterForPreviewIe:
         self.wikiDocument = wikiDocument
 
     def getLinkForWikiWord(self, word, default = None):
-        if self.wikiDocument.isDefinedWikiLink(word):
+        if self.wikiDocument.isDefinedWikiLinkTerm(word):
             return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
@@ -73,7 +73,7 @@ class LinkConverterForPreviewMoz:
         self.wikiDocument = wikiDocument
 
     def getLinkForWikiWord(self, word, default = None):
-        if self.wikiDocument.isDefinedWikiLink(word):
+        if self.wikiDocument.isDefinedWikiLinkTerm(word):
             return urlQuote(u"file://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
@@ -488,7 +488,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 if wikiDocument is None:
                     return
                     
-                wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord)
+                wikiWord = wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
                 if wikiWord is not None:
                     status = _(u"Link to page: %s") % wikiWord

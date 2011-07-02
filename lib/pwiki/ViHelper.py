@@ -1,9 +1,11 @@
-import wx
+import wx, wx.stc
 import SystemInfo
 from wxHelper import GUI_ID, getAccelPairFromKeyDown 
 from collections import defaultdict
 
-#TODO: Multiple registers
+#TODO:  Multiple registers
+#       Page marks
+#       Alt-combinations
 
 class ViHelper():
     """
@@ -45,8 +47,14 @@ class ViHelper():
         self.last_forward_find_cmd = None
         self.last_backward_find_cmd = None
 
+        self.last_search_cmd = None
+        self.search_start_position = []
+        self.search_start_position_future = None
+
         self.last_cmd = None
         self.insert_action = []
+
+        self.selection_mode = "NORMAL"
 
     def SetCount(self):
         self.count = 1
@@ -183,7 +191,9 @@ class ViHelper():
                 self.SetMode(ViHelper.NORMAL)
             else:
                 self.SelectSelection()
-
+                if self.selection_mode == "LINE":
+                    self.SelectFullLines()
+ 
         # Is this ever used?
         if ret is True:
             return True
@@ -203,6 +213,12 @@ class ViHelper():
         self.key_modifier = []
         self.key_number_modifier = []
         self.updateViStatus()
+
+    def SetSelMode(self, mode):
+        self.selection_mode = mode
+
+    def GetSelMode(self):
+        return self.selection_mode
 
     def minmax(self, a, b):
         return min(a, b), max(a, b)
@@ -230,6 +246,8 @@ class ViHelper():
 #-----------------------------------------------------------------------------
 # The following functions are common to both preview and editor mode
 # -----------------------------------------------------------------------------
+    def AddSearchPosition(self, pos):
+        self.search_start_position.append(pos)
 
     def SwitchEditorPreview(self, scName=None):
         mainControl = self.ctrl.presenter.getMainControl()

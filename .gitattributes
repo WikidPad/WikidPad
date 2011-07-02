@@ -366,6 +366,7 @@ WikidPadHelp/files/testimg.gif -text
 /buildGadflyZips.py -text
 /buildWinPortZip.py -text
 docs/api.txt -text
+docs/dev-definitions.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
 extensions/EvalLibrary.py -text

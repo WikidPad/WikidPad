@@ -228,7 +228,7 @@ class LinkConverterForPreviewWk:
         self.wikiDocument = wikiDocument
         
     def getLinkForWikiWord(self, word, default = None):
-        if self.wikiDocument.isDefinedWikiLink(word):
+        if self.wikiDocument.isDefinedWikiLinkTerm(word):
             return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
@@ -625,23 +625,29 @@ class WikiHtmlViewWK(wx.Panel):
 
     def FollowLinkIfSelected(self):
         """
-        Only necessary if we want custom keybindings (e.g. ctrl-l)
-        to be able to follow link. May be better to remap them to
-        activate selected element (like return does - I don't know
-        how to do this at the moment) or to rewrite with javascript?
-
-        Gets selected html, parses it and opens the first link
-        found.
+        Follows any focused link
         """
-        html = self.getSelectedHTML()
 
-        if len(html) > 0:
+        self.html.getWebkitWebView().execute_script('''
+            document.title = "None"
+            if (document.activeElement.tagName == "A" || document.activeElement.tagName == "a") {
+                document.title = document.activeElement.href
+            }
+            ''')
+        link = self.html.getWebkitWebView().get_main_frame().get_title()
 
-            parser = ExtractUrlFromHTML()
-            parser.feed(html)
-            urls = parser.GetUrls()
-            if len(urls) > 0:
-                self._activateLink(urls[0], tabMode=0)
+        if link != "None":
+            self._activateLink(link, tabMode=0)
+
+        #html = self.getSelectedHTML()
+
+        #if len(html) > 0:
+
+        #    parser = ExtractUrlFromHTML()
+        #    parser.feed(html)
+        #    urls = parser.GetUrls()
+        #    if len(urls) > 0:
+        #        self._activateLink(urls[0], tabMode=0)
 
 
     def __on_navigate(self, view, frame, request, action, decision):
@@ -993,7 +999,8 @@ class WikiHtmlViewWK(wx.Panel):
                 
                 # Add to internal jump prefix?
                 pagePrefix = u"wikipage/"
-                wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord[len(pagePrefix):])
+                wikiWord = wikiDocument.getWikiPageNameForLinkTerm(
+                        wikiWord[len(pagePrefix):])
 
                 if wikiWord is not None:
                     status = _(u"Link to page: %s") % wikiWord
@@ -1573,10 +1580,10 @@ class ViFunctions(ViHelper):
 
             72  : (0, (self.GoBackwardInHistory, None), 0), # H
             76  : (0, (self.GoForwardInHistory, None), 0), # L
-            111 : (0, (self.ctrl.presenter.getMainControl()). \
-                                    showWikiWordOpenDialog, None, 0), # o
-            79 : (0, (self.ctrl.presenter.getMainControl()). \
-                                    showWikiWordOpenDialog, None, 0), # O
+            111 : (0, (self.ctrl.presenter.getMainControl(). \
+                                    showWikiWordOpenDialog, None), 0), # o
+            79 : (0, (self.ctrl.presenter.getMainControl(). \
+                                    showWikiWordOpenDialog, None), 0), # O
             106 : (0, (self.DocumentNavigation, 106), 0), # j
             107 : (0, (self.DocumentNavigation, 107), 0), # k
             104 : (0, (self.DocumentNavigation, 104), 0), # h
@@ -1750,7 +1757,7 @@ class ViFunctions(ViHelper):
         //END JAVASCRIPT CODE
         ''')
 
-    def highlightLinks(self, string=None, number=None):
+    def highlightLinks(self, string=u"", number=u""):
         # TODO: Text based link selection
         self.clearHints()
 
@@ -1769,11 +1776,20 @@ class ViFunctions(ViHelper):
 var string = "{0}";
 var number = "{1}";
 
+function checkInputString(element) {{
+    link_text = element.text.toLowerCase()
+    if (string.length == 0) {{
+        return true;
+    }} else if (link_text.indexOf(string) != -1) {{
+        return true;
+    }}
+    return false;
+}}
+
 function checkInput(i, element) {{
     if (number.length == 0) {{
-        return true
-    }}
-    if (i.toString().substr(0, number.length) === number) {{
+        return true;
+    }} else if (i.toString().substr(0, number.length) === number) {{
         return true;
     }}
     return false;
@@ -1802,15 +1818,24 @@ function isElementInViewport(element) {{
 
 var all_links = document.links;
 
+var string_test=new Array();
 var visible_links=new Array();
 var links_selected=new Array();
 
+// First test for input string
 for (var i=0; i<all_links.length; i++) {{
 
     if (isElementInViewport(all_links[i])) {{
-        visible_links.push(all_links[i]);
+        string_test.push(all_links[i]);
         }}
 
+    }}
+
+// Then number
+for (var i=0; i<string_test.length; i++) {{
+    if (checkInputString(string_test[i])) {{
+        visible_links.push(string_test[i]);
+        }}
     }}
 
 primary = false;
@@ -1844,7 +1869,7 @@ for (var i=0; i<hints.length; i++) {{
 
 document.title = links_selected.length;
 //END JAVASCRIPT CODE
-        '''.format(string, number))
+        '''.format(string.lower(), number))
 
         link_number = int(self.ctrl.html.getWebkitWebView(). \
                                 get_main_frame().get_title())
@@ -1900,8 +1925,19 @@ document.title = links_selected.length;
         """
         Processes input text
         """
+        # Seperate string into numerical component
+        n = []
+        s = []
+        for i in text[::-1]:
+            if i.isdigit():
+                n.append(i)
+            else:
+                s.append(i)
 
-        return self.highlightLinks(None, text)
+        s.reverse()
+        n.reverse()
+
+        return self.highlightLinks(u"".join(s), u"".join(n))
 
     def forgetFollowHint(self):
         """

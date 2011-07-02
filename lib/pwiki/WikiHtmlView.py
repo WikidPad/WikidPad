@@ -54,7 +54,7 @@ class LinkConverterForPreview:
         self.wikiDocument = wikiDocument
         
     def getLinkForWikiWord(self, word, default = None):
-        if self.wikiDocument.isDefinedWikiLink(word):
+        if self.wikiDocument.isDefinedWikiLinkTerm(word):
             return u"internaljump:wikipage/%s" % word
         else:
             return default
@@ -638,7 +638,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     wikiDocument = self.presenter.getWikiDocument()
                     if wikiDocument is None:
                         return
-                    wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord)
+                    wikiWord = wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
                     if wikiWord is not None:
                         propList = wikiDocument.getAttributeTriples(wikiWord,
