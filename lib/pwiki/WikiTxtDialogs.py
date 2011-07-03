@@ -363,7 +363,7 @@ class ImagePasteSaver:
         tempFilePath = tempFileSet.createTempFile(
                 u"", file_suffix, relativeTo="")
 
-        img.SaveFile(tempFilePath, wx.BITMAP_TYPE_PNG)
+        img.SaveFile(tempFilePath, wx_image_type)
 
 
         # Check if file already exists
