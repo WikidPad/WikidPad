@@ -19,6 +19,7 @@ import SystemInfo
 
 import Utilities
 
+from TempFileSet import TempFileSet
 
 try:
     import WindowsHacks
@@ -350,19 +351,40 @@ class ImagePasteSaver:
 
         img.SetOptionInt(u"quality", self.quality)
 
-        if self.formatNo == 1:   # PNG
-            destPath = fs.findDestPathNoSource(u".png", self.prefix)
-        elif self.formatNo == 2:   # JPG
-            destPath = fs.findDestPathNoSource(u".jpg", self.prefix)
-
-        if destPath is None:
-            # Couldn't find unused filename
-            return None
+        tempFileSet = TempFileSet() 
 
         if self.formatNo == 1:   # PNG
-            img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
+            file_suffix = u".png"
+            wx_image_type = wx.BITMAP_TYPE_PNG
         elif self.formatNo == 2:   # JPG
-            img.SaveFile(destPath, wx.BITMAP_TYPE_JPEG)
+            file_suffix = u".jpg"
+            wx_image_type = wx.BITMAP_TYPE_JPEG
+
+        tempFilePath = tempFileSet.createTempFile(
+                u"", file_suffix, relativeTo="")
+
+        img.SaveFile(tempFilePath, wx.BITMAP_TYPE_PNG)
+
+
+        # Check if file already exists
+        path, duplicate = fs.findDestPath(tempFilePath)
+
+        if not duplicate:
+            destPath = fs.findDestPathNoSource(file_suffix, self.prefix)
+
+            if destPath is None:
+                # Couldn't find unused filename
+                return None
+
+            # If no duplicate is found move the tmp file (and rename)
+            fs.moveFile(tempFilePath, destPath)
+
+        # Otherwise we just use the file that already exists
+        # TODO: some kind of notification if this occurs?
+        else:
+            destPath = path
+
+        tempFileSet.clear()
 
         return destPath
 
@@ -480,3 +502,4 @@ class ImagePasteDialog(wx.Dialog):
         with WindowUpdateLocker(self):
             self.bitmapControl.SetPosition((0,0))
             self.bitmapControl.SetBitmap(bmp)
+
