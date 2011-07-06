@@ -1979,7 +1979,10 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         if selectNode:
 #             doexpand = True
 
+
         wikiData = self.pWiki.getWikiData()
+
+        # If parent is defined use that as default node
         if not startFromRoot:
             currentNode = self.GetSelection()    # self.GetRootItem()
         else:
@@ -1987,12 +1990,72 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         
         crumbs = None
 
-        if currentNode is not None and currentNode.IsOk() and \
+        # First check if word has canonical parent
+        # NOTE: May have to force tree refresh (if attributes have changed)
+        canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(wikiWord, "parent", None)
+
+        if canonical_parent:
+            loop = True
+
+            parent_list = []
+
+            parentWikiWord = canonical_parent[0][2]
+            parents = self.pWiki.getWikiData().getParentRelationships(wikiWord)
+
+            newWikiWord = wikiWord
+
+            # Follow canonical parents as far as they are defined
+            # Care must be taken to check that the  parent exists in 
+            # the tree (i.e. has a parent itself) and that it has not 
+            # already been added to the list (to prevent infinite loops)
+            while canonical_parent and parentWikiWord not in parent_list \
+            and parentWikiWord in parents:
+                parent_list.append(newWikiWord)
+                newWikiWord = parentWikiWord
+                canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(newWikiWord, "parent", None)
+                if canonical_parent:
+                    parentWikiWord = canonical_parent[0][2]
+                    parents = self.pWiki.getWikiData()\
+                                .getParentRelationships(newWikiWord)
+                else:
+                    break
+
+            # Find path between root node and first node without defined
+            # canonical parent, if no path found try the next parent and
+            # so on.
+            for i in parent_list:
+                rootNode = self.GetRootItem()
+                if rootNode is not None and rootNode.IsOk() and \
+                        self.GetPyData(rootNode).representsFamilyWikiWord():
+                    rootWikiWord = self.GetPyData(rootNode).getWikiWord()
+                    crumbs = wikiData.findBestPathFromWordToWord(
+                                        parent_list.pop(), rootWikiWord)
+
+                    # If parent path cannot be found resort to default path
+                    if crumbs:
+                        # When expanding crumbs below currentNode is used as first node
+                        currentNode = rootNode
+
+                        if parent_list:
+                            parent_list.reverse()
+
+                            # Prevent unnecessary tree node expansion
+                            if parent_list[-1] in crumbs:
+                                crumbs = crumbs[:crumbs.index(parent_list[-1])+1]
+                            else:
+                    # crumbs consists of two parts
+                    # part 1 - path between root node and first node in chain
+                    #           without a canonical parent
+                    # part 2 - node path as defined by canonical parents 
+                                crumbs.extend(parent_list)
+                        break
+
+        elif currentNode is not None and currentNode.IsOk() and \
                 self.GetPyData(currentNode).representsFamilyWikiWord():
             # check for path from wikiWord to currently selected tree node            
             currentWikiWord = self.GetPyData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
             crumbs = wikiData.findBestPathFromWordToWord(wikiWord, currentWikiWord)
-            
+           
             if crumbs and self.pWiki.getConfig().getboolean("main",
                     "tree_no_cycles"):
                 ancestors = self.GetPyData(currentNode).getAncestors()
@@ -2002,6 +2065,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     if c in ancestors:
                         crumbs = None
                         break
+
         
         # if a path is not found try to get a path to the root node
         if not crumbs:
@@ -2011,6 +2075,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 currentWikiWord = self.GetPyData(currentNode).getWikiWord()
                 crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                         currentWikiWord)
+
 
         if crumbs:
             numCrumbs = len(crumbs)
@@ -2025,6 +2090,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         self.Expand(currentNode)
 
                     # fetch the next crumb node
+
                     if (i+1) < numCrumbs:
                         self.Expand(currentNode)
                         currentNode = self.findChildTreeNodeByWikiWord(currentNode,

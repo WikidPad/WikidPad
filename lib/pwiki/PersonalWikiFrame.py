@@ -3917,7 +3917,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.getWikiConfigPath(), )))
 
 
-    def viewWordSelection(self, title, words, motionType):
+    def viewWordSelection(self, title, words, motionType, default=None):
         """
         View a single choice to select a word to go to
         title -- Title of the dialog
@@ -3928,7 +3928,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
         try:
             dlg = AdditionalDialogs.ChooseWikiWordDialog(self, -1, words,
-                    motionType, title)
+                    motionType, title, default)
             dlg.CenterOnParent(wx.BOTH)
             dlg.ShowModal()
             dlg.Destroy()
@@ -3945,8 +3945,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
+
+        # Check for canonical parent to set as default selection
+        default = None
+        canonical_parent = self.getWikiDocument().getAttributeTriples(ofWord, "parent", None)
+        if canonical_parent:
+            default = canonical_parent[0][2]
+
+            # Add the canonical parent to the list if it does not exist
+            if default not in parents:
+                parents.append(default)
+        
+            
         self.viewWordSelection(_(u"Parent nodes of '%s'") % ofWord, parents,
-                "parent")
+                "parent", default)
 
 
     def viewParentLess(self):

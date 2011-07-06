@@ -482,7 +482,7 @@ class ChooseWikiWordDialog(wx.Dialog):
     Used to allow selection from list of parents, parentless words, children
     or bookmarked words.
     """
-    def __init__(self, pWiki, ID, words, motionType, title=None,
+    def __init__(self, pWiki, ID, words, motionType, title=None, default=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -509,6 +509,10 @@ class ChooseWikiWordDialog(wx.Dialog):
         
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+
+        # Set default selection (if it exists)
+        if default is not None:
+            self.ctrls.lb.SetSelection(self.ctrls.lb.FindString(default))
         
         # Fixes focus bug under Linux
         self.SetFocus()

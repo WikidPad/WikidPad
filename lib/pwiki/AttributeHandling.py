@@ -146,6 +146,8 @@ _BUILTINS = {
     u"template_head": (u"auto", u"manual"),
     u"tree_position": None,
     u"view_pane": (u"off", u"editor", u"preview"),
+
+    u"parent": None,
 }
 
 
@@ -318,7 +320,64 @@ class AbstractAttributeCheck:
         """
         assert 0  # abstract
    
+class AttributeCheckParent(AbstractAttributeCheck):
+    """
+    Attribute check for "parent" attribute
+    """
+    def __init__(self, mainControl, attrChecker):
+        AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
+        self.foundAttributes = []
+        
+    def getResponsibleRegex(self):
+        """
+        Return a compiled regular expression of the attribute name(s) (keys)
+        this object is responsible for
+        """
+        return _re.compile(ur"^parent$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
+    def beginPageCheck(self, wikiPage, pageAst):
+        AbstractAttributeCheck.beginPageCheck(self, wikiPage, pageAst)
+
+    def endPageCheck(self):
+        self.foundAttributes = []
+        AbstractAttributeCheck.endPageCheck(self)
+
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
+        """
+        Check attribute entry and issue messages if necessary
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
+        """
+        self.foundAttributes.append((attrName, attrValue, start, end))
+
+        wikiDocument = self.wikiPage.getWikiDocument()
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                wikiDocument.getWikiDefaultWikiLanguage())
+
+        wikiWord = self.wikiPage.getWikiWord()
+
+        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+
+        if not wikiDocument.isDefinedWikiPage(targetWikiWord):
+            # Word does not exist
+            print (attrName, attrValue), wikiWord, wikiWord, (start, end)
+            msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
+                    _(u"Parent wikiword does not exist: "
+                    u"[%s: %s]") %
+                    (attrName, attrValue), wikiWord, wikiWord, (start, end))
+            self.attrChecker.appendLogMessage(msg)
+            return
+
+        # Doesn't seem to work in endPageCheck()
+        if len(self.foundAttributes) > 1:
+            wikiWord = self.wikiPage.getWikiWord()
+            for attr in self.foundAttributes: 
+                msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
+                        _(u"Multiple parent attributes found on page: "
+                        u"[%s: %s]") %
+                        (attr[0], attr[1]), wikiWord, wikiWord, (attr[2], attr[3]))
+                self.attrChecker.appendLogMessage(msg)
+                return
 
 
 class AttributeCheckAlias(AbstractAttributeCheck):
@@ -563,7 +622,8 @@ class AttributeChecker:
         self.singleCheckList = [AttributeCheckAlias(self.mainControl, self),
                 AttributeCheckTemplate(self.mainControl, self),
                 AttributeCheckPresentation(self.mainControl, self),
-                AttributeCheckGlobalGraphInclude(self.mainControl, self)]
+                AttributeCheckGlobalGraphInclude(self.mainControl, self),
+                AttributeCheckParent(self.mainControl, self),]
 
         # Fill singleCheckREs (needed by findCheckObject)
         self.singleCheckREs = []
