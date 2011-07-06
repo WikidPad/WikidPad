@@ -358,9 +358,9 @@ class AttributeCheckParent(AbstractAttributeCheck):
 
         targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
 
-        if not wikiDocument.isDefinedWikiPage(targetWikiWord):
+        if not wikiDocument.isDefinedWikiLinkTerm(targetWikiWord):
             # Word does not exist
-            print (attrName, attrValue), wikiWord, wikiWord, (start, end)
+#             print (attrName, attrValue), wikiWord, wikiWord, (start, end)
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"Parent wikiword does not exist: "
                     u"[%s: %s]") %

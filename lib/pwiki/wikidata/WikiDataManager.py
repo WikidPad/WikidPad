@@ -1995,6 +1995,27 @@ class WikiDataManager(MiscEventSourceMixin):
         return result
 
 
+    def getWikiPageNameForLinkCore(self, linkCore, basePageName):
+        """
+        Fully resolve a link core (which may be a relative or absolute
+        link) to the real page name or None if not possible.
+        basePageName is the name of the page where the link is placed on
+        (needed for relative links and to retrieve the right language helper)
+        """
+        basePage = self.getWikiPageNoError(basePageName)
+
+        langHelper = GetApp().createWikiLanguageHelper(
+                basePage.getWikiLanguageName())
+
+        # Convert possible relative path (if subpages used) to page name
+        absoluteName = langHelper.resolveWikiWordLink(linkCore, basePage)
+
+        # Convert possible alias to real page name (and check if term
+        # denotes a wiki page at all, None is returned otherwise)
+        return self.getWikiPageNameForLinkTerm(absoluteName)
+
+        
+
     def getTodos(self):
         """
         Return all todo entries as list of tuples (wikiword, todoEntry)

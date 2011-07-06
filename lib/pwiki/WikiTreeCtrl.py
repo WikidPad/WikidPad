@@ -1981,6 +1981,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
         wikiData = self.pWiki.getWikiData()
+        wikiDoc = self.pWiki.getWikiDocument()
 
         # If parent is defined use that as default node
         if not startFromRoot:
@@ -1991,15 +1992,21 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         crumbs = None
 
         # First check if word has canonical parent
-        # NOTE: May have to force tree refresh (if attributes have changed)
-        canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(wikiWord, "parent", None)
+        canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(
+                wikiWord, u"parent", None)
 
         if canonical_parent:
+            parentWikiWord = wikiDoc.getWikiPageNameForLinkCore(
+                    canonical_parent[0][2], wikiWord)
+        else:
+            parentWikiWord = None
+
+        if parentWikiWord:
             loop = True
 
             parent_list = []
 
-            parentWikiWord = canonical_parent[0][2]
+#             parentWikiWord = canonical_parent[0][2]
             parents = self.pWiki.getWikiData().getParentRelationships(wikiWord)
 
             newWikiWord = wikiWord
@@ -2008,13 +2015,20 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             # Care must be taken to check that the  parent exists in 
             # the tree (i.e. has a parent itself) and that it has not 
             # already been added to the list (to prevent infinite loops)
-            while canonical_parent and parentWikiWord not in parent_list \
-            and parentWikiWord in parents:
+            while parentWikiWord and parentWikiWord not in parent_list \
+                    and parentWikiWord in parents:
                 parent_list.append(newWikiWord)
                 newWikiWord = parentWikiWord
-                canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(newWikiWord, "parent", None)
+                canonical_parent = self.pWiki.getWikiDocument()\
+                        .getAttributeTriples(newWikiWord, u"parent", None)
+
                 if canonical_parent:
-                    parentWikiWord = canonical_parent[0][2]
+                    parentWikiWord = wikiDoc.getWikiPageNameForLinkCore(
+                            canonical_parent[0][2], wikiWord)
+                else:
+                    parentWikiWord = None
+
+                if parentWikiWord:
                     parents = self.pWiki.getWikiData()\
                                 .getParentRelationships(newWikiWord)
                 else:
