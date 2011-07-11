@@ -2351,6 +2351,14 @@
             <border>5</border>
           </object>
           <object class="sizeritem">
+            <object class="wxCheckBox" name="cbEditorCompatibilityViKeys">
+              <label>Use vi keys in editor</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
             <object class="wxCheckBox" name="cbSearchDontAllowCancel">
               <label>Forbid cancel on search</label>
             </object>

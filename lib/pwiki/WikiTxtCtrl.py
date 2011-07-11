@@ -300,18 +300,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 
-        # Not necessary, self.onOptionsChanged() is called below (MB)
-#         use_vi_navigation = self.presenter.getConfig().getboolean("main",
-#                     "html_preview_webkitViKeys", False)
-# 
-#         if use_vi_navigation:
-#             self.vi = ViHandler(self)
-#             wx.EVT_KEY_DOWN(self, self.vi.OnViKeyDown)
-#         else:
-#             wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#             self.vi = None
-
-
         if config.getboolean("main", "editor_useImeWorkaround", False):
             wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
 
@@ -1082,7 +1070,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # To allow switching vi keys on and off without restart
         use_vi_navigation = self.presenter.getConfig().getboolean("main",
-                "html_preview_webkitViKeys", False)
+                "editor_compatibility_ViKeys", False)
 
         self.Unbind(wx.EVT_KEY_DOWN)
         self.Unbind(wx.EVT_LEFT_UP)

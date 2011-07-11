@@ -613,6 +613,9 @@ GLOBALDEFAULTS = {
     ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with 
             # spaces in it preserved unquoted)?
 
+    ("main", "editor_compatibility_ViKeys"): "False", # Use vi emulation keys in editor?
+
+
     # Editor color options
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)

@@ -588,7 +588,6 @@ class OptionsDialog(wx.Dialog):
             ("fastSearch_caseSensitive", "cbFastSearchCaseSensitive", "b"),
             ("fastSearch_wholeWord", "cbFastSearchWholeWord", "b"),
 
-            ("search_dontAllowCancel", "cbSearchDontAllowCancel", "b"),
 
             ("wikiLockFile_ignore", "cbWikiLockFileIgnore", "b"),
             ("wikiLockFile_create", "cbWikiLockFileCreate", "b"),
@@ -596,6 +595,8 @@ class OptionsDialog(wx.Dialog):
 
             ("editor_useImeWorkaround", "cbEditorUseImeWorkaround", "b"),
             ("menu_accels_kbdTranslate", "cbMenuAccelsKbdTranslate", "b"),
+            ("search_dontAllowCancel", "cbSearchDontAllowCancel", "b"),
+            ("editor_compatibility_ViKeys", "cbEditorCompatibilityViKeys", "b"),
             ("mouse_scrollUnderPointer", "cbMouseScrollUnderPointer", "b"),
 
             ("auto_save", "cbAutoSave", "b"),
