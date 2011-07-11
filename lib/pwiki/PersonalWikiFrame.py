@@ -5184,12 +5184,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dlg.ShowModal()
         dlg.Destroy()
 
-    def OnShowPrintMainDialog(self, evt):
+    def OnShowPrintMainDialog(self, evt=None, exportTo=-1):
         if self.printer is None:
             from .Printing import Printer
             self.printer = Printer(self)
 
-        self.printer.showPrintMainDialog()
+        self.printer.showPrintMainDialog(exportTo=exportTo)
 
 
     def OnShowWikiPropertiesDialog(self, evt):

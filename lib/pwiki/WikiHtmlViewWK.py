@@ -808,7 +808,7 @@ class WikiHtmlViewWK(wx.Panel):
                 menu.remove(i)
 
         print_menu_item = gtk.ImageMenuItem(gtk.STOCK_PRINT)
-        print_menu_item.connect("activate", self.html.Print)
+        print_menu_item.connect("activate", self.OnPrint)
         menu.append(print_menu_item)
 
         back_menu_item = gtk.ImageMenuItem(gtk.STOCK_GO_BACK)
@@ -972,6 +972,10 @@ class WikiHtmlViewWK(wx.Panel):
 
     def OnGoForwardInHistory(self, gtkEvent):
         self.presenter.getPageHistory().goInHistory(+1)
+
+    def OnPrint(self, gtkEvent):
+        # 2=Export to HTML (Webkit)
+        self.presenter.getMainControl().OnShowPrintMainDialog(exportTo=2)
 
     def updateStatus(self, status):
         if self.visible:
@@ -1550,16 +1554,16 @@ class WKHtmlWindow(wx.Window):
         """
         self.ctrl.execute_script('window.getSelection().removeAllRanges()')
 
-    def Print(self, evt=None):
-        print_op = gtk.PrintOperation()
-        page_setup = gtk.PageSetup()
-        # TODO: Dialog to change margins
-        page_setup.set_top_margin(20, gtk.UNIT_MM)
-        page_setup.set_left_margin(20, gtk.UNIT_MM)
-        page_setup.set_right_margin(20, gtk.UNIT_MM)
-        page_setup.set_bottom_margin(20, gtk.UNIT_MM)
-        print_op.set_default_page_setup(page_setup)
-        self.ctrl.get_main_frame().print_full(print_op, gtk.PRINT_OPERATION_ACTION_PRINT_DIALOG)
+#     def Print(self, evt=None):
+#         print_op = gtk.PrintOperation()
+#         page_setup = gtk.PageSetup()
+#         # TODO: Dialog to change margins
+#         page_setup.set_top_margin(20, gtk.UNIT_MM)
+#         page_setup.set_left_margin(20, gtk.UNIT_MM)
+#         page_setup.set_right_margin(20, gtk.UNIT_MM)
+#         page_setup.set_bottom_margin(20, gtk.UNIT_MM)
+#         print_op.set_default_page_setup(page_setup)
+#         self.ctrl.get_main_frame().print_full(print_op, gtk.PRINT_OPERATION_ACTION_PRINT_DIALOG)
 
 
 class ViFunctions(ViHelper):
