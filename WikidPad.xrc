@@ -5840,6 +5840,7 @@
               <content>
                 <item>Plain text</item>
                 <item>HTML</item>
+                <item>HTML (Webkit)</item>
               </content>
               <selection>0</selection>
             </object>

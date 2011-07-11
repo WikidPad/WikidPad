@@ -23,7 +23,10 @@ from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
 _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
-
+try:
+    from WikiHtmlViewWK import WKHtmlWindow
+except:
+    WKHtmlWindow = None
 
 class PrintMainDialog(wx.Dialog):
     def __init__(self, pWiki, ID, title="Print",
@@ -247,6 +250,10 @@ class Printer:
             printObj = HtmlPrint()
             printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
                     self.buildWordList(), "html_simple", None, None)
+        elif self.printType == 2:
+            printObj = HtmlWKPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "html_webkit", None, None)
         else: # self.printType == 0:
             printObj = PlainTextPrint()
             printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
@@ -260,6 +267,10 @@ class Printer:
             printObj = HtmlPrint()
             printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
                     self.buildWordList(), "html_simple", None, None)
+        elif self.printType == 2:
+            printObj = HtmlWKPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "html_webkit", None, None)
         else:
             printObj = PlainTextPrint()
             printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
@@ -681,5 +692,84 @@ class HtmlPrintout(wx.html.HtmlPrintout):
 #         self.SetHtmlText(u"ab<br />\n" * 5000)
 
 
+class HtmlWKPrint(HtmlPrint):
+    def getPrintTypes(self):
+        return (
+            ("html_webkit", u'HTML (Webkit)', None),
+            )
+
+    def _buildHtml(self):
+        def getTextFromWord(word):
+            return self.wikiDocument.getWikiPage(word).getLiveText()
+
+        exporterInstance = PluginManager.getExporterTypeDict(
+                self.pWiki, False)[u"html_single"][0](self.pWiki)
+
+        # TODO Progress handler
+        # TODO Set additional options
+        exporterInstance.setJobData(self.wikiDocument, self.wordList,
+                u"html_previewWK", None, False,
+                exporterInstance.getAddOpt(None), progressHandler=None)
+
+        self.tempFileSet = TempFileSet()
+        exporterInstance.tempFileSet = self.tempFileSet
+        exporterInstance.styleSheet = u""
+        
+        realfp = StringIO.StringIO()
+        exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
+
+        return realfp.getvalue().decode("utf-8")
+
+    def doPrint(self):
+        """
+        To print with webkit we load the pages into a temporary frame
+        that contains a WKHtmlWindow and use webkits print function.
+
+        The frame does not need to be shown as a preview is builtin
+        """
+        if self.checkWebkit():
+            text = self._buildHtml()
+
+            try:        
+                frame = WKPrintFrame(text)
+            finally:
+                frame.Destroy()
+                self._freeHtml()
+
+    def doPreview(self):
+        """Preview is built into the print function"""
+        self.doPrint()
+
+    def checkWebkit(self):
+        # NOTE: It would be better to check this earlier but I don't
+        #       know how to have conditions in XrcControls  -- Ross
+        if WKHtmlWindow:
+            return True
+        else:
+            dlg = wx.MessageDialog(None, \
+                _('Error loading Webkit: try a different export format)'), \
+                _('Error'), wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal() 
+            return False
+
+
+if WKHtmlWindow:
+
+    class WKPrintPanel(wx.Panel):
+        def __init__(self, parent, html):
+            """Panel to contain webkit ctrl"""
+            wx.Panel.__init__(self, parent)
+
+            html_preview = WKHtmlWindow(self)
+            html_preview.PizzaMagic()
+            html_preview.LoadHtmlString(html)
+            html_preview.Print()
+
+            
+    class WKPrintFrame(wx.Frame):
+        """Frame to contain webkit ctrl panel"""
+        def __init__(self, html):
+            wx.Frame.__init__(self, None)
+            html_panel = WKPrintPanel(self, html)
 
 

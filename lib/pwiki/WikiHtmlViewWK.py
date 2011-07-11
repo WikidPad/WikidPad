@@ -807,11 +807,14 @@ class WikiHtmlViewWK(wx.Panel):
                 # Remove unknown menu items
                 menu.remove(i)
 
+        print_menu_item = gtk.ImageMenuItem(gtk.STOCK_PRINT)
+        print_menu_item.connect("activate", self.html.Print)
+        menu.append(print_menu_item)
+
         back_menu_item = gtk.ImageMenuItem(gtk.STOCK_GO_BACK)
         back_menu_item.connect("activate", self.OnGoBackInHistory)
         menu.append(back_menu_item)
 
-            
         forward_menu_item = gtk.ImageMenuItem(gtk.STOCK_GO_FORWARD)
         forward_menu_item.connect("activate", self.OnGoForwardInHistory)
         menu.append(forward_menu_item)
@@ -1450,6 +1453,7 @@ class WikiHtmlViewWK(wx.Panel):
 
 
 
+
 #_CONTEXT_MENU_INTERNAL_JUMP = \
 #u"""
 #Activate;CMD_ACTIVATE_THIS
@@ -1521,6 +1525,8 @@ class WKHtmlWindow(wx.Window):
     # Some basic usefull methods
 #     def SetEditable(self, editable=True):
 #         self.ctrl.set_editable(editable)
+    def LoadHtmlString(self, html):
+        self.ctrl.load_string(html, "text/html", "UTF-8", u"file://")
 
     def LoadUrl(self, url):
         try:
@@ -1543,6 +1549,17 @@ class WKHtmlWindow(wx.Window):
         directly so we have to use some javascript
         """
         self.ctrl.execute_script('window.getSelection().removeAllRanges()')
+
+    def Print(self, evt=None):
+        print_op = gtk.PrintOperation()
+        page_setup = gtk.PageSetup()
+        # TODO: Dialog to change margins
+        page_setup.set_top_margin(20, gtk.UNIT_MM)
+        page_setup.set_left_margin(20, gtk.UNIT_MM)
+        page_setup.set_right_margin(20, gtk.UNIT_MM)
+        page_setup.set_bottom_margin(20, gtk.UNIT_MM)
+        print_op.set_default_page_setup(page_setup)
+        self.ctrl.get_main_frame().print_full(print_op, gtk.PRINT_OPERATION_ACTION_PRINT_DIALOG)
 
 
 class ViFunctions(ViHelper):
