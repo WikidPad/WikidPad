@@ -1393,10 +1393,16 @@ class WikiHtmlViewWK(wx.Panel):
                 anchor = urllib.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
 
             if tabMode & 2:
-                # New tab
-                presenter = self.presenter.getMainControl().\
-                        createNewDocPagePresenterTab()
-                presenter.switchSubControl("preview", False)
+                if tabMode == 6:
+                    # New Window
+                    self.presenter.getMainControl(). \
+                        OpenNewWikidPadInstance([word], [u'preview']) 
+                    return True
+                else:
+                    # New tab
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTab()
+                    presenter.switchSubControl("preview", False)
             else:
                 # Same tab
                 presenter = self.presenter

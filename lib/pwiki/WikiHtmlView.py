@@ -495,10 +495,16 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
             # open the wiki page
             if tabMode & 2:
-                # New tab
-                presenter = self.presenter.getMainControl().\
-                        createNewDocPagePresenterTab()
-                presenter.switchSubControl("preview", False)
+                if tabMode == 6:
+                    # New Window
+                    self.presenter.getMainControl(). \
+                        OpenNewWikidPadInstance([word], [u'preview']) 
+                    return True
+                else:
+                    # New tab
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTab()
+                    presenter.switchSubControl("preview", False)
             else:
                 # Same tab
                 presenter = self.presenter

@@ -1975,11 +1975,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if node.name == "wikiWord":
                 searchStr = None
 
+                newWindow = False
                 # open the wiki page
                 if tabMode & 2:
-                    # New tab
-                    presenter = self.presenter.getMainControl().\
-                            createNewDocPagePresenterTab()
+                    if tabMode == 6:
+                        # New Window
+                        newWindow = True
+                    else:
+                        # New tab
+                        presenter = self.presenter.getMainControl().\
+                                createNewDocPagePresenterTab()
                 else:
                     # Same tab
                     presenter = self.presenter
@@ -2008,6 +2013,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     if wikiWord is not None:
                         if wikiWord == unaliasedTarget:
                             forbiddenSearchfragHit = (node.pos, node.pos + node.strLength)
+
+                if newWindow:
+                    # NOTE: what about suggNewPageTitle?
+                    self.presenter.getMainControl().OpenNewWikidPadInstance(
+                            [unaliasedTarget], [u"textedit"])
+                    return True
 
                 presenter.openWikiPage(unaliasedTarget,
                         motionType="child", anchor=node.anchorLink,
@@ -2044,9 +2055,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     # open the wiki page
                     if tabMode & 2:
-                        # New tab
-                        presenter = self.presenter.getMainControl().\
-                                createNewDocPagePresenterTab()
+                        if tabMode == 6:
+                            # New Window
+                            self.presenter.getMainControl(). \
+                                OpenNewWikidPadInstance(
+                                    [node.value], [u"textedit"])
+                            return True
+                        else:
+                            # New tab
+                            presenter = self.presenter.getMainControl().\
+                                    createNewDocPagePresenterTab()
                     else:
                         # Same tab
                         presenter = self.presenter

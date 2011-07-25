@@ -847,7 +847,12 @@ WIKIFALLTHROUGH ={
 
 # Maps configuration setting "mouse_middleButton_withoutCtrl" number to a 
 # tabMode number for WikiTxtCtrl._activateLink or WikiHtmlView._activateLink
-MIDDLE_MOUSE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
+MIDDLE_MOUSE_CONFIG_TO_TABMODE = {
+                                    0: 2, # New tab in background
+                                    1: 3, # New tab in foreground
+                                    2: 0, # Same Tab
+                                    3: 6, # New Window
+                                 }
 
 
 

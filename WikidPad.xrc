@@ -1747,6 +1747,7 @@
                 <item>New tab in foreground</item>
                 <item>New tab in background</item>
                 <item>Same Tab</item>
+                <item>New Window</item>
               </content>
               <selection>0</selection>
             </object>
@@ -1766,6 +1767,7 @@
                 <item>New tab in foreground</item>
                 <item>New tab in background</item>
                 <item>Same Tab</item>
+                <item>New Window</item>
               </content>
               <selection>1</selection>
             </object>
