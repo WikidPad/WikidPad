@@ -358,6 +358,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 self.OnActivateNewTabThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
+                self.OnActivateNewWindowThis)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS,
                 self.OnConvertUrlAbsoluteRelativeThis)
@@ -1975,12 +1977,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if node.name == "wikiWord":
                 searchStr = None
 
-                newWindow = False
                 # open the wiki page
                 if tabMode & 2:
                     if tabMode == 6:
                         # New Window
-                        newWindow = True
+                        presenter = self.presenter.getMainControl().\
+                                createNewDocPagePresenterTabInNewFrame()
                     else:
                         # New tab
                         presenter = self.presenter.getMainControl().\
@@ -2013,12 +2015,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     if wikiWord is not None:
                         if wikiWord == unaliasedTarget:
                             forbiddenSearchfragHit = (node.pos, node.pos + node.strLength)
-
-                if newWindow:
-                    # NOTE: what about suggNewPageTitle?
-                    self.presenter.getMainControl().OpenNewWikidPadInstance(
-                            [unaliasedTarget], [u"textedit"])
-                    return True
 
                 presenter.openWikiPage(unaliasedTarget,
                         motionType="child", anchor=node.anchorLink,
@@ -2057,10 +2053,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     if tabMode & 2:
                         if tabMode == 6:
                             # New Window
-                            self.presenter.getMainControl(). \
-                                OpenNewWikidPadInstance(
-                                    [node.value], [u"textedit"])
-                            return True
+                            presenter = self.presenter.getMainControl().\
+                                    createNewDocPagePresenterTabInNewFrame()
                         else:
                             # New tab
                             presenter = self.presenter.getMainControl().\
@@ -2073,7 +2067,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             motionType="child")  # , anchor=node.value)
 
                     if not tabMode & 1:
-                        # Show in foreground
+                        # Show in foreground (if presenter is in other window,
+                        # this does nothing)
                         presenter.getMainControl().getMainAreaPanel().\
                                 showPresenter(presenter)
 
@@ -2214,6 +2209,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def OnActivateNewTabBackgroundThis(self, evt):
         if self.contextMenuTokens:
             self.activateTokens(self.contextMenuTokens, 3)
+
+    def OnActivateNewWindowThis(self, evt):
+        if self.contextMenuTokens:
+            self.activateTokens(self.contextMenuTokens, 6)
+
 
     def OnOpenContainingFolderThis(self, evt):
         if self.contextMenuTokens:
@@ -2973,6 +2973,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # from IncrementalSearchDialog.OnKeyDownInput
             self.activateLink(tabMode=2)
 
+        elif matchesAccelPair("ActivateLinkNewWindow", accP):
+            self.activateLink(tabMode=6)
+
         elif matchesAccelPair("LogLineUp", accP):
             # LogLineUp is by default undefined
             self.moveSelectedLinesOneUp(False)
@@ -3641,6 +3644,7 @@ u"""
 Follow Link;CMD_ACTIVATE_THIS
 Follow Link New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Follow Link New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+Follow Link New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 """
 
 _CONTEXT_MENU_INTEXT_WIKI_URL = \
@@ -3713,6 +3717,7 @@ if False:
     N_(u"Follow Link")
     N_(u"Follow Link New Tab")
     N_(u"Follow Link New Tab Backgrd.")
+    N_(u"Follow Link New Window")
 
     N_(u"Convert Absolute/Relative File URL")
     N_(u"Open Containing Folder")

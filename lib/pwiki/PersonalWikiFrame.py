@@ -391,8 +391,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.openWiki(wikiToOpen, wikiWordsToOpen,
                         anchorToOpen=anchorToOpen,
                         lastTabsSubCtrls=cmdLineAction.lastTabsSubCtrls,
-                        activeTabNo=cmdLineAction.activeTabNo, 
-                        wikiWordsToCreate=cmdLineAction.wikiWordsToCreate)
+                        activeTabNo=cmdLineAction.activeTabNo)
 #                 wx.GetApp().pauseBackgroundThreads()
             else:
                 if cmdLineAction.wikiToOpen:
@@ -2229,11 +2228,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Create main area panel first
         self.mainAreaPanel = MainAreaPanel(self, self, -1)
-#         self.mainAreaPanel = MainAreaPanel(self)
         self.mainAreaPanel.getMiscEvent().addListener(self)
 
-        p = self.createNewDocPagePresenterTab()
-        self.mainAreaPanel.prepareCurrentPresenter(p)
+#         p = self.createNewDocPagePresenterTab()
+#         self.mainAreaPanel.prepareCurrentPresenter(p)
  
         # ------------------------------------------------------------------------------------
         # Create menu and toolbar
@@ -2625,6 +2623,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.mainAreaPanel.appendPresenterTab(presenter)
 
 
+    def createNewDocPagePresenterTabInNewFrame(self):
+        """
+        Launches a new wikidpad instance, create a DocPagePresenter in it
+        and return it. Works only if wiki is loaded already
+        """
+        wd = self.getWikiDocument()
+        if wd is None:
+            return None
+
+        clAction = CmdLineAction([])
+        clAction.inheritFrom(self.getCmdLineAction())
+        clAction.wikiToOpen = wd.getWikiConfigPath()
+        clAction.wikiWordsToOpen = ()
+
+        newFrame = wx.GetApp().startPersonalWikiFrame(clAction)
+        return newFrame.createNewDocPagePresenterTab()
+
+
 #     def appendLogMessage(self, msg):
 #         """
 #         Add message to log window, make log window visible if necessary
@@ -2978,7 +2994,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def openWiki(self, wikiCombinedFilename, wikiWordsToOpen=None,
             ignoreWdhName=False, lastTabsSubCtrls=None, anchorToOpen=None,
-            activeTabNo=-1, wikiWordsToCreate=None):
+            activeTabNo=-1):
         """
         opens up a wiki
         wikiWordsToOpen -- List of wiki words to open or None for default
@@ -3265,10 +3281,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     # Omitting word, so adjust activeTabNo
                     activeTabNo -= 1
 
-                if wikiWordsToCreate:
-                    for word in wikiWordsToCreate:
-                        wwo.append((word, u"textedit"))
-    
                 # now try and open the last wiki page as leftmost tab
                 if len(wwo) > 0: ## and wwo[0][0] != self.wikiName:
                     firstWikiWord = wwo[0][0]
@@ -3657,16 +3669,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # open the wiki page
         if tabMode & 2:
             if tabMode == 6:
-                # Open tab in new window
-                if len(unifName) == 0:
-                    return
-                
-                if unifName.startswith(u"wikipage/"):
-                    unifName = unifName[9:]
-
-                self.OpenNewWikidPadInstance([unifName], [u'textedit']) 
-                return
-                
+                # New Window
+                presenter = self.presenter.getMainControl().\
+                        createNewDocPagePresenterTabInNewFrame()
             else:
                 # New tab
                 presenter = self.createNewDocPagePresenterTab()
@@ -3687,7 +3692,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return None
 
         if not tabMode & 1:
-            # Show in foreground
+            # Show in foreground (if presenter is in other window, this does nothing)
             self.getMainAreaPanel().showPresenter(presenter)
 
         return presenter
@@ -4966,32 +4971,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             raise
 
 
-#     def OnCmdCloneWindow(self, evt):
-#         _prof.start()
-#         self._OnCmdCloneWindow(evt)
-#         _prof.stop()
-
-
-    def OnCmdCloneWindow(self, evt, wikiWords=None, preview=False):
-        """
-        Clones the currently open window, creating a new instance with
-        the same tabs.
-
-        """
-        wws, subCtrls, activeNo = \
-                self.getMainAreaPanel().getOpenWikiWordsSubCtrlsAndActiveNo()
-        self.OpenNewWikidPadInstance(wws, subCtrls, activeNo)
-
-    def OpenNewWikidPadInstance(self, wikiWords, subCtrls, activeNo=0):
-        """
-        Launches a new wikidpad instance
-
-        @param wikiWords: List of wikiwords to open
-        @param subCtrls: Coresponding list (to wikiWords) of modes
-            e.g. u"textedit" or u"preview"
-        @ param activeNo: Tab to give focus to.
-
-        """
+    def OnCmdCloneWindow(self, evt):
         wd = self.getWikiDocument()
         if wd is None:
             return
@@ -5001,30 +4981,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             clAction.inheritFrom(self.getCmdLineAction())
             clAction.wikiToOpen = wd.getWikiConfigPath()
             clAction.frameToOpen = 1  # Open in new frame
+            wws, subCtrls, activeNo = \
+                    self.getMainAreaPanel().getOpenWikiWordsSubCtrlsAndActiveNo()
 
-            wikiWordsToOpen = []
-            wikiWordsToCreate = []
-            lastTabsSubCtrls = []
-
-            if len(wikiWords) > 1:
-                for word, sub in wikiWords, subCtrls:
-                    if self.getWikiDocument().isDefinedWikiLink(word):
-                        wikiWordsToOpen.append(word)
-                        lastTabsSubCtrls.append(sub)
-                    else:
-                        wikiWordsToCreate.append(word)
-            else:
-                if self.getWikiDocument().isDefinedWikiLink(wikiWords[0]):
-                    wikiWordsToOpen.append(wikiWords[0])
-                    lastTabsSubCtrls.append(subCtrls[0])
-                else:
-                    wikiWordsToCreate.append(wikiWords[0])
-                    
-
-            if wikiWords is not None:
-                clAction.wikiWordsToOpen = wikiWordsToOpen
-                clAction.wikiWordsToCreate = wikiWordsToCreate
-                clAction.lastTabsSubCtrls = lastTabsSubCtrls
+            if wws is not None:
+                clAction.wikiWordsToOpen = wws
+                clAction.lastTabsSubCtrls = subCtrls
                 clAction.activeTabNo = activeNo
 
             wx.GetApp().startPersonalWikiFrame(clAction)
@@ -5033,6 +4995,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.displayErrorMessage(_(u'Error while starting new '
                     u'WikidPad instance'), e)
             return
+
 
     def OnImportFromPagefiles(self, evt):
         if self.isReadOnlyWiki():

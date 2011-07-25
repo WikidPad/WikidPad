@@ -21,6 +21,7 @@ CatchClipboardAtPage=""
 CatchClipboardAtCursor=""
 CatchClipboardOff=""
 ActivateLink="Ctrl-L"
+ActivateLinkNewWindow=""
 if wx.Platform == "__WXMSW__":
     ActivateLinkNewTab="Ctrl-Alt-L"
     ActivateLinkBackground="Ctrl-Shift-L"

@@ -587,23 +587,15 @@ class ViHintDialog(wx.Frame):
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
             foundPos = self.viCtrl.executeFollowHint(searchString)
-        elif matchesAccelPair("ActivateLink", accP):
+            
+        elif matchesAccelPair("ActivateLink", accP) or \
+                matchesAccelPair("ActivateLinkNewTab", accP) or \
+                matchesAccelPair("ActivateLink2", accP) or \
+                matchesAccelPair("ActivateLinkBackground", accP) or \
+                matchesAccelPair("ActivateLinkNewWindow", accP):
             # ActivateLink is normally Ctrl-L
-            self.viCtrl.endFollowHint()
-            self.Close()
-            self.viCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
-            self.viCtrl.endFollowHint()
-            self.Close()
-            self.viCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
-            self.viCtrl.endFollowHint()
-            self.Close()
-            self.viCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkBackground", accP):
-            # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.viCtrl.endFollowHint()
             self.Close()
             self.viCtrl.OnKeyDown(evt)

@@ -41,7 +41,6 @@ class CmdLineAction:
                 # (interpreted by PersonalWikiFrame)
         self.lastTabsSubCtrls = None  # Corresponding list of subcontrol names
                 # for each wikiword to open
-        self.wikiWordsToCreate = None  # Words to create and open
         self.noRecent = False  # Do not modify history of recently opened wikis
 
         if len(sargs) == 0:
@@ -62,16 +61,16 @@ class CmdLineAction:
         # New style
         try:
             opts, rargs = getopt.getopt(sargs, "hw:p:x",
-                    ["help", "wiki=", "page=", "new-page=", "exit", 
-                    "export-what=", "export-type=", "export-dest=", 
-                    "export-compfn", "export-saved=", "continuous-export-saved=",
-                    "anchor", "rebuild", "no-recent", "preview", "editor"])
+                    ["help", "wiki=", "page=", "exit", "export-what=",
+                    "export-type=", "export-dest=", "export-compfn",
+                    "export-saved=", "continuous-export-saved=",
+                    "anchor",
+					"rebuild", "no-recent", "preview", "editor"])
         except getopt.GetoptError:
             self.cmdLineError = True
             return
 
         wikiWordsToOpen = []
-        wikiWordsToCreate = []
 
         for o, a in opts:
             if o in ("-h", "--help"):
@@ -80,8 +79,6 @@ class CmdLineAction:
                 self.wikiToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-p", "--page"):
                 wikiWordsToOpen.append(mbcsDec(a, "replace")[0])
-            elif o in ("--new-page"):
-                wikiWordsToCreate.append(mbcsDec(a, "replace")[0])
             elif o == "--anchor":
                 self.anchorToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-x", "--exit"):
@@ -111,8 +108,6 @@ class CmdLineAction:
         if len(wikiWordsToOpen) > 0:
             self.wikiWordsToOpen = tuple(wikiWordsToOpen)
 
-        if len(wikiWordsToCreate) > 0:
-            self.wikiWordsToCreate = tuple(wikiWordsToCreate)
 
         self._fillLastTabsSubCtrls(len(wikiWordsToOpen))
 
@@ -133,6 +128,7 @@ class CmdLineAction:
                 self.lastTabsSubCtrls = ["textedit"] * wwoLen + [newItem]
 
             return
+
 
         if len(self.lastTabsSubCtrls) < wwoLen:
                 self.lastTabsSubCtrls += [self.lastTabsSubCtrls[-1]] * \

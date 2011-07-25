@@ -143,7 +143,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
-                self.OnActivateNewTabBackgroundThis)        
+                self.OnActivateNewTabBackgroundThis)
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
+                self.OnActivateNewWindowThis)
+
         wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
                 self.OnOpenContainingFolderThis)
 
@@ -497,9 +500,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
             if tabMode & 2:
                 if tabMode == 6:
                     # New Window
-                    self.presenter.getMainControl(). \
-                        OpenNewWikidPadInstance([word], [u'preview']) 
-                    return True
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTabInNewFrame()
                 else:
                     # New tab
                     presenter = self.presenter.getMainControl().\
@@ -545,6 +547,9 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def OnActivateNewTabBackgroundThis(self, evt):
         self._activateLink(self.contextHref, tabMode=3)
+
+    def OnActivateNewWindowThis(self, evt):
+        self._activateLink(self.contextHref, tabMode=6)
 
 
     def OnOpenContainingFolderThis(self, evt):
@@ -669,6 +674,7 @@ u"""
 Activate;CMD_ACTIVATE_THIS
 Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+Activate New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 """
 
 
@@ -677,4 +683,5 @@ if False:
     N_(u"Activate")
     N_(u"Activate New Tab")
     N_(u"Activate New Tab Backgrd.")
+    N_(u"Activate New Window")
 

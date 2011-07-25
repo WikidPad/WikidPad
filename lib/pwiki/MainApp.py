@@ -658,6 +658,8 @@ class App(wx.App, MiscEventSourceMixin):
             wikiFrame.SetIcon(self.standardIcon)
         except:
             pass
+        
+        return wikiFrame
 
 
     def unregisterMainFrame(self, wikiFrame):

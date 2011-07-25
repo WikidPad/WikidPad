@@ -146,23 +146,14 @@ class IncrementalSearchDialog(wx.Frame):
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
-        elif matchesAccelPair("ActivateLink", accP):
+        elif matchesAccelPair("ActivateLink", accP) or \
+                matchesAccelPair("ActivateLinkNewTab", accP) or \
+                matchesAccelPair("ActivateLink2", accP) or \
+                matchesAccelPair("ActivateLinkBackground", accP) or \
+                matchesAccelPair("ActivateLinkNewWindow", accP):
             # ActivateLink is normally Ctrl-L
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkBackground", accP):
-            # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.OnKeyDown(evt)

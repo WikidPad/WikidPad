@@ -175,22 +175,14 @@ class WebkitSearchDialog(wx.Frame):
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
             foundPos = self.webkitCtrl.executeIncrementalSearchBackward(searchString)
-        elif matchesAccelPair("ActivateLink", accP):
+        elif matchesAccelPair("ActivateLink", accP) or \
+                matchesAccelPair("ActivateLinkNewTab", accP) or \
+                matchesAccelPair("ActivateLink2", accP) or \
+                matchesAccelPair("ActivateLinkBackground", accP) or \
+                matchesAccelPair("ActivateLinkNewWindow", accP):
             # ActivateLink is normally Ctrl-L
-            self.webkitCtrl.endIncrementalSearch()
-            self.Close()
-            self.webkitCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
-            self.webkitCtrl.endIncrementalSearch()
-            self.Close()
-            self.webkitCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
-            self.webkitCtrl.endIncrementalSearch()
-            self.Close()
-            self.webkitCtrl.OnKeyDown(evt)
-        elif matchesAccelPair("ActivateLinkBackground", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.webkitCtrl.endIncrementalSearch()
             self.Close()
@@ -1375,7 +1367,6 @@ class WikiHtmlViewWK(wx.Panel):
 
         if href.startswith(internaljumpPrefix + u"wikipage/"):  # len("wikipage/") == 9
 
-
             # Jump to another wiki page
 
             # First check for an anchor. In URLs, anchors are always
@@ -1395,9 +1386,8 @@ class WikiHtmlViewWK(wx.Panel):
             if tabMode & 2:
                 if tabMode == 6:
                     # New Window
-                    self.presenter.getMainControl(). \
-                        OpenNewWikidPadInstance([word], [u'preview']) 
-                    return True
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTabInNewFrame()
                 else:
                     # New tab
                     presenter = self.presenter.getMainControl().\
