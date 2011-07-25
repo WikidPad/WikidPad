@@ -1371,8 +1371,18 @@ class HtmlExporter(AbstractExporter):
         """
         self.astNodeStack.append(astNode)
 
-        self.outAppend(u'<table border="2">\n')
-        
+        # Retrieve table appendix values
+        cssClass = u""
+        tableModeAppendix = astNode.findFlatByName("tableModeAppendix")
+        if tableModeAppendix:
+            # Written this way to keep compatible if user's own parser wasn't
+            # updated properly
+            style = getattr(tableModeAppendix, "cssClass", u"")
+            if style:
+                cssClass = u' class="{0}"'.format(style)
+
+        self.outAppend(u'<table border="2"{0}>\n'.format(cssClass))
+
         for row in astNode.iterFlatByName("tableRow"):
             self.outAppend(u"<tr>")
             for cell in row.iterFlatByName("tableCell"):
@@ -1380,7 +1390,7 @@ class HtmlExporter(AbstractExporter):
                 self.processAst(content, cell)
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
-        
+
         if self.asIntHtmlPreview:
             self.outAppend(u'</table>\n<br />\n') # , eatPostBreak=not self.asIntHtmlPreview)
         else:

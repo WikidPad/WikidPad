@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-06-26
+# Last modified (format YYYY-MM-DD): 2011-07-21
 
 
 import locale, pprint, time, sys, string, traceback
@@ -494,12 +494,18 @@ tableRow = tableRow.setResultsNameNoCopy("tableRow").setParseAction(actionHideOn
 
 
 def actionTableModeAppendix(s, l, st, t):
+    st.dictStack.getNamedDict("table")["table.tabSeparated"] = False
+    t.cssClass = None
     for key, data in t.entries:
         if key == "t":
             st.dictStack.getNamedDict("table")["table.tabSeparated"] = True
-            return
-
-    st.dictStack.getNamedDict("table")["table.tabSeparated"] = False
+        # Styles are designated by "s=". They will result in the css class
+        # s being applied to all table elements. E. g. "s=foo" uses class
+        # "foo". The '=' can be omitted, therefore "sfoo" does the same.
+        elif key == "s":
+            if data.startswith(u"="):
+                data = data[1:]
+            t.cssClass = data
 
 
 tableModeAppendix = modeAppendix.setResultsName("tableModeAppendix").addParseAction(actionTableModeAppendix)
