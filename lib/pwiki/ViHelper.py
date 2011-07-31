@@ -167,6 +167,24 @@ class ViHelper():
                 # text that was selected.
                 self.StartSelection()
 
+        # Special case if single char is selected (anchor needs to be reversed
+        # if movement moves in a particular direction
+        single = False
+        reverse = False
+        if self.mode == ViHelper.VISUAL:
+            start_pos = self.ctrl.GetCurrentPos()
+            if len(self.ctrl.GetSelectedText()) < 1:
+                single = True
+            else:
+                if start_pos - self.GetSelectionAnchor() < 0:
+                    reverse = True
+                
+            ## Unicode character can take more than one pos
+            #offset = anchor - self.GetSelectionAnchor()
+            #offset_len = len(self.ctrl.GetSelectedText())
+            #if offset < 0:
+            #    offset_len = - offset_len
+
         # Run the actual function
         if type(args) == dict:
             ret = func(**args)
@@ -179,6 +197,13 @@ class ViHelper():
         if pre_motion_key is not None:
             # post motion function
             self.pre_keys[self.mode][pre_motion_key][1]()
+        # horrible fix for word end cmd
+        #else:
+        #    try:
+        #        if func == self.MoveCaretWordEnd:
+        #            self.ctrl.CharLeft()
+        #    except:
+        #        pass
 
         # If the command is repeatable save its type and any other settings
         if repeatable > 0:
@@ -186,17 +211,29 @@ class ViHelper():
 
         # Some commands should cause the mode to revert back to normal if run
         # from visual mode, others shouldn't.
+        # NOTE: This is currently dependent on a number of function and
+        #       variables on present in the WikiTxtCtrl implementation
         if self.mode == ViHelper.VISUAL:
             if com_type not in [1, 2]:
                 self.SetMode(ViHelper.NORMAL)
             else:
+                if single:
+                    if self.ctrl.GetCurrentPos() < start_pos:
+                        self.StartSelection(start_pos+1)
+                else:
+                    if reverse:
+                        if self.ctrl.GetCurrentPos() - \
+                                self.GetSelectionAnchor() >= -1:
+                            self.StartSelection(self.GetSelectionAnchor()-1)
+                            
+
                 self.SelectSelection()
                 if self.selection_mode == "LINE":
                     self.SelectFullLines()
  
-        # Is this ever used?
-        if ret is True:
-            return True
+        ## Is this ever used?
+        #if ret is True:
+        #    return True
 
         self.FlushBuffers()
 
