@@ -36,6 +36,14 @@ If you activated support for vi keys (options dialog, options page "HTML preivew
                             defaults to bottom of page
         (count) gg      : scroll to (count)% of page
                             defaults to top of page
+        {count} %       : scroll to {count}% of page
+
+                0       : scrolls to absolute left of document
+        (count) ^       : scrolls to (count)% of document
+                          horizontally. Defaults to 0% (same as
+                          0)
+        (count) $       : scrolls to (count)% of document
+                          horizontally. Defaults to 100%
 
                 gh      : goto home page
                 gH      : open home in new forground tab
@@ -49,6 +57,11 @@ If you activated support for vi keys (options dialog, options page "HTML preivew
         (count) L       : go forward in history count times
 
                 gu      : display parents dialog (Ctrl + Up)
+        (count) gU      : same as gu but if only one parent defined
+                          skip the dialog and open it directly. If
+                          count keep going until no or more than one
+                          parent reached (intervening pages are not
+                          recorded in history).
 
                 o       : open wikipage (Ctrl + o)
 
@@ -57,9 +70,12 @@ If you activated support for vi keys (options dialog, options page "HTML preivew
                 dd      : close current tab (as opposed to single 
                           "d" in pentadactyl)
 
-                return  : follow link (if selected)
+                Return  : follow link (if selected)
 
         Ctrl+[ or Esc   : clear selection (and/or count/modifier)
+        
+                y       : copy selected wikiword to clipboard (not implemented)
+                Y       : copy selected text to clipboard
 >>
 
 where (count) should be replaced by a number between 0 and 10000 (including).

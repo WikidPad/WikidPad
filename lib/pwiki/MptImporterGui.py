@@ -6,7 +6,7 @@ import Consts
 
 from WikiExceptions import *
 
-from wxHelper import runDialogModalFactory, XrcControls, GUI_ID
+from wxHelper import ModalDialogMixin, XrcControls, GUI_ID
 
 import Utilities
 
@@ -119,7 +119,8 @@ class RequestGridRow(object):
 
     def setByUnifName(self, unifName):
         # Check for renamable parts
-        m, r = self._splitOnMatchSeq(unifName, (u"wikipage/", u"savedsearch/"))
+        m, r = self._splitOnMatchSeq(unifName, (u"wikipage/", u"savedsearch/",
+                u"savedpagesearch/"))
 
         if m is not None:
             self.renamable = True
@@ -175,7 +176,8 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             _RequestGrid._UNIFPREFIX_TO_HR_NAME_MAP = {
                     u"wikipage/": _(u"Wiki page"),
                     u"funcpage/": _(u"Func. page"),
-                    u"savedsearch/": _(u"Saved search")
+                    u"savedsearch/": _(u"Saved search"),
+                    u"savedpagesearch/": _(u"Saved page search")
             }
 
         self.inputPanel = parent
@@ -251,6 +253,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             unifNamePrefix = obj.unifNamePrefix
             typeHr = self._UNIFPREFIX_TO_HR_NAME_MAP[unifNamePrefix]
         else:
+            print "--_fillRowByData9", repr(unifName)
             for k, v in self._UNIFPREFIX_TO_HR_NAME_MAP.iteritems():
                 if unifName.startswith(k):
                     typeHr = v
@@ -259,6 +262,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             else:
                 typeHr = u""  # TODO Error? Message?
                 unifNamePrefix = None
+            print "--_fillRowByData21", repr((unifName, typeHr, unifNamePrefix))
 
         self.SetCellValue(rowNo, self.COL_TYPE, typeHr)
         
@@ -315,6 +319,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
                 "select unifName from entries where not dontImport and ("
                 "unifName glob 'wikipage/*' or "
                 "unifName glob 'savedsearch/*' or "
+                "unifName glob 'savedpagesearch/*' or "
                 "unifName glob 'funcpage/*')"):
             result[unifName].doImport = RequestGridRow.IMPORT_DEFAULT
 
@@ -515,7 +520,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
                     unifName))
 
 
-class MultiPageTextImporterDialog(wx.Dialog):
+class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
     """
     """
 
@@ -589,5 +594,5 @@ class MultiPageTextImporterDialog(wx.Dialog):
 
 
 
-MultiPageTextImporterDialog.runModal = staticmethod(runDialogModalFactory(MultiPageTextImporterDialog))
+# MultiPageTextImporterDialog.runModal = staticmethod(runDialogModalFactory(MultiPageTextImporterDialog))
 

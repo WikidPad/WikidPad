@@ -363,8 +363,8 @@ class MultiPageTextImporter:
 
         # Then find other collisions (saved searches etc.)
         for unifName in self.tempDb.execSqlQuerySingleColumn(
-                "select unifName from entries where unifName glob 'savedsearch/*' "
-                "and not dontImport"):
+                "select unifName from entries where (unifName glob 'savedsearch/*' "
+                "or unifName glob 'savedpagesearch/*') and not dontImport"):
             if self.wikiDocument.hasDataBlock(unifName):
                 self.tempDb.execSql("update entries set collisionWithPresent = ? "
                         "where unifName = ?", (unifName, unifName))
@@ -499,6 +499,8 @@ class MultiPageTextImporter:
             if tag.startswith(u"funcpage/"):
                 self._skipContent()
             elif tag.startswith(u"savedsearch/"):
+                self._skipContent()
+            elif tag.startswith(u"savedpagesearch/"):
                 self._skipContent()
             elif tag.startswith(u"wikipage/"):
                 self._skipContent()
@@ -684,6 +686,8 @@ class MultiPageTextImporter:
                 self._importItemFuncPageVer1Pass2(tag[9:])
             elif tag.startswith(u"savedsearch/"):
                 self._importB64DatablockVer1Pass2(renameImportTo)
+            elif tag.startswith(u"savedpagesearch/"):
+                self._importHintedDatablockVer1Pass2(renameImportTo)
             elif tag.startswith(u"versioning/"):
                 self._importHintedDatablockVer1Pass2(renameImportTo)
             else:

@@ -5,7 +5,7 @@ import os, os.path, traceback, sqlite3
 import wx, wx.xrc
 
 from wxHelper import GUI_ID, wxKeyFunctionSink, XrcControls, \
-        runDialogModalFactory
+        ModalDialogMixin
 
 # from .wxHelper import XrcControls
 #
@@ -1204,7 +1204,7 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
 
 
 
-class FileCleanupInitialDialog(wx.Dialog):
+class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
     """
     Dialog to ask for the options for the data to collect on file links
     and file storage
@@ -1245,13 +1245,13 @@ class FileCleanupInitialDialog(wx.Dialog):
 
         self.EndModal(wx.ID_OK)
 
-FileCleanupInitialDialog.runModal = staticmethod(runDialogModalFactory(
-        FileCleanupInitialDialog))
+# FileCleanupInitialDialog.runModal = staticmethod(runDialogModalFactory(
+#         FileCleanupInitialDialog))
 
 
 
 
-class FileCleanupDialog(wx.Dialog):
+class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
     """
     """
 
@@ -1470,8 +1470,8 @@ class FileCleanupDialog(wx.Dialog):
 
 
 
-FileCleanupDialog.runModal = staticmethod(runDialogModalFactory(
-        FileCleanupDialog))
+# FileCleanupDialog.runModal = staticmethod(runDialogModalFactory(
+#         FileCleanupDialog))
 
 
 

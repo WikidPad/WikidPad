@@ -5035,7 +5035,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         # up goes to the previous sibling or to the last
         # of its children if it's expanded
-        elif keyCode == wx.WXK_UP:
+        elif keyCode in (wx.WXK_UP, wx.WXK_NUMPAD_UP):
             prev = self.GetPrevSibling(self._key_current)
             if not prev:
                 prev = self.GetItemParent(self._key_current)
@@ -5075,7 +5075,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     self._key_current = prev
 
         # left arrow goes to the parent
-        elif keyCode == wx.WXK_LEFT:
+        elif keyCode in (wx.WXK_LEFT, wx.WXK_NUMPAD_LEFT):
             
             prev = self.GetItemParent(self._current)
             if prev == self.GetRootItem() and self.HasFlag(TR_HIDE_ROOT):            
@@ -5088,7 +5088,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 if prev and self.IsItemEnabled(prev):
                     self.DoSelectItem(prev, unselect_others, extended_select)
                 
-        elif keyCode == wx.WXK_RIGHT:
+        elif keyCode in (wx.WXK_RIGHT, wx.WXK_NUMPAD_RIGHT):
             # this works the same as the down arrow except that we
             # also expand the item if it wasn't expanded yet
             if self.IsExpanded(self._current) and self.HasChildren(self._current):
@@ -5100,7 +5100,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 self.Expand(self._current)
             # fall through
 
-        elif keyCode == wx.WXK_DOWN:
+        elif keyCode in (wx.WXK_DOWN, wx.WXK_NUMPAD_DOWN):
             if self.IsExpanded(self._key_current) and self.HasChildren(self._key_current):
 
                 child = self.GetNextActiveItem(self._key_current)
@@ -5132,7 +5132,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     
 
         # <End> selects the last visible tree item
-        elif keyCode == wx.WXK_END:
+        elif keyCode in (wx.WXK_END, wx.WXK_NUMPAD_END):
             
             last = self.GetRootItem()
 
@@ -5153,7 +5153,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 self.DoSelectItem(last, unselect_others, extended_select)
                 
         # <Home> selects the root item
-        elif keyCode == wx.WXK_HOME:
+        elif keyCode in (wx.WXK_HOME, wx.WXK_NUMPAD_HOME):
                 
             prev = self.GetRootItem()
             

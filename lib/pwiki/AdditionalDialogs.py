@@ -33,7 +33,7 @@ import Serialization, PluginManager, SystemInfo
 
 
 
-class SelectWikiWordDialog(wx.Dialog):
+class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
     """
     Called for "Append/Prepend wiki word" in tree node context menu
     """
@@ -173,11 +173,11 @@ class SelectWikiWordDialog(wx.Dialog):
             evt.Skip()
             
 
-SelectWikiWordDialog.runModal = staticmethod(runDialogModalFactory(SelectWikiWordDialog))
+# SelectWikiWordDialog.runModal = staticmethod(runDialogModalFactory(SelectWikiWordDialog))
 
      
 
-class OpenWikiWordDialog(wx.Dialog):
+class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, pWiki, parent, ID, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
@@ -295,16 +295,19 @@ class OpenWikiWordDialog(wx.Dialog):
                             self.ctrls.text.SetFocus()
                             return False
 
-                        # wikiWord is valid but nonexisting, so maybe create it?
-                        result = wx.MessageBox(
-                                uniToGui(_(u"'%s' is not an existing wikiword. Create?") %
-                                wikiWord), uniToGui(_(u"Create")),
-                                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
-    
-                        if result == wx.NO:
-                            self.ctrls.text.SetFocus()
-                            return False
-    
+                        if self.pWiki.getConfig().getboolean("main",
+                                "openWordDialog_askForCreateWhenNonexistingWord",
+                                True):
+                            # wikiWord is valid but nonexisting, so maybe create it?
+                            result = wx.MessageBox(
+                                    uniToGui(_(u"'%s' is not an existing wikiword. Create?") %
+                                    wikiWord), uniToGui(_(u"Create")),
+                                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
+
+                            if result == wx.NO:
+                                self.ctrls.text.SetFocus()
+                                return False
+
                         self.value = ((wikiWord, 0, wikiWord, -1, -1),)
             else:
                 self.value = ((entered, 0, entered, -1, -1),)
@@ -473,11 +476,11 @@ class OpenWikiWordDialog(wx.Dialog):
     def OnNewTabBackground(self, evt):
         self.activateSelectedWikiWords(3)
 
-OpenWikiWordDialog.runModal = staticmethod(runDialogModalFactory(OpenWikiWordDialog))
+# OpenWikiWordDialog.runModal = staticmethod(runDialogModalFactory(OpenWikiWordDialog))
 
 
 
-class ChooseWikiWordDialog(wx.Dialog):
+class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
     """
     Used to allow selection from list of parents, parentless words, children
     or bookmarked words.
@@ -625,7 +628,7 @@ class ChooseWikiWordDialog(wx.Dialog):
 
 
 
-class RenameWikiWordDialog(wx.Dialog):
+class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, mainControl, fromWikiWord, parent, ID, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
@@ -749,7 +752,7 @@ class RenameWikiWordDialog(wx.Dialog):
 
 
 
-RenameWikiWordDialog.runModal = staticmethod(runDialogModalFactory(RenameWikiWordDialog))
+# RenameWikiWordDialog.runModal = staticmethod(runDialogModalFactory(RenameWikiWordDialog))
 
 
 
@@ -763,7 +766,7 @@ RenameWikiWordDialog.runModal = staticmethod(runDialogModalFactory(RenameWikiWor
 
 
 
-class SelectIconDialog(wx.Dialog):
+class SelectIconDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
@@ -849,7 +852,7 @@ class SelectIconDialog(wx.Dialog):
 
 
 
-SelectIconDialog.runModal = staticmethod(runDialogModalFactory(SelectIconDialog))
+# SelectIconDialog.runModal = staticmethod(runDialogModalFactory(SelectIconDialog))
 
 
 
@@ -1075,7 +1078,7 @@ class FontFaceDialog(wx.Dialog):
 
 
 
-class ExportDialog(wx.Dialog):
+class ExportDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, mainControl, ID, continuousExport=False, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         from . import Exporters
@@ -1570,7 +1573,7 @@ class ExportDialog(wx.Dialog):
                     "saved export: ") + e.message)
 
 
-ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
+# ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
 
 
 
@@ -1772,7 +1775,7 @@ def _children(win, indent=0):
 
 
 
-class NewWikiSettings(wx.Dialog):
+class NewWikiSettings(wx.Dialog, ModalDialogMixin):
     """
     Dialog to choose options when creating a new wiki or when a wiki with
     damaged configuration file is opened.
@@ -1863,7 +1866,7 @@ class NewWikiSettings(wx.Dialog):
 
         self.EndModal(wx.ID_OK)
 
-NewWikiSettings.runModal = staticmethod(runDialogModalFactory(NewWikiSettings))
+# NewWikiSettings.runModal = staticmethod(runDialogModalFactory(NewWikiSettings))
 
 
 

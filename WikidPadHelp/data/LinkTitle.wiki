@@ -1,0 +1,20 @@
+﻿++ Link Title
+
+A link title is the part inside of a bracketed URL or wiki word link after the vertical bar '|' (if present) up to the closing bracket. It contains the text and/or image that should be shown in HTML preview or export instead of the link. You can click then on this content to go to the linked URL or wiki word.
+
+A title can contain simple formatting (bold, italics) and image URLs (see [UrlLinking#++ Images]).
+
+Examples (also look at it in preview mode):
+
+[UrlLinking]  (no title, shows default text)
+
+[UrlLinking|a title to replace the default]
+
+[https://somewheresecure.com|Some *text* and _an image_ rel://files/testimg.gif>r40% to click on]
+
+
++++ Little caveat: image URLs with spaces
+
+URLs in brackets are allowed to contain spaces which are automatically replaced by the appropriate escape code '%20' before the link is followed. This rule only apply to the actual link URL (before '|'). To use spaced image URLs in a title you must bracket them separately, e.g.
+
+[https://somewheresecure.com|[rel://files/spaced testimg.gif]]

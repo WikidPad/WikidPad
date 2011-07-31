@@ -26,6 +26,8 @@ Same as [WikiExport#What to export]
 ++++ Print as
 Choose as what it should be printed, either as "Plain text", which means the wiki pages are printed without any formatting or as "HTML" which uses the internal HTML renderer to build the print pages.
 
+If Webkit is supported (currently Linux only) you can also select "HTML (Webkit)" to let Webkit render the print pages.
+
 
 ++++ Page separator
 This applies only to "Plain text" prints.

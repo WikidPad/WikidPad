@@ -10,7 +10,7 @@ import wx, wx.xrc
 # from Utilities import *  # TODO Remove this
 
 from wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
-        runDialogModalFactory, WindowUpdateLocker
+        ModalDialogMixin, WindowUpdateLocker
 
 
 from StringOps import unescapeForIni
@@ -214,7 +214,7 @@ class FilePasteParams:
 
 
 
-class FilePasteDialog(wx.Dialog):
+class FilePasteDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, pWiki, ID, filepastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
@@ -278,7 +278,7 @@ class FilePasteDialog(wx.Dialog):
             self.EndModal(wx.ID_OK)
 
 
-FilePasteDialog.runModal = staticmethod(runDialogModalFactory(FilePasteDialog))
+# FilePasteDialog.runModal = staticmethod(runDialogModalFactory(FilePasteDialog))
 
 
 

@@ -1,9 +1,11 @@
 # import profilehooks
 # profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
-import sys, traceback, re, threading, time
+import sys, traceback, re, time
 
 import wx, wx.html, wx.xrc
+
+from rtlibRepl import minidom
 
 import Consts
 from .MiscEvent import MiscEventSourceMixin, KeyFunctionSink
@@ -608,44 +610,101 @@ class SearchResultListBox(wx.HtmlListBox):
 
 
 class SearchPageDialog(wx.Dialog):
-    def __init__(self, pWiki, ID, title="",
+    def __init__(self, mainControl, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
         d = wx.PreDialog()
         self.PostCreate(d)
 
-        self.pWiki = pWiki
+        self.mainControl = mainControl
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "SearchPageDialog")
+        res.LoadOnDialog(self, self.mainControl, "SearchPageDialog")
 
         self.ctrls = XrcControls(self)
 
         self.ctrls.btnClose.SetId(wx.ID_CANCEL)
         
+        self.showExtended = True
+        self.mainSizer = self.GetSizer()
+#         self.mainSizer.Detach(self.ctrls.lbSavedSearches)
+        self.OnToggleExtended(None)
+        
         self.firstFind = True
+        self.savedSearches = None
+
+        self._refreshSavedSearchesList()
         self._refreshSearchHistoryCombo()
         
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
         wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+
+        wx.EVT_BUTTON(self, GUI_ID.btnToggleExtended, self.OnToggleExtended)
+        wx.EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnDeleteSearches, self.OnDeleteSearches)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadSearch, self.OnLoadSearch)
+#         wx.EVT_BUTTON(self, GUI_ID.btnLoadAndRunSearch, self.OnLoadAndRunSearch)
+
         wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)
         wx.EVT_COMBOBOX(self, GUI_ID.cbSearch, self.OnSearchComboSelected) 
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadSearch)
         wx.EVT_CLOSE(self, self.OnClose)
-
+        
 
     def OnClose(self, evt):
-        self.pWiki.nonModalFindDlg = None
+        self.mainControl.nonModalFindDlg = None
         self.Destroy()
 
 
-    def _buildSearchOperation(self):
+    def OnToggleExtended(self, evt):
+        self.showExtended = not self.showExtended
+        winMin = self.GetMinSize()
+        winCurr = self.GetSize()
+        oldSizerMin = self.mainSizer.CalcMin()
+
+#         print "--OnToggleExtended3", repr((self.showExtended, self.mainSizer.CalcMin()))
+        
+        if not self.showExtended:
+            self.ctrls.panelSavedSearchButtons.Show(False)
+            self.mainSizer.Detach(self.ctrls.panelSavedSearchButtons)
+            self.ctrls.btnToggleExtended.SetLabel(_(u"More >>"))
+        else:
+            self.ctrls.panelSavedSearchButtons.Show(True)
+            self.mainSizer.Add(self.ctrls.panelSavedSearchButtons, (1,0), (1,2),
+                    flag=wx.ALL | wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL,
+                    border=5)
+#             self.mainSizer.AddGrowableRow(1)
+            self.ctrls.btnToggleExtended.SetLabel(_(u"<< Less"))
+
+#         print "--OnToggleExtended13", repr(self.mainSizer.CalcMin())
+        self.Layout()
+
+        newSizerMin = self.mainSizer.CalcMin()
+
+        self.SetMinSize((winMin.GetWidth() - oldSizerMin.GetWidth() +
+                newSizerMin.GetWidth(),
+                winMin.GetHeight() - oldSizerMin.GetHeight() +
+                newSizerMin.GetHeight()))
+        
+        self.SetSize((winCurr.GetWidth() - oldSizerMin.GetWidth() +
+                newSizerMin.GetWidth(),
+                winCurr.GetHeight() - oldSizerMin.GetHeight() +
+                newSizerMin.GetHeight()))
+        
+
+
+
+
+    def _buildSearchReplaceOperation(self):
         sarOp = SearchReplaceOperation()
         sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
-        sarOp.replaceOp = False
+        sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+        sarOp.replaceOp = True
         sarOp.booleanOp = False
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
@@ -659,6 +718,18 @@ class SearchPageDialog(wx.Dialog):
         sarOp.wikiWide = False
 
         return sarOp
+
+
+    def showSearchReplaceOperation(self, sarOp):
+        """
+        Load settings from search operation into controls
+        """
+        self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
+        self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
+        self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
+        self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
+        self.ctrls.cbRegEx.SetValue(sarOp.wildCard == 'regex')
+
 
 
     def buildHistoryTuple(self):
@@ -711,10 +782,151 @@ class SearchPageDialog(wx.Dialog):
             self.ctrls.cbSearch.Thaw()
 
 
+    def _refreshSavedSearchesList(self):
+        wikiData = self.mainControl.getWikiData()
+        unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedpagesearch/")
+
+        result = []
+#         suppExTypes = PluginManager.getSupportedExportTypes(mainControl,
+#                     None, continuousExport)
+
+        for un in unifNames:
+            name = un[16:]
+            content = wikiData.retrieveDataBlock(un)
+            xmlDoc = minidom.parseString(content)
+            xmlNode = xmlDoc.firstChild
+#             etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
+#             if etype not in suppExTypes:
+#                 # Export type of saved export not supported
+#                 continue
+
+            result.append((name, xmlNode))
+    
+        self.mainControl.getCollator().sortByFirst(result)
+    
+        self.savedSearches = result
+
+        self.ctrls.lbSavedSearches.Clear()
+        for search in self.savedSearches:
+            self.ctrls.lbSavedSearches.Append(uniToGui(search[0]))
+
+
+
     def _refreshSearchHistoryCombo(self):
         hist = wx.GetApp().getPageSearchHistory()
         self.ctrls.cbSearch.Clear()
         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
+
+
+    def OnDeleteSearches(self, evt):
+        sels = self.ctrls.lbSavedSearches.GetSelections()
+        
+        if len(sels) == 0:
+            return
+            
+        answer = wx.MessageBox(
+                _(u"Do you want to delete %i search(es)?") % len(sels),
+                _(u"Delete search"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+        if answer == wx.NO:
+            return
+
+        for s in sels:
+#             self.mainControl.getWikiData().deleteSavedSearch(self.savedSearches[s])
+            self.mainControl.getWikiData().deleteDataBlock(
+                    u"savedpagesearch/" + self.savedSearches[s][0])
+        self._refreshSavedSearchesList()
+
+
+    def OnLoadSearch(self, evt):
+        self._loadSearch()
+        
+#     def OnLoadAndRunSearch(self, evt):
+#         if self._loadSearch():
+#             try:
+#                 self._refreshPageList()
+#             except UserAbortException:
+#                 return
+#             except re.error, e:
+#                 self.displayErrorMessage(_(u'Error in regular expression'),
+#                         _(unicode(e)))
+#             except ParseException, e:
+#                 self.displayErrorMessage(_(u'Error in boolean expression'),
+#                         _(unicode(e)))
+#             except DbReadAccessError, e:
+#                 self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
+#                         _(unicode(e)))
+
+
+    def _loadSearch(self):
+        sels = self.ctrls.lbSavedSearches.GetSelections()
+        
+        if len(sels) != 1:
+            return False
+        
+        xmlNode = self.savedSearches[sels[0]][1]
+
+        sarOp = SearchReplaceOperation()
+        sarOp.serializeFromXml(xmlNode)
+        self.showSearchReplaceOperation(sarOp)
+        
+        return True
+
+
+    # TODO Store search mode
+    def OnSaveSearch(self, evt):
+        sarOp = self._buildSearchReplaceOperation()
+        try:
+            sarOp.rebuildSearchOpTree()
+        except re.error, e:
+            self.mainControl.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+            return
+        except ParseException, e:
+            self.mainControl.displayErrorMessage(_(u'Error in boolean expression'),
+                    _(unicode(e)))
+            return
+
+        if len(sarOp.searchStr) > 0:
+            title = sarOp.getTitle()
+            while True:
+                title = guiToUni(wx.GetTextFromUser(_(u"Title:"),
+                        _(u"Choose search title"), title, self))
+                if title == u"":
+                    return  # Cancel
+                    
+#                 if title in self.mainControl.getWikiData().getSavedSearchTitles():
+                if (u"savedpagesearch/" + title) in self.mainControl.getWikiData()\
+                        .getDataBlockUnifNamesStartingWith(
+                        u"savedpagesearch/" + title):
+
+                    answer = wx.MessageBox(
+                            _(u"Do you want to overwrite existing search '%s'?") %
+                            title, _(u"Overwrite search"),
+                            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+                    if answer == wx.NO:
+                        continue
+
+#                 self.mainControl.getWikiData().saveSearch(title,
+#                         sarOp.getPackedSettings())
+
+                xmlDoc = minidom.getDOMImplementation().createDocument(None,
+                        None, None)
+                xmlNode = xmlDoc.createElement(u"savedpagesearch")
+                sarOp.serializeToXml(xmlNode, xmlDoc)
+                
+                xmlDoc.appendChild(xmlNode)
+                content = xmlDoc.toxml("utf-8")
+                xmlDoc.unlink()
+                self.mainControl.getWikiData().storeDataBlock(
+                        u"savedpagesearch/" + title, content,
+                        storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
+
+                self._refreshSavedSearchesList()
+                break
+        else:
+            self.mainControl.displayErrorMessage(
+                    _(u"Invalid search string, can't save as view"))
 
 
     def displayErrorMessage(self, errorStr, e=u""):
@@ -726,7 +938,7 @@ class SearchPageDialog(wx.Dialog):
 
 
     def _nextSearch(self, sarOp):
-        editor = self.pWiki.getActiveEditor()
+        editor = self.mainControl.getActiveEditor()
         if self.ctrls.rbSearchFrom.GetSelection() == 0:
             # Search from cursor
             contPos = editor.getContinuePosForSearch(sarOp)
@@ -763,7 +975,7 @@ class SearchPageDialog(wx.Dialog):
         if guiToUni(self.ctrls.cbSearch.GetValue()) == u"":
             return
 
-        sarOp = self._buildSearchOperation()
+        sarOp = self._buildSearchReplaceOperation()
         sarOp.replaceOp = False
         self.addCurrentToHistory()
         try:
@@ -775,12 +987,12 @@ class SearchPageDialog(wx.Dialog):
 
 
     def OnReplace(self, evt):
-        sarOp = self._buildSearchOperation()
-        sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
-        sarOp.replaceOp = True
+        sarOp = self._buildSearchReplaceOperation()
+#         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+#         sarOp.replaceOp = True
         self.addCurrentToHistory()
         try:
-            self.pWiki.getActiveEditor().executeReplace(sarOp)
+            self.mainControl.getActiveEditor().executeReplace(sarOp)
             self._nextSearch(sarOp)
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
@@ -788,12 +1000,12 @@ class SearchPageDialog(wx.Dialog):
 
 
     def OnReplaceAll(self, evt):
-        sarOp = self._buildSearchOperation()
-        sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
-        sarOp.replaceOp = True
+        sarOp = self._buildSearchReplaceOperation()
+#         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+#         sarOp.replaceOp = True
         sarOp.cycleToStart = False
         lastSearchPos = 0
-        editor = self.pWiki.getActiveEditor()
+        editor = self.mainControl.getActiveEditor()
         self.addCurrentToHistory()
         replaceCount = 0
         editor.BeginUndoAction()

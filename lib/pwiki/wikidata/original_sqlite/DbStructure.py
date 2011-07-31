@@ -5,7 +5,7 @@ DB formats to the current one
 """
 
 
-import string, codecs, types, traceback
+import string, codecs, types, threading, traceback
 
 from os import mkdir, unlink, rename
 from os.path import exists, join

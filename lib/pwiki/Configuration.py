@@ -720,6 +720,8 @@ GLOBALDEFAULTS = {
     ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed  
     ("main", "mainTabs_switchMruOrder"): "True", # Switch between tabs in most-recently used order
     ("main", "startup_splashScreen_show"): "True", # Show splash screen on startup
+    ("main", "openWordDialog_askForCreateWhenNonexistingWord"): "True", # Ask if to create
+            # (instead of create without ask) when trying to open non-existing word in "Open WikiWord" dialog
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",

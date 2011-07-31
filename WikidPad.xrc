@@ -398,6 +398,14 @@
         <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
+        <object class="wxCheckBox" name="cbOpenWordDialogAskForCreateWhenNonexistingWord">
+          <label>Ask for creation when opening non-existing word</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxFlexGridSizer">
           <cols>3</cols>
           <growablecols>1</growablecols>
@@ -4472,8 +4480,7 @@
   <object class="wxDialog" name="SearchPageDialog">
     <title>Search Page</title>
     <centered>1</centered>
-    <object class="wxBoxSizer">
-      <orient>wxHORIZONTAL</orient>
+    <object class="wxGridBagSizer">
       <object class="sizeritem">
         <object class="wxBoxSizer">
           <orient>wxVERTICAL</orient>
@@ -4496,7 +4503,7 @@
               </object>
               <object class="sizeritem">
                 <object class="wxStaticText" name="">
-                  <label>&amp;Replace by:</label>
+                  <label>Re&amp;place by:</label>
                 </object>
                 <option>0</option>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4555,7 +4562,7 @@
                 <object class="wxRadioBox" name="rbSearchFrom">
                   <label>Search from</label>
                   <content>
-                    <item>cursor</item>
+                    <item>c&amp;ursor</item>
                     <item>&amp;beginning</item>
                   </content>
                   <selection>0</selection>
@@ -4570,6 +4577,7 @@
         </object>
         <option>1</option>
         <flag>wxEXPAND</flag>
+        <cellpos>0,0</cellpos>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -4597,7 +4605,7 @@
               <label> Replace &amp;All </label>
             </object>
             <option>0</option>
-            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -4605,11 +4613,115 @@
               <label>Close</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnToggleExtended">
+              <label></label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>1,1</cellpos>
+          </object>
         </object>
+        <option>1</option>
+        <flag>wxEXPAND</flag>
+        <cellpos>0,1</cellpos>
       </object>
+      <object class="sizeritem">
+        <object class="wxPanel" name="panelSavedSearchButtons">
+          <object class="wxGridBagSizer">
+            <object class="sizeritem">
+              <object class="wxBoxSizer">
+                <orient>wxVERTICAL</orient>
+                <object class="sizeritem">
+                  <object class="wxStaticLine"/>
+                  <option>0</option>
+                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <cellpos>1,0</cellpos>
+                  <cellspan>1,1</cellspan>
+                  <border>5</border>
+                </object>
+              </object>
+              <option>0</option>
+              <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+              <cellpos>0,0</cellpos>
+              <cellspan>1,2</cellspan>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText" name="stSavedSearches">
+                <label>Saved Searches:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+              <border>5</border>
+              <cellpos>1,0</cellpos>
+              <cellspan>1,2</cellspan>
+            </object>
+            <object class="sizeritem">
+              <object class="wxListBox" name="lbSavedSearches">
+                <content/>
+                <style>wxLB_EXTENDED</style>
+              </object>
+              <option>1</option>
+              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+              <border>5</border>
+              <minsize>-1,80</minsize>
+              <cellpos>2,0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxBoxSizer">
+                <object class="sizeritem">
+                  <object class="wxButton" name="btnLoadSearch">
+                    <label>&amp;Load Search</label>
+                  </object>
+                  <option>0</option>
+                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <border>5</border>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxButton" name="btnSaveSearch">
+                    <label>&amp;Save Search</label>
+                  </object>
+                  <option>0</option>
+                  <flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <border>5</border>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxButton" name="btnDeleteSearches">
+                    <label>&amp;Delete Search(es)</label>
+                  </object>
+                  <option>0</option>
+                  <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <border>5</border>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxButton" name="btnLoadAndRunSearch">
+                    <label>Load and R&amp;un Search</label>
+                    <hidden>1</hidden>
+                  </object>
+                  <option>0</option>
+                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <border>5</border>
+                </object>
+                <orient>wxVERTICAL</orient>
+              </object>
+              <flag>wxEXPAND</flag>
+              <cellpos>2,1</cellpos>
+            </object>
+            <growablecols>0</growablecols>
+            <growablerows>2</growablerows>
+          </object>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <cellpos>1,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
+      <growablecols>0</growablecols>
+      <growablerows>1</growablerows>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
   </object>

@@ -16,6 +16,20 @@ lowercase letter in the word (this is called "camelcase", like e.g.
 WikiWord) or where a lowercase letter follows after multiple uppercase
 letters (ABCd).
 
+Additionally text in brackets [] not containing some special
+characters (backslash \, #, !, ], [) can be a wiki word (in short
+called "bracketed wiki word"). If you bracket a camelcase wiki word
+it's the same as the non-bracketed word.
+
+Bracketed wiki words can also contain titles after a vertical bar '|'
+(if present) up to the closing bracket. The title is shown in HTML
+preview/export, example:
+
+[WordLinking|text you see instead in preview]
+
+See LinkTitle for more details about titles.
+
+
 anchor: exclude_from_linking
 +++ Exclude wiki words from linking
 

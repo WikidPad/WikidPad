@@ -1,5 +1,24 @@
 ﻿++ Change Log
 
+Jul. 31, 2011 (2.2beta06)
+
+    * Further improvements to Vi-mode in editor and Webkit preview
+      (thanks to Ross)
+    * Separate option for vi emulation in editor.
+      See [OptionsDialog#*Use vi keys in editor*]
+    * Support for canonical parents (thanks to Ross).
+      See [WikiDocumentAttributes#*parent*]
+    * Support Webkit HTML rendering for print (thanks to Ross)
+    * Table option to set CSS class (thanks to Ross).
+      See [TextFormatting#+++ Tables]
+    * Option to switch off asking if nonexisting wiki word should be
+      created in open WikiWord dialog.
+      See [OptionsDialog#*Ask for creation when opening non-existing word*]
+    * Option to open link in new window when middle clicking on it,
+      also menu item to do that (thanks to Ross)
+
+
+
 Jun. 25, 2011 (2.2beta05)
 
     * Trashcan support. See [Menu Wiki#++ Open trashcan],

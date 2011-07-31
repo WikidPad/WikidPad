@@ -8,7 +8,7 @@ import os, traceback
 import wx
 
 
-from .wxHelper import EnhancedListControl, XrcControls, runDialogModalFactory, \
+from .wxHelper import EnhancedListControl, XrcControls, ModalDialogMixin, \
         GUI_ID, WindowUpdateLocker, appendToMenuByMenuDesc, \
         getAccelPairFromKeyDown
 
@@ -132,7 +132,7 @@ class TrashBagList(EnhancedListControl):
 
 
 
-class TrashcanDialog(wx.Dialog):
+class TrashcanDialog(wx.Dialog, ModalDialogMixin):
     """
     """
     def __init__(self, mainControl, parent):
@@ -239,12 +239,12 @@ class TrashcanDialog(wx.Dialog):
 
 
 
-TrashcanDialog.runModal = staticmethod(runDialogModalFactory(
-        TrashcanDialog))
+# TrashcanDialog.runModal = staticmethod(runDialogModalFactory(
+#         TrashcanDialog))
 
 
 
-class TrashBagRenameDialog(wx.Dialog):
+class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
     """
     """
     RET_CANCEL = -1
@@ -385,8 +385,8 @@ class TrashBagRenameDialog(wx.Dialog):
 
 
 
-TrashBagRenameDialog.runModal = staticmethod(runDialogModalFactory(
-        TrashBagRenameDialog))
+# TrashBagRenameDialog.runModal = staticmethod(runDialogModalFactory(
+#         TrashBagRenameDialog))
 
 
 

@@ -30,6 +30,9 @@ Follow the URL or wiki word link the text cursor is currently on in editor.
 ++ Follow Link in New Tab
 Same as "Follow Link" but opens a new tab for the target.
 
+++ Follow Link in New Window
+Same as "Follow Link" but opens a new window for the target.
+
 ++ Copy URL to Clipboard
 Copy "wiki:" URL of current wiki page to clipboard.
 

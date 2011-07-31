@@ -706,27 +706,27 @@ class MultiPageTextExporter(AbstractExporter):
                     shText)
             self.exportFile.write(content)
 
-    @staticmethod
-    def _writeHintedDatablock(wikiDocument, exportFile, unifName, useB64):
-        sh = wikiDocument.guessDataBlockStoreHint(unifName)
-        if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
-            shText = u"extern"
-        else:
-            shText = u"intern"
-
-        exportFile.write(unifName + u"\n")
-        if useB64:
-            datablock = wikiDocument.retrieveDataBlock(unifName)
-
-            exportFile.write(u"important/encoding/base64  storeHint/%s\n" %
-                    shText)
-            exportFile.write(base64BlockEncode(datablock))
-        else:
-            content = wikiDocument.retrieveDataBlockAsText(unifName)
-
-            exportFile.write(u"important/encoding/text  storeHint/%s\n" %
-                    shText)
-            exportFile.write(content)
+#     @staticmethod
+#     def _writeHintedDatablock(wikiDocument, exportFile, unifName, useB64):
+#         sh = wikiDocument.guessDataBlockStoreHint(unifName)
+#         if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
+#             shText = u"extern"
+#         else:
+#             shText = u"intern"
+# 
+#         exportFile.write(unifName + u"\n")
+#         if useB64:
+#             datablock = wikiDocument.retrieveDataBlock(unifName)
+# 
+#             exportFile.write(u"important/encoding/base64  storeHint/%s\n" %
+#                     shText)
+#             exportFile.write(base64BlockEncode(datablock))
+#         else:
+#             content = wikiDocument.retrieveDataBlockAsText(unifName)
+# 
+#             exportFile.write(u"important/encoding/text  storeHint/%s\n" %
+#                     shText)
+#             exportFile.write(content)
 
 #     def _writeSeparator(self):
 #         self.exportFile.checkAndClearBuffer()
@@ -800,6 +800,7 @@ class MultiPageTextExporter(AbstractExporter):
     
                     # Write saved searches
                     if self.writeSavedSearches:
+                        # Wiki-wide searches
                         wikiData = self.wikiDocument.getWikiData()
                         unifNames = wikiData.getDataBlockUnifNamesStartingWith(
                                 u"savedsearch/")
@@ -810,7 +811,15 @@ class MultiPageTextExporter(AbstractExporter):
                             datablock = wikiData.retrieveDataBlock(un)
     
                             self.exportFile.write(base64BlockEncode(datablock))
+                        
+                        # Page searches
+                        unifNames = wikiData.getDataBlockUnifNamesStartingWith(
+                                u"savedpagesearch/")
     
+                        for un in unifNames:
+                            self.exportFile.writeSeparator()
+                            self._writeHintedDatablock(un, False)
+
                     locale.setlocale(locale.LC_ALL, '')
     
                     # Write actual wiki words

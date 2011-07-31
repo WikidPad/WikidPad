@@ -5,7 +5,7 @@ Various string operations, like unicode encoding/decoding,
 creating diff information for plain byte sequences
 """
 
-import os, threading, traceback
+import os, traceback
 
 from struct import pack, unpack
 

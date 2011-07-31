@@ -641,7 +641,7 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
 
 
 
-
+# TODO: 2.4: Remove
 def runDialogModalFactory(clazz):
     def runModal(*args, **kwargs):
         dlg = clazz(*args, **kwargs)
@@ -656,6 +656,29 @@ def runDialogModalFactory(clazz):
             dlg.Destroy()
     
     return runModal
+
+
+class ModalDialogMixin(object):
+    @classmethod
+    def runModal(clazz, *args, **kwargs):
+        dlg = clazz(*args, **kwargs)
+        try:
+            dlg.CenterOnParent(wx.BOTH)
+            if dlg.ShowModal() == wx.ID_OK:
+                return dlg.GetValue()
+            else:
+                return dlg.GetCancelValue()
+    
+        finally:
+            dlg.Destroy()
+
+
+    def GetValue(self):
+        return None
+
+    def GetCancelValue(self):
+        return self.GetValue()   # TODO: Good idea?
+
 
 
 

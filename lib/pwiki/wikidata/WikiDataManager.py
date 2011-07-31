@@ -3,7 +3,6 @@ from __future__ import with_statement
 
 from weakref import WeakValueDictionary
 import os, os.path, time, shutil, traceback, ConfigParser
-from threading import RLock, Thread, Condition
 # from collections import deque
 
 import re
@@ -575,9 +574,10 @@ class WikiDataManager(MiscEventSourceMixin):
             self.refCount = 0
             self.updateExecutor.end(hardEnd=True)  # TODO Inform user as this may take some time
 
-            self.trashcan.writeOverview()
-            self.trashcan.close()
-            self.trashcan = None
+            if self.trashcan is not None:
+                self.trashcan.writeOverview()
+                self.trashcan.close()
+                self.trashcan = None
 
             # Invalidate all cached pages to prevent yet running threads from
             # using them

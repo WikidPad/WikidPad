@@ -110,7 +110,12 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def OnDestroy(self, evt):
+        if not self is evt.GetEventObject():
+            evt.Skip()
+            return
+
         self.close()
+        evt.Skip()
 
 
     def OnSize(self, evt):
@@ -217,6 +222,7 @@ class DocStructureCtrl(EnhancedListControl):
         t = threading.Thread(None, self.buildTocList,
                 args = (text, docPage, depth, uth))
         uth.setThread(t)
+        t.setDaemon(True)
         t.start()
 
 
@@ -256,6 +262,7 @@ class DocStructureCtrl(EnhancedListControl):
             self.tocList = result
             self.tocListStarts = [r[0] for r in result]
 
+            threadstop.testRunning()
             Utilities.callInMainThread(self.applyTocList)
 
         except NotCurrentThreadException:

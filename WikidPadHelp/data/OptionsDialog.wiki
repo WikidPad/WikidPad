@@ -72,12 +72,15 @@ Switch between the page tabs with Ctrl-Tab and Ctrl-Shift-Tab in an order where 
 Instead of the default shortcuts you can look how to change them at ChangingKeyBindings and modify entries "GoNextTab" and "GoPreviousTab" in "KeyBindings.py".
 
 *Minimize on close button*
-Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
+Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the tray area.
 
 If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
 
 *Show splash screen*
 Shows a splash screen on startup. Switching this off doesn't speed up starting of WikidPad (maybe one millisecond). Splash screen is never shown if WikidPad was started with command line option -x (exit after other command line commands were processed).
+
+*Ask for creation when opening non-existing word*
+When you use the "Open Wiki Word" dialog and enter some search text until no wiki word matches it (the list below search field is empty) you can create a new wiki word by hitting OK. If this is checked (default) you are asked if you really wanted to create a new word.
 
 *Statusbar time format*
 Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
@@ -268,7 +271,7 @@ Enter here the path to a script or program which takes the path or URL of a file
 ++++ Mouse
 
 *Middle button without CTRL*
-Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
+Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background, in the same (active) tab or in a new window.
 
 *Middle button with CTRL*
 Same as before, but set reaction if CTRL is pressed while clicking the middle button.
@@ -366,6 +369,9 @@ Fixes some problems when entering characters in non-Western languages, e.g. when
 
 *Translate menu accelerators for keyboard layout*
 Windows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when CTRL is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
+
+*Use vi keys in editor*
+Partly emulates behavior of the vi editor. If you are not used to vi (or one of its clones) you should not check this!
 
 *Forbid cancel on search*
 Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.

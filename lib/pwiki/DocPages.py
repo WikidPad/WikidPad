@@ -3,7 +3,7 @@ from __future__ import with_statement
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
-import os.path, re, struct, time, traceback, threading, collections
+import os.path, re, struct, time, traceback, collections
 
 from .rtlibRepl import minidom
 
@@ -496,9 +496,6 @@ class AbstractWikiPage(DataCarryingPage):
         self.__sinkWikiDocumentSpellSession = KeyFunctionSinkAR((
                 ("modified spell checker session", self.onModifiedSpellCheckerSession),
         ))
-
-#         self.metaDataProcessLock = threading.RLock()  # lock while processing
-#                 # meta-data
 
         self.wikiPageName = wikiPageName
         self.childRelations = None

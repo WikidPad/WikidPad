@@ -22,6 +22,12 @@ Switch to preview to see the "Go somewhere" only. You can also use an image URL 
 
 [https://somewheresecure.com|rel://files/testimg.gif>r40%]
 
+If the image URL contains spaces, enclose it in an additional pair of brackets:
+
+[https://somewheresecure.com|[rel://files/spaced testimg.gif]]
+
+See LinkTitle for more details about titles.
+
 
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.

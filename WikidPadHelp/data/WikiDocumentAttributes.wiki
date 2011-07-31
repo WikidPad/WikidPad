@@ -229,6 +229,10 @@ Controls which pane should be shown when a page is opened:
 You can also use "global.view_pane".
 
 
+*parent*
+Define the "canonical parent" of a page. This means that in the list of parent nodes of a page (menu "Navigate"->"Go to Parent") the canonical parent is selected by default and if you go to a page the tree selects the entry which is placed under the canonical parent (if possible).
+
+
 *short_hint*
 If you place the mouse pointer over the wiki link to a page which contains this attribute, the value of the attribute is shown as a tooltip. E.g. place the mouse pointer over this link and let it rest one moment:
     ShortHintAttribute

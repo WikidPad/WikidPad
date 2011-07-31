@@ -5,7 +5,7 @@ GUI support and error checking for handling attributes (=properties)
 from __future__ import with_statement
 
 
-import traceback, threading
+import traceback
 
 import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as _re
 
@@ -691,10 +691,6 @@ class AttributeChecker:
 
         # if page needs no update, check it directly
         self.checkPage(wikiPage)
-
-#         th = threading.Thread(target=self.checkPage, args=(wikiPage,))
-#         th.setDaemon(True)
-#         th.start()
 
 
     def miscEventHappened(self, miscevt):

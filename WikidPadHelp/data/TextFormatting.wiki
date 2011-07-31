@@ -83,7 +83,7 @@ With this, you can write \[brackets] or \*asterisks\* which are not seen as form
 +++ Tables
 
 A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
-Each line with text is a table row, cells are separated by |. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
+Each line with text is a table row, cells are separated by '|'. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
 
 Example:
 
@@ -102,10 +102,20 @@ with two	rows and	three columns delimited by tabs (not |) and \
                                                     with two lines in a cell
 >>
 
+If you want a particular style (see [Cascading style sheets]) for a table, start it with
+
+<<|sStylename
+>>
+
+where "Stylename" can be replaced by the name of a style you defined in one of the CSS files described in [Cascading style sheets].
+
+You can also combine this with the tabulator option:
+
+<<|sStylename;t
+>>
 
 
 anchor: html
 +++ HTML tags and entities
 You can also use <b>HTML tags</b> and &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entities in WikidPad. Use preview to show the effect of them.
-
 

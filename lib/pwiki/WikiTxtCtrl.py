@@ -1234,6 +1234,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     "main", "async_highlight_delay")
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
             sth.setThread(t)
+            t.setDaemon(True)
             t.start()
 
 
@@ -1287,7 +1288,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.pageType = docPage.getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
         self.handleSpecialPageType()
-        # TODO Handle form mode!!
+        # TODO Handle form mode
         self.presenter.informEditorTextChanged(self)
 
 
@@ -1697,7 +1698,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     process(node, stack[:])
 
                 elif node.name == "heading":
-                    if node.level < 6:   # TODO: Compatibility for Presentation.py without heading5
+                    if node.level < 5:
                         styleNo = FormatTypes.Heading1 + \
                                 (node.level - 1)
                     else:
@@ -3305,6 +3306,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 kwargs={"threadstop": self.calltipThreadHolder})
 
         self.calltipThreadHolder.setThread(thread)
+        thread.setDaemon(True)
         thread.start()
 
 

@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 2, 105, 0)
-VERSION_STRING = "wikidPad 2.2beta05"
+VERSION_TUPLE = ("wikidPad", 2, 2, 106, 0)
+VERSION_STRING = "wikidPad 2.2beta06"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -38,7 +38,7 @@ DEADBLOCKTIMEOUT = 1800
 # Scintilla known format types and numbers
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading1", "Heading2", "Heading3",
-        "Heading4", "Heading5", "Url", "Script", "Attribute", "ToDo"
+        "Heading4", "Url", "Script", "Attribute", "ToDo"
         ], 0)
 
 

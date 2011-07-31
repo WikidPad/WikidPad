@@ -1649,18 +1649,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiPageMenu.AppendSeparator()
 
-        self.addMenuItem(wikiPageMenu, _(u'Set as Roo&t') + u'\t' + self.keyBindings.SetAsRoot,
+        self.addMenuItem(wikiPageMenu, _(u'Set as Roo&t') + u'\t' +
+                self.keyBindings.SetAsRoot,
                 _(u'Set current wiki word as tree root'),
                 lambda evt: self.setCurrentWordAsRoot(),
                 )
 
-        self.addMenuItem(wikiPageMenu, _(u'R&eset Root') + u'\t' + self.keyBindings.ResetRoot,
-                _(u'Set home wiki word as tree root'),
+        self.addMenuItem(wikiPageMenu, _(u'R&eset Root') + u'\t' +
+                self.keyBindings.ResetRoot, _(u'Set home wiki word as tree root'),
                 lambda evt: self.setHomeWordAsRoot(),
                 )
 
         self.addMenuItem(wikiPageMenu, _(u'S&ynchronise Tree'),
-                _(u'Find the current wiki word in the tree'), lambda evt: self.findCurrentWordInTree(),
+                _(u'Find the current wiki word in the tree'),
+                lambda evt: self.findCurrentWordInTree(),
                 "tb_cycle", updatefct=(self.OnUpdateDisNotWikiPage,))
 
         wikiPageMenu.AppendSeparator()
@@ -1672,8 +1674,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 )
 
         self.addMenuItem(wikiPageMenu, _(u'Follow Link in &New Tab') + u'\t' +
-                self.keyBindings.ActivateLinkNewTab, _(u'Activate link/word in new tab'),
+                self.keyBindings.ActivateLinkNewTab,
+                _(u'Activate link/word in new tab'),
                 lambda evt: self.getActiveEditor().activateLink(tabMode=2),
+                updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
+                )
+
+        self.addMenuItem(wikiPageMenu, _(u'Follow Link in New &Window') + u'\t' +
+                self.keyBindings.ActivateLinkNewWindow,
+                _(u'Activate link/word in new window'),
+                lambda evt: self.getActiveEditor().activateLink(tabMode=6),
                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
                 )
 
@@ -1826,8 +1836,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Go to wiki homepage'),
                 lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
                     forceTreeSyncFromRoot=True),
-                "tb_home")
-
+                "tb_home", updatefct=(self.OnUpdateDisNoWiki,))
 
         self.addMenuItem(navigateMenu, _(u'Up&ward') + u'\t' + 
                 self.keyBindings.GoUpwardFromSubpage,
@@ -2808,10 +2817,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         
         # reset the editor
-        self.getActiveEditor().loadWikiPage(None)
-        self.getActiveEditor().SetSelection(-1, -1)
-        self.getActiveEditor().EmptyUndoBuffer()
-        self.getActiveEditor().Disable()
+        if self.getActiveEditor():
+            self.getActiveEditor().loadWikiPage(None)
+            self.getActiveEditor().SetSelection(-1, -1)
+            self.getActiveEditor().EmptyUndoBuffer()
+            self.getActiveEditor().Disable()
 
         # reset tray
         self.setShowOnTray()
@@ -3409,7 +3419,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if self.getWikiData():
                         wd.release()
                 except (IOError, OSError, DbAccessError), e:
-                    pass                
+                    # TODO: Option to show such errors
+#                     traceback.print_exc()
+                    pass
                 self.wikiData = None
                 if self.wikiDataManager is not None:
                     self.currentWikiDocumentProxyEvent.setWatchedEvent(None)
@@ -5578,12 +5590,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.Destroy()
 
     def _prepareExitWiki(self):
+        self.getMainAreaPanel().updateConfig()
+        self.closeWiki()
+
         self.Unbind(wx.EVT_ICONIZE)
         if self._interceptCollection is not None:
             self._interceptCollection.close()
 
-        self.getMainAreaPanel().updateConfig()
-        self.closeWiki()
 
         wx.GetApp().getMiscEvent().removeListener(self)
 
@@ -5611,7 +5624,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.configuration.set("main", "windowLayout", layoutCfStr)
 
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
-        self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
+        if self.getActiveEditor():
+            self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
         if not self.getCmdLineAction().noRecent:
             self.configuration.set("main", "wiki_history",
                     ";".join(self.wikiHistory))

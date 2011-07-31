@@ -398,6 +398,8 @@ class OptionsDialog(wx.Dialog):
             ("minimize_on_closeButton", "cbMinimizeOnCloseButton", "b"),
             ("mainTabs_switchMruOrder", "cbMainTabsSwitchMruOrder", "b"),
             ("startup_splashScreen_show", "cbStartupSplashScreenShow", "b"),
+            ("openWordDialog_askForCreateWhenNonexistingWord",
+                "cbOpenWordDialogAskForCreateWhenNonexistingWord", "b"),
 
             ("pagestatus_timeformat", "tfPageStatusTimeFormat", "ttdf",
                 "btnSelectPageStatusTimeFormat"),
