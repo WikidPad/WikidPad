@@ -336,6 +336,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         Close all tabs except the current one.
         """
         current = self.currentPresenter
+        if current is None:
+            return
+
         if not isinstance(current, BasicDocPagePresenter):
             # Current presenter is not a doc page one, so take first doc page
             # presenter instead

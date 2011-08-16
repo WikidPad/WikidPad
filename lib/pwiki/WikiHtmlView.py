@@ -356,6 +356,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.refresh()
 
     def onUpdatedWikiPage(self, miscevt):
+        if self.presenter.getConfig().getboolean("main",
+                "html_preview_reduceUpdateHandling", False):
+            return
+
         self.outOfSync = True
         if self.visible:
             self.refresh()

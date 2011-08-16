@@ -10,7 +10,7 @@ import wx, wx.xrc, wx.html
 
 from wxHelper import *
 
-from StringOps import escapeHtml, unescapeWithRe
+from StringOps import escapeHtml, unescapeWithRe, urlFromPathname
 
 from TempFileSet import TempFileSet
 from . import PluginManager
@@ -727,10 +727,14 @@ class HtmlWKPrint(HtmlPrint):
         exporterInstance.tempFileSet = self.tempFileSet
         exporterInstance.styleSheet = u""
         
-        realfp = StringIO.StringIO()
-        exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
+        htpath = self.tempFileSet.createTempFile(
+                    u"", ".html", relativeTo="").decode("latin-1")
 
-        return realfp.getvalue().decode("utf-8")
+        realfp = StringIO.StringIO()
+        with open(htpath, "w") as realfp:
+            exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
+
+        return htpath  # realfp.getvalue().decode("utf-8")
 
     def doPrint(self, doPreview=False):
         """
@@ -741,7 +745,7 @@ class HtmlWKPrint(HtmlPrint):
         """
         if self.checkWebkit():
             import gtk
-            text = self._buildHtml()
+            htpath = self._buildHtml()
             frame = None
 
             try:
@@ -759,14 +763,16 @@ class HtmlWKPrint(HtmlPrint):
                 page_setup.set_bottom_margin(br.y, gtk.UNIT_MM)
                 print_op.set_default_page_setup(page_setup)
 
-                frame = WKPrintFrame(text)
+                frame = WKPrintFrame(htpath)
                 if doPreview:
                     opCode = gtk.PRINT_OPERATION_ACTION_PREVIEW
+                    frame.print_full(print_op, opCode)
+                    return False
                 else:
                     opCode = gtk.PRINT_OPERATION_ACTION_PRINT_DIALOG
-
-                frame.print_full(print_op, opCode)
-
+                    result = frame.print_full(print_op, opCode)
+                    return result in (gtk.PRINT_OPERATION_RESULT_APPLY,
+                            gtk.PRINT_OPERATION_RESULT_IN_PROGRESS)
             finally:
                 if frame:
                     frame.Destroy()
@@ -792,13 +798,14 @@ class HtmlWKPrint(HtmlPrint):
 if WKHtmlWindow:
 
     class WKPrintPanel(wx.Panel):
-        def __init__(self, parent, html):
+        def __init__(self, parent, htpath):
             """Panel to contain webkit ctrl"""
             wx.Panel.__init__(self, parent)
 
             self.html_preview = WKHtmlWindow(self)
             self.html_preview.PizzaMagic()
-            self.html_preview.LoadHtmlString(html)
+            url = "file:" + urlFromPathname(htpath)
+            self.html_preview.LoadUrl(url)
             
         
 #         def Print(self):
@@ -807,9 +814,9 @@ if WKHtmlWindow:
             
     class WKPrintFrame(wx.Frame):
         """Frame to contain webkit ctrl panel"""
-        def __init__(self, html):
+        def __init__(self, htpath):
             wx.Frame.__init__(self, None)
-            self.html_panel = WKPrintPanel(self, html)
+            self.html_panel = WKPrintPanel(self, htpath)
         
         def print_full(self, print_op, opCode):
             return self.html_panel.html_preview.getWebkitWebView()\

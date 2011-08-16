@@ -249,6 +249,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # set the autocomplete separator
         self.AutoCompSetSeparator(1)   # ord('~')
+        self.AutoCompSetTypeSeparator(2)   # ord('?')
 
         # register some event handlers
         self.presenterListener = wxKeyFunctionSink((

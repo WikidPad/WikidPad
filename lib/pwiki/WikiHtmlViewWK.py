@@ -329,10 +329,6 @@ class WikiHtmlViewWK(wx.Panel):
 
         self.currentHtpath = 0 # index into self.htpaths
 
-        self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
-                os.path.normcase(getLongPath(self.htpaths[1]))]
-
-
         #wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         #wx.EVT_KEY_UP(self, self.OnKeyUp)
         #wx.EVT_SIZE(self, self.OnSize)
@@ -1271,6 +1267,9 @@ class WikiHtmlViewWK(wx.Panel):
             self.refresh()
 
     def onUpdatedWikiPage(self, miscevt):
+#         if self.presenter.getConfig().getboolean("main",
+#                 "html_preview_reduceUpdateHandling", False):
+#             return
         #self.outOfSync = True
         #if self.visible:
         #    self.refresh()

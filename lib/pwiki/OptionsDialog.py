@@ -600,6 +600,8 @@ class OptionsDialog(wx.Dialog):
             ("search_dontAllowCancel", "cbSearchDontAllowCancel", "b"),
             ("editor_compatibility_ViKeys", "cbEditorCompatibilityViKeys", "b"),
             ("mouse_scrollUnderPointer", "cbMouseScrollUnderPointer", "b"),
+            ("html_preview_reduceUpdateHandling",
+                    "cbHtmlPreviewReduceUpdateHandling", "b"),
 
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),

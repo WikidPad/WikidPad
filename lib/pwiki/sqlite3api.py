@@ -544,7 +544,7 @@ class Cursor:
         raise AttributeError, "No attribute %s in sqlite3api.Cursor" % attr
             
 
-_GLOB_ESCAPE_RE = re.compile(r"([\[\]\*])")
+_GLOB_ESCAPE_RE = re.compile(r"([\[\]\*\?])")
 
 def escapeForGlob(s):
     return _GLOB_ESCAPE_RE.sub(r"[\1]", s)

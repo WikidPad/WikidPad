@@ -354,6 +354,10 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.refresh()
 
     def onUpdatedWikiPage(self, miscevt):
+        if self.presenter.getConfig().getboolean("main",
+                "html_preview_reduceUpdateHandling", False):
+            return
+
         self.outOfSync = True
         if self.visible:
             self.refresh()
@@ -363,7 +367,6 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
     def OnSetFocus(self, evt):
-        # Trying to fix mysterious crashes (but doesn't help)
         try:
             if self.visible:
                 self.refresh()
