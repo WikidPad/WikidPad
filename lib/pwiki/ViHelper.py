@@ -44,6 +44,7 @@ class ViHelper():
         
         self.last_find_cmd = None
 
+        self.last_search_args = None
         self.last_search_cmd = None
         self.jumps = []
         self.current_jump = -1
@@ -88,6 +89,7 @@ class ViHelper():
         """
         # TODO: Rewrite
         if keycode is not None:
+            # If we have a tuple the keycode includes a modified, e.g. ctrl
             if type(keycode) == tuple:
                 return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
             try:
@@ -342,7 +344,6 @@ class ViHelper():
         self.ctrl.presenter.getMainControl().statusBar.SetStatusText(text , 0)
 
     def _enableMenuShortcuts(self, enable):
-        # TODO: 
         if enable and len(self.menuShortCuts) < 1:
             return
 
@@ -351,49 +352,14 @@ class ViHelper():
         if enable:
             for i in self.menuShortCuts:
                 self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
-            self.ctrl.presenter.getMainControl().SetAcceleratorTable(
-                                                                self.accelTable)
+            self.ctrl.presenter.getMainControl() \
+                                        .SetAcceleratorTable( self.accelTable)
         else:
             self.accelTable = self.ctrl.presenter.getMainControl() \
                                                         .GetAcceleratorTable()
 
-            menus = self.menu_bar.GetMenus()
-
-            menu_items = []
-
-            def getMenuItems(menu):
-                for i in menu.GetMenuItems():
-                    menu_items.append(i.GetId())
-                    if i.GetSubMenu() is not None:
-                        getMenuItems(i.GetSubMenu())
-                
-            for menu, x in menus:
-                getMenuItems(menu)
-            
-            for i in menu_items:
-                menu_item = self.menu_bar.FindItemById(i)
-                accel = menu_item.GetAccel()
-                if accel is not None and accel.ToString() in self.viKeyAccels:
-                    label = menu_item.GetItemLabel()
-                    self.menuShortCuts[i] = (label)
-                    # Removing the end part of the label is enough to disable the
-                    # accelerator. This is used instead of SetAccel() so as to
-                    # preserve menu accelerators.
-                    menu_item.SetText(label.split("\t")[0]+"\tNone")
-
-    def _enableMenuShortcuts(self, enable):
-        if (enable and len(self.menuShortCuts) < 1) or \
-                (not enable and len(self.menuShortCuts) > 0):
-            return
-
-        self.menu_bar = self.ctrl.presenter.getMainControl().mainmenu
-
-        if enable:
-            for i in self.menuShortCuts:
-                self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
-            self.ctrl.presenter.getMainControl().SetAcceleratorTable(self.accelTable)
-        else:
-            self.accelTable = self.ctrl.presenter.getMainControl().GetAcceleratorTable()
+            self.ctrl.presenter.getMainControl() \
+                                .SetAcceleratorTable(wx.NullAcceleratorTable)
 
             menus = self.menu_bar.GetMenus()
 
@@ -417,13 +383,52 @@ class ViHelper():
                     # Removing the end part of the label is enough to disable the
                     # accelerator. This is used instead of SetAccel() so as to
                     # preserve menu accelerators.
+                    # NOTE: doesn't seem to override ctrl-n!
                     menu_item.SetText(label.split("\t")[0]+"\tNone")
 
-        #for i in range(self.menu_bar.GetMenuCount()):
-        #    menu = self.menu_bar.GetMenu(i)
-        #    enableMenu(menu, i)
-        #    for menuItem in menu.GetMenuItems():
-        #        enableMenu(menuItem)
+    #def _enableMenuShortcuts(self, enable):
+    #    if (enable and len(self.menuShortCuts) < 1) or \
+    #            (not enable and len(self.menuShortCuts) > 0):
+    #        return
+
+    #    self.menu_bar = self.ctrl.presenter.getMainControl().mainmenu
+
+    #    if enable:
+    #        for i in self.menuShortCuts:
+    #            self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
+    #        self.ctrl.presenter.getMainControl().SetAcceleratorTable(self.accelTable)
+    #    else:
+    #        self.accelTable = self.ctrl.presenter.getMainControl().GetAcceleratorTable()
+
+    #        menus = self.menu_bar.GetMenus()
+
+    #        menu_items = []
+
+    #        def getMenuItems(menu):
+    #            for i in menu.GetMenuItems():
+    #                menu_items.append(i.GetId())
+    #                if i.GetSubMenu() is not None:
+    #                    getMenuItems(i.GetSubMenu())
+    #            
+    #        for menu, x in menus:
+    #            getMenuItems(menu)
+    #        
+    #        for i in menu_items:
+    #            menu_item = self.menu_bar.FindItemById(i)
+    #            accel = menu_item.GetAccel()
+    #            if accel is not None and accel.ToString() in self.viKeyAccels:
+    #                label = menu_item.GetItemLabel()
+    #                self.menuShortCuts[i] = (label)
+    #                # Removing the end part of the label is enough to disable the
+    #                # accelerator. This is used instead of SetAccel() so as to
+    #                # preserve menu accelerators.
+    #                menu_item.SetText(label.split("\t")[0]+"\tNone")
+
+    #    #for i in range(self.menu_bar.GetMenuCount()):
+    #    #    menu = self.menu_bar.GetMenu(i)
+    #    #    enableMenu(menu, i)
+    #    #    for menuItem in menu.GetMenuItems():
+    #    #        enableMenu(menuItem)
 
 
 
