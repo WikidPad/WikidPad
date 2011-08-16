@@ -378,11 +378,16 @@ class WikiHtmlViewWK(wx.Panel):
 
                 self.keyEventConn = self.html.ctrl.connect("key-press-event",
                         self.__on_key_press_event_vi)
+
+                wx.CallAfter(self.vi._enableMenuShortcuts, False)
+
             else:
+                self.vi._enableMenuShortcuts(True)
                 self.vi = None
                 
                 self.keyEventConn = self.html.ctrl.connect("key-press-event",
                         self.__on_key_press_event)
+
 
             self.html.ctrl.connect("scroll_event", self.__on_scroll_event)
 

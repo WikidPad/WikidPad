@@ -27,14 +27,12 @@ class ViHelper():
 
         self.mode = 0
 
-        self.pre_motion_key = None
-        self.pre_key = None
+        self._motion = []
+        self._motion_wildcard = []
+        self._wildcard = []
+        self._acceptable_keys = None
+        self.key_inputs = []
 
-        # When true pre_keys are ignored, as happens if a non pre modifier
-        # is active
-        self.block_pre_keys = False
-
-        self.key_modifier = []
         self.key_number_modifier = [] # holds the count
 
         self.count = 1
@@ -44,17 +42,20 @@ class ViHelper():
 
         self.marks = defaultdict(dict)
         
-        self.last_forward_find_cmd = None
-        self.last_backward_find_cmd = None
+        self.last_find_cmd = None
 
         self.last_search_cmd = None
-        self.search_start_position = []
-        self.search_start_position_future = None
+        self.jumps = []
+        self.current_jump = -1
 
         self.last_cmd = None
         self.insert_action = []
 
         self.selection_mode = "NORMAL"
+                    
+        # The following dictionary holds the menu shortcuts that have been
+        # disabled upon entering ViMode
+        self.menuShortCuts = {}
 
     def SetCount(self):
         self.count = 1
@@ -67,16 +68,32 @@ class ViHelper():
                 self.count = 10000
             self.true_count = True
 
+    def SetNumber(self, n):
+        # TODO: move to ViHelper
+        # If 0 is first modifier it is a command
+        if len(self.key_number_modifier) < 1 and n == 0:
+            return False
+        self.key_number_modifier.append(n)
+        self.updateViStatus(True)
+        return True
+
     def GetCharFromCode(self, keycode):
         """
         Converts keykeycode to unikeycode character. If no keykeycode is specified
-        returns an empty string
+        returns an empty string.
 
-        @param keycode: raw keycode value
-        @return:        unicode character or empty string
+        @param keycode: Raw keycode value
+
+        @return:        Requested character
         """
+        # TODO: Rewrite
         if keycode is not None:
-            return unichr(keycode)
+            if type(keycode) == tuple:
+                return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
+            try:
+                return unichr(keycode)
+            except TypeError:
+                return keycode
         else:
             return u""
 
@@ -103,19 +120,49 @@ class ViHelper():
 
     def SetDefaultCaretColour(self):
         self.default_caret_colour = self.ctrl.GetCaretForeground()
+        
+    def GenerateMotionKeys(self, keys):
+        key_mods = defaultdict(dict)
+        for mode in keys:
+            key_mods[mode] = set()
+            for accel in keys[mode]:
+                if keys[mode][accel][0] == 1:
+                        key_mods[mode].add(accel)
+
+        return key_mods
 
     def GenerateKeyModifiers(self, keys):
         """
-        Takes dictionary of key combinations and returns those that
-        can be used to start a two key sequences
+        Takes dictionary of key combinations and returns all possible
+        key starter combinations
 
         @param keys: see self.keys in derived classes
         """
         key_mods = defaultdict(dict)
-        for j in keys:
-            key_mods[j] = {}
-            key_mods[j] = set([i[0] for i in keys[j] if isinstance(i, tuple)])
+        for mode in keys:
+            key_mods[mode] = defaultdict(set)
+            for accel in keys[mode]:
+                if len(accel) > 1:
+                    for i in range(1, len(accel)):
+                        if i == 1:
+                            key_mods[mode][(accel[0],)].add(accel[1])
+                        else:
+                            key_mods[mode][accel[:i]].add(accel[i])
+
         return key_mods
+
+    def GenerateKeyAccelerators(self, keys):
+        """
+        This could be improved
+        """
+        key_accels = set()
+        for j in keys:
+            for accels in keys[j]:
+                for accel in accels:
+                    if type(accel) == tuple and len(accel) > 1:
+                        key_accels.add("{0}-{1}".format(accel[0], unichr(accel[1]).upper()))
+                
+        return key_accels
 
     def Repeat(self, func, count=None, arg=None):
         """
@@ -139,7 +186,8 @@ class ViHelper():
             else:
                 func()
 
-    def RunFunction(self, key, pre_motion_key=None):
+    def RunFunction(self, key, motion=None, motion_wildcard=None, 
+                                                        wildcards=None):
         """
         Called when a key command is run
 
@@ -147,18 +195,27 @@ class ViHelper():
         respective function.
 
         """
+        if motion is None:
+            motion = self._motion
+        if wildcards is None:
+            wildcards = self._wildcard
+        if motion_wildcard is None:
+            motion_wildcard = tuple(self._motion_wildcard)
+
+        def RunFunc(func, args):
+            if type(args) == dict:
+                ret = func(**args)
+            elif args is not None:
+                ret = func(args)
+            else:
+                ret = func()
+
         keys = self.keys[self.mode]
 
         com_type, command, repeatable = keys[key]
         func, args = command
 
-        # If a "pre motion" key has been pressed it must be followed by a motion.
-        if pre_motion_key is not None:
-            if com_type != 1: # Not a motion
-                return False
-            # Is it repeatable?
-            repeatable = self.pre_keys[self.mode][pre_motion_key][2]
-
+        if "motion" in key:
             # If in visual mode we don't want to change the selection start point
             if self.mode != ViHelper.VISUAL:
                 # Otherwise the "pre motion" commands work by setting a start point
@@ -166,6 +223,20 @@ class ViHelper():
                 # finishing with a "post motion" command, i.e. deleting the
                 # text that was selected.
                 self.StartSelection()
+
+            motion_key = tuple(motion)
+
+            
+            junk, (motion_func, motion_args), junk = keys[motion_key]
+            if motion_wildcard:
+                motion_args = tuple(motion_wildcard)
+                if len(motion_args) == 1:
+                    motion_args = motion_args[0]
+                else:
+                    motion_args = tuple(motion_args)
+
+            RunFunc(motion_func, motion_args)
+            
 
         # Special case if single char is selected (anchor needs to be reversed
         # if movement moves in a particular direction
@@ -178,25 +249,15 @@ class ViHelper():
             else:
                 if start_pos - self.GetSelectionAnchor() < 0:
                     reverse = True
-                
-            ## Unicode character can take more than one pos
-            #offset = anchor - self.GetSelectionAnchor()
-            #offset_len = len(self.ctrl.GetSelectedText())
-            #if offset < 0:
-            #    offset_len = - offset_len
 
+        if type(key) == tuple and "*" in key:
+            args = tuple(wildcards)
+            if len(args) == 1:
+                args = args[0]
+            else:
+                args = tuple(args)
         # Run the actual function
-        if type(args) == dict:
-            ret = func(**args)
-        elif args is not None:
-            ret = func(args)
-        else:
-            ret = func()
-            
-        # If "pre motion" key set run the "post motion" command
-        if pre_motion_key is not None:
-            # post motion function
-            self.pre_keys[self.mode][pre_motion_key][1]()
+        RunFunc(func, args)
         # horrible fix for word end cmd
         #else:
         #    try:
@@ -204,10 +265,11 @@ class ViHelper():
         #            self.ctrl.CharLeft()
         #    except:
         #        pass
-
+            
         # If the command is repeatable save its type and any other settings
         if repeatable > 0:
-            self.last_cmd = repeatable, key, self.count, pre_motion_key
+            self.last_cmd = repeatable, key, self.count, motion, \
+                                            motion_wildcard, wildcards
 
         # Some commands should cause the mode to revert back to normal if run
         # from visual mode, others shouldn't.
@@ -231,10 +293,6 @@ class ViHelper():
                 if self.selection_mode == "LINE":
                     self.SelectFullLines()
  
-        ## Is this ever used?
-        #if ret is True:
-        #    return True
-
         self.FlushBuffers()
 
     def FlushBuffers(self):
@@ -244,9 +302,13 @@ class ViHelper():
         Should be called after (most?) successful inputs and all failed
         ones.
         """
-        self.pre_motion_key = None
-        self.pre_key = None
-        self.block_pre_keys = False
+        self._acceptable_keys = None
+
+        self._motion = []
+        self._motion_wildcard = []
+        self._wildcard = []
+        self.key_inputs = []
+
         self.key_modifier = []
         self.key_number_modifier = []
         self.updateViStatus()
@@ -265,26 +327,148 @@ class ViHelper():
         mode = self.mode
         text = u""
         if mode in self.keys:
-            if (len(self.key_modifier) == 1 and \
-            self.key_modifier[0] in self.key_mods[mode]) or \
-                tuple(self.key_modifier) in self.keys[mode] or force:
-                    mode = ViHelper.MODE_TEXT[self.mode]
-                    count = u"".join(map(str, self.key_number_modifier))
-                    pre_motion_key = self.GetCharFromCode(self.pre_motion_key)
-                    pre_key = self.GetCharFromCode(self.pre_key)
-                    key_modifier = u"".join(self.GetCharFromCode(i) \
-                                                for i in self.key_modifier)
-
-                    text = u"{0}{1}{2}{3}{4}".format( 
-                            mode, count, pre_motion_key, pre_key, key_modifier)
+            cmd = u"".join([self.GetCharFromCode(i) for i in self.key_inputs])
+            text = u"{0}{1}{2}".format(
+                            ViHelper.MODE_TEXT[self.mode],
+                            u"".join(map(str, self.key_number_modifier)),
+                            cmd
+                            )
 
         self.ctrl.presenter.getMainControl().statusBar.SetStatusText(text , 0)
+
+    def _enableMenuShortcuts(self, enable):
+        # TODO: 
+        if enable and len(self.menuShortCuts) < 1:
+            return
+
+        self.menu_bar = self.ctrl.presenter.getMainControl().mainmenu
+
+        if enable:
+            for i in self.menuShortCuts:
+                self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
+            self.ctrl.presenter.getMainControl().SetAcceleratorTable(
+                                                                self.accelTable)
+        else:
+            self.accelTable = self.ctrl.presenter.getMainControl() \
+                                                        .GetAcceleratorTable()
+
+            menus = self.menu_bar.GetMenus()
+
+            menu_items = []
+
+            def getMenuItems(menu):
+                for i in menu.GetMenuItems():
+                    menu_items.append(i.GetId())
+                    if i.GetSubMenu() is not None:
+                        getMenuItems(i.GetSubMenu())
+                
+            for menu, x in menus:
+                getMenuItems(menu)
+            
+            for i in menu_items:
+                menu_item = self.menu_bar.FindItemById(i)
+                accel = menu_item.GetAccel()
+                if accel is not None and accel.ToString() in self.viKeyAccels:
+                    label = menu_item.GetItemLabel()
+                    self.menuShortCuts[i] = (label)
+                    # Removing the end part of the label is enough to disable the
+                    # accelerator. This is used instead of SetAccel() so as to
+                    # preserve menu accelerators.
+                    menu_item.SetText(label.split("\t")[0]+"\tNone")
+
+    def _enableMenuShortcuts(self, enable):
+        if (enable and len(self.menuShortCuts) < 1) or \
+                (not enable and len(self.menuShortCuts) > 0):
+            return
+
+        self.menu_bar = self.ctrl.presenter.getMainControl().mainmenu
+
+        if enable:
+            for i in self.menuShortCuts:
+                self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
+            self.ctrl.presenter.getMainControl().SetAcceleratorTable(self.accelTable)
+        else:
+            self.accelTable = self.ctrl.presenter.getMainControl().GetAcceleratorTable()
+
+            menus = self.menu_bar.GetMenus()
+
+            menu_items = []
+
+            def getMenuItems(menu):
+                for i in menu.GetMenuItems():
+                    menu_items.append(i.GetId())
+                    if i.GetSubMenu() is not None:
+                        getMenuItems(i.GetSubMenu())
+                
+            for menu, x in menus:
+                getMenuItems(menu)
+            
+            for i in menu_items:
+                menu_item = self.menu_bar.FindItemById(i)
+                accel = menu_item.GetAccel()
+                if accel is not None and accel.ToString() in self.viKeyAccels:
+                    label = menu_item.GetItemLabel()
+                    self.menuShortCuts[i] = (label)
+                    # Removing the end part of the label is enough to disable the
+                    # accelerator. This is used instead of SetAccel() so as to
+                    # preserve menu accelerators.
+                    menu_item.SetText(label.split("\t")[0]+"\tNone")
+
+        #for i in range(self.menu_bar.GetMenuCount()):
+        #    menu = self.menu_bar.GetMenu(i)
+        #    enableMenu(menu, i)
+        #    for menuItem in menu.GetMenuItems():
+        #        enableMenu(menuItem)
+
+
+
 
 #-----------------------------------------------------------------------------
 # The following functions are common to both preview and editor mode
 # -----------------------------------------------------------------------------
-    def AddSearchPosition(self, pos):
-        self.search_start_position.append(pos)
+
+# Jumps
+    
+    # TODO: generalise so they work with wikihtmlview as well
+    #       should work in lines (so if line is deleted)
+    def AddJumpPosition(self, pos=None):
+        if pos is None: pos = self.ctrl.GetCurrentPos()
+
+        current_page = self.ctrl.presenter.getWikiWord()
+        if self.jumps:
+            last_page, last_pos = self.jumps[self.current_jump]
+            if last_page == current_page and pos == last_pos:
+                return
+
+        if self.current_jump < len(self.jumps):
+            self.jumps = self.jumps[:self.current_jump+1]
+        self.jumps.append((current_page, pos))
+        self.current_jump += 1
+
+    def GotoNextJump(self):
+        if self.current_jump + 1 < len(self.jumps):
+            self.current_jump += 1
+        else: 
+            return
+
+        word, pos = self.jumps[self.current_jump]
+        if word != self.ctrl.presenter.getWikiWord():
+            self.ctrl.presenter.openWikiPage(word)
+        self.ctrl.GotoPos(pos)
+
+    def GotoPreviousJump(self):
+        if self.current_jump + 1 == len(self.jumps):
+            self.AddJumpPosition(self.ctrl.GetCurrentPos())
+        if self.current_jump - 1 >= 0:
+            self.current_jump -= 1
+        else:
+            return
+        word, pos = self.jumps[self.current_jump]
+        if word != self.ctrl.presenter.getWikiWord():
+            self.ctrl.presenter.openWikiPage(word)
+        self.ctrl.GotoPos(pos)
+
+            
 
     def SwitchEditorPreview(self, scName=None):
         mainControl = self.ctrl.presenter.getMainControl()
