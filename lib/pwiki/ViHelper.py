@@ -186,6 +186,18 @@ class ViHelper():
             else:
                 func()
 
+    def RunKeyChain(self, key_chain, mode):
+        self.updateViStatus()
+        if key_chain in self.keys[mode]:
+            self.RunFunction(key_chain)
+            self.FlushBuffers()
+            return True
+        else:
+            if key_chain in self.key_mods[mode]:
+                self._acceptable_keys = self.key_mods[mode][key_chain]
+                return True
+        return False
+
     def RunFunction(self, key, motion=None, motion_wildcard=None, 
                                                         wildcards=None):
         """
@@ -258,13 +270,6 @@ class ViHelper():
                 args = tuple(args)
         # Run the actual function
         RunFunc(func, args)
-        # horrible fix for word end cmd
-        #else:
-        #    try:
-        #        if func == self.MoveCaretWordEnd:
-        #            self.ctrl.CharLeft()
-        #    except:
-        #        pass
             
         # If the command is repeatable save its type and any other settings
         if repeatable > 0:

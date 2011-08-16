@@ -548,55 +548,84 @@ class WikiHtmlViewWK(wx.Panel):
         if key in (65505, 65507, 65513):
             return False
 
-        control_mask = False
         if gtkEvent.state & gtk.gdk.CONTROL_MASK: # Ctrl
-            control_mask = True
+            key = ("Ctrl", key)
 
-        if key == 65307: # Escape
+        if key == 65307 or key == ("Ctrl", 91): # Escape
             self.html.ClearSelection()
             vi.FlushBuffers()
         
         m = vi.mode
 
-        if 48 <= key <= 57: # Normal
-            if self.vi.SetNumber(key-48):
-                return True
-        elif 65456 <= key <= 65465: # Numpad
-            if self.vi.SetNumber(key-65456):
-                return True
-
-        # If control add it to keys
-        if control_mask:
-            key = ("ctrl", key)
-
-        # Currently only supports single modifier (i.e. 2 key commands)
-        if len(vi.key_modifier) == 0 and key in vi.key_mods[m]:
-            vi.key_modifier.append(key)
-            vi.updateViStatus()
-            return True
+        if vi._acceptable_keys is None or \
+                                "*" not in vi._acceptable_keys:
+            if 48 <= key <= 57: # Normal
+                if self.vi.SetNumber(key-48):
+                    return True
+            elif 65456 <= key <= 65465: # Numpad
+                if self.vi.SetNumber(key-65456):
+                    return True
 
         # Set count to be used
         vi.SetCount()
 
-        # Double key commands, e.g. gg, gU
-        if len(vi.key_modifier) == 1:
+        if vi._motion and vi._acceptable_keys is None:
+            #vi._acceptable_keys = None
+            vi._motion.append(key)
 
-            vi.key_modifier.append(key)
+            temp = vi._motion[:-1]
+            temp.append("*")
+            if tuple(vi._motion) in vi.motion_keys[m]:
+                vi.RunKeyChain(tuple(vi.key_inputs), m)
+                return True
+                #vi._motion = []
+            elif tuple(temp) in vi.motion_keys[m]:
+                vi._motion[-1] = "*"
+                vi._motion_wildcard.append(key)
+                vi.RunKeyChain(tuple(vi.key_inputs), m)
+                #vi._motion = []
+                return True
+                
+            elif tuple(vi._motion) in vi.motion_key_mods[m]:
+                #vi._acceptable_keys = vi.motion_key_mods[m][tuple(vi._motion)]
+                return True
 
-            key = tuple(vi.key_modifier)
-
-            vi.updateViStatus()
-
-
-        if key in vi.keys[m]:
-            vi.RunFunction(key)
+            vi.FlushBuffers()
             return True
 
-        # If we've reached this point key hasn't been recogised so
-        # clear buffers
-        vi.key_modifier = []
-        vi.key_number_modifier = []
+
+        if vi._acceptable_keys is not None:
+            if key in vi._acceptable_keys:
+                vi._acceptable_keys = None
+                pass
+            elif "*" in vi._acceptable_keys:
+                vi._wildcard.append(key)
+                vi.key_inputs.append("*")
+                vi._acceptable_keys = None
+                vi.RunKeyChain(tuple(vi.key_inputs), m)
+
+                return True
+            elif "motion" in vi._acceptable_keys:
+                vi._acceptable_keys = None
+                vi._motion.append(key)
+                if (key,) in vi.motion_keys[m]:
+                    vi.key_inputs.append("motion")
+                    vi.RunKeyChain(tuple(vi.key_inputs), m)
+                    return True
+                if (key,) in vi.motion_key_mods[m]:
+                    vi.key_inputs.append("motion")
+                    return True
+
+
+        vi.key_inputs.append(key)
         vi.updateViStatus()
+
+        key_chain = tuple(vi.key_inputs)
+
+        if vi.RunKeyChain(key_chain, m):
+            return True
+
+        vi.FlushBuffers()
         
         # Now send to  self.keyProcessWxWindow  to let wxPython translate
         # and process the key event
@@ -1574,6 +1603,8 @@ class ViFunctions(ViHelper):
         self.keys = { 0 : {
             (103, 117) : (0, (self.ViewParents, False), 0), # gu
             (103, 85) : (0, (self.ViewParents, True), 0), # gU
+            (92, 117) : (0, (self.ViewParents, False), 0), # \u
+            (92, 85) : (0, (self.ViewParents, True), 0), # \U
             (103, 116) : (0, (self.SwitchTabs, None), 0), # gt
             (103, 84)  : (0, (self.SwitchTabs, True), 0), # gT
             (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
@@ -1590,48 +1621,53 @@ class ViFunctions(ViHelper):
             ("ctrl", 117) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
             ("ctrl", 108) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
 
-            47  : (0, (self.StartSearch, None), 0), # /
+            (47,)  : (0, (self.StartSearch, None), 0), # /
             # H and L are equivelent to gh and gl in preview mode
-            72  : (0, (self.GoBackwardInHistory, None), 0), # H
-            76  : (0, (self.GoForwardInHistory, None), 0), # L
+            (72,)  : (0, (self.GoBackwardInHistory, None), 0), # H
+            (76,)  : (0, (self.GoForwardInHistory, None), 0), # L
             (103, 72)  : (0, (self.GoBackwardInHistory, None), 0), # gH
             (103, 76)  : (0, (self.GoForwardInHistory, None), 0), # gL
             (103, 104)  : (0, (self.GoBackwardInHistory, None), 0), # gh
             (103, 108)  : (0, (self.GoForwardInHistory, None), 0), # gl
 
-            72  : (0, (self.GoBackwardInHistory, None), 0), # H
-            76  : (0, (self.GoForwardInHistory, None), 0), # L
-            111 : (0, (self.ctrl.presenter.getMainControl(). \
+            (72,)  : (0, (self.GoBackwardInHistory, None), 0), # H
+            (76,)  : (0, (self.GoForwardInHistory, None), 0), # L
+            (111,) : (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # o
-            79 : (0, (self.ctrl.presenter.getMainControl(). \
+            (79,) : (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # O
-            106 : (0, (self.DocumentNavigation, 106), 0), # j
-            107 : (0, (self.DocumentNavigation, 107), 0), # k
-            104 : (0, (self.DocumentNavigation, 104), 0), # h
-            108 : (0, (self.DocumentNavigation, 108), 0), # l
+            (106,) : (0, (self.DocumentNavigation, 106), 0), # j
+            (107,) : (0, (self.DocumentNavigation, 107), 0), # k
+            (104,) : (0, (self.DocumentNavigation, 104), 0), # h
+            (108,) : (0, (self.DocumentNavigation, 108), 0), # l
             (103, 103) : (0, (self.DocumentNavigation, (103, 103)), 0), # gg
-            71  : (0, (self.DocumentNavigation, 71), 0), # G
-            37  : (0, (self.DocumentNavigation, 37), 0), # %
-            36  : (0, (self.DocumentNavigation, 36), 0), # $
-            94  : (0, (self.DocumentNavigation, 94), 0), # ^
-            48  : (0, (self.DocumentNavigation, 48), 0), # 0
-            102 : (0, (self.startFollowHint, 0), 0), # f
-            70 : (0, (self.startFollowHint, 2), 0), # F
-            89  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
-            117 : (0, (self.CopyWikiWord, None), 0), # y
+            (71,)  : (0, (self.DocumentNavigation, 71), 0), # G
+            (37,)  : (0, (self.DocumentNavigation, 37), 0), # %
+            (36,)  : (0, (self.DocumentNavigation, 36), 0), # $
+            (94,)  : (0, (self.DocumentNavigation, 94), 0), # ^
+            (48,)  : (0, (self.DocumentNavigation, 48), 0), # 0
+            (102,) : (0, (self.startFollowHint, 0), 0), # f
+            (70,) : (0, (self.startFollowHint, 2), 0), # F
+            (89,)  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
+            (117,) : (0, (self.CopyWikiWord, None), 0), # y
             #65293  : (self.ctrl.FollowLinkIfSelected, None), # return
 
             (103, 115)  : (0, (self.SwitchEditorPreview, None), 0), # gs
             (103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
             (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
-            (65470)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
-            (65471)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
+            (65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
+            (65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
     
         }
         }
 
         # Generate possible key modifiers
         self.key_mods = self.GenerateKeyModifiers(self.keys)
+        self.motion_keys = self.GenerateMotionKeys(self.keys)
+        self.motion_key_mods = self.GenerateKeyModifiers(self.motion_keys)
+
+        # Used for rewriting menu shortcuts
+        self.viKeyAccels = self.GenerateKeyAccelerators(self.keys)
 
     # Vi Helper functions
     def SetMode(self, mode):

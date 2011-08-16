@@ -4290,48 +4290,20 @@ class ViHandler(ViHelper):
         m = self.mode
 
 
-        def PossibleInputs(key_chain):
-            if tuple(key_chain) in self.key_mods[m]:
-                return self.key_mods[m][key_chain] 
-            return False
-                
-
-        def CheckInput(key_chain):
-            try:
-                if tuple(key_chain) in self.key_mods:
-                    return 1
-                elif tuple(list(key_chain[:-1]).append("*")) in self.key_mods:
-                    return 2
-                elif tuple(list(key_chain[:-1]).append("motion")) in \
-                                                                self.key_mods:
-                    return 3
-            except TypeError:
-                pass
-            return False
-
-        def RunKeyChain(key_chain):
-            self.updateViStatus()
-            if key_chain in self.keys[m]:
-                self.RunFunction(key_chain)
-                self.FlushBuffers()
-                return True
-            else:
-                if key_chain in self.key_mods[m]:
-                    self._acceptable_keys = self.key_mods[m][key_chain]
-                    return True
-            return False
 
         #control_mask = False
         if accP[0] == 2: # Ctrl
         #    control_mask = True
             key = ("Ctrl", key)
 
-        if 48 <= key <= 57: # Normal
-            if self.SetNumber(key-48):
-                return
-        elif 65456 <= key <= 65465: # Numpad
-            if self.SetNumber(key-65456):
-                return
+        if self._acceptable_keys is None or \
+                                "*" not in self._acceptable_keys:
+            if 48 <= key <= 57: # Normal
+                if self.SetNumber(key-48):
+                    return
+            elif 65456 <= key <= 65465: # Numpad
+                if self.SetNumber(key-65456):
+                    return
 
         self.SetCount()
 
@@ -4342,13 +4314,13 @@ class ViHandler(ViHelper):
             temp = self._motion[:-1]
             temp.append("*")
             if tuple(self._motion) in self.motion_keys[m]:
-                RunKeyChain(tuple(self.key_inputs))
+                self.RunKeyChain(tuple(self.key_inputs), m)
                 return
                 #self._motion = []
             elif tuple(temp) in self.motion_keys[m]:
                 self._motion[-1] = "*"
                 self._motion_wildcard.append(key)
-                RunKeyChain(tuple(self.key_inputs))
+                self.RunKeyChain(tuple(self.key_inputs), m)
                 #self._motion = []
                 return
                 
@@ -4368,7 +4340,7 @@ class ViHandler(ViHelper):
                 self._wildcard.append(key)
                 self.key_inputs.append("*")
                 self._acceptable_keys = None
-                RunKeyChain(tuple(self.key_inputs))
+                self.RunKeyChain(tuple(self.key_inputs), m)
 
                 return
             elif "motion" in self._acceptable_keys:
@@ -4376,7 +4348,7 @@ class ViHandler(ViHelper):
                 self._motion.append(key)
                 if (key,) in self.motion_keys[m]:
                     self.key_inputs.append("motion")
-                    RunKeyChain(tuple(self.key_inputs))
+                    self.RunKeyChain(tuple(self.key_inputs), m)
                     return
                 if (key,) in self.motion_key_mods[m]:
                     self.key_inputs.append("motion")
@@ -4388,7 +4360,7 @@ class ViHandler(ViHelper):
 
         key_chain = tuple(self.key_inputs)
 
-        if RunKeyChain(key_chain):
+        if self.RunKeyChain(key_chain, m):
             return
 
         self.FlushBuffers()
@@ -5467,7 +5439,7 @@ class ViHandler(ViHelper):
         # Replace does not wrap lines and fails if you try and replace 
         # non existent chars
         line, pos = self.ctrl.GetCurLineRaw()
-        if pos + count > len(line)-1:
+        if pos + count > len(line):
             return
 
         self.last_cmd = 3, keycode, count, None
@@ -5477,8 +5449,9 @@ class ViHandler(ViHelper):
         self.ctrl.GotoPos(self.ctrl.GetCurrentPos()+count-1)
         self.EndDelete()
         self.Repeat(self.InsertText, arg=char)
+        if pos + count != len(line):
+            self.MoveCaretPos(-1)
         self.ctrl.EndUndoAction()
-        self.MoveCaretPos(-1)
 
     def StartReplaceMode(self):
         # TODO: visual indication
