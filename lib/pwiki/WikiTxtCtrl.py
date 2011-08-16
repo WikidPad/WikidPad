@@ -1078,6 +1078,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.Unbind(wx.EVT_KEY_DOWN)
         self.Unbind(wx.EVT_LEFT_UP)
+        self.Unbind(wx.EVT_SCROLLWIN)
+        self.Unbind(wx.EVT_MOUSEWHEEL)
 
         if use_vi_navigation:
             if self.vi is None:
