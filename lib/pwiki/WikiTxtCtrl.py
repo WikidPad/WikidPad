@@ -5671,7 +5671,7 @@ class ViHandler(ViHelper):
         self.ctrl.GotoPos(self.ctrl.GetLineIndentPosition(line))
         self.ctrl.ChooseCaretX()
 
-    def GotoColumn(self, pos):
+    def GotoColumn(self, pos=None):
         """
         Moves caret to "pos" on current line. If no pos specified use "count".
 
@@ -5728,10 +5728,7 @@ class ViHandler(ViHelper):
         if forward_char in string.whitespace:
             while forward_char in string.whitespace:
                 pos += 1
-                forward_cChooseCaretX()
-
-    def GotoColumn(self):
-        lhar = self.GetUnichrAt(pos)
+                forward_char = self.GetUnichrAt(pos)
         else:
             self._MoveCaretSentenceStart(pos-1, start_pos)
             return
