@@ -513,10 +513,18 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
-        # Set default selection (if it exists)
-        if default is not None:
-            self.ctrls.lb.SetSelection(self.ctrls.lb.FindString(default))
-        
+        if len(words) > 0:
+            # Set default selection (if it exists)
+            # Set to first item otherwise
+            if default is not None:
+                selPos = self.ctrls.lb.FindString(default)
+                if selPos == -1:
+                    selPos = 0
+            else:
+                selPos = 0
+
+            self.ctrls.lb.SetSelection(selPos)
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
