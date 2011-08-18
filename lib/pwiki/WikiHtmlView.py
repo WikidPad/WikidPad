@@ -230,7 +230,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
-                prevPage.setPresentation(self.GetViewStart(), 3)
+                prevPage.setPresentation(self.getIntendedViewStart(), 3)
             except WikiWordNotFoundException, e:
                 pass
 
@@ -265,7 +265,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
     
             # TODO Reset after open wiki
             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-            lx, ly = self.GetViewStart()
+            lx, ly = self.getIntendedViewStart()
             self.SetFonts("", "", [max(s + 2 * zoom, 1)
                     for s in self._DEFAULT_FONT_SIZES])
                     
@@ -278,6 +278,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
             if self.HasAnchor(self.anchor):
                 self.ScrollToAnchor(self.anchor)
                 # Workaround because ScrollToAnchor scrolls too far
+                # Here the real scroll position is needed so
+                # getIntendedViewStart() is not called
                 lx, ly = self.GetViewStart()
                 self.scrollDeferred(lx, ly-1)
             else:
@@ -345,7 +347,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
-                prevPage.setPresentation(self.GetViewStart(), 3)
+                prevPage.setPresentation(self.getIntendedViewStart(), 3)
             except WikiWordNotFoundException, e:
                 pass
 
@@ -387,14 +389,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
 
     def OnSize(self, evt):
-        if self.counterResizeIgnore > 0:
-            self.counterResizeIgnore -= 1
-            return
-
-        lx, ly = self.GetViewStart()
-        self.counterResizeIgnore = 1
-        evt.Skip()
+        lx, ly = self.getIntendedViewStart()
         self.scrollDeferred(lx, ly)
+
+        evt.Skip()
 
 
     def OnSetFocus(self, evt):
@@ -481,6 +479,17 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self._activateLink(href, tabMode=0)
 
 
+    def getIntendedViewStart(self):
+        """
+        If a deferred scrolling waits for process, this returns the deferred
+        scroll values instead of real view start
+        """
+        if self.deferredScrollPos is not None:
+            return self.deferredScrollPos
+        else:
+            return self.GetViewStart()
+
+
     def _activateLink(self, href, tabMode=0):
         """
         Called if link was activated by clicking in the context menu, 
@@ -535,6 +544,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
             if self.HasAnchor(anchor):
                 self.ScrollToAnchor(anchor)
                 # Workaround because ScrollToAnchor scrolls too far
+                # Here the real scroll position is needed so
+                # getIntendedViewStart() is not called
                 lx, ly = self.GetViewStart()
                 self.scrollDeferred(lx, ly-1)
             else:

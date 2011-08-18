@@ -125,6 +125,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
+        self.deferredScrollPos = None  # Used by scrollDeferred()
 
         self.currentLoadedWikiWord = None
         self.currentLoadedUrl = None  # Contains the URL of the temporary HTML
@@ -207,15 +208,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
     def refresh(self):
         ## _prof.start()
-
+        
         # Store position of currently displayed page, if any
-#         if self.currentLoadedWikiWord:
-#             try:
-#                 prevPage = self.presenter.getWikiDocument().getWikiPage(
-#                         self.currentLoadedWikiWord)
-#                 prevPage.setPresentation(self.GetViewStart(), 3)
-#             except WikiWordNotFoundException, e:
-#                 pass
+        if self.currentLoadedWikiWord:
+            try:
+                prevPage = self.presenter.getWikiDocument().getWikiPage(
+                        self.currentLoadedWikiWord)
+                prevPage.setPresentation(self.GetViewStart(), 3)
+            except WikiWordNotFoundException, e:
+                pass
+            except AttributeError:
+                pass
 
         wikiPage = self.presenter.getDocPage()
         if isinstance(wikiPage,
@@ -263,7 +266,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 self.currentLoadedUrl = url
                 self.passNavigate += 1
 #                 self.RefreshPage(iewin.REFRESH_COMPLETELY)
+
+                lx, ly = self.GetViewStart()
+
                 self.LoadUrl(url, iewin.NAV_NoReadFromCache | iewin.NAV_NoWriteToCache)
+                self.scrollDeferred(lx, ly)
             else:                        
                 self.currentLoadedWikiWord = word
 
@@ -282,6 +289,10 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 self.passNavigate += 1
                 self.LoadUrl(url, iewin.NAV_NoReadFromCache | iewin.NAV_NoWriteToCache)
                 self.lastAnchor = self.anchor
+                
+                if self.anchor is None:
+                    lx, ly = wikiPage.getPresentation()[3:5]
+                    self.scrollDeferred(lx, ly)
 
         else:  # Not outOfSync
             if self.anchor is not None:
@@ -293,6 +304,25 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.outOfSync = False
 
         ## _prof.stop()
+
+
+
+    # IE ActiveX wx mapping
+    def GetViewStart(self):
+        """
+        Bridge IE ActiveX object to wx's ScrolledWindow.
+        """
+        body = self.ctrl.Document.body
+        return (body.scrollLeft, body.scrollTop)
+
+    def Scroll(self, x, y):
+        """
+        Bridge IE ActiveX object to wx's ScrolledWindow
+        """
+        body = self.ctrl.Document.body
+        body.scrollLeft = x
+        body.scrollTop = y
+
 
 
     def gotoAnchor(self, anchor):
@@ -364,6 +394,15 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
     def onChangedLiveText(self, miscevt):
         self.outOfSync = True
+
+
+    def scrollDeferred(self, lx, ly):
+        self.deferredScrollPos = (lx, ly)
+
+
+    def DownloadComplete(self, this):
+        if self.deferredScrollPos is not None:
+            self.Scroll(self.deferredScrollPos[0], self.deferredScrollPos[1])
 
 
     def OnSetFocus(self, evt):

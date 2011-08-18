@@ -382,11 +382,12 @@ class WikiHtmlViewWK(wx.Panel):
                 wx.CallAfter(self.vi._enableMenuShortcuts, False)
 
             else:
-                self.vi._enableMenuShortcuts(True)
-                self.vi = None
-                
-                self.keyEventConn = self.html.ctrl.connect("key-press-event",
-                        self.__on_key_press_event)
+                if self.vi is not None:
+                    self.vi._enableMenuShortcuts(True)
+                    self.vi = None
+                    
+                    self.keyEventConn = self.html.ctrl.connect("key-press-event",
+                            self.__on_key_press_event)
 
 
             self.html.ctrl.connect("scroll_event", self.__on_scroll_event)
@@ -888,7 +889,7 @@ class WikiHtmlViewWK(wx.Panel):
         sb = self.presenter.getMainControl().GetStatusBar()
 
         # Save scroll position
-        x, y = self.GetViewStart()
+        x, y = self.getIntendedViewStart()
         
         self.searchStartScrollPosition = x, y
 
@@ -1037,6 +1038,7 @@ class WikiHtmlViewWK(wx.Panel):
             self.presenter.getMainControl().statusBar.SetStatusText(
                     uniToGui(status), 0)
 
+
     # GTK wx mapping
     def GetViewStart(self):
         """
@@ -1057,6 +1059,18 @@ class WikiHtmlViewWK(wx.Panel):
         """
         self.scrolled_window.get_hadjustment().set_value(x)
         self.scrolled_window.get_vadjustment().set_value(y)
+
+
+    def getIntendedViewStart(self):
+        """
+        If a deferred scrolling waits for process, this returns the deferred
+        scroll values instead of real view start
+        """
+        if self.deferredScrollPos is not None:
+            return self.deferredScrollPos
+        else:
+            return self.GetViewStart()
+
 
     def setLayerVisible(self, vis, scName=""):
         """
@@ -1099,7 +1113,7 @@ class WikiHtmlViewWK(wx.Panel):
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
-                vs = self.GetViewStart()
+                vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
             except WikiWordNotFoundException, e:
@@ -1270,7 +1284,7 @@ class WikiHtmlViewWK(wx.Panel):
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
-                vs = self.GetViewStart()
+                vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
             except WikiWordNotFoundException, e:
@@ -1314,7 +1328,6 @@ class WikiHtmlViewWK(wx.Panel):
 
 
     def scrollDeferred(self, lx, ly):
-
         if not self.webkitCtrlLoaded or self.deferredScrollPos is not None:
             # WebkitWebView not realized yet or
             # an unprocessed _scrollAndThaw is in the message queue yet ->
@@ -1336,15 +1349,10 @@ class WikiHtmlViewWK(wx.Panel):
 
 
     def OnSize(self, evt):
-        if self.counterResizeIgnore > 0:
-            self.counterResizeIgnore -= 1
-            return
+        lx, ly = self.getIntendedViewStart()
+        self.scrollDeferred(lx, ly)
 
-        vs = self.GetViewStart()
-        if vs is not None:
-            self.counterResizeIgnore = 1
-            evt.Skip()
-            self.scrollDeferred(vs[0], vs[1])
+        evt.Skip()
 
 
     def OnClipboardCopy(self, evt):
