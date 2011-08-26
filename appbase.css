@@ -2,6 +2,12 @@ BODY {
 	font-family: Verdana; font-size: 90%;
 }
 
+.wikidpad {
+    /* class used by all elements created from HTML preview/exporter.
+    Address specific elements e.g. with "br.wikidpad" */
+}
+
+
 .wiki-name-ref {
 	color: #888888; font-size: 75%;
 }
@@ -30,6 +36,18 @@ BODY {
 }
 
 .wiki-link {
+}
+
+/* normal indentation */
+.normalindent {
+}
+
+/* list of bullets (unordered list) */
+.bulletlist {
+}
+
+/* default ordered list */
+.orderedlist {
 }
 
 .page-toc {
@@ -139,4 +157,6 @@ BODY {
 
 .heading-level15 {
 }
+
+
 
