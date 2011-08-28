@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+Aug. 28, 2011 (2.1rc07)
+
+    * Bug fixed: Problems with autocompletion if wiki word contains
+      question mark
+
+
+
 Jun. 25, 2011 (2.1rc05)
 
     * Bug fixed: WikidPad can't be closed if volume access lost

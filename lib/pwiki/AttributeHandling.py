@@ -124,6 +124,7 @@ _BUILTINS = {
     u"global.html.bgimage": None,
     u"global.import_scripts": None,
     u"global.language": None, # TODO: special handling
+    u"global.paragraph_mode": (u"true", u"false"),
     u"global.template": None,
     u"global.template_head": (u"auto", u"manual"),
     u"global.view_pane": (u"off", u"editor", u"preview"),
