@@ -412,6 +412,9 @@ If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these c
 *Scroll under pointer*
 Windows only, *experimental*. When using the mouse-wheel on Windows it normally scrolls the control which currently has the focus (is active). With this option the control under the mouse pointer is scrolled instead. This only works for some controls, for the others you first have to click into the control (give it the focus) and then scroll while mouse pointer is over the control.
 
+*Reduce update handling in HTML preview*
+Windows only. Suppresses some updating of contents in Internet Explorer. Check this only if you have problems with IE preview scrolling suddenly upward to beginning of wiki page.
+
 *Ignore wiki lock file*
 *Create wiki lock file*
 Change these settings only if you know what you are doing! See [WikiLockFile].

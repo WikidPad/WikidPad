@@ -1,5 +1,36 @@
 ﻿++ Change Log
 
+Aug. 28, 2011 (2.2beta07)
+
+    * Improvements to vi emulation (thanks to Ross)
+    * When choosing wikiword from dialog list of children, parents,
+      etc. automatically select first item if no other default given
+      (thanks to Ross)
+    * Option to suppress reaction of HTML preview on
+      "updated wiki page" events for IE to avoid automatic scrolling
+      of preview window upward to begin.
+      See [OptionsDialog#*Reduce update handling in HTML preview*]
+    * Some problems with scrolling of internal and Webkit renderer
+      fixed
+    * Saving and restoring of scroll positions now also supported for
+      IE renderer
+    * Adding more CSS classes to HTML elements, especially class
+      "wikidpad" to all elements.
+      See [Cascading style sheets#+++ The class "wikidpad"]
+    * Removed 'size="1"' from "hr"-tags in HTML exporter to allow
+      full CSS styling
+
+    * Bug fixed: WikidPad's own print dialog wasn't closed after
+      starting print of type "HTML (Webkit)"
+    * Bug fixed: Javascript wasn't processesd (correctly) if printing
+      HTML with Webkit (some problems persist)
+    * Bug fixed: Added forgotten "global.paragraph_mode" attribute to
+      autocompletion
+    * Bug fixed: Problems with autocompletion if wiki word contains
+      question mark
+
+
+
 Jul. 31, 2011 (2.2beta06)
 
     * Further improvements to Vi-mode in editor and Webkit preview
