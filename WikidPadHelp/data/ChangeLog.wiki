@@ -1,5 +1,14 @@
 ﻿++ Change Log
 
+Oct. 01, 2011 (2.1rc08)
+
+    * Bug fixed: MacOS: wx.html.HtmlWindow.GetViewStart() returns
+      wx.Point instead of tuple under some circumstances
+    * Enhancements for Mac OS (thanks to cmore): Support for emacs
+      shortcuts, bug fixes
+
+
+
 Aug. 28, 2011 (2.1rc07)
 
     * Bug fixed: Problems with autocompletion if wiki word contains

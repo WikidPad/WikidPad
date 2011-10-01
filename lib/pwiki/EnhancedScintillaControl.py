@@ -7,12 +7,11 @@ import traceback, codecs
 
 import wx, wx.stc
 
-from wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
+from .wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
 
-import StringOps
+from . import StringOps
 
-from SystemInfo import isUnicode
-
+from .SystemInfo import isUnicode, isOSX
 
 
 def bytelenSct_utf8(us):
@@ -136,10 +135,13 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
         # Register general keyboard commands (minus some which may lead to problems
         for key, mod, action in _DEFAULT_STC_KEYS:
             self.CmdKeyAssign(key, mod, action)
-        
+            
         self.allowRectExtend(True)
-
         
+        if isOSX():
+            for key, mod, action in _MACOS_ADD_STC_KEYS:
+                self.CmdKeyAssign(key, mod, action)
+
         # register some special keyboard commands
         self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
         self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
@@ -385,4 +387,19 @@ _RECT_EXTEND_STC_KEYS = (
         (wx.stc.STC_KEY_END,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEENDRECTEXTEND),
         (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEUPRECTEXTEND),
         (wx.stc.STC_KEY_NEXT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
+    )
+
+
+_MACOS_ADD_STC_KEYS = (
+        (ord('B'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_CHARLEFT),
+        (ord('F'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_CHARRIGHT),
+        (ord('P'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_LINEUP),
+        (ord('N'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_LINEDOWN),
+        (ord('A'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_HOMEDISPLAY),
+        (ord('E'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_LINEENDDISPLAY),
+        (ord('J'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_NEWLINE),
+        (ord('H'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_DELETEBACK),
+        (ord('U'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_DELLINELEFT),
+        (ord('K'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_DELLINERIGHT),
+        (ord('D'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_CLEAR),
     )

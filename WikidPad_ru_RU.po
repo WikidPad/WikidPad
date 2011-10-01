@@ -5,7 +5,7 @@
 msgid ""
 msgstr "Project-Id-Version: WIKIDPAD INTERNATIONALISATION. RUSSIAN. VERSION 1.0\n"
 "POT-Creation-Date: 2010-11-14 20:59\n"
-"PO-Revision-Date: 2011-05-29 19:13+0600\n"
+"PO-Revision-Date: 2011-08-26 23:35+0700\n"
 "Last-Translator: Oleg Domanov <odomanov@yandex.ru>\n"
 "Language-Team:  <odomanov@yandex.ru>\n"
 "MIME-Version: 1.0\n"
@@ -1167,7 +1167,7 @@ msgstr "Системная"
 
 #: WikidPad.xrc:0
 msgid "Tab width:"
-msgstr "Ширина вкладки:"
+msgstr "Интервал табулятора:"
 
 #: WikidPad.xrc:0
 msgid "Table of contents:"
@@ -1418,16 +1418,16 @@ msgid "Source directory:"
 msgstr "Папка источника:"
 
 #: WikidPad.xrc:0 lib\pwiki\DiffGui.py:434 lib\pwiki\PersonalWikiFrame.py:1267
-#: lib\pwiki\WikiTxtCtrl.py:3538
+#: lib\pwiki\WikiTxtCtrl.py:3540
 msgid "Copy"
 msgstr "Копировать"
 
 #: WikidPad.xrc:0 lib\pwiki\DiffGui.py:435 lib\pwiki\PersonalWikiFrame.py:1276
-#: lib\pwiki\WikiTxtCtrl.py:3541
+#: lib\pwiki\WikiTxtCtrl.py:3543
 msgid "Select All"
 msgstr "Выбрать всё"
 
-#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:437 lib\pwiki\WikiTxtCtrl.py:3555
+#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:437 lib\pwiki\WikiTxtCtrl.py:3557
 msgid "Close Tab"
 msgstr "Закрыть вкладку"
 
@@ -1460,22 +1460,22 @@ msgid "Versioning"
 msgstr "Версии"
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1242
-#: lib\pwiki\WikiTxtCtrl.py:3535
+#: lib\pwiki\WikiTxtCtrl.py:3537
 msgid "Undo"
 msgstr "Отменить"
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1246
-#: lib\pwiki\WikiTxtCtrl.py:3536
+#: lib\pwiki\WikiTxtCtrl.py:3538
 msgid "Redo"
 msgstr "Вернуть"
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1262
-#: lib\pwiki\WikiTxtCtrl.py:3537
+#: lib\pwiki\WikiTxtCtrl.py:3539
 msgid "Cut"
 msgstr "Вырезать"
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1271
-#: lib\pwiki\WikiTxtCtrl.py:3539
+#: lib\pwiki\WikiTxtCtrl.py:3541
 msgid "Paste"
 msgstr "Вставить"
 
@@ -1515,7 +1515,7 @@ msgstr "Как полный поиск"
 msgid "Activate New Tab"
 msgstr "Открыть в новой вкладке"
 
-#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3540
+#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3542
 msgid "Delete"
 msgstr "Удалить"
 
@@ -2465,43 +2465,43 @@ msgstr ""
 msgid "YELLOW"
 msgstr ""
 
-#: lib\pwiki\AttributeHandling.py:353
+#: lib\pwiki\AttributeHandling.py:354
 msgid "Alias value isn't a valid wikiword: [%s: %s], %s"
 msgstr "Псевдоним не является допустимым вики-словом: [%s: %s], %s"
 
-#: lib\pwiki\AttributeHandling.py:364
+#: lib\pwiki\AttributeHandling.py:365
 msgid "A real wikiword with the alias name exists already: [%s: %s]"
 msgstr "Реальное вики-слово с таким именем уже существует: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:415
+#: lib\pwiki\AttributeHandling.py:416
 msgid "Template value isn't a valid wikiword: [%s: %s], %s"
 msgstr "Шаблон не является допустимым вики-словом: [%s: %s], %s"
 
-#: lib\pwiki\AttributeHandling.py:426
+#: lib\pwiki\AttributeHandling.py:427
 msgid "Template value isn't an existing wikiword: [%s: %s]"
 msgstr "Шаблон не является существующим вики-словом: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:473
+#: lib\pwiki\AttributeHandling.py:474
 msgid "The attribute %s was already set differently on this page"
 msgstr "Атрибут %s на этой странице уже установлен в иное значение "
 
-#: lib\pwiki\AttributeHandling.py:485
+#: lib\pwiki\AttributeHandling.py:486
 msgid "Attribute '%s' is already defined on the wiki page(s): %s"
 msgstr "Атрибут '%s' уже определён на вики-страницах: %s"
 
-#: lib\pwiki\AttributeHandling.py:494
+#: lib\pwiki\AttributeHandling.py:495
 msgid "Icon name doesn't exist: [%s: %s]"
 msgstr "Такой иконки не существует: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:501
+#: lib\pwiki\AttributeHandling.py:502
 msgid "Color name doesn't exist: [%s: %s]"
 msgstr "Такого цвета не существует: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:548
+#: lib\pwiki\AttributeHandling.py:549
 msgid "The attribute 'global.graph.relations.exclude' (e.g. on page '%s') overrides the '...include' attribute"
 msgstr "Атрибут 'global.graph.relations.exclude' (например, на странице '%s') переопределяет атрибут '...include'"
 
-#: lib\pwiki\AttributeHandling.py:674
+#: lib\pwiki\AttributeHandling.py:675
 msgid "Same attribute twice: [%s: %s]"
 msgstr "Повторяется один и тот же атрибут: [%s: %s]"
 
@@ -2605,35 +2605,35 @@ msgstr "Вики-страница не найдена, будет создана
 msgid "History"
 msgstr "История"
 
-#: lib\pwiki\DocPages.py:2226
+#: lib\pwiki\DocPages.py:2228
 msgid "Func. tag %s does not exist"
 msgstr "Функц. метка %s не существует"
 
-#: lib\pwiki\DocPages.py:2487
+#: lib\pwiki\DocPages.py:2489
 msgid "Global text blocks"
 msgstr "Глобальные текстовые блоки"
 
-#: lib\pwiki\DocPages.py:2488
+#: lib\pwiki\DocPages.py:2490
 msgid "Wiki text blocks"
 msgstr "Текстовые блоки этой вики"
 
-#: lib\pwiki\DocPages.py:2489
+#: lib\pwiki\DocPages.py:2491
 msgid "Global spell list"
 msgstr "Глобальный список правописания"
 
-#: lib\pwiki\DocPages.py:2490
+#: lib\pwiki\DocPages.py:2492
 msgid "Wiki spell list"
 msgstr "Список правописания этой вики"
 
-#: lib\pwiki\DocPages.py:2491
+#: lib\pwiki\DocPages.py:2493
 msgid "Global cc. blacklist"
 msgstr "Глобальный чёрный список"
 
-#: lib\pwiki\DocPages.py:2492
+#: lib\pwiki\DocPages.py:2494
 msgid "Wiki cc. blacklist"
 msgstr "Чёрный список этой вики"
 
-#: lib\pwiki\DocPages.py:2493
+#: lib\pwiki\DocPages.py:2495
 msgid "Favorite wikis"
 msgstr "Избранные вики"
 
@@ -2754,11 +2754,11 @@ msgstr "Настройки плагинов"
 msgid "Wiki language"
 msgstr "Синтаксис вики"
 
-#: lib\pwiki\MainAreaPanel.py:665 lib\pwiki\WikiTxtCtrl.py:2177
+#: lib\pwiki\MainAreaPanel.py:665 lib\pwiki\WikiTxtCtrl.py:2179
 msgid "This can only be done for the page of a wiki word"
 msgstr "Это можно сделать только со страницей вики-слова"
 
-#: lib\pwiki\MainAreaPanel.py:666 lib\pwiki\WikiTxtCtrl.py:2178
+#: lib\pwiki\MainAreaPanel.py:666 lib\pwiki\WikiTxtCtrl.py:2180
 msgid "Not a wiki page"
 msgstr "Не вики-страница"
 
@@ -4407,7 +4407,7 @@ msgstr "Выберите вики для Избранного"
 msgid "Multiple words rename to same word"
 msgstr "Несколько слов переименовываются в одно и то же слово"
 
-#: lib\pwiki\WikiHtmlView.py:600 lib\pwiki\WikiTxtCtrl.py:2123
+#: lib\pwiki\WikiHtmlView.py:600 lib\pwiki\WikiTxtCtrl.py:2125
 msgid "Folder does not exist"
 msgstr "Папка не существует"
 
@@ -4463,119 +4463,119 @@ msgstr "Добавить вики-слово в конец"
 msgid "Prepend Wiki Word"
 msgstr "Добавить вики-слово в начало"
 
-#: lib\pwiki\WikiTxtCtrl.py:1288
+#: lib\pwiki\WikiTxtCtrl.py:1289
 msgid "Select Template"
 msgstr "Выберите шаблон"
 
-#: lib\pwiki\WikiTxtCtrl.py:1290
+#: lib\pwiki\WikiTxtCtrl.py:1291
 msgid "Select Template (deletes current content!)"
 msgstr "Выберите шаблон (удалит текущее содержание!)"
 
-#: lib\pwiki\WikiTxtCtrl.py:1396
+#: lib\pwiki\WikiTxtCtrl.py:1398
 msgid "Use Template"
 msgstr "Использовать шаблон"
 
-#: lib\pwiki\WikiTxtCtrl.py:2199
+#: lib\pwiki\WikiTxtCtrl.py:2201
 msgid "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
 msgstr "Чтобы выполнить скрипт, установите соответствующее значение в меню \"Вики\", пункт \"Настройки...\", \n"
 "страница настроек \"Безопасность\", пункт \"Безопасность скриптов\"."
 
-#: lib\pwiki\WikiTxtCtrl.py:2202
+#: lib\pwiki\WikiTxtCtrl.py:2204
 msgid "Script execution disabled"
 msgstr "Выполнение скрипта запрещено"
 
-#: lib\pwiki\WikiTxtCtrl.py:2274
+#: lib\pwiki\WikiTxtCtrl.py:2276
 msgid "\n"
 "Exception: %s"
 msgstr "\n"
 "Исключение: %s"
 
-#: lib\pwiki\WikiTxtCtrl.py:2921
+#: lib\pwiki\WikiTxtCtrl.py:2923
 msgid "No more fields in this 'form' page"
 msgstr "Больше нет полей на странице 'form'"
 
-#: lib\pwiki\WikiTxtCtrl.py:3090
+#: lib\pwiki\WikiTxtCtrl.py:3092
 msgid "Line: %d Col: %d Pos: %d"
 msgstr "Строка: %d  Колонка: %d  Позиция: %d"
 
-#: lib\pwiki\WikiTxtCtrl.py:3270
+#: lib\pwiki\WikiTxtCtrl.py:3272
 msgid "Couldn't copy file"
 msgstr "Ошибка копирования файла"
 
-#: lib\pwiki\WikiTxtCtrl.py:3531
+#: lib\pwiki\WikiTxtCtrl.py:3533
 msgid "Ignore"
 msgstr "Игнорировать"
 
-#: lib\pwiki\WikiTxtCtrl.py:3532
+#: lib\pwiki\WikiTxtCtrl.py:3534
 msgid "Add Globally"
 msgstr "Добавить глобально"
 
-#: lib\pwiki\WikiTxtCtrl.py:3533
+#: lib\pwiki\WikiTxtCtrl.py:3535
 msgid "Add Locally"
 msgstr "Добавить локально"
 
-#: lib\pwiki\WikiTxtCtrl.py:3543
+#: lib\pwiki\WikiTxtCtrl.py:3545
 msgid "Follow Link"
 msgstr "Открыть ссылку"
 
-#: lib\pwiki\WikiTxtCtrl.py:3544
+#: lib\pwiki\WikiTxtCtrl.py:3546
 msgid "Follow Link New Tab"
 msgstr "Открыть ссылку в новой вкладке"
 
-#: lib\pwiki\WikiTxtCtrl.py:3545
+#: lib\pwiki\WikiTxtCtrl.py:3547
 msgid "Follow Link New Tab Backgrd."
 msgstr "Открыть ссылку в новой вкладке на заднем фоне"
 
-#: lib\pwiki\WikiTxtCtrl.py:3547
+#: lib\pwiki\WikiTxtCtrl.py:3549
 msgid "Convert Absolute/Relative File URL"
 msgstr "Преобразовать Абсолютный/Относительный URL файла"
 
-#: lib\pwiki\WikiTxtCtrl.py:3548
+#: lib\pwiki\WikiTxtCtrl.py:3550
 msgid "Open Containing Folder"
 msgstr "Открыть папку"
 
-#: lib\pwiki\WikiTxtCtrl.py:3550
+#: lib\pwiki\WikiTxtCtrl.py:3552
 msgid "Copy anchor URL to clipboard"
 msgstr "Копировать anchor URL в буфер"
 
-#: lib\pwiki\WikiTxtCtrl.py:3552
+#: lib\pwiki\WikiTxtCtrl.py:3554
 msgid "Other..."
 msgstr "Другие..."
 
-#: lib\pwiki\WikiTxtCtrl.py:3553
+#: lib\pwiki\WikiTxtCtrl.py:3555
 msgid "Use Template..."
 msgstr "Использовать шаблон..."
 
-#: lib\pwiki\WikiTxtCtrl.py:3557
+#: lib\pwiki\WikiTxtCtrl.py:3559
 msgid "Show folding"
 msgstr "Показать свёртку фрагментов"
 
-#: lib\pwiki\WikiTxtCtrl.py:3558
+#: lib\pwiki\WikiTxtCtrl.py:3560
 msgid "Show folding marks and allow folding"
 msgstr "Показать значки свёртки и разрешить свёртку фрагментов текста"
 
-#: lib\pwiki\WikiTxtCtrl.py:3559
+#: lib\pwiki\WikiTxtCtrl.py:3561
 msgid "&Toggle current folding"
 msgstr "&Свернуть/Развернуть текущий фрагмент"
 
-#: lib\pwiki\WikiTxtCtrl.py:3560
+#: lib\pwiki\WikiTxtCtrl.py:3562
 msgid "Toggle folding of the current line"
 msgstr "Свернуть/Развернуть фрагмент текста, соответствующего текущей строке"
 
-#: lib\pwiki\WikiTxtCtrl.py:3561
+#: lib\pwiki\WikiTxtCtrl.py:3563
 msgid "&Unfold All"
 msgstr "&Развернуть всё"
 
-#: lib\pwiki\WikiTxtCtrl.py:3562
+#: lib\pwiki\WikiTxtCtrl.py:3564
 msgid "Unfold everything in current editor"
 msgstr "Развернуть все фрагменты в текущем редакторе"
 
-#: lib\pwiki\WikiTxtCtrl.py:3563
+#: lib\pwiki\WikiTxtCtrl.py:3565
 msgid "&Fold All"
 msgstr "&Свернуть всё"
 
-#: lib\pwiki\WikiTxtCtrl.py:3564
+#: lib\pwiki\WikiTxtCtrl.py:3566
 msgid "Fold everything in current editor"
 msgstr "Свернуть все фрагменты в текущем редакторе"
 

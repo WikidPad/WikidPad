@@ -516,6 +516,15 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self._activateLink(href, tabMode=0)
 
 
+    if isOSX():
+        def GetViewStart(self):
+            result = wx.html.HtmlWindow.GetViewStart(self)
+            if isinstance(result, wx.Point):
+                return (result.x, result.y)
+            else:
+                return result
+
+
     def _activateLink(self, href, tabMode=0):
         """
         Called if link was activated by clicking in the context menu, 

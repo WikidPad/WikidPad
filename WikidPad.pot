@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-08-27 11:29\n"
+"POT-Creation-Date: 2011-10-01 16:55\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1510,7 +1510,7 @@ msgid "As Full Search"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2367
-#: lib\pwiki\WikiHtmlView.py:714
+#: lib\pwiki\WikiHtmlView.py:723
 msgid "Activate New Tab"
 msgstr ""
 
@@ -1526,17 +1526,17 @@ msgstr ""
 msgid "Sort dates ascending"
 msgstr ""
 
-#: WikidPadStarter.py:203
+#: WikidPadStarter.py:208
 msgid "Error starting WikidPad"
 msgstr ""
 
-#: WikidPadStarter.py:204 lib\pwiki\PersonalWikiFrame.py:5191
+#: WikidPadStarter.py:209 lib\pwiki\PersonalWikiFrame.py:5191
 #: lib\pwiki\SearchAndReplaceDialogs.py:724
 #: lib\pwiki\SearchAndReplaceDialogs.py:1008
 msgid "Error!"
 msgstr ""
 
-#: WikidPadStarter.py:211 lib\pwiki\MptImporterGui.py:201
+#: WikidPadStarter.py:216 lib\pwiki\MptImporterGui.py:201
 msgid "Error"
 msgstr ""
 
@@ -4195,11 +4195,11 @@ msgstr ""
 msgid "Search: %s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2366 lib\pwiki\WikiHtmlView.py:713
+#: lib\pwiki\SearchAndReplaceDialogs.py:2366 lib\pwiki\WikiHtmlView.py:722
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2368 lib\pwiki\WikiHtmlView.py:715
+#: lib\pwiki\SearchAndReplaceDialogs.py:2368 lib\pwiki\WikiHtmlView.py:724
 msgid "Activate New Tab Backgrd."
 msgstr ""
 
@@ -4236,11 +4236,11 @@ msgstr ""
 msgid "Multiple words rename to same word"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:600 lib\pwiki\WikiTxtCtrl.py:2125
+#: lib\pwiki\WikiHtmlView.py:609 lib\pwiki\WikiTxtCtrl.py:2125
 msgid "Folder does not exist"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:692 lib\pwiki\WikiHtmlViewIE.py:486
+#: lib\pwiki\WikiHtmlView.py:701 lib\pwiki\WikiHtmlViewIE.py:486
 msgid "Link to page: %s"
 msgstr ""
 
