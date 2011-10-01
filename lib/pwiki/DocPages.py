@@ -893,7 +893,7 @@ class AbstractWikiPage(DataCarryingPage):
 #             if wx.Thread_IsMain(): traceback.print_stack()
 
         with self.livePageAstBuildLock:   # TODO: Timeout?
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             with self.textOperationLock:
                 text = self.getLiveText()
@@ -912,7 +912,7 @@ class AbstractWikiPage(DataCarryingPage):
                 else:
                     origThreadstop = threadstop
                     threadstop = FunctionThreadStop(
-                            lambda: origThreadstop.isRunning() and 
+                            lambda: origThreadstop.isValidThread() and 
                             liveTextPlaceHold is self.liveTextPlaceHold)
 
             if len(text) == 0:
@@ -922,7 +922,7 @@ class AbstractWikiPage(DataCarryingPage):
                         threadstop=threadstop)
 
             with self.textOperationLock:
-                threadstop.testRunning()
+                threadstop.testValidThread()
 
                 self.livePageAst = pageAst
                 self.livePageBasePlaceHold = liveTextPlaceHold
@@ -930,7 +930,7 @@ class AbstractWikiPage(DataCarryingPage):
 
 
         if self.isReadOnlyEffect():
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return pageAst
 
 #         if False and allowMetaDataUpdate:   # TODO: Option
@@ -938,7 +938,7 @@ class AbstractWikiPage(DataCarryingPage):
 #                     threadstop=threadstop)
 
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return pageAst
 
 
@@ -981,7 +981,7 @@ class AbstractWikiPage(DataCarryingPage):
         the result is inaccurate.
         """
 #         with self.livePageAstBuildLock:   # TODO: Timeout?
-        threadstop.testRunning()
+        threadstop.testValidThread()
         
         with self.textOperationLock:
             text = self.getLiveText()
@@ -999,7 +999,7 @@ class AbstractWikiPage(DataCarryingPage):
             else:
                 origThreadstop = threadstop
                 threadstop = FunctionThreadStop(
-                        lambda: origThreadstop.isRunning() and 
+                        lambda: origThreadstop.isValidThread() and 
                         liveTextPlaceHold is self.liveTextPlaceHold)
 
         spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
@@ -1017,7 +1017,7 @@ class AbstractWikiPage(DataCarryingPage):
         spellSession.close()
 
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             self.liveSpellCheckerUnknownWords = unknownWords
             self.liveSpellCheckerUnknownWordsBasePlaceHold = liveTextPlaceHold
@@ -1027,7 +1027,7 @@ class AbstractWikiPage(DataCarryingPage):
 
 
         if self.isReadOnlyEffect():
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return unknownWords
 
 #         if False and allowMetaDataUpdate:   # TODO: Option
@@ -1035,7 +1035,7 @@ class AbstractWikiPage(DataCarryingPage):
 #                     threadstop=threadstop)
 
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return unknownWords
 
 
@@ -1059,7 +1059,7 @@ class AbstractWikiPage(DataCarryingPage):
         finally:
             wx.GetApp().freeWikiParser(parser)
 
-        threadstop.testRunning()
+        threadstop.testValidThread()
 
         return pageAst
 
@@ -1605,7 +1605,7 @@ class WikiPage(AbstractWikiPage):
         attrs = {}
 
         def addAttribute(key, value):
-            threadstop.testRunning()
+            threadstop.testValidThread()
             values = attrs.get(key)
             if not values:
                 values = []
@@ -1620,7 +1620,7 @@ class WikiPage(AbstractWikiPage):
                 addAttribute(attrKey, attrValue)
 
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             self.attrs = None
 
@@ -1638,7 +1638,7 @@ class WikiPage(AbstractWikiPage):
                     self.getFormatDetails().isEquivTo(self.livePageBaseFormatDetails) and \
                     pageAst is self.livePageAst:
 
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 # clear the dirty flag
 
                 self.getWikiData().setMetaDataState(self.wikiPageName,
@@ -1664,13 +1664,13 @@ class WikiPage(AbstractWikiPage):
         childRelationSet = set()
 
         def addTodo(todoKey, todoValue):
-            threadstop.testRunning()
+            threadstop.testValidThread()
             todo = (todoKey, todoValue)
             if todo not in todos:
                 todos.append(todo)
 
         def addChildRelationship(toWord, pos):
-            threadstop.testRunning()
+            threadstop.testValidThread()
             if toWord not in childRelationSet:
                 childRelations.append((toWord, pos))
                 childRelationSet.add(toWord)
@@ -1681,14 +1681,14 @@ class WikiPage(AbstractWikiPage):
             for todoKey, todoValueNode in node.todos:
                 addTodo(todoKey, todoValueNode.getString())
 
-        threadstop.testRunning()
+        threadstop.testValidThread()
 
         # Add child relations
         wwTokens = pageAst.iterDeepByName("wikiWord")
         for t in wwTokens:
             addChildRelationship(t.wikiWord, t.pos)
 
-        threadstop.testRunning()
+        threadstop.testValidThread()
         
         # Add aliases to match terms
         matchTerms = []
@@ -1702,7 +1702,7 @@ class WikiPage(AbstractWikiPage):
 
         for w, k, v in self.getWikiDocument().getAttributeTriples(
                 self.wikiPageName, u"alias", None):
-            threadstop.testRunning()
+            threadstop.testValidThread()
             if not langHelper.checkForInvalidWikiLink(v,
                     self.getWikiDocument()):
 #                 matchTerms.append((v, ALIAS_TYPE, self.wikiPageName, -1, -1))
@@ -1716,7 +1716,7 @@ class WikiPage(AbstractWikiPage):
         if depth > 0:
             HEADALIAS_TYPE = Consts.WIKIWORDMATCHTERMS_TYPE_FROM_CONTENT
             for node in pageAst.iterFlatByName("heading"):
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 if node.level > depth:
                     continue
 
@@ -1728,20 +1728,20 @@ class WikiPage(AbstractWikiPage):
                         node.pos + node.strLength, 0))
 
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             self.todos = None
             self.childRelations = None
             self.childRelationSet = set()
         try:
             self.getWikiData().updateTodos(self.wikiPageName, todos)
-            threadstop.testRunning()
+            threadstop.testValidThread()
             self.getWikiData().updateChildRelations(self.wikiPageName,
                     childRelations)
-            threadstop.testRunning()
+            threadstop.testValidThread()
             self.getWikiData().updateWikiWordMatchTerms(self.wikiPageName,
                     matchTerms)
-            threadstop.testRunning()
+            threadstop.testValidThread()
         except WikiWordNotFoundException:
             return False
 #             self.modified = None   # ?
@@ -1767,7 +1767,7 @@ class WikiPage(AbstractWikiPage):
                     self.getFormatDetails().isEquivTo(self.livePageBaseFormatDetails) and \
                     pageAst is self.livePageAst:
 
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 # clear the dirty flag
                 self.updateDirtySince = None
 
@@ -1787,7 +1787,7 @@ class WikiPage(AbstractWikiPage):
         Add or update the index for the given docPage
         """
         with self.textOperationLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             if not self.getWikiDocument().isSearchIndexEnabled():
                 return True  # Or false?
@@ -2401,7 +2401,7 @@ class FunctionalPage(DataCarryingPage):
         containing the whole text.
         """
         with self.livePageAstBuildLock:
-            threadstop.testRunning()
+            threadstop.testValidThread()
     
             pageAst = self.livePageAst
             
@@ -2412,7 +2412,7 @@ class FunctionalPage(DataCarryingPage):
                 pageAst = buildSyntaxNode([buildSyntaxNode(
                         self.getLiveText(), 0, "plainText")], 0, "text")
 
-                threadstop.testRunning()
+                threadstop.testValidThread()
 
                 self.livePageAst = pageAst
 

@@ -224,13 +224,99 @@ if os.name == "nt":
 #   mypath = os.path.dirname(get_resource_filename("libenchant.dll"))
 #   os.environ['PATH'] = os.environ['PATH'] + ";" + mypath
 
-e_path = find_library("enchant")
-if not e_path:
-  e_path = find_library("libenchant")
-if not e_path:
-  raise ImportError("enchant C library not found")
+# cmore deleted begin
 
-e = cdll.LoadLibrary(e_path)
+# e_path = find_library("enchant")
+# if not e_path:
+#   e_path = find_library("libenchant")
+# if not e_path:
+#   raise ImportError("enchant C library not found")
+# 
+# e = cdll.LoadLibrary(e_path)
+
+# cmore deleted end
+
+
+# cmore add begin
+
+e = None
+
+# from enchant.errors import *
+
+def _e_path_possibilities():
+    """Generator yielding possible locations of the enchant library."""
+    yield os.environ.get("PYENCHANT_LIBRARY_PATH")
+    yield find_library("enchant")
+    yield find_library("libenchant")
+    yield find_library("libenchant-1")
+    if sys.platform == 'darwin':
+         # enchant lib installed by macports
+         yield "/opt/local/lib/libenchant.dylib"
+
+
+# On win32 we ship a bundled version of the enchant DLLs.
+# Use them if they're present.
+if sys.platform == "win32":
+    e_path = None
+    try:
+        from enchant import utils
+        e_path = utils.get_resource_filename("libenchant.dll")
+    except:
+         try:
+            from enchant import utils
+            e_path = utils.get_resource_filename("libenchant-1.dll")
+         except:
+            pass
+    if e_path is not None:
+        # We need to use LoadLibraryEx with LOAD_WITH_ALTERED_SEARCH_PATH so
+        # that we don't accidentally suck in other versions of e.g. glib.
+        if not isinstance(e_path,unicode):
+            e_path = unicode(e_path,sys.getfilesystemencoding())
+        LoadLibraryEx = windll.kernel32.LoadLibraryExW
+        LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
+        e_handle = LoadLibraryEx(e_path,None,LOAD_WITH_ALTERED_SEARCH_PATH)
+        if not e_handle:
+            raise WinError()
+        e = CDLL(e_path,handle=e_handle)
+
+
+# On darwin there may be a bundled version of the enchant DLLs.
+# Use them if they're present.
+if e is None and sys.platform == "darwin":
+  try:
+      from enchant import utils
+      e_path = utils.get_resource_filename("lib/libenchant.1.dylib")
+  except:
+      pass
+  else:
+      # Enchant doesn't natively support relocatable binaries on OSX.
+      # We fake it by patching the enchant source to expose a char**, which
+      # we can write the runtime path into ourselves.
+      e = CDLL(e_path)
+      try:
+          e_dir = os.path.dirname(os.path.dirname(e_path))
+          prefix_dir = POINTER(c_char_p).in_dll(e,"enchant_prefix_dir_p")
+          prefix_dir.contents = c_char_p(e_dir)
+      except AttributeError:
+          e = None
+
+
+# Not found yet, search various standard system locations.
+if e is None:
+    for e_path in _e_path_possibilities():
+        if e_path is not None:
+            try:
+                e = cdll.LoadLibrary(e_path)
+            except:
+                pass
+
+
+
+# No usable enchant install was found :-(
+if e is None:
+   raise ImportError("enchant C library not found")
+
+# cmore add end
 
 
 # Define various callback function types

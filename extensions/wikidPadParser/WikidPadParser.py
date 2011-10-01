@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-07-21
+# Last modified (format YYYY-MM-DD): 2011-09-30
 
 
 import locale, pprint, time, sys, string, traceback
@@ -1279,7 +1279,7 @@ class _TheParser(object):
                         text = node.text
                         start = node.pos
                         
-                        threadstop.testRunning()
+                        threadstop.testValidThread()
                         while text != u"":
                             # The foundWordText is the text as typed in the page
                             # foundWord is the word as entered in database

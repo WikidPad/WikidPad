@@ -885,7 +885,6 @@ class ParserElement(object):
         #~ self.name = "<unknown>"  # don't define self.name, let subclasses try/except upcall
         self.strRepr = None
         self.resultsName = None
-#         self.saveAsList = savelist
         self.whiteChars = ParserElement.DEFAULT_WHITE_CHARS
         self.skipWhitespace = self.whiteChars != ""
         self.copyDefaultWhiteChars = True
@@ -1280,7 +1279,7 @@ class ParserElement(object):
                 else:
                     retTokens = retTokens.asList()
 
-            state.threadstop.testRunning()
+            state.threadstop.testValidThread()
 #             print "--Clock" , time.clock()
 #             elif isinstance(retTokens, list) and len(retTokens) > 0 and self.resultsName:
 #                 retTokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
@@ -1351,7 +1350,8 @@ class ParserElement(object):
     def buildStartState(self, instring, baseDict=None,
             threadstop=DUMBTHREADSTOP):
         """
-        Returns a tuple(namestack, fullstack, instring, revInstring).
+        Returns a ParsingState containing namestack, fullstack, instring and
+        revInstring.
         The  namestack  contains strings with all named tokens.
         fullstack  is a StackedCopyDict
         instring  is the complete text to parse
@@ -1387,7 +1387,6 @@ class ParserElement(object):
         ParserElement.resetCache()
         if not self.streamlined:
             self.streamline()
-            #~ self.saveAsList = True
         for e in self.ignoreExprs:
             e.streamline()
         if not self.keepTabs:
@@ -3559,7 +3558,6 @@ class ParseElementEnhance(ParserElement):
             self.mayReturnEmpty = expr.mayReturnEmpty
             self.setWhitespaceChars( expr.whiteChars )
             self.skipWhitespace = expr.skipWhitespace
-#             self.saveAsList = expr.saveAsList
             self.callPreparse = expr.callPreparse
             self.ignoreExprs.extend(expr.ignoreExprs)
 
@@ -3768,7 +3766,6 @@ class ZeroOrMore(ParseElementEnhance):
 
     def setResultsName( self, name, listAllMatches=False ):
         ret = super(ZeroOrMore,self).setResultsName(name,listAllMatches)
-        ret.saveAsList = True
         return ret
 
 
@@ -3853,7 +3850,6 @@ class OneOrMore(ParseElementEnhance, NecessaryRegexProvider):
 
     def setResultsName( self, name, listAllMatches=False ):
         ret = super(OneOrMore,self).setResultsName(name,listAllMatches)
-        ret.saveAsList = True
         return ret
 
 
@@ -4120,7 +4116,6 @@ class Forward(ParseElementEnhance, NecessaryRegexProvider):
         head.mayReturnEmpty = self.expr.mayReturnEmpty
         head.setWhitespaceChars( self.expr.whiteChars )
         head.skipWhitespace = self.expr.skipWhitespace
-#         self.saveAsList = self.expr.saveAsList
         head.ignoreExprs.extend(self.expr.ignoreExprs)
 
         return None
@@ -4188,7 +4183,6 @@ class TokenConverter(ParseElementEnhance):
     """Abstract subclass of ParseExpression, for converting parsed results."""
     def __init__( self, expr ):
         super(TokenConverter,self).__init__( expr )
-#         self.saveAsList = False
 
 
 # TODO May not work
@@ -4243,7 +4237,6 @@ class Group(TokenConverter, NecessaryRegexProvider):
     """Converter to return the matched tokens as a list - useful for returning tokens of ZeroOrMore and OneOrMore expressions."""
 #     def __init__( self, expr ):
 #         super(Group,self).__init__( expr )
-#         self.saveAsList = True
 
 
     def getNamedElementNeedsPacking(self):

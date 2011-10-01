@@ -575,7 +575,7 @@ class OptionsDialog(wx.Dialog):
             ("versioning_dateFormat", "tfVersioningDateFormat", "ttdf",
                 "btnSelectVersioningDateFormat"),
 
-
+            ("search_stripSpaces", "cbSearchStripSpaces", "b"),
             ("search_wiki_searchType", "rboxWwSearchSearchType", "seli"),
             ("search_wiki_caseSensitive", "cbWwSearchCaseSensitive", "b"),
             ("search_wiki_wholeWord", "cbWwSearchWholeWord", "b"),

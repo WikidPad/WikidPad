@@ -1536,7 +1536,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         try:
             if delay != 0 and not threadstop is DUMBTHREADSTOP:
                 sleep(delay)
-                threadstop.testRunning()
+                threadstop.testValidThread()
 
             docPage = self.getLoadedDocPage()
             if docPage is None:
@@ -1545,7 +1545,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             for i in range(20):   # "while True" is too dangerous
                 formatDetails = docPage.getFormatDetails()
                 pageAst = docPage.getLivePageAst(threadstop=threadstop)
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 if not formatDetails.isEquivTo(docPage.getFormatDetails()):
                     continue
                 else:
@@ -1553,14 +1553,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             stylebytes = self.processTokens(text, pageAst, threadstop)
 
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             if self.getFoldingActive():
                 foldingseq = self.processFolding(pageAst, threadstop)
             else:
                 foldingseq = None
 
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             if self.onlineSpellCheckerActive and \
                     isinstance(docPage, DocPages.AbstractWikiPage):
@@ -1572,13 +1572,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                 scTokens = docPage.getSpellCheckerUnknownWords(threadstop=threadstop)
 
-                threadstop.testRunning()
+                threadstop.testValidThread()
 
                 if scTokens.getChildrenCount() > 0:
                     spellStyleBytes = self.processSpellCheckTokens(text, scTokens,
                             threadstop)
 
-                    threadstop.testRunning()
+                    threadstop.testValidThread()
 
                     # TODO: Faster? How?
                     stylebytes = "".join([chr(ord(a) | ord(b))
@@ -1665,7 +1665,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         def process(pageAst, stack):
             for node in pageAst.iterFlatNamed():
-                threadstop.testRunning()
+                threadstop.testValidThread()
 
                 styleNo = WikiTxtCtrl._TOKEN_TO_STYLENO.get(node.name)
 
@@ -1729,7 +1729,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def processSpellCheckTokens(self, text, scTokens, threadstop):
         stylebytes = StyleCollector(0, text, self.bytelenSct)
         for node in scTokens:
-            threadstop.testRunning()
+            threadstop.testValidThread()
             stylebytes.bindStyle(node.pos, node.strLength,
                     wx.stc.STC_INDIC2_MASK)
 
@@ -1744,7 +1744,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         foldHeader = False
 
         for node in pageAst:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             if node.name == "heading":
                 while levelStack and (levelStack[-1][0] != "heading" or
@@ -3219,7 +3219,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             callTip = None
             for astNode in astNodes:
                 if astNode.name == "wikiWord":
-                    threadstop.testRunning()
+                    threadstop.testValidThread()
                     wikiWord = wikiDocument.getWikiPageNameForLinkTerm(
                             astNode.wikiWord)
 
@@ -3279,14 +3279,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                 def SetImageTooltip(path):
                                     self.tooltip_image = ImageTooltipPanel(self,
                                             path, maxWidth, maxHeight)
-                                threadstop.testRunning()
+                                threadstop.testValidThread()
                                 callInMainThread(SetImageTooltip, path)
                             else:
                                 callTip = _(u"Not a valid image")
                             break
 
             if callTip:
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 callInMainThread(self.CallTipShow, bytePos, callTip)
 
         except NotCurrentThreadException:

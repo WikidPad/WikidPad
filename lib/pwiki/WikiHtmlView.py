@@ -479,6 +479,15 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self._activateLink(href, tabMode=0)
 
 
+    if isOSX():
+        def GetViewStart(self):
+            result = wx.html.HtmlWindow.GetViewStart(self)
+            if isinstance(result, wx.Point):
+                return (result.x, result.y)
+            else:
+                return result
+
+
     def getIntendedViewStart(self):
         """
         If a deferred scrolling waits for process, this returns the deferred

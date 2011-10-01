@@ -1661,7 +1661,7 @@ class WikiDataManager(MiscEventSourceMixin):
             wikiData = self.getWikiData()
             sarOp.beginWikiSearch(self)
             try:
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 # First search currently cached pages
                 exclusionSet = set()
                 preResultSet = set()
@@ -1683,11 +1683,11 @@ class WikiDataManager(MiscEventSourceMixin):
     
                     exclusionSet.add(k)
     
-                    threadstop.testRunning()
+                    threadstop.testValidThread()
     
                 # Now search database
                 resultSet = self.getWikiData().search(sarOp, exclusionSet)
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 resultSet |= preResultSet
                 if applyOrdering:
                     result = sarOp.applyOrdering(resultSet, self.getCollator())
@@ -1697,23 +1697,23 @@ class WikiDataManager(MiscEventSourceMixin):
             finally:
                 sarOp.endWikiSearch()
     
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return result
         else:
             # Processing index search
-            threadstop.testRunning()
+            threadstop.testValidThread()
             if not self.isSearchIndexEnabled():
                 return []
 
             q = sarOp.getWhooshIndexQuery(self)
             s = self.getSearchIndex().searcher()
-            threadstop.testRunning()
+            threadstop.testValidThread()
             resultList = s.search(q, limit=None)
             
             result = [rd["unifName"][9:] for rd in resultList
                     if rd["unifName"].startswith(u"wikipage/")]
             
-            threadstop.testRunning()
+            threadstop.testValidThread()
             return result
 
 

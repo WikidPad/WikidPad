@@ -89,8 +89,8 @@ class EqnHandler:
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return u"<pre>" + _(u"[Please set path to MimeTeX executable]") + \
-                    "</pre>"
+            return u'<pre>' + _(u'[Please set path to MimeTeX executable]') + \
+                    '</pre>'
 
         # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
         # variable
@@ -121,8 +121,8 @@ class EqnHandler:
         try:
             response = response[(response.index("\n\n") + 2):]
         except ValueError:
-            return u"<pre>" + _(u"[Invalid response from MimeTeX]") + \
-                    "</pre>"
+            return u'<pre>' + _(u'[Invalid response from MimeTeX]') + \
+                    '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)

@@ -27,7 +27,8 @@ from .WindowLayout import setWindowPos, setWindowSize, \
 
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
-from .SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
+from .SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
+        stripSearchString
 
 
 
@@ -190,7 +191,7 @@ class SearchResultListBox(wx.HtmlListBox):
         """
         Called by showFound(), must be called in main thread.
         """
-        if threadstop.isRunning():
+        if threadstop.isValidThread():
             self.SetItemCount(itemCount)
             self.Refresh()
 
@@ -240,7 +241,7 @@ class SearchResultListBox(wx.HtmlListBox):
                         sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
                         try:
                             for w in found:
-                                threadstop.testRunning()
+                                threadstop.testValidThread()
                                 docPage = wikiDocument.getWikiPageNoError(w)
                                 text = docPage.getLiveTextNoTemplate()
                                 if text is None:
@@ -297,7 +298,7 @@ class SearchResultListBox(wx.HtmlListBox):
                         sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
                         try:
                             for w in found:
-                                threadstop.testRunning()
+                                threadstop.testValidThread()
                                 docPage = wikiDocument.getWikiPageNoError(w)
                                 text = docPage.getLiveTextNoTemplate()
                                 if text is None:
@@ -326,9 +327,9 @@ class SearchResultListBox(wx.HtmlListBox):
                             self.foundinfo.append(
                                     _SearchResultItemInfo(w).buildOccurrence(
                                     text, before, after, (-1, -1), -1, 100))
-                    threadstop.testRunning()
+                    threadstop.testValidThread()
                 
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 self.isShowingSearching = False
 #                 callInMainThreadAsync(self.SetItemCount, len(self.foundinfo))
                 callInMainThreadAsync(self._displayFound, len(self.foundinfo),
@@ -695,14 +696,12 @@ class SearchPageDialog(wx.Dialog):
                 newSizerMin.GetWidth(),
                 winCurr.GetHeight() - oldSizerMin.GetHeight() +
                 newSizerMin.GetHeight()))
-        
-
-
 
 
     def _buildSearchReplaceOperation(self):
         sarOp = SearchReplaceOperation()
-        sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
+        sarOp.searchStr = stripSearchString(
+                guiToUni(self.ctrls.cbSearch.GetValue()))
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         sarOp.booleanOp = False
@@ -1268,7 +1267,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         searchType = self.ctrls.rboxSearchType.GetSelection()
         
         sarOp = SearchReplaceOperation()
-        sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
+        sarOp.searchStr = stripSearchString(
+                guiToUni(self.ctrls.cbSearch.GetValue()))
         sarOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
         
         sarOp.indexSearch = 'no' if searchType != Consts.SEARCHTYPE_INDEX \
@@ -2449,7 +2449,7 @@ class FastSearchPopup(wx.Frame):
 
         # TODO Make configurable
         sarOp = SearchReplaceOperation()
-        sarOp.searchStr = searchText
+        sarOp.searchStr = stripSearchString(searchText)
         sarOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
         sarOp.caseSensitive = config.getboolean("main",
                 "fastSearch_caseSensitive")

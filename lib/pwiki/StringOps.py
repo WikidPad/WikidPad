@@ -326,7 +326,7 @@ def loadEntireFile(filename, textMode=False):
 
 def writeEntireFile(filename, content, textMode=False):
     """
-    Write entire file (binary mode).
+    Write entire file.
     content  can either be a bytestring or a tuple or list of bytestrings
     which are then written one by one to the file.
     If textMode is True, content can also be a unistring or sequence 
@@ -343,63 +343,9 @@ def writeEntireFile(filename, content, textMode=False):
     if basePath == "":
         basePath = u"."
 
-#     fd, tempPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(basePath),
-#             text=textMode)
-
-#     try:
     tempPath = TempFileSet.createTempFile(content, suffix=suffix, path=basePath,
             textMode=textMode)
 
-#         try:
-#             if isinstance(content, unicode):
-#                 assert textMode
-#                 content = content.encode("utf-8")
-#                 os.write(fd, BOM_UTF8)
-#                 os.write(fd, content)
-#             elif isinstance(content, str):
-#                 os.write(fd, content)
-#             else:    # content is a sequence
-#                 try:
-#                     iCont = iter(content)
-#         
-#                     firstContent = iCont.next()
-#                     
-#                     unic = False
-#                     if isinstance(firstContent, unicode):
-#                         firstContent = firstContent.encode("utf-8")
-#                         os.write(fd, BOM_UTF8)
-#                         unic = True
-# 
-#                     assert isinstance(firstContent, str)
-#                     os.write(fd, firstContent)
-#     
-#                     while True:
-#                         content = iCont.next()
-#     
-#                         if unic:
-#                             assert isinstance(content, unicode)
-#                             content = content.encode("utf-8")
-#     
-#                         assert isinstance(content, str)
-#                         os.write(fd, content)
-#                 except StopIteration:
-#                     pass
-# 
-#         finally:
-#             os.close(fd)
-# 
-#     except Exception, e:
-#         # Something went wrong -> try to remove temporary file
-#         try:
-#             os.unlink(tempPath)
-#         except:
-#             traceback.print_exc()
-#         
-#         raise e
-#     else:
-
-    # Successful operation so far
-    
     if os.path.exists(filename):
         os.unlink(filename)
 

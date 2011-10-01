@@ -547,17 +547,17 @@ class VersionExplorerPanel(EnhancedListControl):
         """
         try:
 #             sleep(0.3)   # Make configurable?
-#             threadstop.testRunning()
+#             threadstop.testValidThread()
 
             if docPage is not None and not isinstance(docPage, FunctionalPage):
                 versionOverview = docPage.getVersionOverview()
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 self.setVersionOverview(versionOverview)
 
                 Utilities.callInMainThread(self.applyTocList)
                 return
 
-            threadstop.testRunning()
+            threadstop.testValidThread()
             self.setVersionOverview(None)
             self.applyTocList()
 

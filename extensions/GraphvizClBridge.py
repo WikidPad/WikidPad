@@ -103,8 +103,8 @@ class GraphVizBaseHandler:
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return u"<pre>" + _(u"[Please set path to GraphViz executables]") + \
-                    "</pre>"
+            return u'<pre>' + _(u'[Please set path to GraphViz executables]') + \
+                    '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -145,8 +145,8 @@ class GraphVizBaseHandler:
         if errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u"<pre>" + _(u"[%s Error: %s]") % (appname, errResponse) +\
-                     u"</pre>"
+            return u'<pre>' + _(u'[%s Error: %s]') % (appname, errResponse) +\
+                     u'</pre>'
 
 
         # Return appropriate HTML code for the image

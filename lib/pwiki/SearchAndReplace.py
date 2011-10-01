@@ -1,5 +1,7 @@
 import re, traceback
 
+import wx
+
 from WikiExceptions import *
 
 from Serialization import SerializeStream, findXmlElementFlat, \
@@ -1997,10 +1999,14 @@ class SearchReplaceOperation:
 
 
 
-
-
-
-
-
-
+def stripSearchString(searchStr):
+    """
+    Strip leading and trailing spaces from a search string if appropriate
+    option is set.
+    """
+    if wx.GetApp().getGlobalConfig().getboolean("main", "search_stripSpaces",
+            True):
+        return searchStr.strip(u" ")
+    else:
+        return searchStr
 

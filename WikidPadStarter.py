@@ -99,6 +99,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
 
 import wx
 
+# cmore addition
+if (not hasattr(wx, "NO_3D")):
+    wx.NO_3D=0
+
+
 # from pwiki import srePersistent
 # srePersistent.loadCodeCache()
 

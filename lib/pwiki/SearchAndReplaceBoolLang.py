@@ -262,7 +262,7 @@ toSearch.optimize(("regexcombine",)).parseWithTabs()
 def parse(content):
     """
     Parse the  content  written in wiki language  intLanguageName  using
-    formatDetails  and regularly call  threadstop.testRunning()  to
+    formatDetails  and regularly call  threadstop.testValidThread()  to
     raise exception if execution thread is no longer current parsing
     thread.
     """

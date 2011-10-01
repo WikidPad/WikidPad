@@ -300,8 +300,8 @@ class GraphVizBaseHandler:
                 source, insToken.appendices)
 
         if response is not None:
-            return u"<pre>" + (u"[%s]" % response)+ \
-                    "</pre>"
+            return u'<pre>' + (u'[%s]' % response)+ \
+                    '</pre>'
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":

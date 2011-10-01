@@ -1,5 +1,20 @@
 ﻿++ Change Log
 
+Oct. 01, 2011 (2.2beta08)
+
+    * New flag character 'f' for favorites to bring existing frame
+      to front. See [FavoriteWikis]
+    * Option to strip leading and trailing spaces from search strings
+      for convenience.
+      See [OptionsDialog#*Strip leading/trailing spaces*]
+    * Enhancements for Mac OS (thanks to cmore): Support for emacs
+      shortcuts, better search for Enchant library (spell checking),
+      bug fixes
+    * Bug fixed: MacOS: wx.html.HtmlWindow.GetViewStart() returns
+      wx.Point instead of tuple under some circumstances
+
+
+
 Aug. 28, 2011 (2.2beta07)
 
     * Improvements to vi emulation (thanks to Ross)

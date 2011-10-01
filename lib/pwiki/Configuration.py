@@ -690,7 +690,7 @@ GLOBALDEFAULTS = {
 
     # Search options
     ("main", "search_wiki_searchType"): "0",  # Default search type for wiki-wide search
-            # 0: Regex; 1: "Anded" regex; 2: Text as is
+            # 0: Regex; 1: Boolean regex; 2: Text as is; 3: Indexed search
     ("main", "search_wiki_caseSensitive"): "False",  # Wiki-wide search case sensitive?
     ("main", "search_wiki_wholeWord"): "False",  # Wiki-wide search for whole words only?
     ("main", "search_wiki_context_before"): "20", # No. of context characters before
@@ -709,7 +709,8 @@ GLOBALDEFAULTS = {
 
     ("main", "search_dontAllowCancel"): "False", # Iff true a running search can't be canceled
             # (advanced option to cure a problem on Mac OS)
-
+    ("main", "search_stripSpaces"): "True", # Iff True then leading and trailing spaces are
+            # stripped from search text before searching
 
     # Miscellaneous
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing

@@ -330,6 +330,9 @@ Set the time format the version list should use to show the dates. The format ca
 
 ++++ Searching
 
+*Strip leading/trailing spaces*
+If set, leading and trailing spaces are removed from search expressions before they are processed. This may be helpful if you copy and paste a word into a search field 
+
 *Wiki-wide search defaults*
 Set the search options to use for wiki-wide search dialog:
 

@@ -669,7 +669,26 @@ class App(wx.App, MiscEventSourceMixin):
         self.fireMiscEventProps({"removed wiki frame": True,
                 "wiki frame": wikiFrame})
 
+    
+    def findFrameByWikiConfigPath(self, wikiConfigPath):
+        """
+        Find and return a PersonalWikiFrame which currently displays the wiki
+        determined by its  wikiConfigPath. If wiki isn't displayed None is
+        returned. If multiple frames show the wiki one of them is chosen
+        arbitrarily.
+        """
+        from .OsAbstract import samefile
+
+        for frame in self.mainFrameSet:
+            wikiDoc = frame.getWikiDocument()
+            if wikiDoc is None:
+                continue
+            if samefile(wikiDoc.getWikiConfigPath(), wikiConfigPath):
+                return frame
         
+        return None
+
+
     def describeExporters(self, mainControl):
         return reduce(lambda a, b: a+list(b),
                 self.describeExportersApi.describeExporters(mainControl), [])

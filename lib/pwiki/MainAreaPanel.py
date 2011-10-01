@@ -8,17 +8,19 @@ import os, sys, traceback, re
 import wx
 # import wx.xrc as xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown, \
+from .wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown, \
         WindowUpdateLocker
 
-from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
+from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
 from WikiExceptions import *
 
-import SystemInfo
-from StringOps import escapeForIni, pathWordAndAnchorToWikiUrl
+from . import SystemInfo
+from .StringOps import escapeForIni, pathWordAndAnchorToWikiUrl
 
-from DocPagePresenter import BasicDocPagePresenter
+from .SearchAndReplace import stripSearchString
+
+from .DocPagePresenter import BasicDocPagePresenter
 
 import DocPages
 
@@ -379,7 +381,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 if selText:
                     editCtrl = presenter.getSubControl("textedit")
                     editCtrl.incSearchCharStartPos = 0
-                    editCtrl.searchStr = re.escape(selText)
+                    editCtrl.searchStr = re.escape(stripSearchString(selText))
                     editCtrl.executeIncrementalSearch()
             else:
                 presenter.switchSubControl("textedit", gainFocus=True)

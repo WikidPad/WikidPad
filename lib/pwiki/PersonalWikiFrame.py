@@ -1190,6 +1190,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if entry is None:
                 return
 
+            if u"f" in entry.flags:
+                # Try to focus already open frame
+                frame = wx.GetApp().findFrameByWikiConfigPath(entry.value)
+                if frame:
+                    if frame.IsIconized():
+                        frame.Iconize(False)
+                    frame.Raise()
+                    frame.SetFocus()
+                    return
+
             if u"n" in entry.flags:
                 # Open in new frame
                 try:

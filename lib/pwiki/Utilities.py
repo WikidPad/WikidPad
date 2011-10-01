@@ -22,7 +22,7 @@ class BasicThreadStop(object):
     for some reason (e.g. a parsing operation should be stopped if the
     parsed text was changed and the operation on the old text therefore becomes
     useless).
-    During the operation the function isRunning() or testRunning() should be
+    During the operation the function isValidThread() or testValidThread() should be
     called from time to time to check if op. should be stopped.
 
     This class is used for synchronous operations where no thread stop
@@ -30,13 +30,13 @@ class BasicThreadStop(object):
     """
     __slots__ = ()
 
-    def isRunning(self):
+    def isValidThread(self):
         """
         Returns True if operation should continue.
         """
         return True
 
-    def testRunning(self):
+    def testValidThread(self):
         """
         Throws a NotCurrentThreadException if op. should stop, does nothing
         otherwise.
@@ -53,10 +53,10 @@ class FunctionThreadStop(BasicThreadStop):
     def __init__(self, fct):
         self.fct = fct
 
-    def isRunning(self):
+    def isValidThread(self):
         return self.fct()
         
-    def testRunning(self):
+    def testValidThread(self):
         if not self.fct():
             raise NotCurrentThreadException()
 
@@ -78,7 +78,7 @@ class ThreadHolder(BasicThreadStop):
     def setThread(self, thread):
         self.thread = thread
         
-    def testRunning(self):
+    def testValidThread(self):
         """
         Throws NotCurrentThreadException if self.thread is not equal to
         current thread
@@ -86,7 +86,7 @@ class ThreadHolder(BasicThreadStop):
         if threading.currentThread() is not self.thread:
             raise NotCurrentThreadException()
 
-    def isRunning(self):
+    def isValidThread(self):
         """
         Return True if current thread is thread in holder
         """
@@ -136,10 +136,10 @@ class SingleThreadExecutor(BasicThreadStop):
         self.paused = False
         self.currentThreadStop = None
 
-    def isRunning(self):
+    def isValidThread(self):
         return self.deques is not None
         
-    def testRunning(self):
+    def testValidThread(self):
         if self.deques is None:
             raise NotCurrentThreadException()
 
@@ -560,7 +560,6 @@ class _TimeoutRLock(threading._Verbose):
         return self.__owner is threading.currentThread()
 
 
-
 def seqStartsWith(seq, startSeq):
     """
     Returns True iff sequence startSeq is the beginning of sequence seq or
@@ -722,24 +721,6 @@ class IdentityList(list):
                 return i
 
         return -1
-
-
-def filterIdenticalItem(seq, i):
-    """
-    Return a list with the elements of seq minus those for which element[i]
-    is identical to another element[j] which is earlier in the sequence
-    """
-    foundIds = set()
-    result = []
-    
-    for el in seq:
-        if id(el[i]) in foundIds:
-            continue
-        
-        foundIds.add(id(el[i]))
-        result.append(el)
-    
-    return result
 
 
 def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight):

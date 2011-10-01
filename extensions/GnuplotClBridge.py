@@ -88,8 +88,8 @@ class GptHandler:
         
         if self.extAppExe == "":
             # No path to Gnuplot executable -> show message
-            return u"<pre>" + _(u"[Please set path to Gnuplot executable]") +\
-                    u"</pre>"
+            return u'<pre>' + _(u'[Please set path to Gnuplot executable]') +\
+                    u'</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -137,8 +137,8 @@ class GptHandler:
             
         if errResponse != "":
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u"<pre>" + _(u"[Gnuplot error: %s]") % errResponse +\
-                    u"</pre>"
+            return u'<pre>' + _(u'[Gnuplot error: %s]') % errResponse +\
+                    u'</pre>'
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":

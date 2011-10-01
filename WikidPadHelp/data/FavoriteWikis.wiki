@@ -11,6 +11,7 @@ To simply add a wiki, choose "Add wiki" in the "Favorites" menu. In the dialog y
     * a keyboard shortcut (e.g. "Alt-1") if desired
     * the path or wiki URL of the wiki (by default, this field contains the path of the current wiki),
     * if you want to open the wiki in a new window
+    * if you want to bring an already open window with this wiki to front if present
     * if you want to show an icon in toolbar. If so, you can also enter
         * the position in toolbar relative to other favorite icons (up to 9 icons can be there)
         * the name of the icon to show
@@ -26,7 +27,7 @@ Title\tShortcut;Flags;Iconname=Path
 
     * Title is the wiki title shown in "Favorites" menu
     * After \t you can enter the shortcut. If you don't want a shortcut, you can omit the \t as well
-    * Flags can contain an 'n' to show the wiki in a new window and/or a digit to determine icon position in toolbar. Flags can also be empty.
+    * Flags can contain an 'n' to show the wiki in a new window, 'f' to bring already open window to front and/or a digit to determine icon position in toolbar. Flags can also be empty.
     * Iconname is name of the icon
     * Path can be a path or a wiki URL of the wiki to open
 

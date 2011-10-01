@@ -394,6 +394,9 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
             flags = u""
             if self.ctrls.cbOpenInNewWindow.GetValue():
                 flags += u"n"
+                
+            if self.ctrls.cbBringToFront.GetValue():
+                flags += u"f"
             
             if self.ctrls.cbShowInToolbar.GetValue():
                 flags += unicode(self.ctrls.spinIconPosition.GetValue())

@@ -557,7 +557,7 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         startPos = 0
 
         while True:
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             start, end, spWord = langHelper.findNextWordForSpellcheck(text,
                     startPos, docPage)

@@ -239,7 +239,7 @@ class DocStructureCtrl(EnhancedListControl):
                 return
 
             sleep(0.3)   # Make configurable?
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             depth = min(depth, 15)
             depth = max(depth, 1)
@@ -248,7 +248,7 @@ class DocStructureCtrl(EnhancedListControl):
 
             result = []
             for node in pageAst.iterFlatByName("heading"):
-                threadstop.testRunning()
+                threadstop.testValidThread()
                 if node.level > depth:
                     continue
 
@@ -257,12 +257,12 @@ class DocStructureCtrl(EnhancedListControl):
                     title = title[:-1]
                 result.append((node.pos, node.level, title))
 
-            threadstop.testRunning()
+            threadstop.testValidThread()
 
             self.tocList = result
             self.tocListStarts = [r[0] for r in result]
 
-            threadstop.testRunning()
+            threadstop.testValidThread()
             Utilities.callInMainThread(self.applyTocList)
 
         except NotCurrentThreadException:
