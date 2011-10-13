@@ -302,8 +302,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 
-        if config.getboolean("main", "editor_useImeWorkaround", False):
-            wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
+#         if config.getboolean("main", "editor_useImeWorkaround", False):
+#             wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 
@@ -1076,6 +1076,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         use_vi_navigation = self.presenter.getConfig().getboolean("main",
                 "editor_compatibility_ViKeys", False)
 
+        self.Unbind(wx.EVT_CHAR)
         self.Unbind(wx.EVT_KEY_DOWN)
         self.Unbind(wx.EVT_LEFT_UP)
         self.Unbind(wx.EVT_SCROLLWIN)
@@ -1099,7 +1100,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if self.vi is not None:
                 self.vi.TurnOff()
                 self.vi = None
+
+            if self.presenter.getConfig().getboolean("main",
+                    "editor_useImeWorkaround", False):
+                wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
             self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
 
 
     def onChangedConfiguration(self, miscevt):
