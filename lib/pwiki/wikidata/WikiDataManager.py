@@ -788,6 +788,7 @@ class WikiDataManager(MiscEventSourceMixin):
         of the update executor
         """
         if not self.isReadOnlyEffect():
+            self.updateExecutor.prepare()
             self.updateExecutor.clearDeque(1)
             self.updateExecutor.clearDeque(self.UEQUEUE_INDEX)
             if not strToBool(self.getWikiData().getDbSettingsValue(
@@ -1234,8 +1235,6 @@ class WikiDataManager(MiscEventSourceMixin):
                     "syncWikiWordMatchtermsUpToDate", "1")
             
             progresshandler.update(step, _(u"Starting update thread"))
-
-            self.updateExecutor.start()
 
             self.getWikiData().fullyResetMetaDataState()
             self.pushDirtyMetaDataUpdate()

@@ -143,15 +143,19 @@ class SingleThreadExecutor(BasicThreadStop):
         if self.deques is None:
             raise NotCurrentThreadException()
 
+    def prepare(self):
+        with self.dequeCondition:
+            if self.deques is None:
+                self.deques = tuple(collections.deque()
+                        for i in range(self.dequeCount))
+
     def start(self):
         with self.dequeCondition:
             self.paused = False
             if self.thread is not None and self.thread.isAlive():
                 return
 
-            if self.deques is None:
-                self.deques = tuple(collections.deque()
-                        for i in range(self.dequeCount))
+            self.prepare()
 
             self.thread = threading.Thread(target=self._runQueue)
             self.thread.setDaemon(self.daemon)
