@@ -866,21 +866,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if wikiData is not None:
             if wikiData.checkCapability("rebuild") == 1:
+                if wikiData.checkCapability("filePerPage") == 1:
+                    self.addMenuItem(maintenanceMenu,
+                            _(u'Update ext. modif. wiki files'),
+                            _(u'Check for externally modified files and '
+                            u'update cache in background'),
+                            self.OnCmdUpdateExternallyModFiles,
+                            menuID=GUI_ID.CMD_UPDATE_EXTERNALLY_MOD_FILES_WIKI,
+                            updatefct=(self.OnUpdateDisReadOnlyWiki,))
+
                 self.addMenuItem(maintenanceMenu, _(u'&Rebuild Wiki...'),
                         _(u'Rebuild this wiki and its cache completely'),
                         lambda evt: self.rebuildWiki(onlyDirty=False),
                         menuID=GUI_ID.MENU_REBUILD_WIKI,
                         updatefct=(self.OnUpdateDisReadOnlyWiki,))
                 
-#                 if wikiData.checkCapability("filePerPage") == 1:
-#                     self.addMenuItem(maintenanceMenu,
-#                             _(u'Update &externally modified files'),
-#                             _(u'Check for externally modified files and '
-#                             u'update cache in background'),
-#                             self.OnCmdUpdateExternallyModFiles,
-#                             menuID=GUI_ID.CMD_UPDATE_EXTERNALLY_MOD_FILES_WIKI,
-#                             updatefct=self.OnUpdateDisReadOnlyWiki)
-
                 self.addMenuItem(maintenanceMenu, _(u'&Update cache...'),
                         _(u'Update cache where marked as not up to date'),
                         lambda evt: self.rebuildWiki(onlyDirty=True),
@@ -4977,8 +4977,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         # TODO Progresshandler?
-        self.getWikiDocument().checkFileSignatureForAllWikiPageNamesAndMarkDirty()
-        self.getWikiDocument().pushDirtyMetaDataUpdate()
+        self.getWikiDocument().initiateExtWikiFileUpdate()
+        # self.checkFileSignatureForAllWikiPageNamesAndMarkDirty()
+        # self.getWikiDocument().pushDirtyMetaDataUpdate()
 
 
 
