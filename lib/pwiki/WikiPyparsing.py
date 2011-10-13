@@ -3024,9 +3024,6 @@ class MatchFirst(ParseExpression, NecessaryRegexProvider):
                     raise ParseException(instring, loc, "no defined alternatives to match", self)
         else:
             loc, styles = self.regexCombiner.findAll(instring, loc)
-            # If idx is 0, the end expression matched, higher values
-            # matched self.exprs[idx-1]
-            # idx == -1 means nothing found
             
             if len(styles) == 0:
                 raise ParseException(instring, loc, "no defined alternatives to match", self)

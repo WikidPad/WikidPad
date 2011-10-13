@@ -484,7 +484,10 @@ class WikiDataManager(MiscEventSourceMixin):
         self.trashcan = Trashcan.Trashcan(self)
         
         if self.trashcan.isInDatabase():
-            self.trashcan.readOverview()
+            try:
+                self.trashcan.readOverview()
+            except:
+                traceback.print_exc() # TODO: Notify user?
             
         if self.isSearchIndexEnabled() and self.getWikiConfig().getint(
                 "main", "indexSearch_formatNo", 1) != Consts.SEARCHINDEX_FORMAT_NO:
@@ -826,6 +829,7 @@ class WikiDataManager(MiscEventSourceMixin):
         of the update executor
         """
         if not self.isReadOnlyEffect():
+            self.updateExecutor.prepare()
             self.updateExecutor.clearDeque(1)
             self.updateExecutor.clearDeque(self.UEQUEUE_INDEX)
             if not strToBool(self.getWikiData().getDbSettingsValue(
@@ -1275,8 +1279,6 @@ class WikiDataManager(MiscEventSourceMixin):
             
             progresshandler.update(step, _(u"Starting update thread"))
 
-            self.updateExecutor.start()
-
             self.getWikiData().fullyResetMetaDataState()
             self.pushDirtyMetaDataUpdate()
 
@@ -1284,6 +1286,25 @@ class WikiDataManager(MiscEventSourceMixin):
             progresshandler.close()
             self.updateExecutor.start()
 
+
+    def initiateExtWikiFileUpdate(self):
+        """
+        Called to ensure that database is synchronized with external wiki page
+        files (for "Original ..." database backends). This is intended to be run
+        after direct file changes (using external text editor, dropbox, ...)
+        """
+        if self.getWikiData().checkCapability("filePerPage") != 1:
+            # Nothing to do
+            return
+            
+        self.updateExecutor.end(hardEnd=True)
+        try:
+            print "--initiateExtWikiFileUpdate7"
+            self.getWikiData().refreshWikiPageLinkTerms(deleteFully=True)
+            self.checkFileSignatureForAllWikiPageNamesAndMarkDirty()
+            self.pushDirtyMetaDataUpdate()
+        finally:
+            self.updateExecutor.start()
 
 
     def rebuildWiki(self, progresshandler, onlyDirty):
