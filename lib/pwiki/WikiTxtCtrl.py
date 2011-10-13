@@ -1086,7 +1086,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 self.vi = ViHandler(self)
 
             
-            #self.Bind(wx.EVT_CHAR, self.vi.OnViKeyDown)
+            self.Bind(wx.EVT_CHAR, self.vi.OnChar)
             self.Bind(wx.EVT_KEY_DOWN, self.vi.OnViKeyDown)
             self.Bind(wx.EVT_LEFT_UP, self.vi.OnLeftMouseUp)
             self.Bind(wx.EVT_SCROLLWIN, self.vi.OnScroll)
@@ -3451,30 +3451,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
         else:
             return u'\n'
 
-    def GetLastVisibleLine(self):
-        """
-        Returns line number of the first visible line in viewport
-        """
-        return self.GetFirstVisibleLine() + self.LinesOnScreen() - 1
-
-    def GetMiddleVisibleLine(self):
-        """
-        Returns line number of the middle visible line in viewport
-        """
-        # TODO: Fix this for long lines
-        fl = self.GetFirstVisibleLine()
-        ll = self.GetLastVisibleLine()
-
-        lines = ll - fl
-
-        mid = fl + lines // 2
-
-        #if self.LinesOnScreen() < self.GetLineCount():
-        #    # This may return a float with .5  Really wanted? (MB)
-        #    mid = (fl + (self.LinesOnScreen() / 2))
-        #else:
-        #    mid = (fl + (self.GetLineCount() / 2))
-        return mid
 
     # TODO
 #     def setMouseCursor(self):
@@ -3867,6 +3843,12 @@ class ViHandler(ViHelper):
         wx.CallAfter(self.SetMode, ViHelper.NORMAL)
         wx.CallAfter(self.Setup)
 
+
+        self.key_map = {}
+        for varName in vars(wx):
+            if varName.startswith("WXK_"):
+                self.key_map[getattr(wx, varName)] = varName
+
         self.text_object_map = {
                     "w" : (False, self.SelectInWord),
                     "W" : (False, self.SelectInWORD),
@@ -4009,19 +3991,19 @@ class ViHandler(ViHelper):
     (103, 107) : (1, (self.MoveCaretUp, None), 0), # gk
     (103, 106) : (1, (self.MoveCaretDown, None), 0), # gj
     # Arrow keys
-    (65361,) : (1, (self.MoveCaretLeft, None), 0), # left 
-    (65362,) : (1, (self.MoveCaretUp, None), 0), # up
-    (65363,) : (1, (self.MoveCaretRight, None), 0), # right
-    (65364,) : (1, (self.MoveCaretDown, None), 0), # down
+    (wx.WXK_LEFT,) : (1, (self.MoveCaretLeft, None), 0), # left 
+    (wx.WXK_UP,) : (1, (self.MoveCaretUp, None), 0), # up
+    (wx.WXK_RIGHT,) : (1, (self.MoveCaretRight, None), 0), # right
+    (wx.WXK_DOWN,) : (1, (self.MoveCaretDown, None), 0), # down
 
-    (65293,) : (1, (self.MoveCaretDownAndIndent, None), 0), # enter
-    (65293,) : (1, (self.MoveCaretDownAndIndent, None), ), # return
+    (wx.WXK_RETURN,) : (1, (self.MoveCaretDownAndIndent, None), 0), # enter
+    (wx.WXK_NUMPAD_ENTER,) : (1, (self.MoveCaretDownAndIndent, None), 0), # return
 
     # Line movement
     (36,)    : (1, (self.GotoLineEnd, False), 0), # $
-    (65367,) : (1, (self.GotoLineEnd, False), 0), # home
+    (wx.WXK_HOME,) : (1, (self.GotoLineEnd, False), 0), # home
     (48,)    : (1, (self.GotoLineStart, None), 0), # 0
-    (65360,) : (1, (self.GotoLineStart, None), 0), # end 
+    (wx.WXK_END,) : (1, (self.GotoLineStart, None), 0), # end 
     (45,)    : (1, (self.GotoLineIndentPreviousLine, None), 0), # -
     (43,)    : (1, (self.GotoLineIndentNextLine, None), 0), # +
     (94,)    : (1, (self.GotoLineIndent, None), 0), # ^
@@ -4064,7 +4046,7 @@ class ViHandler(ViHelper):
     (("Ctrl", 114),)    : (0, (self.Redo, None), 0), # <c-r>
 
     (("Ctrl", 105),)    : (1, (self.GotoNextJump, None), 0), # <c-i>
-    (65289,)            : (1, (self.GotoNextJump, None), 0), # Tab
+    (wx.WXK_TAB,)            : (1, (self.GotoNextJump, None), 0), # Tab
     (("Ctrl", 111),)    : (1, (self.GotoPreviousJump, None), 0), # <c-o>
 
     # These two are motions
@@ -4128,8 +4110,8 @@ class ViHandler(ViHelper):
     # TODO: think of suitable commands for the following
     #(103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
     (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
-    (65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
-    (65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
+    (wx.WXK_F1,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
+    (wx.WXK_F2,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
             }
             }
 
@@ -4142,11 +4124,16 @@ class ViHandler(ViHelper):
         # Shortcuts available in insert mode (need to be repeatable by ".",
         # i.e. must work with EmulateKeypresses)
         self.keys[1] = {
-        (("Ctrl", 64),)  : (0, (self.InsertPreviousText, None), 0), # Ctrl-@
-        (("Ctrl", 97),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
-                                                            None), 0), # Ctrl-a
+        # TODO:
+        #(("Ctrl", 64),)  : (0, (self.InsertPreviousText, None), 0), # Ctrl-@
+        #(("Ctrl", 97),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
+        #                                                    None), 0), # Ctrl-a
         (("Ctrl", 110),)  : (0, (self.Autocomplete, True), 0), # Ctrl-n
         (("Ctrl", 112),)  : (0, (self.Autocomplete, False), 0), # Ctrl-p
+
+        # Unlike vim we these are case sensitive
+        (("Ctrl", 119),)  : (0, (self.DeleteBackword, False), 0), # Ctrl-w
+        (("Ctrl", 87),)  : (0, (self.DeleteBackword, True), 0), # Ctrl-W
         }
 
         # Rather than rewrite all the keys for other modes it is easier just
@@ -4174,10 +4161,10 @@ class ViHandler(ViHelper):
                 (89,) : (0, (self.Yank, True), 0), # Y
                 (60,) : (0, (self.Indent, {"forward":False, "visual":True}), 0), # <
                 (62,) : (0, (self.Indent, {"forward":True, "visual":True}), 0), # >
-                (117,) : (0, (self.LowerCase, None), 0), # u
-                (85,) : (0, (self.UpperCase, None), 0), # U
-                (103, 117) : (1, self.LowerCase, 0), # gu
-                (103, 85) : (1, self.UpperCase, 0), # gU
+                (117,) : (0, (self.SelectionToLowerCase, None), 0), # u
+                (85,) : (0, (self.SelectionToUpperCase, None), 0), # U
+                (103, 117) : (0, (self.SelectionToLowerCase, None), 0), # gu
+                (103, 85) : (0, (self.SelectionToUpperCase, None), 0), # gU
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
@@ -4220,7 +4207,7 @@ class ViHandler(ViHelper):
         self._undo_start_position = None
         self._undo_positions = []
 
- 
+
     def Setup(self):
         self.AddJumpPosition(self.ctrl.GetCurrentPos())
 
@@ -4284,8 +4271,8 @@ class ViHandler(ViHelper):
     # actions
 
     # Need to overide Undo and Redo to goto positions
-    def BeginUndo(self, use_start_pos=False):
-        if self._undo_state == 0:
+    def BeginUndo(self, use_start_pos=False, force=False):
+        if self._undo_state == 0 or force:
             self.ctrl.BeginUndoAction()
             #self._undo_start_positions = \
             #            self._undo_start_positions[:self._undo_pos + 1]
@@ -4297,7 +4284,11 @@ class ViHandler(ViHelper):
                     self._undo_start_position = self.ctrl.GetSelectionStart()
                 else:
                     self._undo_start_position = self.ctrl.GetCurrentPos()
-        self._undo_state += 1
+
+        if force:
+            self._undo_state = 1
+        else:
+            self._undo_state += 1
 
 
     def EndUndo(self, force=False):
@@ -4334,27 +4325,48 @@ class ViHandler(ViHelper):
 
     # TODO: Remember caret position
     def GotoFirstVisibleLine(self):
-        line = self.ctrl.GetFirstVisibleLine()
-        if line < self.ctrl.GetCurrentLine():
-            return
+        # GetFirstVisibleLine does not take into account word wrapping
+        line = self.GetFirstVisibleLine()
+        # Correct for word wrapping
+        pos = self.ctrl.GetLineIndentPosition(line)
+        text = self.ctrl.GetTextRange(0, pos)
+
         self.ctrl.GotoLine(line)
 
     def GotoLastVisibleLine(self):
-        line = self.ctrl.GetLastVisibleLine()
+        line = self.GetLastVisibleLine()
         if line > self.ctrl.GetCurrentLine():
             return
         self.ctrl.GotoLine(line)
 
-    def OnMouseScroll(self, evt):
-        current_line = self.ctrl.GetCurrentLine()
-        top_line = self.ctrl.GetFirstVisibleLine() + 1
-        bottom_line = self.ctrl.GetLastVisibleLine()
 
-        if current_line < top_line:
-            wx.CallAfter(self.GotoFirstVisibleLine)
-        elif current_line > bottom_line:
-            wx.CallAfter(self.GotoLastVisibleLine)
-            #offset = evt.GetWheelRotation() / 40
+    def OnMouseScroll(self, evt):
+        # Not the best solution possible but until GetFirstVisibleLine
+        # is fixed appears to be the best.
+        current_line = self.ctrl.GetCurrentLine()
+        if evt.GetWheelRotation() < 0:
+            if current_line <= self.GetFirstVisibleLine():
+                
+                for i in range(evt.GetLinesPerAction()):
+                    #self.ctrl.LineDown()
+                    self.ctrl.LineScrollDown()
+                return
+        else:
+            if current_line >= self.GetLastVisibleLine()-evt.GetLinesPerAction()-1:
+                
+                for i in range(evt.GetLinesPerAction()):
+                    #self.ctrl.LineUp()
+                    self.ctrl.LineScrollUp()
+                return
+        #if self.ctrl.GetLineVisible(current_line):
+        #    top_line = self.GetFirstVisibleLine() + 1
+        #    bottom_line = self.GetLastVisibleLine()
+
+        #    if current_line < top_line:
+        #        wx.CallAfter(self.GotoFirstVisibleLine)
+        #    elif current_line > bottom_line:
+        #        wx.CallAfter(self.GotoLastVisibleLine)
+        #    #offset = evt.GetWheelRotation() / 40
             #print offset
             #if offset < 0:
             #        func = self.ctrl.LineDown
@@ -4374,9 +4386,10 @@ class ViHandler(ViHelper):
         viewport movements
         """
         # NOTE: may be inefficient?
+        #       perhaps use EVT_SCROLLWIN_LINEUP 
         current_line = self.ctrl.GetCurrentLine()
-        top_line = self.ctrl.GetFirstVisibleLine()+1
-        bottom_line = self.ctrl.GetLastVisibleLine()-1
+        top_line = self.GetFirstVisibleLine()+1
+        bottom_line = self.GetLastVisibleLine()-1
 
         if current_line < top_line:
             self.MoveCaretToLine(top_line)
@@ -4428,104 +4441,151 @@ class ViHandler(ViHelper):
         evt.Skip()
         self.ctrl.Bind(wx.EVT_KEY_DOWN, None)
 
+
+    def OnChar(self, evt):
+	"""
+	Handles EVT_CHAR events necessary for windows
+	"""
+        m = self.mode
+
+        key = evt.GetKeyCode()
+
+	# OnChar seems to throw different keycodes if ctrl is pressed.
+	# a = 1, b = 2 ... z = 26
+	# will not handle different cases
+        if evt.ControlDown():
+	    key = key + 96
+            key = ("Ctrl", key)
+
+	if not self.HandleKey(key, m):
+	    evt.Skip()
+
+
     def OnViKeyDown(self, evt):
         """
         Handle keypresses when in Vi mode
 
         """
 
-
-        # The following code is mostly duplicated from OnKeyDown (should be
-        # rewritten to avoid duplication)
+        m = self.mode
         key = evt.GetKeyCode()
-        # TODO Check all modifiers
-        if not evt.ControlDown() and not evt.ShiftDown():  
-            if key == wx.WXK_TAB:
-                if self.ctrl.pageType == u"form":
-                    if not self.ctrl._goToNextFormField():
-                        self.ctrl.presenter.getMainControl().showStatusMessage(
-                                _(u"No more fields in this 'form' page"), -1)
-                    return
-                evt.Skip()
-            elif key == wx.WXK_RETURN and not self.ctrl.AutoCompActive():
-                text = self.ctrl.GetText()
-                wikiDocument = self.ctrl.presenter.getWikiDocument()
-                bytePos = self.ctrl.GetCurrentPos()
-                lineStartBytePos = self.ctrl.PositionFromLine(
-                                        self.ctrl.LineFromPosition(bytePos))
 
-                lineStartCharPos = len(self.ctrl.GetTextRange(0, 
-                                                        lineStartBytePos))
-                charPos = lineStartCharPos + len(self.ctrl.GetTextRange(
-                                                lineStartBytePos, bytePos))
-
-                autoUnbullet = self.ctrl.presenter.getConfig().getboolean("main",
-                        "editor_autoUnbullets", False)
-
-                settings = {
-                        "autoUnbullet": autoUnbullet,
-                        "autoBullets": self.ctrl.autoBullets,
-                        "autoIndent": self.ctrl.autoIndent
-                        }
-
-                if self.ctrl.wikiLanguageHelper.handleNewLineBeforeEditor(
-                        self.ctrl, text, charPos, lineStartCharPos, 
-                        wikiDocument, settings):
+        if m == ViHelper.INSERT:
+            # The following code is mostly duplicated from OnKeyDown (should be
+            # rewritten to avoid duplication)
+            # TODO Check all modifiers
+            if not evt.ControlDown() and not evt.ShiftDown():  
+                if key == wx.WXK_TAB:
+                    if self.ctrl.pageType == u"form":
+                        if not self.ctrl._goToNextFormField():
+                            self.ctrl.presenter.getMainControl().showStatusMessage(
+                                    _(u"No more fields in this 'form' page"), -1)
+                        return
                     evt.Skip()
-                    return
-                # Hack to maintain consistency when pressing return
-                # on an empty bullet
-                elif bytePos != self.ctrl.GetCurrentPos():
-                    return
+                elif key == wx.WXK_RETURN and not self.ctrl.AutoCompActive():
+                    text = self.ctrl.GetText()
+                    wikiDocument = self.ctrl.presenter.getWikiDocument()
+                    bytePos = self.ctrl.GetCurrentPos()
+                    lineStartBytePos = self.ctrl.PositionFromLine(
+                                            self.ctrl.LineFromPosition(bytePos))
 
-        # NOTE: need to check cross platform compat
+                    lineStartCharPos = len(self.ctrl.GetTextRange(0, 
+                                                            lineStartBytePos))
+                    charPos = lineStartCharPos + len(self.ctrl.GetTextRange(
+                                                    lineStartBytePos, bytePos))
 
-        key = evt.GetRawKeyCode()
+                    autoUnbullet = self.ctrl.presenter.getConfig().getboolean("main",
+                            "editor_autoUnbullets", False)
+
+                    settings = {
+                            "autoUnbullet": autoUnbullet,
+                            "autoBullets": self.ctrl.autoBullets,
+                            "autoIndent": self.ctrl.autoIndent
+                            }
+
+                    if self.ctrl.wikiLanguageHelper.handleNewLineBeforeEditor(
+                            self.ctrl, text, charPos, lineStartCharPos, 
+                            wikiDocument, settings):
+                        evt.Skip()
+                        return
+                    # Hack to maintain consistency when pressing return
+                    # on an empty bullet
+                    elif bytePos != self.ctrl.GetCurrentPos():
+                        return
 
         # Pass modifier keys on
-        if key in (65505, 65507, 65513):
+        if key in (wx.WXK_CONTROL, wx.WXK_ALT, wx.WXK_SHIFT):
             return
 
-        accP = getAccelPairFromKeyDown(evt)
+        # On linux we can just use GetRawKeyCode() and work directly with
+	# its return. On windows we have to skip this event (for keys which 
+	# will produce a char event to wait for EVT_CHAR (self.OnChar()) to 
+	# get the correct key translation
+        if key not in self.key_map:
+            key = evt.GetRawKeyCode()
+        else:
+	    # Keys present in the key_map should be consitent across
+	    # all platforms and can be handled directly.
+            if evt.ControlDown():
+                key = ("Ctrl", key)
+	    if not self.HandleKey(key, m):
+		evt.Skip()
+	    return
 
-        # TODO: Replace with override keys? break and run function
-        # Escape, Ctrl-[, Ctrl-C
-        # In VIM Ctrl-C triggers *InsertLeave*
-        if key == 65307 or accP == (2, 91) or accP == (2, 99): 
-            # TODO: Move into ViHandler?
-            self.SetMode(ViHandler.NORMAL)
-            self.FlushBuffers()
-            return
+	
+    	# What about os-x?
+	if not isLinux():
+	    # Manual fix for some windows problems may be necessary
+	    # e.g. Ctrl-[ won't work
+	    evt.Skip()
+	    return
 
+        if evt.ControlDown():
+            key = ("Ctrl", key)
+
+	if not self.HandleKey(key, m):
+	    evt.Skip()
+
+
+    def HandleKey(self, key, m):
 
         # There should be a better way to monitor for selection changed
         if self.HasSelection():
             self.EnterVisualMode()
 
-        #control_mask = False
-        try:
-            if 2 in accP[0]: # Ctrl
-            #    control_mask = True
-                key = ("Ctrl", key)
-        except TypeError:
-            if accP[0] == 2:
-                key = ("Ctrl", key)
 
-        m = self.mode
+        # TODO: Replace with override keys? break and run function
+        # Escape, Ctrl-[, Ctrl-C
+        # In VIM Ctrl-C triggers *InsertLeave*
+        if key == wx.WXK_ESCAPE or key == ("Ctrl", 91) or key == ("Ctrl", 99): 
+            # TODO: Move into ViHandler?
+            self.SetMode(ViHandler.NORMAL)
+            self.FlushBuffers()
+            return True
+
+        # Registers
+        if m != 1 and key == 34 and self._acceptable_keys is None: # "
+            self.register.select_register = True
+            return True
+        elif self.register.select_register:
+            self.register.SelectRegister(key)
+            self.register.select_register = False
+            return True
+
 
         if m in [1, 3]: # Insert mode, replace mode, 
             # Store each keyevent
-            # NOTE: this may be terribly inefficient (i'm not sure)
+            # NOTE:
             #       !!may need to seperate insert and replace modes!!
             #       what about autocomplete?
             # It would be possbile to just store the text that is inserted
             # however then actions would be ignored
             self.insert_action.append(key)
-            if key in [65362, 65362]: # Arrow up / arrow down
+            if key in [wx.WXK_UP, wx.WXK_DOWN]: # Arrow up / arrow down
                 self.insert_action = []
             if not self.RunKeyChain((key,), m):
-                evt.Skip()
-            return
+                return False
+            return True
 
 
 
@@ -4535,10 +4595,10 @@ class ViHandler(ViHelper):
                                 "*" not in self._acceptable_keys:
             if 48 <= key <= 57: # Normal
                 if self.SetNumber(key-48):
-                    return
+                    return True
             elif 65456 <= key <= 65465: # Numpad
                 if self.SetNumber(key-65456):
-                    return
+                    return True
 
         self.SetCount()
 
@@ -4550,21 +4610,21 @@ class ViHandler(ViHelper):
             temp.append("*")
             if tuple(self._motion) in self.motion_keys[m]:
                 self.RunKeyChain(tuple(self.key_inputs), m)
-                return
+                return True
                 #self._motion = []
             elif tuple(temp) in self.motion_keys[m]:
                 self._motion[-1] = "*"
                 self._motion_wildcard.append(key)
                 self.RunKeyChain(tuple(self.key_inputs), m)
                 #self._motion = []
-                return
+                return True
                 
             elif tuple(self._motion) in self.motion_key_mods[m]:
                 #self._acceptable_keys = self.motion_key_mods[m][tuple(self._motion)]
-                return
+                return True
 
             self.FlushBuffers()
-            return
+            return True
 
 
         if self._acceptable_keys is not None:
@@ -4577,17 +4637,17 @@ class ViHandler(ViHelper):
                 self._acceptable_keys = None
                 self.RunKeyChain(tuple(self.key_inputs), m)
 
-                return
+                return True
             elif "motion" in self._acceptable_keys:
                 self._acceptable_keys = None
                 self._motion.append(key)
                 if (key,) in self.motion_keys[m]:
                     self.key_inputs.append("motion")
                     self.RunKeyChain(tuple(self.key_inputs), m)
-                    return
+                    return True
                 if (key,) in self.motion_key_mods[m]:
                     self.key_inputs.append("motion")
-                    return
+                    return True
 
 
         self.key_inputs.append(key)
@@ -4596,9 +4656,11 @@ class ViHandler(ViHelper):
         key_chain = tuple(self.key_inputs)
 
         if self.RunKeyChain(key_chain, m):
-            return
+            return True
 
         self.FlushBuffers()
+
+	return True
             
     def TurnOff(self):
         self._enableMenuShortcuts(True)
@@ -4622,19 +4684,19 @@ class ViHandler(ViHelper):
             
             for i in actions:
                 # TODO: handle modifier keys, e.g. ctrl
-                if i == 65361:
+                if i == wx.WXK_LEFT:
                     self.ctrl.CharLeft()
-                elif i == 65363:
+                elif i == wx.WXK_RIGHT:
                     self.ctrl.CharRight()
-                elif i == 65288:
+                elif i == wx.WXK_BACK:
                     self.ctrl.DeleteBackNotLine()
-                elif i in [65535, 65439]:
+                elif i in [wx.WXK_DELETE]:# 65439????
                     self.ctrl.CharRight()
                     self.ctrl.DeleteBack()
-                elif i in [65293, 65421]: # enter, return
+                elif i in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]: # enter, return
                     self.ctrl.InsertText(self.ctrl.GetCurrentPos(), eol)
                     self.ctrl.CharRight()
-                elif i == 65289: # tab
+                elif i == wx.WXK_TAB: # tab
                     self.ctrl.InsertText(self.ctrl.GetCurrentPos(), "\t")
                     self.ctrl.CharRight()
                 else:
@@ -4697,22 +4759,62 @@ class ViHandler(ViHelper):
             text = self.ctrl.GetTextRange(0, self.ctrl.GetCurrentPos())
             word_list.extend(re.findall(ur"\b{0}.*?\b".format(word), text, re.U))
 
+
+            # Remove duplicates
+            words = set()
+            words.add(word)
+
+            unique_word_list = [i for i in word_list if i not in words and not words.add(i)]
             # No completions found
-            if len(word_list) <= 1:
+            if len(unique_word_list) < 1:
                 if self.HasSelection():
                     self.ctrl.CharRight()
                 self.visualBell("RED")
                 return
 
-            # Remove duplicates
-            words = set()
-            words.add(word)
-            word_list_prepped = "\x01".join([i for i in word_list if i not in words and not words.add(i)])
+            word_list_prepped = "\x01".join(unique_word_list)
 
             if self.HasSelection():
                 self.ctrl.CharRight()
             self.ctrl.AutoCompShow(word_length, word_list_prepped)
             self.ctrl.Bind(wx.EVT_KEY_DOWN, self.OnAutocompleteKeyDown)
+
+    def GetFirstVisibleLine(self):
+        return self.ctrl.GetFirstVisibleLine()
+        #line = self.ctrl.GetFirstVisibleLine()
+        #pos = self.ctrl.GetLineIdentPosition(line)
+        #text = self.ctrl.GetTextRange(0, pos)
+        #move = 0
+        #print line, self.ctrl.GetLineVisible(line)
+        #while self.ctrl.GetLineVisible(line - 1) and line - 1 > 0:
+        #    line -= 1
+        #
+        #return line
+
+    def GetLastVisibleLine(self):
+        """
+        Returns line number of the first visible line in viewport
+        """
+        return self.GetFirstVisibleLine() + self.ctrl.LinesOnScreen() - 1
+
+    def GetMiddleVisibleLine(self):
+        """
+        Returns line number of the middle visible line in viewport
+        """
+        # TODO: Fix this for long lines
+        fl = self.GetFirstVisibleLine()
+        ll = self.GetLastVisibleLine()
+
+        lines = ll - fl
+
+        mid = fl + lines // 2
+
+        #if self.LinesOnScreen() < self.GetLineCount():
+        #    # This may return a float with .5  Really wanted? (MB)
+        #    mid = (fl + (self.LinesOnScreen() / 2))
+        #else:
+        #    mid = (fl + (self.GetLineCount() / 2))
+        return mid
 
         
     def GotoSelectionStart(self):
@@ -4731,13 +4833,13 @@ class ViHandler(ViHelper):
             self.SelectATextObject(char_to_change)
             if self.HasSelection():
                 pos = self.ExtendSelectionIfRequired()
-                self.BeginUndo()
+                self.BeginUndo(force=True)
                 self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText()[1:-1])
                 self.ctrl.CharLeft()
                 self.SelectSelection()
                 self.SurroundSelection(keycodes[1])
                 self.ctrl.GotoPos(pos)
-                self.EndUndo()
+                self.EndUndo(force=True)
                 self.visualBell("GREEN")
                 return
         self.visualBell("RED")
@@ -5163,6 +5265,16 @@ class ViHandler(ViHelper):
             
         self.ctrl.ReplaceSelection(" ".join(new_text))
 
+    def DeleteBackword(self, word=False):
+        if word:
+            move_word = self.MoveCaretBackWORD
+        else:
+            move_word = self.MoveCaretBackWord
+        self.StartSelection()
+        move_word()
+        self.SelectSelection()
+        self.DeleteSelection(yank=False)
+
     def DeleteSelectionAndInsert(self):
         self.DeleteSelection()
         self.Insert()
@@ -5237,12 +5349,13 @@ class ViHandler(ViHelper):
             self.ctrl.CharRightExtend()
         return start
 
-    def DeleteSelection(self):
+    def DeleteSelection(self, yank=True):
         """Yank selection and delete it"""
         #if self.mode == ViHelper.VISUAL:
         #    start = self.ExtendSelectionIfRequired()
         self.BeginUndo()
-        self.YankSelection()
+        if yank:
+            self.YankSelection()
         self.ctrl.Clear()
         #self.ctrl.GotoPos(start)
         self.EndUndo()
@@ -5314,11 +5427,19 @@ class ViHandler(ViHelper):
         self.ctrl.ReplaceSelection(text.swapcase())
         self.EndUndo()
 
-    def UpperCase(self):
+    def SelectionToUpperCase(self):
+        self.BeginUndo()
+        self.ExtendSelectionIfRequired()
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().upper())
+        self.RemoveSelection()
+        self.EndUndo()
 
-    def LowerCase(self):
+    def SelectionToLowerCase(self):
+        self.BeginUndo()
+        self.ExtendSelectionIfRequired()
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().lower())
+        self.RemoveSelection()
+        self.EndUndo()
 
     def Indent(self, forward=True, repeat=1, visual=False):
         if visual == True:
@@ -5362,14 +5483,14 @@ class ViHandler(ViHelper):
     def GetViewportPosition(self):
         lines = self.ctrl.LinesOnScreen() - 1
         current = self.ctrl.GetCurrentLine()
-        first_visible_line = self.ctrl.GetFirstVisibleLine()
+        first_visible_line = self.GetFirstVisibleLine()
 
         n = current - first_visible_line
 
         return n / float(lines)
 
     def _ScrollViewportByLines(self, n):
-        first_visible_line = self.ctrl.GetFirstVisibleLine()
+        first_visible_line = self.GetFirstVisibleLine()
         lines_on_screen = self.ctrl.LinesOnScreen()
 
         line = max(0, first_visible_line + n)
@@ -5764,7 +5885,10 @@ class ViHandler(ViHelper):
         Contains some custom code to allow repeating
         """
         # TODO: visual indication
-        char = unichr(keycode)
+	try:
+	    char = unichr(keycode)
+	except:
+	    return
 
         # If in visual mode use the seletion we have (not the count)
         if self.mode == ViHelper.VISUAL:
@@ -5850,7 +5974,8 @@ class ViHandler(ViHelper):
 
         text = self.ctrl.GetTextRange(start, end) + self.ctrl.GetEOLChar()
 
-        self.ctrl.Copy(text)
+        #self.ctrl.Copy(text)
+        self.register.SetCurrentRegister(text)
 
     def YankSelection(self, lines=False):
         """Copy the current selection to the clipboard"""
@@ -5865,7 +5990,8 @@ class ViHandler(ViHelper):
             self.ctrl.SetSelection(start, end)
             self.ctrl.CharRightExtend()
 
-        self.ctrl.Copy()
+        #self.ctrl.Copy()
+        self.register.SetCurrentRegister(self.ctrl.GetSelectedText())
 
     def Yank(self, lines=False):
         self.SelectSelection()
@@ -5876,7 +6002,12 @@ class ViHandler(ViHelper):
 
     def Put(self, before, count=None):
         count = count if count is not None else self.count
-        text = getTextFromClipboard()
+        #text = getTextFromClipboard()
+        text = self.register.GetCurrentRegister()
+
+        if text is None:
+            self.visualBell("RED")
+            return
 
         self.BeginUndo(True)
 
@@ -6458,13 +6589,13 @@ class ViHandler(ViHelper):
             self.ctrl.GotoLine(self.ctrl.GetLineCount())
 
     def GotoViewportTop(self):
-        self.GotoLineIndent(self.ctrl.GetFirstVisibleLine())
+        self.GotoLineIndent(self.GetFirstVisibleLine())
         
     def GotoViewportMiddle(self):
-        self.GotoLineIndent(self.ctrl.GetMiddleVisibleLine())
+        self.GotoLineIndent(self.GetMiddleVisibleLine())
 
     def GotoViewportBottom(self):
-        self.GotoLineIndent(self.ctrl.GetLastVisibleLine())
+        self.GotoLineIndent(self.GetLastVisibleLine())
 
     def ScrollViewportTop(self):
         self._PositionViewport(0)

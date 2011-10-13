@@ -1,6 +1,6 @@
 import wx, wx.stc
 import SystemInfo
-from wxHelper import GUI_ID, getAccelPairFromKeyDown 
+from wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
 from collections import defaultdict
 
 #TODO:  Multiple registers
@@ -57,6 +57,8 @@ class ViHelper():
         # The following dictionary holds the menu shortcuts that have been
         # disabled upon entering ViMode
         self.menuShortCuts = {}
+
+        self.register = ViRegister(self.ctrl)
 
     def SetCount(self):
         self.count = 1
@@ -320,6 +322,8 @@ class ViHelper():
         self.key_number_modifier = []
         self.updateViStatus()
 
+        self.register.SelectRegister(None)
+
     def SetSelMode(self, mode):
         self.selection_mode = mode
 
@@ -377,14 +381,23 @@ class ViHelper():
             for i in menu_items:
                 menu_item = self.menu_bar.FindItemById(i)
                 accel = menu_item.GetAccel()
-                if accel is not None and accel.ToString() in self.viKeyAccels:
-                    label = menu_item.GetItemLabel()
-                    self.menuShortCuts[i] = (label)
-                    # Removing the end part of the label is enough to disable the
-                    # accelerator. This is used instead of SetAccel() so as to
-                    # preserve menu accelerators.
-                    # NOTE: doesn't seem to override ctrl-n!
-                    menu_item.SetText(label.split("\t")[0]+"\tNone")
+		if accel is not None:
+		    try:
+			if accel.ToString() in self.viKeyAccels:
+			    label = menu_item.GetItemLabel()
+			    self.menuShortCuts[i] = (label)
+			    # Removing the end part of the label is enough to disable the
+			    # accelerator. This is used instead of SetAccel() so as to
+			    # preserve menu accelerators.
+			    # NOTE: doesn't seem to override ctrl-n!
+			    menu_item.SetText(label.split("\t")[0]+"\tNone")
+		    except:
+			# Key errors appear in windows! (probably due to
+			# unicode support??).
+			if unichr(accel.GetKeyCode()) in self.viKeyAccels:
+			    label = menu_item.GetItemLabel()
+			    self.menuShortCuts[i] = (label)
+			    menu_item.SetText(label.split("\t")[0]+"\tNone")
 
     #def _enableMenuShortcuts(self, enable):
     #    if (enable and len(self.menuShortCuts) < 1) or \
@@ -486,9 +499,11 @@ class ViHelper():
 
     def StartSearch(self):
         # TODO: customise the search to make it more vim-like
+        #       allow starting search backwards
         text = self.ctrl.GetSelectedText()
         text = text.split("\n", 1)[0]
         text = text[:30]
+
         self.ctrl.startIncrementalSearch(text)
 
     def GoForwardInHistory(self):
@@ -854,3 +869,61 @@ class ViHintDialog(wx.Frame):
         self.Close()
 
  
+# TODO:numbered registers
+#      special registers
+class ViRegister():
+    def __init__(self, ctrl):
+        self.ctrl = ctrl
+
+        self.select_register = False
+        self.current_reg = None
+
+        self.alpha = """
+                        abcdefghijklmnopqrstuvwxyz
+                        ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                     """
+        self.special = '"+01.'
+        self.registers = {}
+
+        for i in self.alpha:
+            self.registers[i] = None
+
+        for i in self.special:
+            self.registers[i] = None
+
+        self.registers['"'] = u""
+
+    def SelectRegister(self, key_code):
+        if key_code is None:
+            self.current_reg = None
+            return
+
+        reg = unichr(key_code)
+        if reg in self.registers:
+            self.current_reg = reg
+            return True
+        else:
+            self.current_reg = None
+            return False
+
+    def SetCurrentRegister(self, value):
+        self.registers['"'] = value
+        if self.current_reg is None:
+            pass
+        elif self.current_reg in self.alpha:
+            self.registers[self.current_reg] = value
+        elif self.current_reg == "+":
+            self.ctrl.Copy()
+        self.current_reg = None
+
+    def GetCurrentRegister(self):
+        if self.current_reg == "+":
+            text = getTextFromClipboard()
+        elif self.current_reg is None:
+            text = self.registers['"']
+        elif self.current_reg in self.registers:
+            text = self.registers[self.current_reg]
+        else: # should never occur
+            return
+        self.current_reg = None
+        return text
