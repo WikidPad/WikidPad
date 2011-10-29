@@ -1081,6 +1081,23 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
+    def getDefinedWikiPageNamesStartingWith(self, thisStr):
+        """
+        Get the names of all wiki pages in the db starting with  thisStr
+        Function must work for read-only wiki.
+        """
+        try:
+            thisStr = sqlite.escapeForGlob(thisStr)
+
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwords where word glob (? || '*')", 
+                    (thisStr,))
+
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
     def isDefinedWikiPageName(self, word):
         try:
             return bool(self.connWrap.execSqlQuerySingleItem(

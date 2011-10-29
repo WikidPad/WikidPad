@@ -1,5 +1,14 @@
 ﻿++ Wiki Maintenance
 
+++ Update ext. modif. wiki files
+
+Update externally modified wiki files (for the "Original" database backends only).
+
+Checks if wiki page files were modified outside of WikidPad, marks them dirty in this case and rebuilds them in background. Useful if you modify page files e.g. with a text editor or if you synchronize multiple copies of your wiki (without syncing the overview database) by means of version control or e.g. Dropbox.
+
+A file is recognized as modified by change of modification timestamp or size (both is recorded for each file in the overview database).
+
+
 ++ Rebuilding wiki
 
 In menu "Wiki"->"Maintenance"->"Rebuild Wiki".

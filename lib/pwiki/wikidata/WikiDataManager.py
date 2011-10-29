@@ -1451,7 +1451,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def getWikiWordSubpages(self, wikiWord):
-        return self.getWikiData().getWikiPageLinkTermsStartingWith(
+        return self.getWikiData().getDefinedWikiPageNamesStartingWith(
                 wikiWord + u"/")
 
 
@@ -1625,12 +1625,19 @@ class WikiDataManager(MiscEventSourceMixin):
         # But first update the match terms which need synchronous updating
         page.refreshSyncUpdateMatchTerms()
 
+        self.getWikiData().setMetaDataState(toWikiWord,
+                Consts.WIKIWORDMETADATA_STATE_DIRTY)
+
         content = page.getLiveText()
         if prevTitle is not None and content.startswith(prevTitle):
             # Replace previous title with new one
             content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
                     u"\n" + content[len(prevTitle):]
             page.replaceLiveText(content)
+
+        page.initiateUpdate()
+
+
 #             page.update(content)
 
 

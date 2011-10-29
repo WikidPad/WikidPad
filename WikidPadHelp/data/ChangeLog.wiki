@@ -1,5 +1,20 @@
 ﻿++ Change Log
 
+Oct. 29, 2011 (2.2beta09)
+
+    * Maintenance option to check external wiki files for
+      modification (for "original" backends).
+      See [WikiMaintenance#++ Update ext. modif. wiki files]
+    * Vi emulation improvements (thanks to Ross):
+        * Initial support for multiple clipboard registers in vi emulation
+        * Add support for ViEmulation on windows (for editor)
+
+    * Bug fixed: Failure on startup with invalid but existing trashcan overview
+    * Bug fixed: Background rebuild didn't work sometimes
+    * Bug fixed: Renaming all subpages failed if a subpage is an alias
+
+
+
 Oct. 01, 2011 (2.2beta08)
 
     * New flag character 'f' for favorites to bring existing frame
