@@ -1511,7 +1511,7 @@ msgid "As Full Search"
 msgstr "Как полный поиск"
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2367
-#: lib\pwiki\WikiHtmlView.py:714
+#: lib\pwiki\WikiHtmlView.py:723
 msgid "Activate New Tab"
 msgstr "Открыть в новой вкладке"
 
@@ -1527,17 +1527,17 @@ msgstr "Показать пустые дни"
 msgid "Sort dates ascending"
 msgstr "Сортировать даты по возрастанию"
 
-#: WikidPadStarter.py:203
+#: WikidPadStarter.py:208
 msgid "Error starting WikidPad"
 msgstr "Ошибка при старте WikidPad"
 
-#: WikidPadStarter.py:204 lib\pwiki\PersonalWikiFrame.py:5191
+#: WikidPadStarter.py:209 lib\pwiki\PersonalWikiFrame.py:5191
 #: lib\pwiki\SearchAndReplaceDialogs.py:724
 #: lib\pwiki\SearchAndReplaceDialogs.py:1008
 msgid "Error!"
 msgstr "Ошибка!"
 
-#: WikidPadStarter.py:211 lib\pwiki\MptImporterGui.py:201
+#: WikidPadStarter.py:216 lib\pwiki\MptImporterGui.py:201
 msgid "Error"
 msgstr "Ошибка"
 
@@ -4366,11 +4366,11 @@ msgstr "Как вкладку"
 msgid "Search: %s"
 msgstr "Найти: %s"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2366 lib\pwiki\WikiHtmlView.py:713
+#: lib\pwiki\SearchAndReplaceDialogs.py:2366 lib\pwiki\WikiHtmlView.py:722
 msgid "Activate"
 msgstr "Открыть новую вкладку"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2368 lib\pwiki\WikiHtmlView.py:715
+#: lib\pwiki\SearchAndReplaceDialogs.py:2368 lib\pwiki\WikiHtmlView.py:724
 msgid "Activate New Tab Backgrd."
 msgstr "Открыть новую вкладку на заднем плане"
 
@@ -4407,11 +4407,11 @@ msgstr "Выберите вики для Избранного"
 msgid "Multiple words rename to same word"
 msgstr "Несколько слов переименовываются в одно и то же слово"
 
-#: lib\pwiki\WikiHtmlView.py:600 lib\pwiki\WikiTxtCtrl.py:2125
+#: lib\pwiki\WikiHtmlView.py:609 lib\pwiki\WikiTxtCtrl.py:2125
 msgid "Folder does not exist"
 msgstr "Папка не существует"
 
-#: lib\pwiki\WikiHtmlView.py:692 lib\pwiki\WikiHtmlViewIE.py:486
+#: lib\pwiki\WikiHtmlView.py:701 lib\pwiki\WikiHtmlViewIE.py:486
 msgid "Link to page: %s"
 msgstr "Ссылка на страницу: %s"
 

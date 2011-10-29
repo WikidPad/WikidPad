@@ -1177,6 +1177,20 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
+    def getDefinedWikiPageNamesStartingWith(self, thisStr):
+        """
+        Get the names of all wiki pages in the db starting with  thisStr
+        Function must work for read-only wiki.
+        """
+        try:
+            words = self.getAllDefinedWikiPageNames()
+            return [w for w in words if w.startswith(thisStr)]
+
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
     def isDefinedWikiPage(self, word):
         try:
             return bool(self.connWrap.execSqlQuerySingleItem(

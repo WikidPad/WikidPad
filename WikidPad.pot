@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-10-01 16:55\n"
+"POT-Creation-Date: 2011-10-28 22:45\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4530,7 +4530,7 @@ msgid "Database exists already and is currently in use"
 msgstr ""
 
 #: lib\pwiki\wikidata\WikiDataManager.py:69
-#: lib\pwiki\wikidata\WikiDataManager.py:2038
+#: lib\pwiki\wikidata\WikiDataManager.py:2045
 msgid "Data handler %s not available"
 msgstr ""
 
@@ -4567,32 +4567,32 @@ msgstr ""
 msgid "Required wiki language handler \"%s\" not available"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:915
+#: lib\pwiki\wikidata\WikiDataManager.py:916
 msgid "Word '%s' not in wiki"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1220
-#: lib\pwiki\wikidata\WikiDataManager.py:1291
+#: lib\pwiki\wikidata\WikiDataManager.py:1221
+#: lib\pwiki\wikidata\WikiDataManager.py:1290
 msgid "Update basic link info"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1236
+#: lib\pwiki\wikidata\WikiDataManager.py:1237
 msgid "Starting update thread"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1311
+#: lib\pwiki\wikidata\WikiDataManager.py:1310
 msgid "Update attributes of %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1333
+#: lib\pwiki\wikidata\WikiDataManager.py:1332
 msgid "Update syntax of %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1354
+#: lib\pwiki\wikidata\WikiDataManager.py:1353
 msgid "Update index of %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1374
+#: lib\pwiki\wikidata\WikiDataManager.py:1373
 msgid "Final cleanup"
 msgstr ""
 

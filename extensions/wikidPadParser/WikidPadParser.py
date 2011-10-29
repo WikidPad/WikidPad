@@ -605,7 +605,7 @@ WikiWordPathPartPAT = ur"(?!\.\.)[^\\/\[\]\|\000-\037=:;#!]+"
 WikiPageNamePAT = WikiWordPathPartPAT + "(?:/" + WikiWordPathPartPAT + ")*"
 
 # Begins with dotted path parts which mean to go upward in subpage path
-WikiWordDottedPathPAT = ur"\.\.(/\.\.)*(?:/" + WikiWordPathPartPAT + ")*"
+WikiWordDottedPathPAT = ur"\.\.(?:/\.\.)*(?:/" + WikiWordPathPartPAT + ")*"
 WikiWordNonDottedPathPAT = ur"/{0,2}" + WikiPageNamePAT
 
 WikiWordNccPAT = WikiWordDottedPathPAT + ur"|" + WikiWordNonDottedPathPAT
