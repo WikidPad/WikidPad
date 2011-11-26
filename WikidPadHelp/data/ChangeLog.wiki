@@ -1,10 +1,17 @@
 ﻿++ Change Log
 
+Nov. 27, 2011 (2.1final)
+
+    * Small changes in help wiki
+
+
+
 Oct. 29, 2011 (2.1rc09)
 
     * Bug fixed: Background rebuild didn't work sometimes
     * Bug fixed: Renaming all subpages failed if a subpage is
       an alias
+
 
 
 Oct. 01, 2011 (2.1rc08)

@@ -2,7 +2,7 @@
 
 The original KeyBindings are for Windows.
 
-Some of them doesn't work on Linux or Apple OSX because they are reserved by the Operating System or the Desktop Environment itself. Or due to other reasons.
+Some of them don't work on Linux or Apple OSX because they are reserved by the Operating System or the Desktop Environment itself. Or due to other reasons.
 
 Additionally the Windows' "Ctrl" key is existing on Mac OSX as well. 
 At least it seems so. But in reality one has to use the "Command" key instead.

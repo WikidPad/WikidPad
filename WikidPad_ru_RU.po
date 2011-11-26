@@ -4703,7 +4703,7 @@ msgid "Database exists already and is currently in use"
 msgstr "База данных уже существует и сейчас используется"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:69
-#: lib\pwiki\wikidata\WikiDataManager.py:2038
+#: lib\pwiki\wikidata\WikiDataManager.py:2045
 msgid "Data handler %s not available"
 msgstr "Обработчик данных %s недоступен"
 
@@ -4740,32 +4740,32 @@ msgstr "Ошибка при инициализации обработчика \"
 msgid "Required wiki language handler \"%s\" not available"
 msgstr "Требуемый обработчик синтаксиса \"%s\" не доступен"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:915
+#: lib\pwiki\wikidata\WikiDataManager.py:916
 msgid "Word '%s' not in wiki"
 msgstr "Слова '%s' нет в вики"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1220
-#: lib\pwiki\wikidata\WikiDataManager.py:1291
+#: lib\pwiki\wikidata\WikiDataManager.py:1221
+#: lib\pwiki\wikidata\WikiDataManager.py:1290
 msgid "Update basic link info"
 msgstr "Обновление осн.информации о связях"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1236
+#: lib\pwiki\wikidata\WikiDataManager.py:1237
 msgid "Starting update thread"
 msgstr "Запуск процесса обновления"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1311
+#: lib\pwiki\wikidata\WikiDataManager.py:1310
 msgid "Update attributes of %s"
 msgstr "Обновление атрибутов: %s"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1333
+#: lib\pwiki\wikidata\WikiDataManager.py:1332
 msgid "Update syntax of %s"
 msgstr "Обновление синтаксиса: %s"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1354
+#: lib\pwiki\wikidata\WikiDataManager.py:1353
 msgid "Update index of %s"
 msgstr "Обновление индекса: %s"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1374
+#: lib\pwiki\wikidata\WikiDataManager.py:1373
 msgid "Final cleanup"
 msgstr "Окончательно прибираемся"
 
