@@ -5,7 +5,7 @@ from __future__ import with_statement
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
-import os, os.path, sys, gc, traceback, string, re
+import os, os.path, sys, gc, traceback, string, re, collections
 from os.path import *
 import time
 
@@ -135,6 +135,9 @@ def _buildChainedUpdateEventFct(chain):
 #     return evtFct
 
 
+_StatusBarStackEntry = collections.namedtuple("_StatusBarStackEntry",
+        ("msg, duration, key"))
+
 
 class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
     HOTKEY_ID_HIDESHOW_BYAPP = 1
@@ -204,6 +207,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.spellChkDlg = None  # Stores spell check dialog, if present
         self.printer = None  # Stores Printer object (initialized on demand)
         self.continuousExporter = None   # Exporter-derived object if continuous export is in effect
+        self.statusBarStack = []  # Internal stack with statusbar information
         
         self.mainAreaPanel = None
         self.mainmenu = None
@@ -5167,26 +5171,66 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             raise InternalError(u"Unexpected result from MessageBox in stdDialog()")
 
 
-    def showStatusMessage(self, msg, duration=0):
+    def showStatusMessage(self, msg, duration=0, key=None):
         """
         If duration > 0 the message is removed after  duration  milliseconds.
         If duration == 0 show forever (until new message overwrites)
         If duration == -1 show for a default length (ten seconds currently)
+        
+        key -- if given you can remove message(s) with this key by using
+                self.dropStatusMessage(key). Messages with other keys
+                remain
         """
         self.statusBarTimer.Stop()
-        self.statusBar.SetStatusText(msg, 0)
         
-        if duration == 0:
+        if duration == 0 and key == None:
+            self.statusBar.SetStatusText(msg, 0)
             return
         
         if duration == -1:
             duration = 10000
+            
+        self.statusBarStack.append(_StatusBarStackEntry(msg, duration, key))
+        self._updateStatusBarByStack()
 
-        self.statusBarTimer.Start(duration, True)
+
+    def dropStatusMessageByKey(self, key):
+        if len(self.statusBarStack) == 0:
+            return
+        
+        update = self.statusBarStack[-1].key == key
+        
+        self.statusBarStack = [e for e in self.statusBarStack if e.key != key]
+        
+        if update:
+            self._updateStatusBarByStack()
+
+
+    def _updateStatusBarByStack(self):
+        self.statusBarTimer.Stop()
+
+        if len(self.statusBarStack) == 0:
+            self.statusBar.SetStatusText(u"", 0)
+            return
+            
+        # Just in case: Restrict stack size
+        if len(self.statusBarStack) > 50:
+            self.statusBarStack = self.statusBarStack[(len(self.statusBarStack) - 50):]
+
+        msg, duration, key = self.statusBarStack[-1]
+
+        self.statusBar.SetStatusText(msg, 0)
+        if duration != 0:
+            self.statusBarTimer.Start(duration, True)
 
 
     def OnStatusBarTimer(self, evt):
-        self.statusBar.SetStatusText(u"", 0)
+        if len(self.statusBarStack) == 0:
+            self.statusBar.SetStatusText(u"", 0)
+            return
+
+        del self.statusBarStack[-1]
+        self._updateStatusBarByStack()
 
 
     def displayMessage(self, title, str):

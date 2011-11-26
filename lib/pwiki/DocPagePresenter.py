@@ -198,7 +198,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 "docPage": page,
                 "oldDocPage": oldPage})
         # p2.update({"loaded current page": True})
-        self.fireMiscEventProps(p2)        
+        self.fireMiscEventProps(p2)
+        page.informVisited()
 
 
     def openWikiPage(self, wikiWord, addToHistory=True,
@@ -366,11 +367,11 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         wx.GetApp().getMiscEvent().addListener(self)
 
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
-                lambda evt: self.viewHistory())
+                lambda evt: self.viewPageHistory())
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_UP,
-                lambda evt: self.viewHistory(-1))
+                lambda evt: self.viewPageHistory(-1))
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN,
-                lambda evt: self.viewHistory(1))
+                lambda evt: self.viewPageHistory(1))
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_BACK,
                 lambda evt: self.pageHistory.goInHistory(-1))
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
@@ -441,12 +442,12 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
                 wx.Panel.SetFocus(self)
 
 
-    def viewHistory(self, posDelta=0):
+    def viewPageHistory(self, posDelta=0):
         if not self.getMainControl().requireReadAccess():
             return
 
         try:
-            hist = self.pageHistory.getHistoryList()
+            hist = self.pageHistory.getHrHistoryList()
             histpos = self.pageHistory.getPosition()
         except (IOError, OSError, DbAccessError), e:
             self.getMainControl().lostAccess(e)

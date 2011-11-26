@@ -633,6 +633,9 @@ class App(wx.App, MiscEventSourceMixin):
                     "Error", style = wx.OK)
 
 
+    def getMainFrameSet(self):
+        return self.mainFrameSet
+
     def startPersonalWikiFrame(self, clAction):
         from PersonalWikiFrame import PersonalWikiFrame
 

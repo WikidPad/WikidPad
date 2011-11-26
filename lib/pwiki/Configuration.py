@@ -685,7 +685,10 @@ GLOBALDEFAULTS = {
     ("main", "timeline_sortDateAscending"): u"True", # If True the newer days are downward in the list, otherwise upward
 
     ("main", "versioning_dateFormat"): u"%Y %m %d",  # Time format to show dates in the versioning view
+    ("main", "wikiWideHistory_dateFormat"): u"%x %I:%M %p",  # Time format to show "visited" time in wiki-wide history
 
+    ("main", "wikiWideHistory_columnWidths"): u"100,100", # Width of "page name" and
+            # "visited" column in wiki-wide history panel
 
 
     # Search options
@@ -817,6 +820,10 @@ WIKIDEFAULTS = {
 
     ("main", "versioning_completeSteps"): u"10",  # How many versions before next version is saved complete
             # instead of reverse differential? 0: Always revdiff, 1: Always complete, 2: Every second v. is complete ...
+
+    ("main", "tabHistory_maxEntries"): u"25",  # Maximum number of entries in the history for each tab
+    ("main", "wikiWideHistory_maxEntries"): u"100",  # Maximum number of entries in the wiki-wide history
+
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical

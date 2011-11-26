@@ -327,6 +327,9 @@ This option can also be set in the context menu of the timeline.
 *Versioning: Date format*
 Set the time format the version list should use to show the dates. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
 
+*Wiki-wide history: Date format*
+Set date format for the wiki-wide history list.
+
 
 ++++ Searching
 
@@ -545,8 +548,9 @@ If you came to a not yet created page through a titled link (e.g. [WikiWord| Thi
 *Headings as aliases: Up to heading depth*
 All headings with a level less or equal this number are shown in the "Open Wiki Word" dialog. You can select them to come to the wiki page they are on. If value is 0, no headings are processed. After changing this value, you may have to rebuild the wiki to see an effect.
 
+++++ Chronological
 
-++++ Versioning
++++++ Versioning
 
 *Where to store*
 Set where version information should be stored, either in the main "Database" files or as "Separate files" which creates one file for each version to save and additionally one file for each wiki page which has versions, so "Database" is the recommended option.
@@ -561,6 +565,17 @@ This means if one of these versions is damaged and therefore incorrect, this ver
 So you can set that versions are stored as complete from time to time. If you e.g. set this value to 10 (the default) each tenth version is stored completely. If you set it to 1, each version is complete, 0 creates only reverse difference versions.
 
 Regardless of this setting a version is always saved as complete if the reverse difference data would be larger than the complete data.
+
++++++ Tab history
+
+*Max. entries*
+Maximum number of history items to record for each tab.
+
+
++++++ Wiki-wide history
+
+*Max. entries*
+Maximum number of history items to record for wiki-wide history.
 
 
 ++++ Wiki language

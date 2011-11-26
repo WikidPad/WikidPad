@@ -6,12 +6,12 @@ You can use the tree to navigate your wikiwords.  Or you can use the
 "view parents" and "view children" feature.
 
 To view the parents of the current page, the pages that link to this
-page, either enter "CTRL-UP" or select "Wiki Words/View Parents"
+page, either enter "CTRL-UP" or select "Navigate"->"Go to Parent"
 from the menu bar.
 
 To view the children of the current page, the pages that this page
-links to, either enter "CTRL-DOWN" or select "Wiki Words/View
-Children" from the menu bar.
+links to, either enter "CTRL-DOWN" or select "Navigate"->"List Children"
+from the menu bar.
 
 When editing a piece of text you can follow a link in a couple
 of different ways.

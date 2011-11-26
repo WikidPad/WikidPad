@@ -16,7 +16,7 @@ wikidpad = Target(
 
     # what to build
     script = 'WikidPad.py',
-    icon_resources = [(0, 'icons/pwiki.ico')]
+    icon_resources = [(0, 'icons/pwiki.ico'), (1, 'icons/pwiki.ico')]
 )
 
 

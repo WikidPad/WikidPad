@@ -39,6 +39,9 @@ def bytelenSct_mbcs(us):
     return len(StringOps.mbcsEnc(us)[0])
 
 
+_WORD_DIVIDER = re.compile(ur"(\b[\w']+)",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+
 
 # TODO: Handle editing and rename/delete of baseDocPage
 class InlineDiffControl(SearchableScintillaControl):
@@ -156,7 +159,7 @@ class InlineDiffControl(SearchableScintillaControl):
         self.setStyles(faces)
 
 
-        self._calcProcTokens(fromText, toText)
+        self._calcProcTokensCharWise(fromText, toText)
         text = self._buildViewText()
         self._calcViewStylebytes(text)
 
@@ -178,7 +181,8 @@ class InlineDiffControl(SearchableScintillaControl):
                 self.fromVerNo, toVerNo)
 
 
-    def _calcProcTokens(self, fromText, toText):
+
+    def _calcProcTokensCharWise(self, fromText, toText):
         sm = difflib.SequenceMatcher(None, fromText, toText)
         ops = sm.get_opcodes()
 
@@ -209,6 +213,75 @@ class InlineDiffControl(SearchableScintillaControl):
                 node = TerminalNode(fromText[i1:i2], charPos, "equal")
                 procList.append(node)
                 charPos += i2 - i1
+
+        self.procTokens = NonTerminalNode(procList, 2, "diff")
+
+
+    def _divideToWords(unself, text):
+        divided = _WORD_DIVIDER.split(text)
+        if len(divided) == 0:
+            return [], []
+        
+        if divided[0] == u"":
+            del divided[0]
+            if len(divided) == 0:
+                return [], []
+        
+        if divided[-1] == u"":
+            del divided[-1]
+            if len(divided) == 0:
+                return [], []
+        
+        posIdx = [None] * (len(divided) + 1)    # len(divided)   # 
+        pos = 0
+        
+        for i, s in enumerate(divided):
+            posIdx[i] = pos
+            pos += len(s)
+            
+        posIdx[-1] = pos
+
+        return divided, posIdx
+
+
+    def _calcProcTokensWordWise(self, fromText, toText):
+        fromDivided, fromPosIdx = self._divideToWords(fromText)
+        toDivided, toPosIdx = self._divideToWords(toText)
+        
+        sm = difflib.SequenceMatcher(None, fromDivided, toDivided)
+        ops = sm.get_opcodes()
+
+        procList = []
+        charPos = 0
+        for tag, i1, i2, j1, j2 in ops:
+            if tag == "replace":
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                node = TerminalNode(procText, charPos, "delete")
+                procList.append(node)
+                charPos += len(procText)
+
+                toPosIdx[j1]
+                toPosIdx[j2]
+                toText[toPosIdx[j1]:toPosIdx[j2]]
+
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                node = TerminalNode(procText, charPos, "insert")
+                procList.append(node)
+                charPos += len(procText)
+            elif tag == "delete":
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                node = TerminalNode(procText, charPos, "delete")
+                procList.append(node)
+                charPos += len(procText)
+            elif tag == "insert":
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                node = TerminalNode(procText, charPos, "insert")
+                procList.append(node)
+                charPos += len(procText)
+            elif tag == "equal":
+                node = TerminalNode(fromText[fromPosIdx[i1]:fromPosIdx[i2]], charPos, "equal")
+                procList.append(node)
+                charPos += fromPosIdx[i2] - fromPosIdx[i1]
 
         self.procTokens = NonTerminalNode(procList, 2, "diff")
 

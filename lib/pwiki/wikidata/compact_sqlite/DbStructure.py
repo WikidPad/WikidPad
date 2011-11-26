@@ -1458,7 +1458,7 @@ create the "wordnormcase" column content. A "-" means the column contains
 invalid data.
 
 
-++ 1.9final to 2.0alpha1 (formatver=2):
+++ 1.9final to 2.0alpha1 (formatver=8?):
     
     Table "search_views" removed (taken over by "datablocks")
     
@@ -1523,7 +1523,7 @@ invalid data.
         value: arbitrary, default object for this field in table
 
 
-++ 2.0 to 2.1alpha1 (formatver=9):
+++ 2.0 to 2.1alpha1 (formatver=9?):
     
     Table "todos" modified:
         "todo" column replaced by "key" and "value" columns

@@ -216,7 +216,8 @@ class DocPage(object, MiscEventSourceMixin):
         Called to inform the page that it was visited and should set
         the "visited" entry in the database to current time.
         """
-        pass
+        self.fireMiscEventProps({"visited doc page": True})
+
 
     def getWikiLanguageName(self):
         """
@@ -1247,6 +1248,8 @@ class WikiPage(AbstractWikiPage):
             ts = wikiData.getTimestamps(word)
             ts = ts[:2] + (time.time(),) + ts[3:]
             wikiData.setTimestamps(word, ts)
+            
+        super(WikiPage, self).informVisited()
 
 
     def _changeHeadingForTemplate(self, content):

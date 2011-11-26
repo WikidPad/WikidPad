@@ -6,7 +6,15 @@ For example:
 
     * Put your cursor at the end of this line and press enter.
 
-The start a numbered bulleted list type an indented number followed by a period at the beginning of the line. For example:
+
+To start a numbered list use # instead of the asterisk (switch to preview to see the numbers):
+
+    # Put your cursor at the end of this line and press enter.
+
+        # Subnumber 1
+        # Subnumber 2
+
+You can also type an indented number followed by a period at the beginning of the line instead, but this is deprecated. For example:
 
     1. Put your cursor at the end of this line and press enter.
 
@@ -38,7 +46,7 @@ If you want to reduce indentation, press SHIFT-TAB instead.
 
 +++ Caution
 
-Be sure to indent your list, otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.
+Be sure to indent your list, otherwise it is only interpreted as plain text.
 
 Example (switch to preview to see the problem):
 
@@ -47,4 +55,3 @@ Example (switch to preview to see the problem):
 * of list
 
 
-After the list.

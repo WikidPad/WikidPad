@@ -2,6 +2,7 @@
 data_dir = data
 
 [main]
+wikiwidehistory_maxentries = 100
 footnotes_as_wikiwords = False
 versioning_storagelocation = 0
 last_wiki_word = WikidPadHelp
@@ -26,6 +27,7 @@ indexsearch_enabled = False
 wiki_lasttabssubctrls = textedit
 template_pagenamesre = ^template/
 tree_expandednodes_descriptorpathes_main = 
+tabhistory_maxentries = 25
 tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True
 further_wiki_words = 

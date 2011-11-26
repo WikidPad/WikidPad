@@ -2067,6 +2067,53 @@
         <option>0</option>
         <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Wiki-wide history</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Date format:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfWikiWideHistoryDateFormat"/>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectWikiWideHistoryDateFormat">
+              <label>...</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageSearching">
@@ -3080,15 +3127,30 @@
       </object>
     </object>
   </object>
-  <object class="wxPanel" name="OptionsPageCwVersioning">
+  <object class="wxPanel" name="OptionsPageCwChronological">
     <object class="wxGridBagSizer">
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Versioning</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <cellpos>0,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
       <object class="sizeritem">
         <object class="wxStaticText">
           <label>Where to store:</label>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
-        <cellpos>0,0</cellpos>
+        <cellpos>1,0</cellpos>
       </object>
       <object class="sizeritem">
         <object class="wxChoice" name="chVersioningStorageLocation">
@@ -3101,7 +3163,7 @@
         <option>1</option>
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
-        <cellpos>0,1</cellpos>
+        <cellpos>1,1</cellpos>
       </object>
       <growablecols>1</growablecols>
       <object class="sizeritem">
@@ -3110,14 +3172,14 @@
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
-        <cellpos>1,0</cellpos>
+        <cellpos>2,0</cellpos>
       </object>
       <object class="sizeritem">
         <object class="wxTextCtrl" name="tfVersioningCompleteSteps"/>
         <option>1</option>
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
-        <cellpos>1,1</cellpos>
+        <cellpos>2,1</cellpos>
       </object>
       <object class="sizeritem">
         <object class="wxStaticText">
@@ -3126,8 +3188,120 @@
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
-        <cellpos>2,0</cellpos>
+        <cellpos>3,0</cellpos>
         <cellspan>1,2</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxVERTICAL</orient>
+          <object class="spacer">
+            <size>0,0</size>
+            <option>1</option>
+            <flag>wxEXPAND</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticLine"/>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>4,0</cellpos>
+            <cellspan>1,2</cellspan>
+          </object>
+          <object class="spacer">
+            <size>0,0</size>
+            <option>1</option>
+            <flag>wxEXPAND</flag>
+          </object>
+        </object>
+        <flag>wxEXPAND</flag>
+        <cellpos>4,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Tab history</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <cellpos>5,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>Max. entries:</label>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <cellpos>6,0</cellpos>
+      </object>
+      <object class="sizeritem">
+        <object class="wxTextCtrl" name="tfTabHistoryMaxEntries"/>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>6,1</cellpos>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxVERTICAL</orient>
+          <object class="spacer">
+            <size>0,0</size>
+            <option>1</option>
+            <flag>wxEXPAND</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticLine"/>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>4,0</cellpos>
+            <cellspan>1,2</cellspan>
+          </object>
+          <object class="spacer">
+            <size>0,0</size>
+            <option>1</option>
+            <flag>wxEXPAND</flag>
+          </object>
+        </object>
+        <flag>wxEXPAND</flag>
+        <cellpos>7,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Wiki-wide history</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <cellpos>8,0</cellpos>
+        <cellspan>1,2</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>Max. entries:</label>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <cellpos>9,0</cellpos>
+      </object>
+      <object class="sizeritem">
+        <object class="wxTextCtrl" name="tfWikiWideHistoryMaxEntries"/>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>9,1</cellpos>
       </object>
     </object>
   </object>

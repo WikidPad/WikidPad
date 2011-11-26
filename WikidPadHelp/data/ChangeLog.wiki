@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+Nov. 27, 2011 (2.2beta10)
+
+    * Wiki-wide history. See [ChronViewWindow#+++ Wiki-wide history]
+    * Page history now also records functional pages
+
+
+
 Oct. 29, 2011 (2.2beta09)
 
     * Maintenance option to check external wiki files for

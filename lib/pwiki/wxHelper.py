@@ -1161,6 +1161,31 @@ class EnhancedListControl(wx.ListCtrl):
     def autosizeColumn(self, col):
         # Call function below
         autosizeColumn(self, col)
+        
+    def getConfigStringForColWidths(self):
+        result = []
+        for i in xrange(self.GetColumnCount()):
+            result.append(unicode(self.GetColumnWidth(i)))
+        
+        return u",".join(result)
+    
+    def setColWidthsByConfigString(self, cfgString):
+        if cfgString is None:
+            return
+
+        cfgParts = cfgString.split(u",")
+        if len(cfgParts) != self.GetColumnCount():
+            return
+            
+        try:
+            cfgParts = [int(p) for p in cfgParts]
+        except ValueError:
+            return
+
+        with WindowUpdateLocker(self):
+            for i in xrange(self.GetColumnCount()):
+                self.SetColumnWidth(i, cfgParts[i])
+
 
 
 

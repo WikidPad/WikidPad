@@ -149,7 +149,8 @@ class VersionOverview(MiscEventSourceMixin):
 
     def readOverviewFromBytes(self, content):
         """
-        Read overview from bytestring content. Needed for handling imports
+        Read overview from bytestring content. Needed to handle multi-page text
+        imports.
         """
         if content is None:
             self.versionEntries = []

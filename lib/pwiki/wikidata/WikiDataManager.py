@@ -23,6 +23,8 @@ from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
 from ..DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 # from ..timeView.Versioning import VersionOverview
 
+from ..timeView.WikiWideHistory import WikiWideHistory
+
 from .. import AttributeHandling
 
 from ..SearchAndReplace import SearchReplaceOperation
@@ -406,6 +408,8 @@ class WikiDataManager(MiscEventSourceMixin):
         
         self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
+        self.wikiWideHistory = WikiWideHistory(self)
+        self.wikiWideHistory.readOverview()
 
         self.wikiName = wikiName
         self.dataDir = dataDir
@@ -581,6 +585,9 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.trashcan.writeOverview()
                 self.trashcan.close()
                 self.trashcan = None
+                
+            self.wikiWideHistory.writeOverview()
+            self.wikiWideHistory.close()
 
             # Invalidate all cached pages to prevent yet running threads from
             # using them
@@ -643,6 +650,9 @@ class WikiDataManager(MiscEventSourceMixin):
     def getTrashcan(self):
         return self.trashcan
         
+    def getWikiWideHistory(self):
+        return self.wikiWideHistory
+
     def getWikiDefaultWikiLanguage(self):
         """
         Returns the internal name of the default wiki language of this wiki.
@@ -1299,7 +1309,6 @@ class WikiDataManager(MiscEventSourceMixin):
             
         self.updateExecutor.end(hardEnd=True)
         try:
-            print "--initiateExtWikiFileUpdate7"
             self.getWikiData().refreshWikiPageLinkTerms(deleteFully=True)
             self.checkFileSignatureForAllWikiPageNamesAndMarkDirty()
             self.pushDirtyMetaDataUpdate()
@@ -2240,6 +2249,12 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs["funcPage"] = miscevt.getSource()
 
                 self.fireMiscEventProps(attrs)
+            elif miscevt.has_key("visited doc page"):
+                attrs = miscevt.getProps().copy()
+                attrs["docPage"] = miscevt.getSource()
+
+                self.fireMiscEventProps(attrs)
+
 #         elif miscevt.getSource() is GetApp().getGlobalConfig():
 #             if miscevt.has_key("changed configuration"):
 #                 # TODO: On demand

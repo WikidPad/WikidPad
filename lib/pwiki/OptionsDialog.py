@@ -574,6 +574,8 @@ class OptionsDialog(wx.Dialog):
             ("timeline_sortDateAscending", "cbTimelineSortDateAscending", "b"),
             ("versioning_dateFormat", "tfVersioningDateFormat", "ttdf",
                 "btnSelectVersioningDateFormat"),
+            ("wikiWideHistory_dateFormat", "tfWikiWideHistoryDateFormat", "ttdf",
+                "btnSelectWikiWideHistoryDateFormat"),
 
             ("search_stripSpaces", "cbSearchStripSpaces", "b"),
             ("search_wiki_searchType", "rboxWwSearchSearchType", "seli"),
@@ -642,7 +644,6 @@ class OptionsDialog(wx.Dialog):
             ("trashcan_askOnDelete", "cbTrashcanAskOnDelete", "b"),
             ("trashcan_storageLocation", "chTrashcanStorageLocation", "seli"),
 
-
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
             ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
             ("wikiPageTitle_fromLinkTitle", "cbWikiPageTitleFromLinkTitle", "b"),
@@ -650,6 +651,8 @@ class OptionsDialog(wx.Dialog):
 
             ("versioning_storageLocation", "chVersioningStorageLocation", "seli"),
             ("versioning_completeSteps", "tfVersioningCompleteSteps", "i0+"),
+            ("tabHistory_maxEntries", "tfTabHistoryMaxEntries", "i0+"),
+            ("wikiWideHistory_maxEntries", "tfWikiWideHistoryMaxEntries", "i0+"),
 
             ("wiki_wikiLanguage", "chWikiWikiLanguage", "wikilang"),
 
@@ -696,7 +699,7 @@ class OptionsDialog(wx.Dialog):
             ("??switch mark/current wiki/begin", u""),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
             ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
-            ("OptionsPageCwVersioning", 2 * u" " + N_(u"Versioning")),
+            ("OptionsPageCwChronological", 2 * u" " + N_(u"Chronological")),
             ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),
             ("??insert mark/current wiki/wiki lang", u""),
             ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),

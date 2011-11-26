@@ -3232,7 +3232,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     # Set status to wikipage
                     callInMainThread(
                             self.presenter.getMainControl().showStatusMessage,
-                            _(u"Link to page: %s") % wikiWord, 0)
+                            _(u"Link to page: %s") % wikiWord, 0, "linkToPage")
 
                     if wikiWord is not None:
                         propList = wikiDocument.getAttributeTriples(
@@ -3334,9 +3334,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.calltipThreadHolder.setThread(None)
         self.CallTipCancel()
 
-        # Set status back to nothing
-        callInMainThread(self.presenter.getMainControl().showStatusMessage, "",
-                0)
+        # Set status back to previous
+        callInMainThread(self.presenter.getMainControl().dropStatusMessageByKey,
+                "linkToPage")
         # And close any shown pic
         if self.tooltip_image:
             self.tooltip_image.Close()

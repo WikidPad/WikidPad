@@ -16,6 +16,8 @@ from . import DatedWikiWordFilters
 from .TimelinePanel import TimelinePanel
 from .CalendarPanel import CalendarPanel
 from .VersioningGui import VersionExplorerPanel
+from .WikiWideHistoryGui import WikiWideHistoryPanel
+
 
 class TimeViewCtrl(wx.Notebook):
     def __init__(self, parent, ID, mainControl):
@@ -27,6 +29,7 @@ class TimeViewCtrl(wx.Notebook):
 
         self.modifiedPanel = LayeredControlPanel(self, -1)
         self.versionPanel = LayeredControlPanel(self, -1)
+        self.wwHistoryPanel = LayeredControlPanel(self, -1)
 
         tlp = TimelinePanel(self.modifiedPanel, -1, self.mainControl,
                 wikiWordFilter)
@@ -45,8 +48,17 @@ class TimeViewCtrl(wx.Notebook):
         self.versionPanel.switchSubControl("version explorer")
         
         self.AddPage(self.versionPanel, _(u"Versions"))
+
+
+        wwh = WikiWideHistoryPanel(self.wwHistoryPanel, -1, self.mainControl)
+
+        self.wwHistoryPanel.setSubControl("wiki wide history", wwh)
+        self.wwHistoryPanel.switchSubControl("wiki wide history")
         
-        self.notebookPages = [self.modifiedPanel, self.versionPanel]
+        self.AddPage(self.wwHistoryPanel, _(u"Wiki-wide history"))
+        
+        self.notebookPages = [self.modifiedPanel, self.versionPanel,
+                self.wwHistoryPanel]
         self.runningPageChangedEvent = False
 
 #         for i, w in enumerate(self.notebookPages):
@@ -57,6 +69,8 @@ class TimeViewCtrl(wx.Notebook):
 
         if lastTab == u"version":
             tabIdx = 1
+        elif lastTab == u"wiki wide history":
+            tabIdx = 2
         else:
             tabIdx = 0
         
@@ -73,7 +87,8 @@ class TimeViewCtrl(wx.Notebook):
     def close(self):
         """
         """
-        lastTab = (u"modified", u"version")[self.GetSelection()]
+        lastTab = (u"modified", u"version", u"wiki wide history")[
+                self.GetSelection()]
 
         self.mainControl.getConfig().set("main",
                 "timeView_lastSelectedTab", lastTab)

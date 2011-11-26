@@ -37,8 +37,11 @@ First double click on the version you want to have as "to" version in the "versi
 In the diff view the versions tab works differently. Double clicking on a version changes the diff to compare the last version before the double clicked one with the double clicked one. So you can compare step by step which changes were made from one version to the next. The context menu of the version tab also allows to explicitly set the version to compare from or to compare to.
 
 
++++ Wiki-wide history
+
+This tab records which pages you visited last (and when). With double-click or middle-click on an entry in this list you can open the respective page.
 
 
 +++ Options
 
-See [OptionsDialog#++++ Chron. view] and [OptionsDialog#++++ Versioning]
+See [OptionsDialog#++++ Chron. view] and [OptionsDialog#++++ Chronological]

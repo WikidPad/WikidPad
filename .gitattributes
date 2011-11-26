@@ -712,6 +712,8 @@ lib/pwiki/timeView/TimeViewCtrl.py -text
 lib/pwiki/timeView/TimelinePanel.py -text
 lib/pwiki/timeView/Versioning.py -text
 lib/pwiki/timeView/VersioningGui.py -text
+lib/pwiki/timeView/WikiWideHistory.py -text
+lib/pwiki/timeView/WikiWideHistoryGui.py -text
 lib/pwiki/timeView/WikiWordListPopup.py -text
 lib/pwiki/timeView/__init__.py -text
 lib/pwiki/urllib_red.py -text

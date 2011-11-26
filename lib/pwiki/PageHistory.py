@@ -1,6 +1,8 @@
 import traceback
 
-from MiscEvent import KeyFunctionSink
+from .MiscEvent import KeyFunctionSink
+
+from . import DocPages
 
 class PageHistory:
     """
@@ -15,7 +17,7 @@ class PageHistory:
         self.mainControlSink = KeyFunctionSink((
                 ("opened wiki", self.onOpenedWiki),
         ))
-        
+
         self.docPagePresenter = docPagePresenter
 
         self.docPPresenterSink = KeyFunctionSink((
@@ -25,7 +27,8 @@ class PageHistory:
         self.__sinkWikiDoc = KeyFunctionSink((
                 ("deleted wiki page", self.onDeletedWikiPage),
                 ("pseudo-deleted wiki page", self.onDeletedWikiPage),
-                ("renamed wiki page", self.onRenamedWikiPage)
+                ("renamed wiki page", self.onRenamedWikiPage),
+                ("changed configuration", self.onChangedConfiguration)
         ))
 
 
@@ -51,9 +54,7 @@ class PageHistory:
 
 
     def onLoadedCurrentDocPage(self, miscevt):
-#         print "--onLoadedCurrentDocPage1", repr(miscevt)
-#         traceback.print_stack()
-        if miscevt.get("motionType") == "history":
+        if miscevt.get("motionType") == "pageHistory":
             # history was used to move to new word, so don't add word to
             # history, move only pos
             delta = miscevt.get("historyDelta", 0)
@@ -72,8 +73,9 @@ class PageHistory:
                 return
                 
             upname = page.getUnifiedPageName()
-            if not upname.startswith(u"wikipage/"):
-                # Page is not a wiki page but a functional page
+            if not upname.startswith(u"wikipage/") and \
+                    not DocPages.isFuncTag(upname):
+                # Page is neither a wiki page nor a standard functional page
                 return
 
             if self.pos == 0 or self.history[self.pos-1] != upname:
@@ -82,11 +84,23 @@ class PageHistory:
                 # Otherwise, we would add the same word which is already
                 # at the end
             
-                if len(self.history) > 25:  # TODO Configurable
-                    self.history.pop(0)
-                    self.pos -= 1
-                    self.pos = max(0, self.pos)  # TODO ?
+                self.limitEntries()
 
+
+    def onChangedConfiguration(self, miscevt):
+        self.limitEntries()
+
+
+    def limitEntries(self):
+        limit = self.mainControl.getConfig().getint("main",
+                "tabHistory_maxEntries", 25)
+        
+        while len(self.history) > limit:
+            self.history.pop(0)
+            self.pos -= 1
+        
+        self.pos = max(0, self.pos)
+        
 
     def onDeletedWikiPage(self, miscevt):
         """
@@ -141,7 +155,7 @@ class PageHistory:
             return
 
         self.docPagePresenter.openDocPage(self.history[newpos - 1],
-                motionType="history", historyDelta=delta)
+                motionType="pageHistory", historyDelta=delta)
 
 
     def getDeepness(self):
@@ -169,11 +183,19 @@ class PageHistory:
             return
             
         self.docPagePresenter.openDocPage(self.history[self.pos - 1],
-                motionType="history", historyDelta=0)
+                motionType="pageHistory", historyDelta=0)
         
         
-    def getHistoryList(self):
-        return [h[9:] for h in self.history]
+    def getHrHistoryList(self):
+        result = []
+        
+        for upname in self.history:
+            if upname.startswith("wikipage/"):
+                result.append(upname[9:])
+            else:
+                result.append(u"<" + DocPages.getHrNameForFuncTag(upname) + u">")
+                
+        return result
         
     def getPosition(self):
         return self.pos

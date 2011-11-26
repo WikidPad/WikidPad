@@ -6,14 +6,14 @@ import os, traceback
 import wx
 
 # from MiscEvent import KeyFunctionSinkAR
-from pwiki.wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
+from ..wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
         drawTextRight, drawTextCenter, getAccelPairFromKeyDown, \
         appendToMenuByMenuDesc
 
-from pwiki.SystemInfo import isWindows, isOSX
+from ..SystemInfo import isWindows, isOSX
 
-from pwiki.WindowLayout import setWindowPos, setWindowClientSize
-from pwiki.Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from ..WindowLayout import setWindowPos, setWindowClientSize
+from ..Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
 
 
@@ -155,7 +155,7 @@ class WikiWordListPopup(wx.Frame):
         
         if self.mainControl.getConfig().getboolean("main",
                 "timeView_autohide", False):
-            # Auto-hide tree
+            # Auto-hide timeview
             self.mainControl.setShowTimeView(False)
             
         self.mainControl.getActiveEditor().SetFocus()

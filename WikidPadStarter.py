@@ -18,7 +18,8 @@ if not hasattr(sys, 'frozen'):
 #     sys.path.append("lib")
 #     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\lib")
 
-# os.environ["PATH"] = os.path.dirname(os.path.abspath(sys.argv[0])) + ";" + os.environ["PATH"]
+    os.environ["PATH"] = os.path.dirname(os.path.abspath(sys.argv[0])) + \
+            os.pathsep + os.environ["PATH"]
 
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 
