@@ -299,7 +299,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
         wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
 
-        wx.EVT_LEFT_DOWN(self, self.OnClick)
+#         wx.EVT_LEFT_DOWN(self, self.OnClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 
@@ -2070,7 +2070,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 return True
 
             elif node.name == "urlLink":
-                print "local - editor", node.url
                 self.presenter.getMainControl().launchUrl(node.url)
                 return True
 
