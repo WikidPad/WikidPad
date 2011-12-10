@@ -1482,7 +1482,7 @@ class WikiHtmlViewWK(wx.Panel):
                 # To lauch external urls we need to remove webkits preceeding
                 # "file:///", quote the url and add "file:/"
                 self.presenter.getMainControl().launchUrl(
-                        "file:/{0}".format(urllib.quote(href[len("file:///"):])))
+                        u"file:/{0}".format(urlQuote(href[len("file:///"):])))
                 #decision.ignore()
             return True
         else:
