@@ -18,7 +18,12 @@ class ViHelper():
     # Current these are only (partly) implemented for the editor
     NORMAL, INSERT, VISUAL, REPLACE = range(4)
 
-    MODE_TEXT = { 0 : u"", 1 : u"--INSERT--", 2 : u"--VISUAL--", 3 : u"REPLACE" }
+    MODE_TEXT = { 
+                    0 : u"", 
+                    1 : u"--INSERT--", 
+                    2 : u"--VISUAL--", 
+                    3 : u"--REPLACE" 
+                }
 
     def __init__(self, ctrl):
         # ctrl is WikiTxtCtrl in the case of the editor,
@@ -91,7 +96,7 @@ class ViHelper():
         """
         # TODO: Rewrite
         if keycode is not None:
-            # If we have a tuple the keycode includes a modified, e.g. ctrl
+            # If we have a tuple the keycode includes a modifier, e.g. ctrl
             if type(keycode) == tuple:
                 return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
             try:
@@ -198,6 +203,11 @@ class ViHelper():
             return True
         else:
             if key_chain in self.key_mods[mode]:
+                # TODO: better fix
+                try:
+                    self.ctrl.SetCaretForeground(wx.Colour(0, 255, 255))
+                except:
+                    pass
                 self._acceptable_keys = self.key_mods[mode][key_chain]
                 return True
         return False
@@ -231,6 +241,10 @@ class ViHelper():
         com_type, command, repeatable = keys[key]
         func, args = command
 
+        selected_text_len = None
+    
+        # If a motion is present in the command (but not the main command)
+        # it needs to be run first
         if "motion" in key:
             # If in visual mode we don't want to change the selection start point
             if self.mode != ViHelper.VISUAL:
@@ -239,6 +253,8 @@ class ViHelper():
                 # finishing with a "post motion" command, i.e. deleting the
                 # text that was selected.
                 self.StartSelection()
+            else:
+                selected_text_len = len(self.ctrl.GetSelectedText())
 
             motion_key = tuple(motion)
 
@@ -256,15 +272,22 @@ class ViHelper():
 
         # Special case if single char is selected (anchor needs to be reversed
         # if movement moves in a particular direction
-        single = False
-        reverse = False
-        if self.mode == ViHelper.VISUAL:
+        
+        # horrible hack
+        try:
             start_pos = self.ctrl.GetCurrentPos()
-            if len(self.ctrl.GetSelectedText()) < 1:
+        except:
+            print "REMOVE THIS HACK"
+
+        single = False
+        if self.mode == ViHelper.VISUAL:
+            if len(self.ctrl.GetSelectedText()) <= 1:
                 single = True
-            else:
-                if start_pos - self.GetSelectionAnchor() < 0:
-                    reverse = True
+            #else:
+            #    if start_pos - self.GetSelectionAnchor() <= 0:
+            #        reverse = True
+
+            #print self.ctrl.GetCurrentPos() - self.GetSelectionAnchor()
 
         if type(key) == tuple and "*" in key:
             args = tuple(wildcards)
@@ -276,9 +299,10 @@ class ViHelper():
         RunFunc(func, args)
             
         # If the command is repeatable save its type and any other settings
-        if repeatable > 0:
+        if repeatable in [1, 2, 3]:
             self.last_cmd = repeatable, key, self.count, motion, \
-                                            motion_wildcard, wildcards
+                                            motion_wildcard, wildcards, \
+                                            selected_text_len
 
         # Some commands should cause the mode to revert back to normal if run
         # from visual mode, others shouldn't.
@@ -291,11 +315,15 @@ class ViHelper():
                 if single:
                     if self.ctrl.GetCurrentPos() < start_pos:
                         self.StartSelection(start_pos+1)
-                else:
-                    if reverse:
-                        if self.ctrl.GetCurrentPos() - \
-                                self.GetSelectionAnchor() >= -1:
-                            self.StartSelection(self.GetSelectionAnchor()-1)
+                        start_pos +=1
+                if self.ctrl.GetCurrentPos() > start_pos:
+                    self.ctrl.CharRight()
+                    
+                #else:
+                #    if reverse:
+                #        if self.ctrl.GetCurrentPos() - \
+                #                self.GetSelectionAnchor() >= -1:
+                #            self.StartSelection(self.GetSelectionAnchor()+1)
                             
 
                 self.SelectSelection()
@@ -322,7 +350,14 @@ class ViHelper():
         self.key_number_modifier = []
         self.updateViStatus()
 
-        self.register.SelectRegister(None)
+        self.FlushBuffersExtra()
+
+        
+    def FlushBuffersExtra(self):
+        """
+        To be overidden by derived class
+        """
+        pass
 
     def SetSelMode(self, mode):
         self.selection_mode = mode
@@ -898,13 +933,22 @@ class ViRegister():
             self.current_reg = None
             return
 
-        reg = unichr(key_code)
+        if type(key_code) == int:
+            reg = unichr(key_code)
+        else:
+            reg = key_code
+
         if reg in self.registers:
             self.current_reg = reg
+            print 1
             return True
         else:
+            print 2
             self.current_reg = None
             return False
+
+    def GetSelectedRegister(self):
+        return self.current_reg
 
     def SetCurrentRegister(self, value):
         self.registers['"'] = value
@@ -915,6 +959,10 @@ class ViRegister():
         elif self.current_reg == "+":
             self.ctrl.Copy()
         self.current_reg = None
+
+    def GetRegister(self, reg):
+        if reg in self.registers:
+            return self.registers[reg]
 
     def GetCurrentRegister(self):
         if self.current_reg == "+":

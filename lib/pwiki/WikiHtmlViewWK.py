@@ -1204,9 +1204,9 @@ class WikiHtmlViewWK(wx.Panel):
 #                 self.passNavigate += 1
                 self.html.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
                 self.lastAnchor = self.anchor
-            else:
-                lx, ly = wikiPage.getPresentation()[3:5]
-                self.scrollDeferred(lx, ly)
+            #else:
+            #    lx, ly = wikiPage.getPresentation()[3:5]
+            #    self.scrollDeferred(lx, ly)
 
         self.anchor = None
         self.outOfSync = False
@@ -1618,6 +1618,12 @@ class ViFunctions(ViHelper):
             (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
             (103, 82) : (0, (self.OpenHomePage, True), 0), # gR
 
+            (92, 111) : (0, (self.ctrl.presenter.getMainControl(). \
+                                            showWikiWordOpenDialog, None), 0), # \o
+            # TODO: rewrite open dialog so it can be opened with new tab as default
+            (92, 79): (0, (self.ctrl.presenter.getMainControl(). \
+                                            showWikiWordOpenDialog, None), 0), # \O
+
             (100, 100) : (0, (self.CloseCurrentTab, None), 0), # dd
 
             (90, 90) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0), # ZZ
@@ -1630,6 +1636,8 @@ class ViFunctions(ViHelper):
             ("ctrl", 108) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
 
             (47,)  : (0, (self.StartSearch, None), 0), # /
+            (91,)  : (0, (self.GoBackwardInHistory, None), 0), # [
+            (93,)  : (0, (self.GoForwardInHistory, None), 0), # ]
             # H and L are equivelent to gh and gl in preview mode
             (72,)  : (0, (self.GoBackwardInHistory, None), 0), # H
             (76,)  : (0, (self.GoForwardInHistory, None), 0), # L
