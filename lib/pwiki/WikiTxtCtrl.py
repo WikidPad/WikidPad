@@ -3983,88 +3983,89 @@ class ViHandler(ViHelper):
     #               3 : Replace
     # Note:
     # The repeats provided by ; and , are managed within the FindChar function
+        k = ViHelper.KEY_BINDINGS
         self.keys = {
             0 : {
             # Normal mode
-    (60, "motion")  : (0, (self.DedentText, None), 1), # <motion
-    (62, "motion")  : (0, (self.IndentText, None), 1), # >motion
-    (99, "motion")  : (2, (self.EndDeleteInsert, None), 2), # cmotion
-    (99, 99)  : (2, (self.DeleteLineIndentInsert, None), 2), # cc
-    (100, "motion") : (0, (self.EndDelete, None), 1), # dmotion
-    (100, 115, "*") : (0, (self.DeleteSurrounding, None), 1), # ds
-    (121, "motion") : (0, (self.Yank, None), 1), # ymotion
-    (99, 115, "*", "*") : (0, (self.ChangeSurrounding, None), 1), # cs**
+    (k["<"], "motion")  : (0, (self.DedentText, None), 1), # <motion
+    (k[">"], "motion")  : (0, (self.IndentText, None), 1), # >motion
+    (k["c"], "motion")  : (2, (self.EndDeleteInsert, None), 2), # cmotion
+    (k["c"], k["c"])  : (2, (self.DeleteLineIndentInsert, None), 2), # cc
+    (k["d"], "motion") : (0, (self.EndDelete, None), 1), # dmotion
+    (k["d"], k["s"], "*") : (0, (self.DeleteSurrounding, None), 1), # ds
+    (k["y"], "motion") : (0, (self.Yank, None), 1), # ymotion
+    (k["c"], k["s"], "*", "*") : (0, (self.ChangeSurrounding, None), 1), # cs**
     #       cas**??ca**?? add surrounding
-    (121, 115, "motion", "*") : (0, (self.PreSurround, None), 1), # ysmotion*
+    (k["y"], k["s"], "motion", "*") : (0, (self.PreSurround, None), 1), # ysmotion*
     # TODO: yS and ySS (indentation on new line)
     # ? yss
-    (121, 83, "motion", "*") : (0, (self.PreSurroundOnNewLine, None), 1), # yS**
-    (121, 115, 115, "*") : (0, (self.PreSurroundLine, None), 1), # yss*
-    (103, 117, "motion") : (0, (self.PreLowercase, None), 1), # gu
-    (103, 85, "motion") : (0, (self.PreUppercase, None), 1), # gU
-    (103, 115, "motion") : (0, (self.SubscriptMotion, None), 1), # gs
-    (103, 83, "motion") : (0, (self.SuperscriptMotion, None), 1), # gS
-    (39, "*")  : (1, (self.GotoMark, None), 0), # '
-    (96, "*")  : (1, (self.GotoMarkIndent, None), 0), # `
-    (109, "*") : (0, (self.Mark, None), 0), # m
-    (102, "*") : (1, (self.FindNextChar, None), 4), # f
-    (70, "*")  : (1, (self.FindNextCharBackwards, None), 4), # F
-    (116, "*") : (1, (self.FindUpToNextChar, None), 5), # t
-    (84, "*")  : (1, (self.FindUpToNextCharBackwards, None), 5), # T
-    (114, "*") : (0, (self.ReplaceChar, None), 0), # r*
+    (k["y"], k["S"], "motion", "*") : (0, (self.PreSurroundOnNewLine, None), 1), # yS**
+    (k["y"], k["s"], k["s"], "*") : (0, (self.PreSurroundLine, None), 1), # yss*
+    (k["g"], k["u"], "motion") : (0, (self.PreLowercase, None), 1), # gu
+    (k["g"], k["U"], "motion") : (0, (self.PreUppercase, None), 1), # gU
+    (k["g"], k["s"], "motion") : (0, (self.SubscriptMotion, None), 1), # gs
+    (k["g"], k["S"], "motion") : (0, (self.SuperscriptMotion, None), 1), # gS
+    (k["'"], "*")  : (1, (self.GotoMark, None), 0), # '
+    (k["`"], "*")  : (1, (self.GotoMarkIndent, None), 0), # `
+    (k["m"], "*") : (0, (self.Mark, None), 0), # m
+    (k["f"], "*") : (1, (self.FindNextChar, None), 4), # f
+    (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 4), # F
+    (k["t"], "*") : (1, (self.FindUpToNextChar, None), 5), # t
+    (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 5), # T
+    (k["r"], "*") : (0, (self.ReplaceChar, None), 0), # r*
 
-    (100, 99, u"motion", u"*") : (0, (self.DeleteCharMotion, 
+    (k["d"], k["c"], u"motion", u"*") : (0, (self.DeleteCharMotion, 
                                             False), 1), # dcmotion*
 
-    (105,) : (0, (self.Insert, None), 2), # i
-    (97,) : (0, (self.Append, None), 2), # a
-    (73,) : (0, (self.InsertAtLineStart, None), 2), # I
-    (65,) : (0, (self.AppendAtLineEnd, None), 2), # A
-    (111,) : (0, (self.OpenNewLine, False), 2), # o
-    (79,) : (0, (self.OpenNewLine, True), 2), # O
-    (67,) : (0, (self.TruncateLineAndInsert, None), 2), # C
-    (68,) : (0, (self.TruncateLine, None), 2), # D
+    (k["i"],) : (0, (self.Insert, None), 2), # i
+    (k["a"],) : (0, (self.Append, None), 2), # a
+    (k["I"],) : (0, (self.InsertAtLineStart, None), 2), # I
+    (k["A"],) : (0, (self.AppendAtLineEnd, None), 2), # A
+    (k["o"],) : (0, (self.OpenNewLine, False), 2), # o
+    (k["O"],) : (0, (self.OpenNewLine, True), 2), # O
+    (k["C"],) : (0, (self.TruncateLineAndInsert, None), 2), # C
+    (k["D"],) : (0, (self.TruncateLine, None), 2), # D
 
-    (120,) : (0, (self.DeleteRight, None), 1), # x
-    (88,) : (0, (self.DeleteLeft, None), 1), # X
+    (k["x"],) : (0, (self.DeleteRight, None), 1), # x
+    (k["X"],) : (0, (self.DeleteLeft, None), 1), # X
 
-    (115,) : (0, (self.DeleteRightAndInsert, None), 2), # s
-    (83,) : (0, (self.DeleteLinesAndIndentInsert, None), 2), # S
+    (k["s"],) : (0, (self.DeleteRightAndInsert, None), 2), # s
+    (k["S"],) : (0, (self.DeleteLinesAndIndentInsert, None), 2), # S
 
-    (119,) : (1, (self.MoveCaretNextWord, None), 0), # w
-    (87,) : (1, (self.MoveCaretNextWORD, None), 0), # W
-    (103, 101) : (1, (self.MoveCaretPreviousWordEnd, None), 0), # ge
+    (k["w"],) : (1, (self.MoveCaretNextWord, None), 0), # w
+    (k["W"],) : (1, (self.MoveCaretNextWORD, None), 0), # W
+    (k["g"], k["e"]) : (1, (self.MoveCaretPreviousWordEnd, None), 0), # ge
     # TODO: gE
-    (101,) : (1, (self.MoveCaretWordEnd, None), 0), # e
-    (69,) : (1, (self.MoveCaretWordEND, None), 0), # E
-    (98,) : (1, (self.MoveCaretBackWord, None), 0), # b
-    (66,) : (1, (self.MoveCaretBackWORD, None), 0), # B
+    (k["e"],) : (1, (self.MoveCaretWordEnd, None), 0), # e
+    (k["E"],) : (1, (self.MoveCaretWordEND, None), 0), # E
+    (k["b"],) : (1, (self.MoveCaretBackWord, None), 0), # b
+    (k["B"],) : (1, (self.MoveCaretBackWORD, None), 0), # B
 
-    (123,) : (1, (self.MoveCaretParaUp, None), 0), # {
-    (125,) : (1, (self.MoveCaretParaDown, None), 0), # }
+    (k["{"],) : (1, (self.MoveCaretParaUp, None), 0), # {
+    (k["}"],) : (1, (self.MoveCaretParaDown, None), 0), # }
 
     # TODO: complete search
     # Search should use a custom implementation of wikidpads incremental search
-    (47,)  : (0, (self.StartSearch, None), 0), # /
+    (k["/"],)  : (0, (self.StartSearch, None), 0), # /
     #47  : (0, (self.StartSearchReverse, None), 0), # /
-    (110,) : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0), # n
-    (78,) : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0), # N
+    (k["n"],) : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0), # n
+    (k["N"],) : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0), # N
 
-    (42,) : (1, (self.Repeat, self.SearchCaretWordForwards), 0), # *
-    (35,) : (1, (self.Repeat, self.SearchCaretWordBackwards), 0), # #
+    (k["*"],) : (1, (self.Repeat, self.SearchCaretWordForwards), 0), # *
+    (k["#"],) : (1, (self.Repeat, self.SearchCaretWordBackwards), 0), # #
 
-    (103, 42)  : (1, (self.Repeat, self.SearchPartialCaretWordForwards), 0), # g*
-    (103, 35)  : (1, (self.Repeat, self.SearchPartialCaretWordBackwards), 0), # g#
+    (k["g"], k["*"])  : (1, (self.Repeat, self.SearchPartialCaretWordForwards), 0), # g*
+    (k["g"], k["#"])  : (1, (self.Repeat, self.SearchPartialCaretWordBackwards), 0), # g#
 
     # Basic movement
-    (104,) : (1, (self.MoveCaretLeft, None), 0), # h
-    (107,) : (1, (self.MoveCaretUp, None), 0), # k
-    (108,) : (1, (self.MoveCaretRight, False), 0), # l
-    (106,) : (1, (self.MoveCaretDown, None), 0), # j
-    (103, 107) : (1, (self.MoveCaretUp, {"visual" : True}), 0), # gk
-    (103, 106) : (1, (self.MoveCaretDown, {"visual" : True}), 0), # gj
+    (k["h"],) : (1, (self.MoveCaretLeft, None), 0), # h
+    (k["k"],) : (1, (self.MoveCaretUp, None), 0), # k
+    (k["l"],) : (1, (self.MoveCaretRight, False), 0), # l
+    (k["j"],) : (1, (self.MoveCaretDown, None), 0), # j
+    (k["g"], k["k"]) : (1, (self.MoveCaretUp, {"visual" : True}), 0), # gk
+    (k["g"], k["j"]) : (1, (self.MoveCaretDown, {"visual" : True}), 0), # gj
     # TODO: g^ / g0
-    (103, 106) : (1, (self.MoveCaretDown, {"visual" : True}), 0), # gj
+    (k["g"], k["j"]) : (1, (self.MoveCaretDown, {"visual" : True}), 0), # gj
     # Arrow keys
     (wx.WXK_LEFT,) : (1, (self.MoveCaretLeft, None), 0), # left 
     (wx.WXK_UP,) : (1, (self.MoveCaretUp, None), 0), # up
@@ -4075,121 +4076,121 @@ class ViHandler(ViHelper):
     (wx.WXK_NUMPAD_ENTER,) : (1, (self.MoveCaretDownAndIndent, None), 0), # return
 
     # Line movement
-    (36,)    : (1, (self.GotoLineEnd, False), 0), # $
+    (k["$"],)    : (1, (self.GotoLineEnd, False), 0), # $
     (wx.WXK_END,) : (1, (self.GotoLineEnd, False), 0), # home
-    (48,)    : (1, (self.GotoLineStart, None), 0), # 0
+    (k["0"],)    : (1, (self.GotoLineStart, None), 0), # 0
     (wx.WXK_HOME,) : (1, (self.GotoLineStart, None), 0), # end 
-    (45,)    : (1, (self.GotoLineIndentPreviousLine, None), 0), # -
-    (43,)    : (1, (self.GotoLineIndentNextLine, None), 0), # +
-    (94,)    : (1, (self.GotoLineIndent, None), 0), # ^
-    (124,)   : (1, (self.GotoColumn, None), 0), # |
+    (k["-"],)    : (1, (self.GotoLineIndentPreviousLine, None), 0), # -
+    (k["+"],)    : (1, (self.GotoLineIndentNextLine, None), 0), # +
+    (k["^"],)    : (1, (self.GotoLineIndent, None), 0), # ^
+    (k["|"],)   : (1, (self.GotoColumn, None), 0), # |
 
-    (40,)   : (1, (self.GotoSentenceStart, None), 0), # (
-    (41,)   : (1, (self.GotoNextSentence, None), 0), # )
+    (k["("],)   : (1, (self.GotoSentenceStart, None), 0), # (
+    (k[")"],)   : (1, (self.GotoNextSentence, None), 0), # )
 
     # Page scroll control
-    (103, 103)  : (1, (self.DocumentNavigation, (103, 103)), 0), # gg
-    (71,)        : (1, (self.DocumentNavigation, 71), 0), # G
-    (37,)        : (1, (self.DocumentNavigation, 37), 0), # %
+    (k["g"], k["g"])  : (1, (self.DocumentNavigation, (k["g"], k["g"])), 0), # gg
+    (k["G"],)        : (1, (self.DocumentNavigation, k["G"]), 0), # G
+    (k["%"],)        : (1, (self.DocumentNavigation, k["%"]), 0), # %
 
-    (72,)        : (1, (self.GotoViewportTop, None), 0), # H
-    (76,)        : (1, (self.GotoViewportBottom, None), 0), # L
-    (77,)        : (1, (self.GotoViewportMiddle, None), 0), # M
+    (k["H"],)        : (1, (self.GotoViewportTop, None), 0), # H
+    (k["L"],)        : (1, (self.GotoViewportBottom, None), 0), # L
+    (k["M"],)        : (1, (self.GotoViewportMiddle, None), 0), # M
 
-    (122, 122)  : (0, (self.ScrollViewportMiddle, None), 0), # zz
-    (122, 116)  : (0, (self.ScrollViewportTop, None), 0), # zt
-    (122, 98)   : (0, (self.ScrollViewportBottom, None), 0), # zb
+    (k["z"], k["z"])  : (0, (self.ScrollViewportMiddle, None), 0), # zz
+    (k["z"], k["t"])  : (0, (self.ScrollViewportTop, None), 0), # zt
+    (k["z"], k["b"])   : (0, (self.ScrollViewportBottom, None), 0), # zb
 
-    (("Ctrl", 117),)    : (0, (self.ScrollViewportUpHalfScreen, 
+    (("Ctrl", k["u"]),)    : (0, (self.ScrollViewportUpHalfScreen, 
                                                         None), 0), # <c-u>
-    (("Ctrl", 100),)    : (0, (self.ScrollViewportDownHalfScreen, 
+    (("Ctrl", k["d"]),)    : (0, (self.ScrollViewportDownHalfScreen, 
                                                         None), 0), # <c-d>
-    (("Ctrl", 98),)     : (0, (self.ScrollViewportUpFullScreen, 
+    (("Ctrl", k["b"]),)     : (0, (self.ScrollViewportUpFullScreen, 
                                                         None), 0), # <c-b>
-    (("Ctrl", 102),)    : (0, (self.ScrollViewportDownFullScreen, 
+    (("Ctrl", k["f"]),)    : (0, (self.ScrollViewportDownFullScreen, 
                                                         None), 0), # <c-f>
 
-    (("Ctrl", 101),)    : (0, (self.ScrollViewportLineDown, 
+    (("Ctrl", k["e"]),)    : (0, (self.ScrollViewportLineDown, 
                                                         None), 0), # <c-e>
-    (("Ctrl", 121),)    : (0, (self.ScrollViewportLineUp, 
+    (("Ctrl", k["y"]),)    : (0, (self.ScrollViewportLineUp, 
                                                         None), 0), # <c-y>
 
-    (90, 90)    : (0, (self.ctrl.presenter.getMainControl().\
+    (k["Z"], k["Z"])    : (0, (self.ctrl.presenter.getMainControl().\
                                         exitWiki, None), 0), # ZZ
 
-    (117,)              : (0, (self.Undo, None), 0), # u
-    (("Ctrl", 114),)    : (0, (self.Redo, None), 0), # <c-r>
+    (k["u"],)              : (0, (self.Undo, None), 0), # u
+    (("Ctrl", k["r"]),)    : (0, (self.Redo, None), 0), # <c-r>
 
-    (("Ctrl", 105),)    : (1, (self.GotoNextJump, None), 0), # <c-i>
+    (("Ctrl", k["i"]),)    : (1, (self.GotoNextJump, None), 0), # <c-i>
     (wx.WXK_TAB,)            : (1, (self.GotoNextJump, None), 0), # Tab
-    (("Ctrl", 111),)    : (1, (self.GotoPreviousJump, None), 0), # <c-o>
+    (("Ctrl", k["o"]),)    : (1, (self.GotoPreviousJump, None), 0), # <c-o>
 
     # These two are motions
-    (59,)   : (1, (self.RepeatLastFindCharCmd, None), 0), # ;
-    (44,)   : (1, (self.RepeatLastFindCharCmdReverse, None), 0), # ,
+    (k[";"],)   : (1, (self.RepeatLastFindCharCmd, None), 0), # ;
+    (k[","],)   : (1, (self.RepeatLastFindCharCmdReverse, None), 0), # ,
 
     # Replace ?
     # repeatable?
-    (82,)   : (0, (self.StartReplaceMode, None), 0), # R
+    (k["R"],)   : (0, (self.StartReplaceMode, None), 0), # R
 
-    (118,)   : (2, (self.EnterVisualMode, None), 0), # v
-    (86,)   : (2, (self.EnterLineVisualMode, None), 0), # V
+    (k["v"],)   : (2, (self.EnterVisualMode, None), 0), # v
+    (k["V"],)   : (2, (self.EnterLineVisualMode, None), 0), # V
 
-    (74,)   : (0, (self.JoinLines, None), 1), # J
+    (k["J"],)   : (0, (self.JoinLines, None), 1), # J
 
-    (126,)   : (0, (self.SwapCase, None), 0), # ~
+    (k["~"],)   : (0, (self.SwapCase, None), 0), # ~
 
-    (121, 121)  : (0, (self.YankLine, None), 0), # yy
-    (89,)        : (0, (self.YankLine, None), 0), # Y
-    (112,)       : (0, (self.Put, False), 0), # p
-    (80,)        : (0, (self.Put, True), 0), # P
+    (k["y"], k["y"])  : (0, (self.YankLine, None), 0), # yy
+    (k["Y"],)        : (0, (self.YankLine, None), 0), # Y
+    (k["p"],)       : (0, (self.Put, False), 0), # p
+    (k["P"],)        : (0, (self.Put, True), 0), # P
 
-    (("Ctrl", 118),)       : (0, (self.PutClipboard, False), 0), # <c-v>
+    (("Ctrl", k["v"]),)       : (0, (self.PutClipboard, False), 0), # <c-v>
 
-    (100, 100)  : (0, (self.DeleteLine, None), 1), # dd
+    (k["d"], k["d"])  : (0, (self.DeleteLine, None), 1), # dd
 
-    (62, 62)    : (0, (self.Indent, True), 1), # >>
-    (60, 60)    : (0, (self.Indent, False), 1), # <<
+    (k[">"], k[">"])    : (0, (self.Indent, True), 1), # >>
+    (k["<"], k["<"])    : (0, (self.Indent, False), 1), # <<
 
-    (46,)    : (0, (self.RepeatCmd, None), 0), # .
+    (k["."],)    : (0, (self.RepeatCmd, None), 0), # .
 
     # Wikipage navigation
     # As some command (e.g. HL) are already being used in most cases
     # these navigation commands have been prefixed by "g".
     # TODO: different repeat command for these?
-    (103, 102)  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0), # gf
-    (("Ctrl", 119), 103, 102)  : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0), # <c-w>gf
-    (103, 70)   : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0), # gF
-    (103, 98)   : (0, (self.ctrl.activateLink, { "tabMode" : 3 }), 0), # gb
+    (k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0), # gf
+    (("Ctrl", k["w"]), k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0), # <c-w>gf
+    (k["g"], k["F"])   : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0), # gF
+    (k["g"], k["b"])   : (0, (self.ctrl.activateLink, { "tabMode" : 3 }), 0), # gb
     # This might be going a bit overboard with history nagivaiton!
-    (103, 72)   : (0, (self.GoBackwardInHistory, None), 0), # gH
-    (103, 76)   : (0, (self.GoForwardInHistory, None), 0), # gL
-    (103, 104)  : (0, (self.GoBackwardInHistory, None), 0), # gh
-    (103, 108)  : (0, (self.GoForwardInHistory, None), 0), # gl
-    (91,)        : (0, (self.GoBackwardInHistory, None), 0), # [
-    (93,)        : (0, (self.GoForwardInHistory, None), 0), # ]
-    (103, 116) : (0, (self.SwitchTabs, None), 0), # gt
-    (103, 84)  : (0, (self.SwitchTabs, True), 0), # gT
-    (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
-    (103, 82) : (0, (self.OpenHomePage, True), 0), # gR
-    (92, 111) : (0, (self.ctrl.presenter.getMainControl(). \
+    (k["g"], k["H"])   : (0, (self.GoBackwardInHistory, None), 0), # gH
+    (k["g"], k["L"])   : (0, (self.GoForwardInHistory, None), 0), # gL
+    (k["g"], k["h"])  : (0, (self.GoBackwardInHistory, None), 0), # gh
+    (k["g"], k["l"])  : (0, (self.GoForwardInHistory, None), 0), # gl
+    (k["["],)        : (0, (self.GoBackwardInHistory, None), 0), # [
+    (k["]"],)        : (0, (self.GoForwardInHistory, None), 0), # ]
+    (k["g"], k["t"]) : (0, (self.SwitchTabs, None), 0), # gt
+    (k["g"], k["T"])  : (0, (self.SwitchTabs, True), 0), # gT
+    (k["g"], k["r"]) : (0, (self.OpenHomePage, False), 0), # gr
+    (k["g"], k["R"]) : (0, (self.OpenHomePage, True), 0), # gR
+    (k["\\"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # \o
     # TODO: rewrite open dialog so it can be opened with new tab as default
-    (92, 79): (0, (self.ctrl.presenter.getMainControl(). \
+    (k["\\"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # \O
 
-    (92, 117) : (0, (self.ViewParents, False), 0), # \u
-    (92, 85) : (0, (self.ViewParents, True), 0), # \U
+    (k["\\"], k["u"]) : (0, (self.ViewParents, False), 0), # \u
+    (k["\\"], k["U"]) : (0, (self.ViewParents, True), 0), # \U
 
-    (92, 104, "*") : (0, (self.SetHeading, None), 1), # \h{level}
+    (k["\\"], k["h"], "*") : (0, (self.SetHeading, None), 1), # \h{level}
 
-    (92, 115) : (0, (self.CreateShortHint, None), 2), # \s
+    (k["\\"], k["s"]) : (0, (self.CreateShortHint, None), 2), # \s
 
-    #(103, 115)  : (0, (self.SwitchEditorPreview, None), 0), # gs
+    #(k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
     
     # TODO: think of suitable commands for the following
-    #(103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
-    (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
+    #(k["g"], k["e"])  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
+    (k["g"], k["p"])  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
     (wx.WXK_F1,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
     (wx.WXK_F2,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
             }
@@ -4198,8 +4199,8 @@ class ViHandler(ViHelper):
 
         # Could be changed to use a wildcard
         for i in self.text_object_map:
-            self.keys[0][(105, ord(i))] = (1, (self.SelectInTextObject, i), 0)
-            self.keys[0][(97, ord(i))] = (1, (self.SelectATextObject, i), 0)
+            self.keys[0][(k["i"], ord(i))] = (1, (self.SelectInTextObject, i), 0)
+            self.keys[0][(k["a"], ord(i))] = (1, (self.SelectATextObject, i), 0)
 
         # INSERT MODE
         # Shortcuts available in insert mode (need to be repeatable by ".",
@@ -4207,15 +4208,15 @@ class ViHandler(ViHelper):
         self.keys[1] = {
         # TODO:
         #(("Ctrl", 64),)  : (0, (self.InsertPreviousText, None), 0), # Ctrl-@
-        #(("Ctrl", 97),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
+        #(("Ctrl", k["a"]),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
         #                                                    None), 0), # Ctrl-a
-        (("Ctrl", 110),)  : (0, (self.Autocomplete, True), 0), # Ctrl-n
-        (("Ctrl", 112),)  : (0, (self.Autocomplete, False), 0), # Ctrl-p
+        (("Ctrl", k["n"]),)  : (0, (self.Autocomplete, True), 0), # Ctrl-n
+        (("Ctrl", k["p"]),)  : (0, (self.Autocomplete, False), 0), # Ctrl-p
 
         # Unlike vim we these are case sensitive
-        (("Ctrl", 119),)  : (0, (self.DeleteBackword, False), 0), # Ctrl-w
-        (("Ctrl", 87),)  : (0, (self.DeleteBackword, True), 0), # Ctrl-W
-        (("Ctrl", 118),)       : (0, (self.PutClipboard, False), 0), # <c-v>
+        (("Ctrl", k["w"]),)  : (0, (self.DeleteBackword, False), 0), # Ctrl-w
+        (("Ctrl", k["W"]),)  : (0, (self.DeleteBackword, True), 0), # Ctrl-W
+        (("Ctrl", k["v"]),)       : (0, (self.PutClipboard, False), 0), # <c-v>
 
         # F1 and F2 in insert mode will still switch between editor and preview
         # Should it revert back to normal mode?
@@ -4230,43 +4231,43 @@ class ViHandler(ViHelper):
         self.keys[2] = self.keys[0].copy()
         self.keys[2].update({
 
-                (39, "*")  : (1, (self.GotoMark, None), 0), # '
-                (96, "*")  : (1, (self.GotoMarkIndent, None), 0), # `
-                (109, "*") : (0, (self.Mark, None), 0), # m
-                (102, "*") : (1, (self.FindNextChar, None), 0), # f
-                (70, "*")  : (1, (self.FindNextCharBackwards, None), 0), # F
-                (116, "*") : (1, (self.FindUpToNextChar, None), 0), # t
-                (84, "*")  : (1, (self.FindUpToNextCharBackwards, None), 0), # T
-                (114, "*") : (0, (self.ReplaceChar, None), 0), # r*
-                (83, "*")  : (0, (self.SurroundSelection, None), 2), # S
+                (k["'"], "*")  : (1, (self.GotoMark, None), 0), # '
+                (k["`"], "*")  : (1, (self.GotoMarkIndent, None), 0), # `
+                (k["m"], "*") : (0, (self.Mark, None), 0), # m
+                (k["f"], "*") : (1, (self.FindNextChar, None), 0), # f
+                (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 0), # F
+                (k["t"], "*") : (1, (self.FindUpToNextChar, None), 0), # t
+                (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 0), # T
+                (k["r"], "*") : (0, (self.ReplaceChar, None), 0), # r*
+                (k["S"], "*")  : (0, (self.SurroundSelection, None), 2), # S
 
 
-                (99,)  : (0, (self.DeleteSelectionAndInsert, None), 2), # c
-                (100,)  : (0, (self.DeleteSelection, None), 1), # d
-                (68,) : (0, (self.DeleteSelectionLines, None), 2), # D
-                (120,)  : (0, (self.DeleteSelection, None), 1), # x
-                (121,) : (0, (self.Yank, False), 0), # y
-                (89,) : (0, (self.Yank, True), 0), # Y
-                (60,) : (0, (self.Indent, {"forward":False, "visual":True}), 0), # <
-                (62,) : (0, (self.Indent, {"forward":True, "visual":True}), 0), # >
-                (117,) : (0, (self.SelectionToLowerCase, None), 0), # u
-                (85,) : (0, (self.SelectionToUpperCase, None), 0), # U
-                (103, 117) : (0, (self.SelectionToLowerCase, None), 0), # gu
-                (103, 85) : (0, (self.SelectionToUpperCase, None), 0), # gU
-                (103, 115) : (0, (self.SelectionToSubscript, None), 0), # gs
-                (103, 83) : (0, (self.SelectionToSuperscript, None), 0), # gS
+                (k["c"],)  : (0, (self.DeleteSelectionAndInsert, None), 2), # c
+                (k["d"],)  : (0, (self.DeleteSelection, None), 1), # d
+                (k["D"],) : (0, (self.DeleteSelectionLines, None), 2), # D
+                (k["x"],)  : (0, (self.DeleteSelection, None), 1), # x
+                (k["y"],) : (0, (self.Yank, False), 0), # y
+                (k["Y"],) : (0, (self.Yank, True), 0), # Y
+                (k["<"],) : (0, (self.Indent, {"forward":False, "visual":True}), 0), # <
+                (k[">"],) : (0, (self.Indent, {"forward":True, "visual":True}), 0), # >
+                (k["u"],) : (0, (self.SelectionToLowerCase, None), 0), # u
+                (k["U"],) : (0, (self.SelectionToUpperCase, None), 0), # U
+                (k["g"], k["u"]) : (0, (self.SelectionToLowerCase, None), 0), # gu
+                (k["g"], k["U"]) : (0, (self.SelectionToUpperCase, None), 0), # gU
+                (k["g"], k["s"]) : (0, (self.SelectionToSubscript, None), 0), # gs
+                (k["g"], k["S"]) : (0, (self.SelectionToSuperscript, None), 0), # gS
 
-                (92, 100, 99, u"*") : (0, (self.DeleteCharFromSelection, 
-                                                                None), 0), # gS
+                (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection, 
+                                                                None), 0), # \dc* 
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
         # as in normal mode (and it most cases are replaced by other function)
-        del self.keys[2][(100, 100)] # dd
-        del self.keys[2][(121, 121)] # yy
-        del self.keys[2][(105,)] # i
-        del self.keys[2][(97,)] # a
-        del self.keys[2][(83,)] # S
+        del self.keys[2][(k["d"], k["d"])] # dd
+        del self.keys[2][(k["y"], k["y"])] # yy
+        del self.keys[2][(k["i"],)] # i
+        del self.keys[2][(k["a"],)] # a
+        del self.keys[2][(k["S"],)] # S
 
         self.keys[3] = {}
 
@@ -4649,6 +4650,17 @@ class ViHandler(ViHelper):
         key = evt.GetKeyCode()
 
         if m == ViHelper.INSERT:
+
+            # TODO: Allow navigation with Ctrl-N / Ctrl-P
+            accP = getAccelPairFromKeyDown(evt)
+            matchesAccelPair = self.ctrl.presenter.getMainControl().\
+                                    keyBindings.matchesAccelPair
+
+            if matchesAccelPair("AutoComplete", accP):
+                # AutoComplete is normally Ctrl-Space
+                # Handle autocompletion
+                self.ctrl.autoComplete()
+
             # The following code is mostly duplicated from OnKeyDown (should be
             # rewritten to avoid duplication)
             # TODO Check all modifiers
@@ -4741,7 +4753,7 @@ class ViHandler(ViHelper):
             return True
 
         # Registers
-        if m != 1 and key == 34 and self._acceptable_keys is None: # "
+        if m != 1 and key == 34 and self._acceptable_keys is None and not self.key_inputs: # "
             self.register.select_register = True
             return True
         elif self.register.select_register:
@@ -4922,17 +4934,25 @@ class ViHandler(ViHelper):
 # Misc stuff
 #--------------------------------------------------------------------
     def Autocomplete(self, forwards):
+        # TODO: fix for single length words.
         if not self.ctrl.AutoCompActive():
             # NOTE: list order is not correct
-            print self.GetUnichrAt(self.ctrl.GetCurrentPos()-1)
-            if self.GetUnichrAt(self.ctrl.GetCurrentPos()-1) in \
+            pos = self.ctrl.GetCurrentPos()
+            if pos - 1 > 0 and self.GetUnichrAt(pos-1) in \
                                 self.WORD_BREAK_INCLUDING_WHITESPACE:
                 word = u"[a-zA-Z0-9_]"
                 word_length = 0
-
+            # Select in word fails if it is a single char, may be better
+            # to fix it there
+            elif pos - 2 > 0 and self.GetUnichrAt(pos-2) in \
+                                self.WORD_BREAK_INCLUDING_WHITESPACE:
+                self.ctrl.CharLeftExtend()
+                word = self.ctrl.GetSelectedText()
+                word_length = 1
             else:
                 self.ctrl.CharLeft()
                 # Vim only selects backwards
+                # this will select the entire word
                 self.SelectInWord()
                 self.ctrl.CharRightExtend()
                 #self.ExtendSelectionIfRequired()

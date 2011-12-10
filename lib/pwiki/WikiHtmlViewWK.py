@@ -1610,70 +1610,71 @@ class ViFunctions(ViHelper):
     def __init__(self, view):
         ViHelper.__init__(self, view)
 
+        k = ViHelper.KEY_BINDINGS
         # Currently we only have one mode whilst in preview
         self.keys = { 0 : {
-            (103, 117) : (0, (self.ViewParents, False), 0), # gu
-            (103, 85) : (0, (self.ViewParents, True), 0), # gU
-            (92, 117) : (0, (self.ViewParents, False), 0), # \u
-            (92, 85) : (0, (self.ViewParents, True), 0), # \U
-            (103, 116) : (0, (self.SwitchTabs, None), 0), # gt
-            (103, 84)  : (0, (self.SwitchTabs, True), 0), # gT
-            (103, 114) : (0, (self.OpenHomePage, False), 0), # gr
-            (103, 82) : (0, (self.OpenHomePage, True), 0), # gR
+            (k["g"], k["y"]) : (0, (self.ViewParents, False), 0), # gu
+            (k["g"], k["U"]) : (0, (self.ViewParents, True), 0), # gU
+            (k["\\"], k["y"]) : (0, (self.ViewParents, False), 0), # \u
+            (k["\\"], k["U"]) : (0, (self.ViewParents, True), 0), # \U
+            (k["g"], k["t"]) : (0, (self.SwitchTabs, None), 0), # gt
+            (k["g"], k["T"])  : (0, (self.SwitchTabs, True), 0), # gT
+            (k["g"], k["r"]) : (0, (self.OpenHomePage, False), 0), # gr
+            (k["g"], k["R"]) : (0, (self.OpenHomePage, True), 0), # gR
 
-            (92, 111) : (0, (self.ctrl.presenter.getMainControl(). \
+            (k["\\"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
                                             showWikiWordOpenDialog, None), 0), # \o
             # TODO: rewrite open dialog so it can be opened with new tab as default
-            (92, 79): (0, (self.ctrl.presenter.getMainControl(). \
+            (k["\\"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
                                             showWikiWordOpenDialog, None), 0), # \O
 
-            (100, 100) : (0, (self.CloseCurrentTab, None), 0), # dd
+            (k["d"], k["d"]) : (0, (self.CloseCurrentTab, None), 0), # dd
 
-            (90, 90) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0), # ZZ
+            (k["Z"], k["Z"]) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0), # ZZ
 
             # ctrl +
 
-            ("ctrl", 91) : (0, (self.ctrl.html.ClearSelection, None), 0), # Ctrl + [
-            ("ctrl", 100) : (0, (self.HalfPageJumpDown, None), 0), # Ctrl + d
-            ("ctrl", 117) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
-            ("ctrl", 108) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
+            ("Ctrl", k["["]) : (0, (self.ctrl.html.ClearSelection, None), 0), # Ctrl + [
+            ("Ctrl", k["d"]) : (0, (self.HalfPageJumpDown, None), 0), # Ctrl + d
+            ("Ctrl", k["y"]) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
+            ("Ctrl", k["l"]) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
 
-            (47,)  : (0, (self.StartSearch, None), 0), # /
-            (91,)  : (0, (self.GoBackwardInHistory, None), 0), # [
-            (93,)  : (0, (self.GoForwardInHistory, None), 0), # ]
+            (k["/"],)  : (0, (self.StartSearch, None), 0), # /
+            (k["["],)  : (0, (self.GoBackwardInHistory, None), 0), # [
+            (k["]"],)  : (0, (self.GoForwardInHistory, None), 0), # ]
             # H and L are equivelent to gh and gl in preview mode
-            (72,)  : (0, (self.GoBackwardInHistory, None), 0), # H
-            (76,)  : (0, (self.GoForwardInHistory, None), 0), # L
-            (103, 72)  : (0, (self.GoBackwardInHistory, None), 0), # gH
-            (103, 76)  : (0, (self.GoForwardInHistory, None), 0), # gL
-            (103, 104)  : (0, (self.GoBackwardInHistory, None), 0), # gh
-            (103, 108)  : (0, (self.GoForwardInHistory, None), 0), # gl
+            (k["H"],)  : (0, (self.GoBackwardInHistory, None), 0), # H
+            (k["L"],)  : (0, (self.GoForwardInHistory, None), 0), # L
+            (k["g"], k["H"])  : (0, (self.GoBackwardInHistory, None), 0), # gH
+            (k["g"], k["L"])  : (0, (self.GoForwardInHistory, None), 0), # gL
+            (k["g"], k["h"])  : (0, (self.GoBackwardInHistory, None), 0), # gh
+            (k["g"], k["l"])  : (0, (self.GoForwardInHistory, None), 0), # gl
 
-            (72,)  : (0, (self.GoBackwardInHistory, None), 0), # H
-            (76,)  : (0, (self.GoForwardInHistory, None), 0), # L
-            (111,) : (0, (self.ctrl.presenter.getMainControl(). \
+            (k["H"],)  : (0, (self.GoBackwardInHistory, None), 0), # H
+            (k["L"],)  : (0, (self.GoForwardInHistory, None), 0), # L
+            (k["o"],) : (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # o
-            (79,) : (0, (self.ctrl.presenter.getMainControl(). \
+            (k["O"],) : (0, (self.ctrl.presenter.getMainControl(). \
                                     showWikiWordOpenDialog, None), 0), # O
-            (106,) : (0, (self.DocumentNavigation, 106), 0), # j
-            (107,) : (0, (self.DocumentNavigation, 107), 0), # k
-            (104,) : (0, (self.DocumentNavigation, 104), 0), # h
-            (108,) : (0, (self.DocumentNavigation, 108), 0), # l
-            (103, 103) : (0, (self.DocumentNavigation, (103, 103)), 0), # gg
-            (71,)  : (0, (self.DocumentNavigation, 71), 0), # G
-            (37,)  : (0, (self.DocumentNavigation, 37), 0), # %
-            (36,)  : (0, (self.DocumentNavigation, 36), 0), # $
-            (94,)  : (0, (self.DocumentNavigation, 94), 0), # ^
-            (48,)  : (0, (self.DocumentNavigation, 48), 0), # 0
-            (102,) : (0, (self.startFollowHint, 0), 0), # f
-            (70,) : (0, (self.startFollowHint, 2), 0), # F
-            (89,)  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
-            (117,) : (0, (self.CopyWikiWord, None), 0), # y
-            #65293  : (self.ctrl.FollowLinkIfSelected, None), # return
+            (k["j"],) : (0, (self.DocumentNavigation, k["j"]), 0), # j
+            (k["k"],) : (0, (self.DocumentNavigation, k["k"]), 0), # k
+            (k["h"],) : (0, (self.DocumentNavigation, k["h"]), 0), # h
+            (k["l"],) : (0, (self.DocumentNavigation, k["l"]), 0), # l
+            (k["g"], k["g"]) : (0, (self.DocumentNavigation, (k["g"], k["g"])), 0), # gg
+            (k["G"],)  : (0, (self.DocumentNavigation, k["G"]), 0), # G
+            (k["%"],)  : (0, (self.DocumentNavigation, k["%"]), 0), # %
+            (k["$"],)  : (0, (self.DocumentNavigation, k["$"]), 0), # $
+            (k["^"],)  : (0, (self.DocumentNavigation, k["^"]), 0), # ^
+            (k["0"],)  : (0, (self.DocumentNavigation, k["0"]), 0), # 0
+            (k["f"],) : (0, (self.startFollowHint, 0), 0), # f
+            (k["F"],) : (0, (self.startFollowHint, 2), 0), # F
+            (k["Y"],)  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
+            (k["y"],) : (0, (self.CopyWikiWord, None), 0), # y
+            #652k["]"]  : (self.ctrl.FollowLinkIfSelected, None), # return
 
-            (103, 115)  : (0, (self.SwitchEditorPreview, None), 0), # gs
-            (103, 101)  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
-            (103, 112)  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
+            (k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
+            (k["g"], k["."])  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
+            (k["g"], k["p"])  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
             (65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
             (65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
     
