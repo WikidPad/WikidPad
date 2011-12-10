@@ -1479,7 +1479,10 @@ class WikiHtmlViewWK(wx.Panel):
                 self.gotoAnchor(hrefSplit[1])
                 #decision.ignore()
             else:
-                self.presenter.getMainControl().launchUrl(href)
+                # To lauch external urls we need to remove webkits preceeding
+                # "file:///", quote the url and add "file:/"
+                self.presenter.getMainControl().launchUrl(
+                        "file:/{0}".format(urllib.quote(href[len("file:///"):])))
                 #decision.ignore()
             return True
         else:
