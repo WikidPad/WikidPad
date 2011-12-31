@@ -366,6 +366,7 @@ WikidPadHelp/files/testimg.gif -text
 /bld.bat -text
 /buildGadflyZips.py -text
 /buildWinPortZip.py -text
+docs/MenuHandling_contextInfo.txt -text
 docs/api.txt -text
 docs/dev-definitions.txt -text
 docs/dev-setup.txt -text
@@ -383,6 +384,7 @@ extensions/Presentation.py -text
 extensions/WikidPadHooks.py -text
 extensions/WikidPadParserStub.py -text
 extensions/autoNew.py -text
+extensions/charcountContext.pyf -text
 extensions/referrals.py -text
 extensions/wikidPadParser/WikidPadParser.py -text
 extensions/wikidPadParser/__init__.py -text

@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-import os, sys, traceback, os.path, imp
+import os, sys, traceback, os.path, imp, collections
 
 # sys.path.append(ur"C:\Daten\Projekte\Wikidpad\Next20\extensions")
 
@@ -86,7 +86,10 @@ class SimplePluginAPI(object):
 
     @staticmethod
     def _createHelper(funcList):
-        return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in funcList]
+        f = lambda *args, **kwargs: [fun(*args, **kwargs) for fun in funcList]
+        f.getCompounds = lambda: funcList
+
+        return f
 
 
     def registerModule(self, module):
@@ -143,10 +146,17 @@ class WrappedPluginAPI(object):
     @staticmethod
     def _createHelper(wrapFct, list):
         if wrapFct is None or isinstance(wrapFct, (str, unicode)):
-            return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in list]
+            f = lambda *args, **kwargs: [fun(*args, **kwargs) for fun in list]
+            f.getCompounds = lambda: list
+            
+            return f
         else:
-            return lambda *args, **kwargs: [wrapFct(module, *args, **kwargs)
+            f = lambda *args, **kwargs: [wrapFct(module, *args, **kwargs)
                     for module in list]
+            f.getCompounds = lambda: [lambda *args, **kwargs: wrapFct(module,
+                    *args, **kwargs) for module in list]
+
+            return f
 
 
     def registerModule(self, module):
@@ -193,9 +203,12 @@ class PluginAPIAggregation(object):
 
     @staticmethod
     def _createHelper(funcList):
-        return lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
+        f = lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
                 [fun(*args, **kwargs) for fun in funcList])
+        f.getCompounds = lambda: reduce(lambda a, b: a+list(b),
+                [fun.getCompounds() for fun in funcList])
 
+        return f
 
 
 
@@ -374,6 +387,91 @@ class PluginManager(object):
 # 
 #         return module
 
+
+class LearningDispatcher:
+    def __init__(self, apiFunc):
+        self.apiFunc = apiFunc
+        self.keyToHandlerList = {}
+        
+    def hasHandlerForKey(self, key):
+        if not self.keyToHandlerList.has_key(key):
+            # If the key is not in the dictionary this function wasn't called
+            # yet therefore we have to assume that there may be handlers
+            return True
+
+        return len(self.keyToHandlerList[key]) > 0
+    
+    def clearLearning(self):
+        self.keyToHandlerList.clear()
+        
+        
+    def dispatch(self, key, *args, **kwargs):
+        result = []
+        
+        if self.keyToHandlerList.has_key(key):
+            # Function was called previously 
+            for hdl in self.keyToHandlerList[key]:
+                result.append(hdl(*args, **kwargs))
+            
+            return result
+        else:
+            # Yet unknown function
+            allHandlers = self.apiFunc.getCompounds()
+            hdlList = []
+            for hdl in allHandlers:
+                r = hdl(*args, **kwargs)
+                if r is None:
+                    # Handler doesn't handle particular key
+                    continue
+                result.append(r)
+                hdlList.append(hdl)
+            
+            self.keyToHandlerList[key] = hdlList
+
+        return result
+
+
+class KeyInParamLearningDispatcher(LearningDispatcher):
+    def __init__(self, apiFunc, keyIdx):
+        LearningDispatcher.__init__(self, apiFunc)
+        self.keyIdx = keyIdx
+
+    def dispatch(self, *args, **kwargs):
+        return LearningDispatcher.dispatch(self, args[self.keyIdx],
+                *args, **kwargs)
+
+
+
+# class MenuPluginDispatcher:
+#     """
+#     Dispatches menus (especially context menus) to handlers which can modify
+#     them to add additional menu items
+#     """
+#     def __init__(self, descriptors):
+#         """
+#         descriptors -- Sequence of tuples as returned by
+#             describeMenuModifiers() of a plugin. Each tuple is of form
+#             (contextName, menuHandler). Assume length >= 2, it may have
+#             additional fields.
+#         """
+#         contextNameIndex = collections.defaultdict(list)
+#         for d in descriptors:
+#             contextNameIndex[d[0]].append(d)
+# 
+#         self.contextNameIndex = contextNameIndex
+# 
+#     def hasHandlerForContextName(self, contextName):
+#         return self.contextNameIndex.has_key(contextName) or \
+#                 self.contextNameIndex.has_key("*")
+# 
+#     def dispatch(self, menu, contextName, contextDict):
+#         for d in self.contextNameIndex.get(contextName, ()):
+#             d[1](menu, contextName, contextDict)
+#         for d in self.contextNameIndex.get("*", ()):
+#             d[1](menu, contextName, contextDict)
+        
+    
+        
 
 
 class InsertionPluginManager:

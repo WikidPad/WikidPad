@@ -27,7 +27,7 @@ def _unescapeWithRe(text):
 
 class wxIdPool:
     def __init__(self):
-        self.poolmap={}
+        self._poolmap={}
 
     def __getattr__(self, name):
         """Returns a new wx-Id for each new string <name>.
@@ -40,11 +40,13 @@ class wxIdPool:
             return XRCID(name)
         except:
             try:
-                return self.poolmap[name]
+                return self._poolmap[name]
             except KeyError:
                 id = wx.NewId()
-                self.poolmap[name] = id
+                self._poolmap[name] = id
                 return id
+                
+    __getitem__ = __getattr__
 
 
 GUI_ID = wxIdPool()
@@ -1200,6 +1202,196 @@ if SystemInfo.isWindows():   # Maybe necessary for other OS' as well
 else:
     def autosizeColumn(listCtrl, col):
         listCtrl.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+
+
+
+def registerPluginGuiId(idText):
+    """
+    Takes a string id and returns an id number suitable for GUI operations.
+    If given  idText  wasn't used in a previous call, a new id is returned
+    otherwise the same id as for the first call with same idText is returned.
+    """
+    return GUI_ID[idText]
+
+
+
+class EnhancedPlgSuppMenu(wx.Menu):
+    """
+    A plugin supported context menu provides functionality for plugins to add
+    additional menu items and react on them
+    """
+    def __init__(self, owningWindow, title=u"", style=0):
+        wx.Menu.__init__(self, title, style)
+
+        self.contextName = None
+        self.contextDict = None
+        self.listenedIds = set()
+        self.owningWindow = owningWindow
+
+    def close(self):
+        self.clearListeners()
+
+    def setContext(self, contextName, contextDict):
+        self.contextName = contextName
+        self.contextDict = contextDict
+
+    def setContextName(self, contextName):
+        self.contextName = contextName
+        
+    def getContextName(self):
+        return self.contextName
+
+    def setContextDict(self, contextDict):
+        self.contextDict = contextDict
+        
+    def getContextDict(self):
+        return self.contextDict
+        
+    def getOwningWindow(self):
+        return self.owningWindow
+
+        
+    @staticmethod
+    def convertId(id):
+        if isinstance(id, basestring):
+            id = registerPluginGuiId(id)
+        elif id == -1:
+            id = wx.NewId()
+
+        return id
+    
+    def appendNecessarySeparator(self):
+        """
+        Similar to AppendSeparator, but ensures that no separator appears
+        at the beginning of the menu or two separators consecutively.
+        """
+        if self.GetMenuItemCount() == 0:
+            return
+        
+        # Python's  "list[-1]"  syntax doesn't work here
+        if self.GetMenuItems()[self.GetMenuItemCount() - 1].IsSeparator():
+            return
+        
+        self.AppendSeparator()
+
+
+    def preparePlgMenuItem(self, label, hint, evtfct=None, iconBitmap=None,
+            menuID=None, updatefct=None, kind=wx.ITEM_NORMAL):
+        """
+        Prepare a menu item for a plugin. Mainly called by "provideMenuItemV01"
+        of a "MenuItemProvider" plugin.
+        label -- Label of menu item
+        hint -- Short help text for status bar
+        evtfct -- function to call when item is clicked, function takes
+            the following parameters:
+            
+            menuItemUnifName -- unified name string identifying provided menu item
+            contextName -- string to identify the basic type of menu, e.g.
+                "contextMenu/editor/textArea" for the context menu in
+                the text area of the editor.
+            
+            contextDict -- a dictionary with string keys and arbitrary objects
+                as values. These give more information about the situation
+                in which the menu was created. The content depends on
+                the context name.
+                Detailed information is given in
+                "docs/MenuHandling_contextInfo.txt".
+            
+            menu -- this menu object
+
+        iconBitmap -- icon as wx.Bitmap object
+        menuID -- string or number to identify item uniquely in the scope of
+            this menu
+        updatefct -- function to call when item needs UI update (before it is
+            shown). Function takes same parameters as  evtfct.
+        kind -- One of wx.ITEM_NORMAL, wx.ITEM_CHECK, wx.ITEM_RADIO
+        
+        Returns: Newly created wx.MenuItem object
+        """
+        # Similar to (but not copy of) PersonalWikiFrame.addMenuItem
+
+        menuIDNo = self.convertId(menuID)
+        
+        if menuIDNo is None:
+            menuIDNo = wx.NewId()
+            
+        if kind is None:
+            kind = wx.ITEM_NORMAL
+
+#         lcut = label.split(u"\t", 1)
+#         if len(lcut) > 1:
+#             lcut[1] = self.translateMenuAccelerator(lcut[1])
+#             label = lcut[0] + u" \t" + lcut[1]
+
+        menuitem = wx.MenuItem(self, menuIDNo, label, hint, kind)
+        if iconBitmap:
+            menuitem.SetBitmap(iconBitmap)
+
+        # self.AppendItem(menuitem)
+        if evtfct is not None:
+            self.addCmdListener(menuIDNo, evtfct, menuID)
+
+        if updatefct is not None:
+# TODO:
+#             if isinstance(updatefct, tuple):
+#                 updatefct = _buildChainedUpdateEventFct(updatefct)
+            self.addUpdListener(menuIDNo, updatefct, menuID)
+
+        return menuitem
+
+
+#     def addPlgMenuItem(self, label, hint, evtfct=None, iconBitmap=None,
+#             menuID=None, updatefct=None, kind=wx.ITEM_NORMAL):
+#         # Similar to (but not copy of) PersonalWikiFrame.addMenuItem
+#         
+#         menuitem = self.preparePlgMenuItem(label, hint, evtfct, iconBitmap,
+#             menuID, updatefct, kind)
+#         self.AppendItem(menuitem)
+#         return menuitem
+
+
+    def insertProvidedItem(self, insertIdx, unifName):
+        wx.GetApp().getProvideMenuItemDispatcher().dispatch(unifName,
+                self.contextName, self.contextDict, self, insertIdx)
+    
+    def appendProvidedItem(self, unifName):
+        return self.insertProvidedItem(self.GetMenuItemCount(), unifName)
+
+    def addCmdListener(self, id, handler, origId=None):
+        id = self.convertId(id)
+        self.owningWindow.Bind(wx.EVT_MENU, lambda evt: handler(evt, origId,
+                self.contextName, self.contextDict, self), id=id)
+        self.listenedIds.add(id)
+    
+    def removeCmdListener(self, id):
+        id = self.convertId(id)
+        self.owningWindow.Unbind(wx.EVT_MENU, id=id)
+        self.listenedIds.discard(id)
+
+
+    def addUpdListener(self, id, handler, origId=None):
+        id = self.convertId(id)
+#         self.Bind(wx.EVT_UPDATE_UI, handler, id=id)
+        self.owningWindow.Bind(wx.EVT_UPDATE_UI, lambda evt: handler(evt, origId,
+                self.contextName, self.contextDict, self), id=id)
+        self.listenedIds.add(id)
+    
+    def removeUpdListener(self, id):
+        id = self.convertId(id)
+        self.owningWindow.Unbind(wx.EVT_UPDATE_UI, id=id)
+        self.listenedIds.discard(id)
+
+
+    def clearListeners(self):
+        for id in self.listenedIds:
+            self.owningWindow.Unbind(wx.EVT_MENU, id=id)
+            self.owningWindow.Unbind(wx.EVT_UPDATE_UI, id=id)
+
+        self.listenedIds.clear()
+
+
+
+
 
 
 

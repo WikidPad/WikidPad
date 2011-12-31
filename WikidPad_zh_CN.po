@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WikidPad 2.2\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2011-05-04 16:31+0800\n"
+"PO-Revision-Date: 2011-12-06 15:29+0800\n"
 "Last-Translator: 郁晓旭 <yuxiaoxu@msn.com>\n"
 "Language-Team: yuxiaoxu <yuxiaoxu@msn.com>\n"
 "MIME-Version: 1.0\n"
@@ -40,6 +40,10 @@ msgid " &Test "
 msgstr "测试(&T)"
 
 #: WikidPad.xrc:0
+msgid " Close "
+msgstr " 关闭"
+
+#: WikidPad.xrc:0
 msgid " Find &Next "
 msgstr "查找下一个(&N)"
 
@@ -54,6 +58,10 @@ msgstr "区分大小写(&C)"
 #: WikidPad.xrc:0
 msgid "&Create"
 msgstr "创建(&C)"
+
+#: WikidPad.xrc:0
+msgid "&Delete All"
+msgstr "全删(&D)"
 
 #: WikidPad.xrc:0
 msgid "&Delete Export(s)"
@@ -92,8 +100,8 @@ msgid "&Replace"
 msgstr "替换(&R)"
 
 #: WikidPad.xrc:0
-msgid "&Replace by:"
-msgstr "替换为(&R):"
+msgid "&Restore"
+msgstr "还原(&R)"
 
 #: WikidPad.xrc:0
 msgid "&Save Export"
@@ -106,6 +114,10 @@ msgstr "保存搜索(&S)"
 #: WikidPad.xrc:0
 msgid "&Search:"
 msgstr "检索(&S):"
+
+#: WikidPad.xrc:0
+msgid "&Strip leading/trailing spaces"
+msgstr "前缀/后缀空间(&S)"
 
 #: WikidPad.xrc:0
 msgid "&Whole word"
@@ -262,6 +274,14 @@ msgstr "作为树"
 #: WikidPad.xrc:0
 msgid "Ask"
 msgstr "询问"
+
+#: WikidPad.xrc:0
+msgid "Ask before deletion of wiki word"
+msgstr "删除维基字前询问"
+
+#: WikidPad.xrc:0
+msgid "Ask for creation when opening non-existing word"
+msgstr "当打开不存在关键字，是否询问创建。"
 
 #: WikidPad.xrc:0
 msgid "Ask settings on each paste"
@@ -584,6 +604,10 @@ msgid "Format version"
 msgstr "格式版本"
 
 #: WikidPad.xrc:0
+msgid "General"
+msgstr "一般"
+
+#: WikidPad.xrc:0
 msgid "Given:"
 msgstr "给定："
 
@@ -610,6 +634,10 @@ msgstr "标题前缀："
 #: WikidPad.xrc:0
 msgid "Headings as aliases"
 msgstr "标题作为别名"
+
+#: WikidPad.xrc:0
+msgid "Height:"
+msgstr "高度："
 
 #: WikidPad.xrc:0
 msgid "Hidden"
@@ -648,6 +676,10 @@ msgid "Image pasting"
 msgstr "粘贴图像"
 
 #: WikidPad.xrc:0
+msgid "Image preview tooltips for local URLs"
+msgstr "图像预览本地URL链接提示"
+
+#: WikidPad.xrc:0
 msgid "Import format:"
 msgstr "导入格式:"
 
@@ -670,6 +702,10 @@ msgstr "交集"
 #: WikidPad.xrc:0
 msgid "JPEG"
 msgstr "JPEG"
+
+#: WikidPad.xrc:0
+msgid "Just bring to front if open already"
+msgstr "如已打开，置于最前"
 
 #: WikidPad.xrc:0
 msgid "Keeping directory in filestorage keeps everything in it"
@@ -706,6 +742,14 @@ msgstr "边界色:"
 #: WikidPad.xrc:0
 msgid "Max. characters on each tab:"
 msgstr "每个标签最大字符数:"
+
+#: WikidPad.xrc:0
+msgid "Max. entries:"
+msgstr "最大条目："
+
+#: WikidPad.xrc:0
+msgid "Max. number of entries:"
+msgstr "最大条目数："
 
 #: WikidPad.xrc:0
 msgid "Middle button with CTRL:"
@@ -752,8 +796,20 @@ msgid "N. T. &Backgr."
 msgstr "新标签页在后台(&B)"
 
 #: WikidPad.xrc:0
+msgid "Name clash"
+msgstr "名称冲突"
+
+#: WikidPad.xrc:0
+msgid "Name collision:"
+msgstr "命名冲突："
+
+#: WikidPad.xrc:0
 msgid "Natural"
 msgstr "固有"
+
+#: WikidPad.xrc:0
+msgid "New Window"
+msgstr "新窗口"
 
 #: WikidPad.xrc:0
 msgid "New tab in background"
@@ -932,8 +988,8 @@ msgid "Preview"
 msgstr "预览"
 
 #: WikidPad.xrc:0
-msgid "Preview renderer:"
-msgstr "渲染引擎:"
+msgid "Preview renderer*:"
+msgstr "预览渲染："
 
 #: WikidPad.xrc:0
 msgid "Preview:"
@@ -964,12 +1020,20 @@ msgid "R&egular expression"
 msgstr "正则表达式(&E)"
 
 #: WikidPad.xrc:0
+msgid "Re&place by:"
+msgstr "替换为(&R)："
+
+#: WikidPad.xrc:0
 msgid "Read-only wiki"
 msgstr "只读维基"
 
 #: WikidPad.xrc:0
 msgid "Recent wikis list length:"
 msgstr "最近维基列表长度:"
+
+#: WikidPad.xrc:0
+msgid "Reduce update handling in HTML preview"
+msgstr "减少更新HTML预览处理"
 
 #: WikidPad.xrc:0
 msgid "Referencing directory in filestorage keeps everything in it"
@@ -994,6 +1058,14 @@ msgstr "改字："
 #: WikidPad.xrc:0
 msgid "Rename dialog defaults"
 msgstr "修改对话框默认值"
+
+#: WikidPad.xrc:0
+msgid "Rename trashcan entry to:"
+msgstr "重命名垃圾箱条目为："
+
+#: WikidPad.xrc:0
+msgid "Rename wiki element to:"
+msgstr "重命名维基元素为："
 
 #: WikidPad.xrc:0
 msgid "Replace &All"
@@ -1128,6 +1200,10 @@ msgid "Single process per user*"
 msgstr "单用户单进程*"
 
 #: WikidPad.xrc:0
+msgid "Skip"
+msgstr "跳过"
+
+#: WikidPad.xrc:0
 msgid "Sort"
 msgstr "排序"
 
@@ -1208,6 +1284,10 @@ msgid "System"
 msgstr "系统"
 
 #: WikidPad.xrc:0
+msgid "Tab history"
+msgstr "浏览选项卡历史"
+
+#: WikidPad.xrc:0
 msgid "Tab width:"
 msgstr "表格符宽度:"
 
@@ -1268,6 +1348,10 @@ msgid "Translate menu accelerators for keyboard layout* (Windows)"
 msgstr "按键盘布局转化菜单加速键（Windows）"
 
 #: WikidPad.xrc:0
+msgid "Trashcan"
+msgstr "垃圾箱"
+
+#: WikidPad.xrc:0
 msgid "Tree auto-follow"
 msgstr "树自动跟随"
 
@@ -1324,12 +1408,24 @@ msgid "Use link title if present"
 msgstr "如果当前使用标题链接"
 
 #: WikidPad.xrc:0
+msgid "Use vi keys in Webkit preview"
+msgstr "Webkit预览使用vi关键字"
+
+#: WikidPad.xrc:0
+msgid "Use vi keys in editor"
+msgstr "在编辑器使用vi关键字"
+
+#: WikidPad.xrc:0
 msgid "User notification:"
 msgstr "用户统治:"
 
 #: WikidPad.xrc:0
 msgid "Version Import"
 msgstr "导入版本"
+
+#: WikidPad.xrc:0
+msgid "Versioning"
+msgstr "版本化"
 
 #: WikidPad.xrc:0
 msgid "Visited link color:"
@@ -1358,6 +1454,10 @@ msgstr "当维基打开时"
 #: WikidPad.xrc:0
 msgid "Whole wiki"
 msgstr "整个维基"
+
+#: WikidPad.xrc:0
+msgid "Width:"
+msgstr "宽度："
 
 #: WikidPad.xrc:0
 msgid "Wiki Search"
@@ -1404,8 +1504,8 @@ msgid "bytes"
 msgstr "字节"
 
 #: WikidPad.xrc:0
-msgid "cursor"
-msgstr "光标"
+msgid "c&ursor"
+msgstr "光标(&U)"
 
 #: WikidPad.xrc:0
 msgid "include in export:"
@@ -1440,48 +1540,49 @@ msgid "..."
 msgstr "..."
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:792
+#: lib\pwiki\AdditionalDialogs.py:823
 msgid " OK "
 msgstr "确定"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:796
+#: lib\pwiki\AdditionalDialogs.py:827
 msgid " Cancel "
 msgstr "取消"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1183
+#: lib\pwiki\AdditionalDialogs.py:1214
 msgid "Destination directory:"
 msgstr "目的目录:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1377
-#: lib\pwiki\SearchAndReplaceDialogs.py:1485
+#: lib\pwiki\AdditionalDialogs.py:1408
+#: lib\pwiki\SearchAndReplaceDialogs.py:892
+#: lib\pwiki\SearchAndReplaceDialogs.py:1697
 msgid "Title:"
 msgstr "标题:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1659
+#: lib\pwiki\AdditionalDialogs.py:1690
 msgid "Source directory:"
 msgstr "源目录:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\DiffGui.py:436
-#: lib\pwiki\PersonalWikiFrame.py:1320
-#: lib\pwiki\WikiTxtCtrl.py:3601
+#: lib\pwiki\DiffGui.py:509
+#: lib\pwiki\PersonalWikiFrame.py:1361
+#: lib\pwiki\WikiTxtCtrl.py:3707
 msgid "Copy"
 msgstr "复制"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\DiffGui.py:437
-#: lib\pwiki\PersonalWikiFrame.py:1329
-#: lib\pwiki\WikiTxtCtrl.py:3604
+#: lib\pwiki\DiffGui.py:510
+#: lib\pwiki\PersonalWikiFrame.py:1370
+#: lib\pwiki\WikiTxtCtrl.py:3710
 msgid "Select All"
 msgstr "全选"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\DiffGui.py:439
-#: lib\pwiki\WikiTxtCtrl.py:3618
+#: lib\pwiki\DiffGui.py:512
+#: lib\pwiki\WikiTxtCtrl.py:3727
 msgid "Close Tab"
 msgstr "关闭标签卡"
 
@@ -1498,10 +1599,10 @@ msgstr "保留"
 #: lib\pwiki\FileCleanup.py:616
 #: lib\pwiki\FileCleanup.py:686
 #: lib\pwiki\FileCleanup.py:775
-#: lib\pwiki\MptImporterGui.py:170
-#: lib\pwiki\MptImporterGui.py:172
+#: lib\pwiki\MptImporterGui.py:173
+#: lib\pwiki\MptImporterGui.py:175
 #: lib\pwiki\OptionsDialog.py:139
-#: lib\pwiki\OptionsDialog.py:885
+#: lib\pwiki\OptionsDialog.py:907
 msgid "Default"
 msgstr "默认"
 
@@ -1510,7 +1611,7 @@ msgstr "默认"
 #: lib\pwiki\FileCleanup.py:531
 #: lib\pwiki\FileCleanup.py:687
 #: lib\pwiki\FileCleanup.py:1265
-#: lib\pwiki\WikiTxtCtrl.py:3603
+#: lib\pwiki\WikiTxtCtrl.py:3709
 msgid "Delete"
 msgstr "删除"
 
@@ -1522,99 +1623,99 @@ msgid "Collect"
 msgstr "收藏"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\MptImporterGui.py:170
-#: lib\pwiki\MptImporterGui.py:172
+#: lib\pwiki\MptImporterGui.py:173
+#: lib\pwiki\MptImporterGui.py:175
 msgid "Yes"
 msgstr "是"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\MptImporterGui.py:171
+#: lib\pwiki\MptImporterGui.py:174
 msgid "Overwrite"
 msgstr "覆写"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\MptImporterGui.py:171
-#: lib\pwiki\MptImporterGui.py:172
+#: lib\pwiki\MptImporterGui.py:174
+#: lib\pwiki\MptImporterGui.py:175
 msgid "No"
 msgstr "否"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\MptImporterGui.py:195
+#: lib\pwiki\MptImporterGui.py:199
 msgid "Import"
 msgstr "导入"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\OptionsDialog.py:680
-msgid "Versioning"
-msgstr "版本化"
-
-#: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1295
-#: lib\pwiki\WikiTxtCtrl.py:3598
+#: lib\pwiki\PersonalWikiFrame.py:1336
+#: lib\pwiki\WikiTxtCtrl.py:3704
 msgid "Undo"
 msgstr "撤消"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1299
-#: lib\pwiki\WikiTxtCtrl.py:3599
+#: lib\pwiki\PersonalWikiFrame.py:1340
+#: lib\pwiki\WikiTxtCtrl.py:3705
 msgid "Redo"
 msgstr "重做"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1315
-#: lib\pwiki\WikiTxtCtrl.py:3600
+#: lib\pwiki\PersonalWikiFrame.py:1356
+#: lib\pwiki\WikiTxtCtrl.py:3706
 msgid "Cut"
 msgstr "剪切"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1324
-#: lib\pwiki\WikiTxtCtrl.py:3602
+#: lib\pwiki\PersonalWikiFrame.py:1365
+#: lib\pwiki\WikiTxtCtrl.py:3708
 msgid "Paste"
 msgstr "粘贴"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1617
+#: lib\pwiki\PersonalWikiFrame.py:1658
 msgid "&Delete"
 msgstr "删除(&D)"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:2031
-#: lib\pwiki\PersonalWikiFrame.py:2032
+#: lib\pwiki\PersonalWikiFrame.py:2087
+#: lib\pwiki\PersonalWikiFrame.py:2088
 msgid "Open Wiki Word"
 msgstr "打开维基字"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:2062
-#: lib\pwiki\PersonalWikiFrame.py:2063
+#: lib\pwiki\PersonalWikiFrame.py:2118
+#: lib\pwiki\PersonalWikiFrame.py:2119
 msgid "Rename Wiki Word"
 msgstr "更改维基字"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\SearchAndReplaceDialogs.py:855
+#: lib\pwiki\SearchAndReplaceDialogs.py:1066
 msgid "Close"
 msgstr "关闭"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\SearchAndReplaceDialogs.py:1711
+#: lib\pwiki\SearchAndReplaceDialogs.py:1923
 msgid "Set page list"
 msgstr "设置页面清单"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\SearchAndReplaceDialogs.py:1962
+#: lib\pwiki\SearchAndReplaceDialogs.py:2174
 msgid "As Resultlist"
 msgstr "结果列表"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\SearchAndReplaceDialogs.py:1967
-#: lib\pwiki\SearchAndReplaceDialogs.py:2073
+#: lib\pwiki\SearchAndReplaceDialogs.py:2179
+#: lib\pwiki\SearchAndReplaceDialogs.py:2285
 msgid "As Full Search"
 msgstr "全文检索"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\SearchAndReplaceDialogs.py:2367
-#: lib\pwiki\WikiHtmlView.py:672
+#: lib\pwiki\SearchAndReplaceDialogs.py:2579
+#: lib\pwiki\WikiHtmlView.py:708
 msgid "Activate New Tab"
 msgstr "激活新标签卡"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\timeView\TimeViewCtrl.py:58
+msgid "Wiki-wide history"
+msgstr "维基广度搜索"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\timeView\TimelinePanel.py:798
@@ -1626,19 +1727,20 @@ msgstr "显示空日"
 msgid "Sort dates ascending"
 msgstr "按日期升序"
 
-#: WikidPadStarter.py:206
+#: WikidPadStarter.py:212
 msgid "Error starting WikidPad"
 msgstr "WikidPad启动出错"
 
-#: WikidPadStarter.py:207
-#: lib\pwiki\PersonalWikiFrame.py:5097
-#: lib\pwiki\SearchAndReplaceDialogs.py:724
-#: lib\pwiki\SearchAndReplaceDialogs.py:1008
+#: WikidPadStarter.py:213
+#: lib\pwiki\PersonalWikiFrame.py:5256
+#: lib\pwiki\SearchAndReplaceDialogs.py:935
+#: lib\pwiki\SearchAndReplaceDialogs.py:1219
 msgid "Error!"
 msgstr "错误！"
 
-#: WikidPadStarter.py:214
-#: lib\pwiki\MptImporterGui.py:199
+#: WikidPadStarter.py:220
+#: lib\pwiki\MptImporterGui.py:203
+#: lib\pwiki\Printing.py:793
 msgid "Error"
 msgstr "错误"
 
@@ -1745,16 +1847,16 @@ msgstr "单个HTML文件"
 msgid "Set of HTML pages"
 msgstr "多个HTML文件"
 
-#: extensions\HtmlExporter.py:682
-#: extensions\HtmlExporter.py:771
+#: extensions\HtmlExporter.py:683
+#: extensions\HtmlExporter.py:773
 msgid "Exporting %s"
 msgstr "正导出%s"
 
-#: extensions\HtmlExporter.py:1554
-msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
-msgstr "<pre>[在 \"选项\", 页面 \"安全性\", 选项 \"程序插入脚本\"中允许插入备注]</pre>"
+#: extensions\HtmlExporter.py:1618
+msgid "<pre class=\"wikidpad\">[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
+msgstr "<pre class=\"wikidpad\">[在 \"选项\", 页面 \"安全性\", 选项 \"程序插入脚本\"中允许插入评估]</pre>"
 
-#: extensions\HtmlExporter.py:2151
+#: extensions\HtmlExporter.py:2267
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr "[发现未知解析结点名 \"%s\" ]"
 
@@ -1786,7 +1888,7 @@ msgstr "Ploticus路径:"
 msgid "Output format:"
 msgstr "输出格式:"
 
-#: extensions\WikidPadParserStub.py:121
+#: extensions\WikidPadParserStub.py:124
 msgid "Footnotes as wiki words"
 msgstr "脚注作为维基字"
 
@@ -1815,17 +1917,17 @@ msgstr "*%s页面关联l* %s\n"
 msgid "*%s page(s) referred to by* %s\n"
 msgstr "*%s页面通过* %s关联\n"
 
-#: extensions\wikidPadParser\WikidPadParser.py:1625
-#: extensions\wikidPadParser\WikidPadParser.py:1652
+#: extensions\wikidPadParser\WikidPadParser.py:1660
+#: extensions\wikidPadParser\WikidPadParser.py:1687
 msgid "This is a footnote"
 msgstr "这是脚注。"
 
-#: extensions\wikidPadParser\WikidPadParser.py:1630
-#: extensions\wikidPadParser\WikidPadParser.py:1657
+#: extensions\wikidPadParser\WikidPadParser.py:1665
+#: extensions\wikidPadParser\WikidPadParser.py:1692
 msgid "This is syntactically not a wiki word"
 msgstr "在语法上这不是个维基字。"
 
-#: extensions\wikidPadParser\WikidPadParser.py:2274
+#: extensions\wikidPadParser\WikidPadParser.py:2317
 msgid ""
 "++ Wiki Settings\n"
 "\n"
@@ -1849,34 +1951,34 @@ msgstr ""
 "\n"
 "[icon: cog]\n"
 
-#: lib\pwiki\AdditionalDialogs.py:144
-#: lib\pwiki\AdditionalDialogs.py:360
+#: lib\pwiki\AdditionalDialogs.py:145
+#: lib\pwiki\AdditionalDialogs.py:366
 msgid "Links to:"
 msgstr "链接至:"
 
-#: lib\pwiki\AdditionalDialogs.py:290
-#: lib\pwiki\AdditionalDialogs.py:402
+#: lib\pwiki\AdditionalDialogs.py:293
+#: lib\pwiki\AdditionalDialogs.py:416
 msgid "'%s' is an invalid WikiWord"
 msgstr "'%s'是无效的维基字。"
 
-#: lib\pwiki\AdditionalDialogs.py:297
+#: lib\pwiki\AdditionalDialogs.py:303
 msgid "'%s' is not an existing wikiword. Create?"
 msgstr "'%s' 不存在该维基字。是否新建?"
 
-#: lib\pwiki\AdditionalDialogs.py:298
+#: lib\pwiki\AdditionalDialogs.py:304
 msgid "Create"
 msgstr "创建"
 
-#: lib\pwiki\AdditionalDialogs.py:408
+#: lib\pwiki\AdditionalDialogs.py:422
 msgid "'%s' exists already"
 msgstr "'%s' 已存在"
 
-#: lib\pwiki\AdditionalDialogs.py:422
-#: lib\pwiki\AdditionalDialogs.py:515
+#: lib\pwiki\AdditionalDialogs.py:438
+#: lib\pwiki\AdditionalDialogs.py:545
 msgid "Do you want to delete %i wiki page(s)?"
 msgstr "你确定要删除%i维基页吗?"
 
-#: lib\pwiki\AdditionalDialogs.py:674
+#: lib\pwiki\AdditionalDialogs.py:705
 msgid ""
 "Can't process renaming:\n"
 "%s"
@@ -1884,28 +1986,29 @@ msgstr ""
 "无法处理如下内容：\n"
 "%s"
 
-#: lib\pwiki\AdditionalDialogs.py:675
+#: lib\pwiki\AdditionalDialogs.py:706
 msgid "Can't rename"
 msgstr "无法改名"
 
-#: lib\pwiki\AdditionalDialogs.py:713
+#: lib\pwiki\AdditionalDialogs.py:744
 msgid "Can't rename to itself"
 msgstr "无法改成原名"
 
-#: lib\pwiki\AdditionalDialogs.py:716
+#: lib\pwiki\AdditionalDialogs.py:747
+#: lib\pwiki\TrashcanGui.py:379
 #: lib\pwiki\WikiExceptions.py:73
 msgid "Word already exists"
 msgstr "字已存在"
 
-#: lib\pwiki\AdditionalDialogs.py:765
+#: lib\pwiki\AdditionalDialogs.py:796
 msgid "Select Icon"
 msgstr "选择图标"
 
-#: lib\pwiki\AdditionalDialogs.py:774
+#: lib\pwiki\AdditionalDialogs.py:805
 msgid "Icon"
 msgstr "图标"
 
-#: lib\pwiki\AdditionalDialogs.py:840
+#: lib\pwiki\AdditionalDialogs.py:871
 msgid ""
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -2039,95 +2142,95 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:950
+#: lib\pwiki\AdditionalDialogs.py:981
 msgid "<invalid>"
 msgstr "<无效>"
 
-#: lib\pwiki\AdditionalDialogs.py:1083
+#: lib\pwiki\AdditionalDialogs.py:1114
 msgid "Continuous Export"
 msgstr "连续导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1186
+#: lib\pwiki\AdditionalDialogs.py:1217
 msgid "Destination file:"
 msgstr "目的文件:"
 
-#: lib\pwiki\AdditionalDialogs.py:1220
+#: lib\pwiki\AdditionalDialogs.py:1251
 msgid "Destination directory does not exist"
 msgstr "目的目录必须存在"
 
-#: lib\pwiki\AdditionalDialogs.py:1225
+#: lib\pwiki\AdditionalDialogs.py:1256
 msgid "Destination must be a directory"
 msgstr "目的必须是目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1231
+#: lib\pwiki\AdditionalDialogs.py:1262
 msgid "Destination must be a file"
 msgstr "目的必须是文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1241
-#: lib\pwiki\PersonalWikiFrame.py:4683
+#: lib\pwiki\AdditionalDialogs.py:1272
+#: lib\pwiki\PersonalWikiFrame.py:4807
 msgid "Exporting"
 msgstr "导出中"
 
-#: lib\pwiki\AdditionalDialogs.py:1243
-#: lib\pwiki\PersonalWikiFrame.py:4685
+#: lib\pwiki\AdditionalDialogs.py:1274
+#: lib\pwiki\PersonalWikiFrame.py:4809
 msgid "Preparing"
 msgstr "准备中"
 
-#: lib\pwiki\AdditionalDialogs.py:1263
+#: lib\pwiki\AdditionalDialogs.py:1294
 msgid "Error while exporting"
 msgstr "导出时出错"
 
-#: lib\pwiki\AdditionalDialogs.py:1279
-#: lib\pwiki\PersonalWikiFrame.py:4626
+#: lib\pwiki\AdditionalDialogs.py:1310
+#: lib\pwiki\PersonalWikiFrame.py:4750
 msgid "Select Export Directory"
 msgstr "选择导出目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1293
-#: lib\pwiki\AdditionalDialogs.py:1732
+#: lib\pwiki\AdditionalDialogs.py:1324
+#: lib\pwiki\AdditionalDialogs.py:1763
 msgid "All files (*.*)"
 msgstr "所有文件(*.*)"
 
-#: lib\pwiki\AdditionalDialogs.py:1298
+#: lib\pwiki\AdditionalDialogs.py:1329
 msgid "Select Export File"
 msgstr "选择导出文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1325
-#: lib\pwiki\PersonalWikiFrame.py:4650
-#: lib\pwiki\PersonalWikiFrame.py:4666
-#: lib\pwiki\Printing.py:183
+#: lib\pwiki\AdditionalDialogs.py:1356
+#: lib\pwiki\PersonalWikiFrame.py:4774
+#: lib\pwiki\PersonalWikiFrame.py:4790
+#: lib\pwiki\Printing.py:198
 msgid "No real wiki word selected as root"
 msgstr "没有真正的维基字选定为根"
 
-#: lib\pwiki\AdditionalDialogs.py:1378
+#: lib\pwiki\AdditionalDialogs.py:1409
 msgid "Choose export title"
 msgstr "选择导出标题"
 
-#: lib\pwiki\AdditionalDialogs.py:1387
+#: lib\pwiki\AdditionalDialogs.py:1418
 msgid "Do you want to overwrite existing export '%s'?"
 msgstr "你确定要覆写已经存在的'%s'导出文件吗?"
 
-#: lib\pwiki\AdditionalDialogs.py:1388
+#: lib\pwiki\AdditionalDialogs.py:1419
 msgid "Overwrite export"
 msgstr "覆盖导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1427
+#: lib\pwiki\AdditionalDialogs.py:1458
 msgid "Do you want to delete %i export(s)?"
 msgstr "你确定要删除%i导出文件?"
 
-#: lib\pwiki\AdditionalDialogs.py:1428
+#: lib\pwiki\AdditionalDialogs.py:1459
 msgid "Delete export"
 msgstr "删除导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1465
+#: lib\pwiki\AdditionalDialogs.py:1496
 msgid "Selected export type does not support saving"
 msgstr "所选导出类型不支持保存"
 
-#: lib\pwiki\AdditionalDialogs.py:1506
+#: lib\pwiki\AdditionalDialogs.py:1537
 #: lib\pwiki\CmdLineAction.py:213
 msgid "Export type '%s' of saved export is not supported"
 msgstr "已保存导出不支持导出类型 '%s'"
 
-#: lib\pwiki\AdditionalDialogs.py:1517
+#: lib\pwiki\AdditionalDialogs.py:1548
 #: lib\pwiki\CmdLineAction.py:224
 msgid ""
 "Saved export uses different version for additional options than current export\n"
@@ -2140,49 +2243,49 @@ msgstr ""
 "已导出版本: %i\n"
 "当前导出版本: %i"
 
-#: lib\pwiki\AdditionalDialogs.py:1525
+#: lib\pwiki\AdditionalDialogs.py:1556
 #: lib\pwiki\CmdLineAction.py:233
 msgid "Type of additional option storage ('%s') is unknown"
 msgstr "附加存储选项类型 ('%s')未知"
 
-#: lib\pwiki\AdditionalDialogs.py:1549
+#: lib\pwiki\AdditionalDialogs.py:1580
 #: lib\pwiki\CmdLineAction.py:255
 msgid "Error during retrieving saved export: "
 msgstr "获取保存导出时出错:"
 
-#: lib\pwiki\AdditionalDialogs.py:1662
+#: lib\pwiki\AdditionalDialogs.py:1693
 msgid "Source file:"
 msgstr "源文件:"
 
-#: lib\pwiki\AdditionalDialogs.py:1678
+#: lib\pwiki\AdditionalDialogs.py:1709
 msgid "Source does not exist"
 msgstr "源必须存在"
 
-#: lib\pwiki\AdditionalDialogs.py:1688
+#: lib\pwiki\AdditionalDialogs.py:1719
 msgid "Source must be a directory"
 msgstr "源必须是目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1693
+#: lib\pwiki\AdditionalDialogs.py:1724
 msgid "Source must be a file"
 msgstr "源必须是文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1704
+#: lib\pwiki\AdditionalDialogs.py:1735
 msgid "Error while importing"
 msgstr "导入时出错"
 
-#: lib\pwiki\AdditionalDialogs.py:1718
+#: lib\pwiki\AdditionalDialogs.py:1749
 msgid "Select Import Directory"
 msgstr "选择导入目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1733
+#: lib\pwiki\AdditionalDialogs.py:1764
 msgid "*"
 msgstr "*"
 
-#: lib\pwiki\AdditionalDialogs.py:1737
+#: lib\pwiki\AdditionalDialogs.py:1768
 msgid "Select Import File"
 msgstr "选择导入文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1853
+#: lib\pwiki\AdditionalDialogs.py:1884
 msgid ""
 "\n"
 "<html>\n"
@@ -2270,7 +2373,7 @@ msgstr ""
 "    </center>\n"
 "    \n"
 "    \n"
-"\n"
+"    \n"
 "    \n"
 "    <hr />\n"
 "    \n"
@@ -2282,68 +2385,68 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1904
-#: lib\pwiki\PersonalWikiFrame.py:1949
+#: lib\pwiki\AdditionalDialogs.py:1935
+#: lib\pwiki\PersonalWikiFrame.py:2005
 msgid "About WikidPad"
 msgstr "关于WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:1908
+#: lib\pwiki\AdditionalDialogs.py:1939
 msgid "N/A"
 msgstr "N/A"
 
-#: lib\pwiki\AdditionalDialogs.py:1918
+#: lib\pwiki\AdditionalDialogs.py:1949
 msgid "Okay"
 msgstr "好的"
 
-#: lib\pwiki\AdditionalDialogs.py:2019
+#: lib\pwiki\AdditionalDialogs.py:2050
 msgid "Wiki Properties"
 msgstr "维基属性(&P)..."
 
-#: lib\pwiki\AdditionalDialogs.py:2026
+#: lib\pwiki\AdditionalDialogs.py:2057
 msgid "No wiki loaded"
 msgstr "没有装载维基"
 
-#: lib\pwiki\AdditionalDialogs.py:2030
+#: lib\pwiki\AdditionalDialogs.py:2061
 msgid "Wiki config. path:"
 msgstr "维基文件配置路径:"
 
-#: lib\pwiki\AdditionalDialogs.py:2036
+#: lib\pwiki\AdditionalDialogs.py:2067
 msgid "Wiki database backend:"
 msgstr "维基库后台:"
 
-#: lib\pwiki\AdditionalDialogs.py:2044
+#: lib\pwiki\AdditionalDialogs.py:2075
 msgid "Number of wiki pages:"
 msgstr "维基页总数:"
 
-#: lib\pwiki\AdditionalDialogs.py:2053
+#: lib\pwiki\AdditionalDialogs.py:2084
 msgid "Wiki is read-only. Reason:"
 msgstr "维基只读原因："
 
-#: lib\pwiki\AdditionalDialogs.py:2056
+#: lib\pwiki\AdditionalDialogs.py:2087
 msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
 msgstr ""
 "数据库写权限丢失。\n"
 " 尝试重新建立，然后运行\"维基\"->\"重新连接\""
 
-#: lib\pwiki\AdditionalDialogs.py:2058
+#: lib\pwiki\AdditionalDialogs.py:2089
 msgid "Wiki was set read-only in options dialog"
 msgstr "在选项对话框维基已被设置为只读"
 
-#: lib\pwiki\AdditionalDialogs.py:2063
-#: lib\pwiki\AdditionalDialogs.py:2065
+#: lib\pwiki\AdditionalDialogs.py:2094
+#: lib\pwiki\AdditionalDialogs.py:2096
 msgid "Can't write wiki config.:"
 msgstr "无法写入维基配置文件："
 
-#: lib\pwiki\AdditionalDialogs.py:2063
-#: lib\pwiki\AdditionalDialogs.py:2067
+#: lib\pwiki\AdditionalDialogs.py:2094
+#: lib\pwiki\AdditionalDialogs.py:2098
 msgid "Unknown reason"
 msgstr "未知原因"
 
-#: lib\pwiki\AdditionalDialogs.py:2080
+#: lib\pwiki\AdditionalDialogs.py:2111
 msgid "Jobs"
 msgstr "作业"
 
-#: lib\pwiki\AdditionalDialogs.py:2097
+#: lib\pwiki\AdditionalDialogs.py:2128
 msgid "Number of Jobs:"
 msgstr "作业数:"
 
@@ -2619,43 +2722,51 @@ msgstr "黄绿色"
 msgid "YELLOW"
 msgstr "黄色"
 
-#: lib\pwiki\AttributeHandling.py:353
+#: lib\pwiki\AttributeHandling.py:366
+msgid "Parent wikiword does not exist: [%s: %s]"
+msgstr "父维基字不存在:[%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:377
+msgid "Multiple parent attributes found on page: [%s: %s]"
+msgstr "页面出现多次父属性：[%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:413
 msgid "Alias value isn't a valid wikiword: [%s: %s], %s"
 msgstr "别名不是有效维基字: [%s: %s],  %s"
 
-#: lib\pwiki\AttributeHandling.py:364
+#: lib\pwiki\AttributeHandling.py:424
 msgid "A real wikiword with the alias name exists already: [%s: %s]"
 msgstr "该别名维基字已存在: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:415
+#: lib\pwiki\AttributeHandling.py:476
 msgid "Template value isn't a valid wikiword: [%s: %s], %s"
 msgstr "摸板值不是有效的维基字: [%s: %s], %s"
 
-#: lib\pwiki\AttributeHandling.py:426
+#: lib\pwiki\AttributeHandling.py:487
 msgid "Template value isn't an existing wikiword: [%s: %s]"
 msgstr "模板值不是已存在的维基字: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:473
+#: lib\pwiki\AttributeHandling.py:534
 msgid "The attribute %s was already set differently on this page"
 msgstr "属性 %s 已在本页不同处设置"
 
-#: lib\pwiki\AttributeHandling.py:485
+#: lib\pwiki\AttributeHandling.py:546
 msgid "Attribute '%s' is already defined on the wiki page(s): %s"
 msgstr "属性'%s'已定义于维基页: %s"
 
-#: lib\pwiki\AttributeHandling.py:494
+#: lib\pwiki\AttributeHandling.py:555
 msgid "Icon name doesn't exist: [%s: %s]"
 msgstr "图标名不存在: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:501
+#: lib\pwiki\AttributeHandling.py:562
 msgid "Color name doesn't exist: [%s: %s]"
 msgstr "颜色名不存在: [%s: %s]"
 
-#: lib\pwiki\AttributeHandling.py:548
+#: lib\pwiki\AttributeHandling.py:609
 msgid "The attribute 'global.graph.relations.exclude' (e.g. on page '%s') overrides the '...include' attribute"
 msgstr "属性 'global.graph.relations.exclude' (例如：在页 '%s') 覆盖 '...include'属性。"
 
-#: lib\pwiki\AttributeHandling.py:674
+#: lib\pwiki\AttributeHandling.py:732
 msgid "Same attribute twice: [%s: %s]"
 msgstr "同一属性值出现两次: [%s: %s]"
 
@@ -2748,52 +2859,60 @@ msgstr "配置文件没有找到"
 msgid "Ambiguos option set %s:%s"
 msgstr "歧义选项设置%s:%s"
 
-#: lib\pwiki\DiffGui.py:168
+#: lib\pwiki\DiffGui.py:171
 msgid "<Diff from %s to %s>"
 msgstr "<从 %s 到 %s 有差异>"
 
-#: lib\pwiki\DocPagePresenter.py:231
+#: lib\pwiki\DocPagePresenter.py:232
 msgid "'%s' is an invalid wiki word. %s."
 msgstr "'%s' 是无效维基字。 %s."
 
-#: lib\pwiki\DocPagePresenter.py:265
+#: lib\pwiki\DocPagePresenter.py:266
 msgid "Wiki page not found, a new page will be created"
 msgstr "维基页没有找到，新页将被创建。"
 
-#: lib\pwiki\DocPagePresenter.py:457
 #: lib\pwiki\DocPagePresenter.py:458
+#: lib\pwiki\DocPagePresenter.py:459
 msgid "History"
 msgstr "历史"
 
-#: lib\pwiki\DocPages.py:2210
+#: lib\pwiki\DocPages.py:2307
 msgid "Func. tag %s does not exist"
 msgstr "功能标签%s不存在"
 
-#: lib\pwiki\DocPages.py:2471
+#: lib\pwiki\DocPages.py:2576
 msgid "Global text blocks"
 msgstr "全局文本区"
 
-#: lib\pwiki\DocPages.py:2472
+#: lib\pwiki\DocPages.py:2577
 msgid "Wiki text blocks"
 msgstr "维基文本区"
 
-#: lib\pwiki\DocPages.py:2473
+#: lib\pwiki\DocPages.py:2578
 msgid "Global spell list"
 msgstr "全局拼写列表"
 
-#: lib\pwiki\DocPages.py:2474
+#: lib\pwiki\DocPages.py:2579
 msgid "Wiki spell list"
 msgstr "维基拼写列表"
 
-#: lib\pwiki\DocPages.py:2475
+#: lib\pwiki\DocPages.py:2580
 msgid "Global cc. blacklist"
 msgstr "全局cc.黑名单"
 
-#: lib\pwiki\DocPages.py:2476
+#: lib\pwiki\DocPages.py:2581
 msgid "Wiki cc. blacklist"
 msgstr "维基cc.黑名单"
 
-#: lib\pwiki\DocPages.py:2477
+#: lib\pwiki\DocPages.py:2582
+msgid "Global ncc. blacklist"
+msgstr "全局ncc.黑名单"
+
+#: lib\pwiki\DocPages.py:2583
+msgid "Wiki ncc. blacklist"
+msgstr "维基ncc.黑名单"
+
+#: lib\pwiki\DocPages.py:2584
 msgid "Favorite wikis"
 msgstr "维基收藏夹"
 
@@ -2801,24 +2920,25 @@ msgstr "维基收藏夹"
 msgid "Set of *.wiki files"
 msgstr "多个*.wiki文件"
 
-#: lib\pwiki\Exporters.py:561
-#: lib\pwiki\Importers.py:61
+#: lib\pwiki\Exporters.py:560
+#: lib\pwiki\Exporters.py:845
+msgid "No usable separator found"
+msgstr "没有发现可用分隔符"
+
+#: lib\pwiki\Exporters.py:592
+#: lib\pwiki\Importers.py:62
 msgid "Multipage text"
 msgstr "多页文本文件"
 
-#: lib\pwiki\Exporters.py:595
-#: lib\pwiki\Importers.py:74
+#: lib\pwiki\Exporters.py:626
+#: lib\pwiki\Importers.py:75
 msgid "Multipage files (*.mpt)"
 msgstr "多页文件 (*.mpt)"
 
-#: lib\pwiki\Exporters.py:596
-#: lib\pwiki\Importers.py:75
+#: lib\pwiki\Exporters.py:627
+#: lib\pwiki\Importers.py:76
 msgid "Text file (*.txt)"
 msgstr "文本文件 (*.txt)"
-
-#: lib\pwiki\Exporters.py:805
-msgid "No usable separator found"
-msgstr "没有发现可用分隔符"
 
 #: lib\pwiki\FileCleanup.py:203
 msgid "Scan links in %s"
@@ -2830,7 +2950,7 @@ msgid "Path"
 msgstr "路径"
 
 #: lib\pwiki\FileCleanup.py:555
-#: lib\pwiki\MptImporterGui.py:193
+#: lib\pwiki\MptImporterGui.py:197
 msgid "Type"
 msgstr "类型"
 
@@ -2855,20 +2975,20 @@ msgstr "文件"
 msgid "Only a real wiki page can be a clipboard catcher"
 msgstr "只有真实的维基页才能被剪贴板捕获"
 
-#: lib\pwiki\Importers.py:171
+#: lib\pwiki\Importers.py:178
 msgid "Opening import file failed"
 msgstr "打开导入文件失败"
 
-#: lib\pwiki\Importers.py:202
-#: lib\pwiki\Importers.py:217
+#: lib\pwiki\Importers.py:209
+#: lib\pwiki\Importers.py:224
 msgid "Bad file format, header not detected"
 msgstr "错误文件格式，文件头无法识别"
 
-#: lib\pwiki\Importers.py:210
+#: lib\pwiki\Importers.py:217
 msgid "File format number %i is not supported"
 msgstr "不支持文件格式数%i"
 
-#: lib\pwiki\Importers.py:466
+#: lib\pwiki\Importers.py:483
 msgid "Bad wiki word: %s, %s"
 msgstr "维基坏字: %s, %s"
 
@@ -2903,7 +3023,7 @@ msgstr ""
 #: lib\pwiki\MainApp.py:334
 #: lib\pwiki\MainApp.py:357
 #: lib\pwiki\MainApp.py:367
-#: lib\pwiki\PersonalWikiFrame.py:3080
+#: lib\pwiki\PersonalWikiFrame.py:3155
 msgid "Continue?"
 msgstr "是否继续？"
 
@@ -2933,46 +3053,50 @@ msgstr ""
 "当前会话发生错误\n"
 "参见文件%s"
 
-#: lib\pwiki\MainApp.py:786
+#: lib\pwiki\MainApp.py:820
 msgid "Plugin options"
 msgstr "插件选项"
 
-#: lib\pwiki\MainApp.py:835
-#: lib\pwiki\OptionsDialog.py:681
+#: lib\pwiki\MainApp.py:869
+#: lib\pwiki\OptionsDialog.py:703
 msgid "Wiki language"
 msgstr "维基语言"
 
-#: lib\pwiki\MainApp.py:858
+#: lib\pwiki\MainApp.py:892
 msgid "Plugins"
 msgstr "插件"
 
-#: lib\pwiki\MainAreaPanel.py:665
-#: lib\pwiki\WikiTxtCtrl.py:2212
+#: lib\pwiki\MainAreaPanel.py:670
+#: lib\pwiki\WikiTxtCtrl.py:2424
 msgid "This can only be done for the page of a wiki word"
 msgstr "仅维基字页面可完成"
 
-#: lib\pwiki\MainAreaPanel.py:666
-#: lib\pwiki\WikiTxtCtrl.py:2213
+#: lib\pwiki\MainAreaPanel.py:671
+#: lib\pwiki\WikiTxtCtrl.py:2425
 msgid "Not a wiki page"
 msgstr "不是维基页"
 
-#: lib\pwiki\MptImporterGui.py:174
+#: lib\pwiki\MptImporterGui.py:177
 msgid "Wiki page"
 msgstr "维基页"
 
-#: lib\pwiki\MptImporterGui.py:175
+#: lib\pwiki\MptImporterGui.py:178
 msgid "Func. page"
 msgstr "功能页"
 
-#: lib\pwiki\MptImporterGui.py:176
+#: lib\pwiki\MptImporterGui.py:179
 msgid "Saved search"
 msgstr "保存搜索"
 
-#: lib\pwiki\MptImporterGui.py:194
+#: lib\pwiki\MptImporterGui.py:180
+msgid "Saved page search"
+msgstr "已保存页面搜索"
+
+#: lib\pwiki\MptImporterGui.py:198
 msgid "Name"
 msgstr "名称"
 
-#: lib\pwiki\MptImporterGui.py:196
+#: lib\pwiki\MptImporterGui.py:200
 msgid ""
 "Version\n"
 "Import"
@@ -2980,13 +3104,13 @@ msgstr ""
 "版本\n"
 "导入"
 
-#: lib\pwiki\MptImporterGui.py:197
+#: lib\pwiki\MptImporterGui.py:201
 msgid ""
 "Rename\n"
 "imported"
 msgstr "已导入改名"
 
-#: lib\pwiki\MptImporterGui.py:198
+#: lib\pwiki\MptImporterGui.py:202
 msgid ""
 "Rename\n"
 "present"
@@ -2994,1121 +3118,1155 @@ msgstr ""
 "改名\n"
 "当前"
 
-#: lib\pwiki\MptImporterGui.py:383
+#: lib\pwiki\MptImporterGui.py:390
 msgid "You can't rename imported and present item at the same time"
 msgstr "你不能同时对已导入与当前项目进行改名"
 
-#: lib\pwiki\MptImporterGui.py:396
+#: lib\pwiki\MptImporterGui.py:403
 msgid "Rename imported"
 msgstr "已导入改名"
 
-#: lib\pwiki\MptImporterGui.py:405
+#: lib\pwiki\MptImporterGui.py:412
 msgid "Rename present"
 msgstr "修改当前"
 
-#: lib\pwiki\MptImporterGui.py:416
-#: lib\pwiki\MptImporterGui.py:440
+#: lib\pwiki\MptImporterGui.py:423
+#: lib\pwiki\MptImporterGui.py:447
 msgid "Name collision: Item '%s' will be imported already"
 msgstr "名称冲突：项'%s'将要被导入。"
 
-#: lib\pwiki\MptImporterGui.py:422
-#: lib\pwiki\MptImporterGui.py:451
+#: lib\pwiki\MptImporterGui.py:429
+#: lib\pwiki\MptImporterGui.py:458
 msgid "Name collision: Item '%s' will already be created by renaming '%s'"
 msgstr "名称冲突：项'%s'将要被创建为'%s'"
 
-#: lib\pwiki\MptImporterGui.py:431
-#: lib\pwiki\MptImporterGui.py:445
+#: lib\pwiki\MptImporterGui.py:438
+#: lib\pwiki\MptImporterGui.py:452
 msgid "Name collision: Item '%s' exists already in database"
 msgstr "名称冲突：项'%s'已存在于数据库"
 
-#: lib\pwiki\OptionsDialog.py:661
+#: lib\pwiki\OptionsDialog.py:683
 msgid "Application"
 msgstr "应用程序"
 
-#: lib\pwiki\OptionsDialog.py:662
+#: lib\pwiki\OptionsDialog.py:684
 msgid "User interface"
 msgstr "用户界面"
 
-#: lib\pwiki\OptionsDialog.py:663
+#: lib\pwiki\OptionsDialog.py:685
 msgid "Security"
 msgstr "安全性"
 
-#: lib\pwiki\OptionsDialog.py:664
+#: lib\pwiki\OptionsDialog.py:686
 msgid "Tree"
 msgstr "树"
 
-#: lib\pwiki\OptionsDialog.py:665
+#: lib\pwiki\OptionsDialog.py:687
 msgid "HTML preview/export"
 msgstr "HTML预览/导出"
 
-#: lib\pwiki\OptionsDialog.py:666
+#: lib\pwiki\OptionsDialog.py:688
 msgid "HTML header"
 msgstr "网页标题"
 
-#: lib\pwiki\OptionsDialog.py:667
+#: lib\pwiki\OptionsDialog.py:689
 msgid "Editor"
 msgstr "编辑器"
 
-#: lib\pwiki\OptionsDialog.py:668
+#: lib\pwiki\OptionsDialog.py:690
 msgid "Editor Colors"
 msgstr "编辑器颜色"
 
-#: lib\pwiki\OptionsDialog.py:669
+#: lib\pwiki\OptionsDialog.py:691
 msgid "Clipboard Catcher"
 msgstr "剪贴板监视器"
 
-#: lib\pwiki\OptionsDialog.py:670
+#: lib\pwiki\OptionsDialog.py:692
 msgid "File Launcher"
 msgstr "文件装载器"
 
-#: lib\pwiki\OptionsDialog.py:671
+#: lib\pwiki\OptionsDialog.py:693
 msgid "Mouse"
 msgstr "鼠标"
 
-#: lib\pwiki\OptionsDialog.py:672
+#: lib\pwiki\OptionsDialog.py:694
 msgid "Chron. view"
 msgstr "时序图"
 
-#: lib\pwiki\OptionsDialog.py:673
+#: lib\pwiki\OptionsDialog.py:695
 msgid "Searching"
 msgstr "检索中"
 
-#: lib\pwiki\OptionsDialog.py:674
-#: lib\pwiki\OptionsDialog.py:683
+#: lib\pwiki\OptionsDialog.py:696
+#: lib\pwiki\OptionsDialog.py:705
 msgid "Advanced"
 msgstr "高级"
 
-#: lib\pwiki\OptionsDialog.py:675
+#: lib\pwiki\OptionsDialog.py:697
 msgid "Timing"
 msgstr "时间轴"
 
-#: lib\pwiki\OptionsDialog.py:676
+#: lib\pwiki\OptionsDialog.py:698
 msgid "Autosave"
 msgstr "自动保存"
 
-#: lib\pwiki\OptionsDialog.py:678
+#: lib\pwiki\OptionsDialog.py:700
 msgid "Current Wiki"
 msgstr "当前维基"
 
-#: lib\pwiki\OptionsDialog.py:679
+#: lib\pwiki\OptionsDialog.py:701
 msgid "Headings"
 msgstr "标题"
 
-#: lib\pwiki\OptionsDialog.py:823
+#: lib\pwiki\OptionsDialog.py:702
+msgid "Chronological"
+msgstr "按时间顺序"
+
+#: lib\pwiki\OptionsDialog.py:845
 msgid "IE"
 msgstr "IE"
 
-#: lib\pwiki\OptionsDialog.py:825
+#: lib\pwiki\OptionsDialog.py:847
 msgid "Mozilla"
 msgstr "Mozilla"
 
-#: lib\pwiki\OptionsDialog.py:829
+#: lib\pwiki\OptionsDialog.py:851
 msgid "Webkit"
 msgstr "Webkit"
 
-#: lib\pwiki\OptionsDialog.py:963
+#: lib\pwiki\OptionsDialog.py:988
 msgid "Wave files (*.wav)|*.wav"
 msgstr "Wave文件(*.wav)|*.wav"
 
-#: lib\pwiki\OptionsDialog.py:974
-#: lib\pwiki\OptionsDialog.py:1285
+#: lib\pwiki\OptionsDialog.py:999
+#: lib\pwiki\OptionsDialog.py:1320
 msgid "All files (*.*)|*"
 msgstr "所有文件(*.*)|*"
 
-#: lib\pwiki\OptionsDialog.py:1275
+#: lib\pwiki\OptionsDialog.py:1310
 msgid "Select Directory"
 msgstr "选择目录"
 
-#: lib\pwiki\OptionsDialog.py:1283
+#: lib\pwiki\OptionsDialog.py:1318
 msgid "Select File"
 msgstr "选择文件"
 
-#: lib\pwiki\PWikiNonCore.py:41
+#: lib\pwiki\PWikiNonCore.py:44
 msgid "Choose a file to create URL for"
 msgstr "选择文件用于创建URL用于"
 
-#: lib\pwiki\PWikiNonCore.py:70
-#: lib\pwiki\PWikiNonCore.py:71
+#: lib\pwiki\PWikiNonCore.py:73
+#: lib\pwiki\PWikiNonCore.py:74
 msgid "     Scanning     "
 msgstr "     扫描"
 
-#: lib\pwiki\PWikiNonCore.py:106
+#: lib\pwiki\PWikiNonCore.py:138
 msgid "&File URL..."
 msgstr "文件URL(&F)..."
 
-#: lib\pwiki\PWikiNonCore.py:106
+#: lib\pwiki\PWikiNonCore.py:138
 msgid "Use file dialog to add URL"
 msgstr "使用文件对话框增加URL"
 
-#: lib\pwiki\PWikiNonCore.py:110
+#: lib\pwiki\PWikiNonCore.py:142
 msgid "Current &Date"
 msgstr "当前日期(&D)"
 
-#: lib\pwiki\PWikiNonCore.py:110
+#: lib\pwiki\PWikiNonCore.py:142
 msgid "Insert current date"
 msgstr "插入当前日期"
 
-#: lib\pwiki\PWikiNonCore.py:115
+#: lib\pwiki\PWikiNonCore.py:148
 msgid "File cleanup..."
 msgstr "清理文件..."
 
-#: lib\pwiki\PWikiNonCore.py:115
+#: lib\pwiki\PWikiNonCore.py:148
 msgid "Remove orphaned files and dead links"
 msgstr "移除孤立文件与死链接"
 
-#: lib\pwiki\PersonalWikiFrame.py:154
+#: lib\pwiki\PWikiNonCore.py:153
+msgid "Page read only"
+msgstr "页面只读"
+
+#: lib\pwiki\PWikiNonCore.py:153
+msgid "Set current page read only"
+msgstr "将当前页面设为只读"
+
+#: lib\pwiki\PWikiNonCore.py:159
+#: lib\pwiki\PWikiNonCore.py:160
+msgid "Open trashcan"
+msgstr "打开垃圾箱"
+
+#: lib\pwiki\PersonalWikiFrame.py:157
 msgid "Bad formatted command line."
 msgstr "错误命令行格式。"
 
-#: lib\pwiki\PersonalWikiFrame.py:381
-#: lib\pwiki\PersonalWikiFrame.py:389
-#: lib\pwiki\PersonalWikiFrame.py:1190
+#: lib\pwiki\PersonalWikiFrame.py:403
+#: lib\pwiki\PersonalWikiFrame.py:411
+#: lib\pwiki\PersonalWikiFrame.py:1231
 msgid "Wiki doesn't exist: %s"
 msgstr "不存在维基: %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:751
+#: lib\pwiki\PersonalWikiFrame.py:773
 msgid "&New"
 msgstr "新建(&N)"
 
-#: lib\pwiki\PersonalWikiFrame.py:752
+#: lib\pwiki\PersonalWikiFrame.py:774
 msgid "Create new wiki"
 msgstr "创建新维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:755
+#: lib\pwiki\PersonalWikiFrame.py:777
 msgid "&Open"
 msgstr "打开(&O)"
 
-#: lib\pwiki\PersonalWikiFrame.py:757
+#: lib\pwiki\PersonalWikiFrame.py:779
 msgid "In &This Window..."
 msgstr "在本窗口(&T)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:759
+#: lib\pwiki\PersonalWikiFrame.py:781
 msgid "Open wiki in this window"
 msgstr "在本窗口打开维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:761
+#: lib\pwiki\PersonalWikiFrame.py:783
 msgid "In &New Window..."
 msgstr "在新窗口(&N)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:763
+#: lib\pwiki\PersonalWikiFrame.py:785
 msgid "Open wiki in a new window"
 msgstr "在新窗口打开维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:765
+#: lib\pwiki\PersonalWikiFrame.py:787
 msgid "&Current in New Window"
 msgstr "当前新窗口(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:767
+#: lib\pwiki\PersonalWikiFrame.py:789
 msgid "Create new window for same wiki"
 msgstr "为同一维基创建新窗口"
 
-#: lib\pwiki\PersonalWikiFrame.py:772
+#: lib\pwiki\PersonalWikiFrame.py:794
 msgid "&Recent"
 msgstr "最近(&R)"
 
-#: lib\pwiki\PersonalWikiFrame.py:779
+#: lib\pwiki\PersonalWikiFrame.py:801
 msgid "F&avorites"
 msgstr "收藏夹(&A)"
 
-#: lib\pwiki\PersonalWikiFrame.py:785
+#: lib\pwiki\PersonalWikiFrame.py:807
 msgid "&Search Wiki..."
 msgstr "搜索维基(&S)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:786
+#: lib\pwiki\PersonalWikiFrame.py:808
 msgid "Search whole wiki"
 msgstr "搜索整个维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:794
+#: lib\pwiki\PersonalWikiFrame.py:816
 msgid "Publish as HTML"
 msgstr "发布为HTML"
 
-#: lib\pwiki\PersonalWikiFrame.py:797
+#: lib\pwiki\PersonalWikiFrame.py:819
 msgid "Wiki as Single HTML Page"
 msgstr "维基为单个HTML文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:798
+#: lib\pwiki\PersonalWikiFrame.py:820
 msgid "Publish Wiki as Single HTML Page"
 msgstr "发布维基为单个HTML文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:802
+#: lib\pwiki\PersonalWikiFrame.py:824
 msgid "Wiki as Set of HTML Pages"
 msgstr "维基为多个HTML文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:803
+#: lib\pwiki\PersonalWikiFrame.py:825
 msgid "Publish Wiki as Set of HTML Pages"
 msgstr "发布维基为多个HTML文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:807
+#: lib\pwiki\PersonalWikiFrame.py:829
 msgid "Current Wiki Word as HTML Page"
 msgstr "当前维基字为HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:808
+#: lib\pwiki\PersonalWikiFrame.py:830
 msgid "Publish Current Wiki Word as HTML Page"
 msgstr "发布当前维基字为HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:812
+#: lib\pwiki\PersonalWikiFrame.py:834
 msgid "Sub-Tree as Single HTML Page"
 msgstr "子树为单个HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:813
+#: lib\pwiki\PersonalWikiFrame.py:835
 msgid "Publish Sub-Tree as Single HTML Page"
 msgstr "发布子树为单个HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:817
+#: lib\pwiki\PersonalWikiFrame.py:839
 msgid "Sub-Tree as Set of HTML Pages"
 msgstr "子树为多个HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:818
+#: lib\pwiki\PersonalWikiFrame.py:840
 msgid "Publish Sub-Tree as Set of HTML Pages"
 msgstr "发布子树为多个HTML页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:826
+#: lib\pwiki\PersonalWikiFrame.py:848
 msgid "Other Export..."
 msgstr "其他导出..."
 
-#: lib\pwiki\PersonalWikiFrame.py:827
-#: lib\pwiki\PersonalWikiFrame.py:1856
+#: lib\pwiki\PersonalWikiFrame.py:849
+#: lib\pwiki\PersonalWikiFrame.py:1912
 msgid "Open general export dialog"
 msgstr "打开一般导出对话框"
 
-#: lib\pwiki\PersonalWikiFrame.py:831
+#: lib\pwiki\PersonalWikiFrame.py:853
 msgid "Print..."
 msgstr "打印..."
 
-#: lib\pwiki\PersonalWikiFrame.py:832
+#: lib\pwiki\PersonalWikiFrame.py:854
 msgid "Show the print dialog"
 msgstr "显示打印对话框"
 
-#: lib\pwiki\PersonalWikiFrame.py:836
+#: lib\pwiki\PersonalWikiFrame.py:864
 msgid "&Properties..."
 msgstr "属性(&P)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:837
+#: lib\pwiki\PersonalWikiFrame.py:865
 msgid "Show general information about current wiki"
 msgstr "显示当前维基一般信息"
 
-#: lib\pwiki\PersonalWikiFrame.py:841
+#: lib\pwiki\PersonalWikiFrame.py:869
 msgid "Maintenance"
 msgstr "维护"
 
-#: lib\pwiki\PersonalWikiFrame.py:845
+#: lib\pwiki\PersonalWikiFrame.py:875
+msgid "Update ext. modif. wiki files"
+msgstr "更新外部修改*.wiki文件"
+
+#: lib\pwiki\PersonalWikiFrame.py:876
+msgid "Check for externally modified files and update cache in background"
+msgstr "检查外部修改文件与后台更新缓存"
+
+#: lib\pwiki\PersonalWikiFrame.py:882
 msgid "&Rebuild Wiki..."
 msgstr "重构维基(&R)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:846
+#: lib\pwiki\PersonalWikiFrame.py:883
 msgid "Rebuild this wiki and its cache completely"
 msgstr "完全重构该维基及缓存"
 
-#: lib\pwiki\PersonalWikiFrame.py:860
+#: lib\pwiki\PersonalWikiFrame.py:888
 msgid "&Update cache..."
 msgstr "更新缓存(&U)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:861
+#: lib\pwiki\PersonalWikiFrame.py:889
 msgid "Update cache where marked as not up to date"
 msgstr "更新没有最新更新标记的缓存"
 
-#: lib\pwiki\PersonalWikiFrame.py:866
+#: lib\pwiki\PersonalWikiFrame.py:894
 msgid "&Initiate update..."
 msgstr "更新初始化(&I)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:867
+#: lib\pwiki\PersonalWikiFrame.py:895
 msgid "Initiate full cache update which is done mainly in background"
 msgstr "完成初始化更新全缓存主要在后台进行"
 
-#: lib\pwiki\PersonalWikiFrame.py:887
+#: lib\pwiki\PersonalWikiFrame.py:917
 msgid "Show job count..."
 msgstr "显示作业数..."
 
-#: lib\pwiki\PersonalWikiFrame.py:888
+#: lib\pwiki\PersonalWikiFrame.py:918
 msgid "Show how many update jobs are waiting in background"
 msgstr "显示后台正在等待更新作业数"
 
-#: lib\pwiki\PersonalWikiFrame.py:893
+#: lib\pwiki\PersonalWikiFrame.py:924
 msgid "Open as &Type..."
 msgstr "打开为(&T)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:894
+#: lib\pwiki\PersonalWikiFrame.py:925
 msgid "Open wiki with a specified wiki database type"
 msgstr "使用指定的维基数据库类型打开维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:898
+#: lib\pwiki\PersonalWikiFrame.py:929
 msgid "Reconnect..."
 msgstr "重新链接..."
 
-#: lib\pwiki\PersonalWikiFrame.py:899
+#: lib\pwiki\PersonalWikiFrame.py:930
 msgid "Reconnect to database after connection failure"
 msgstr "连接失败后重新连接到数据库"
 
-#: lib\pwiki\PersonalWikiFrame.py:905
+#: lib\pwiki\PersonalWikiFrame.py:936
 msgid "&Optimise Database"
 msgstr "数据库优化(&O)"
 
-#: lib\pwiki\PersonalWikiFrame.py:906
+#: lib\pwiki\PersonalWikiFrame.py:937
 msgid "Free unused space in database"
 msgstr "释放数据库空间"
 
-#: lib\pwiki\PersonalWikiFrame.py:913
+#: lib\pwiki\PersonalWikiFrame.py:944
 msgid "&Copy .wiki files to database"
 msgstr "复制.wiki文件到数据库(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:914
+#: lib\pwiki\PersonalWikiFrame.py:945
 msgid "Copy .wiki files to database"
 msgstr "复制.wiki文件到数据库"
 
-#: lib\pwiki\PersonalWikiFrame.py:924
+#: lib\pwiki\PersonalWikiFrame.py:955
 msgid "E&xit"
 msgstr "退出(&X)"
 
-#: lib\pwiki\PersonalWikiFrame.py:924
-#: lib\pwiki\PersonalWikiFrame.py:5663
+#: lib\pwiki\PersonalWikiFrame.py:955
+#: lib\pwiki\PersonalWikiFrame.py:5832
 msgid "Exit"
 msgstr "退出"
 
-#: lib\pwiki\PersonalWikiFrame.py:1092
+#: lib\pwiki\PersonalWikiFrame.py:1123
 msgid "Reread text blocks"
 msgstr "重读文本块"
 
-#: lib\pwiki\PersonalWikiFrame.py:1093
+#: lib\pwiki\PersonalWikiFrame.py:1124
 msgid "Reread the text block file(s) and recreate menu"
 msgstr "重读文本块文件并重建菜单"
 
-#: lib\pwiki\PersonalWikiFrame.py:1147
+#: lib\pwiki\PersonalWikiFrame.py:1178
 msgid "Add wiki"
 msgstr "添加维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:1148
+#: lib\pwiki\PersonalWikiFrame.py:1179
 msgid "Add a wiki to the favorites"
 msgstr "添加维基到收藏夹"
 
-#: lib\pwiki\PersonalWikiFrame.py:1153
-#: lib\pwiki\PersonalWikiFrame.py:1154
+#: lib\pwiki\PersonalWikiFrame.py:1184
+#: lib\pwiki\PersonalWikiFrame.py:1185
 msgid "Manage favorites"
 msgstr "管理收藏夹"
 
-#: lib\pwiki\PersonalWikiFrame.py:1176
-#: lib\pwiki\PersonalWikiFrame.py:1906
-#: lib\pwiki\PersonalWikiFrame.py:2424
-#: lib\pwiki\PersonalWikiFrame.py:4903
-#: lib\pwiki\PersonalWikiFrame.py:5240
+#: lib\pwiki\PersonalWikiFrame.py:1217
+#: lib\pwiki\PersonalWikiFrame.py:1962
+#: lib\pwiki\PersonalWikiFrame.py:2480
+#: lib\pwiki\PersonalWikiFrame.py:3927
+#: lib\pwiki\PersonalWikiFrame.py:5022
+#: lib\pwiki\PersonalWikiFrame.py:5399
 msgid "Error while starting new WikidPad instance"
 msgstr "当开启新WikidPad实例发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:1283
+#: lib\pwiki\PersonalWikiFrame.py:1324
 msgid "W&iki"
 msgstr "维基(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1294
+#: lib\pwiki\PersonalWikiFrame.py:1335
 msgid "&Undo"
 msgstr "撤消(&U)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1298
+#: lib\pwiki\PersonalWikiFrame.py:1339
 msgid "&Redo"
 msgstr "重做(&R)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1306
+#: lib\pwiki\PersonalWikiFrame.py:1347
 msgid "&Search and Replace..."
 msgstr "查找与替换(&S)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1308
+#: lib\pwiki\PersonalWikiFrame.py:1349
 msgid "Search and replace inside current page"
 msgstr "在当前页查找与替换"
 
-#: lib\pwiki\PersonalWikiFrame.py:1314
+#: lib\pwiki\PersonalWikiFrame.py:1355
 msgid "Cu&t"
 msgstr "剪切(&T)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1319
+#: lib\pwiki\PersonalWikiFrame.py:1360
 msgid "&Copy"
 msgstr "复制(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1323
+#: lib\pwiki\PersonalWikiFrame.py:1364
 msgid "&Paste"
 msgstr "粘贴(&P)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1328
+#: lib\pwiki\PersonalWikiFrame.py:1369
 msgid "Select &All"
 msgstr "全选(&A)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1334
+#: lib\pwiki\PersonalWikiFrame.py:1375
 msgid "Copy to Sc&ratchPad"
 msgstr "复制到便笺(&R)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1336
+#: lib\pwiki\PersonalWikiFrame.py:1377
 msgid "Copy selected text to ScratchPad"
 msgstr "复制所选文本到便笺"
 
-#: lib\pwiki\PersonalWikiFrame.py:1342
+#: lib\pwiki\PersonalWikiFrame.py:1383
 msgid "Paste T&extblock"
 msgstr "粘贴文本块(&E)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1350
+#: lib\pwiki\PersonalWikiFrame.py:1391
 msgid "C&lipboard Catcher"
 msgstr "剪贴板监视器(&L)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1353
-#: lib\pwiki\PersonalWikiFrame.py:4214
+#: lib\pwiki\PersonalWikiFrame.py:1394
+#: lib\pwiki\PersonalWikiFrame.py:4336
 msgid "Set at Page"
 msgstr "在页面设置"
 
-#: lib\pwiki\PersonalWikiFrame.py:1355
+#: lib\pwiki\PersonalWikiFrame.py:1396
 msgid "Text copied to clipboard is also appended to this page"
 msgstr "复制到剪贴板文本同样追加到本页"
 
-#: lib\pwiki\PersonalWikiFrame.py:1361
+#: lib\pwiki\PersonalWikiFrame.py:1402
 msgid "Set at Cursor"
 msgstr "在光标设置"
 
-#: lib\pwiki\PersonalWikiFrame.py:1363
+#: lib\pwiki\PersonalWikiFrame.py:1404
 msgid "Text copied to clipboard is also added to cursor position"
 msgstr "复制到剪贴板的文本同时在光标位置插入"
 
-#: lib\pwiki\PersonalWikiFrame.py:1369
+#: lib\pwiki\PersonalWikiFrame.py:1410
 msgid "Set Off"
 msgstr "关闭"
 
-#: lib\pwiki\PersonalWikiFrame.py:1371
+#: lib\pwiki\PersonalWikiFrame.py:1412
 msgid "Switch off clipboard catcher"
 msgstr "关闭剪贴板监视器"
 
-#: lib\pwiki\PersonalWikiFrame.py:1381
+#: lib\pwiki\PersonalWikiFrame.py:1422
 msgid "Spell Check..."
 msgstr "拼写检查..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1383
+#: lib\pwiki\PersonalWikiFrame.py:1424
 msgid "Spell check current and possibly further pages"
 msgstr "当前或更远一级页面拼写检查"
 
-#: lib\pwiki\PersonalWikiFrame.py:1387
+#: lib\pwiki\PersonalWikiFrame.py:1428
 msgid "Spell Check While Type"
 msgstr "输入时拼写检查"
 
-#: lib\pwiki\PersonalWikiFrame.py:1388
+#: lib\pwiki\PersonalWikiFrame.py:1429
 msgid "Set if editor should do spell checking during typing"
 msgstr "输入状态编辑器进行拼写检查时设置"
 
-#: lib\pwiki\PersonalWikiFrame.py:1393
+#: lib\pwiki\PersonalWikiFrame.py:1434
 msgid "Clear Ignore List"
 msgstr "清除忽略列表"
 
-#: lib\pwiki\PersonalWikiFrame.py:1395
+#: lib\pwiki\PersonalWikiFrame.py:1436
 msgid "Clear the list of words to ignore for spell check while type"
 msgstr "清除词列表用于输入时忽略拼写检查"
 
-#: lib\pwiki\PersonalWikiFrame.py:1404
+#: lib\pwiki\PersonalWikiFrame.py:1445
 msgid "&Insert"
 msgstr "插入(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1428
+#: lib\pwiki\PersonalWikiFrame.py:1469
 msgid "&Settings"
 msgstr "设置(&S)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1431
+#: lib\pwiki\PersonalWikiFrame.py:1472
 msgid "&Date Format..."
 msgstr "日期格式(&D)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1432
+#: lib\pwiki\PersonalWikiFrame.py:1473
 msgid "Set date format for inserting current date"
 msgstr "设置日期格式用于插入当前日期"
 
-#: lib\pwiki\PersonalWikiFrame.py:1436
+#: lib\pwiki\PersonalWikiFrame.py:1477
 msgid "Auto-&Wrap"
 msgstr "自动折行(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1437
+#: lib\pwiki\PersonalWikiFrame.py:1478
 msgid "Set if editor should wrap long lines"
 msgstr "设置编辑器折叠长行"
 
-#: lib\pwiki\PersonalWikiFrame.py:1451
+#: lib\pwiki\PersonalWikiFrame.py:1492
 msgid "Auto-&Indent"
 msgstr "自动缩进(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1452
+#: lib\pwiki\PersonalWikiFrame.py:1493
 msgid "Auto indentation"
 msgstr "自动缩进"
 
-#: lib\pwiki\PersonalWikiFrame.py:1458
+#: lib\pwiki\PersonalWikiFrame.py:1499
 msgid "Auto-&Bullets"
 msgstr "自动编号(&B)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1459
+#: lib\pwiki\PersonalWikiFrame.py:1500
 msgid "Show bullet on next line if current has one"
 msgstr "如果当前拥有编号，下一行将显示编号"
 
-#: lib\pwiki\PersonalWikiFrame.py:1465
+#: lib\pwiki\PersonalWikiFrame.py:1506
 msgid "Tabs to spaces"
 msgstr "制表符添加空格"
 
-#: lib\pwiki\PersonalWikiFrame.py:1466
+#: lib\pwiki\PersonalWikiFrame.py:1507
 msgid "Write spaces when hitting TAB key"
 msgstr "按TAB键添加空格"
 
-#: lib\pwiki\PersonalWikiFrame.py:1474
+#: lib\pwiki\PersonalWikiFrame.py:1515
 msgid "Show T&oolbar"
 msgstr "显示工具栏(&O)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1476
+#: lib\pwiki\PersonalWikiFrame.py:1517
 msgid "Show toolbar"
 msgstr "显示工具栏"
 
-#: lib\pwiki\PersonalWikiFrame.py:1483
+#: lib\pwiki\PersonalWikiFrame.py:1524
 msgid "Show &Tree View"
 msgstr "显示树型视图(&T)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1485
+#: lib\pwiki\PersonalWikiFrame.py:1526
 msgid "Show Tree Control"
 msgstr "显示树控件"
 
-#: lib\pwiki\PersonalWikiFrame.py:1492
+#: lib\pwiki\PersonalWikiFrame.py:1533
 msgid "Show &Chron. View"
 msgstr "按时间顺序查看(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1494
+#: lib\pwiki\PersonalWikiFrame.py:1535
 msgid "Show chronological view"
 msgstr "按时间顺序查看"
 
-#: lib\pwiki\PersonalWikiFrame.py:1501
+#: lib\pwiki\PersonalWikiFrame.py:1542
 msgid "Show &Page Structure"
 msgstr "显示页面结构(&P)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1503
+#: lib\pwiki\PersonalWikiFrame.py:1544
 msgid "Show structure (headings) of the page"
 msgstr "显示页面结构（标题）"
 
-#: lib\pwiki\PersonalWikiFrame.py:1515
+#: lib\pwiki\PersonalWikiFrame.py:1556
 msgid "Show &Indentation Guides"
 msgstr "显示缩进符(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1516
+#: lib\pwiki\PersonalWikiFrame.py:1557
 msgid "Show indentation guides in editor"
 msgstr "在编辑器显示缩进符"
 
-#: lib\pwiki\PersonalWikiFrame.py:1521
+#: lib\pwiki\PersonalWikiFrame.py:1562
 msgid "Show Line &Numbers"
 msgstr "显示行号(&N)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1522
+#: lib\pwiki\PersonalWikiFrame.py:1563
 msgid "Show line numbers in editor"
 msgstr "在编辑器显示行号"
 
-#: lib\pwiki\PersonalWikiFrame.py:1529
+#: lib\pwiki\PersonalWikiFrame.py:1570
 msgid "Stay on Top"
 msgstr "保持最上"
 
-#: lib\pwiki\PersonalWikiFrame.py:1531
+#: lib\pwiki\PersonalWikiFrame.py:1572
 msgid "Stay on Top of all other windows"
 msgstr "保持在其他所有窗口最上面"
 
-#: lib\pwiki\PersonalWikiFrame.py:1539
+#: lib\pwiki\PersonalWikiFrame.py:1580
 msgid "&Zoom In"
 msgstr "缩小(&Z)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1540
-#: lib\pwiki\PersonalWikiFrame.py:2101
+#: lib\pwiki\PersonalWikiFrame.py:1581
+#: lib\pwiki\PersonalWikiFrame.py:2157
 msgid "Zoom In"
 msgstr "缩小"
 
-#: lib\pwiki\PersonalWikiFrame.py:1543
+#: lib\pwiki\PersonalWikiFrame.py:1584
 msgid "Zoo&m Out"
 msgstr "放大(&M)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1544
-#: lib\pwiki\PersonalWikiFrame.py:2106
+#: lib\pwiki\PersonalWikiFrame.py:1585
+#: lib\pwiki\PersonalWikiFrame.py:2162
 msgid "Zoom Out"
 msgstr "放大"
 
-#: lib\pwiki\PersonalWikiFrame.py:1566
+#: lib\pwiki\PersonalWikiFrame.py:1607
 msgid "Toggle Ed./Prev"
 msgstr "切换编辑/预览"
 
-#: lib\pwiki\PersonalWikiFrame.py:1568
-#: lib\pwiki\PersonalWikiFrame.py:2097
+#: lib\pwiki\PersonalWikiFrame.py:1609
+#: lib\pwiki\PersonalWikiFrame.py:2153
 msgid "Switch between editor and preview"
 msgstr "在编辑/预览间切换"
 
-#: lib\pwiki\PersonalWikiFrame.py:1572
+#: lib\pwiki\PersonalWikiFrame.py:1613
 msgid "Enter Edit Mode"
 msgstr "进入编辑模式"
 
-#: lib\pwiki\PersonalWikiFrame.py:1573
+#: lib\pwiki\PersonalWikiFrame.py:1614
 msgid "Show editor in tab"
 msgstr "在标签页显示编辑器"
 
-#: lib\pwiki\PersonalWikiFrame.py:1577
+#: lib\pwiki\PersonalWikiFrame.py:1618
 msgid "Enter Preview Mode"
 msgstr "进入预览模式"
 
-#: lib\pwiki\PersonalWikiFrame.py:1579
+#: lib\pwiki\PersonalWikiFrame.py:1620
 msgid "Show preview in tab"
 msgstr "在标签页显示预览"
 
-#: lib\pwiki\PersonalWikiFrame.py:1603
+#: lib\pwiki\PersonalWikiFrame.py:1644
 msgid "&Save"
 msgstr "保存(&S)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1604
+#: lib\pwiki\PersonalWikiFrame.py:1645
 msgid "Save all open pages"
 msgstr "保存所有打开页面"
 
-#: lib\pwiki\PersonalWikiFrame.py:1611
+#: lib\pwiki\PersonalWikiFrame.py:1652
 msgid "&Rename"
 msgstr "改名(&R)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1612
+#: lib\pwiki\PersonalWikiFrame.py:1653
 msgid "Rename current wiki word"
 msgstr "更改当前维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1618
+#: lib\pwiki\PersonalWikiFrame.py:1659
 msgid "Delete current wiki word"
 msgstr "删除当前维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1625
+#: lib\pwiki\PersonalWikiFrame.py:1666
 msgid "Set as Roo&t"
 msgstr "设为根(&T)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1626
+#: lib\pwiki\PersonalWikiFrame.py:1668
 msgid "Set current wiki word as tree root"
 msgstr "将当前维基字设为树根"
 
-#: lib\pwiki\PersonalWikiFrame.py:1630
+#: lib\pwiki\PersonalWikiFrame.py:1672
 msgid "R&eset Root"
 msgstr "重设根(&E)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1631
+#: lib\pwiki\PersonalWikiFrame.py:1673
 msgid "Set home wiki word as tree root"
 msgstr "设置首页维基字为树根"
 
-#: lib\pwiki\PersonalWikiFrame.py:1635
+#: lib\pwiki\PersonalWikiFrame.py:1677
 msgid "S&ynchronise Tree"
 msgstr "同步树(&Y)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1636
+#: lib\pwiki\PersonalWikiFrame.py:1678
 msgid "Find the current wiki word in the tree"
 msgstr "在树中查找当前维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1641
+#: lib\pwiki\PersonalWikiFrame.py:1684
 msgid "&Follow Link"
 msgstr "链接(&F)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1642
+#: lib\pwiki\PersonalWikiFrame.py:1685
 msgid "Activate link/word"
 msgstr "激活链接/字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1647
+#: lib\pwiki\PersonalWikiFrame.py:1690
 msgid "Follow Link in &New Tab"
 msgstr "在新选项卡打开链接(&N)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1648
+#: lib\pwiki\PersonalWikiFrame.py:1692
 msgid "Activate link/word in new tab"
 msgstr "在新选项卡激活链接与字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1653
+#: lib\pwiki\PersonalWikiFrame.py:1697
+msgid "Follow Link in New &Window"
+msgstr "在新窗口打开链接(&T)"
+
+#: lib\pwiki\PersonalWikiFrame.py:1699
+msgid "Activate link/word in new window"
+msgstr "在新窗口激活链接与关键字"
+
+#: lib\pwiki\PersonalWikiFrame.py:1704
 msgid "Copy &URL to Clipboard"
 msgstr "复制 (&U)RL 到剪贴板"
 
-#: lib\pwiki\PersonalWikiFrame.py:1655
+#: lib\pwiki\PersonalWikiFrame.py:1706
 msgid "Copy full \"wiki:\" URL of the word to clipboard"
 msgstr "复制该维基字完整 \"wiki:\" URL到剪贴板 "
 
-#: lib\pwiki\PersonalWikiFrame.py:1661
+#: lib\pwiki\PersonalWikiFrame.py:1712
 msgid "&Add version"
 msgstr "增加版本(&A)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1662
+#: lib\pwiki\PersonalWikiFrame.py:1713
 msgid "Add new version"
 msgstr "增加新版本"
 
-#: lib\pwiki\PersonalWikiFrame.py:1670
+#: lib\pwiki\PersonalWikiFrame.py:1727
 msgid "&Bold"
 msgstr "加粗(&B)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1671
-#: lib\pwiki\PersonalWikiFrame.py:2082
+#: lib\pwiki\PersonalWikiFrame.py:1728
+#: lib\pwiki\PersonalWikiFrame.py:2138
 msgid "Bold"
 msgstr "加粗"
 
-#: lib\pwiki\PersonalWikiFrame.py:1677
+#: lib\pwiki\PersonalWikiFrame.py:1734
 msgid "&Italic"
 msgstr "斜体(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1678
-#: lib\pwiki\PersonalWikiFrame.py:2088
+#: lib\pwiki\PersonalWikiFrame.py:1735
+#: lib\pwiki\PersonalWikiFrame.py:2144
 msgid "Italic"
 msgstr "斜体"
 
-#: lib\pwiki\PersonalWikiFrame.py:1684
+#: lib\pwiki\PersonalWikiFrame.py:1741
 msgid "&Heading"
 msgstr "标题(&H)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1685
+#: lib\pwiki\PersonalWikiFrame.py:1742
 msgid "Add Heading"
 msgstr "增加标题"
 
-#: lib\pwiki\PersonalWikiFrame.py:1693
+#: lib\pwiki\PersonalWikiFrame.py:1750
 msgid "&Rewrap Text"
 msgstr "文本重新折行(&R)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1695
+#: lib\pwiki\PersonalWikiFrame.py:1752
 msgid "Rewrap Text"
 msgstr "文本重新折行"
 
-#: lib\pwiki\PersonalWikiFrame.py:1700
+#: lib\pwiki\PersonalWikiFrame.py:1757
 msgid "&Convert"
 msgstr "转换(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1703
+#: lib\pwiki\PersonalWikiFrame.py:1760
 msgid "Selection to &Link"
 msgstr "选择设为链接(&L)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1704
+#: lib\pwiki\PersonalWikiFrame.py:1761
 msgid "Remove non-allowed characters and make sel. a wiki word link"
 msgstr "移除非法字符并设选择为维基字链接"
 
-#: lib\pwiki\PersonalWikiFrame.py:1709
+#: lib\pwiki\PersonalWikiFrame.py:1766
 msgid "Selection to &Wiki Word"
 msgstr "选择设为维基字(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1711
+#: lib\pwiki\PersonalWikiFrame.py:1768
 msgid "Put selected text in a new or existing wiki word"
 msgstr "将选择文本置为新的或已存在的维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1716
+#: lib\pwiki\PersonalWikiFrame.py:1773
 msgid "Absolute/Relative &File URL"
 msgstr "绝对/相对文件URL(&F)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1718
+#: lib\pwiki\PersonalWikiFrame.py:1775
 msgid "Convert file URL from absolute to relative and vice versa"
 msgstr "转换绝对文件URL到相对，反之亦然。"
 
-#: lib\pwiki\PersonalWikiFrame.py:1732
+#: lib\pwiki\PersonalWikiFrame.py:1789
 msgid "&Icon Name"
 msgstr "图标名(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1744
+#: lib\pwiki\PersonalWikiFrame.py:1801
 msgid "&Color Name"
 msgstr "颜色名(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1752
+#: lib\pwiki\PersonalWikiFrame.py:1809
 msgid "&Add Attribute"
 msgstr "增加属性(&A)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1761
+#: lib\pwiki\PersonalWikiFrame.py:1818
 msgid "&Icon Attribute"
 msgstr "图标属性(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1771
+#: lib\pwiki\PersonalWikiFrame.py:1828
 msgid "&Color Attribute"
 msgstr "颜色属性(&C)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1780
+#: lib\pwiki\PersonalWikiFrame.py:1837
 msgid "&Back"
 msgstr "后退(&B)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1781
+#: lib\pwiki\PersonalWikiFrame.py:1838
 msgid "Go backward"
 msgstr "后退"
 
-#: lib\pwiki\PersonalWikiFrame.py:1786
+#: lib\pwiki\PersonalWikiFrame.py:1843
 msgid "&Forward"
 msgstr "前进(&F)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1787
+#: lib\pwiki\PersonalWikiFrame.py:1844
 msgid "Go forward"
 msgstr "前进"
 
-#: lib\pwiki\PersonalWikiFrame.py:1792
+#: lib\pwiki\PersonalWikiFrame.py:1849
 msgid "&Wiki Home"
 msgstr "维基主页(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1793
+#: lib\pwiki\PersonalWikiFrame.py:1850
 msgid "Go to wiki homepage"
 msgstr "转至维基主页"
 
-#: lib\pwiki\PersonalWikiFrame.py:1799
+#: lib\pwiki\PersonalWikiFrame.py:1855
 msgid "Up&ward"
 msgstr "向上(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1801
-#: lib\pwiki\PersonalWikiFrame.py:2049
-#: lib\pwiki\PersonalWikiFrame.py:2050
+#: lib\pwiki\PersonalWikiFrame.py:1857
+#: lib\pwiki\PersonalWikiFrame.py:2105
+#: lib\pwiki\PersonalWikiFrame.py:2106
 msgid "Go upward from a subpage"
 msgstr "从子页往上查找"
 
-#: lib\pwiki\PersonalWikiFrame.py:1806
+#: lib\pwiki\PersonalWikiFrame.py:1862
 msgid "Go to &Page..."
 msgstr "转至页(&P)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1807
+#: lib\pwiki\PersonalWikiFrame.py:1863
 msgid "Open wiki word"
 msgstr "打开维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:1812
+#: lib\pwiki\PersonalWikiFrame.py:1868
 msgid "Go to P&arent..."
 msgstr "转至父结点(&A)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1814
+#: lib\pwiki\PersonalWikiFrame.py:1870
 msgid "List parents of current wiki word"
 msgstr "显示当前维基字父结点"
 
-#: lib\pwiki\PersonalWikiFrame.py:1817
+#: lib\pwiki\PersonalWikiFrame.py:1873
 msgid "List &Children..."
 msgstr "显示子结点(&C)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1819
+#: lib\pwiki\PersonalWikiFrame.py:1875
 msgid "List children of current wiki word"
 msgstr "显示当前维基字子结点"
 
-#: lib\pwiki\PersonalWikiFrame.py:1822
+#: lib\pwiki\PersonalWikiFrame.py:1878
 msgid "List Pa&rentless Pages"
 msgstr "显示叶子页面(&P)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1824
+#: lib\pwiki\PersonalWikiFrame.py:1880
 msgid "List nodes with no parent relations"
 msgstr "结点清单不带父子关系"
 
-#: lib\pwiki\PersonalWikiFrame.py:1829
+#: lib\pwiki\PersonalWikiFrame.py:1885
 msgid "Show &History..."
 msgstr "显示历史(&H)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1830
+#: lib\pwiki\PersonalWikiFrame.py:1886
 msgid "View tab history"
 msgstr "显示历史选项卡"
 
-#: lib\pwiki\PersonalWikiFrame.py:1833
+#: lib\pwiki\PersonalWikiFrame.py:1889
 msgid "&Up History..."
 msgstr "向上历史(&U)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1834
+#: lib\pwiki\PersonalWikiFrame.py:1890
 msgid "Up in tab history"
 msgstr "选项卡历史向上"
 
-#: lib\pwiki\PersonalWikiFrame.py:1837
+#: lib\pwiki\PersonalWikiFrame.py:1893
 msgid "&Down History..."
 msgstr "向下历史(&D)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1838
+#: lib\pwiki\PersonalWikiFrame.py:1894
 msgid "Down in tab history"
 msgstr "选项卡历史向下"
 
-#: lib\pwiki\PersonalWikiFrame.py:1843
+#: lib\pwiki\PersonalWikiFrame.py:1899
 msgid "Add B&ookmark"
 msgstr "增加书签(&O)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1844
+#: lib\pwiki\PersonalWikiFrame.py:1900
 msgid "Add bookmark to page"
 msgstr "增加页书签"
 
-#: lib\pwiki\PersonalWikiFrame.py:1848
+#: lib\pwiki\PersonalWikiFrame.py:1904
 msgid "Go to &Bookmark..."
 msgstr "转至书签(&B)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1849
+#: lib\pwiki\PersonalWikiFrame.py:1905
 msgid "List bookmarks"
 msgstr "书签列表"
 
-#: lib\pwiki\PersonalWikiFrame.py:1855
+#: lib\pwiki\PersonalWikiFrame.py:1911
 msgid "&Export..."
 msgstr "导出(&E)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1859
+#: lib\pwiki\PersonalWikiFrame.py:1915
 msgid "&Continuous Export..."
 msgstr "连续导出(&C)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1860
+#: lib\pwiki\PersonalWikiFrame.py:1916
 msgid "Open export dialog for continuous export of changes"
 msgstr "打开导出对话框用于连续导出"
 
-#: lib\pwiki\PersonalWikiFrame.py:1866
+#: lib\pwiki\PersonalWikiFrame.py:1922
 msgid "&Import..."
 msgstr "导入(&I)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1867
+#: lib\pwiki\PersonalWikiFrame.py:1923
 msgid "Import dialog"
 msgstr "导入对话框"
 
-#: lib\pwiki\PersonalWikiFrame.py:1873
+#: lib\pwiki\PersonalWikiFrame.py:1929
 msgid "Scripts"
 msgstr "脚本"
 
-#: lib\pwiki\PersonalWikiFrame.py:1874
+#: lib\pwiki\PersonalWikiFrame.py:1930
 msgid "Run scripts, evaluate expressions"
 msgstr "运行脚本，计算表达式"
 
-#: lib\pwiki\PersonalWikiFrame.py:1876
+#: lib\pwiki\PersonalWikiFrame.py:1932
 msgid "&Eval"
 msgstr "运算(&E)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1877
+#: lib\pwiki\PersonalWikiFrame.py:1933
 msgid "Evaluate script blocks"
 msgstr "运行脚本块"
 
-#: lib\pwiki\PersonalWikiFrame.py:1882
+#: lib\pwiki\PersonalWikiFrame.py:1938
 msgid "Run Function &%i\tCtrl-%i"
 msgstr "运行函数 &%i\tCtrl-%i"
 
-#: lib\pwiki\PersonalWikiFrame.py:1883
+#: lib\pwiki\PersonalWikiFrame.py:1939
 msgid "Run script function %i"
 msgstr "运行脚本函数 %i"
 
-#: lib\pwiki\PersonalWikiFrame.py:1888
+#: lib\pwiki\PersonalWikiFrame.py:1944
 msgid "O&ptions..."
 msgstr "选项(&P)..."
 
-#: lib\pwiki\PersonalWikiFrame.py:1889
+#: lib\pwiki\PersonalWikiFrame.py:1945
 msgid "Set options"
 msgstr "设置选项"
 
-#: lib\pwiki\PersonalWikiFrame.py:1910
+#: lib\pwiki\PersonalWikiFrame.py:1966
 msgid "&Open help wiki"
 msgstr "打开帮助(&O)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1911
+#: lib\pwiki\PersonalWikiFrame.py:1967
 msgid "Open WikidPadHelp, the help wiki"
 msgstr "打开WikidPadHelp，维基帮助文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:1920
+#: lib\pwiki\PersonalWikiFrame.py:1976
 msgid "&Visit Homepage"
 msgstr "访问主页(&V)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1921
+#: lib\pwiki\PersonalWikiFrame.py:1977
 msgid "Visit wikidPad homepage"
 msgstr "访问WikidPad主页"
 
-#: lib\pwiki\PersonalWikiFrame.py:1931
+#: lib\pwiki\PersonalWikiFrame.py:1987
 msgid "Show &License"
 msgstr "显示许可(&L)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1932
+#: lib\pwiki\PersonalWikiFrame.py:1988
 msgid "Show license of WikidPad and used components"
 msgstr "显示WikidPad 许可与用户组件"
 
-#: lib\pwiki\PersonalWikiFrame.py:1949
+#: lib\pwiki\PersonalWikiFrame.py:2005
 msgid "&About"
 msgstr "关于(&A)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1953
+#: lib\pwiki\PersonalWikiFrame.py:2009
 msgid "&Wiki"
 msgstr "维基(&W)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1954
+#: lib\pwiki\PersonalWikiFrame.py:2010
 msgid "&Edit"
 msgstr "编辑(&E)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1955
+#: lib\pwiki\PersonalWikiFrame.py:2011
 msgid "&View"
 msgstr "视图(&V)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1956
+#: lib\pwiki\PersonalWikiFrame.py:2012
 msgid "&Tabs"
 msgstr "标签页(&T)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1957
+#: lib\pwiki\PersonalWikiFrame.py:2013
 msgid "Wiki &Page"
 msgstr "维基页(&P)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1958
+#: lib\pwiki\PersonalWikiFrame.py:2014
 msgid "&Format"
 msgstr "格式(&F)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1959
+#: lib\pwiki\PersonalWikiFrame.py:2015
 msgid "&Navigate"
 msgstr "导航(&N)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1960
+#: lib\pwiki\PersonalWikiFrame.py:2016
 msgid "E&xtra"
 msgstr "高级(&X)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1976
+#: lib\pwiki\PersonalWikiFrame.py:2032
 msgid "Pl&ugins"
 msgstr "插件(&U)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1982
+#: lib\pwiki\PersonalWikiFrame.py:2038
 msgid "&Help"
 msgstr "帮助(&H)"
 
-#: lib\pwiki\PersonalWikiFrame.py:1984
+#: lib\pwiki\PersonalWikiFrame.py:2040
 msgid "He&lp"
 msgstr "帮助(&L)"
 
-#: lib\pwiki\PersonalWikiFrame.py:2010
-#: lib\pwiki\PersonalWikiFrame.py:2011
+#: lib\pwiki\PersonalWikiFrame.py:2066
+#: lib\pwiki\PersonalWikiFrame.py:2067
 msgid "Back"
 msgstr "后退"
 
-#: lib\pwiki\PersonalWikiFrame.py:2016
-#: lib\pwiki\PersonalWikiFrame.py:2017
+#: lib\pwiki\PersonalWikiFrame.py:2072
+#: lib\pwiki\PersonalWikiFrame.py:2073
 msgid "Forward"
 msgstr "前进"
 
-#: lib\pwiki\PersonalWikiFrame.py:2022
-#: lib\pwiki\PersonalWikiFrame.py:2023
+#: lib\pwiki\PersonalWikiFrame.py:2078
+#: lib\pwiki\PersonalWikiFrame.py:2079
 msgid "Wiki Home"
 msgstr "维基主页"
 
-#: lib\pwiki\PersonalWikiFrame.py:2037
-#: lib\pwiki\PersonalWikiFrame.py:2038
+#: lib\pwiki\PersonalWikiFrame.py:2093
+#: lib\pwiki\PersonalWikiFrame.py:2094
 msgid "Search"
 msgstr "搜索"
 
-#: lib\pwiki\PersonalWikiFrame.py:2043
-#: lib\pwiki\PersonalWikiFrame.py:2044
+#: lib\pwiki\PersonalWikiFrame.py:2099
+#: lib\pwiki\PersonalWikiFrame.py:2100
 msgid "Find current word in tree"
 msgstr "在树中查找当前关键字"
 
-#: lib\pwiki\PersonalWikiFrame.py:2053
-#: lib\pwiki\PersonalWikiFrame.py:2072
-#: lib\pwiki\PersonalWikiFrame.py:2092
+#: lib\pwiki\PersonalWikiFrame.py:2109
+#: lib\pwiki\PersonalWikiFrame.py:2128
+#: lib\pwiki\PersonalWikiFrame.py:2148
 msgid "Separator"
 msgstr "分隔符"
 
-#: lib\pwiki\PersonalWikiFrame.py:2057
-#: lib\pwiki\PersonalWikiFrame.py:2058
+#: lib\pwiki\PersonalWikiFrame.py:2113
+#: lib\pwiki\PersonalWikiFrame.py:2114
 msgid "Save Wiki Word"
 msgstr "保存维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:2068
-#: lib\pwiki\PersonalWikiFrame.py:2069
-#: lib\pwiki\PersonalWikiFrame.py:4359
+#: lib\pwiki\PersonalWikiFrame.py:2124
+#: lib\pwiki\PersonalWikiFrame.py:2125
+#: lib\pwiki\PersonalWikiFrame.py:4482
 msgid "Delete Wiki Word"
 msgstr "删除维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:2076
+#: lib\pwiki\PersonalWikiFrame.py:2132
 msgid "Heading"
 msgstr "标题"
 
-#: lib\pwiki\PersonalWikiFrame.py:2096
+#: lib\pwiki\PersonalWikiFrame.py:2152
 msgid "Switch Editor/Preview"
 msgstr "切换编辑/预览"
 
-#: lib\pwiki\PersonalWikiFrame.py:2117
+#: lib\pwiki\PersonalWikiFrame.py:2173
 msgid "Wikize Selected Word "
 msgstr "选中词维基化"
 
-#: lib\pwiki\PersonalWikiFrame.py:2118
+#: lib\pwiki\PersonalWikiFrame.py:2174
 msgid "Wikize Selected Word"
 msgstr "选中词维基化"
 
-#: lib\pwiki\PersonalWikiFrame.py:2189
+#: lib\pwiki\PersonalWikiFrame.py:2246
 msgid "Line: 9999 Col: 9999 Pos: 9999999988888"
 msgstr "行: 9999 列: 9999 位置: 9999999988888"
 
-#: lib\pwiki\PersonalWikiFrame.py:2361
+#: lib\pwiki\PersonalWikiFrame.py:2417
 msgid "Regular expression error"
 msgstr "错误正则表达式"
 
-#: lib\pwiki\PersonalWikiFrame.py:2370
+#: lib\pwiki\PersonalWikiFrame.py:2426
 msgid "Are you sure you want to reconnect? You may lose some data by this process."
 msgstr "你确定想要重新连接吗？该过程可能会丢失数据。"
 
-#: lib\pwiki\PersonalWikiFrame.py:2372
+#: lib\pwiki\PersonalWikiFrame.py:2428
 msgid "Reconnect database"
 msgstr "重连数据库"
 
-#: lib\pwiki\PersonalWikiFrame.py:2386
-#: lib\pwiki\PersonalWikiFrame.py:3440
+#: lib\pwiki\PersonalWikiFrame.py:2442
+#: lib\pwiki\PersonalWikiFrame.py:3524
 msgid "Error while trying to reconnect:\n"
 msgstr "正尝试重新连接时发生错误:\n"
 
-#: lib\pwiki\PersonalWikiFrame.py:2388
+#: lib\pwiki\PersonalWikiFrame.py:2444
 msgid ""
 "There was an error while reconnecting the database\n"
 "\n"
@@ -4120,16 +4278,16 @@ msgstr ""
 "你想重新尝试再次连接吗？\n"
 "%s"
 
-#: lib\pwiki\PersonalWikiFrame.py:2391
+#: lib\pwiki\PersonalWikiFrame.py:2447
 msgid "Error reconnecting!"
 msgstr "重新连接时发生错误!"
 
-#: lib\pwiki\PersonalWikiFrame.py:2407
-#: lib\pwiki\PersonalWikiFrame.py:3487
+#: lib\pwiki\PersonalWikiFrame.py:2463
+#: lib\pwiki\PersonalWikiFrame.py:3571
 msgid "Error while trying to write:\n"
 msgstr "尝试写入时发生错误:\n"
 
-#: lib\pwiki\PersonalWikiFrame.py:2409
+#: lib\pwiki\PersonalWikiFrame.py:2465
 msgid ""
 "There was an error while writing to the database\n"
 "\n"
@@ -4141,61 +4299,61 @@ msgstr ""
 "你想要重新尝试写入吗?\n"
 "%s"
 
-#: lib\pwiki\PersonalWikiFrame.py:2412
+#: lib\pwiki\PersonalWikiFrame.py:2468
 msgid "Error writing!"
 msgstr "写入错误!"
 
-#: lib\pwiki\PersonalWikiFrame.py:2531
+#: lib\pwiki\PersonalWikiFrame.py:2587
 msgid "There was an error loading the icons for the tree control."
 msgstr "装载树控件所需图标时发生错误。"
 
-#: lib\pwiki\PersonalWikiFrame.py:2797
+#: lib\pwiki\PersonalWikiFrame.py:2872
 msgid "No data handler available to create database."
 msgstr "创建数据库时无可用数据句柄。"
 
-#: lib\pwiki\PersonalWikiFrame.py:2809
+#: lib\pwiki\PersonalWikiFrame.py:2884
 msgid "A wiki already exists in '%s', overwrite? (This deletes everything in and below this directory!)"
 msgstr "维基在'%s'里已存在，覆写吗？ (这将删除该目录下所有内容！)"
 
-#: lib\pwiki\PersonalWikiFrame.py:2811
+#: lib\pwiki\PersonalWikiFrame.py:2886
 msgid "Warning"
 msgstr "警告"
 
-#: lib\pwiki\PersonalWikiFrame.py:2852
+#: lib\pwiki\PersonalWikiFrame.py:2927
 msgid "A wiki database already exists in this location, overwrite?"
 msgstr "维基数据库在该位置已存在，覆写吗？"
 
-#: lib\pwiki\PersonalWikiFrame.py:2854
+#: lib\pwiki\PersonalWikiFrame.py:2929
 msgid "Wiki DB Exists"
 msgstr "维基数据库已存在"
 
-#: lib\pwiki\PersonalWikiFrame.py:2865
+#: lib\pwiki\PersonalWikiFrame.py:2940
 msgid "There was an error creating the wiki database."
 msgstr "创建维基数据库发生错误。"
 
-#: lib\pwiki\PersonalWikiFrame.py:2934
-#: lib\pwiki\PersonalWikiFrame.py:2935
+#: lib\pwiki\PersonalWikiFrame.py:3009
+#: lib\pwiki\PersonalWikiFrame.py:3010
 msgid "Choose database type"
 msgstr "选择数据库类型"
 
-#: lib\pwiki\PersonalWikiFrame.py:2972
+#: lib\pwiki\PersonalWikiFrame.py:3047
 msgid "Inaccessible or missing file: %s"
 msgstr "无效访问或缺失文件：%s。"
 
-#: lib\pwiki\PersonalWikiFrame.py:3023
-#: lib\pwiki\PersonalWikiFrame.py:3108
+#: lib\pwiki\PersonalWikiFrame.py:3098
+#: lib\pwiki\PersonalWikiFrame.py:3183
 msgid "Error connecting to database in '%s'"
 msgstr "连接数据库'%s'发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:3028
+#: lib\pwiki\PersonalWikiFrame.py:3103
 msgid "The wiki needs an update to work with this version of WikidPad. Older versions of WikidPad may be unable to read the wiki after an update."
 msgstr "当前版本WikidPad需要升级，旧版本WikidPad升级后可能无法读取维基。"
 
-#: lib\pwiki\PersonalWikiFrame.py:3031
+#: lib\pwiki\PersonalWikiFrame.py:3106
 msgid "Update database?"
 msgstr "要升级数据库吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:3066
+#: lib\pwiki\PersonalWikiFrame.py:3141
 msgid ""
 "Wiki '%s' is probably in use by different\n"
 "instance of WikidPad. Connect anyway (dangerous!)?"
@@ -4203,11 +4361,11 @@ msgstr ""
 "维基'%s'正被不同WikidPad实例使用。\n"
 "要强制连接吗（危险！）？"
 
-#: lib\pwiki\PersonalWikiFrame.py:3068
+#: lib\pwiki\PersonalWikiFrame.py:3143
 msgid "Wiki already in use"
 msgstr "维基正被使用"
 
-#: lib\pwiki\PersonalWikiFrame.py:3077
+#: lib\pwiki\PersonalWikiFrame.py:3152
 msgid ""
 "Configuration file '%s' is corrupted or missing.\n"
 "You may have to change some settings in configuration page \"Current Wiki\" and below which were lost."
@@ -4215,11 +4373,11 @@ msgstr ""
 "配置文件'%s'冲突或缺失。.\n"
 "你可能需要修改配置页中的一些设置，\"当前维基\"及子结点丢失内容。"
 
-#: lib\pwiki\PersonalWikiFrame.py:3115
+#: lib\pwiki\PersonalWikiFrame.py:3190
 msgid "Can't write to database '%s'"
 msgstr "无法写入数据库'%s'"
 
-#: lib\pwiki\PersonalWikiFrame.py:3324
+#: lib\pwiki\PersonalWikiFrame.py:3399
 msgid ""
 "There is no (write-)access to underlying wiki\n"
 "Close anyway and loose possible changes?"
@@ -4227,35 +4385,35 @@ msgstr ""
 "没有写入该维基的权限\n"
 "强制关闭，放弃可能的修改?"
 
-#: lib\pwiki\PersonalWikiFrame.py:3326
+#: lib\pwiki\PersonalWikiFrame.py:3401
 msgid "Close anyway"
 msgstr "强制关闭"
 
-#: lib\pwiki\PersonalWikiFrame.py:3410
+#: lib\pwiki\PersonalWikiFrame.py:3494
 msgid "This operation requires an open database"
 msgstr "当前操作需要打开数据库"
 
-#: lib\pwiki\PersonalWikiFrame.py:3411
+#: lib\pwiki\PersonalWikiFrame.py:3495
 msgid "No open database"
 msgstr "没有打开的数据库"
 
-#: lib\pwiki\PersonalWikiFrame.py:3423
+#: lib\pwiki\PersonalWikiFrame.py:3507
 msgid "No connection to database. Try to reconnect?"
 msgstr "数据库无连接。尝试重新连接吗？"
 
-#: lib\pwiki\PersonalWikiFrame.py:3424
+#: lib\pwiki\PersonalWikiFrame.py:3508
 msgid "Reconnect database?"
 msgstr "重新连接数据库?"
 
-#: lib\pwiki\PersonalWikiFrame.py:3431
+#: lib\pwiki\PersonalWikiFrame.py:3515
 msgid "Trying to reconnect database..."
 msgstr "正在重新连接数据库..."
 
-#: lib\pwiki\PersonalWikiFrame.py:3443
+#: lib\pwiki\PersonalWikiFrame.py:3527
 msgid "Error while reconnecting database"
 msgstr "重新连接数据库时发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:3468
+#: lib\pwiki\PersonalWikiFrame.py:3552
 msgid ""
 "This operation needs write access to database\n"
 "Try to write?"
@@ -4263,19 +4421,19 @@ msgstr ""
 "当前操作需要数据库写权限\n"
 "尝试写入吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:3469
+#: lib\pwiki\PersonalWikiFrame.py:3553
 msgid "Try writing?"
 msgstr "尝试写入?"
 
-#: lib\pwiki\PersonalWikiFrame.py:3476
+#: lib\pwiki\PersonalWikiFrame.py:3560
 msgid "Trying to write to database..."
 msgstr "正在尝试写入数据库..."
 
-#: lib\pwiki\PersonalWikiFrame.py:3490
+#: lib\pwiki\PersonalWikiFrame.py:3574
 msgid "Error while writing to database"
 msgstr "尝试写入数据库时发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:3514
+#: lib\pwiki\PersonalWikiFrame.py:3598
 msgid ""
 "Database connection error: %s.\n"
 "Try to re-establish, then run \"Wiki\"->\"Reconnect\""
@@ -4283,12 +4441,12 @@ msgstr ""
 "数据库连节错误： %s.\n"
 "尝试重新建立，然后运行\"维基\"->\"重新连接\""
 
-#: lib\pwiki\PersonalWikiFrame.py:3516
-#: lib\pwiki\PersonalWikiFrame.py:3533
+#: lib\pwiki\PersonalWikiFrame.py:3600
+#: lib\pwiki\PersonalWikiFrame.py:3617
 msgid "Connection lost"
 msgstr "连接丢失"
 
-#: lib\pwiki\PersonalWikiFrame.py:3531
+#: lib\pwiki\PersonalWikiFrame.py:3615
 msgid ""
 "No write access to database: %s.\n"
 " Try to re-establish, then run \"Wiki\"->\"Reconnect\""
@@ -4296,115 +4454,115 @@ msgstr ""
 "数据库: %s，无写入权限。\n"
 " 尝试重新建立，然后运行\"维基\"->\"重新连接\""
 
-#: lib\pwiki\PersonalWikiFrame.py:3550
+#: lib\pwiki\PersonalWikiFrame.py:3634
 msgid "Trying to reconnect ..."
 msgstr "正尝试重新连接..."
 
-#: lib\pwiki\PersonalWikiFrame.py:3559
+#: lib\pwiki\PersonalWikiFrame.py:3643
 msgid "Error while trying to reconnect:"
 msgstr "重新连接时发生错误:"
 
-#: lib\pwiki\PersonalWikiFrame.py:3803
+#: lib\pwiki\PersonalWikiFrame.py:3899
 msgid "Couldn't start file"
 msgstr "无法起用文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:3818
+#: lib\pwiki\PersonalWikiFrame.py:3907
 msgid "Couldn't open wiki: %s"
 msgstr "无法打开维基: %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:3848
+#: lib\pwiki\PersonalWikiFrame.py:3958
 msgid "Mod.: %s"
 msgstr "修改: %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:3849
+#: lib\pwiki\PersonalWikiFrame.py:3959
 msgid "; Crea.: %s"
 msgstr "; 创建: %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:3886
+#: lib\pwiki\PersonalWikiFrame.py:4008
 msgid "Parent nodes of '%s'"
 msgstr "'%s'父结点"
 
-#: lib\pwiki\PersonalWikiFrame.py:3898
+#: lib\pwiki\PersonalWikiFrame.py:4020
 msgid "Parentless nodes"
 msgstr "叶子结点"
 
-#: lib\pwiki\PersonalWikiFrame.py:3910
+#: lib\pwiki\PersonalWikiFrame.py:4032
 msgid "Child nodes of '%s'"
 msgstr "'%s'子结点"
 
-#: lib\pwiki\PersonalWikiFrame.py:3923
+#: lib\pwiki\PersonalWikiFrame.py:4045
 msgid "Bookmarks"
 msgstr "书签"
 
-#: lib\pwiki\PersonalWikiFrame.py:4070
+#: lib\pwiki\PersonalWikiFrame.py:4192
 msgid "Wiki: %s"
 msgstr "维基: %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:4209
+#: lib\pwiki\PersonalWikiFrame.py:4331
 msgid "Set at Page: %s\t%s"
 msgstr "设置于页: %s\t%s"
 
-#: lib\pwiki\PersonalWikiFrame.py:4225
+#: lib\pwiki\PersonalWikiFrame.py:4347
 msgid "Error saving global configuration"
 msgstr "保存全局设置时发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:4236
+#: lib\pwiki\PersonalWikiFrame.py:4358
 msgid "Error saving current configuration"
 msgstr "保存当前设置时发生错误"
 
-#: lib\pwiki\PersonalWikiFrame.py:4258
+#: lib\pwiki\PersonalWikiFrame.py:4380
 msgid "No real wiki word selected to rename"
 msgstr "没有选择真实的维基字用于修改"
 
-#: lib\pwiki\PersonalWikiFrame.py:4262
+#: lib\pwiki\PersonalWikiFrame.py:4384
 msgid "The scratch pad cannot be renamed."
 msgstr "本便笺无法改名"
 
-#: lib\pwiki\PersonalWikiFrame.py:4286
+#: lib\pwiki\PersonalWikiFrame.py:4408
 msgid "Description:"
 msgstr "描述:"
 
-#: lib\pwiki\PersonalWikiFrame.py:4287
+#: lib\pwiki\PersonalWikiFrame.py:4409
 msgid "Store new version"
 msgstr "保存新版本"
 
-#: lib\pwiki\PersonalWikiFrame.py:4301
+#: lib\pwiki\PersonalWikiFrame.py:4423
 msgid "Do you want to delete all stored versions?"
 msgstr "你想要删除所有已保存版本吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4302
+#: lib\pwiki\PersonalWikiFrame.py:4424
 msgid "Delete All Versions"
 msgstr "删除所有版本"
 
-#: lib\pwiki\PersonalWikiFrame.py:4347
+#: lib\pwiki\PersonalWikiFrame.py:4469
 msgid "The scratch pad cannot be deleted"
 msgstr "本便笺无法删除"
 
-#: lib\pwiki\PersonalWikiFrame.py:4351
+#: lib\pwiki\PersonalWikiFrame.py:4473
 msgid "No real wiki word to delete"
 msgstr "没有真实的维基字可供删除"
 
-#: lib\pwiki\PersonalWikiFrame.py:4358
+#: lib\pwiki\PersonalWikiFrame.py:4481
 msgid "Are you sure you want to delete wiki word '%s'?"
 msgstr "你确定要删除维基字'%s'吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4389
+#: lib\pwiki\PersonalWikiFrame.py:4513
 msgid "No real wiki word to modify"
 msgstr "没有真实的维基字可供修改"
 
-#: lib\pwiki\PersonalWikiFrame.py:4405
+#: lib\pwiki\PersonalWikiFrame.py:4529
 msgid "Replace text by WikiWord:"
 msgstr "替换文本为维基字:"
 
-#: lib\pwiki\PersonalWikiFrame.py:4406
+#: lib\pwiki\PersonalWikiFrame.py:4530
 msgid "Replace by Wiki Word"
 msgstr "替换为维基字"
 
-#: lib\pwiki\PersonalWikiFrame.py:4415
+#: lib\pwiki\PersonalWikiFrame.py:4539
 msgid "'%s' is an invalid wiki word."
 msgstr "'%s'是无效维基字。"
 
-#: lib\pwiki\PersonalWikiFrame.py:4430
+#: lib\pwiki\PersonalWikiFrame.py:4554
 msgid ""
 "Wiki word %s exists already\n"
 "Would you like to append to the word?"
@@ -4412,160 +4570,219 @@ msgstr ""
 "维基字%s已存在\n"
 "你想要追加该维基字吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4433
+#: lib\pwiki\PersonalWikiFrame.py:4557
 msgid "Word exists"
 msgstr "维基字已存在"
 
-#: lib\pwiki\PersonalWikiFrame.py:4691
+#: lib\pwiki\PersonalWikiFrame.py:4815
 msgid "Error on export"
 msgstr "导出出错"
 
-#: lib\pwiki\PersonalWikiFrame.py:4763
+#: lib\pwiki\PersonalWikiFrame.py:4887
 msgid "Are you sure you want to start a full rebuild of wiki in background?"
 msgstr "确认你想要开始在后台完全重建维基吗?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4765
+#: lib\pwiki\PersonalWikiFrame.py:4889
 msgid "Initiate update"
 msgstr "初始化升级"
 
-#: lib\pwiki\PersonalWikiFrame.py:4772
-#: lib\pwiki\PersonalWikiFrame.py:4773
+#: lib\pwiki\PersonalWikiFrame.py:4896
+#: lib\pwiki\PersonalWikiFrame.py:4897
 msgid "     Initiating update     "
 msgstr "     初始化升级"
 
-#: lib\pwiki\PersonalWikiFrame.py:4787
+#: lib\pwiki\PersonalWikiFrame.py:4911
 msgid "Error initiating update"
 msgstr "初始化升级时出错"
 
-#: lib\pwiki\PersonalWikiFrame.py:4796
+#: lib\pwiki\PersonalWikiFrame.py:4920
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
 msgstr "确认你要重建该维基吗?首先你应该备份数据!"
 
-#: lib\pwiki\PersonalWikiFrame.py:4798
+#: lib\pwiki\PersonalWikiFrame.py:4922
 msgid "Rebuild wiki"
 msgstr "重建维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:4805
-#: lib\pwiki\PersonalWikiFrame.py:4806
+#: lib\pwiki\PersonalWikiFrame.py:4929
+#: lib\pwiki\PersonalWikiFrame.py:4930
 msgid "     Rebuilding wiki     "
 msgstr "     重建维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:4821
+#: lib\pwiki\PersonalWikiFrame.py:4945
 msgid "Error rebuilding wiki"
 msgstr "重建维基出错"
 
-#: lib\pwiki\PersonalWikiFrame.py:4913
+#: lib\pwiki\PersonalWikiFrame.py:5032
 msgid "This could overwrite pages in the database. Continue?"
 msgstr "这些操作可能会覆写数据库中的页面。是否继续?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4914
+#: lib\pwiki\PersonalWikiFrame.py:5033
 msgid "Import pagefiles"
 msgstr "导入页面文件"
 
-#: lib\pwiki\PersonalWikiFrame.py:5016
+#: lib\pwiki\PersonalWikiFrame.py:5135
 msgid "No list of strings passed to \"listmcstr\" dialog"
 msgstr "没有字符串列表传送到\"listmcstr\"对话框"
 
-#: lib\pwiki\PersonalWikiFrame.py:5039
+#: lib\pwiki\PersonalWikiFrame.py:5158
 msgid "Unknown dialog type"
 msgstr "未知对话框类型"
 
-#: lib\pwiki\PersonalWikiFrame.py:5208
-#: lib\pwiki\PersonalWikiFrame.py:5226
-#: lib\pwiki\PersonalWikiFrame.py:5251
+#: lib\pwiki\PersonalWikiFrame.py:5367
+#: lib\pwiki\PersonalWikiFrame.py:5385
+#: lib\pwiki\PersonalWikiFrame.py:5410
 msgid "Choose a Wiki to open"
 msgstr "选择需要打开的维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:5265
+#: lib\pwiki\PersonalWikiFrame.py:5424
 msgid "Name for new wiki (must be in the form of a WikiWord):"
 msgstr "新维基名(必须是维基字的形式):"
 
-#: lib\pwiki\PersonalWikiFrame.py:5266
+#: lib\pwiki\PersonalWikiFrame.py:5425
 msgid "Create New Wiki"
 msgstr "创建新维基"
 
-#: lib\pwiki\PersonalWikiFrame.py:5281
+#: lib\pwiki\PersonalWikiFrame.py:5440
 msgid "Directory to store new wiki"
 msgstr "存储新维基的目录"
 
-#: lib\pwiki\PersonalWikiFrame.py:5292
-#: lib\pwiki\wikidata\WikiDataManager.py:1406
-#: lib\pwiki\wikidata\WikiDataManager.py:1462
+#: lib\pwiki\PersonalWikiFrame.py:5451
+#: lib\pwiki\wikidata\WikiDataManager.py:1482
+#: lib\pwiki\wikidata\WikiDataManager.py:1538
 msgid "'%s' is an invalid wiki word. %s"
 msgstr "'%s'是无效维基字。 %s"
 
-#: lib\pwiki\PersonalWikiFrame.py:5596
+#: lib\pwiki\PersonalWikiFrame.py:5765
 msgid "Clipboard Catcher at Cursor"
 msgstr "在光标处开始剪贴板捕获"
 
-#: lib\pwiki\PersonalWikiFrame.py:5600
+#: lib\pwiki\PersonalWikiFrame.py:5769
 msgid "Clipboard Catcher off"
 msgstr "关闭剪贴板监视器"
 
-#: lib\pwiki\PersonalWikiFrame.py:5661
+#: lib\pwiki\PersonalWikiFrame.py:5830
 msgid "Restore"
 msgstr "还原"
 
-#: lib\pwiki\PersonalWikiFrame.py:5662
+#: lib\pwiki\PersonalWikiFrame.py:5831
 msgid "Save"
 msgstr "保存"
 
-#: lib\pwiki\Printing.py:328
-#: lib\pwiki\Printing.py:645
+#: lib\pwiki\Printing.py:56
+msgid "HTML (Webkit)"
+msgstr "HTML（Webkit）"
+
+#: lib\pwiki\Printing.py:351
+#: lib\pwiki\Printing.py:668
 msgid "Print Preview"
 msgstr "打印预览"
 
-#: lib\pwiki\Printing.py:341
+#: lib\pwiki\Printing.py:364
 msgid "Printout"
 msgstr "打印输出"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:158
+#: lib\pwiki\Printing.py:792
+msgid "Error loading Webkit: try a different export format)"
+msgstr "装载Webkit错误：尝试使用不同导出格式)"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:161
 msgid "Searching... (click into field to abort)"
 msgstr "搜索中... (在域中单击取消)"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:160
+#: lib\pwiki\SearchAndReplaceDialogs.py:163
 msgid "Not found"
 msgstr "没有发现"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:745
-msgid "End of document reached. Continue at beginning?"
-msgstr "已到达文档尾。是否在文档开始处继续？"
+#: lib\pwiki\SearchAndReplaceDialogs.py:676
+msgid "More >>"
+msgstr "更多>>"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:747
-msgid "Continue at beginning?"
-msgstr "在开始处继续?"
+#: lib\pwiki\SearchAndReplaceDialogs.py:683
+msgid "<< Less"
+msgstr "<<小于"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:758
-#: lib\pwiki\SearchAndReplaceDialogs.py:759
-msgid "No matches found"
-msgstr "没有发现匹配结果"
+#: lib\pwiki\SearchAndReplaceDialogs.py:827
+#: lib\pwiki\SearchAndReplaceDialogs.py:1824
+msgid "Do you want to delete %i search(es)?"
+msgstr "你想要删除%i个搜索结果吗?"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:773
-#: lib\pwiki\SearchAndReplaceDialogs.py:786
-#: lib\pwiki\SearchAndReplaceDialogs.py:1029
-#: lib\pwiki\SearchAndReplaceDialogs.py:1249
-#: lib\pwiki\SearchAndReplaceDialogs.py:1275
-#: lib\pwiki\SearchAndReplaceDialogs.py:1332
-#: lib\pwiki\SearchAndReplaceDialogs.py:1346
-#: lib\pwiki\SearchAndReplaceDialogs.py:1425
-#: lib\pwiki\SearchAndReplaceDialogs.py:1474
-#: lib\pwiki\SearchAndReplaceDialogs.py:1635
-#: lib\pwiki\SearchAndReplaceDialogs.py:2259
+#: lib\pwiki\SearchAndReplaceDialogs.py:828
+#: lib\pwiki\SearchAndReplaceDialogs.py:1825
+msgid "Delete search"
+msgstr "删除搜索"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:881
+#: lib\pwiki\SearchAndReplaceDialogs.py:984
+#: lib\pwiki\SearchAndReplaceDialogs.py:997
+#: lib\pwiki\SearchAndReplaceDialogs.py:1240
+#: lib\pwiki\SearchAndReplaceDialogs.py:1461
+#: lib\pwiki\SearchAndReplaceDialogs.py:1487
+#: lib\pwiki\SearchAndReplaceDialogs.py:1544
+#: lib\pwiki\SearchAndReplaceDialogs.py:1558
+#: lib\pwiki\SearchAndReplaceDialogs.py:1637
+#: lib\pwiki\SearchAndReplaceDialogs.py:1686
+#: lib\pwiki\SearchAndReplaceDialogs.py:1847
+#: lib\pwiki\SearchAndReplaceDialogs.py:2471
 msgid "Error in regular expression"
 msgstr "正则表达式错误"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:814
-#: lib\pwiki\SearchAndReplaceDialogs.py:1419
+#: lib\pwiki\SearchAndReplaceDialogs.py:885
+#: lib\pwiki\SearchAndReplaceDialogs.py:1464
+#: lib\pwiki\SearchAndReplaceDialogs.py:1491
+#: lib\pwiki\SearchAndReplaceDialogs.py:1547
+#: lib\pwiki\SearchAndReplaceDialogs.py:1562
+#: lib\pwiki\SearchAndReplaceDialogs.py:1640
+#: lib\pwiki\SearchAndReplaceDialogs.py:1690
+#: lib\pwiki\SearchAndReplaceDialogs.py:1850
+#: lib\pwiki\SearchAndReplaceDialogs.py:2474
+msgid "Error in boolean expression"
+msgstr "错误布尔正则表达式"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:893
+#: lib\pwiki\SearchAndReplaceDialogs.py:1698
+msgid "Choose search title"
+msgstr "选择搜索标题"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:903
+#: lib\pwiki\SearchAndReplaceDialogs.py:1708
+msgid "Do you want to overwrite existing search '%s'?"
+msgstr "你想要覆写已存在检索'%s'吗?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:904
+#: lib\pwiki\SearchAndReplaceDialogs.py:1709
+msgid "Overwrite search"
+msgstr "覆写检索"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:928
+#: lib\pwiki\SearchAndReplaceDialogs.py:1724
+msgid "Invalid search string, can't save as view"
+msgstr "无效搜索串，不能保存为视图"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:956
+msgid "End of document reached. Continue at beginning?"
+msgstr "已到达文档尾。是否在文档开始处继续？"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:958
+msgid "Continue at beginning?"
+msgstr "在开始处继续?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:969
+#: lib\pwiki\SearchAndReplaceDialogs.py:970
+msgid "No matches found"
+msgstr "没有发现匹配结果"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1025
+#: lib\pwiki\SearchAndReplaceDialogs.py:1631
 msgid "%i replacements done"
 msgstr "完成 %i 次替换"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:815
-#: lib\pwiki\SearchAndReplaceDialogs.py:1359
-#: lib\pwiki\SearchAndReplaceDialogs.py:1420
+#: lib\pwiki\SearchAndReplaceDialogs.py:1026
+#: lib\pwiki\SearchAndReplaceDialogs.py:1571
+#: lib\pwiki\SearchAndReplaceDialogs.py:1632
 msgid "Replace All"
 msgstr "全部替换"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1028
+#: lib\pwiki\SearchAndReplaceDialogs.py:1239
 msgid ""
 "Bad regular expression '%s':\n"
 "%s"
@@ -4573,80 +4790,45 @@ msgstr ""
 "不良正则表达式 '%s':\n"
 "%s"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1252
-#: lib\pwiki\SearchAndReplaceDialogs.py:1279
-#: lib\pwiki\SearchAndReplaceDialogs.py:1335
-#: lib\pwiki\SearchAndReplaceDialogs.py:1350
-#: lib\pwiki\SearchAndReplaceDialogs.py:1428
-#: lib\pwiki\SearchAndReplaceDialogs.py:1478
-#: lib\pwiki\SearchAndReplaceDialogs.py:1638
-#: lib\pwiki\SearchAndReplaceDialogs.py:2262
-msgid "Error in boolean expression"
-msgstr "错误布尔正则表达式"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1255
-#: lib\pwiki\SearchAndReplaceDialogs.py:1283
-#: lib\pwiki\SearchAndReplaceDialogs.py:1431
-#: lib\pwiki\SearchAndReplaceDialogs.py:1641
-#: lib\pwiki\SearchAndReplaceDialogs.py:2265
+#: lib\pwiki\SearchAndReplaceDialogs.py:1467
+#: lib\pwiki\SearchAndReplaceDialogs.py:1495
+#: lib\pwiki\SearchAndReplaceDialogs.py:1643
+#: lib\pwiki\SearchAndReplaceDialogs.py:1853
+#: lib\pwiki\SearchAndReplaceDialogs.py:2477
 msgid "Error. Maybe wiki rebuild is needed"
 msgstr "错误：可能需要维基重建。"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1359
+#: lib\pwiki\SearchAndReplaceDialogs.py:1571
 msgid "Replace all occurrences?"
 msgstr "替换所有匹配结果？"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1486
-msgid "Choose search title"
-msgstr "选择搜索标题"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1496
-msgid "Do you want to overwrite existing search '%s'?"
-msgstr "你想要覆写已存在检索'%s'吗?"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1497
-msgid "Overwrite search"
-msgstr "覆写检索"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1512
-msgid "Invalid search string, can't save as view"
-msgstr "无效搜索串，不能保存为视图"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1612
-msgid "Do you want to delete %i search(es)?"
-msgstr "你想要删除%i个搜索结果吗?"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1613
-msgid "Delete search"
-msgstr "删除搜索"
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1713
+#: lib\pwiki\SearchAndReplaceDialogs.py:1925
 msgid "*Set page list*"
 msgstr "*设置页面列表*"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2000
+#: lib\pwiki\SearchAndReplaceDialogs.py:2212
 msgid "<Search: %s>"
 msgstr "<检索:  %s>"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2050
+#: lib\pwiki\SearchAndReplaceDialogs.py:2262
 msgid "Fast Search"
 msgstr "快速检索"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2077
+#: lib\pwiki\SearchAndReplaceDialogs.py:2289
 msgid "As Tab"
 msgstr "作为标签页"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2117
+#: lib\pwiki\SearchAndReplaceDialogs.py:2329
 msgid "Search: %s"
 msgstr "搜索: %s"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2366
-#: lib\pwiki\WikiHtmlView.py:671
+#: lib\pwiki\SearchAndReplaceDialogs.py:2578
+#: lib\pwiki\WikiHtmlView.py:707
 msgid "Activate"
 msgstr "激活"
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2368
-#: lib\pwiki\WikiHtmlView.py:673
+#: lib\pwiki\SearchAndReplaceDialogs.py:2580
+#: lib\pwiki\WikiHtmlView.py:709
 msgid "Activate New Tab Backgrd."
 msgstr "在后台激活新选项卡"
 
@@ -4668,7 +4850,7 @@ msgstr "没有发现更多拼写错误单词"
 msgid "No dictionary found for this page"
 msgstr "本页面没有发现字典"
 
-#: lib\pwiki\StringOps.py:737
+#: lib\pwiki\StringOps.py:683
 msgid "Inval. timestamp"
 msgstr "无效时间戳"
 
@@ -4681,98 +4863,162 @@ msgstr "<无标题>"
 msgid "Select wiki for favorites"
 msgstr "选择放入收藏夹的维基"
 
+#: lib\pwiki\Trashcan.py:262
+msgid "Trashcan data damaged"
+msgstr "垃圾箱数据被损坏"
+
+#: lib\pwiki\TrashcanGui.py:201
+msgid "Delete %i elements from trashcan?"
+msgstr "是否从垃圾箱删除%i？"
+
+#: lib\pwiki\TrashcanGui.py:202
+#: lib\pwiki\TrashcanGui.py:228
+msgid "Delete from trashcan"
+msgstr "从垃圾箱删除"
+
+#: lib\pwiki\TrashcanGui.py:227
+msgid "Delete all elements from trashcan?"
+msgstr "是否清空垃圾箱？"
+
+#: lib\pwiki\ViHelper.py:728
+msgid "Follow Hint:"
+msgstr "按照提示："
+
 #: lib\pwiki\WikiExceptions.py:72
 msgid "Multiple words rename to same word"
 msgstr "多个单词修改为同一单词"
 
-#: lib\pwiki\WikiHtmlView.py:558
-#: lib\pwiki\WikiTxtCtrl.py:2159
+#: lib\pwiki\WikiHtmlView.py:593
+#: lib\pwiki\WikiTxtCtrl.py:2252
 msgid "Folder does not exist"
 msgstr "文件夹不存在"
 
-#: lib\pwiki\WikiHtmlView.py:650
-#: lib\pwiki\WikiHtmlViewIE.py:494
-#: lib\pwiki\WikiHtmlViewWK.py:486
+#: lib\pwiki\WikiHtmlView.py:685
+#: lib\pwiki\WikiHtmlViewIE.py:536
+#: lib\pwiki\WikiHtmlViewWK.py:1036
+#: lib\pwiki\WikiTxtCtrl.py:3235
 msgid "Link to page: %s"
 msgstr "链接页面: %s"
 
-#: lib\pwiki\WikiHtmlViewWK.py:358
+#: lib\pwiki\WikiHtmlView.py:710
+msgid "Activate New Window"
+msgstr "激活新窗口"
+
+#: lib\pwiki\WikiHtmlViewWK.py:75
+#: lib\pwiki\WikiTxtDialogs.py:48
+msgid "Incremental search (ENTER/ESC to finish)"
+msgstr "增量查找(按ENTER/ESC完成)"
+
+#: lib\pwiki\WikiHtmlViewWK.py:802
 msgid "Open Link (External)"
 msgstr "打开（外部）链接"
 
-#: lib\pwiki\WikiHtmlViewWK.py:361
+#: lib\pwiki\WikiHtmlViewWK.py:805
 msgid "Follow &Link"
 msgstr "打开链接(&L)"
 
-#: lib\pwiki\WikiHtmlViewWK.py:373
+#: lib\pwiki\WikiHtmlViewWK.py:817
 msgid "Follow Link in New &Tab"
 msgstr "在新选项卡打开链接(&T)"
 
-#: lib\pwiki\WikiHtmlViewWK.py:380
+#: lib\pwiki\WikiHtmlViewWK.py:824
 msgid "Follow Link in New Back&ground Tab"
 msgstr "在新背景选项卡打开链接(&G)"
 
-#: lib\pwiki\WikiTreeCtrl.py:525
+#: lib\pwiki\WikiTreeCtrl.py:536
 msgid "Views"
 msgstr "视图"
 
-#: lib\pwiki\WikiTreeCtrl.py:902
+#: lib\pwiki\WikiTreeCtrl.py:946
 msgid "searches"
 msgstr "检索结果"
 
-#: lib\pwiki\WikiTreeCtrl.py:984
+#: lib\pwiki\WikiTreeCtrl.py:1028
 msgid "modified-within"
 msgstr "修改范围"
 
-#: lib\pwiki\WikiTreeCtrl.py:1012
+#: lib\pwiki\WikiTreeCtrl.py:1056
 msgid "1 day"
 msgstr "1天"
 
-#: lib\pwiki\WikiTreeCtrl.py:1014
+#: lib\pwiki\WikiTreeCtrl.py:1058
 msgid "%i days"
 msgstr "%i 天"
 
-#: lib\pwiki\WikiTreeCtrl.py:1052
+#: lib\pwiki\WikiTreeCtrl.py:1096
 msgid "parentless-nodes"
 msgstr "叶子结点"
 
-#: lib\pwiki\WikiTreeCtrl.py:1083
+#: lib\pwiki\WikiTreeCtrl.py:1127
 msgid "undefined-nodes"
 msgstr "未定义结点"
 
-#: lib\pwiki\WikiTreeCtrl.py:1113
+#: lib\pwiki\WikiTreeCtrl.py:1157
 msgid "Func. pages"
 msgstr "功能页"
 
-#: lib\pwiki\WikiTreeCtrl.py:1245
+#: lib\pwiki\WikiTreeCtrl.py:1291
 msgid "Add icon attribute"
 msgstr "增加图标属性"
 
-#: lib\pwiki\WikiTreeCtrl.py:1252
+#: lib\pwiki\WikiTreeCtrl.py:1298
 msgid "Add color attribute"
 msgstr "增加颜色属性"
 
-#: lib\pwiki\WikiTreeCtrl.py:1856
+#: lib\pwiki\WikiTreeCtrl.py:1923
 msgid "Append Wiki Word"
 msgstr "追加维基字"
 
-#: lib\pwiki\WikiTreeCtrl.py:1871
+#: lib\pwiki\WikiTreeCtrl.py:1938
 msgid "Prepend Wiki Word"
 msgstr "插入关键字"
 
-#: lib\pwiki\WikiTxtCtrl.py:1252
+#: lib\pwiki\WikiTxtCtrl.py:1321
 msgid "Select Template"
 msgstr "选择模板"
 
-#: lib\pwiki\WikiTxtCtrl.py:1254
+#: lib\pwiki\WikiTxtCtrl.py:1323
 msgid "Select Template (deletes current content!)"
 msgstr "选择模板（清除当前内容！）"
 
-#: lib\pwiki\WikiTxtCtrl.py:1360
+#: lib\pwiki\WikiTxtCtrl.py:1436
 msgid "Use Template"
 msgstr "使用模板"
 
-#: lib\pwiki\WikiTxtCtrl.py:2234
+#: lib\pwiki\WikiTxtCtrl.py:2282
+#: lib\pwiki\WikiTxtCtrl.py:2321
+msgid "File does not exist"
+msgstr "文件不存在"
+
+#: lib\pwiki\WikiTxtCtrl.py:2288
+msgid "Are you sure you want to delete the file: %s"
+msgstr "你确定要删除文件'%s'吗?"
+
+#: lib\pwiki\WikiTxtCtrl.py:2289
+msgid "Delete File"
+msgstr "删除文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:2329
+msgid "Enter new name"
+msgstr "输入新名称"
+
+#: lib\pwiki\WikiTxtCtrl.py:2330
+msgid "Rename File"
+msgstr "改名文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:2340
+msgid "Target is not a file"
+msgstr "目标不是一个文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:2344
+msgid "Target file exists already. Overwrite?"
+msgstr "目标文件已存在。是否覆盖？"
+
+#: lib\pwiki\WikiTxtCtrl.py:2345
+msgid "Overwrite File"
+msgstr "覆写文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:2446
 msgid ""
 "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
@@ -4780,11 +5026,11 @@ msgstr ""
 "在菜单\"维基\"，菜单项\"选项...\"，选项卡\"安全性\", \n"
 "项目\"脚本安全性\"选择相应的数据用于执行脚本。"
 
-#: lib\pwiki\WikiTxtCtrl.py:2237
+#: lib\pwiki\WikiTxtCtrl.py:2449
 msgid "Script execution disabled"
 msgstr "脚本执行被禁用"
 
-#: lib\pwiki\WikiTxtCtrl.py:2309
+#: lib\pwiki\WikiTxtCtrl.py:2521
 msgid ""
 "\n"
 "Exception: %s"
@@ -4792,97 +5038,110 @@ msgstr ""
 "\n"
 "异常: %s"
 
-#: lib\pwiki\WikiTxtCtrl.py:3017
+#: lib\pwiki\WikiTxtCtrl.py:3016
+#: lib\pwiki\WikiTxtCtrl.py:4488
 msgid "No more fields in this 'form' page"
 msgstr "在该“表单”页没有更多域。"
 
-#: lib\pwiki\WikiTxtCtrl.py:3176
+#: lib\pwiki\WikiTxtCtrl.py:3185
 msgid "Line: %d Col: %d Pos: %d"
 msgstr "行: %d 列: %d 位置: %d"
 
-#: lib\pwiki\WikiTxtCtrl.py:3352
+#: lib\pwiki\WikiTxtCtrl.py:3291
+msgid "Not a valid image"
+msgstr "不是有效图像"
+
+#: lib\pwiki\WikiTxtCtrl.py:3437
 msgid "Couldn't copy file"
 msgstr "无法复制文件"
 
-#: lib\pwiki\WikiTxtCtrl.py:3594
+#: lib\pwiki\WikiTxtCtrl.py:3700
 msgid "Ignore"
 msgstr "忽略"
 
-#: lib\pwiki\WikiTxtCtrl.py:3595
+#: lib\pwiki\WikiTxtCtrl.py:3701
 msgid "Add Globally"
 msgstr "全局增加"
 
-#: lib\pwiki\WikiTxtCtrl.py:3596
+#: lib\pwiki\WikiTxtCtrl.py:3702
 msgid "Add Locally"
 msgstr "本地增加"
 
-#: lib\pwiki\WikiTxtCtrl.py:3606
+#: lib\pwiki\WikiTxtCtrl.py:3712
 msgid "Follow Link"
 msgstr "打开链接"
 
-#: lib\pwiki\WikiTxtCtrl.py:3607
+#: lib\pwiki\WikiTxtCtrl.py:3713
 msgid "Follow Link New Tab"
 msgstr "新标签页打开链接"
 
-#: lib\pwiki\WikiTxtCtrl.py:3608
+#: lib\pwiki\WikiTxtCtrl.py:3714
 msgid "Follow Link New Tab Backgrd."
 msgstr "新标签页打开链接在后台"
 
-#: lib\pwiki\WikiTxtCtrl.py:3610
+#: lib\pwiki\WikiTxtCtrl.py:3715
+msgid "Follow Link New Window"
+msgstr "在新窗口打开链接"
+
+#: lib\pwiki\WikiTxtCtrl.py:3717
 msgid "Convert Absolute/Relative File URL"
 msgstr "转换绝对/相对文件URL"
 
-#: lib\pwiki\WikiTxtCtrl.py:3611
+#: lib\pwiki\WikiTxtCtrl.py:3718
 msgid "Open Containing Folder"
 msgstr "打开所在文件夹"
 
-#: lib\pwiki\WikiTxtCtrl.py:3613
+#: lib\pwiki\WikiTxtCtrl.py:3719
+msgid "Rename file"
+msgstr "重命名文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:3720
+msgid "Delete file"
+msgstr "删除文件"
+
+#: lib\pwiki\WikiTxtCtrl.py:3722
 msgid "Copy anchor URL to clipboard"
 msgstr "复制锚点URL到剪贴板"
 
-#: lib\pwiki\WikiTxtCtrl.py:3615
+#: lib\pwiki\WikiTxtCtrl.py:3724
 msgid "Other..."
 msgstr "其他..."
 
-#: lib\pwiki\WikiTxtCtrl.py:3616
+#: lib\pwiki\WikiTxtCtrl.py:3725
 msgid "Use Template..."
 msgstr "使用模板..."
 
-#: lib\pwiki\WikiTxtCtrl.py:3620
+#: lib\pwiki\WikiTxtCtrl.py:3729
 msgid "Show folding"
 msgstr "显示折叠"
 
-#: lib\pwiki\WikiTxtCtrl.py:3621
+#: lib\pwiki\WikiTxtCtrl.py:3730
 msgid "Show folding marks and allow folding"
 msgstr "显示折叠标记并允许折叠"
 
-#: lib\pwiki\WikiTxtCtrl.py:3622
+#: lib\pwiki\WikiTxtCtrl.py:3731
 msgid "&Toggle current folding"
 msgstr "切换当前折叠(&T)"
 
-#: lib\pwiki\WikiTxtCtrl.py:3623
+#: lib\pwiki\WikiTxtCtrl.py:3732
 msgid "Toggle folding of the current line"
 msgstr "切换当前行的折叠状态"
 
-#: lib\pwiki\WikiTxtCtrl.py:3624
+#: lib\pwiki\WikiTxtCtrl.py:3733
 msgid "&Unfold All"
 msgstr "全部展开(&U)"
 
-#: lib\pwiki\WikiTxtCtrl.py:3625
+#: lib\pwiki\WikiTxtCtrl.py:3734
 msgid "Unfold everything in current editor"
 msgstr "展开当前编辑器所有内容"
 
-#: lib\pwiki\WikiTxtCtrl.py:3626
+#: lib\pwiki\WikiTxtCtrl.py:3735
 msgid "&Fold All"
 msgstr "全部折叠(&F)"
 
-#: lib\pwiki\WikiTxtCtrl.py:3627
+#: lib\pwiki\WikiTxtCtrl.py:3736
 msgid "Fold everything in current editor"
 msgstr "折叠当前编辑器所有内容"
-
-#: lib\pwiki\WikiTxtDialogs.py:43
-msgid "Incremental search (ENTER/ESC to finish)"
-msgstr "增量查找(按ENTER/ESC完成)"
 
 #: lib\pwiki\WindowsHacks.py:317
 msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
@@ -4900,7 +5159,7 @@ msgstr "删除失败：%s。SHFileOperation返回结果. %s"
 msgid "Modified"
 msgstr "修改"
 
-#: lib\pwiki\timeView\TimeViewCtrl.py:47
+#: lib\pwiki\timeView\TimeViewCtrl.py:50
 msgid "Versions"
 msgstr "版本集"
 
@@ -4912,9 +5171,9 @@ msgstr "显示日期（不关联维基字）"
 msgid "List dates ascending or descending"
 msgstr "日期列表升序或降序排列"
 
-#: lib\pwiki\timeView\Versioning.py:175
-#: lib\pwiki\timeView\Versioning.py:442
-#: lib\pwiki\timeView\Versioning.py:454
+#: lib\pwiki\timeView\Versioning.py:176
+#: lib\pwiki\timeView\Versioning.py:443
+#: lib\pwiki\timeView\Versioning.py:455
 msgid "Versioning data damaged"
 msgstr "版本化数据被损坏"
 
@@ -4988,6 +5247,18 @@ msgstr "增加新版本"
 msgid "Delete all versions of current page"
 msgstr "删除当前页所有版本"
 
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:20
+msgid "Page Name"
+msgstr "页面名"
+
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:21
+msgid "Visited"
+msgstr "已访问过"
+
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:380
+msgid "Clear history"
+msgstr "清空历史记录"
+
 #: lib\pwiki\wikidata\FileStorage.py:194
 msgid "File compare error, file not readable or changed during compare"
 msgstr "文件比较错误，文件不可读或比较时被修改"
@@ -5004,78 +5275,78 @@ msgstr "内部错误：错误源文件名"
 msgid "Copy of file '%s' couldn't be created"
 msgstr "无法创建文件副本'%s'"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:64
+#: lib\pwiki\wikidata\WikiDataManager.py:66
 msgid "Database exists already and is currently in use"
 msgstr "数据库已经存在并且正被使用"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:69
-#: lib\pwiki\wikidata\WikiDataManager.py:2035
+#: lib\pwiki\wikidata\WikiDataManager.py:71
+#: lib\pwiki\wikidata\WikiDataManager.py:2148
 msgid "Data handler %s not available"
 msgstr "数据句柄“%s”不可用"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:90
+#: lib\pwiki\wikidata\WikiDataManager.py:92
 msgid "Database is already in use with database handler \"%s\". Can't open with different handler."
 msgstr "数据库已被数据库句柄'%s'使用。无法使用不同句柄打开。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:96
+#: lib\pwiki\wikidata\WikiDataManager.py:98
 msgid "Database is already in use with wiki language handler \"%s\". Can't open with different handler."
 msgstr "数据库已被维基语言句柄'%s'使用。无法使用不同句柄打开。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:300
+#: lib\pwiki\wikidata\WikiDataManager.py:302
 msgid "Wiki is probably already in use by other instance"
 msgstr "维基很可能被其他实例使用。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:323
-#: lib\pwiki\wikidata\WikiDataManager.py:333
+#: lib\pwiki\wikidata\WikiDataManager.py:325
+#: lib\pwiki\wikidata\WikiDataManager.py:335
 msgid "Wiki configuration file is corrupted"
 msgstr "维基配置文件冲突"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:366
+#: lib\pwiki\wikidata\WikiDataManager.py:368
 msgid "No data handler information found, probably \"Original Gadfly\" is right."
 msgstr "没有发现数据句柄信息，可能\"原始的Gadfly\"是正确的。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:372
+#: lib\pwiki\wikidata\WikiDataManager.py:374
 msgid "Required data handler \"%s\" unknown to WikidPad"
 msgstr "WikidPad遇到未知请求数据句柄 \"%s\""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:378
+#: lib\pwiki\wikidata\WikiDataManager.py:380
 msgid "Error on initializing data handler \"%s\""
 msgstr "初始化数据句柄\"%s\"出错"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:389
+#: lib\pwiki\wikidata\WikiDataManager.py:391
 msgid "Required wiki language handler \"%s\" not available"
 msgstr "请求的维基语言句柄\"%s\"不可用。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:915
+#: lib\pwiki\wikidata\WikiDataManager.py:968
 msgid "Word '%s' not in wiki"
 msgstr "字'%s'不存在于维基"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1220
-#: lib\pwiki\wikidata\WikiDataManager.py:1291
+#: lib\pwiki\wikidata\WikiDataManager.py:1274
+#: lib\pwiki\wikidata\WikiDataManager.py:1363
 msgid "Update basic link info"
 msgstr "更新基本链接信息"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1236
+#: lib\pwiki\wikidata\WikiDataManager.py:1290
 msgid "Starting update thread"
 msgstr "开始更新进程"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1311
+#: lib\pwiki\wikidata\WikiDataManager.py:1383
 msgid "Update attributes of %s"
 msgstr "更新%s属性集"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1333
+#: lib\pwiki\wikidata\WikiDataManager.py:1407
 msgid "Update syntax of %s"
 msgstr "更新语法于：%s。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1354
+#: lib\pwiki\wikidata\WikiDataManager.py:1428
 msgid "Update index of %s"
 msgstr "更新索引于：%s。"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1374
+#: lib\pwiki\wikidata\WikiDataManager.py:1448
 msgid "Final cleanup"
 msgstr "清除完成"
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1467
+#: lib\pwiki\wikidata\WikiDataManager.py:1543
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
 msgstr "无法修改'%s'为'%s'，%s'已存在。"
 
@@ -5118,26 +5389,23 @@ msgstr "数据库格式已更新"
 msgid "Wiki page not found: %s"
 msgstr "没有发现维基页: %s"
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:484
-#: lib\pwiki\wikidata\original_gadfly\WikiData.py:464
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:521
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:528
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:512
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:565
 msgid "You cannot delete the root wiki node"
 msgstr "你不能删除维基根结点"
 
-#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1065
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1168
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1132
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1235
 msgid "Wiki page not found (no path information) for word: %s"
 msgstr "没有找到匹配维基字“%s”的相关维基页(无路径信息)。"
 
-#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1083
-#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1097
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1186
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1200
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1150
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1164
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1253
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1267
 msgid "Wiki page not found (bad path information) for word: %s"
 msgstr "没有找到匹配维基字“%s”的相关维基页(不良路径信息)。"
-
-#~ msgid "Last wiki doesn't exist: %s"
-#~ msgstr "最近维基不存在: %s"
 
 #~ msgid "Update page %s"
 #~ msgstr "更新页%s"

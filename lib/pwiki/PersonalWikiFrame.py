@@ -695,7 +695,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.eventRoundtrip -= 1
 
 
-    def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
+    def addMenuItem(self, menu, label, hint, evtfct=None, icondesc=None,
             menuID=None, updatefct=None, kind=wx.ITEM_NORMAL):
         if menuID is None:
             menuID = wx.NewId()
@@ -709,7 +709,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             label = lcut[0] + u" \t" + lcut[1]
 
 
-        menuitem = wx.MenuItem(menu, menuID, label + u" ", text, kind)
+        menuitem = wx.MenuItem(menu, menuID, label + u" ", hint, kind)
         bitmap = self.resolveIconDescriptor(icondesc)
         if bitmap:
             menuitem.SetBitmap(bitmap)
@@ -2679,6 +2679,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.windowLayouter.collapseWindow("log")
 
     def reloadMenuPlugins(self):
+        wx.GetApp().reloadPlugins()
+
         if self.mainmenu is not None:
             self.menuFunctions = self.pluginManager.registerSimplePluginAPI((
                     "MenuFunctions",1), ("describeMenuItems",))
@@ -2686,6 +2688,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.loadFixedExtensions()
             self.pluginManager.loadPlugins([ u'KeyBindings.py',
                     u'EvalLibrary.py' ] )
+                    
+            # TODO: Support for plugin menu modifiers wx.GetApp().reloadPluginMenuModifiers()
 
             # This is a rebuild of an existing menu (after loading a new wikiData)
             clearMenu(self.pluginsMenu)

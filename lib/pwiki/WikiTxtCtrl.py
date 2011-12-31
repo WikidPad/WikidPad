@@ -21,9 +21,8 @@ import wx, wx.stc
 
 from Consts import FormatTypes
 
-#from Utilities import *  # TODO Remove this
 from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, \
-        calcResizeArIntoBoundingBox
+        calcResizeArIntoBoundingBox, DictFromFields
 
 from .wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
@@ -78,38 +77,6 @@ except:
 # Python compiler flag for float division
 CO_FUTURE_DIVISION = 0x2000
 
-
-
-def bytelenSct_utf8(us):
-    """
-    us -- unicode string
-    returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
-    """
-    return len(StringOps.utf8Enc(us)[0])
-
-
-def bytelenSct_mbcs(us):
-    """
-    us -- unicode string
-    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
-    """
-    return len(StringOps.mbcsEnc(us)[0])
-
-
-
-# etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
-# EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
-#
-# class StyleDoneEvent(wx.PyCommandEvent):
-#     """
-#     This wx Event is fired when style and folding calculations are finished.
-#     It is needed to savely transfer data from the style thread to the main thread.
-#     """
-#     def __init__(self, stylebytes, foldingseq):
-#         wx.PyCommandEvent.__init__(self, etEVT_STYLE_DONE_COMMAND, -1)
-#         self.stylebytes = stylebytes
-# #         self.pageAst = pageAst
-#         self.foldingseq = foldingseq
 
 
 
@@ -1360,15 +1327,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         rightFold = leftFold + self.GetMarginWidth(self.FOLD_MARGIN)
 
-        menu = wx.Menu()
+        menu = wxHelper.EnhancedPlgSuppMenu(self)
+
+        contextInfo = DictFromFields()
+        contextInfo.mousePos = mousePos
+        contextInfo.txtCtrl = self
 
         if mousePos.x >= leftFold and mousePos.x < rightFold:
             # Right click in fold margin
-
+            contextName = "contextMenu/editor/foldMargin"
             appendToMenuByMenuDesc(menu, FOLD_MENU)
         else:
-
+            contextName = "contextMenu/editor/textArea"
             nodes = self.getTokensForMousePos(mousePos)
+            contextInfo.tokens = nodes
 
             self.contextMenuTokens = nodes
             addActivateItem = False
@@ -1379,20 +1351,26 @@ class WikiTxtCtrl(SearchableScintillaControl):
             for node in nodes:
                 if node.name == "wikiWord":
                     addActivateItem = True
+                    contextInfo.inWikiWord = True
                 elif node.name == "urlLink":
                     addActivateItem = True
                     if node.url.startswith(u"file:") or \
                             node.url.startswith(u"rel://"):
                         addFileUrlItem = True
+                        contextInfo.inFileUrl = True
                     elif node.url.startswith(u"wiki:") or \
                             node.url.startswith(u"wikirel://"):
                         addWikiUrlItem = True
+                        contextInfo.inWikiUrl = True
                 elif node.name == "insertion" and node.key == u"page":
                     addActivateItem = True
+                    contextInfo.inPageInsertion = True
                 elif node.name == "anchorDef":
                     addUrlToClipboardItem = True
+                    contextInfo.inAnchorDef = True
                 elif node.name == "unknownSpelling":
                     unknownWord = node.getText()
+                    contextInfo.inUnknownSpelling = True
 
             if unknownWord:
                 # Right click on a word not in spelling dictionary
@@ -1466,10 +1444,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
             item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
             if item: item.Enable(self.CanPaste())
 
+        contextInfo = contextInfo.getDict()
+
+        menu.setContext(contextName, contextInfo)
+        wx.GetApp().getModifyMenuDispatcher().dispatch(contextName,
+                contextInfo, menu)
         # Dwell lock to avoid image popup while context menu is shown
         with self.dwellLock():
             # Show menu
             self.PopupMenu(menu)
+            menu.close()
 
         self.contextMenuTokens = None
         self.contextMenuSpellCheckSuggestions = None

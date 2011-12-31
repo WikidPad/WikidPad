@@ -37,6 +37,8 @@ Source: dist\WikidPad_*.po; DestDir: {app}; Flags: ignoreversion sortfilesbyexte
 Source: dist\langlist.txt; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\gadfly.zip; DestDir: {app}; Flags: nocompression
 Source: dist\library.zip; DestDir: {app}; Flags: nocompression
+Source: docs\MenuHandling_contextInfo.txt; DestDir: {app}\docs\; Flags: recursesubdirs ignoreversion
+Source: extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: WikidPad-winport.config; DestDir: {app}; DestName: WikidPad.config; Flags: onlyifdoesntexist; Check: PortableInstall
 Source: Microsoft.VC90.CRT.manifest; DestDir: {app}
 Source: winBinAdditions\msvcp90.dll; DestDir: {app}
@@ -51,8 +53,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.2beta10"
-#define verNo "002.002.110.000"
+#define verStr "2.3beta01"
+#define verNo "002.003.101.000"
 
 SolidCompression=true
 AppName=WikidPad

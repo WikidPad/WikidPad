@@ -224,8 +224,6 @@ class App(wx.App, MiscEventSourceMixin):
         import OsAbstract
         import Ipc
         import OptionsDialog, Localization
-        from PluginManager import PluginManager, InsertionPluginManager
-
 
         self.optionsDlgPanelList = list(
                 OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
@@ -379,9 +377,46 @@ class App(wx.App, MiscEventSourceMixin):
 #         dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
 #                 os.path.join(self.wikiAppDir, u'user_extensions'),
 #                 os.path.join(self.wikiAppDir, u'extensions') )
+
+        self.reloadPlugins()
+
+        self.collator = None
+
+        # Further configuration settings
+        self._rereadGlobalConfig()
+
+        rd = Localization.getI18nXrcData(self.wikiAppDir,
+                self.globalConfigSubDir, "WikidPad")
+        ## _prof.stop()
+
+        res = wx.xrc.XmlResource.Get()
+        res.SetFlags(0)
+        res.LoadFromString(rd)
+        
+#         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
+#         res.LoadFromString(rd)
+
+        self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
+                    'pwiki.ico'), wx.BITMAP_TYPE_ICO)
+
+        self.startPersonalWikiFrame(cmdLine)
+
+        return True
+
+
+    def reloadPlugins(self):
+        """
+        Load or reload application-wide plugins. Normally called only once
+        automatically at startup. Later calls only recommended during plugin
+        development as they can have unwanted side effects!
+        """
+        from PluginManager import PluginManager, InsertionPluginManager, \
+                KeyInParamLearningDispatcher
+
         dirs = ( os.path.join(self.wikiAppDir, u'extensions'),
                 os.path.join(self.wikiAppDir, u'user_extensions'),
                 os.path.join(self.globalConfigSubDir, u'user_extensions') )
+
         self.pluginManager = PluginManager(dirs, systemDirIdx=0)
 
         # Register app-wide plugin APIs
@@ -396,7 +431,12 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.describeExportersApi = self.pluginManager.registerSimplePluginAPI(
                 ("Exporters", 1), ("describeExportersV01",))
+                
+        menuModifierApi = self.pluginManager.registerSimplePluginAPI(
+                ("MenuModifier", 1), ("modifyMenuV01",))
 
+        menuItemProviderApi = self.pluginManager.registerSimplePluginAPI(
+                ("MenuItemProvider", 1), ("provideMenuItemV01",))
 
         # Load plugins
 #         dirs = ( os.path.join(self.wikiAppDir, u'user_extensions'),
@@ -428,29 +468,16 @@ class App(wx.App, MiscEventSourceMixin):
         self.wikiLanguageDescDict = dict(( (item[0], item)
                 for item in wikiLanguageDescriptions ))
 
+        # Parameters to .dispatch(): contextName, contextDict, menu;
+        # contextName is key for LearningDispatcher
+        self.modifyMenuDispatcher = KeyInParamLearningDispatcher(
+                menuModifierApi.modifyMenuV01, 0)
 
-        self.collator = None
+        # Parameters to .dispatch(): menuItemUnifName, contextName, contextDict,
+        # menu, insertIdx; menuItemUnifName is key for LearningDispatcher
+        self.provideMenuItemDispatcher = KeyInParamLearningDispatcher(
+                menuItemProviderApi.provideMenuItemV01, 0)
 
-        # Further configuration settings
-        self._rereadGlobalConfig()
-
-        rd = Localization.getI18nXrcData(self.wikiAppDir,
-                self.globalConfigSubDir, "WikidPad")
-        ## _prof.stop()
-
-        res = wx.xrc.XmlResource.Get()
-        res.SetFlags(0)
-        res.LoadFromString(rd)
-        
-#         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
-#         res.LoadFromString(rd)
-
-        self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
-                    'pwiki.ico'), wx.BITMAP_TYPE_ICO)
-
-        self.startPersonalWikiFrame(cmdLine)
-
-        return True
 
 
     def _readSocketLine(self, sock):
@@ -483,6 +510,13 @@ class App(wx.App, MiscEventSourceMixin):
                     if l[0] != "wikidpad_default_2_0"]
         else:
             return self.wikiLanguageDescDict.values()
+
+
+    def getModifyMenuDispatcher(self):
+        return self.modifyMenuDispatcher
+
+    def getProvideMenuItemDispatcher(self):
+        return self.provideMenuItemDispatcher
 
 
     def createWikiParser(self, intLanguageName, debugMode=False):   # ):True

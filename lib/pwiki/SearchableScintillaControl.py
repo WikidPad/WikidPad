@@ -33,6 +33,11 @@ class SearchableScintillaControl(EnhancedScintillaControl):
         self.searchStr = u""
 
 
+    def getPresenter(self):
+        return self.presenter
+        
+    def getMainControl(self):
+        return self.mainControl
 
     def setSelectionForIncSearchByCharPos(self, start, end):
         """

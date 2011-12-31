@@ -620,16 +620,25 @@ class StringPathSet(set):
 class DefaultDictParam(dict):
     """
     Similar to collections.defaultdict, but gives key as argument to
-    defaultFactory
+    defaultFactory to create key-dependent value
     """
     def __init__(self, defaultFactory):
         self.defaultFactory = defaultFactory
-    
+
     def __missing__(self, key):
         val = self.defaultFactory(key)
         self[key] = val
         return val
 
+
+class DictFromFields(object):
+    """
+    Helper to create dictionary. Create an object from it, set fields on it
+    and retrieve all fields which do not start with double underscore.
+    """
+    def getDict(self):
+        return dict(((k, v) for k, v in self.__dict__.iteritems()
+                if not k.startswith("__")))
 
 
 

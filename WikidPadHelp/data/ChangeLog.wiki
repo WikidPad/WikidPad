@@ -1,5 +1,21 @@
 ﻿++ Change Log
 
+Jan. 01, 2011 (2.3beta01)
+
+    * Vi-mode improvements (thanks to Ross)
+        * Add link autocomplete support to vi insert mode
+        * Separate VI keybindings to allows for easier remapping of keys
+
+    * Internal: Basic support for plugins in context menus (read
+      "extensions/charcountContext.pyf" and
+      "docs/MenuHandling_contextInfo.txt")
+
+    * Bug fixed: Encode external webkit urls so they all work as
+      expected (thanks to Ross)
+    * Bug fixed: Layout problem in page search and replace dialog
+
+
+
 Nov. 27, 2011 (2.2beta10)
 
     * Wiki-wide history. See [ChronViewWindow#+++ Wiki-wide history]
