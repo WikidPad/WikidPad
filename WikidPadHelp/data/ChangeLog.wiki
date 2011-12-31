@@ -1,5 +1,13 @@
 ﻿++ Change Log
 
+Jan. 01, 2012 (2.2rc01)
+
+    * Bug fixed: Encode external webkit urls so they all work as
+      expected (thanks to Ross)
+    * Bug fixed: Layout problem in page search and replace dialog
+
+
+
 Nov. 27, 2011 (2.2beta10)
 
     * Wiki-wide history. See [ChronViewWindow#+++ Wiki-wide history]
