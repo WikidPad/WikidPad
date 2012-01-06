@@ -2374,25 +2374,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if link.startswith(u"rel://") or link.startswith(u"wikirel://"):
                     link = self.presenter.getWikiDocument()\
                             .makeRelUrlAbsolute(link, addSafe=addSafe)
-
-                elif link.startswith(u"file:"):
-                    link = self.presenter.getWikiDocument()\
-                            .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
-                            link), addSafe=addSafe)
-                    if link is None:
-                        continue # TODO Message?
-                elif link.startswith(u"wiki:"):
-                    link = self.presenter.getWikiDocument()\
-                            .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
-                            link), addSafe=addSafe)
-                    if link is None:
-                        continue # TODO Message?
-                    else:
-                        link = u"wiki" + link  # Combines to "wikirel://"
-
+                            
                 else:
-                    continue
-
+                    link = self.presenter.getWikiDocument()\
+                            .makeAbsUrlRelative(link, addSafe=addSafe)
+                    if link is None:
+                        continue # TODO Message?
+                    
                 self.replaceTextAreaByCharPos(link, node.coreNode.pos,
                         node.coreNode.pos + node.coreNode.strLength)
 

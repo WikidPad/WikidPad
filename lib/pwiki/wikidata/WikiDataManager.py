@@ -17,6 +17,7 @@ from ..Utilities import TimeoutRLock, SingleThreadExecutor, DUMBTHREADSTOP
 from ..MiscEvent import MiscEventSourceMixin
 
 from .. import ParseUtilities
+from .. import StringOps
 from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool, pathnameFromUrl, urlFromPathname, \
         relativeFilePath
@@ -788,6 +789,8 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         Return the absolute file: URL for a rel: URL
         """
+        relurl, add = StringOps.decomposeUrlQsFrag(relurl)
+        
         if relurl.startswith(u"rel://"):
             relpath = pathnameFromUrl(relurl[6:], False)
 
@@ -795,7 +798,8 @@ class WikiDataManager(MiscEventSourceMixin):
                     os.path.abspath(os.path.join(os.path.dirname(
                             self.getWikiConfigPath()), relpath)), addSafe=addSafe)
 
-            return url
+#             return url
+            return StringOps.composeUrlQsFrag(url, add)
         elif relurl.startswith(u"wikirel://"):
             relpath = pathnameFromUrl(relurl[10:], False)
 
@@ -803,7 +807,8 @@ class WikiDataManager(MiscEventSourceMixin):
                     os.path.abspath(os.path.join(os.path.dirname(
                             self.getWikiConfigPath()), relpath)), addSafe=addSafe)
 
-            return url
+#             return url
+            return StringOps.composeUrlQsFrag(url, add)
 
 
     def makeAbsPathRelUrl(self, absPath, addSafe=''):
@@ -822,6 +827,31 @@ class WikiDataManager(MiscEventSourceMixin):
             return None
 
         return u"rel://" + urlFromPathname(relPath, addSafe=addSafe)
+
+
+    def makeAbsUrlRelative(self, url, addSafe=''):
+        """
+        Return the relative rel: URL for a file: URL if possible.
+        Returns None if url can't be converted
+        """
+        link, add = StringOps.decomposeUrlQsFrag(url)
+
+        if link.startswith(u"file:"):
+            link = self.makeAbsPathRelUrl(StringOps.pathnameFromUrl(
+                    link), addSafe=addSafe)
+            if link is None:
+                return None  # Error message?
+        elif link.startswith(u"wiki:"):
+            link = self.makeAbsPathRelUrl(StringOps.pathnameFromUrl(
+                    link), addSafe=addSafe)
+            if link is None:
+                return None  # Error message?
+            else:
+                link = u"wiki" + link  # Combines to "wikirel://"
+        else:
+            return None  # Error message?
+            
+        return StringOps.composeUrlQsFrag(link, add)
 
 
 

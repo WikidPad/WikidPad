@@ -998,9 +998,9 @@ def ntPathnameFromUrl(url, testFileType=True):
         url = url[5:]
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
-    
-    # Strip fragment if present
-    url = url.split("#", 1)[0]
+        
+    # Strip fragment or query if present
+    url, dummy = decomposeUrlQsFrag(url)
 
     if (not ':' in url) and (not '|' in url) and (not '%3A' in url) and (not '%3a' in url):
         # No drive specifier, just convert slashes
@@ -1058,8 +1058,8 @@ def macPathnameFromUrl(url, testFileType=True):
     elif url[:2] == '//':
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
 
-    # Strip fragment if present
-    url = url.split("#", 1)[0]
+    # Strip fragment or query if present
+    url, dummy = decomposeUrlQsFrag(url)
 
     components = url.split('/')
     # Remove . and embedded ..
@@ -1102,8 +1102,8 @@ def elsePathnameFromUrl(url, testFileType=True):
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
     
-    # Strip fragment if present
-    url = url.split("#", 1)[0]
+    # Strip fragment or query if present
+    url, dummy = decomposeUrlQsFrag(url)
 
     return flexibleUrlUnquote(url)
 
@@ -1117,6 +1117,28 @@ elif os.name == 'mac':
 else:
 #     pathnameFromUrl = flexibleUrlUnquote
     pathnameFromUrl = elsePathnameFromUrl
+
+
+
+_DECOMPOSE_URL_RE = _re.compile(ur"([^?#]*)((?:[?#].*)?)", _re.UNICODE | _re.DOTALL);
+
+
+def decomposeUrlQsFrag(url):
+    """
+    Find first '?' or '#' (query string or fragment) in URL and split URL
+    there so that the parts can be (un-)quoted differently.
+    Returns a 2-tuple with main part and additional part of URL.
+    """
+    return _DECOMPOSE_URL_RE.match(url).groups()
+    
+
+def composeUrlQsFrag(mainUrl, additional):
+    """
+    Compose main URL and additional part back into one URL. Currently a very
+    simple function but may become more complex later.
+    """
+    return mainUrl + additional
+    
 
 
 def _quoteChar(c):
