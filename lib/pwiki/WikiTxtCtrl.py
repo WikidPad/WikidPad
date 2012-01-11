@@ -1715,9 +1715,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
 
-                elif node.name in ("table", "tableRow", "tableCell",
-                        "orderedList", "unorderedList", "indentedText",
-                        "noExport"):
+                elif node.name in \
+                        self.wikiLanguageHelper.getRecursiveStylingNodeNames():
                     process(node, stack[:])
 
         process(pageAst, [])
