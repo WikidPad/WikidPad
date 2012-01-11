@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-09-30
+# Last modified (format YYYY-MM-DD): 2012-01-11
 
 
 import locale, pprint, time, sys, string, traceback
@@ -505,7 +505,8 @@ def actionTableModeAppendix(s, l, st, t):
         elif key == "s":
             if data.startswith(u"="):
                 data = data[1:]
-            t.cssClass = data
+            t.cssClass = data.replace(u",", u" ")
+            
 
 
 tableModeAppendix = modeAppendix.setResultsName("tableModeAppendix").addParseAction(actionTableModeAppendix)
@@ -2333,6 +2334,21 @@ These are your default global settings.
         Returns a new WikiLanguageDetails object based on current configuration
         """
         return WikiLanguageDetails(wikiDocument, docPage)
+        
+        
+    
+    _RECURSIVE_STYLING_NODE_NAMES = frozenset(("table", "tableRow", "tableCell",
+                        "orderedList", "unorderedList", "indentedText",
+                        "noExport"))
+                        
+    @staticmethod
+    def getRecursiveStylingNodeNames():
+        """
+        Returns a set of those node names of NonTerminalNode s  for which the
+        WikiTxtCtrl.processTokens() should process children recursively.
+        """
+        return _TheHelper._RECURSIVE_STYLING_NODE_NAMES
+            
 
 
 THE_LANGUAGE_HELPER = _TheHelper()
