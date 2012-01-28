@@ -1,11 +1,15 @@
-import wx, wx.stc
+import wx
 import SystemInfo
 from wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
 from collections import defaultdict
+from StringOps import pathEnc
+import os
+import ConfigParser
 
 #TODO:  Multiple registers
 #       Page marks
 #       Alt-combinations
+#       .rc
 
 class ViHelper():
     """
@@ -22,7 +26,7 @@ class ViHelper():
                     0 : u"", 
                     1 : u"--INSERT--", 
                     2 : u"--VISUAL--", 
-                    3 : u"--REPLACE" 
+                    3 : u"--REPLACE--" 
                 }
 
     KEY_BINDINGS = {
@@ -123,6 +127,9 @@ class ViHelper():
                     }
                             
 
+    CMD_INPUT_DELAY = 1000
+
+
     def __init__(self, ctrl):
         # ctrl is WikiTxtCtrl in the case of the editor,
         # WikiHtmlViewWk for the preview mode.
@@ -155,13 +162,43 @@ class ViHelper():
         self.last_cmd = None
         self.insert_action = []
 
-        self.selection_mode = "NORMAL"
+        self.selection_mode = u"NORMAL"
                     
         # The following dictionary holds the menu shortcuts that have been
         # disabled upon entering ViMode
         self.menuShortCuts = {}
 
         self.register = ViRegister(self.ctrl)
+
+
+        self.LoadSettings()
+
+    def LoadSettings(self):
+        """
+        Settings are loaded from the file vi.rc in the wikidpad global config
+        dir
+        """
+        rc_file = None
+        rc_file_names = (".WikidPad.virc", "WikidPad.virc")
+
+        config_dir = wx.GetApp().globalConfigDir
+
+        for n in rc_file_names:
+            path = pathEnc(os.path.join(config_dir, n))
+            if os.path.isfile(path):
+                rc_file = path
+                break
+
+        if rc_file is not None:
+            config = ConfigParser.ConfigParser()
+            config.read(rc_file)
+
+            for key in config.options("keys"):
+                try:
+                    self.KEY_BINDINGS[key] = int(config.get("keys", key))
+                except ValueError:
+                    print "Invalid keycode: {0}".format(key)
+
 
     def SetCount(self):
         self.count = 1
@@ -233,7 +270,7 @@ class ViHelper():
         for mode in keys:
             key_mods[mode] = set()
             for accel in keys[mode]:
-                if keys[mode][accel][0] == 1:
+                if keys[mode][accel][0] > 0:
                         key_mods[mode].add(accel)
 
         return key_mods
@@ -311,7 +348,7 @@ class ViHelper():
         return False
 
     def RunFunction(self, key, motion=None, motion_wildcard=None, 
-                                                        wildcards=None):
+                            wildcards=None, text_to_select=None, repeat=False):
         """
         Called when a key command is run
 
@@ -326,6 +363,7 @@ class ViHelper():
         if motion_wildcard is None:
             motion_wildcard = tuple(self._motion_wildcard)
 
+
         def RunFunc(func, args):
             if type(args) == dict:
                 ret = func(**args)
@@ -336,10 +374,22 @@ class ViHelper():
 
         keys = self.keys[self.mode]
 
+        if text_to_select is not None:
+            # Use visual keys instead
+            keys = self.keys[ViHelper.VISUAL]
+            lines, n = text_to_select
+            if lines:
+                start_line = self.ctrl.GetCurrentLine()
+                self.SelectLines(start_line, start_line - 1 + n, 
+                                                    include_eol=True)
+            else:
+                self.StartSelection()
+                self.MoveCaretPos(n, allow_last_char=True)
+                self.SelectSelection(2)
+
         com_type, command, repeatable = keys[key]
         func, args = command
 
-        selected_text_len = None
     
         # If a motion is present in the command (but not the main command)
         # it needs to be run first
@@ -351,13 +401,11 @@ class ViHelper():
                 # finishing with a "post motion" command, i.e. deleting the
                 # text that was selected.
                 self.StartSelection()
-            else:
-                selected_text_len = len(self.ctrl.GetSelectedText())
 
             motion_key = tuple(motion)
 
             
-            junk, (motion_func, motion_args), junk = keys[motion_key]
+            motion_com_type, (motion_func, motion_args), junk = keys[motion_key]
             if motion_wildcard:
                 motion_args = tuple(motion_wildcard)
                 if len(motion_args) == 1:
@@ -366,26 +414,14 @@ class ViHelper():
                     motion_args = tuple(motion_args)
 
             RunFunc(motion_func, motion_args)
+
+            self.SelectSelection(motion_com_type)
             
-
-        # Special case if single char is selected (anchor needs to be reversed
-        # if movement moves in a particular direction
-        
-        # horrible hack
-        try:
-            start_pos = self.ctrl.GetCurrentPos()
-        except:
-            print "REMOVE THIS HACK"
-
-        single = False
+        # If in visual mode we save some details about the selection so the
+        # command can be repeated
+        selected_text = None
         if self.mode == ViHelper.VISUAL:
-            if len(self.ctrl.GetSelectedText()) <= 1:
-                single = True
-            #else:
-            #    if start_pos - self.GetSelectionAnchor() <= 0:
-            #        reverse = True
-
-            #print self.ctrl.GetCurrentPos() - self.GetSelectionAnchor()
+            selected_text = self.GetSelectionDetails()
 
         if type(key) == tuple and "*" in key:
             args = tuple(wildcards)
@@ -397,37 +433,24 @@ class ViHelper():
         RunFunc(func, args)
             
         # If the command is repeatable save its type and any other settings
-        if repeatable in [1, 2, 3]:
+        if repeatable in [1, 2, 3] and not repeat:
             self.last_cmd = repeatable, key, self.count, motion, \
                                             motion_wildcard, wildcards, \
-                                            selected_text_len
+                                            selected_text
 
         # Some commands should cause the mode to revert back to normal if run
         # from visual mode, others shouldn't.
-        # NOTE: This is currently dependent on a number of function and
-        #       variables on present in the WikiTxtCtrl implementation
         if self.mode == ViHelper.VISUAL:
-            if com_type not in [1, 2]:
+            if com_type < 1:
                 self.SetMode(ViHelper.NORMAL)
             else:
-                if single:
-                    if self.ctrl.GetCurrentPos() < start_pos:
-                        self.StartSelection(start_pos+1)
-                        start_pos +=1
-                if self.ctrl.GetCurrentPos() > start_pos:
-                    self.ctrl.CharRight()
+                if self.ctrl.GetCurrentPos() < self._visual_start_pos:
+                    self.StartSelection(self._visual_start_pos + 1)
+                else:
+                    self.StartSelection(self._visual_start_pos)
                     
-                #else:
-                #    if reverse:
-                #        if self.ctrl.GetCurrentPos() - \
-                #                self.GetSelectionAnchor() >= -1:
-                #            self.StartSelection(self.GetSelectionAnchor()+1)
-                            
+                self.SelectSelection(com_type)
 
-                self.SelectSelection()
-                if self.selection_mode == "LINE":
-                    self.SelectFullLines()
- 
         self.FlushBuffers()
 
     def FlushBuffers(self):
@@ -462,6 +485,12 @@ class ViHelper():
 
     def GetSelMode(self):
         return self.selection_mode
+
+    def HasSelection(self):
+        """
+        Should be overridden by child class if necessaryyy
+        """
+        return False
 
     def minmax(self, a, b):
         return min(a, b), max(a, b)
@@ -532,52 +561,6 @@ class ViHelper():
 			    self.menuShortCuts[i] = (label)
 			    menu_item.SetText(label.split("\t")[0]+"\tNone")
 
-    #def _enableMenuShortcuts(self, enable):
-    #    if (enable and len(self.menuShortCuts) < 1) or \
-    #            (not enable and len(self.menuShortCuts) > 0):
-    #        return
-
-    #    self.menu_bar = self.ctrl.presenter.getMainControl().mainmenu
-
-    #    if enable:
-    #        for i in self.menuShortCuts:
-    #            self.menu_bar.FindItemById(i).SetText(self.menuShortCuts[i])
-    #        self.ctrl.presenter.getMainControl().SetAcceleratorTable(self.accelTable)
-    #    else:
-    #        self.accelTable = self.ctrl.presenter.getMainControl().GetAcceleratorTable()
-
-    #        menus = self.menu_bar.GetMenus()
-
-    #        menu_items = []
-
-    #        def getMenuItems(menu):
-    #            for i in menu.GetMenuItems():
-    #                menu_items.append(i.GetId())
-    #                if i.GetSubMenu() is not None:
-    #                    getMenuItems(i.GetSubMenu())
-    #            
-    #        for menu, x in menus:
-    #            getMenuItems(menu)
-    #        
-    #        for i in menu_items:
-    #            menu_item = self.menu_bar.FindItemById(i)
-    #            accel = menu_item.GetAccel()
-    #            if accel is not None and accel.ToString() in self.viKeyAccels:
-    #                label = menu_item.GetItemLabel()
-    #                self.menuShortCuts[i] = (label)
-    #                # Removing the end part of the label is enough to disable the
-    #                # accelerator. This is used instead of SetAccel() so as to
-    #                # preserve menu accelerators.
-    #                menu_item.SetText(label.split("\t")[0]+"\tNone")
-
-    #    #for i in range(self.menu_bar.GetMenuCount()):
-    #    #    menu = self.menu_bar.GetMenu(i)
-    #    #    enableMenu(menu, i)
-    #    #    for menuItem in menu.GetMenuItems():
-    #    #        enableMenu(menuItem)
-
-
-
 
 #-----------------------------------------------------------------------------
 # The following functions are common to both preview and editor mode
@@ -630,14 +613,49 @@ class ViHelper():
         mainControl = self.ctrl.presenter.getMainControl()
         mainControl.setDocPagePresenterSubControl(scName)
 
-    def StartSearch(self):
+    def StartForwardSearch(self, initial_input=None):
+        self._StartSearch(initial_input=initial_input, forward=True)
+
+    def StartReverseSearch(self, initial_input=None):
+        self._StartSearch(initial_input=initial_input, forward=False)
+
+    def _StartSearch(self, initial_input=None, forward=True):
         # TODO: customise the search to make it more vim-like
         #       allow starting search backwards
-        text = self.ctrl.GetSelectedText()
-        text = text.split("\n", 1)[0]
-        text = text[:30]
+        text = initial_input
+        if initial_input is None:
+            if self.HasSelection():
+                text = self.ctrl.GetSelectedText()
+                text = text.split("\n", 1)[0]
+                text = text[:30]
 
-        self.ctrl.startIncrementalSearch(text)
+        sb = self.ctrl.presenter.getMainControl().GetStatusBar()
+
+
+        # TODO: save current position
+        # Save scroll position
+        #x, y = self.getIntendedViewStart()
+        
+        #self.searchStartScrollPosition = 0, 0 
+
+        rect = sb.GetFieldRect(0)
+        w = 0
+        h = 0
+        for n in range(1, sb.GetFieldsCount()):
+            r = sb.GetFieldRect(n)
+            rect.width += r.width
+        if SystemInfo.isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+        rect.y -= rect.height
+
+        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+
+        dlg = ViInputDialog(self.ctrl, -1, self.ctrl, rect,
+                sb.GetFont(), self.ctrl.presenter.getMainControl(), search=True,forward_search=forward, initial_input=text)
+        dlg.Show()
+
+
 
     def GoForwardInHistory(self):
         pageHistDeepness = self.ctrl.presenter.getPageHistory().getDeepness()[1]
@@ -734,13 +752,13 @@ class ViHelper():
         mainAreaPanel.SetSelection(newTabNum-1)
         mainAreaPanel.presenters[mainAreaPanel.GetSelection()].SetFocus()
 
-    def CloseCurrentTab(self):
+    def CloseCurrentTab(self, junk=None):
         """
         Closes currently focused tab
         """
         mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
-        mainAreaPanel.closePresenterTab(mainAreaPanel.getCurrentPresenter())
-        return True
+        wx.CallAfter(mainAreaPanel.closePresenterTab, mainAreaPanel.getCurrentPresenter())
+        #return True
 
     def OpenHomePage(self, inNewTab=False):
         """
@@ -782,6 +800,67 @@ class ViHelper():
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
 
         bell = ViVisualBell(self.ctrl, -1, rect, colour)
+
+    def StartCmdInput(self, initial_input=None):
+
+        sb = self.ctrl.presenter.getMainControl().GetStatusBar()
+
+
+        # TODO: save current position
+        # Save scroll position
+        #x, y = self.getIntendedViewStart()
+        
+        #self.searchStartScrollPosition = 0, 0 
+
+        rect = sb.GetFieldRect(0)
+        w = 0
+        h = 0
+        for n in range(1, sb.GetFieldsCount()):
+            r = sb.GetFieldRect(n)
+            rect.width += r.width
+        if SystemInfo.isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+        rect.y -= rect.height
+
+        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+
+        dlg = ViInputDialog(self.ctrl, -1, self.ctrl, rect,
+                sb.GetFont(), self.ctrl.presenter.getMainControl(), search=False, initial_input=initial_input)
+        dlg.Show()
+
+
+
+
+    def ResetViInput(self):
+        """
+        Called by WebkitSearchDialog before aborting an inc. search.
+        Called when search was explicitly aborted by user (with escape key)
+        TODO: Make vi keybinding "Ctrl + [" call this as well
+        """
+        self.html.ClearSelection()
+
+        # To remain consitent with the textctrl incremental search we scroll
+        # back to where the search was started 
+        x, y = self.searchStartScrollPosition
+        self.Scroll(x, y)
+
+    def EndViInput(self):
+        """
+        Called if incremental search ended successfully.
+        """
+        pass
+
+
+
+
+
+
+
+
+
+
+
 
 
 # I will move this to wxHelper later (MB)
@@ -857,7 +936,7 @@ class ViHintDialog(wx.Frame):
 
         self.viCtrl = viCtrl
         self.mainControl = mainControl
-        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
+        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_INPUT_FIELD,
                 _(u"Follow Hint:"), style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -883,7 +962,7 @@ class ViHintDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
+        wx.EVT_TEXT(self, GUI_ID.INC_INPUT_FIELD, self.OnText)
         wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
         wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
         wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
@@ -1038,10 +1117,8 @@ class ViRegister():
 
         if reg in self.registers:
             self.current_reg = reg
-            print 1
             return True
         else:
-            print 2
             self.current_reg = None
             return False
 
@@ -1073,3 +1150,494 @@ class ViRegister():
             return
         self.current_reg = None
         return text
+
+class CmdParser():
+    def __init__(self, ctrl):
+        self.ctrl = ctrl
+
+        self.data = []
+
+        self.cmds = {
+            "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
+            "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
+            "tabopen" : (self.GetWikiPages, self.OpenWikiPageNewTab),
+            "bgtabopen" : (self.GetWikiPages, self.OpenWikiPageBackgroundTab),
+            "tabonly" : (self.Pass, self.CloseOtherTabs),
+            "deletepage" : (self.GetDefinedWikiPages, self.Pass),
+            "dlpage" : (self.GetDefinedWikiPages, self.Pass),
+            "renamepage" : (self.GetDefinedWikiPages, self.Pass),
+            "quit" : (self.GetTabs, self.CloseTab),
+            "quitall" : (self.Pass, self.CloseWiki),
+            "exit" : (self.Pass, self.CloseWiki),
+            }
+
+    def Pass(self):
+        pass
+
+    def ParseCmd(self, text_input):
+        split_cmd = text_input.split(" ")
+
+        args = False
+        if len(split_cmd) > 1:
+            if split_cmd[1] != u"":
+                args = True
+            else:
+                args = False
+
+        cmd_list = []
+        for cmd in self.cmds:
+            if cmd.startswith(split_cmd[0]):
+                cmd_list.append(cmd)
+
+        return cmd_list, args
+
+    def ParseCmdWithArgs(self, text_input):
+        split_cmd = text_input.split(u" ")
+
+        arg = None
+        action = split_cmd[0]
+        if len(split_cmd) > 1:
+            arg = u" ".join(split_cmd[1:])
+
+        cmd_list = []
+        
+        for cmd in self.cmds:
+            if cmd.startswith(action):
+                if arg is not None or text_input.endswith(u" "):
+                    return self.cmds[cmd][0](arg)
+                else:
+                    cmd_list.append(cmd)
+
+        return cmd_list
+
+    def RunCmd(self, text_input, list_box_selection):
+        if list_box_selection > -1 and self.data:
+            arg = self.data[list_box_selection]
+        else:
+            arg = None
+
+        split_cmd = text_input.split(" ")
+
+        action = split_cmd[0]
+        if arg is None and len(split_cmd) > 1 and len(split_cmd[1]) > 0:
+            arg = u" ".join(split_cmd[1:])
+        
+        for cmd in self.cmds:
+            if cmd.startswith(action):
+                return self.cmds[cmd][1](arg)
+
+        self.ClearInput()
+        
+    def ClearInput(self):
+        self.data = []
+
+    def CloseOtherTabs(self):
+        self.ctrl.presenter.getMainControl().getMainAreaPanel()._closeAllButCurrentTab()
+                    
+
+    def OpenWikiPageCurrentTab(self, link_info):
+        self.OpenWikiPage(link_info, 0)
+
+    def OpenWikiPageNewTab(self, link_info):
+        self.OpenWikiPage(link_info, 2)
+
+    def OpenWikiPageBackgroundTab(self, link_info):
+        self.OpenWikiPage(link_info, 3)
+
+    def OpenWikiPage(self, link_info, tab_mode):
+        if not type(link_info) == tuple:
+            value = ((link_info, 0, link_info, -1, -1),)
+        else:
+            value = (link_info,)
+
+        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(u"wikipage/" + value[0][2], tabMode=tab_mode, firstcharpos=value[0][3], charlength=value[0][4])
+
+    def GetTabs(self, text_input):
+        mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
+        page_count = mainAreaPanel.GetPageCount()
+
+        #print dir(mainAreaPanel.GetCurrentPage())
+
+        tabs = []
+
+        return_data = []
+
+        for i in range(page_count):
+            page = mainAreaPanel.GetPage(i)
+            return_data.append(page.getWikiWord())
+            tabs.append(page)
+
+        self.data = tabs
+
+        return return_data
+
+
+    def CloseTab(self, text_input):
+        if text_input is None:
+            self.ctrl.vi.CloseCurrentTab()
+            return
+            #currentTabNum = mainAreaPanel.GetSelection() + 1
+
+        if text_input in self.data:
+            self.ctrl.presenter.getMainControl().getMainAreaPanel().closePresenterTab(text_input)
+        else:
+            self.ctrl.vi.visualBell("RED")
+        
+    def CloseWiki(self, arg=None):
+        self.ctrl.presenter.getMainControl().exitWiki()
+
+    def GetDefinedWikiPages(self, search_text):
+        if search_text is None:
+            return [(_(u"Enter wikiword..."),)]
+
+        results = self.ctrl.presenter.getMainControl().getWikiData().\
+                                                getAllDefinedWikiPageNames()
+        self.data = results
+
+        if search_text.strip() == u"":
+            return results
+
+        results = [i for i in self.data if i.find(search_text) > -1]
+
+        if not results:
+            return None
+
+        return results
+
+
+    def GetWikiPages(self, search_text):
+        if search_text is None:
+            return [(_(u"Enter wikiword..."),)]
+
+        if search_text.strip() == u"":
+            return [_(u"Enter wikiword...")]
+
+        results = self.ctrl.presenter.getMainControl().getWikiData().\
+                    getWikiWordMatchTermsWith(
+                            search_text, orderBy="word", descend=False)
+
+        self.data = results
+
+        results = [i[0] for i in self.data]
+        if not results:
+            return None
+
+        return results
+
+    def Quit(self, args=None):
+        pass
+        
+        
+
+class ViInputDialog(wx.Frame):
+    
+    COLOR_YELLOW = wx.Colour(255, 255, 0);
+    COLOR_GREEN = wx.Colour(0, 255, 0);
+    COLOR_RED = wx.Colour(255, 0, 0);
+    COLOR_WHITE = wx.Colour(255, 255, 255);
+    
+    def __init__(self, parent, id, ctrl, rect, font, mainControl, search=False, forward_search=True, initial_input=None):
+        # Frame title is invisible but is helpful for workarounds with
+        # third-party tools
+        wx.Frame.__init__(self, parent, id, u"ViInputDialog",
+                rect.GetPosition(), rect.GetSize(),
+                wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT | wx.FRAME_NO_TASKBAR)
+
+        self.start_pos = rect.GetPosition()
+        self.start_size = rect.GetSize()
+
+        self.search = search
+
+        self.forward_search = forward_search
+
+        self.ctrl = ctrl
+        self.mainControl = mainControl
+        self.input_text_field = wx.TextCtrl(self, GUI_ID.INC_INPUT_FIELD,
+                _(u""), size=self.start_size,
+                style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
+
+
+        if initial_input is not None:
+            self.input_text_field.AppendText(initial_input)
+            self.input_text_field.SetSelection(-1, -1)
+
+
+        self.list_box = wx.ListBox(self, GUI_ID.VI_INPUT_LIST_BOX, wx.DefaultPosition, (rect.width, 300), [], wx.LB_SINGLE)
+
+        self.block_list_reload = False
+
+        self.cmd_parser = CmdParser(self.ctrl)
+        self.cmd_list = []
+        self.cmd_history = []
+
+
+        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD)
+        wx.EVT_TIMER(self, GUI_ID.TIMER_VI_UPDATE_CMD, self.CheckViInput)
+
+        self.input_text_field.SetFont(font)
+        self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_YELLOW)
+        mainsizer = wx.BoxSizer(wx.VERTICAL)
+        mainsizer.Add(self.list_box, 0, wx.TOP | wx.ALL | wx.EXPAND, 0)
+        mainsizer.Add(self.input_text_field, 1, wx.BOTTOM | wx.ALL | wx.EXPAND, 0)
+
+        self.SetSizer(mainsizer)
+        self.Layout()
+        #self.input_text_field.SelectAll()  #added for Mac compatibility
+
+        config = self.mainControl.getConfig()
+
+        self.closeDelay = 0 # Milliseconds to close or 0 to deactivate
+
+        wx.EVT_SET_FOCUS(self.list_box, self.OnListItemSelected)
+
+        wx.EVT_TEXT(self, GUI_ID.INC_INPUT_FIELD, self.OnText)
+        wx.EVT_KEY_DOWN(self.input_text_field, self.OnKeyDownInput)
+        #wx.EVT_KILL_FOCUS(self.input_text_field, self.OnKillFocus)
+        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
+                self.OnTimerIncViInputClose)
+        wx.EVT_MOUSE_EVENTS(self.input_text_field, self.OnMouseAnyInput)
+
+        if self.closeDelay:
+            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
+            self.closeTimer.Start(self.closeDelay, True)
+
+
+        self.UpdateLayout()
+
+        #self.input_text_field.SetFocus()
+        wx.CallAfter(self.OnListItemSelected, None)
+
+
+#     def Close(self):
+#         wx.Frame.Close(self)
+#         self.txtCtrl.SetFocus()
+
+    def UpdateLayout(self, show_list_box=False):
+        
+        if self.list_box.GetItems() or show_list_box:
+            self.list_box.Show()
+            self.SetSize((self.start_size[0], self.start_size[1] + self.list_box.GetSize()[1]))
+            self.SetPosition((self.start_pos[0], self.start_pos[1] - self.list_box.GetSize()[1]))
+        else:
+            self.list_box.Hide()
+            self.SetSize(self.start_size)
+            self.SetPosition(self.start_pos)
+
+
+    def OnKillFocus(self, evt):
+        print 10000
+        self.ForgetViInput()
+        self.Close()
+
+    def OnListItemSelected(self, evt):
+        self.input_text_field.SetFocus()
+        self.input_text_field.SetInsertionPointEnd()
+
+    def GetInput(self):
+        return self.input_text_field.GetValue()
+
+    def OnText(self, evt):
+
+        if self.search:
+            text = self.GetInput()
+
+            if not self.forward_search and self.ctrl.vi.HasSelection():
+                self.ctrl.GotoPos(self.ctrl.GetSelectionEnd()+1)
+
+            self.ctrl.SearchAnchor()
+            # TODO: set flags?
+            self.ctrl.vi._SearchText(text, self.forward_search, 
+                        match_case=False, wrap=True, whole_word=False, 
+                                            regex=True, select_text=True)
+            
+            self.ctrl.vi.last_search_args = {'text' : text, 
+                                         'forward' : self.forward_search, 
+                                         'match_case' : False, 
+                                         'whole_word' : False}
+
+        else:
+            if self.block_list_reload:
+                return
+
+            cmd, args = self.cmd_parser.ParseCmd(self.GetInput())
+
+            if cmd:
+                if args:
+                    self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_WHITE)
+                    #self.list_box.Clear()
+                    self.run_cmd_timer.Start(self.ctrl.vi.CMD_INPUT_DELAY)
+                else:
+                    self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
+                    self.CheckViInput()
+            else:
+                self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_RED)
+
+    def ExecuteCmd(self, text_input):
+        self.cmd_parser.RunCmd(text_input, self.list_box.GetSelection())
+        # NOTE will break in webkit
+        self.ctrl.GotoPos(self.ctrl.GetSelectionStart())
+
+    def CheckViInput(self, evt=None):
+        self.run_cmd_timer.Stop()
+        valid_cmd = self.ParseViInput(self.input_text_field.GetValue())
+
+        if valid_cmd == False:
+            # Nothing found
+            self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_YELLOW)
+        else:
+            # Found
+            self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
+
+
+    def ParseViInput(self, input_text):
+        print input_text
+        data = self.cmd_parser.ParseCmdWithArgs(input_text)
+
+        if data != self.cmd_list:
+            self.cmd_list = data
+            self.PopulateListBox(data)
+
+        if not data:
+            return False
+
+        return True
+
+    def ForgetViInput(self):
+        """
+        Called if user just leaves the inc. search field.
+        """
+        self.cmd_parser.ClearInput()
+
+    def PopulateListBox(self, data):
+        self.list_data = data
+
+        self.list_box.Clear()
+        self.list_box.AppendItems(data)
+        #self.list_box.SetSelection(0)
+
+        self.UpdateLayout(show_list_box=True)
+
+    def OnMouseAnyInput(self, evt):
+#         if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
+
+        # Workaround for name clash in wx.MouseEvent.Button:
+        if wx._core_.MouseEvent_Button(evt, wx.MOUSE_BTN_ANY) and self.closeDelay:
+            # If a mouse button was pressed/released, restart timer
+            self.closeTimer.Start(self.closeDelay, True)
+
+        evt.Skip()
+
+
+    def OnKeyDownInput(self, evt):
+        if self.closeDelay:
+            self.closeTimer.Start(self.closeDelay, True)
+
+        key = evt.GetKeyCode()
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
+
+        searchString = self.input_text_field.GetValue()
+
+        foundPos = -2
+        if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
+                (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
+            # Return pressed
+            self.ExecuteCmd(self.GetInput())
+            self.Close()
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE):
+            # Esc -> Abort inc. search, go back to start
+            self.ctrl.resetIncrementalSearch()
+            self.Close()
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_TAB):
+            self.SelectNextListBoxItem()
+
+        elif accP == (wx.ACCEL_SHIFT, wx.WXK_TAB):
+            self.SelectPreviousListBoxItem()
+
+        # do the next search on another ctrl-f
+        elif matchesAccelPair("StartIncrementalSearch", accP):
+            foundPos = self.ctrl.executeIncrementalSearch(searchString)
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+            foundPos = self.ctrl.executeIncrementalSearch(searchString)
+        elif matchesAccelPair("BackwardSearch", accP):
+            foundPos = self.ctrl.executeIncrementalSearchBackward(searchString)
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+            foundPos = self.ctrl.executeIncrementalSearchBackward(searchString)
+        elif matchesAccelPair("ActivateLink", accP) or \
+                matchesAccelPair("ActivateLinkNewTab", accP) or \
+                matchesAccelPair("ActivateLink2", accP) or \
+                matchesAccelPair("ActivateLinkBackground", accP) or \
+                matchesAccelPair("ActivateLinkNewWindow", accP):
+            # ActivateLink is normally Ctrl-L
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            # ActivateLink2 is normally Ctrl-Return
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.ctrl.EndViInput()
+            self.Close()
+            self.ctrl.OnKeyDown(evt)
+        # handle the other keys
+        else:
+            evt.Skip()
+
+        if foundPos == False:
+            # Nothing found
+            self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_YELLOW)
+        else:
+            # Found
+            self.input_text_field.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
+
+        # Else don't change
+
+    if SystemInfo.isOSX():
+        # Fix focus handling after close
+        def Close(self):
+            wx.Frame.Close(self)
+            wx.CallAfter(self.ctrl.SetFocus)
+
+    def SelectNextListBoxItem(self):
+        self.MoveListBoxSelection(1)
+
+    def SelectPreviousListBoxItem(self):
+        self.MoveListBoxSelection(-1)
+
+    def MoveListBoxSelection(self, offset):
+        if self.list_box.GetCount() < 1:
+            print "NO ITEMS"
+            return
+
+        if offset < 0:
+            select = max
+            n = 0
+        else:
+            select = min
+            n = self.list_box.GetCount()
+
+        print "SELECT", self.list_box.GetSelection() + offset
+
+        self.list_box.SetSelection(select(n, 
+                                    self.list_box.GetSelection() + offset))
+        split_text = self.GetInput().split(u" ")
+
+        print split_text
+        self.block_list_reload = True
+        if len(split_text) > 1:# and split_text[1] != u"":
+            self.input_text_field.SetValue("{0} {1}".format(self.input_text_field.GetValue().split(u" ")[0], self.list_box.GetStringSelection()))
+        else:
+            self.input_text_field.SetValue("{0}".format(self.list_box.GetStringSelection()))
+        self.input_text_field.SetInsertionPointEnd()
+        self.block_list_reload = False
+        self.run_cmd_timer.Stop()
+
+    def OnTimerIncViInputClose(self, evt):
+        self.cmd_parser.ClearInput()
+        self.ctrl.EndViInput()
+        self.Close()
+
