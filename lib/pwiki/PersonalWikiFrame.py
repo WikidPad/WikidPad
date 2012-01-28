@@ -3202,6 +3202,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.wikiDataManager = wikiDataManager
         self.currentWikiDocumentProxyEvent.setWatchedEvent(
                 self.wikiDataManager.getMiscEvent())
+        self.wikiDataManager.getUpdateExecutor().getMiscEvent().addListener(self)
 
 #         self.wikiDataManager.getMiscEvent().addListener(self)
         self.wikiData = wikiDataManager.getWikiData()
@@ -3442,8 +3443,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     pass
                 self.wikiData = None
                 if self.wikiDataManager is not None:
+                    self.wikiDataManager.getUpdateExecutor().getMiscEvent()\
+                            .removeListener(self)
                     self.currentWikiDocumentProxyEvent.setWatchedEvent(None)
-                self.wikiDataManager = None
+                    self.wikiDataManager = None
             else:
                 # We had already a problem, so ask what to do
                 if errCloseAnywayMsg() == wx.NO:
@@ -3454,8 +3457,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                 self.wikiData = None
                 if self.wikiDataManager is not None:
+                    self.wikiDataManager.getUpdateExecutor().getMiscEvent()\
+                            .removeListener(self)
                     self.currentWikiDocumentProxyEvent.setWatchedEvent(None)
-                self.wikiDataManager = None
+                    self.wikiDataManager = None
                 
             self._refreshHotKeys()
             self.statusBarTimer.Stop()
@@ -3515,8 +3520,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if result == wx.NO:
                 return False
 
-            self.statusBar.PushStatusText(
-                    _(u"Trying to reconnect database..."), 0)
+            self.showStatusMessage(_(u"Trying to reconnect database..."), 0,
+                    "reconnect")
             try:
                 try:
                     wd.reconnect()
@@ -3531,7 +3536,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.displayErrorMessage(_(u'Error while reconnecting '
                             'database'), e)
             finally:
-                self.statusBar.PopStatusText(0)
+                self.dropStatusMessageByKey("reconnect")
 
 
     def requireWriteAccess(self):
@@ -3560,8 +3565,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if result == wx.NO:
                 return False
 
-            self.statusBar.PushStatusText(
-                    _(u"Trying to write to database..."), 0)
+            self.showStatusMessage(_(u"Trying to write to database..."), 0,
+                    "reconnect")
             try:
                 try:
                     # write out the current configuration
@@ -3578,7 +3583,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.displayErrorMessage(_(u'Error while writing to '
                             'database'), e)
             finally:
-                self.statusBar.PopStatusText(0)
+                self.dropStatusMessageByKey("reconnect")
 
 
     def lostAccess(self, exc):
@@ -3635,8 +3640,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # Automatic reconnect was tried already, so don't try again
             return False
 
-        self.statusBar.PushStatusText(_(u"Trying to reconnect ..."), 0)
-
+        self.showStatusMessage(_(u"Trying to reconnect ..."), 0,
+                "reconnect")
         try:
             try:
                 wd.setNoAutoSaveFlag(True)
@@ -3647,7 +3652,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 sys.stderr.write(_(u"Error while trying to reconnect:") + u"\n")
                 traceback.print_exc()
         finally:
-            self.statusBar.PopStatusText(0)
+            self.dropStatusMessageByKey("reconnect")
 
         return False
 
@@ -3753,7 +3758,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not self.requireWriteAccess():
             return
 
-        self.statusBar.PushStatusText(u"Saving page", 0)
+        self.showStatusMessage(_(u"Saving page"), 0, "saving")
         try:
             # Test if editor is active
             if page.getTxtEditor() is None:
@@ -3788,7 +3793,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.lostAccess(e)
                     raise
         finally:
-            self.statusBar.PopStatusText(0)
+            self.dropStatusMessageByKey("saving")
 
 
     def deleteWikiWord(self, wikiWord):
@@ -3907,8 +3912,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             filePath, wikiWordToOpen, anchorToOpen = StringOps.wikiUrlToPathWordAndAnchor(
                     link)
             if not os.path.exists(filePath):
-                self.statusBar.SetStatusText(
-                        uniToGui(_(u"Couldn't open wiki: %s") % link), 0)
+                self.showStatusMessage(
+                        uniToGui(_(u"Couldn't open wiki: %s") % link), -2)
                 return False
 
             if self.configuration.getint(
@@ -5180,10 +5185,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If duration > 0 the message is removed after  duration  milliseconds.
         If duration == 0 show forever (until new message overwrites)
         If duration == -1 show for a default length (ten seconds currently)
+        If duration == -2 show for a long default length (45 seconds currently).
+                Intended for error messages
         
         key -- if given you can remove message(s) with this key by using
                 self.dropStatusMessage(key). Messages with other keys
-                remain
+                remain until overwritten (for duration == 0) or the end
+                of their duration time.
         """
         self.statusBarTimer.Stop()
         
@@ -5193,12 +5201,27 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         if duration == -1:
             duration = 10000
+        elif duration == -2:
+            duration = 45000
             
         self.statusBarStack.append(_StatusBarStackEntry(msg, duration, key))
         self._updateStatusBarByStack()
 
 
+    def updateStatusMessage(self, msg, duration, key):
+        """
+        Delete all messages with key  key  and place this new one on the top.
+        """
+        self.statusBarTimer.Stop()
+
+        self.statusBarStack = [e for e in self.statusBarStack if e.key != key]
+        self.showStatusMessage(msg, duration, key)
+
+
     def dropStatusMessageByKey(self, key):
+        """
+        Delete all messages with given key from stack
+        """
         if len(self.statusBarStack) == 0:
             return
         
@@ -5260,10 +5283,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Error!'), wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
-        try:
-            self.statusBar.SetStatusText(uniToGui(errorStr), 0)
-        except:
-            pass
+#         try:
+#             self.showStatusMessage(uniToGui(errorStr), -2)
+#         except:
+#             pass
 
 
     def showAboutDialog(self):
@@ -5325,6 +5348,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.fireMiscEventProps(miscEvt.getProps())
 #                 if miscEvt.has_key("changed current docpage presenter"):
 #                     self.hooks.switchedToWikiWord(self, oldWord, newWord)
+
+            elif self.isWikiLoaded() and miscEvt.getSource() is \
+                    self.getWikiDocument().getUpdateExecutor():
+                if miscEvt.has_key("changed state"):
+                    # Update executor started/stopped/ran empty/was filled
+                    if miscEvt.get("isRunning"):
+                        jobCount = miscEvt.get("jobCount")
+                    else:
+                        jobCount = 0
+                     
+                    if jobCount > 0:
+                        self.updateStatusMessage(
+                                _("Performing background jobs..."),
+                                duration=120000, key="jobInfo")
+                    else:
+                        self.dropStatusMessageByKey("jobInfo")
+
 
             # Depending on wiki-related or global func. page, the following
             # events come from document or application object
@@ -5460,6 +5500,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def OnIdle(self, evt):
         self.fireMiscEventKeys(("idle visible",))
+        
+        # TODO: Maybe called a bit too often for statusbar check?
+        if self.statusBar.GetStatusText(0) == u"":
+            self._updateStatusBarByStack()
+
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
         if self.getWikiDocument() is None or self.getWikiDocument().getWriteAccessFailed():

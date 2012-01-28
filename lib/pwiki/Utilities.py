@@ -7,8 +7,10 @@ from time import time as _time, sleep as _sleep
 import wx
 
 from Consts import DEADBLOCKTIMEOUT
-from WikiExceptions import NotCurrentThreadException, \
+from .WikiExceptions import NotCurrentThreadException, \
         DeadBlockPreventionTimeOutError, InternalError
+
+from . import MiscEvent
 
 
 class Dummy(object):
@@ -125,8 +127,10 @@ class ExecutionResult(object):
 
 
 
-class SingleThreadExecutor(BasicThreadStop):
+class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
     def __init__(self, dequeCount=1, daemon=False):
+        MiscEvent.MiscEventSourceMixin.__init__(self)
+
         self.dequeCondition = threading.Condition()
         self.daemon = daemon
         self.dequeCount = dequeCount
@@ -160,6 +164,7 @@ class SingleThreadExecutor(BasicThreadStop):
             self.thread = threading.Thread(target=self._runQueue)
             self.thread.setDaemon(self.daemon)
             self.thread.start()
+            self._fireStateChange(True)
 
 
     def getDeque(self, idx=0):
@@ -212,6 +217,14 @@ class SingleThreadExecutor(BasicThreadStop):
                 return sum((len(deque) for deque in self.deques[start:end]), 0)
 
 
+    def _fireStateChange(self, running=None):
+        if running is None:
+            # Detect self
+            running = self.thread is not None and self.thread.isAlive()
+
+        callInMainThreadAsync(self.fireMiscEventProps, {"changed state": True,
+            "isRunning": running, "jobCount": self.getJobCount()})
+
     def _runQueue(self):
         while True:
             with self.dequeCondition:
@@ -220,10 +233,13 @@ class SingleThreadExecutor(BasicThreadStop):
                     job = self._getNextJob()
                     if job is not None:
                         break
+                    self._fireStateChange(True)
                     self.dequeCondition.wait()
+                    self._fireStateChange(True)
 
                 if self.deques is None:
                     # Executor terminated
+                    self._fireStateChange(False)
                     return
 
                 fct, args, kwargs, event, retObj, tstop = job
@@ -234,7 +250,8 @@ class SingleThreadExecutor(BasicThreadStop):
                         # operations may itself push new jobs back on the deque
                         # which must be processed before thread can end
                         if self.getJobCount() == 0:
-                           return
+                            self._fireStateChange(False)
+                            return
 
                         self.deques[-1].appendleft(
                                 (SingleThreadExecutor.ENDOBJECT, None, None,
@@ -244,6 +261,7 @@ class SingleThreadExecutor(BasicThreadStop):
                         # Operation should pause, this means to kill the thread, but
                         # to keep the deques as they are.
                         # To resume, start() is called
+                        self._fireStateChange(False)
                         return
 
                 except Exception, e:
@@ -370,7 +388,7 @@ class SingleThreadExecutor(BasicThreadStop):
         Stops after current job but keeps the queue so that it can resume
         later by call to start(). Returns True if executor thread wasn't
         terminated already.
-        If  wait  is true the function returns after the current job was
+        If  wait  is True the function returns after the current job was
         done and the executor is in pause mode
         """
         with self.dequeCondition:

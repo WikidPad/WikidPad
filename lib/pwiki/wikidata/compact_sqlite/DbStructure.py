@@ -1257,7 +1257,7 @@ def updateDatabase(connwrap, dataDir):
 
         formatver = 9
 
-    # --- WikiPad 2.1alpha.1 reached (formatver=9, writecompatver93,
+    # --- WikiPad 2.1alpha.1 reached (formatver=9, writecompatver=9,
     #         readcompatver=9) ---
 
 

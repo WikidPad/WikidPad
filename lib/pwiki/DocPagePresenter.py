@@ -69,7 +69,11 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         return self.getSubControl("textedit")
 
     def SetStatusText(self, text, field):
-            self.getStatusBar().SetStatusText(uniToGui(text), field)
+        self.getStatusBar().SetStatusText(uniToGui(text), field)
+
+    def showStatusMessage(self, msg, duration=0, key=None):
+        self.getMainControl().showStatusMessage(msg, duration, key)
+
 
     def isCurrent(self):
         return self.getMainControl().getCurrentDocPagePresenter() is self
@@ -155,7 +159,6 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
                 self.getSubControl("textedit").loadWikiPage(None)
                 self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
-
 
 
     def getStatusBar(self):
@@ -262,9 +265,9 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                         suggNewPageTitle=suggNewPageTitle)
                 # trigger hooks
                 self.getMainControl().hooks.newWikiWord(self, wikiWord)
-                self.getStatusBar().SetStatusText(
+                self.showStatusMessage(
                         uniToGui(_(u"Wiki page not found, a new "
-                        u"page will be created")), 0)
+                        u"page will be created")))
 #                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
 
             self.loadWikiPage(page, **evtprops)
