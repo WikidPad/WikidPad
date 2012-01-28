@@ -3977,10 +3977,10 @@ class ViHandler(ViHelper):
     # TODO: ' is linewise
     (k["'"], "*")  : (1, (self.GotoMarkIndent, None), 0), # '
     (k["m"], "*") : (0, (self.Mark, None), 0), # m
-    (k["f"], "*") : (1, (self.FindNextChar, None), 4), # f
-    (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 4), # F
-    (k["t"], "*") : (1, (self.FindUpToNextChar, None), 5), # t
-    (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 5), # T
+    (k["f"], "*") : (1, (self.FindNextChar, None), 4), # f*
+    (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 4), # F*
+    (k["t"], "*") : (1, (self.FindUpToNextChar, None), 5), # t*
+    (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 5), # T*
     (k["r"], "*") : (0, (self.ReplaceChar, None), 0), # r*
 
     (k["d"], k["c"], u"motion", u"*") : (0, (self.DeleteCharMotion, 
@@ -5245,6 +5245,10 @@ class ViHandler(ViHelper):
         pos = self.ctrl.GetCurrentPos()
         if self.SearchBackwardsForChar(char):
             start_pos = self.ctrl.GetCurrentPos()
+            # The fact we need to test if we're in visual mode means
+            # something is not quite right here!
+            if not extra and self.mode == ViHelper.VISUAL:
+                start_pos += len(char)
             self.ctrl.GotoPos(pos)
             if self.SearchForwardsForChar(char):
                 self.StartSelection(start_pos, set_visual_start=True)
@@ -6056,16 +6060,16 @@ class ViHandler(ViHelper):
         return False
 
     def FindNextChar(self, keycode):
-        self.FindChar(keycode, count=self.count)
+        return self.FindChar(keycode, count=self.count)
         
     def FindNextCharBackwards(self, keycode):
-        cmd = self.FindChar(keycode, count=self.count, reverse=True)
+        return self.FindChar(keycode, count=self.count, reverse=True)
 
     def FindUpToNextChar(self, keycode):
-        cmd = self.FindChar(keycode, count=self.count, offset=-1)
+        return self.FindChar(keycode, count=self.count, offset=-1)
         
     def FindUpToNextCharBackwards(self, keycode):
-        cmd = self.FindChar(keycode, count=self.count, reverse=True, offset=-1)
+        return self.FindChar(keycode, count=self.count, reverse=True, offset=-1)
 
     def GetLastFindCharCmd(self):
         return self.last_find_cmd
@@ -6075,7 +6079,7 @@ class ViHandler(ViHelper):
         if args is not None: 
             # Set the new count
             args["count"] = self.count
-            self.FindChar(**args)
+            return self.FindChar(**args)
         
     def RepeatLastFindCharCmdReverse(self):
         args = self.GetLastFindCharCmd()
@@ -6974,7 +6978,9 @@ class ViHandler(ViHelper):
             self.ctrl.GotoLine(0)
 
         elif key == (k["G"]):
-            self.ctrl.GotoLine(self.ctrl.GetLineCount())
+            # As with vim "G" goes to the first nonwhitespace of the 
+            # character on the bottom line
+            self.GotoLineIndent(self.ctrl.GetLineCount())
 
     def GotoViewportTop(self):
         self.GotoLineIndent(self.GetFirstVisibleLine())
@@ -7040,6 +7046,7 @@ class ViHandler(ViHelper):
         self.Insert()
 
     def DeleteLineIndentInsert(self):
+        # TODO: should accept count
         self.BeginUndo()
         self.GotoLineIndent(self.ctrl.GetCurrentLine())
         self.TruncateLineAndInsert()

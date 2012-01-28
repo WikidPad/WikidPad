@@ -6,6 +6,7 @@ from StringOps import pathEnc
 import os
 import ConfigParser
 import re
+import copy
 
 from wxHelper import * # Needed for  XrcControls
 
@@ -426,8 +427,13 @@ class ViHelper():
                     motion_args = motion_args[0]
                 else:
                     motion_args = tuple(motion_args)
-
+ 
             RunFunc(motion_func, motion_args)
+
+            # Test if the motion has caused a movement in the caret
+            # If not consider it an invalid cmd
+            if self._anchor == self.ctrl.GetCurrentPos():
+                return False
 
             self.SelectSelection(motion_com_type)
             
@@ -642,7 +648,7 @@ class ViHelper():
             text = text.split("\n", 1)[0]
             text = text[:30]
 
-        self.input_window.StartSearch(self.ctrl, self.input_cmd_history, text, forward)
+        self.input_window.StartSearch(self.ctrl, self.input_search_history, text, forward)
 
 
     def ContinueLastSearchSameDirection(self):
@@ -1157,6 +1163,7 @@ class CmdParser():
         self.data = []
 
         self.cmds = {
+            "write" : (self.Pass, self.SaveCurrentPage),
             "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
             "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
             "tabopen" : (self.GetWikiPages, self.OpenWikiPageNewTab),
@@ -1181,11 +1188,21 @@ class CmdParser():
                                             "|".join(self.range_cmds.keys()))
     
     def SearchAndReplace(self, pattern):
-        if not pattern.startswith("/"):
+        if pattern.startswith(u"/"):
+            delim = u"\/"
+        elif pattern.startswith(u";"):
+            delim = u"\;"
+        elif pattern.startswith(u"$"):
+            delim = u"\$"
+        elif pattern.startswith(u"|"):
+            delim = u"\|"
+        elif pattern.startswith(u"^"):
+            delim = u"\^"
+        else:
             return False
 
         try:
-            search, replace, flags = re.split(r"(?<!\\)\/", pattern)[1:]
+            search, replace, flags = re.split(r"(?<!\\){0}".format(delim), pattern)[1:]
         except ValueError:
             return False
 
@@ -1389,8 +1406,12 @@ class CmdParser():
     def ClearInput(self):
         self.data = []
 
-    def CloseOtherTabs(self):
+    def CloseOtherTabs(self, args=None):
         self.ctrl.presenter.getMainControl().getMainAreaPanel()._closeAllButCurrentTab()
+
+    def SaveCurrentPage(self, args=None):
+        self.ctrl.presenter.saveCurrentDocPage()
+        return True
 
     def OpenWikiPageCurrentTab(self, link_info):
         self.OpenWikiPage(link_info, 0)
@@ -1661,6 +1682,9 @@ class ViInputDialog(wx.Panel):
         if self.search:
             text = self.GetInput()
 
+            if len(text) < 1:
+                return
+
             self.search_args[u"text"] = text
 
             # would .copy() be better?
@@ -1697,7 +1721,9 @@ class ViInputDialog(wx.Panel):
     def ExecuteCmd(self, text_input):
         self.cmd_history.AddCmd(text_input)
         if self.search:
-            self.ctrl.vi.last_search_args = self.search_args
+            self.search_args[u"text"] = text_input
+            self.ctrl.vi.last_search_args = copy.copy(self.search_args)
+
             self.ctrl.vi.GotoSelectionStart()
         else:
             if self.cmd_parser.RunCmd(text_input, self.ctrls.viInputListBox.GetSelection()):
