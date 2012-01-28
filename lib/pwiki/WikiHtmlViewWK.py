@@ -1506,6 +1506,9 @@ class WikiHtmlViewWK(wx.Panel):
         self.Scroll(x, y)
 
 
+    def SetFocus(self):
+        self.html.ctrl.grab_focus()
+
 
 #_CONTEXT_MENU_INTERNAL_JUMP = \
 #u"""

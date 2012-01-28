@@ -4027,6 +4027,10 @@ class ViHandler(ViHelper):
     (k["k"],) : (2, (self.MoveCaretUp, None), 0), # k
     (k["l"],) : (2, (self.MoveCaretRight, False), 0), # l
     (k["j"],) : (2, (self.MoveCaretDown, None), 0), # j
+
+    # TODO: ctrl-h / ctrl-l - goto headings?
+
+
     (k["g"], k["k"]) : (2, (self.MoveCaretUp, {"visual" : True}), 0), # gk
     (k["g"], k["j"]) : (2, (self.MoveCaretDown, {"visual" : True}), 0), # gj
     # TODO: g^ / g0
@@ -4041,9 +4045,9 @@ class ViHandler(ViHelper):
 
     # Line movement
     (k["$"],)    : (1, (self.GotoLineEnd, False), 0), # $
-    (wx.WXK_END,) : (1, (self.GotoLineEnd, False), 0), # home
+    (wx.WXK_END,) : (1, (self.GotoLineEnd, False), 0), # end
     (k["0"],)    : (2, (self.GotoLineStart, None), 0), # 0
-    (wx.WXK_HOME,) : (2, (self.GotoLineStart, None), 0), # end 
+    (wx.WXK_HOME,) : (2, (self.GotoLineStart, None), 0), # home 
     (k["-"],)    : (1, (self.GotoLineIndentPreviousLine, None), 0), # -
     (k["+"],)    : (1, (self.GotoLineIndentNextLine, None), 0), # +
     (k["^"],)    : (2, (self.GotoLineIndent, None), 0), # ^
@@ -4311,10 +4315,8 @@ class ViHandler(ViHelper):
         # If switching from insert mode vi does a few things
         if self.mode == ViHelper.INSERT:
             # Move back one pos if not at the start of a line
-            # and not on the last line
             if self.ctrl.GetCurrentPos() != \
-                    self.GetLineStartPos(self.ctrl.GetCurrentLine()) and \
-                    self.ctrl.GetLineCount() != self.ctrl.GetCurrentLine() + 1:
+                    self.GetLineStartPos(self.ctrl.GetCurrentLine()):
                 self.ctrl.CharLeft()
 
             # If current line only contains whitespace remove it
@@ -4395,6 +4397,8 @@ class ViHandler(ViHelper):
                 self._undo_positions.append(self.ctrl.GetCurrentPos())
             self._undo_pos += 1
         self._undo_state -= 1
+
+        print self._undo_state
 
     def EndBeginUndo(self):
         # TODO: shares code with EndUndo and BeginUndo
@@ -5202,12 +5206,12 @@ class ViHandler(ViHelper):
                 else:
                     # Only select the brackets if required
                     if not extra:
-                        pass
                         sel_start = self.StartSelection(sel_start+len(bracket), set_visual_start=True)
                         self.ctrl.GotoPos(sel_end-len(bracket))
                         #self.ctrl.SetSelection(sel_start+len(bracket), sel_end-len(bracket))
                         #self.ctrl.CharLeftExtend()
                     else:
+                        sel_start = self.StartSelection(sel_start, set_visual_start=True)
                         if linewise:
                             self.ctrl.CharRightExtend()
             else:
@@ -5535,7 +5539,7 @@ class ViHandler(ViHelper):
         else:
             self._anchor = self.ctrl.GetCurrentPos()
 
-    def SelectSelection(self, com_type=0, mode=None):
+    def SelectSelection(self, com_type=0):
         if com_type < 1:
             print "Select selection called incorrectly"
             return
@@ -5552,8 +5556,6 @@ class ViHandler(ViHelper):
         #self.SetSelMode(u"LINE")
         if self.GetSelMode() == u"LINE":
             self.SelectFullLines()
-        if mode is not None:
-            self.ctrl.SetSelectionMode(None)
         # Inclusive motion commands select the last character as well
         elif com_type != 2:
             self.ctrl.CharRightExtend()
@@ -5850,7 +5852,7 @@ class ViHandler(ViHelper):
             self.SetMode(ViHelper.VISUAL)
             self.StartSelectionAtAnchor()
 
-        self._visual_start_pos = self.ctrl.GetCurrentPos()
+            self._visual_start_pos = self.ctrl.GetCurrentPos()
             #if self.ctrl.GetSelectedText() > 0:
             #    self.MoveCaretRight()
 
@@ -5877,20 +5879,19 @@ class ViHandler(ViHelper):
 
             if not mouse:
                 self.StartSelectionAtAnchor()
+                self._visual_start_pos = self.ctrl.GetCurrentPos()
 
-                #if self.ctrl.GetSelectedText() > 0:
-                #    self.MoveCaretRight()
             else:
                 pos = self.ctrl.GetSelectionStart() \
                         + self.ctrl.GetSelectionEnd() \
                         - self.ctrl.GetCurrentPos()
                 self.StartSelection(pos)
 
-            self._visual_start_pos = self.ctrl.GetCurrentPos()
+                self._visual_start_pos = pos - 1
+
     #--------------------------------------------------------------------
     # Searching
     #--------------------------------------------------------------------
-
     def SearchForwardsForChar(self, search_char, count=None, 
                                     wrap_lines=True, start_offset=-1):
         if count is None: count = self.count
@@ -6402,13 +6403,13 @@ class ViHandler(ViHelper):
             self.ctrl.GotoPos(pos)
 
     def EndDelete(self):
-        self.SelectSelection()
+        self.SelectSelection(2)
         self.DeleteSelection()
         self.SetLineColumnPos()
 
     def EndDeleteInsert(self):
         self.BeginUndo(use_start_pos=True)
-        self.SelectSelection()
+        self.SelectSelection(2)
         self.DeleteSelection()
         self.Insert()
         self.EndUndo()
@@ -6473,6 +6474,7 @@ class ViHandler(ViHelper):
 
     def GotoLineStart(self):
         self.ctrl.Home()
+        self.SetLineColumnPos()
 
     def GotoLineEnd(self, true_end=True):
         self.ctrl.LineEnd()
@@ -6650,20 +6652,7 @@ class ViHandler(ViHelper):
     def MoveCaretRight(self, allow_last_char=True):
         self.MoveCaretPos(self.count, allow_last_char=allow_last_char)
 
-    #def MoveCaretLineUp(self, count=None):
-    #    """Make long lines behave as in vim"""
-    #    count = count if count is not None else self.count
-    #    new_line_number = max(0, self.ctrl.GetCurrentLine()-count)
-    #    self.ctrl.GotoLine(new_line_number)
-
-    #def MoveCaretLineDown(self, count=None):
-    #    """Make long lines behave as in vim"""
-    #    count = count if count is not None else self.count
-    #    new_line_number = min(self.ctrl.GetLineCount(), self.ctrl.GetCurrentLine()+count)
-    #    self.ctrl.GotoLine(new_line_number)
-
     def MoveCaretVertically(self, count):
-        #self.SetLineColumnPos()
         line_no = self.ctrl.GetCurrentLine()
 
         self.ctrl.GotoPos(self.ctrl.PositionFromLine(line_no + count))
@@ -6716,7 +6705,9 @@ class ViHandler(ViHelper):
     def MoveCaretPos(self, offset, allow_last_char=False):
         """
         Move caret by a given offset
+
         """
+        # TODO: Speedup
         line, line_pos = self.ctrl.GetCurLine()
         line_no = self.ctrl.GetCurrentLine()
 
@@ -6825,13 +6816,13 @@ class ViHandler(ViHelper):
         """
         pos = start_pos = self.ctrl.GetCurrentPos()
 
-        # Minor correction is necessary for visual mode
-        if self.mode == ViHelper.VISUAL:
-            # TODO: correct for moving forwards from pos(word end) - 1
-            if pos > self._visual_start_pos:
-                pass
-            elif pos < self._visual_start_pos:
-                pos -= 1
+        ## Minor correction is necessary for visual mode
+        #if self.mode == ViHelper.VISUAL:
+        #    # TODO: correct for moving forwards from pos(word end) - 1
+        #    if pos > self._visual_start_pos:
+        #        pass
+        #    elif pos < self._visual_start_pos:
+        #        pos -= 1
 
         char = self.GetUnichrAt(pos)
 

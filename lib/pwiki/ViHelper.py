@@ -826,8 +826,13 @@ class ViHelper():
 
     def StartCmdInput(self, initial_input=None):
 
+        selection_range = None
+        if self.mode == ViHelper.VISUAL:
+            initial_input = u"'<,'>"
+            selection_range = self.ctrl.vi._GetSelectionRange()
+
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
-                                                            initial_input)
+                                            initial_input, selection_range=selection_range)
 
 
     def EndViInput(self):
@@ -1144,8 +1149,10 @@ class ViRegister():
 
 
 class CmdParser():
-    def __init__(self, ctrl):
+    def __init__(self, ctrl, selection_range=None):
         self.ctrl = ctrl
+
+        self.selection_range = selection_range
 
         self.data = []
 
@@ -1170,14 +1177,17 @@ class CmdParser():
                           }
         # TODO: :s repeats last command
 
-        self.range_regex = u"(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})(.*$)".format(
+        self.range_regex = u"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
                                             "|".join(self.range_cmds.keys()))
     
     def SearchAndReplace(self, pattern):
         if not pattern.startswith("/"):
             return False
 
-        search, replace, flags = re.split(r"(?<!\\)\/", pattern)[1:]
+        try:
+            search, replace, flags = re.split(r"(?<!\\)\/", pattern)[1:]
+        except ValueError:
+            return False
 
         count = 1
         # TODO: Flags
@@ -1193,18 +1203,36 @@ class CmdParser():
         if u"g" in flags:
             count = 0
 
-        search_regex = re.compile(search)
+        re_flags = re.M
+
+        # Hack for replaing newline chars
+        search = re.sub(r"(?<!\\)\\n", "\n", search)
+
+        try:
+            search_regex = re.compile(search, flags=re_flags)
+        except re.error:
+            return False
 
         text_to_sub = self.ctrl.GetSelectedText()
 
-        new_text = []
 
-        # We do the subs on a per line basis as by default vim only
-        # replaces the first occurance
-        for i in text_to_sub.split("\n"):
-            new_text.append(search_regex.sub(replace, i, count))
+        # If our regex contains a newline character we need to search over
+        # all text
+        if "\n" not in search:
+            new_text = []
+
+            # We do the subs on a per line basis as by default vim only
+            # replaces the first occurance
+            for i in text_to_sub.split("\n"):
+                new_text.append(search_regex.sub(replace, i, count))
             
-        self.ctrl.ReplaceSelection("\n".join(new_text))
+            self.ctrl.ReplaceSelection("\n".join(new_text))
+
+        else:
+            self.ctrl.ReplaceSelection(search_regex.sub(replace, text_to_sub))
+
+        return True
+
 
     def Pass(self):
         pass
@@ -1240,28 +1268,60 @@ class CmdParser():
         except ValueError:
             pass
 
+            
+        # Ranges are by default lines
         if start_range == u"%" or end_range == u"%":
             start_range = 0
             end_range = self.ctrl.GetLineCount()
         elif start_range in (None, u""):
             start_range = end_range
+            
 
-        if end_range == u"$":
-            end_range = self.ctrl.GetLineCount()
+        # Convert line ranges to char positions
+        if type(start_range) == int:
+            start_range = self.ctrl.vi.GetLineStartPos(start_range)
+        elif start_range == u".":
+            start_range = self.ctrl.vi.GetLineStartPos(self.ctrl.GetCurrentLine())
+        elif len(start_range) == 2 and start_range.startswith(u"'"):
+            if start_range[1] == u"<":
+                start_range = self.selection_range[0]
+            else:
+                page = self.ctrl.presenter.getWikiWord()
+                # TODO: create helper to prevent mark going past page end?
+                try:
+                    start_range = self.ctrl.vi.marks[page][ord(start_range[1])]
+                except KeyError:
+                    return False # mark not set
+        else:
+            return False # invalid start_range input
 
-        if start_range == u".":
-            start_range = self.ctrl.GetCurrentLine()
-        if end_range == u".":
-            end_range = self.ctrl.GetCurrentLine()
+        if type(end_range) == int:
+            end_range = self.ctrl.GetLineEndPosition(end_range) + 1
+        elif end_range == u"$":
+            end_range = self.ctrl.GetLineEndPosition(self.ctrl.GetLineCount()) + 1
+        elif end_range == u".":
+            end_range = self.ctrl.GetLineEndPosition(self.ctrl.GetCurrentLine()) + 1
+        elif len(end_range) == 2 and end_range.startswith(u"'"):
+            if end_range[1] == u">":
+                end_range = self.selection_range[1]
+            else:
+                page = self.ctrl.presenter.getWikiWord()
+                try:
+                    end_range = self.ctrl.vi.marks[page][ord(end_range[1])]
+                except KeyError:
+                    return False # mark not set
+        else:
+            return False # invalid end_range input
 
 
-        self.ctrl.vi.SelectLines(start_range, end_range)
+        self.ctrl.SetSelection(start_range, end_range)
 
         self.ctrl.vi.BeginUndo()
-        self.range_cmds[cmd](args)
+        rel = self.range_cmds[cmd](args)
         self.ctrl.vi.EndUndo()
-        
 
+        self.ClearInput()
+        return rel
 
     def ParseCmd(self, text_input):
         if self.CheckForRangeCmd(text_input):
@@ -1307,9 +1367,7 @@ class CmdParser():
 
     def RunCmd(self, text_input, viInputListBox_selection):
         if self.CheckForRangeCmd(text_input):
-            self.ExecuteRangeCmd(text_input)
-            self.ClearInput()
-            return
+            return self.ExecuteRangeCmd(text_input)
 
         if viInputListBox_selection > -1 and self.data:
             arg = self.data[viInputListBox_selection]
@@ -1503,13 +1561,16 @@ class ViInputDialog(wx.Panel):
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
             self.closeTimer.Start(self.closeDelay, True)
 
+        self.selection_range = None
+
 
         wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
 
         return
 
-    def StartCmd(self, ctrl, cmd_history, text):
+    def StartCmd(self, ctrl, cmd_history, text, selection_range=None):
         self.search = False
+        self.selection_range = selection_range
         self.StartInput(text, ctrl, cmd_history)
 
     def StartSearch(self, ctrl, cmd_history, text, forward):
@@ -1538,13 +1599,14 @@ class ViInputDialog(wx.Panel):
         
         self.initial_scroll_pos = self.ctrl.GetScrollAndCaretPosition()
 
+        self.block_list_reload = False
+
         if initial_input is not None:
             self.ctrls.viInputTextField.AppendText(initial_input)
             self.ctrls.viInputTextField.SetSelection(-1, -1)
 
-        self.block_list_reload = False
 
-        self.cmd_parser = CmdParser(self.ctrl)
+        self.cmd_parser = CmdParser(self.ctrl, self.selection_range)
         self.cmd_list = []
 
         self.cmd_history = cmd_history
@@ -1638,7 +1700,12 @@ class ViInputDialog(wx.Panel):
             self.ctrl.vi.last_search_args = self.search_args
             self.ctrl.vi.GotoSelectionStart()
         else:
-            self.cmd_parser.RunCmd(text_input, self.ctrls.viInputListBox.GetSelection())
+            if self.cmd_parser.RunCmd(text_input, self.ctrls.viInputListBox.GetSelection()):
+                self.ctrl.vi.visualBell("GREEN")
+            else:
+                self.ctrls.viInputTextField.SetBackgroundColour(
+                        ViInputDialog.COLOR_YELLOW)
+                self.ctrl.vi.visualBell("RED")
 
 
     def CheckViInput(self, evt=None):
