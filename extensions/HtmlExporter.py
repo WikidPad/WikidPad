@@ -414,6 +414,7 @@ class HtmlExporter(AbstractExporter):
         
         self.linkConverter = None
         self.compatFilenames = None
+        self.avoidDeadWikiLinks = True  # avoid links to wikiwords not exported
         self.listPagesOperation = None
 
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
@@ -580,10 +581,14 @@ class HtmlExporter(AbstractExporter):
 
         self.setWikiDocument(wikiDocument)
 
-        self.wordList = []
-        for w in wordList:
-            if self.wikiDocument.isDefinedWikiLinkTerm(w):
-                self.wordList.append(w)
+
+        if self.avoidDeadWikiLinks:
+            self.wordList = [w for w in wordList
+                    if self.shouldExport(
+                    self.wikiDocument.getWikiPageNameForLinkTerm(w))]
+        else:
+            self.wordList = [w for w in wordList
+                    if self.wikiDocument.isDefinedWikiLinkTerm(w)]
 
         if len(self.wordList) == 0:
             return False
@@ -682,6 +687,9 @@ class HtmlExporter(AbstractExporter):
             exportType, exportDest, compatFilenames, addOpt, progressHandler):
         
         self.listPagesOperation = listPagesOperation
+        
+        # for continuous export we want to have dead links to simplify updates
+        self.avoidDeadWikiLinks = False
 
         wordList = wikiDocument.searchWiki(self.listPagesOperation)
         
@@ -704,6 +712,7 @@ class HtmlExporter(AbstractExporter):
     def stopContinuousExport(self):
         self.listPagesOperation.endWikiSearch()
         self.listPagesOperation = None
+        self.avoidDeadWikiLinks = True
         self.__sinkWikiDocument.disconnect()
 
         self.tempFileSet.reset()
@@ -895,6 +904,12 @@ class HtmlExporter(AbstractExporter):
                     
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(wikiPage)
+                
+                if self.avoidDeadWikiLinks:
+                    parentLinks = self.getParentLinks(wikiPage, False,
+                            self.wordlist)
+                else:
+                    parentLinks = self.getParentLinks(wikiPage, False)
 
                 filePointer.write((u'<span class="wikidpad wiki-name-ref">'
                         u'[<a name="%s" class="wikidpad">%s</a>]<br class="wikidpad" />'
@@ -902,7 +917,8 @@ class HtmlExporter(AbstractExporter):
                         u'<span class="wikidpad parent-nodes">parent nodes: %s'
                         u'<br class="wikidpad" /></span>%s%s<hr class="wikidpad" />') %
                         (self.wordAnchor, word,
-                        self.getParentLinks(wikiPage, False), formattedContent,
+                        parentLinks,
+                        formattedContent,
                         u'<br class="wikidpad" />\n' * sepLineCount))
             except Exception, e:
                 traceback.print_exc()
@@ -1268,6 +1284,9 @@ class HtmlExporter(AbstractExporter):
 
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
+            if not wikiWord:
+                return False
+
             try:
                 wikiPage = self.wikiDocument.getWikiPage(wikiWord)
             except WikiWordNotFoundException:
@@ -2098,17 +2117,20 @@ class HtmlExporter(AbstractExporter):
             anchorLink = None
             titleNode = None
             
+        if self.avoidDeadWikiLinks and not self.shouldExport(
+                self.wikiDocument.getWikiPageNameForLinkTerm(wikiWord)):
+            link = None
+        else:
+            self.linkConverter.wikiDocument = self.wikiDocument
+            link = self.linkConverter.getLinkForWikiWord(wikiWord)
 
-        self.linkConverter.wikiDocument = self.wikiDocument
-        link = self.linkConverter.getLinkForWikiWord(wikiWord)
-        
         selfLink = False
 
         if link:
             linkTo = self.wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
             # Test if link to same page itself (maybe with an anchor fragment)
-            if not self.exportType in (u"html_multi", u"xml"):
+            if not self.exportType == u"html_multi":
                 linkFrom = self.wikiDocument.getWikiPageNameForLinkTerm(
                         self.wikiWord)
                 if linkTo is not None and linkTo == linkFrom:
