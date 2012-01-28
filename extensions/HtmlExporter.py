@@ -389,13 +389,6 @@ class TableCell(object):
                         cell.infoRow = self.posRow
                         cell.infoCol = self.posCol
 
-                        
-        
-        
-
-
-
-
 
 
 

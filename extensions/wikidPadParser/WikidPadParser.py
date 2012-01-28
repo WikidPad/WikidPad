@@ -2371,7 +2371,8 @@ class _TheHelper(object):
                     subIndent = indent + u" " * (len(match.group(2)) + 2)
 
             # get the text that will be wrapped
-            text = editor.GetTextRange(startPos, endPos)
+            indentedStartPos = startPos + editor.bytelenSct(indent)
+            text = editor.GetTextRange(indentedStartPos, endPos)
             # remove spaces, newlines, etc
             text = re.sub("[\s\r\n]+", " ", text)
 
