@@ -618,8 +618,6 @@ class OptionsDialog(wx.Dialog):
 
     OPTION_TO_CONTROL_WIKI = (
 
-            ("first_wiki_word", "tfFirstWikiWord", "t"),
-
             ("export_default_dir", "tfExportDefaultDir", "t"),
 
             ("tree_expandedNodes_rememberDuration",
@@ -643,6 +641,15 @@ class OptionsDialog(wx.Dialog):
             ("trashcan_maxNoOfBags", "tfTrashcanMaxNoOfBags", "i0+"),
             ("trashcan_askOnDelete", "cbTrashcanAskOnDelete", "b"),
             ("trashcan_storageLocation", "chTrashcanStorageLocation", "seli"),
+
+            ("first_wiki_word", "tfFirstWikiWord", "t"),
+            ("wiki_onOpen_rebuild", "chWikiOnOpenRebuild", "seli"),
+            ("wiki_onOpen_tabsSubCtrl", "chWikiOnOpenTabsSubCtrl", "selt",
+                    [
+                    u"",
+                    u"preview",
+                    u"textedit"
+                    ]),
 
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
             ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
@@ -698,6 +705,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("??switch mark/current wiki/begin", u""),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
+            ("OptionsPageCwOnOpen", 2 * u" " + N_(u"On Open")),
             ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
             ("OptionsPageCwChronological", 2 * u" " + N_(u"Chronological")),
             ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),

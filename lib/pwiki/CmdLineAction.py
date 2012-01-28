@@ -14,7 +14,12 @@ class CmdLineAction:
     This class parses command line options, provides necessary information
     and performs actions
     """
+    NOT_SET = -1  # Option isn't set to a value yet
     
+    REBUILD_NONE = 0 # No rebuild
+    REBUILD_EXT = 1 # Update externally modified files
+    REBUILD_FULL = 2 # Full rebuild
+
     def __init__(self, sargs):
         """
         sargs -- stripped args (normally sys.args[1:])
@@ -34,7 +39,7 @@ class CmdLineAction:
         self.exportCompFn = False   # Export with compatible filenames?
         self.exportSaved = None  # Name of saved export instead
         self.continuousExportSaved = None  # Name of saved export to run as continuous export
-        self.rebuild = False # Rebuild the wiki
+        self.rebuild = self.NOT_SET  # Rebuild the wiki
         self.frameToOpen = 1  # Open wiki in new frame? (yet unrecognized) 
                 # 1:New frame, 2:Already open frame, 0:Use config default 
         self.activeTabNo = -1  # Number of tab to activate
@@ -65,7 +70,7 @@ class CmdLineAction:
                     "export-type=", "export-dest=", "export-compfn",
                     "export-saved=", "continuous-export-saved=",
                     "anchor",
-					"rebuild", "no-recent", "preview", "editor"])
+                    "rebuild", "update-ext", "no-recent", "preview", "editor"])
         except getopt.GetoptError:
             self.cmdLineError = True
             return
@@ -96,7 +101,9 @@ class CmdLineAction:
             elif o == "--continuous-export-saved":
                 self.continuousExportSaved = mbcsDec(a, "replace")[0]
             elif o == "--rebuild":
-                self.rebuild = True
+                self.rebuild = self.REBUILD_FULL
+            elif o == "--update-ext":
+                self.rebuild = self.REBUILD_EXT
             elif o == "--no-recent":                
                 self.noRecent = True
             elif o == "--preview":
@@ -109,7 +116,7 @@ class CmdLineAction:
             self.wikiWordsToOpen = tuple(wikiWordsToOpen)
 
 
-        self._fillLastTabsSubCtrls(len(wikiWordsToOpen))
+#         self._fillLastTabsSubCtrls(len(wikiWordsToOpen))
 
 
     def _fillLastTabsSubCtrls(self, wwoLen, newItem=None):
@@ -179,8 +186,10 @@ class CmdLineAction:
 
 
     def rebuildAction(self, pWiki):
-        if self.rebuild:
+        if self.rebuild == self.REBUILD_FULL:
             pWiki.rebuildWiki(True)
+        elif self.rebuild == self.REBUILD_EXT:
+            pWiki.updateExternallyModFiles()
 
 
     def _runSavedExport(self, pWiki, savedExportName, continuousExport):
@@ -378,6 +387,7 @@ N_(u"""Options:
     --export-compfn: Use compatible filenames on export
     --continuous-export-saved <name of saved export>: continuous export to start with
     --rebuild: rebuild the Wiki database
+    --update-ext: update externally modified wiki files
     --no-recent: Do not record opened wikis in recently opened wikis list
     --preview: If no pages are given, all opened pages from previous session
                are opened in preview mode. Otherwise all pages given after that

@@ -779,7 +779,14 @@ WIKIDEFAULTS = {
     ("main", "trashcan_storageLocation"): "0",  # Where to store trashcan data? 0: Intern in database;
             # 1: extern in files (not supported for Compact Sqlite DB)
 
-    
+    ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word(s))
+
+    ("main", "wiki_onOpen_rebuild"): u"0", # Rebuild wiki when opening it. 0: No; 1: Only update ext. modified files
+            # 2: Fully; Values must match CmdLineAction.REBUILD_* constants
+    ("main", "wiki_onOpen_tabsSubCtrl"): u"", #  Subctrl to set all tabs on open. Normally "textedit" or "preview".
+            # If empty the content of config. entry "wiki_lastTabsSubCtrls" is used
+
+
     ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree
     ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present
@@ -794,7 +801,6 @@ WIKIDEFAULTS = {
     ("main", "wiki_lastActiveTabNo"): u"-1", # Number of the tab which was last active. Non-wikiwords are ignored
             # for this index
 
-    ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact
                                          # or "original_sqlite"

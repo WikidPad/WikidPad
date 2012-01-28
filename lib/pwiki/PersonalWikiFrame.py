@@ -410,6 +410,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.displayErrorMessage(
                         _(u"Wiki doesn't exist: %s") % wikiToOpen)
 
+        # State here: Wiki opened (if possible), additional command line actions
+        # not done yet.
+        
+        if cmdLineAction.rebuild == cmdLineAction.NOT_SET and \
+                self.isWikiLoaded():
+            cmdLineAction.rebuild = self.getConfig().getint("main",
+                    "wiki_onOpen_rebuild", 0)
+
         cmdLineAction.actionBeforeShow(self)
 
         if cmdLineAction.exitFinally:
@@ -3195,16 +3203,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         % cfgPath, e)
                 break   # ???
 
-        # OK, things look good
-
-        # set the member variables.
+        # OK, things look good. Now set the member variables.
 
         self.wikiDataManager = wikiDataManager
         self.currentWikiDocumentProxyEvent.setWatchedEvent(
                 self.wikiDataManager.getMiscEvent())
         self.wikiDataManager.getUpdateExecutor().getMiscEvent().addListener(self)
 
-#         self.wikiDataManager.getMiscEvent().addListener(self)
         self.wikiData = wikiDataManager.getWikiData()
 
         self.wikiName = self.wikiDataManager.getWikiName()
@@ -3212,6 +3217,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
         
+        if lastTabsSubCtrls is None:
+            defLtsc = self.getConfig().get("main", "wiki_onOpen_tabsSubCtrl", u"")
+            if defLtsc:
+                # Actually multiple values aren't support but just in case
+                defLtsc = unescapeForIni(defLtsc.split(u";", 1)[0])
+                lastTabsSubCtrls = [defLtsc]
+
         try:
             furtherWikiWords = []
 
@@ -3290,7 +3302,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 if not lastTabsSubCtrls:
                     lastTabsSubCtrls = ["textedit"]
                 if len(lastTabsSubCtrls) < len(wikiWordsToOpen):
-                    lastTabsSubCtrls += [lastTabsSubCtrls[0]] * \
+                    lastTabsSubCtrls += [lastTabsSubCtrls[-1]] * \
                             (len(wikiWordsToOpen) - len(lastTabsSubCtrls))
     
                 # Remove/Replace undefined wiki words
@@ -4985,7 +4997,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
 
-    def OnCmdUpdateExternallyModFiles(self, evt):
+    def updateExternallyModFiles(self):
         if self.isReadOnlyWiki():
             return
 
@@ -4994,6 +5006,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # self.checkFileSignatureForAllWikiPageNamesAndMarkDirty()
         # self.getWikiDocument().pushDirtyMetaDataUpdate()
 
+
+    def OnCmdUpdateExternallyModFiles(self, evt):
+        self.updateExternallyModFiles()
 
 
     def vacuumWiki(self):
