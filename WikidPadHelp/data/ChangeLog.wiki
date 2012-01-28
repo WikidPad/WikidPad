@@ -1,6 +1,40 @@
 ﻿++ Change Log
 
-Jan. 01, 2011 (2.3beta01)
+Jan. 29, 2012 (2.3beta02)
+
+    * Table cell appendices. See [TableFormatting#+++ Cell appendix]
+    * Support for spanning over multiple rows/columns in table using
+      continuation cells. See [TableFormatting#+++ Continuation cells]
+    * Restrict wiki word links in HTML export to words which are really
+      exported
+
+    * Configuration option to show all tabs initially in preview or
+      editor mode. See [OptionsDialog#*Tab Mode*]
+    * Configuration option to rebuild or update externally modified files
+      when opening wiki. See [OptionsDialog#*Rebuild*]
+    * Command line option to update externally modified files when
+      opening wiki. See [CommandLineSupport#*--update-ext*]
+
+    * Vi improvements (thanks to Ross)
+      * Add support for repeating visual mode commands in editor
+      * Add option to load keybindings from rc file (~/.Wikidpad.virc)
+      * Initial support for ':' commands.
+      * Rewrite vi search in editor
+      * Rewrite webkit preview to use new search dialog in vi mode
+      * Add support for '<,'> in range cmds
+      * Add :write option
+
+    * Shows a message in statusbar while background tasks are performed
+    * Go to end of paragraph(s) after rewrapping text
+
+    * Bug fixed: Unwanted space in first line of indented paragraph after
+      word wrapping
+    * Bug fixed: Adding spaces to heading of newly created wiki pages only
+      supported small subset of uppercase letters
+
+
+
+Jan. 01, 2012 (2.3beta01)
 
     * Vi-mode improvements (thanks to Ross)
         * Add link autocomplete support to vi insert mode

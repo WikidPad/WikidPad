@@ -241,7 +241,7 @@ class TableCell(object):
                 
                 self.infoRow, self.infoCol = self.findCreateValidCellCoords(
                         self.posRow, self.posCol - 1)
-                
+                        
                 self.getCellByCoords(self.infoRow, self.infoCol).extendSpanTo(
                         self.posRow, self.posCol)
 
@@ -264,11 +264,10 @@ class TableCell(object):
         css, styles, attribs = exporter.getCommonStylesFromAppendix(
                 tableCellAppendix, self.astNode)
                 
-                
         if self.infoRow > 1:
             attribs.append('rowspan="{0}"'.format(self.infoRow))
         if self.infoCol > 1:
-            attribs.append('colspan="{0}"'.format(self.infoRow))
+            attribs.append('colspan="{0}"'.format(self.infoCol))
 
         if tableCellAppendix:
             styleAttr = TEXT_ALIGN_CSS_ATTR.get(getattr(tableCellAppendix,

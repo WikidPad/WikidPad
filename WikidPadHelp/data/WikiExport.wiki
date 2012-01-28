@@ -94,4 +94,4 @@ A few drawbacks to mention:
     2. The set of pages to export will be static under some circumstances. Especially if you start auto-export for all children of one or more pages, it will only export pages which were children when auto-export started regardless if new children are added later.
     3. If you export as a single HTML file, the whole HTML file must be recreated on each change so it is only recommended if you export a few small pages.
     4. If temporary (volatile) files must be created (e.g. generated from MimeTeX or GraphViz) there may be created new ones again and again on each change of a page filling up the "volatile" directory. Therefore it is recommended to make a final non-continuous export to clean up the garbage.
-
+    5. HTML files may contain dead links to pages not exported (because they may be exported later). This is another reason to finally make a non-continuous export.

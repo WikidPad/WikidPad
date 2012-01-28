@@ -40,7 +40,10 @@ Set the wiki to open on startup (same as first parameter of old form).
 Set the page to open on startup (same as second parameter of old form). You can repeat this parameter multiple times to open multiple tabs.
 
 *--rebuild*
-Rebuild the opened wiki.
+Rebuild the opened wiki completely.
+
+*--update-ext*
+Update externally modified files only (see [WikiMaintenance#++ Update ext. modif. wiki files]).
 
 *--no-recent*
 Do not record opened wikis in recently opened wikis list found in menu "Wiki" as submenu "Recent"

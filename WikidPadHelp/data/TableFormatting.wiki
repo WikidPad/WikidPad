@@ -1,0 +1,114 @@
+﻿++ Table Formatting
+
+A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
+Each line with text is a table row, cells are separated by '|'. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
+
+Example (switch between editor and preview to compare how these examples are written and how they look like):
+
+<<|
+ScratchPad| This is| *a table*
+with two| rows and| three columns delimited by \| and \
+                                                    with two lines in a cell
+>>
+
+
++++ Table appendix
+
+To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
+
+<<|t
+ScratchPad	This is	*a table*
+with two	rows and	three columns delimited by tabs (not |) and \
+                                                    with two lines in a cell
+>>
+
+If you want a particular style (see [Cascading style sheets]) for a table, start it with
+
+<<|sStylename
+styled
+>>
+
+where "Stylename" can be replaced by the name of a style you defined in one of the CSS files described in [Cascading style sheets].
+
+You can also combine this with the tabulator option:
+
+<<|sStylename;t
+styled	and tab separated
+>>
+
+
++++ Cell appendix
+
+You can also format a single cell in a similar way. If the first non-whitespace character in a cell is a semicolon, you can append some format options (separated by further semicolons). The appendix ends with a space.
+
+Allowed options:
+*s* sets CSS stylename for the cell
+*A* control text alignment by the following character:
+    *l*: left
+    *c* or *m*: center
+    *r*: right
+
+
+To start a cell with a plain semicolon, precede it with a backslash: \;
+
+
+Examples:
+
+<<|
+simple | ;sStylename thing
+>>
+
+The "thing" cell gets CSS style "Stylename".
+
+
+<<|
+;Al left | ;Ar right
+wiiiiiiiiiiiideeeeeeeeee | wiiiiiiiiiiiideeeeeeeeee
+>>
+
+(the second row is only there to make alignment of first row visible)
+
+
+<<|
+;Al left | ;Ar;sStylename right combined
+wiiiiiiiiiiiideeeeeeeeee | wiiiiiiiiiiiideeeeeeeeee
+>>
+
+
++++ Continuation cells
+
+Sometimes you want a cell to span over multiple rows or columns. This is done with a "continuation cell" which only contains a < or ^ to continue the cell to the left or above respectively.
+
+Continuation cells do not support a cell appendix (as they technically do not exist) but the continued cells do.
+
+Example:
+
+<<|
+;Ac *Overall title* | <
+tall and wide cell | cell 1
+^ | wide wide wide cell 2
+^ | cell 3
+>>
+
+
+++++ Caveats
+
+If a cell spans multiple rows and columns there may be cells which are taken as continuation cells even if not marked as such. Example:
+
+<<|
+Big one | <
+^ | Invisible
+>>
+
+As "Big one" spans over two row and columns it overlaps "Invisible" which is automatically hidden.
+
+
+Trying to span a hidden cell over multiple cells gives unexpected results:
+
+<<|
+B|<|X
+^|I|<
+X|^|V
+>>
+
+Because "I" is hidden the continuation cells to its right and below are just shown as empty cells and "V" is shown as a regular cell.

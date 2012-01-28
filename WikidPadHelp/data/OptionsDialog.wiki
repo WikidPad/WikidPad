@@ -462,9 +462,6 @@ These options apply to the active wiki only
 
 ++++ General options
 
-*First word at startup*
-Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed are shown on opening.
-
 *Default export dir.*
 Set the default export directory into which exports should go.
 
@@ -529,6 +526,22 @@ The database backend "Compact Sqlite" only supports storing in database so this 
 
 *Ask before deletion of wiki word*
 If you switch this off wiki words will be moved to trashcan or deleted without previously asking if you are sure. The maximum number of entries in trashcan should be reasonably high (recommended: 200) if you switch this off.
+
+
+++++ On Open
+Set what should happen when a wiki is opened.
+
+*First word at startup*
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed are shown on opening.
+
+*Rebuild*
+Control if wiki should be rebuilt on open
+    * not at all,
+    * only externally modified files should be rebuilt (see [WikiMaintenance#++ Update ext. modif. wiki files])
+    * fully (needs some time so not recommended under normal conditions, see [WikiMaintenance#++ Rebuilding wiki])
+
+*Tab Mode*
+Allows to override the previously saved state of open tabs (if tab should show editor or preview). 
 
 
 ++++ Headings
