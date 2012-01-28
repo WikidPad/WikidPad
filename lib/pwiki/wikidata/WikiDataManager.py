@@ -1695,6 +1695,12 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.autoLinkRelaxInfo
 
 
+    _TITLE_SPLIT_RE1 = re.compile(ur"([" + StringOps.UPPERCASE + ur"]+)" + 
+            ur"([" + StringOps.UPPERCASE + ur"][" + StringOps.LOWERCASE + ur"])")
+    _TITLE_SPLIT_RE2 = re.compile(ur"([" + StringOps.LOWERCASE + ur"])" +
+            ur"([" + StringOps.UPPERCASE + ur"])")
+
+
     def getWikiPageTitle(self, wikiWord):
         """
         Return a title for a newly created page. It may return None if no title
@@ -1708,10 +1714,14 @@ class WikiDataManager(MiscEventSourceMixin):
         elif creaMode == 1:
             # Add spaces before uppercase letters,
             # e.g. NewWikiWord -> New Wiki Word
-            title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])',
-                    r'\1 \2', wikiWord)
-            title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2',
-                    title)
+            UC = StringOps.UPPERCASE
+            
+#             title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])',
+#                     r'\1 \2', wikiWord)
+#             title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2',
+#                     title)
+            title = self._TITLE_SPLIT_RE1.sub(ur'\1 \2', wikiWord)
+            title = self._TITLE_SPLIT_RE2.sub(ur'\1 \2', title)
             return title
         else:  # creaMode == 2: No title at all.
             return None
