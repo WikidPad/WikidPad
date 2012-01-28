@@ -16,7 +16,8 @@ from pwiki.rtlibRepl import minidom
 from pwiki.wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
 
 import Consts
-from pwiki.WikiExceptions import WikiWordNotFoundException, ExportException
+from pwiki.WikiExceptions import WikiWordNotFoundException, ExportException, \
+        InternalError
 from pwiki.ParseUtilities import getFootnoteAnchorDict
 from pwiki.StringOps import *
 from pwiki import StringOps, Serialization
@@ -186,6 +187,215 @@ class SizeValue(object):
         except ValueError:
             self.unit = SizeValue.UNIT_INVALID
             return False
+
+
+
+TEXT_ALIGN_CSS_ATTR = {
+    u"l" : (u'text-align: left',   u'align="left"'),
+    u"c" : (u'text-align: center', u'align="center"'),
+    u"m" : (u'text-align: center', u'align="center"'),
+    u"r" : (u'text-align: right',  u'align="right"'),
+    }
+
+  
+
+
+class TableCell(object):
+    MODE_VALID = 0
+    MODE_CONTINUATION = 1
+    
+    __slots__ = ("exporter", "grid", "astNode", "posRow", "posCol", "mode",
+            "infoRow", "infoCol", "content")
+    
+    def __init__(self, exporter, grid, posRow, posCol, astNode, content):
+        self.exporter = exporter
+        self.grid = grid
+        self.posRow = posRow
+        self.posCol = posCol
+        self.astNode = astNode
+        self.content = content
+        self.mode = self.MODE_VALID
+        
+        # meanning of  self.info*  depends on mode. For valid cells it is
+        # the rowspan/colspan, for continuation cells it is the position
+        # of the valid cell which is continued
+        self.infoRow = 1
+        self.infoCol = 1
+        
+        if self.astNode.findFlatByName("tableCellContinuationUp"):
+            self.astNode = None
+            if self.posRow > 0:
+                # In first row (self.posRow == 0) there wouldn't be a cell above
+                self.mode = self.MODE_CONTINUATION
+                
+                self.infoRow, self.infoCol = self.findCreateValidCellCoords(
+                        self.posRow - 1, self.posCol)
+                
+                self.getCellByCoords(self.infoRow, self.infoCol).extendSpanTo(
+                        self.posRow, self.posCol)
+        elif self.astNode.findFlatByName("tableCellContinuationLeft"):
+            self.astNode = None
+            if self.posCol > 0:
+                # In first column there wouldn't be a cell to the left
+                self.mode = self.MODE_CONTINUATION
+                
+                self.infoRow, self.infoCol = self.findCreateValidCellCoords(
+                        self.posRow, self.posCol - 1)
+                
+                self.getCellByCoords(self.infoRow, self.infoCol).extendSpanTo(
+                        self.posRow, self.posCol)
+
+
+
+    def processAst(self):
+        if self.mode == self.MODE_CONTINUATION:
+            return  # Don't do anything
+
+        exporter = self.exporter
+
+        if self.astNode is None:
+            exporter.outAppend(u'<td class="wikidpad">')
+            exporter.outAppend(u"</td>")
+            return
+
+
+        tableCellAppendix = self.astNode.findFlatByName("tableCellAppendix")
+
+        css, styles, attribs = exporter.getCommonStylesFromAppendix(
+                tableCellAppendix, self.astNode)
+                
+                
+        if self.infoRow > 1:
+            attribs.append('rowspan="{0}"'.format(self.infoRow))
+        if self.infoCol > 1:
+            attribs.append('colspan="{0}"'.format(self.infoRow))
+
+        if tableCellAppendix:
+            styleAttr = TEXT_ALIGN_CSS_ATTR.get(getattr(tableCellAppendix,
+                    "text_align", None))
+            if styleAttr is not None:
+                styles.append(styleAttr[0])
+                attribs.append(styleAttr[1])
+
+
+#         if tableCellAppendix:
+#             colspan = tableCellAppendix.colSpan
+#             if colspan != 1:
+#                 colspanHtml = ' colspan="{0}"'.format(colspan)
+# 
+#             rowspan = tableCellAppendix.rowSpan
+#             if rowspan != 1:
+#                 rowspanHtml = ' rowspan="{0}"'.format(rowspan)
+
+
+        attrStr = exporter.combineStyles(css, styles, attribs)
+
+        exporter.outAppend(u"<td{0}>".format(attrStr))
+        exporter.processAst(self.content, self.astNode)
+        exporter.outAppend(u"</td>")
+    
+
+
+    def findCreateCell(self, row, col):
+        gridRow = self.grid[row]
+        while len(gridRow) < (col + 1):
+            gridRow.append(TableCell(self.exporter, self.grid, row,
+                    len(gridRow), None, self.content))
+        
+        return gridRow[col]
+
+
+    def findCreateValidCellCoords(self, row, col):
+        while True:
+            gridRow = self.grid[row]
+            while len(gridRow) < (col + 1):
+                gridRow.append(TableCell(self.exporter, self.grid, row,
+                        len(gridRow), None, self.content))
+            
+            cell = gridRow[col]
+            if cell.mode == self.MODE_CONTINUATION:
+                row = cell.infoRow
+                col = cell.infoCol
+                continue
+
+            return row, col
+
+    def getCellByCoords(self, row, col):
+        return self.grid[row][col]
+
+
+    def extendSpanTo(self, row, col):
+        assert self.mode == self.MODE_VALID, "Trying to extend continuation cell"
+        self.infoRow = max(self.infoRow, row - self.posRow + 1)
+        self.infoCol = max(self.infoCol, col - self.posCol + 1)
+        
+
+    def killExtend(self):
+        if self.mode == self.MODE_CONTINUATION:
+            return
+        
+        for row in range(self.posRow, self.posRow + self.infoRow):
+            for col in range(self.posCol, self.posCol + self.infoCol):
+                try:
+                    cell = self.getCellByCoords(row, col)
+                except IndexError:
+                    continue
+                
+                if cell.mode == self.MODE_CONTINUATION:
+                    cell.mode = self.MODE_VALID
+                    cell.astNode = None
+                    cell.infoRow = 1
+                    cell.infoCol = 1
+
+        self.infoRow = 1
+        self.infoCol = 1
+
+
+    def cleanup(self):
+        """
+        Called on each cell before pageAst() is called on them
+        """
+        if self.mode == self.MODE_CONTINUATION:
+            return
+            
+        if self.infoRow > 1 or self.infoCol > 1:
+            for row in range(self.posRow, self.posRow + self.infoRow):
+                for col in range(self.posCol, self.posCol + self.infoCol):
+                    if row == self.posRow and col == self.posCol:
+                        # Don't treat this cell
+                        continue
+    
+                    cell = self.findCreateCell(row, col)
+                    if cell.mode == self.MODE_VALID:
+                        # We have found a valid cell which is spanned over by
+                        # this cell. Can happen for a table like
+                        #    T | <
+                        #    ^ | V
+                        #
+                        # where T is this cell and V is the valid cell
+    
+                        if cell.infoRow > 1 or cell.infoCol > 1:
+                            # Valid cell itself spans multiple cells, e.g.
+                            #    T | < | X
+                            #    ^ | V | <
+                            #    X | ^ | X
+                            # 
+                            # This doesn't work
+    
+                            cell.killExtend()
+                        
+                        cell.mode = self.MODE_CONTINUATION
+                        cell.astNode = None
+                        cell.infoRow = self.posRow
+                        cell.infoCol = self.posCol
+
+                        
+        
+        
+
+
+
+
 
 
 
@@ -1366,6 +1576,37 @@ class HtmlExporter(AbstractExporter):
         return u"".join(self.result)
 
 
+    def getCommonStylesFromAppendix(self, appendix, astNode):
+        if appendix is None:
+            return u"", [], []
+
+        cssClass = u""
+
+        styles = []
+        attributes = []
+
+        if hasattr(appendix, "cssClass") and appendix.cssClass is not None:
+            cssClass = appendix.cssClass
+        
+        return cssClass, styles, attributes
+
+
+
+    def combineStyles(self, cssClass, styles, attributes):
+        if attributes is None:
+            attributes = []
+
+        if cssClass and cssClass[0] != u" ":
+            cssClass = u" " + cssClass
+
+        attributes.append(u'class="wikidpad{0}"'.format(cssClass))
+        
+        if styles:
+            attributes.append(u'style="' + u"; ".join(styles) + u'"');
+        
+        return u" " + u" ".join(attributes)
+
+
 
     def _processTable(self, content, astNode):
         """
@@ -1376,24 +1617,34 @@ class HtmlExporter(AbstractExporter):
         self.astNodeStack.append(astNode)
 
         # Retrieve table appendix values
-        cssClass = u""
         tableModeAppendix = astNode.findFlatByName("tableModeAppendix")
-        if tableModeAppendix:
-            # Written this way to keep compatible if user's own parser wasn't
-            # updated properly
-            style = getattr(tableModeAppendix, "cssClass", u"")
-            if style:
-                cssClass = u" " + style
+        css, styles, attribs = self.getCommonStylesFromAppendix(
+                tableModeAppendix, astNode)
+                
+        attrStr = self.combineStyles(css, styles, attribs)
+        self.outAppend(u'<table border="2"{0}>\n'.format(attrStr))
+        
+        grid = []
+        
+        for posRow, row in enumerate(astNode.iterFlatByName("tableRow")):
+            gridRow = []
+            grid.append(gridRow)
 
-        self.outAppend(u'<table border="2" class="wikidpad{0}">\n'.format(cssClass))
+            for posCol, cell in enumerate(row.iterFlatByName("tableCell")):
+                gridRow.append(TableCell(self, grid, posRow, posCol, cell,
+                        content))
+            
+        for gridRow in grid:
+            for tc in gridRow:
+                tc.cleanup()
 
-        for row in astNode.iterFlatByName("tableRow"):
+
+        for gridRow in grid:
             self.outAppend(u'<tr class="wikidpad">')
-            for cell in row.iterFlatByName("tableCell"):
-                self.outAppend(u'<td class="wikidpad">')
-                self.processAst(content, cell)
-                self.outAppend(u'</td>')
+            for tc in gridRow:
+                tc.processAst()
             self.outAppend(u'</tr>\n')
+
 
         if self.asIntHtmlPreview:
             self.outAppend(u'</table>\n<br class="wikidpad" />\n') # , eatPostBreak=not self.asIntHtmlPreview)
@@ -2233,6 +2484,8 @@ class HtmlExporter(AbstractExporter):
                 self._processWikiWord(node, content)
             elif tname == "table":
                 self._processTable(content, node)
+            elif tname == "tableCellAppendix":
+                pass
             elif tname == "footnote":
                 footnoteId = node.footnoteId
                 fnAnchorNode = getFootnoteAnchorDict(self.basePageAst).get(

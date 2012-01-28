@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2012-01-11
+# Last modified (format YYYY-MM-DD): 2012-01-12
 
 
 import locale, pprint, time, sys, string, traceback
@@ -153,7 +153,7 @@ def pseudoActionFindMarkup(s, l, st, t):
 content = Forward()
 oneLineContent = Forward()
 
-tableContentInCell = Forward().setResultsNameNoCopy("tableCell")
+tableContentInCell = Forward()   # .setResultsNameNoCopy("tableCell")
 headingContent = Forward().setResultsNameNoCopy("headingContent")
 todoContent = Forward().setResultsNameNoCopy("value")
 titleContent = Forward().setResultsNameNoCopy("title")
@@ -488,28 +488,117 @@ def chooseCellEnd(s, l, st, pe):
 
 newCell = Choice([newCellBar, newCellTab], chooseCellEnd)
 
+uselessSpaces = buildRegex(ur" *")
+uselessSpaces = uselessSpaces.setParseAction(actionHideOnEmpty)
 
-tableRow = tableContentInCell + ZeroOrMore(newCell + tableContentInCell)
+
+def chooseTableCellWhitespace(s, l, st, pe):
+    if st.dictStack.get("table.tabSeparated", False):
+        return uselessSpaces
+    else:
+        return whitespace
+
+
+tableCellWhitespace = Choice([whitespace, uselessSpaces],
+        chooseTableCellWhitespace)
+
+
+# Table cells can have there own appendix (started by ;) allowing for advanced
+# formating
+
+def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
+    """
+    Handles the global appendix attributes that can be set for any
+    item that supports appendicies
+    """
+    t.cssClass = None
+    t.text_align = None
+#     t.width = None
+#     t.height = None
+
+    for key, data in t.entries:
+        # Skip keys that have been redefined in the calling appendix
+        if key in ignore:
+            continue
+
+        # Styles are designated by "s" or s. They will result in the css style
+        # being applied to the element. Multiple styles can be seperated my a
+        # comma (,)
+        # Styles are designated by "s=". They will result in the css class
+        # s being applied to all table elements. E. g. "s=foo" uses class
+        # "foo". The '=' can be omitted, therefore "sfoo" does the same.
+        if key == "s":
+            if data.startswith(u"="):
+                data = data[1:]
+            t.cssClass = data.replace(u",", u" ")
+        elif key == u"A":
+            t.text_align = data
+        # Element width can be specified by the "w" key. If the entry ends in
+        # px or % it will be used directly, otherwise size is assumed to be in
+        # pixels.
+#         elif key == u"w":
+#             t.width = getSizeFromEntry(data)
+#         elif key == u"h":
+#             t.height = getSizeFromEntry(data)
+
+    return s, l, st, t
+
+
+def actionTableCellAppendix(s, l, st, t):
+    s, l, st, t = parseGlobalAppendixEntries(s, l, st, t)
+
+tableCellAppendix = buildRegex(ur";") + modeAppendixEntry + \
+        ZeroOrMore(buildRegex(ur";") + modeAppendixEntry)
+tableCellAppendix = tableCellAppendix.addParseAction(actionModeAppendix)
+
+tableCellAppendix = tableCellAppendix.setResultsName("tableCellAppendix")\
+        .addParseAction(actionTableCellAppendix)
+
+
+tableCellContinuationUp = buildRegex(ur"\^")  + tableCellWhitespace + \
+        FollowedBy(newCell | newRow)
+tableCellContinuationUp = tableCellContinuationUp.setResultsNameNoCopy(
+        "tableCellContinuationUp")
+
+tableCellContinuationLeft = buildRegex(ur"<")  + tableCellWhitespace + \
+        FollowedBy(newCell | newRow)
+tableCellContinuationLeft = tableCellContinuationLeft.setResultsNameNoCopy(
+        "tableCellContinuationLeft")
+
+
+tableCell = tableCellWhitespace + MatchFirst([
+        tableCellContinuationUp, 
+        tableCellContinuationLeft,  
+        Optional(tableCellAppendix) + tableContentInCell])
+        
+tableCell = tableCell.setResultsNameNoCopy("tableCell")
+
+tableRow = tableCellWhitespace + tableCell + ZeroOrMore(newCell + tableCellWhitespace + tableCell)
 tableRow = tableRow.setResultsNameNoCopy("tableRow").setParseAction(actionHideOnEmpty)
 
 
 def actionTableModeAppendix(s, l, st, t):
     st.dictStack.getNamedDict("table")["table.tabSeparated"] = False
-    t.cssClass = None
+    
+    s, l, st, t = parseGlobalAppendixEntries(s, l, st, t)
+    
+    t.border = None
+
     for key, data in t.entries:
-        if key == "t":
+        if key == u"t":
             st.dictStack.getNamedDict("table")["table.tabSeparated"] = True
-        # Styles are designated by "s=". They will result in the css class
-        # s being applied to all table elements. E. g. "s=foo" uses class
-        # "foo". The '=' can be omitted, therefore "sfoo" does the same.
-        elif key == "s":
-            if data.startswith(u"="):
-                data = data[1:]
-            t.cssClass = data.replace(u",", u" ")
-            
+        elif key == u"b":
+            if data.endswith(u"px"):
+                t.border = data
+            else:
+                t.border = "{0}px".format(data)
+
+
+
 
 
 tableModeAppendix = modeAppendix.setResultsName("tableModeAppendix").addParseAction(actionTableModeAppendix)
+
 
 table = buildRegex(ur"<<\|").setParseStartAction(preActCheckNothingLeft) + \
         Optional(tableModeAppendix) + buildRegex(ur"[ \t]*\n") + tableRow + ZeroOrMore(newRow + tableRow) + tableEnd
