@@ -414,7 +414,7 @@ class HtmlExporter(AbstractExporter):
         
         self.linkConverter = None
         self.compatFilenames = None
-        self.avoidDeadWikiLinks = True  # avoid links to wikiwords not exported
+        self.avoidDeadWikiLinks = True  # avoid links to not exported wikiwords
         self.listPagesOperation = None
 
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
@@ -580,7 +580,6 @@ class HtmlExporter(AbstractExporter):
         """
 
         self.setWikiDocument(wikiDocument)
-
 
         if self.avoidDeadWikiLinks:
             self.wordList = [w for w in wordList

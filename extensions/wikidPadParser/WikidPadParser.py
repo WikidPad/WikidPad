@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2012-01-12
+# Last modified (format YYYY-MM-DD): 2012-01-24
 
 
 import locale, pprint, time, sys, string, traceback
@@ -2397,7 +2397,7 @@ class _TheHelper(object):
             editor.SetTargetStart(startPos)
             editor.SetTargetEnd(endPos)
             editor.ReplaceTarget(filledText)
-            editor.GotoPos(curPos)
+            editor.GotoPos(endPos)
 
 
     @staticmethod
