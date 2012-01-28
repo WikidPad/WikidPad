@@ -3469,6 +3469,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
         else:
             return u'\n'
 
+    def GetScrollAndCaretPosition(self):
+        return self.GetCurrentPos(), self.GetScrollPos(wx.HORIZONTAL), self.GetScrollPos(wx.VERTICAL)
+
+    def SetScrollAndCaretPosition(self, pos, x, y):
+        self.GotoPos(pos)
+        self.scrollXY(x, y)
+
 
     # TODO
 #     def setMouseCursor(self):
@@ -3942,6 +3949,7 @@ class ViHandler(ViHelper):
             0 : {
             # Normal mode
     (k[":"],)  : (0, (self.StartCmdInput, None), 0), # :
+    # TODO: convert from dialog so search can be used as a motion
     (k["/"],)  : (0, (self.StartForwardSearch, None), 0), # /
     (k["?"],)  : (0, (self.StartReverseSearch, None), 0), # ?
 
@@ -3965,8 +3973,9 @@ class ViHandler(ViHelper):
     # TODO: gugu / guu and gUgU / gUU
     (k["g"], k["s"], "motion") : (0, (self.SubscriptMotion, None), 1), # gs
     (k["g"], k["S"], "motion") : (0, (self.SuperscriptMotion, None), 1), # gS
-    (k["'"], "*")  : (1, (self.GotoMark, None), 0), # '
-    (k["`"], "*")  : (1, (self.GotoMarkIndent, None), 0), # `
+    (k["`"], "*")  : (1, (self.GotoMark, None), 0), # `
+    # TODO: ' is linewise
+    (k["'"], "*")  : (1, (self.GotoMarkIndent, None), 0), # '
     (k["m"], "*") : (0, (self.Mark, None), 0), # m
     (k["f"], "*") : (1, (self.FindNextChar, None), 4), # f
     (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 4), # F
@@ -4360,10 +4369,8 @@ class ViHandler(ViHelper):
     # Need to overide Undo and Redo to goto positions
     # TODO: Tidy up
     def BeginUndo(self, use_start_pos=False, force=False):
-
         if self._undo_state == 0:
             self.ctrl.BeginUndoAction()
-            print "begin undo action"
             self._undo_positions = \
                         self._undo_positions[:self._undo_pos + 1]
 
@@ -4374,18 +4381,9 @@ class ViHandler(ViHelper):
                     self._undo_start_position = self.ctrl.GetCurrentPos()
 
         self._undo_state += 1
-        print "END BEGIN", self._undo_state
 
     def EndUndo(self, force=False):
-        #print "START END", self._undo_state
-        #if force: 
-        #    for i in range(self._undo_state - 1):
-        #        print "end undo action"
-        #        self.ctrl.EndUndoAction()
-        #    self._undo_state = 1
-
         if self._undo_state == 1:
-            print "end undo action"
             self.ctrl.EndUndoAction()
             if self._undo_start_position is not None:
                 self._undo_positions.append(self._undo_start_position)
@@ -4397,11 +4395,9 @@ class ViHandler(ViHelper):
                 self._undo_positions.append(self.ctrl.GetCurrentPos())
             self._undo_pos += 1
         self._undo_state -= 1
-        print "START END", self._undo_state
 
     def EndBeginUndo(self):
         # TODO: shares code with EndUndo and BeginUndo
-        print "END - BEGIN undo"
         self.ctrl.EndUndoAction()
         if self._undo_start_position is not None:
             self._undo_positions.append(self._undo_start_position)
@@ -5635,7 +5631,9 @@ class ViHandler(ViHelper):
         @param end: end line
         @param reverse: if true selection is reversed
         """
-        end = min(end, self.ctrl.GetLineCount())
+        start = max(start, 0)
+        max_line_count = self.ctrl.GetLineCount()
+        end = min(end, max_line_count)
 
         start_pos = self.GetLineStartPos(start)
         end_pos = self.ctrl.GetLineEndPosition(end)
@@ -5645,7 +5643,7 @@ class ViHandler(ViHelper):
         else:
             self.ctrl.SetSelection(start_pos, end_pos)
 
-        if include_eol:
+        if include_eol or end == max_line_count:
             self.ctrl.CharRightExtend()
 
     def PreUppercase(self):
@@ -6095,7 +6093,8 @@ class ViHandler(ViHelper):
 
     # TODO: vim like searching
     def _SearchText(self, text, forward=True, match_case=True, wrap=True, 
-            whole_word=True, regex=False, word_start=False, select_text=False):
+            whole_word=True, regex=False, word_start=False, select_text=False,
+                                            repeat_search=False):
         """
         Searches for next occurance of 'text'
 
@@ -6104,6 +6103,15 @@ class ViHandler(ViHelper):
                         search in reverse
         @param match_case: should search be case sensitive?  
         """
+
+        if repeat_search:
+            offset = 1 if forward else -1
+            self.MoveCaretPos(offset)
+        
+        if not forward and self.HasSelection():
+            self.ctrl.GotoPos(self.ctrl.GetSelectionEnd()+1)
+
+        self.ctrl.SearchAnchor()
         self.AddJumpPosition(self.ctrl.GetCurrentPos() - len(text))
 
         search_cmd = self.ctrl.SearchNext if forward else self.ctrl.SearchPrev
@@ -6134,6 +6142,9 @@ class ViHandler(ViHelper):
             if select_text:
                 # Unicode conversion?
                 self.ctrl.SetSelection(pos, pos + len(text))
+            return True
+
+        return False
 
     def _SearchCaretWord(self, forward=True, match_case=True, whole_word=True):
         """
@@ -6176,34 +6187,6 @@ class ViHandler(ViHelper):
 
     def SearchPartialCaretWordBackwards(self):
         self._SearchCaretWord(False, True, False)
-
-    def ContinueLastSearch(self, reverse):
-        """
-        Repeats last search command
-        """
-        args = self.last_search_args
-        if args is not None:
-            # If "N" we need to reverse the search direction
-            if reverse:
-                args['forward'] = not args['forward']
-
-            offset = 1 if args['forward'] else -1
-            self.MoveCaretPos(offset)
-            self.ctrl.SearchAnchor()
-
-            self._SearchText(**args)
-
-            # Restore search direction (could use copy())
-            if reverse:
-                args['forward'] = not args['forward']
-
-    def ContinueLastSearchSameDirection(self):
-        """Helper function to allow repeats"""
-        self.ContinueLastSearch(False)
-
-    def ContinueLastSearchReverseDirection(self):
-        """Helper function to allow repeats"""
-        self.ContinueLastSearch(True)
 
     #--------------------------------------------------------------------
     # Replace
@@ -6475,8 +6458,16 @@ class ViHandler(ViHelper):
     #--------------------------------------------------------------------
     # Movement commands
     #--------------------------------------------------------------------
+    def GotoSelectionStart(self):
+        if not self.HasSelection():
+            return False
+
+        self.ctrl.GotoPos(self.ctrl.GetSelectionStart())
+
 
     def GetLineStartPos(self, line):
+        if line == 0:
+            return 0
         return self.ctrl.GetLineIndentPosition(line) - \
                                     self.ctrl.GetLineIndentation(line)
 
@@ -6715,7 +6706,8 @@ class ViHandler(ViHelper):
 
 
     def MoveCaretDownAndIndent(self, count=None):
-        self.Repeat(self.ctrl.LineDown, count)
+        #self.Repeat(self.ctrl.LineDown, count)
+        self.MoveCaretDown()
         self.GotoLineIndent()
 
     def MoveCaretLeft(self):

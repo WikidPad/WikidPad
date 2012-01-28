@@ -6809,4 +6809,25 @@
     </object>
     <size>0,0</size>
   </object>
+  <object class="wxPanel" name="ViInputDialog">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxListBox" name="viInputListBox">
+          <style>wxLB_SINGLE</style>
+        </object>
+        <option>1</option>
+        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <option>1</option>
+      </object>
+      <object class="sizeritem">
+        <object class="wxTextCtrl" name="viInputTextField">
+          <style>wxTE_PROCESS_ENTER|wxTE_RICH</style>
+        </object>
+        <option>0</option>
+        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+    </object>
+    <size>0,0</size>
+  </object>
 </resource>

@@ -420,8 +420,8 @@ class WikiHtmlViewWK(wx.Panel):
                 lx, ly = wikiPage.getPresentation()[3:5]
                 self.scrollDeferred(lx, ly)
 
-        self.keyProcessWxWindow.realize()
-        self.html.ctrl.grab_focus()
+            self.keyProcessWxWindow.realize()
+            self.html.ctrl.grab_focus()
 
 
     def __on_button_press_event(self, view, gtkEvent):
@@ -884,94 +884,84 @@ class WikiHtmlViewWK(wx.Panel):
     def __on_expose_event(self, view, *params):
         return self.freezeCount > 0
 
-    def startIncrementalSearch(self, initSearch=None):
-
-        sb = self.presenter.getMainControl().GetStatusBar()
-
-        # Save scroll position
-        x, y = self.getIntendedViewStart()
-        
-        self.searchStartScrollPosition = x, y
-
-        rect = sb.GetFieldRect(0)
-        if SystemInfo.isOSX():
-            # needed on Mac OSX to avoid cropped text
-            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
-
-        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
-
-        dlg = WebkitSearchDialog(self, -1, self, rect,
-                sb.GetFont(), self.presenter.getMainControl(), initSearch)
-        dlg.Show()
-
-
-    def executeIncrementalSearch(self, text):
-        """
-        Run incremental search
-
-        search_text arguments:
-            (string to search for, case_sensitive, forward, wrap)
-
-        Focuses selected elements
-        """
-
-        if len(text) > 0:
-            result = self.html.getWebkitWebView().search_text(text, False, True, True)
-
-            # Focus selected elements
-            # Might this fail is some cases?
-            self.html.getWebkitWebView().execute_script('''
-                var selectionRange = window.getSelection ();
-
-                if (selectionRange.rangeCount > 0) {
-                    var range = selectionRange.getRangeAt (0);
-                    container = range.commonAncestorContainer;
-                }
-
-                container.parentNode.focus();
-                ''')
-            return result
-        else:
-            self.html.ClearSelection()
-            
-        return False
-
-
-    def executeIncrementalSearchBackward(self, text):
-        """
-        Run incremental search backwards
-        """
-        if len(text) > 0:
-            return self.html.getWebkitWebView().search_text(text, False, False, True)
-        else:
-            self.html.ClearSelection()
-
-        return False
-
-    def forgetIncrementalSearch(self):
-        """
-        Called if user just leaves the inc. search field.
-        """
-        pass
-
-    def resetIncrementalSearch(self):
-        """
-        Called by WebkitSearchDialog before aborting an inc. search.
-        Called when search was explicitly aborted by user (with escape key)
-        TODO: Make vi keybinding "Ctrl + [" call this as well
-        """
-        self.html.ClearSelection()
-
-        # To remain consitent with the textctrl incremental search we scroll
-        # back to where the search was started 
-        x, y = self.searchStartScrollPosition
-        self.Scroll(x, y)
-
-    def endIncrementalSearch(self):
-        """
-        Called if incremental search ended successfully.
-        """
-        pass
+#    def startIncrementalSearch(self, initSearch=None):
+#
+#        sb = self.presenter.getMainControl().GetStatusBar()
+#
+#        # Save scroll position
+#        x, y = self.getIntendedViewStart()
+#        
+#        self.searchStartScrollPosition = x, y
+#
+#        rect = sb.GetFieldRect(0)
+#        if SystemInfo.isOSX():
+#            # needed on Mac OSX to avoid cropped text
+#            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+#
+#        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+#
+#        dlg = WebkitSearchDialog(self, -1, self, rect,
+#                sb.GetFont(), self.presenter.getMainControl(), initSearch)
+#        dlg.Show()
+#
+#
+#    def executeIncrementalSearch(self, text):
+#        """
+#        Run incremental search
+#
+#        search_text arguments:
+#            (string to search for, case_sensitive, forward, wrap)
+#
+#        Focuses selected elements
+#        """
+#
+#        if len(text) > 0:
+#            result = self.html.getWebkitWebView().search_text(text, False, True, True)
+#
+#            self.FocusSelection()
+#
+#            return result
+#        else:
+#            self.html.ClearSelection()
+#            
+#        return False
+#
+#
+#    def executeIncrementalSearchBackward(self, text):
+#        """
+#        Run incremental search backwards
+#        """
+#        if len(text) > 0:
+#            return self.html.getWebkitWebView().search_text(text, False, False, True)
+#        else:
+#            self.html.ClearSelection()
+#
+#        return False
+#
+#    def forgetIncrementalSearch(self):
+#        """
+#        Called if user just leaves the inc. search field.
+#        """
+#        pass
+#
+#    def resetIncrementalSearch(self):
+#        """
+#        Called by WebkitSearchDialog before aborting an inc. search.
+#        Called when search was explicitly aborted by user (with escape key)
+#        TODO: Make vi keybinding "Ctrl + [" call this as well
+#        """
+#        self.html.ClearSelection()
+#
+#        # To remain consitent with the textctrl incremental search we scroll
+#        # back to where the search was started 
+#        x, y = self.searchStartScrollPosition
+#        self.Scroll(x, y)
+#
+#    def endIncrementalSearch(self):
+#        """
+#        Called if incremental search ended successfully.
+#        """
+#        pass
 
 
     def OnOpenLinkInNewTab(self, gtkEvent):
@@ -1494,7 +1484,26 @@ class WikiHtmlViewWK(wx.Panel):
         return False
 
 
+    def FocusSelection(self):
+        # Focus selected elements
+        # Might this fail is some cases?
+        self.html.getWebkitWebView().execute_script('''
+            var selectionRange = window.getSelection ();
 
+            if (selectionRange.rangeCount > 0) {
+                var range = selectionRange.getRangeAt (0);
+                container = range.commonAncestorContainer;
+            }
+
+            container.parentNode.focus();
+            ''')
+
+    def GetScrollAndCaretPosition(self):
+        x, y = self.getIntendedViewStart()
+        return None, x, y
+
+    def SetScrollAndCaretPosition(self, pos, x, y):
+        self.Scroll(x, y)
 
 
 
@@ -1644,7 +1653,17 @@ class ViFunctions(ViHelper):
     ("Ctrl", k["y"]) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
     ("Ctrl", k["l"]) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
 
-    (k["/"],)  : (0, (self.StartSearch, None), 0), # /
+    (k["/"],)  : (0, (self.StartForwardSearch, None), 0), # /
+    (k["?"],)  : (0, (self.StartReverseSearch, None), 0), # ?
+
+    (k[":"],)  : (0, (self.StartCmdInput, None), 0), # :
+
+    (k["\\"], k["o"]) : (0, (self.StartCmdInput, "open "), 0), # \o
+    (k["\\"], k["t"]) : (0, (self.StartCmdInput, "tabopen "), 0), # \t
+
+    (k["n"],) : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0), # n
+    (k["N"],) : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0), # N
+
     (k["["],)  : (0, (self.GoBackwardInHistory, None), 0), # [
     (k["]"],)  : (0, (self.GoForwardInHistory, None), 0), # ]
     # H and L are equivelent to gh and gl in preview mode
@@ -2044,6 +2063,35 @@ document.title = links_selected.length;
         """
         self.clearHints()
         self.hintDialog = None
+
+
+    def _SearchText(self, text, forward=True, match_case=False, wrap=True, 
+            whole_word=False, regex=True, word_start=False, select_text=True, 
+                                                    repeat_search=False):
+        """
+        Run incremental search
+
+        search_text arguments:
+            (string to search for, case_sensitive, forward, wrap)
+
+        Focuses selected elements
+        """
+        if len(text) > 0:
+            result = self.ctrl.html.getWebkitWebView().search_text(text, case_sensitive=match_case, forward=forward, wrap=wrap)
+
+            self.ctrl.FocusSelection()
+
+            if not select_text:
+                self.ctrl.html.ClearSelection()
+
+            return result
+        else:
+            self.ctrl.html.ClearSelection()
+            
+        return False
+
+    def RemoveSelection(self):
+        self.ctrl.html.ClearSelection()
 
 
 class KeyProcessWxWindow(wx.Panel):

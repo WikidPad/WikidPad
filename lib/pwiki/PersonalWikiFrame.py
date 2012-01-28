@@ -2328,6 +2328,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.tree = self.windowLayouter.getWindowByName("maintree")
         self.logWindow = self.windowLayouter.getWindowByName("log")
 
+        # Hide the vi input window
+        self.windowLayouter.collapseWindow("vi input")
+
 
         # Register the App IDLE handler
 #         wx.EVT_IDLE(self, self.OnIdle)
@@ -2618,7 +2621,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return TimeViewCtrl(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
             self.mainAreaPanel.Reparent(parent)
-                
+
 #             if not self._mainAreaPanelCreated:
 #                 print "--Parent main area panel2", repr(parent)
 #                 self.mainAreaPanel.Create(parent, -1)
@@ -2632,6 +2635,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             self.mainAreaPanel.setCurrentDocPagePresenter(p)
 
             return self.mainAreaPanel
+
+        elif winName == "vi input":
+            from .ViHelper import ViInputDialog
+            return ViInputDialog(parent, -1, self)
+                
 
 
 

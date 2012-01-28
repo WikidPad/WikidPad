@@ -794,6 +794,10 @@ def calculateMainWindowLayoutCfString(config):
                 "layout sash position:1&layout sash effective position:120"
                 
 
+    # It may be better to load this only when vi mode is started
+    layoutCfStr += ";layout relation:below&layout relative to:main area panel&name:vi input&"\
+                "layout sash position:0&layout sash effective position:120"
+
     return layoutCfStr
 
 
