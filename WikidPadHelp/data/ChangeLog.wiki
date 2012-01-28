@@ -1,5 +1,14 @@
 ﻿++ Change Log
 
+Jan. 29, 2012 (2.2rc02)
+
+    * Bug fixed: Unwanted space in first line of indented paragraph after
+      word wrapping
+    * Bug fixed: Adding spaces to heading of newly created wiki pages only
+      supported small subset of uppercase letters
+
+
+
 Jan. 01, 2012 (2.2rc01)
 
     * Bug fixed: Encode external webkit urls so they all work as
