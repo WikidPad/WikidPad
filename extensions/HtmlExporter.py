@@ -895,7 +895,7 @@ class HtmlExporter(AbstractExporter):
             wikiPage = self.wikiDocument.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
-
+                
             try:
                 content = wikiPage.getLiveText()
 #                 formatDetails = wikiPage.getFormatDetails()
@@ -905,7 +905,7 @@ class HtmlExporter(AbstractExporter):
                 
                 if self.avoidDeadWikiLinks:
                     parentLinks = self.getParentLinks(wikiPage, False,
-                            self.wordlist)
+                            self.wordList)
                 else:
                     parentLinks = self.getParentLinks(wikiPage, False)
 
