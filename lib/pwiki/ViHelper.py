@@ -2,11 +2,12 @@ import wx, wx.xrc
 import SystemInfo
 from wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
 from collections import defaultdict
-from StringOps import pathEnc
+from StringOps import pathEnc, urlQuote
 import os
 import ConfigParser
 import re
 import copy
+import string
 
 from wxHelper import * # Needed for  XrcControls
 
@@ -20,6 +21,7 @@ from WindowLayout import setWindowSize
 
 # TODO: should be configurable
 AUTOCOMPLETE_BOX_HEIGHT = 50
+
 
 class ViHelper():
     """
@@ -138,6 +140,7 @@ class ViHelper():
                             
 
     CMD_INPUT_DELAY = 1000
+    STRIP_BULLETS_ON_LINE_JOIN = True
 
 
     def __init__(self, ctrl):
@@ -248,7 +251,10 @@ class ViHelper():
         if keycode is not None:
             # If we have a tuple the keycode includes a modifier, e.g. ctrl
             if type(keycode) == tuple:
-                return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
+                try:
+                    return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
+                except TypeError:
+                    return keycode
             try:
                 return unichr(keycode)
             except TypeError:
@@ -392,23 +398,28 @@ class ViHelper():
         if text_to_select is not None:
             # Use visual keys instead
             keys = self.keys[ViHelper.VISUAL]
-            lines, n = text_to_select
-            if lines:
-                start_line = self.ctrl.GetCurrentLine()
-                self.SelectLines(start_line, start_line - 1 + n, 
-                                                    include_eol=True)
-            else:
-                self.StartSelection()
-                self.MoveCaretPos(n, allow_last_char=True)
-                self.SelectSelection(2)
 
-        com_type, command, repeatable = keys[key]
+            # If we are already in visual mode use the selected text
+            # Otherwise we use the same amount of text used for initial cmd
+            # NOTE: this should prob be put into another cmd (in WikiTxtCtrl)
+            if not self.mode == ViHelper.VISUAL:
+                lines, n = text_to_select
+                if lines:
+                    start_line = self.ctrl.GetCurrentLine()
+                    self.SelectLines(start_line, start_line - 1 + n, 
+                                                        include_eol=True)
+                else:
+                    self.StartSelection()
+                    self.MoveCaretPos(n, allow_last_char=True)
+                    self.SelectSelection(2)
+
+        com_type, command, repeatable, selection_type = keys[key]
         func, args = command
 
     
         # If a motion is present in the command (but not the main command)
         # it needs to be run first
-        if "motion" in key:
+        if "m" in key:
             # If in visual mode we don't want to change the selection start point
             if self.mode != ViHelper.VISUAL:
                 # Otherwise the "pre motion" commands work by setting a start point
@@ -419,8 +430,9 @@ class ViHelper():
 
             motion_key = tuple(motion)
 
-            
-            motion_com_type, (motion_func, motion_args), junk = keys[motion_key]
+            # Extract the cmd we need to run (it is irrelevent if it is
+            # repeatable or if it has a different selection_type)
+            motion_com_type, (motion_func, motion_args), junk, junk = keys[motion_key]
             if motion_wildcard:
                 motion_args = tuple(motion_wildcard)
                 if len(motion_args) == 1:
@@ -441,7 +453,7 @@ class ViHelper():
         # command can be repeated
         selected_text = None
         if self.mode == ViHelper.VISUAL:
-            selected_text = self.GetSelectionDetails()
+            selected_text = self.GetSelectionDetails(selection_type)
 
         if type(key) == tuple and "*" in key:
             args = tuple(wildcards)
@@ -463,7 +475,10 @@ class ViHelper():
         if self.mode == ViHelper.VISUAL:
             if com_type < 1:
                 self.SetMode(ViHelper.NORMAL)
+            elif com_type == 4:
+                self._visual_start_pos = self._anchor
             else:
+                # TODO: fix this _visual_start_pos and _anchor should be 1 off
                 if self.ctrl.GetCurrentPos() < self._visual_start_pos:
                     self.StartSelection(self._visual_start_pos + 1)
                 else:
@@ -840,6 +855,9 @@ class ViHelper():
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
                                             initial_input, selection_range=selection_range)
 
+    def RepeatLastSubCmd(self, ignore_flags):
+        self.input_window.cmd_parser.RepeatSubCmd(ignore_flags)
+
 
     def EndViInput(self):
         """
@@ -1091,18 +1109,22 @@ class ViRegister():
         self.select_register = False
         self.current_reg = None
 
-        self.alpha = """
-                        abcdefghijklmnopqrstuvwxyz
-                        ABCDEFGHIJKLMNOPQRSTUVWXYZ
-                     """
-        self.special = '"+01.'
+        # Uppercase registers do not exist (although they can be selected)
+        self.alpha = "abcdefghijklmnopqrstuvwxyz"
+        self.special = '"+-.'
         self.registers = {}
 
+        # Create the named (alpha) registers
         for i in self.alpha:
             self.registers[i] = None
 
+        # Create the special registers
         for i in self.special:
             self.registers[i] = None
+
+        # Create numbered registers
+        for i in range(0, 10):
+            self.registers[str(i)] = None
 
         self.registers['"'] = u""
 
@@ -1119,6 +1141,10 @@ class ViRegister():
         if reg in self.registers:
             self.current_reg = reg
             return True
+        # Uppercase alpha regs
+        elif reg.lower() in self.registers:
+            self.current_reg = reg
+            return True
         else:
             self.current_reg = None
             return False
@@ -1126,15 +1152,60 @@ class ViRegister():
     def GetSelectedRegister(self):
         return self.current_reg
 
-    def SetCurrentRegister(self, value):
+    def SetCurrentRegister(self, value, yank_register=False):
+        # Whenever a register is set the unnamed ("") register is also.
         self.registers['"'] = value
         if self.current_reg is None:
-            pass
+            if yank_register:
+                self.SetRegisterZero(value)
+            else:
+                # TODO: decide if following vim here is sensible.
+                # If the deleted text spans multiple lines it is put in the
+                # numbered register
+                if "\n" in value:
+                    self.SetNumberedRegister(value)
+                # Otherwise the small delete register is used.
+                else:
+                    self.SetRegister("-", value)
+        # Lowercase letters replace the contents of the selected register
         elif self.current_reg in self.alpha:
             self.registers[self.current_reg] = value
+        # Uppercase letters append
+        elif self.current_reg.lower() in self.alpha:
+            current_reg = self.current_reg.lower()
+            self.registers[current_reg] = self.registers[current_reg] + value
+        # The "+ reg copies selected text to the clipboard
         elif self.current_reg == "+":
             self.ctrl.Copy()
         self.current_reg = None
+
+
+    def SetRegister(self, register, value):
+        self.registers[register] = value
+
+
+    def SetRegisterZero(self, value):
+        """
+        Helper to set the "0 register.
+        """
+        self.registers["0"] = value
+
+    def SetNumberedRegister(self, value):
+        """
+        Puts the selection into the "1 register and shifts
+        the other registers up by one
+
+        e.g.
+
+        "1 -> "2, "2 -> "3, etc...
+
+        Register "9 is lost in the process
+        """
+        for i in range (2, 10)[::-1]:
+            self.registers[str(i)] = self.registers[str(i-1)]
+
+        self.registers["1"] = value
+
 
     def GetRegister(self, reg):
         if reg in self.registers:
@@ -1145,6 +1216,10 @@ class ViRegister():
             text = getTextFromClipboard()
         elif self.current_reg is None:
             text = self.registers['"']
+        # If the register is alpha we need to check if it is uppercase and
+        # convert it if it is.
+        elif self.current_reg in string.ascii_letters:
+            text = self.registers[self.current_reg.lower()]
         elif self.current_reg in self.registers:
             text = self.registers[self.current_reg]
         else: # should never occur
@@ -1159,21 +1234,36 @@ class CmdParser():
         self.ctrl = ctrl
 
         self.selection_range = selection_range
+        self.last_sub_cmd = None
 
         self.data = []
 
         self.cmds = {
+            "&" : (self.Pass, self.RepeatSubCmd),
+            "&&" : (self.Pass, self.RepeatSubCmdWithFlags),
+            "parents" : (self.GetParentPages, self.OpenWikiPageCurrentTab),
+            "tabparents" : (self.GetParentPages, self.OpenWikiPageNewTab),
+            "bgparents" : (self.GetParentPages, self.OpenWikiPageBackgroundTab),
             "write" : (self.Pass, self.SaveCurrentPage),
             "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
             "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
             "tabopen" : (self.GetWikiPages, self.OpenWikiPageNewTab),
             "bgtabopen" : (self.GetWikiPages, self.OpenWikiPageBackgroundTab),
-            "tabonly" : (self.Pass, self.CloseOtherTabs),
-            "deletepage" : (self.GetDefinedWikiPages, self.Pass),
-            "dlpage" : (self.GetDefinedWikiPages, self.Pass),
+
+            "tab" : (self.GetTabs, self.GotoTab),
+            "buffer" : (self.GetTabs, self.GotoTab),
+
+            "google" : (self.GetWikiPages, self.OpenPageInGoogle),
+            "wikipedia" : (self.GetWikiPages, self.OpenPageInWikipedia),
+
+            # TODO: rewrite with vi like confirmation
+            "deletepage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
+            "dlpage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
+
             "renamepage" : (self.GetDefinedWikiPages, self.Pass),
             "quit" : (self.GetTabs, self.CloseTab),
             "quitall" : (self.Pass, self.CloseWiki),
+            "tabonly" : (self.GetTabs, self.CloseOtherTabs),
             "exit" : (self.Pass, self.CloseWiki),
             }
 
@@ -1187,7 +1277,8 @@ class CmdParser():
         self.range_regex = u"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
                                             "|".join(self.range_cmds.keys()))
     
-    def SearchAndReplace(self, pattern):
+    def SearchAndReplace(self, pattern, ignore_flags=False):
+        # TODO: implement flags
         if pattern.startswith(u"/"):
             delim = u"\/"
         elif pattern.startswith(u";"):
@@ -1230,6 +1321,8 @@ class CmdParser():
         except re.error:
             return False
 
+        self.ctrl.vi.AddJumpPosition()
+
         text_to_sub = self.ctrl.GetSelectedText()
 
 
@@ -1241,21 +1334,39 @@ class CmdParser():
             # We do the subs on a per line basis as by default vim only
             # replaces the first occurance
             for i in text_to_sub.split("\n"):
-                new_text.append(search_regex.sub(replace, i, count))
+                try:
+                    new_text.append(search_regex.sub(replace, i, count))
+                except re.error:
+                    return False
             
             self.ctrl.ReplaceSelection("\n".join(new_text))
 
         else:
             self.ctrl.ReplaceSelection(search_regex.sub(replace, text_to_sub))
 
+        self.last_sub_cmd = pattern
+
         return True
 
+    def RepeatSubCmdWithFlags(self):
+        self.RepeatSubCmd(ignore_flags=False)
 
-    def Pass(self):
+    def RepeatSubCmd(self, ignore_flags=True):
+        cmd = self.last_sub_cmd
+        if cmd is not None:
+            if ignore_flags:
+                # TODO: strip flags
+                pass
+            return self.ExecuteRangeCmd(cmd)
+        else:
+            return False
+        
+
+    def Pass(self, junk=None):
         pass
 
     def CheckForRangeCmd(self, text_input):
-        # TODO: check if cmd is valid
+        # TODO: improve cmd checking
         if re.match(self.range_regex, text_input):
             return True
         elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
@@ -1298,7 +1409,8 @@ class CmdParser():
         if type(start_range) == int:
             start_range = self.ctrl.vi.GetLineStartPos(start_range)
         elif start_range == u".":
-            start_range = self.ctrl.vi.GetLineStartPos(self.ctrl.GetCurrentLine())
+            start_range = self.ctrl.vi.GetLineStartPos(
+                    self.ctrl.GetCurrentLine())
         elif len(start_range) == 2 and start_range.startswith(u"'"):
             if start_range[1] == u"<":
                 start_range = self.selection_range[0]
@@ -1315,9 +1427,11 @@ class CmdParser():
         if type(end_range) == int:
             end_range = self.ctrl.GetLineEndPosition(end_range) + 1
         elif end_range == u"$":
-            end_range = self.ctrl.GetLineEndPosition(self.ctrl.GetLineCount()) + 1
+            end_range = self.ctrl.GetLineEndPosition(
+                                self.ctrl.GetLineCount()) + 1
         elif end_range == u".":
-            end_range = self.ctrl.GetLineEndPosition(self.ctrl.GetCurrentLine()) + 1
+            end_range = self.ctrl.GetLineEndPosition(
+                                self.ctrl.GetCurrentLine()) + 1
         elif len(end_range) == 2 and end_range.startswith(u"'"):
             if end_range[1] == u">":
                 end_range = self.selection_range[1]
@@ -1338,6 +1452,11 @@ class CmdParser():
         self.ctrl.vi.EndUndo()
 
         self.ClearInput()
+
+        # If the cmd is :s save it so it can be repeated
+        if rel and cmd == "s":
+            self.last_sub_cmd = text_input
+
         return rel
 
     def ParseCmd(self, text_input):
@@ -1396,7 +1515,13 @@ class CmdParser():
         action = split_cmd[0]
         if arg is None and len(split_cmd) > 1 and len(split_cmd[1]) > 0:
             arg = u" ".join(split_cmd[1:])
+
+        # If a full cmd name has been entered use it
+        if action in self.cmds:
+            return self.cmds[action][1](arg)
         
+        # Otherwise use the first one found in the cmd list
+        # TODO: sort order
         for cmd in self.cmds:
             if cmd.startswith(action):
                 return self.cmds[cmd][1](arg)
@@ -1406,21 +1531,45 @@ class CmdParser():
     def ClearInput(self):
         self.data = []
 
-    def CloseOtherTabs(self, args=None):
-        self.ctrl.presenter.getMainControl().getMainAreaPanel()._closeAllButCurrentTab()
+    def OpenPageInGoogle(self, text_input=None):
+        if type(text_input) == tuple:
+            text_input = text_input[0]
+        mainCtrl = self.ctrl.presenter.getMainControl()
+        if text_input is None:
+            text_input = self.ctrl.presenter.getWikiWord()
+
+        mainCtrl.launchUrl("https://www.google.com/search?q={0}".format(
+                urlQuote(text_input)))
+        return True
+
+    def OpenPageInWikipedia(self, text_input=None):
+        if type(text_input) == tuple:
+            text_input = text_input[0]
+        mainCtrl = self.ctrl.presenter.getMainControl()
+        if text_input is None:
+            text_input = self.ctrl.presenter.getWikiWord()
+ 
+        mainCtrl.launchUrl("https://www.wikipedia.org/wiki/{0}".format(
+                urlQuote(text_input)))
+        return True
+
+    def CloseOtherTabs(self, text_input=None):
+        if self.GotoTab(text_input):
+            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                    ._closeAllButCurrentTab()
 
     def SaveCurrentPage(self, args=None):
         self.ctrl.presenter.saveCurrentDocPage()
         return True
 
     def OpenWikiPageCurrentTab(self, link_info):
-        self.OpenWikiPage(link_info, 0)
+        return self.OpenWikiPage(link_info, 0)
 
     def OpenWikiPageNewTab(self, link_info):
-        self.OpenWikiPage(link_info, 2)
+        return self.OpenWikiPage(link_info, 2)
 
     def OpenWikiPageBackgroundTab(self, link_info):
-        self.OpenWikiPage(link_info, 3)
+        return self.OpenWikiPage(link_info, 3)
 
     def OpenWikiPage(self, link_info, tab_mode):
         if not type(link_info) == tuple:
@@ -1428,7 +1577,11 @@ class CmdParser():
         else:
             value = (link_info,)
 
-        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(u"wikipage/" + value[0][2], tabMode=tab_mode, firstcharpos=value[0][3], charlength=value[0][4])
+        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
+                u"wikipage/" + value[0][2], tabMode=tab_mode, 
+                firstcharpos=value[0][3], charlength=value[0][4])
+
+        return True
 
     def GetTabs(self, text_input):
         mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
@@ -1440,8 +1593,12 @@ class CmdParser():
 
         for i in range(page_count):
             page = mainAreaPanel.GetPage(i)
-            return_data.append(page.getWikiWord())
-            tabs.append(page)
+
+            wikiword = page.getWikiWord()
+
+            if wikiword.startswith(text_input):
+                return_data.append(wikiword)
+                tabs.append(page)
 
         self.data = tabs
 
@@ -1455,9 +1612,31 @@ class CmdParser():
             #currentTabNum = mainAreaPanel.GetSelection() + 1
 
         if text_input in self.data:
-            self.ctrl.presenter.getMainControl().getMainAreaPanel().closePresenterTab(text_input)
+            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                    .closePresenterTab(text_input)
+            return True
+        elif len(self.data) == 1:
+            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                    .closePresenterTab(self.data[0])
+            return True
         else:
             self.ctrl.vi.visualBell("RED")
+            return False
+
+
+    def GotoTab(self, text_input):
+        if text_input is None:
+            return False
+
+        if text_input in self.data:
+            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                    .showPresenter(text_input)
+            return True
+        elif len(self.data) == 1:
+            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                    .showPresenter(self.data[0])
+            return True
+        return False
         
     def CloseWiki(self, arg=None):
         self.ctrl.presenter.getMainControl().exitWiki()
@@ -1499,6 +1678,21 @@ class CmdParser():
             return None
 
         return results
+
+    def GetParentPages(self, search_text):
+        presenter = self.ctrl.presenter
+        word = presenter.getWikiWord()
+
+        parents = presenter.getMainControl().getWikiData(). \
+                    getParentRelationships(word)
+ 
+        # If no parents give a notification and exit
+        if len(parents) == 0:
+            
+            self.visualBell()
+            return False
+
+        return parents
 
 class ViInputHistory():
     def __init__(self):
@@ -1638,6 +1832,7 @@ class ViInputDialog(wx.Panel):
 
         wx.CallAfter(self.FocusInputField, None)
 
+
     def close(self):
         pass
 
@@ -1719,6 +1914,8 @@ class ViInputDialog(wx.Panel):
                 self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_RED)
 
     def ExecuteCmd(self, text_input):
+        if len(text_input) < 1:
+            return False
         self.cmd_history.AddCmd(text_input)
         if self.search:
             self.search_args[u"text"] = text_input
@@ -1768,6 +1965,7 @@ class ViInputDialog(wx.Panel):
         """
         Called if user cancels the input.
         """
+        self.cmd_history.AddCmd(self.ctrls.viInputTextField.GetValue())
         pos, x, y = self.initial_scroll_pos
         wx.CallAfter(self.ctrl.SetScrollAndCaretPosition, pos, x, y)
 
@@ -1802,7 +2000,7 @@ class ViInputDialog(wx.Panel):
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
 
-        searchString = self.ctrls.viInputTextField.GetValue()
+        searchString = self.GetInput()
 
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
@@ -1811,7 +2009,9 @@ class ViInputDialog(wx.Panel):
             self.ExecuteCmd(self.GetInput())
             self.Close()
 
-        elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE):
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE) or \
+                (accP == (wx.ACCEL_NORMAL, wx.WXK_BACK) 
+                        and len(searchString) == 0):
             # TODO: add ctrl-c (ctrl-[)?
             # Esc -> Abort input, go back to start
             self.ForgetViInput()

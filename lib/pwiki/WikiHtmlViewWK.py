@@ -1625,85 +1625,85 @@ class ViFunctions(ViHelper):
         k = ViHelper.KEY_BINDINGS
         # Currently we only have one mode whilst in preview
         self.keys = { 0 : {
-    #(k["g"], k["u"]) : (0, (self.ViewParents, False), 0), # gu
-    #(k["g"], k["U"]) : (0, (self.ViewParents, True), 0), # gU
-    (k["\\"], k["u"]) : (0, (self.ViewParents, False), 0), # \u
-    (k["\\"], k["U"]) : (0, (self.ViewParents, True), 0), # \U
-    (k["g"], k["t"]) : (0, (self.SwitchTabs, None), 0), # gt
-    (k["g"], k["T"])  : (0, (self.SwitchTabs, True), 0), # gT
-    (k["g"], k["r"]) : (0, (self.OpenHomePage, False), 0), # gr
-    (k["g"], k["R"]) : (0, (self.OpenHomePage, True), 0), # gR
+#(k["g"], k["u"]) : (0, (self.ViewParents, False), 0, 0), # gu
+#(k["g"], k["U"]) : (0, (self.ViewParents, True), 0, 0), # gU
+(k["\\"], k["u"]) : (0, (self.ViewParents, False), 0, 0), # \u
+(k["\\"], k["U"]) : (0, (self.ViewParents, True), 0, 0), # \U
+(k["g"], k["t"]) : (0, (self.SwitchTabs, None), 0, 0), # gt
+(k["g"], k["T"])  : (0, (self.SwitchTabs, True), 0, 0), # gT
+(k["g"], k["r"]) : (0, (self.OpenHomePage, False), 0, 0), # gr
+(k["g"], k["R"]) : (0, (self.OpenHomePage, True), 0, 0), # gR
 
-    (k["\\"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
-                                    showWikiWordOpenDialog, None), 0), # \o
-    # TODO: rewrite open dialog so it can be opened with new tab as default
-    (k["\\"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
-                                    showWikiWordOpenDialog, None), 0), # \O
-    (k["g"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
-                                    showWikiWordOpenDialog, None), 0), # go
-    # TODO: rewrite open dialog so it can be opened with new tab as default
-    (k["g"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
-                                    showWikiWordOpenDialog, None), 0), # gO
+(k["\\"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
+                                showWikiWordOpenDialog, None), 0, 0), # \o
+# TODO: rewrite open dialog so it can be opened with new tab as default
+(k["\\"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
+                                showWikiWordOpenDialog, None), 0, 0), # \O
+(k["g"], k["o"]) : (0, (self.ctrl.presenter.getMainControl(). \
+                                showWikiWordOpenDialog, None), 0, 0), # go
+# TODO: rewrite open dialog so it can be opened with new tab as default
+(k["g"], k["O"]): (0, (self.ctrl.presenter.getMainControl(). \
+                                showWikiWordOpenDialog, None), 0, 0), # gO
 
-    (k["d"], k["d"]) : (0, (self.CloseCurrentTab, None), 0), # dd
+(k["d"], k["d"]) : (0, (self.CloseCurrentTab, None), 0, 0), # dd
 
-    (k["Z"], k["Z"]) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0), # ZZ
+(k["Z"], k["Z"]) : (0, (self.ctrl.presenter.getMainControl().exitWiki, None), 0, 0), # ZZ
 
-    # ctrl +
+# ctrl +
 
-    ("Ctrl", k["["]) : (0, (self.ctrl.html.ClearSelection, None), 0), # Ctrl + [
-    ("Ctrl", k["d"]) : (0, (self.HalfPageJumpDown, None), 0), # Ctrl + d
-    ("Ctrl", k["y"]) : (0, (self.HalfPageJumpUp, None), 0), # Ctrl + u
-    ("Ctrl", k["l"]) : (0, (self.ctrl.FollowLinkIfSelected, None), 0), # Ctrl + l
+("Ctrl", k["["]) : (0, (self.ctrl.html.ClearSelection, None), 0, 0), # Ctrl + [
+("Ctrl", k["d"]) : (0, (self.HalfPageJumpDown, None), 0, 0), # Ctrl + d
+("Ctrl", k["y"]) : (0, (self.HalfPageJumpUp, None), 0, 0), # Ctrl + u
+("Ctrl", k["l"]) : (0, (self.ctrl.FollowLinkIfSelected, None), 0, 0), # Ctrl + l
 
-    (k["/"],)  : (0, (self.StartForwardSearch, None), 0), # /
-    (k["?"],)  : (0, (self.StartReverseSearch, None), 0), # ?
+(k["/"],)  : (0, (self.StartForwardSearch, None), 0, 0), # /
+(k["?"],)  : (0, (self.StartReverseSearch, None), 0, 0), # ?
 
-    (k[":"],)  : (0, (self.StartCmdInput, None), 0), # :
+(k[":"],)  : (0, (self.StartCmdInput, None), 0, 0), # :
 
-    (k["\\"], k["o"]) : (0, (self.StartCmdInput, "open "), 0), # \o
-    (k["\\"], k["t"]) : (0, (self.StartCmdInput, "tabopen "), 0), # \t
+(k["\\"], k["o"]) : (0, (self.StartCmdInput, "open "), 0, 0), # \o
+(k["\\"], k["t"]) : (0, (self.StartCmdInput, "tabopen "), 0, 0), # \t
 
-    (k["n"],) : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0), # n
-    (k["N"],) : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0), # N
+(k["n"],) : (1, (self.Repeat, self.ContinueLastSearchSameDirection), 0, 0), # n
+(k["N"],) : (1, (self.Repeat, self.ContinueLastSearchReverseDirection), 0, 0), # N
 
-    (k["["],)  : (0, (self.GoBackwardInHistory, None), 0), # [
-    (k["]"],)  : (0, (self.GoForwardInHistory, None), 0), # ]
-    # H and L are equivelent to gh and gl in preview mode
-    (k["H"],)  : (0, (self.GoBackwardInHistory, None), 0), # H
-    (k["L"],)  : (0, (self.GoForwardInHistory, None), 0), # L
-    (k["g"], k["H"])  : (0, (self.GoBackwardInHistory, None), 0), # gH
-    (k["g"], k["L"])  : (0, (self.GoForwardInHistory, None), 0), # gL
-    (k["g"], k["h"])  : (0, (self.GoBackwardInHistory, None), 0), # gh
-    (k["g"], k["l"])  : (0, (self.GoForwardInHistory, None), 0), # gl
+(k["["],)  : (0, (self.GoBackwardInHistory, None), 0, 0), # [
+(k["]"],)  : (0, (self.GoForwardInHistory, None), 0, 0), # ]
+# H and L are equivelent to gh and gl in preview mode
+(k["H"],)  : (0, (self.GoBackwardInHistory, None), 0, 0), # H
+(k["L"],)  : (0, (self.GoForwardInHistory, None), 0, 0), # L
+(k["g"], k["H"])  : (0, (self.GoBackwardInHistory, None), 0, 0), # gH
+(k["g"], k["L"])  : (0, (self.GoForwardInHistory, None), 0, 0), # gL
+(k["g"], k["h"])  : (0, (self.GoBackwardInHistory, None), 0, 0), # gh
+(k["g"], k["l"])  : (0, (self.GoForwardInHistory, None), 0, 0), # gl
 
-    (k["H"],)  : (0, (self.GoBackwardInHistory, None), 0), # H
-    (k["L"],)  : (0, (self.GoForwardInHistory, None), 0), # L
-    (k["o"],) : (0, (self.ctrl.presenter.getMainControl(). \
-                            showWikiWordOpenDialog, None), 0), # o
-    (k["O"],) : (0, (self.ctrl.presenter.getMainControl(). \
-                            showWikiWordOpenDialog, None), 0), # O
-    (k["j"],) : (0, (self.DocumentNavigation, k["j"]), 0), # j
-    (k["k"],) : (0, (self.DocumentNavigation, k["k"]), 0), # k
-    (k["h"],) : (0, (self.DocumentNavigation, k["h"]), 0), # h
-    (k["l"],) : (0, (self.DocumentNavigation, k["l"]), 0), # l
-    (k["g"], k["g"]) : (0, (self.DocumentNavigation, (k["g"], k["g"])), 0), # gg
-    (k["G"],)  : (0, (self.DocumentNavigation, k["G"]), 0), # G
-    (k["%"],)  : (0, (self.DocumentNavigation, k["%"]), 0), # %
-    (k["$"],)  : (0, (self.DocumentNavigation, k["$"]), 0), # $
-    (k["^"],)  : (0, (self.DocumentNavigation, k["^"]), 0), # ^
-    (k["0"],)  : (0, (self.DocumentNavigation, k["0"]), 0), # 0
-    (k["f"],) : (0, (self.startFollowHint, 0), 0), # f
-    (k["F"],) : (0, (self.startFollowHint, 2), 0), # F
-    (k["Y"],)  : (0, (self.ctrl.OnClipboardCopy, None), 0), # Y
-    (k["y"],) : (0, (self.CopyWikiWord, None), 0), # y
-    #652k["]"]  : (self.ctrl.FollowLinkIfSelected, None), # return
+(k["H"],)  : (0, (self.GoBackwardInHistory, None), 0, 0), # H
+(k["L"],)  : (0, (self.GoForwardInHistory, None), 0, 0), # L
+(k["o"],) : (0, (self.ctrl.presenter.getMainControl(). \
+                        showWikiWordOpenDialog, None), 0, 0), # o
+(k["O"],) : (0, (self.ctrl.presenter.getMainControl(). \
+                        showWikiWordOpenDialog, None), 0, 0), # O
+(k["j"],) : (0, (self.DocumentNavigation, k["j"]), 0, 0), # j
+(k["k"],) : (0, (self.DocumentNavigation, k["k"]), 0, 0), # k
+(k["h"],) : (0, (self.DocumentNavigation, k["h"]), 0, 0), # h
+(k["l"],) : (0, (self.DocumentNavigation, k["l"]), 0, 0), # l
+(k["g"], k["g"]) : (0, (self.DocumentNavigation, (k["g"], k["g"])), 0, 0), # gg
+(k["G"],)  : (0, (self.DocumentNavigation, k["G"]), 0, 0), # G
+(k["%"],)  : (0, (self.DocumentNavigation, k["%"]), 0, 0), # %
+(k["$"],)  : (0, (self.DocumentNavigation, k["$"]), 0, 0), # $
+(k["^"],)  : (0, (self.DocumentNavigation, k["^"]), 0, 0), # ^
+(k["0"],)  : (0, (self.DocumentNavigation, k["0"]), 0, 0), # 0
+(k["f"],) : (0, (self.startFollowHint, 0), 0, 0), # f
+(k["F"],) : (0, (self.startFollowHint, 2), 0, 0), # F
+(k["Y"],)  : (0, (self.ctrl.OnClipboardCopy, None), 0, 0), # Y
+(k["y"],) : (0, (self.CopyWikiWord, None), 0, 0), # y
+#652k["]"]  : (self.ctrl.FollowLinkIfSelected, None), # return
 
-    (k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
-    (k["g"], k["."])  : (0, (self.SwitchEditorPreview, "textedit"), 0), # ge
-    (k["g"], k["p"])  : (0, (self.SwitchEditorPreview, "preview"), 0), # gp
-    (65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0), # F1
-    (65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0), # F2
+(k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0, 0), # gs
+(k["g"], k["."])  : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # ge
+(k["g"], k["p"])  : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # gp
+(65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F1
+(65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F2
     
         }
         }
