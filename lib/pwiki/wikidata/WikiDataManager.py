@@ -294,7 +294,7 @@ class WikiDataManager(MiscEventSourceMixin):
     UEQUEUE_INDEX = 2
 
     def __init__(self, wikiConfigFilename, dbtype, wikiLangName, ignoreLock=False,
-            createLock=True):
+            createLock=True, recoveryMode=False):
         MiscEventSourceMixin.__init__(self)
 
         self.lockFileName = wikiConfigFilename + u".lock"
@@ -317,7 +317,8 @@ class WikiDataManager(MiscEventSourceMixin):
         self.connected = False
         self.readAccessFailed = False
         self.writeAccessFailed = False
-        self.writeAccessDenied = False
+        self.writeAccessDenied = recoveryMode
+        self.recoveryMode = recoveryMode
 
         try:
             wikiConfig.loadConfig(wikiConfigFilename)
@@ -410,7 +411,13 @@ class WikiDataManager(MiscEventSourceMixin):
         self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
         self.wikiWideHistory = WikiWideHistory(self)
-        self.wikiWideHistory.readOverview()
+        
+        if self.recoveryMode:
+            if self.wikiData.checkCapability("recovery mode") is None:
+                raise WikiDataException(_(u"Recovery mode not supported"))
+
+        if not self.recoveryMode:
+            self.wikiWideHistory.readOverview()
 
         self.wikiName = wikiName
         self.dataDir = dataDir
@@ -437,17 +444,22 @@ class WikiDataManager(MiscEventSourceMixin):
 
         writeException = None
         try:
-            self.wikiData.connect()
+            if self.recoveryMode:
+                self.wikiData.connect(recoveryMode=True)
+            else:
+                self.wikiData.connect()
         except DbWriteAccessError, e:
             traceback.print_exc()
             writeException = e
 
         # TODO: Only initialize on demand
         self.onlineSpellCheckerSession = None
-        if SpellChecker.isSpellCheckSupported():
-            self.onlineSpellCheckerSession = \
-                    SpellChecker.SpellCheckerSession(self)
-            self.onlineSpellCheckerSession.rereadPersonalWordLists()
+        
+        if not self.recoveryMode:
+            if SpellChecker.isSpellCheckSupported():
+                self.onlineSpellCheckerSession = \
+                        SpellChecker.SpellCheckerSession(self)
+                self.onlineSpellCheckerSession.rereadPersonalWordLists()
 
         # Path to file storage
         fileStorDir = os.path.join(os.path.dirname(self.getWikiConfigPath()),
@@ -468,8 +480,9 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiConfiguration.getMiscEvent().addListener(self)
         GetApp().getMiscEvent().addListener(self)
 
-        self._updateCcWordBlacklist()
-        self._updateNccWordBlacklist()
+        if not self.recoveryMode:
+            self._updateCcWordBlacklist()
+            self._updateNccWordBlacklist()
 
         self.readAccessFailed = False
         self.writeAccessFailed = False
@@ -488,31 +501,34 @@ class WikiDataManager(MiscEventSourceMixin):
             
         self.trashcan = Trashcan.Trashcan(self)
         
-        if self.trashcan.isInDatabase():
-            try:
-                self.trashcan.readOverview()
-            except:
-                traceback.print_exc() # TODO: Notify user?
-            
-        if self.isSearchIndexEnabled() and self.getWikiConfig().getint(
-                "main", "indexSearch_formatNo", 1) != Consts.SEARCHINDEX_FORMAT_NO:
-            # Search index rebuild needed
-            # Remove old search index and lower meta data state.
-            # The following pushDirtyMetaDataUpdate() will start rebuilding
+        if not self.recoveryMode:
+            if self.trashcan.isInDatabase():
+                try:
+                    self.trashcan.readOverview()
+                except:
+                    traceback.print_exc() # TODO: Notify user?
 
-            wikiData = self.getWikiData()
+        if not self.recoveryMode:
+            if self.isSearchIndexEnabled() and self.getWikiConfig().getint(
+                    "main", "indexSearch_formatNo", 1) != Consts.SEARCHINDEX_FORMAT_NO:
+                # Search index rebuild needed
+                # Remove old search index and lower meta data state.
+                # The following pushDirtyMetaDataUpdate() will start rebuilding
+    
+                wikiData = self.getWikiData()
+    
+                wikiData.commit()
+                finalState = Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED
+    
+                for wikiWord in wikiData.getWikiPageNamesForMetaDataState(
+                        finalState, "<"):
+                    wikiData.setMetaDataState(wikiWord, finalState)
+    
+                wikiData.commit()
+                self.removeSearchIndex()
+    
+            self.pushDirtyMetaDataUpdate()
 
-            wikiData.commit()
-            finalState = Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED
-
-            for wikiWord in wikiData.getWikiPageNamesForMetaDataState(
-                    finalState, "<"):
-                wikiData.setMetaDataState(wikiWord, finalState)
-
-            wikiData.commit()
-            self.removeSearchIndex()
-
-        self.pushDirtyMetaDataUpdate()
         self.updateExecutor.start()
 
 
@@ -868,6 +884,9 @@ class WikiDataManager(MiscEventSourceMixin):
         Push all words for which meta-data is set dirty into the queue
         of the update executor
         """
+        if self.recoveryMode:
+            return
+        
         if not self.isReadOnlyEffect():
             self.updateExecutor.prepare()
             self.updateExecutor.clearDeque(1)

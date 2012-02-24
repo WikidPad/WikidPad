@@ -11,9 +11,12 @@ import traceback, os.path
 
 import wx
 
-from . import wxHelper, StringOps
+from . import wxHelper, StringOps, Exporters
+
+from .wikidata import WikiDataManager
 
 from . import Trashcan
+
 
 
 
@@ -106,6 +109,36 @@ class PWikiNonCore:
         TrashcanDialog.runModal(self.mainControl, self.mainControl)
 
 
+    def OnRecoverWikiDatabase(self, evt):
+        if self.mainControl.stdDialog("yn", _(u"Continue?"),
+                _(u"You should run this function only on request of a developer\n"
+                "Continue?")) == "no":
+            return
+        
+        wf = self.mainControl.stdDialog("text", _(u"Wiki file"),
+                _(u"Wiki file") + u":")
+
+        if not wf:
+            return
+
+        exportDest = self.mainControl.stdDialog("text",
+                _(u"MPT export target file"),
+                _(u"MPT export target file") + u":")
+
+        if not exportDest:
+            return
+
+        wikiDoc = WikiDataManager.WikiDataManager(wf, None, None, ignoreLock=True,
+            createLock=False, recoveryMode=True)
+            
+        wikiDoc.connect()
+
+        exp = Exporters.MultiPageTextExporter(self.mainControl)
+        exp.recoveryExport(wikiDoc, exportDest, progressHandler=None)
+        
+
+
+
     def _buildDescriptorDict(self):
         """
         Builds and returns a dictionary of tuples to describe the menu items,
@@ -160,6 +193,9 @@ class PWikiNonCore:
                 _(u'Open trashcan'),
                 kb.OpenTrashcan, None, None,
                 None),
+                
+            "recoverWikiDatabase": (self.OnRecoverWikiDatabase, _(u'Recover DB'),
+                _(u'Recover wiki database')),
             }
 
         return descriptorDict

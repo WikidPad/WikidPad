@@ -262,6 +262,30 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
 
 
+def contentToUnicode(content):
+    """
+    Try to detect the text encoding of content
+    and return converted unicode
+    """
+    if isinstance(content, unicode):
+        return content
+
+    if content.startswith(BOM_UTF8):
+        return content[len(BOM_UTF8):].decode("utf-8", "replace")
+    elif content.startswith(BOM_UTF16_BE):
+        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
+    elif content.startswith(BOM_UTF16_LE):
+        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
+    else:
+        try:
+            return content.decode("utf-8", "strict")
+        except UnicodeDecodeError:
+            return mbcsDec(content, "replace")[0]
+
+
+
+
+
 def loadEntireTxtFile(filename):
     """
     Load entire file (text mode) and return its content.

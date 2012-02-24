@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2012-01-24
+# Last modified (format YYYY-MM-DD): 2012-02-17
 
 
 import locale, pprint, time, sys, string, traceback
@@ -601,7 +601,9 @@ tableModeAppendix = modeAppendix.setResultsName("tableModeAppendix").addParseAct
 
 
 table = buildRegex(ur"<<\|").setParseStartAction(preActCheckNothingLeft) + \
-        Optional(tableModeAppendix) + buildRegex(ur"[ \t]*\n") + tableRow + ZeroOrMore(newRow + tableRow) + tableEnd
+        Optional(tableModeAppendix) + buildRegex(ur"[ \t]*\n") + \
+        tableRow + newRow + ZeroOrMore(NotAny(tableEnd) + tableRow + newRow) + \
+        tableEnd
 table = table.setResultsNameNoCopy("table")
 
 

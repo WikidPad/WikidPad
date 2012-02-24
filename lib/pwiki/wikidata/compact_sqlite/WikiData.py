@@ -111,30 +111,32 @@ class WikiData:
         return DbStructure.checkDatabaseFormat(self.connWrap)
 
 
-    def connect(self):
-        formatcheck, formatmsg = self.checkDatabaseFormat()
-
-        if formatcheck == 2:
-            # Unknown format
-            raise WikiDataException, formatmsg
-
-        # Update database from previous versions if necessary
-        if formatcheck == 1:
-            try:
-                DbStructure.updateDatabase(self.connWrap, self.dataDir)
-            except Exception, e:
-                traceback.print_exc()
+    def connect(self, recoveryMode=False):
+        if not recoveryMode:
+            formatcheck, formatmsg = self.checkDatabaseFormat()
+    
+            if formatcheck == 2:
+                # Unknown format
+                raise WikiDataException, formatmsg
+    
+            # Update database from previous versions if necessary
+            if formatcheck == 1:
                 try:
-                    self.connWrap.rollback()
-                except Exception, e2:
+                    DbStructure.updateDatabase(self.connWrap, self.dataDir)
+                except Exception, e:
                     traceback.print_exc()
-                    raise DbWriteAccessError(e2)
-                raise DbWriteAccessError(e)
+                    try:
+                        self.connWrap.rollback()
+                    except Exception, e2:
+                        traceback.print_exc()
+                        raise DbWriteAccessError(e2)
+                    raise DbWriteAccessError(e)
 
         lastException = None
         try:
             # Further possible updates
-            DbStructure.updateDatabase2(self.connWrap)
+            if not recoveryMode:
+                DbStructure.updateDatabase2(self.connWrap)
         except sqlite.Error, e:
             # Remember but continue
             lastException = DbWriteAccessError(e)
@@ -163,12 +165,15 @@ class WikiData:
         self.contentUniInputToDb = contentUniInputToDb
 
         try:
-            self._createTempTables()
+            if not recoveryMode:
+                self._createTempTables()
 
             # reset cache
             self.cachedWikiPageLinkTermDict = None
             self.cachedGlobalAttrs = None
-            self.getGlobalAttributes()
+            
+            if not recoveryMode:
+                self.getGlobalAttributes()
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             try:
@@ -238,6 +243,17 @@ class WikiData:
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+
+    def iterAllWikiPages(self):
+        """
+        Returns iterator over all wiki pages. Each iteration returns a tuple
+        (word, content, modified timestamp, created timestamp, visited timestamp).
+        
+        This is only part of public API if "recovery mode" is supported.
+        """
+        return self.connWrap.execSqlQueryIter(
+                "select word, content, modified, created, visited from wikiwordcontent")
 
 
     def setContent(self, word, content, moddate = None, creadate = None):
@@ -1571,6 +1587,19 @@ class WikiData:
         return fileContentToUnicode(lineendToInternal(datablock))
 
 
+    def iterAllDataBlocks(self):
+        """
+        Returns iterator over all data blocks. Each iteration returns a tuple
+        (unified name, datablock content). The datablock content is returned
+        as binary.
+
+        This is only part of public API if "recovery mode" is supported.
+        """
+        return self.connWrap.execSqlQueryIter(
+                "select unifiedname, data from datablocks")
+
+
+
     def storeDataBlock(self, unifName, newdata, storeHint=None):
         """
         Store newdata under unified name. If previously data was stored under the
@@ -1668,8 +1697,8 @@ class WikiData:
     _CAPABILITIES = {
         "rebuild": 1,
         "compactify": 1,     # = sqlite vacuum
-#         "versioning": 1,     # TODO (old versioning)
-        "plain text import":1,
+        "plain text import": 1,
+        "recovery mode": 1,
 #         "asynchronous commit":1  # Commit can be done in separate thread, but
 #                 # calling any other function during running commit is not allowed
         }

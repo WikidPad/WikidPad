@@ -912,8 +912,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         """
                         )
 
-
-
             # TODO: Test for wikiDocument.isSearchIndexEnabled()
 #             self.addMenuItem(maintenanceMenu, _(u'Re&index Wiki...'),
 #                     _(u'Rebuild the reverse index for fulltext search'),
@@ -953,6 +951,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _(u'Copy .wiki files to database'),
                         self.OnImportFromPagefiles,
                         updatefct=(self.OnUpdateDisReadOnlyWiki,))
+
+
+        self.addMenuItemByUnifNameTable(maintenanceMenu,
+                """
+                menuItem/mainControl/builtin/recoverWikiDatabase
+                """
+                )
 
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between

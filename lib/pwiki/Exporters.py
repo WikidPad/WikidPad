@@ -768,7 +768,7 @@ class MultiPageTextExporter(AbstractExporter):
                 self.separator = u"-----%s-----" % createRandomString(25)
                 try:
                     self.rawExportFile = open(pathEnc(self.exportDest), "w")
-        
+
                     # Only UTF-8 mode currently
                     self.rawExportFile.write(BOM_UTF8)
                     self.exportFile = _SeparatorWatchUtf8Writer(
@@ -851,6 +851,247 @@ class MultiPageTextExporter(AbstractExporter):
             if self.rawExportFile is not None:
                 self.rawExportFile.close()
                 self.rawExportFile = None
+
+
+    def _getDatablocksClass(self, unifName):
+        """
+        """
+        if unifName.startswith(u"wiki/"):
+            return 1 | 8  # as text, not hinted, prepend "funcpage/"
+        elif unifName.startswith(u"savedsearch/"):
+            return 2  # binary, not hinted
+        elif unifName.startswith(u"savedpagesearch/"):
+            return 1 | 4  # text, hinted
+        elif unifName.startswith(u"savedexport/"):
+            return 1 | 4  # text, hinted
+        elif unifName.startswith(u"versioning/overview/"):
+            return 1 | 4  # text, hinted
+        elif unifName.startswith(u"versioning/packet/"):
+            return 2 | 4  # binary, hinted
+        else:
+            return 2 | 4  # binary, hinted
+
+
+
+    def _recoveryExportDatablocks(self):
+        def writeDatablock(unifName, datablock, storeHint):
+            cl = self._getDatablocksClass(unifName)
+
+            if cl == 0:
+                return
+            
+            if cl & 8 == 8:
+                unifName = u"funcpage/" + unifName
+            
+            self.exportFile.writeSeparator()
+            self.exportFile.write(unifName + u"\n")
+            
+            if cl & 4 == 4:
+                # Hinted 
+                if storeHint == Consts.DATABLOCK_STOREHINT_EXTERN:
+                    shText = u"extern"
+                else:
+                    shText = u"intern"
+
+                if cl & 3 == 1:
+                    # as text
+                    self.exportFile.write(
+                            u"important/encoding/text  storeHint/%s\n" %
+                            shText)
+                else:
+                    # as binary
+                    self.exportFile.write(
+                            u"important/encoding/base64  storeHint/%s\n" %
+                            shText)
+
+            if cl & 3 == 1:
+                # as text
+                datablock = StringOps.fileContentToUnicode(
+                        StringOps.lineendToInternal(datablock))
+
+                self.exportFile.write(datablock)
+
+            else:
+                # as binary
+                self.exportFile.write(base64BlockEncode(datablock))
+
+
+        found = set()
+        try:
+            for unifName, datablock in self.wikiDocument.getWikiData()\
+                    .iterAllDataBlocks():
+                        
+                if unifName in found:
+                    continue
+                else:
+                    found.add(unifName)
+                
+#                     try:
+#                         sh = self.wikiDocument.guessDataBlockStoreHint(unifName)
+#                     except:
+
+                writeDatablock(unifName, datablock,
+                        Consts.DATABLOCK_STOREHINT_INTERN)
+                
+
+        except _SeparatorFoundException:
+            raise
+        except:
+            traceback.print_exc()
+            
+        try:
+            for unifName in self.wikiDocument.getDataBlockUnifNamesStartingWith(u""):
+                if unifName in found:
+                    continue
+                else:
+                    found.add(unifName)
+                
+                if self._getDatablocksClass(unifName) == 0:
+                    continue
+                
+                try:
+                    datablock = self.wikiDocument.retrieveDataBlock(unifName)
+                    writeDatablock(unifName, datablock,
+                        Consts.DATABLOCK_STOREHINT_INTERN)
+
+                except:
+                    traceback.print_exc()
+
+        except _SeparatorFoundException:
+            raise
+        except:
+            traceback.print_exc()
+        
+
+
+
+    def _recoveryExportWikiWords(self):
+        def writeWord(word, content, modified, created, visited):
+            if isinstance(content, str):
+                content = StringOps.contentToUnicode(content)
+
+            self.exportFile.writeSeparator()
+
+            self.exportFile.write(u"wikipage/%s\n" % word)
+
+            # Do not use StringOps.strftimeUB here as its output
+            # relates to local time, but we need UTC here.
+            timeStrings = [unicode(time.strftime(
+                    "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+                    for ts in (modified, created, visited)]
+
+            self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
+            self.exportFile.write(content)
+
+
+        found = set()
+
+        try:
+            for word, content, modified, created, visited in \
+                    self.wikiDocument.getWikiData().iterAllWikiPages():
+
+                word = StringOps.contentToUnicode(word)
+
+                if word in found:
+                    continue
+                else:
+                    found.add(word)
+
+                writeWord(word, content, modified, created, visited)
+
+        except _SeparatorFoundException:
+            raise
+        except:
+            traceback.print_exc()
+
+
+        try:
+            for word in self.wikiDocument.getWikiData().getAllDefinedWikiPageNames():
+                if word in found:
+                    continue
+                else:
+                    found.add(word)
+                
+                try:
+                    content = self.wikiDocument.getWikiData().getContent(word)
+                    try:
+                        modified, created, visited = self.wikiDocument\
+                                .getWikiData().getTimestamps(word)
+                    except:
+                        traceback.print_exc()
+                        modified, created, visited = 0, 0, 0
+                    
+                    writeWord(word, content, modified, created, visited)
+                except:
+                    traceback.print_exc()
+
+        except _SeparatorFoundException:
+            raise
+        except:
+            traceback.print_exc()
+
+
+    def recoveryExport(self, wikiDocument, exportDest, progressHandler):
+        """
+        Export in recovery mode
+        
+        wikiDocument -- WikiDocument object
+        exportDest -- Path to destination directory or file to export to
+        """
+        self.wikiDocument = wikiDocument
+        self.exportDest = exportDest
+        self.exportFile = None
+        self.rawExportFile = None
+        self.firstSeparatorCallDone = False
+        
+        self.formatVer = 1
+        
+        try:
+            for tryNumber in range(35):
+                self.separator = u"-----%s-----" % createRandomString(25)
+                try:
+                    self.rawExportFile = open(pathEnc(self.exportDest), "w")
+
+                    # Only UTF-8 mode currently
+                    self.rawExportFile.write(BOM_UTF8)
+                    self.exportFile = _SeparatorWatchUtf8Writer(
+                            self.rawExportFile, self.separator, "replace")
+
+#                     self.wikiPageWriter = MultiPageTextWikiPageWriter(
+#                             self.wikiDocument, self.exportFile,
+#                             self.writeVersionData, self.formatVer)
+
+                    # Identifier line with file format
+                    self.exportFile.write(u"Multipage text format %i\n" %
+                            self.formatVer)
+                    # Separator line
+                    self.exportFile.write(u"Separator: %s\n" % self.separator)
+
+                    self._recoveryExportDatablocks()
+                    self._recoveryExportWikiWords()
+                    
+                    break
+                except _SeparatorFoundException:
+                    if self.exportFile is not None:
+                        self.exportFile.flush()
+                        self.exportFile = None
+        
+                    if self.rawExportFile is not None:
+                        self.rawExportFile.close()
+                        self.rawExportFile = None
+
+            else:
+                raise ExportException(_(u"No usable separator found"))
+        finally:
+            if self.exportFile is not None:
+                self.exportFile.flush()
+                self.exportFile = None
+
+            if self.rawExportFile is not None:
+                self.rawExportFile.close()
+                self.rawExportFile = None
+
+
 
 
 
