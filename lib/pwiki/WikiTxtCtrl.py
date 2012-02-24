@@ -3028,7 +3028,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     return
 
             else:
-                evt.Skip()
+                super(WikiTxtCtrl, self).OnKeyDown(evt)
+
 
         else:
             super(WikiTxtCtrl, self).OnKeyDown(evt)

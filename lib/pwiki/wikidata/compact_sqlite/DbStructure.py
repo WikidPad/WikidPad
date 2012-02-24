@@ -735,7 +735,7 @@ def sqlite_utf8ToLatin1(context, values):
     enc = codecs.getencoder("iso-8859-1")
     
     s = values[0].value_text()
-    context.result_text(enc(utf8Dec(s)[0])[0])
+    context.result_text(enc(utf8Dec(s, "replace")[0], "replace")[0])
 
 
 def sqlite_latin1ToUtf8(context, values):
@@ -755,7 +755,7 @@ def sqlite_utf8ToMbcs(context, values):
     enc = codecs.getencoder("mbcs")
     
     s = values[0].value_text()
-    context.result_text(enc(utf8Dec(s)[0])[0])
+    context.result_text(enc(utf8Dec(s, "replace")[0], "replace")[0])
 
 
 def mbcsToUtf8(s):
@@ -822,7 +822,7 @@ column_text = sqlite.AUTO_COLUMN_CONVERTS[sqlite.SQLITE_TEXT]
 
 
 def column_utftext(stmt, col):
-    return utf8Dec(column_text(stmt, col))[0]
+    return utf8Dec(column_text(stmt, col), "replace")[0]
 
 
 def bind_mbcsutftext(stmt, parno, data):
