@@ -111,7 +111,7 @@ class PWikiNonCore:
 
     def OnRecoverWikiDatabase(self, evt):
         if self.mainControl.stdDialog("yn", _(u"Continue?"),
-                _(u"You should run this function only on request of a developer\n"
+                _(u"You should run this function only if you know what you are doing\n"
                 "Continue?")) == "no":
             return
         

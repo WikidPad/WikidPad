@@ -63,6 +63,26 @@ In menu "Wiki"->"Maintenance"->"Optimise Database". This function is only availa
 If information is deleted from an Sqlite database, the occupied hard disk space is not freed but later reused for new information to add. "Optimise Database" makes this space available for the system again. After deleting large parts of a wiki, you can use "Optimise Database" to free space, especially recommended for a "Compact Sqlite" wiki (where the page content is also stored in the database).
 
 
+++ Recover DB
+
+This function should be used with care. It is needed if you get an error message like "database disk image is malformed" for a wiki of backend type "Compact Sqlite". This means that the database file containing the wiki was damaged. Best way to handle this would be to use a recent backup of your wiki. If you don't have one, this function may help a bit by trying to recover readable parts.
+
+Follow these steps:
+
+* Ensure that the damaged wiki is not opened (if necessary, open another wiki in WikidPad, maybe the help wiki, and close other WikidPad windows)
+* Make a backup of the damaged wiki (if the recovery makes things worse)
+* Select "Recover DB" from menu
+* Answer "Yes" to the warning dialog
+* Enter the full path to the wiki you want to repair (this is the path to the .wiki-file you would normally use in the "Open Wiki" dialog.
+* Enter the path to the output file to create. It should have the suffix ".mpt". If the file exists already it will be overwritten, so be careful!
+* After the function did its work you can have a look at the created .mpt-file. It uses the [Multipage text format] and contains what could be rescued from the wiki
+* In the damaged wiki, subdirectory "data", delete "wiki.sli" (you made a backup, right?). Maybe you must terminate WikidPad before you can delete the file.
+* Now open the damaged wiki regularly. It should open without error messages but is empty now.
+* select in menu "Extra"->"Import". In the import dialog enter the path of the created .mpt-file as source.
+* Rebuild your wiki (or just wait until all data was rebuilt automatically in background)
+
+Now you have a brand new wiki with the recovered elements of the old one. If everything worked fine you can finally delete the .mpt-file.
+
 
 
 ++ Other things about maintenance
