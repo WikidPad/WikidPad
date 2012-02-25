@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+Feb. 25, 2012 (2.2rc03)
+
+    * Bug fixed: "ContinueSearch" (default key: F3) didn't work in text editor
+    * More graceful handling of UTF-8 decoding from sqlite databases
+
+
+
 Jan. 29, 2012 (2.2rc02)
 
     * Bug fixed: Unwanted space in first line of indented paragraph after
