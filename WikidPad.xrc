@@ -4307,6 +4307,7 @@
               <object class="sizeritem">
                 <object class="wxComboBox" name="cbSearch">
                   <content/>
+                  <size>40,-1</size>
                 </object>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                 <border>5</border>

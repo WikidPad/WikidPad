@@ -218,10 +218,12 @@ class MultiPageTextImporter:
 
                 self.separator = line[11:]
                 
+                startPos = self.rawImportFile.tell()
+                self.importFile = decodingReader(self.rawImportFile, "replace")
+
                 if self.formatVer == 0:
                     self._doImportVer0()
                 elif self.formatVer == 1:
-                    startPos = self.rawImportFile.tell()
                     # Create temporary database. It is mainly filled during
                     # pass 1 to check for validity and other things before
                     # actual importing in pass 2
@@ -262,8 +264,6 @@ class MultiPageTextImporter:
                                 )
 
 
-                        self.importFile = decodingReader(self.rawImportFile, "replace")
-                        
                         # Collect some initial information into the temporary database
                         self._doImportVer1Pass1()
     
