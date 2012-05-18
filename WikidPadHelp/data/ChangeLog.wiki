@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+May  19, 2012 (2.2rc04)
+
+    * Bug fixed: Wrong default setting for stripping spaces in search
+    * Bug fixed: Multipage text import of version 0 failed
+
+
+
 Feb. 25, 2012 (2.2rc03)
 
     * Bug fixed: "ContinueSearch" (default key: F3) didn't work in text editor
