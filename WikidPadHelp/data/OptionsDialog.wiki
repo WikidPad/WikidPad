@@ -609,3 +609,16 @@ Interpret [Footnotes] (e.g. "[42]") as wiki words.
 *Filename must match*
 *Modif. date is enough*
 See [FileStorage].
+
+*Time coarsening*
+When using one of the "Original" [DatabaseTypes] each wiki page is stored as a file. For each page file a "signature" is stored in the overview database to detect changes to the file from outside of WikidPad.
+
+This signature consists of length and last modification time of the file. If you transfer your wiki between different file systems the modification times have different precisions (for NTFS it is 100 nanoseconds while FAT has 2 seconds) and may therefore be rounded which is interpreted as file modification by WikidPad.
+
+Time coarsening sets the precision (in seconds) to use for the file signatures. If you use only one file system you can set it to 0 (=as precise as possible). "Using" a file system means to store a wiki there or transfer it (e.g. on USB drive).
+
+If one of the file systems is FAT set this value to 2.
+
+If you use NTFS and ext2 or ext3 set it to 1.
+
+Modifying this setting does not change already recorded file signatures (until associated wiki page is modified). You can either [RebuildTheWiki] or just let WikidPad change it when it thinks it is necessary.

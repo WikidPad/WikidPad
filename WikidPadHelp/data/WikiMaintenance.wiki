@@ -37,7 +37,7 @@ Find files without links and links without files. See FileCleanupDialog.
 
 ++ Show job count
 
-Gives a rough estimation of the number of jobs waiting in the background. The number may be inexact.
+Gives a rough estimation of the number of jobs waiting in the background. The number may be inexact and may be constant for some time because some done jobs create new jobs. Therefore the number of done jobs additionally shows the executed jobs since dialog was opened.
 
 
 ++ Open as Type

@@ -1,5 +1,51 @@
 ﻿++ Change Log
 
+May  19, 2012 (2.3beta04)
+
+    * Option to make timestamp stored in file signature block more
+      coarse to prevent false dirty recognition of wiki files moved
+      between different file systems (with different
+      time granularity). See [OptionsDialog#*Time coarsening*]
+
+    * Made maintenance function "recover wiki" more convenient, now
+      with file dialogs instead of simple text fields
+    * In dialog "Show job count" added info "done jobs" (since
+      opening of dialog) to reduce irritation due to not decreasing
+      job count
+
+    * Printing functionality transferred to plugin "PrintDefault.py"
+
+    * For error logging during initialization different log file name
+      "WikidPad_Init_Error.log" is used (allows to distinguish files
+      in portable installation)
+
+    * Vi improvements (thanks to Ross)
+        * Small fix for searching in editor.
+        * Make repeat (".") more vim-like
+
+        * Add basic support for mouse in ":" commands.
+        * Fix bug when using o or t whilst in visual mode.
+
+        * Add initial support for Vi Plugins.
+        * Fix some small bugs.
+        * Add option to skip to next/previous heading in preview mode
+          using { or }
+
+        * Fix text selection with g0 / g$
+        * Rewrite <sup> / <sub> tags when creating a link using
+          <<ys*r>> (or equivalent)
+        * Copy << >> blocks as lines if the span multiple lines and
+          fully form the lines
+        * Begin rewriting undo / redo function (may still be
+          a bit buggy)
+        * Fix word movements at end of file
+        * Fix line trucation when line is empty
+
+    * Bug fixed: Multipage text import of version 0 failed
+    * Bug fixed: Option "Strip spaces in search" had default "True",
+      should be "False"
+
+
 Feb. 25, 2012 (2.3beta03)
 
     * New (but yet uncomfortable) maintenance function to recover a 

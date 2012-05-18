@@ -382,6 +382,7 @@ extensions/KeyBindings.py -text
 extensions/MimeTexCGIBridge.py -text
 extensions/PloticusClBridge.py -text
 extensions/Presentation.py -text
+extensions/PrintDefault.py -text
 extensions/WikidPadHooks.py -text
 extensions/WikidPadParserStub.py -text
 extensions/autoNew.py -text
