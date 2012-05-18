@@ -22,7 +22,6 @@ from WindowLayout import setWindowSize
 # TODO: should be configurable
 AUTOCOMPLETE_BOX_HEIGHT = 50
 
-
 class ViHelper():
     """
     Base class for ViHandlers to inherit from.
@@ -466,9 +465,9 @@ class ViHelper():
             
         # If the command is repeatable save its type and any other settings
         if repeatable in [1, 2, 3] and not repeat:
-            self.last_cmd = repeatable, key, self.count, motion, \
+            self.last_cmd = [repeatable, key, self.count, motion, \
                                             motion_wildcard, wildcards, \
-                                            selected_text
+                                            selected_text]
 
         # Some commands should cause the mode to revert back to normal if run
         # from visual mode, others shouldn't.
@@ -955,7 +954,7 @@ class ViHintDialog(wx.Frame):
 
         self.viCtrl = viCtrl
         self.mainControl = mainControl
-        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_INPUT_FIELD,
+        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
                 _(u"Follow Hint:"), style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -981,7 +980,7 @@ class ViHintDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_INPUT_FIELD, self.OnText)
+        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
         wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
         wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
         wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
@@ -1053,26 +1052,41 @@ class ViHintDialog(wx.Frame):
             # Esc -> Abort inc. search, go back to start
             self.viCtrl.resetFollowHint()
             self.Close()
+
         elif matchesAccelPair("ContinueSearch", accP):
             foundPos = self.viCtrl.executeFollowHint(searchString)
+
         # do the next search on another ctrl-f
         elif matchesAccelPair("StartFollowHint", accP):
             foundPos = self.viCtrl.executeFollowHint(searchString)
+
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
             foundPos = self.viCtrl.executeFollowHint(searchString)
-            
-        elif matchesAccelPair("ActivateLink", accP) or \
-                matchesAccelPair("ActivateLinkNewTab", accP) or \
-                matchesAccelPair("ActivateLink2", accP) or \
-                matchesAccelPair("ActivateLinkBackground", accP) or \
-                matchesAccelPair("ActivateLinkNewWindow", accP):
+
+        elif matchesAccelPair("ActivateLink", accP):
             # ActivateLink is normally Ctrl-L
+            self.viCtrl.endFollowHint()
+            self.Close()
+            self.viCtrl.OnKeyDown(evt)
+
+        elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.viCtrl.endFollowHint()
+            self.Close()
+            self.viCtrl.OnKeyDown(evt)
+
+        elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
+            self.viCtrl.endFollowHint()
+            self.Close()
+            self.viCtrl.OnKeyDown(evt)
+
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.viCtrl.endFollowHint()
             self.Close()
             self.viCtrl.OnKeyDown(evt)
@@ -1100,8 +1114,6 @@ class ViHintDialog(wx.Frame):
         self.Close()
 
  
-# TODO:numbered registers
-#      special registers
 class ViRegister():
     def __init__(self, ctrl):
         self.ctrl = ctrl
@@ -1896,6 +1908,7 @@ class ViInputDialog(wx.Panel):
             else:
                 self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
 
+        # cmd
         else:
             if self.block_list_reload:
                 return
@@ -2016,7 +2029,14 @@ class ViInputDialog(wx.Panel):
             # Esc -> Abort input, go back to start
             self.ForgetViInput()
             self.Close()
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_BACK):
+            # When text is deleted we the search start is reset to the initial
+            # position
+            pos, x, y = self.initial_scroll_pos
+            self.ctrl.SetScrollAndCaretPosition(pos, x, y)
+            evt.Skip() # Skip so text is still deleted
 
+        # Arrow keys can be used to navigate the cmd_lie history
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_UP):
             self.SetInput(self.cmd_history.GoBackwardsInHistory())
 
@@ -2029,23 +2049,6 @@ class ViInputDialog(wx.Panel):
         elif accP == (wx.ACCEL_SHIFT, wx.WXK_TAB):
             self.SelectPreviousListBoxItem()
 
-        ### do the next search on another ctrl-f
-        #elif matchesAccelPair("StartIncrementalSearch", accP):
-        #    foundPos = self.ctrl.executeIncrementalSearch(searchString)
-        #elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
-        #        (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
-        #        (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-        #        (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-        #        (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
-        #    foundPos = self.ctrl.executeIncrementalSearch(searchString)
-        #elif matchesAccelPair("BackwardSearch", accP):
-        #    foundPos = self.ctrl.executeIncrementalSearchBackward(searchString)
-        #elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
-        #        (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
-        #        (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-        #        (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-        #        (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
-        #    foundPos = self.ctrl.executeIncrementalSearchBackward(searchString)
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \
                 matchesAccelPair("ActivateLink2", accP) or \

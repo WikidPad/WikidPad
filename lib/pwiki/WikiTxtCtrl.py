@@ -4479,6 +4479,8 @@ class ViHandler(ViHelper):
         self.register.SelectRegister(None)
 
     def OnMouseScroll(self, evt):
+    # TODO: check if it would be better to move the caret once scrolling has
+    #       finished
         # Not the best solution possible but until GetFirstVisibleLine
         # is fixed appears to be the best.
         current_line = self.ctrl.GetCurrentLine()
@@ -4879,7 +4881,12 @@ class ViHandler(ViHelper):
         cmd_type, key, count, motion, motion_wildcards, wildcards, \
                 text_to_select = self.last_cmd
 
-        self.count = count
+        # If no count has been specified use saved count
+        if not self.true_count:
+            self.count = count
+        # overwise save the new count
+        else:
+            self.last_cmd[2] = self.count
         self._motion = motion
         actions = self.insert_action
         # NOTE: Is "." only going to repeat editable commands as in vim?
@@ -4904,7 +4911,9 @@ class ViHandler(ViHelper):
         # TODO: move to ViHelper?
         if self.last_cmd is not None:
             self.BeginUndo()
-            self.Repeat(self._RepeatCmdHelper)
+            # If a count is specified the count in the previous cmd is changed
+            #self.Repeat(self._RepeatCmdHelper)
+            self._RepeatCmdHelper()
             self.EndUndo()
         else:
             self.visualBell("RED")
@@ -5476,10 +5485,11 @@ class ViHandler(ViHelper):
                 if ViHelper.STRIP_BULLETS_ON_LINE_JOIN:
                     # TODO: roman numerals
                     # It may be better to avoid using a regex here?
-                    line = re.sub(r"^ *(\*|\d.) ", r"", line)
+                    line = re.sub(r"^ *(\*|#|\d\.) ", r"", line)
                 new_text.append(line.lstrip())
 
         self.ctrl.ReplaceSelection(" ".join(new_text))
+        self.CheckLineEnd()
         self.EndUndo()
 
     #def DeleteCharMotion(self, key_code):
@@ -6270,7 +6280,8 @@ class ViHandler(ViHelper):
         if pos + count > line_length:
             return
 
-        self.last_cmd = 3, keycode, count, None, None, None, selected_text_len
+        self.last_cmd = \
+                [3, keycode, count, None, None, None, selected_text_len]
 
         self.BeginUndo(use_start_pos=True, force=True)
         self.StartSelection()
