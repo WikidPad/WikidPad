@@ -712,7 +712,7 @@ GLOBALDEFAULTS = {
 
     ("main", "search_dontAllowCancel"): "False", # Iff true a running search can't be canceled
             # (advanced option to cure a problem on Mac OS)
-    ("main", "search_stripSpaces"): "True", # Iff True then leading and trailing spaces are
+    ("main", "search_stripSpaces"): "False", # Iff True then leading and trailing spaces are
             # stripped from search text before searching
 
     # Miscellaneous
