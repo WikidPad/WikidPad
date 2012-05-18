@@ -3939,6 +3939,7 @@ class ViHandler(ViHelper):
     #               1 : Motion (inclusive)
     #               2 : Motion (exclusive)
     #               3 : Command ends in visual mode
+    #               4 : Command alters visual anchor pos
 
     # function : function to call on keypress
 
@@ -3961,30 +3962,30 @@ class ViHandler(ViHelper):
             0 : {
             # Normal mode
     (k[":"],)  : (0, (self.StartCmdInput, None), 0, 0), # :
+    (k["&"],)  : (0, (self.RepeatLastSubCmd, False), 0, 0), # &
     # TODO: convert from dialog so search can be used as a motion
     (k["/"],)  : (0, (self.StartForwardSearch, None), 0, 0), # /
     (k["?"],)  : (0, (self.StartReverseSearch, None), 0, 0), # ?
 
 
-    (k["<"], "motion")  : (0, (self.DedentText, None), 1, 0), # <motion
-    (k[">"], "motion")  : (0, (self.IndentText, None), 1, 0), # >motion
-    (k["c"], "motion")  : (0, (self.EndDeleteInsert, None), 2, 0), # cmotion
-    (k["c"], k["c"])  : (0, (self.DeleteLineIndentInsert, None), 2, 0), # cc
-    (k["d"], "motion") : (0, (self.EndDelete, None), 1, 0), # dmotion
+    (k["<"], "m")  : (0, (self.DedentText, None), 1, 0), # <motion
+    (k[">"], "m")  : (0, (self.IndentText, None), 1, 0), # >motion
+    (k["c"], "m")  : (0, (self.EndDeleteInsert, None), 2, 0), # cmotion
+    (k["d"], "m") : (0, (self.EndDelete, None), 1, 0), # dmotion
     (k["d"], k["s"], "*") : (0, (self.DeleteSurrounding, None), 1, 0), # ds
-    (k["y"], "motion") : (0, (self.Yank, None), 1, 0), # ymotion
+    (k["y"], "m") : (0, (self.Yank, None), 1, 0), # ymotion
     (k["c"], k["s"], "*", "*") : (0, (self.ChangeSurrounding, None), 1, 0), # cs**
     #       cas**??ca**?? add surrounding
-    (k["y"], k["s"], "motion", "*") : (0, (self.PreSurround, None), 1, 0), # ysmotion*
+    (k["y"], k["s"], "m", "*") : (0, (self.PreSurround, None), 1, 0), # ysmotion*
     # TODO: yS and ySS (indentation on new line)
     # ? yss
-    (k["y"], k["S"], "motion", "*") : (0, (self.PreSurroundOnNewLine, None), 1, 0), # yS**
+    (k["y"], k["S"], "m", "*") : (0, (self.PreSurroundOnNewLine, None), 1, 0), # yS**
     (k["y"], k["s"], k["s"], "*") : (0, (self.PreSurroundLine, None), 1, 0), # yss*
-    (k["g"], k["u"], "motion") : (0, (self.PreLowercase, None), 1, 0), # gu
-    (k["g"], k["U"], "motion") : (0, (self.PreUppercase, None), 1, 0), # gU
+    (k["g"], k["u"], "m") : (0, (self.PreLowercase, None), 1, 0), # gu
+    (k["g"], k["U"], "m") : (0, (self.PreUppercase, None), 1, 0), # gU
     # TODO: gugu / guu and gUgU / gUU
-    (k["g"], k["s"], "motion") : (0, (self.SubscriptMotion, None), 1, 0), # gs
-    (k["g"], k["S"], "motion") : (0, (self.SuperscriptMotion, None), 1, 0), # gS
+    (k["g"], k["s"], "m") : (0, (self.SubscriptMotion, None), 1, 0), # gs
+    (k["g"], k["S"], "m") : (0, (self.SuperscriptMotion, None), 1, 0), # gS
     (k["`"], "*")  : (1, (self.GotoMark, None), 0, 0), # `
     # TODO: ' is linewise
     (k["'"], "*")  : (1, (self.GotoMarkIndent, None), 0, 0), # '
@@ -3995,7 +3996,7 @@ class ViHandler(ViHelper):
     (k["T"], "*")  : (2, (self.FindUpToNextCharBackwards, None), 5, 0), # T*
     (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
 
-    (k["d"], k["c"], u"motion", u"*") : (0, (self.DeleteCharMotion, 
+    (k["d"], k["c"], u"m", u"*") : (0, (self.DeleteCharMotion, 
                                             False), 1, 0), # dcmotion*
 
     (k["i"],) : (0, (self.Insert, None), 2, 0), # i
@@ -4012,6 +4013,7 @@ class ViHandler(ViHelper):
 
     (k["s"],) : (0, (self.DeleteRightAndInsert, None), 2, 0), # s
     (k["S"],) : (0, (self.DeleteLinesAndIndentInsert, None), 2, 0), # S
+    (k["c"], k["c"])  : (0, (self.DeleteLinesAndIndentInsert, None), 2, 1), # cc
 
     (k["w"],) : (2, (self.MoveCaretNextWord, None), 0, 0), # w
     (k["W"],) : (2, (self.MoveCaretNextWORD, None), 0, 0), # W
@@ -4045,7 +4047,11 @@ class ViHandler(ViHelper):
 
     (k["g"], k["k"]) : (2, (self.MoveCaretUp, {"visual" : True}), 0, 0), # gk
     (k["g"], k["j"]) : (2, (self.MoveCaretDown, {"visual" : True}), 0, 0), # gj
-    # TODO: g^ / g0
+
+
+    (k["g"], k["0"])  : (2, (self.GotoVisualLineStart, None), 1, 0), # g0
+    (k["g"], k["$"])  : (2, (self.GotoVisualLineEnd, None), 1, 0), # g$
+
     # Arrow keys
     (wx.WXK_LEFT,) : (2, (self.MoveCaretLeft, None), 0, 0), # left 
     (wx.WXK_UP,) : (2, (self.MoveCaretUp, None), 0, 0), # up
@@ -4182,29 +4188,29 @@ class ViHandler(ViHelper):
 
         # Could be changed to use a wildcard
         for i in self.text_object_map:
-            self.keys[0][(k["i"], ord(i))] = (1, (self.SelectInTextObject, i, 0), 0, 0)
-            self.keys[0][(k["a"], ord(i))] = (1, (self.SelectATextObject, i, 0), 0, 0)
+            self.keys[0][(k["i"], ord(i))] = (1, (self.SelectInTextObject, i), 0, 0)
+            self.keys[0][(k["a"], ord(i))] = (1, (self.SelectATextObject, i), 0, 0)
 
         # INSERT MODE
         # Shortcuts available in insert mode (need to be repeatable by ".",
         # i.e. must work with EmulateKeypresses)
         self.keys[1] = {
-        # TODO:
-        #(("Ctrl", 64),)  : (0, (self.InsertPreviousText, None), 0), # Ctrl-@
-        #(("Ctrl", k["a"]),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
-        #                                                    None), 0), # Ctrl-a
-        (("Ctrl", k["n"]),)  : (0, (self.Autocomplete, True), 0, 0), # Ctrl-n
-        (("Ctrl", k["p"]),)  : (0, (self.Autocomplete, False), 0, 0), # Ctrl-p
+    # TODO:
+    #(("Ctrl", 64),)  : (0, (self.InsertPreviousText, None), 0), # Ctrl-@
+    #(("Ctrl", k["a"]),)  : (0, (self.InsertPreviousTextLeaveInsertMode, 
+    #                                                    None), 0), # Ctrl-a
+    (("Ctrl", k["n"]),)  : (0, (self.Autocomplete, True), 0, 0), # Ctrl-n
+    (("Ctrl", k["p"]),)  : (0, (self.Autocomplete, False), 0, 0), # Ctrl-p
 
-        # Unlike vim we these are case sensitive
-        (("Ctrl", k["w"]),)  : (0, (self.DeleteBackword, False), 0, 0), # Ctrl-w
-        (("Ctrl", k["W"]),)  : (0, (self.DeleteBackword, True), 0, 0), # Ctrl-W
-        (("Ctrl", k["v"]),)       : (0, (self.PutClipboard, False), 0, 0), # <c-v>
+    # Unlike vim we these are case sensitive
+    (("Ctrl", k["w"]),)  : (0, (self.DeleteBackword, False), 0, 0), # Ctrl-w
+    (("Ctrl", k["W"]),)  : (0, (self.DeleteBackword, True), 0, 0), # Ctrl-W
+    (("Ctrl", k["v"]),)       : (0, (self.PutClipboard, True), 0, 0), # <c-v>
 
-        # F1 and F2 in insert mode will still switch between editor and preview
-        # Should it revert back to normal mode?
-        (wx.WXK_F1,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F1
-        (wx.WXK_F2,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F2
+    # F1 and F2 in insert mode will still switch between editor and preview
+    # Should it revert back to normal mode?
+    (wx.WXK_F1,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F1
+    (wx.WXK_F2,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F2
         }
 
         # Rather than rewrite all the keys for other modes it is easier just
@@ -4222,8 +4228,9 @@ class ViHandler(ViHelper):
     (k["t"], "*") : (1, (self.FindUpToNextChar, None), 0, 0), # t
     (k["T"], "*")  : (2, (self.FindUpToNextCharBackwards, None), 0, 0), # T
     (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
-    (k["S"], "*")  : (0, (self.SurroundSelection, None), 2, 0), # S
+    (k["S"], "*")  : (0, (self.SurroundSelection, None), 1, 0), # S
 
+    (k["o"],)  : (4, (self.SwitchSelection, None), 0, 0), # o
 
     (k["c"],)  : (0, (self.DeleteSelectionAndInsert, None), 2, 0), # c
     (k["d"],)  : (0, (self.DeleteSelection, None), 1, 0), # d
@@ -4241,7 +4248,7 @@ class ViHandler(ViHelper):
     (k["g"], k["S"]) : (0, (self.SelectionToSuperscript, None), 1, 0), # gS
 
     (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection, 
-                                                                None), 1), # \dc* 
+                                                    None), 1), # \dc* 
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
@@ -4545,6 +4552,7 @@ class ViHandler(ViHelper):
         evt.Skip()
 
     def OnMouseClick(self, evt):
+        # TODO: block mouse movement whilst entering a command?
         self.ctrl.OnClick(evt)
         wx.CallAfter(self.SetLineColumnPos)
 
@@ -4814,15 +4822,15 @@ class ViHandler(ViHelper):
                 self.RunKeyChain(tuple(self.key_inputs), m)
 
                 return True
-            elif "motion" in self._acceptable_keys:
+            elif "m" in self._acceptable_keys:
                 self._acceptable_keys = None
                 self._motion.append(key)
                 if (key,) in self.motion_keys[m]:
-                    self.key_inputs.append("motion")
+                    self.key_inputs.append("m")
                     self.RunKeyChain(tuple(self.key_inputs), m)
                     return True
                 if (key,) in self.motion_key_mods[m]:
-                    self.key_inputs.append("motion")
+                    self.key_inputs.append("m")
                     return True
 
 
@@ -5210,6 +5218,7 @@ class ViHandler(ViHelper):
         self.StartSelection(None, set_visual_start=True)
         self.MoveCaretParaDown()
         self.ctrl.CharLeft()
+        self.ctrl.CharLeft()
         self.SelectSelection(2)
 
     def _SelectInBracket(self, bracket, extra=False, start_pos=None, 
@@ -5253,6 +5262,7 @@ class ViHandler(ViHelper):
                             self.ctrl.CharRightExtend()
             else:
                 self.ctrl.GotoPos(start_pos)
+        self.SelectSelection(2)
 
     def SelectInSquareBracket(self, extra=False):
         """ Selects text in [ ] block """
@@ -5396,11 +5406,24 @@ class ViHandler(ViHelper):
         if uni_chr in replacements:
             # Use .join([]) ?
 
+            REWRITE_SUB_SUP_LINKS = True
+
+            new_text = text
+
+            # TODO: add option to rewrite links containing <sup> and <sub> tags
+            tags = [u"<sup>", u"</sup>", u"<sub>", u"</sub>"]
+            if uni_chr == u"r" and REWRITE_SUB_SUP_LINKS and \
+                    True in [tag in text for tag in tags]:
+                stripped_text = text
+                for tag in tags:
+                    stripped_text = stripped_text.replace(tag, u"")
+                new_text = "{0}|{1}".format(stripped_text, text)
+
             # If r is used on a subpage we will add // for ease of use
             if uni_chr == u"r" and u"/" in self.ctrl.presenter.getWikiWord():
-                new_text = "{0}//{1}{2}".format(replacements[uni_chr][0], text, replacements[uni_chr][1])
+                new_text = "{0}//{1}{2}".format(replacements[uni_chr][0], new_text, replacements[uni_chr][1])
             else:
-                new_text = "{0}{1}{2}".format(replacements[uni_chr][0], text, replacements[uni_chr][1])
+                new_text = "{0}{1}{2}".format(replacements[uni_chr][0], new_text, replacements[uni_chr][1])
         else:
             new_text = "{0}{1}{2}".format(uni_chr, text, uni_chr)
 
@@ -5551,6 +5574,30 @@ class ViHandler(ViHelper):
     def GetSelectionAnchor(self):
         return self._anchor
 
+    def SelectEOLCharIfRequired(self):
+        """
+        Select the end of line character if current selection spans multiple
+        lines and selects and selects all the text. Will select the EOL char
+        if required.
+
+        @return: True if multiple lines are selected in their entirety. 
+        """
+        sel_start, sel_end = self._GetSelectionRange()
+
+        eol_char = self.ctrl.GetEOLChar()
+
+        if self.GetUnichrAt(sel_start - 1) != eol_char or \
+                self.ctrl.GetEOLChar() not in self.ctrl.GetSelectedText():
+            return False
+
+        if self.GetUnichrAt(sel_end - 1) == eol_char:
+            return True
+        elif self.GetUnichrAt(sel_end) == eol_char:
+            self.ctrl.CharRightExtend()
+            return True
+
+        return False
+
     def GetSelectionDetails(self, selection_type):
         # Test if selection is lines
         if selection_type == 1 or self.GetSelMode() == u"LINE" or \
@@ -5584,16 +5631,27 @@ class ViHandler(ViHelper):
         else:
             self._anchor = self.ctrl.GetCurrentPos()
 
+    def SwitchSelection(self, com_type=0):
+        """
+        Goes to the other end of the selected text (switches the cursor and
+        anchor positions)
+        """
+        anchor = self._anchor
+        self._anchor = self.ctrl.GetCurrentPos()
+        self._visual_start_pos = self._anchor
+        self.ctrl.GotoPos(anchor)
+        self.SelectSelection(2)
+
     def SelectSelection(self, com_type=0):
         if com_type < 1:
             print "Select selection called incorrectly", inspect.getframeinfo(inspect.currentframe().f_back)[2]
 
             return
 
-        if self.mode == ViHelper.VISUAL:
-            start_pos = self._visual_start_pos
-        else:
-            start_pos = self._anchor
+        #if self.mode == ViHelper.VISUAL:
+        #    start_pos = self._visual_start_pos
+        #else:
+        #    start_pos = self._anchor
         current_pos = self.ctrl.GetCurrentPos()
 
 
@@ -5606,8 +5664,6 @@ class ViHandler(ViHelper):
         elif com_type != 2:
             self.ctrl.CharRightExtend()
             
-
-
     def SelectionOnSingleLine(self):
         """
         Assume that if an EOL char is present we have mutiple lines
@@ -5634,10 +5690,16 @@ class ViHandler(ViHelper):
     def DeleteSelection(self, yank=True):
         """Yank selection and delete it"""
         self.BeginUndo(use_start_pos=True)
+
+        # Hack so that when deleting blocks that consit of entire lines
+        # the eol char is copied as well (allows pasting of line block)
+        self.SelectEOLCharIfRequired()
+
         if yank:
             self.YankSelection()
+
         self.ctrl.Clear()
-        #self.ctrl.GotoPos(start)
+
         self.EndUndo()
         self.LeaveVisualMode()
         self.SetLineColumnPos()
@@ -5706,6 +5768,7 @@ class ViHandler(ViHelper):
 
 
     def PreUppercase(self):
+        """Convert selected text to uppercase"""
         start = self.ctrl.GetSelectionStart()
         self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().upper())
@@ -5713,6 +5776,7 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def PreLowercase(self):
+        """Convert selected text to lowercase"""
         start = self.ctrl.GetSelectionStart()
         self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().lower())
@@ -5734,6 +5798,7 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def CreateShortHint(self):
+        """Add short hint template"""
         self.BeginUndo()
         self.ctrl.AddText('[short_hint:""]')
         self.ctrl.CharLeft()
@@ -5757,9 +5822,13 @@ class ViHandler(ViHelper):
         self.MoveCaretUp(1)
 
     def SwapCase(self):
+        """
+        Swap case of selected text. If no text selected swap case of
+        character under caret.
+        """
         self.BeginUndo(force=True)
         text = self.ctrl.GetSelectedText()
-        if len(text) == 0:
+        if len(text) < 1:
             self.StartSelection()
             self.MoveCaretRight(allow_last_char=True)
             self.SelectSelection(2)
@@ -5768,16 +5837,20 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def SelectionToSubscript(self):
+        """Surround selected text with <sub> </sub> tags"""
         self.BeginUndo(force=True)
         #self.ExtendSelectionIfRequired()
-        self.ctrl.ReplaceSelection("<sub>{0}</sub>".format(self.ctrl.GetSelectedText()))
+        self.ctrl.ReplaceSelection("<sub>{0}</sub>".format(
+                self.ctrl.GetSelectedText()))
         self.RemoveSelection()
         self.EndUndo()
 
     def SelectionToSuperscript(self):
+        """Surround selected text with <sup> </sup> tags"""
         self.BeginUndo(force=True)
         #self.ExtendSelectionIfRequired()
-        self.ctrl.ReplaceSelection("<sup>{0}</sup>".format(self.ctrl.GetSelectedText()))
+        self.ctrl.ReplaceSelection("<sup>{0}</sup>".format(
+                self.ctrl.GetSelectedText()))
         self.RemoveSelection()
         self.EndUndo()
 
@@ -5844,6 +5917,7 @@ class ViHandler(ViHelper):
         return n / float(lines)
 
     def _ScrollViewportByLines(self, n):
+        # TODO: should not always move cursor position
         first_visible_line = self.GetFirstVisibleLine()
         lines_on_screen = self.ctrl.LinesOnScreen()
 
@@ -6017,7 +6091,7 @@ class ViHandler(ViHelper):
             forward = False
             b = self.REVERSE_BRACES
         else:
-            return
+            return False
 
         start_pos = self.ctrl.GetCurrentPos()
         if forward:
@@ -6047,7 +6121,7 @@ class ViHandler(ViHelper):
                 if forward:
                     pos = start_pos + j + len(search_brace)
                 else:
-                    pos = start_pos - j + len(search_brace)
+                    pos = start_pos - j - len(search_brace)
                 break
 
         if pos > -1:
@@ -6381,6 +6455,8 @@ class ViHandler(ViHelper):
             start, end = self._GetSelectionRange()
             self.ctrl.SetSelection(start, end)
             self.ctrl.CharRightExtend()
+
+        self.SelectEOLCharIfRequired()
 
         #self.ctrl.Copy()
         text = self.ctrl.GetSelectedText()
@@ -6927,7 +7003,9 @@ class ViHandler(ViHelper):
 
         char = self.GetUnichrAt(pos)
 
+        # At the end of the file
         if char is None:
+            self.ctrl.CharLeft()
             return
 
         text_length = self.ctrl.GetTextLength()
@@ -7012,6 +7090,8 @@ class ViHandler(ViHelper):
         def func():
             self.ctrl.WordRight()
             while self.GetChar(-1) and not self.GetChar(-1).isspace():
+                if self.ctrl.GetCurrentPos() == self.ctrl.GetLength():
+                    return
                 self.ctrl.WordRight()
         self.Repeat(func, count)
 
@@ -7032,10 +7112,14 @@ class ViHandler(ViHelper):
     def MoveCaretParaUp(self, count=None):
         self.AddJumpPosition()
         self.Repeat(self.ctrl.ParaUp, count)
+        self.ctrl.CharLeft()
 
     def MoveCaretParaDown(self, count=None):
+        # TODO: headings as paragraphs?
         self.AddJumpPosition()
+        self.ctrl.CharRight()
         self.Repeat(self.ctrl.ParaDown, count)
+        self.ctrl.CharLeft()
 
     def GotoPosAndSave(self, pos):
         """
@@ -7043,6 +7127,18 @@ class ViHandler(ViHelper):
         """
         self.ctrl.GotoPos(pos)
         self.SetLineColumnPos()
+
+    def GotoVisualLineStart(self):
+        """
+        Move caret to start of the visual line
+        """
+        self.ctrl.HomeDisplay()
+
+    def GotoVisualLineEnd(self):
+        """
+        Move caret to end of the visual line
+        """
+        self.ctrl.LineEndDisplay()
 
     def DocumentNavigation(self, key):
         """
@@ -7116,15 +7212,22 @@ class ViHandler(ViHelper):
     def ScrollViewportLineUp(self):
         self._ScrollViewportByLines(-1)
 
+    # TODO: FIX UNDO / REDO 
+    def CanUndo(self):
+        return not self._undo_pos < 0
+
+    def CanRedo(self):
+        return not self._undo_pos > len(self._undo_positions)
+
     def Undo(self, count=None):
-        if self.ctrl.CanUndo():
+        if self.CanUndo():
             self.visualBell("GREEN")
             self.Repeat(self._Undo, count)
         else:
             self.visualBell("RED")
 
     def Redo(self, count=None):
-        if self.ctrl.CanRedo():
+        if self.CanRedo():
             self.visualBell("GREEN")
             self.Repeat(self._Redo, count)
         else:
@@ -7140,13 +7243,6 @@ class ViHandler(ViHelper):
                                                 self.ctrl.GetCurrentLine()):
             self.ctrl.CharRight()
         self.Insert()
-
-    def DeleteLineIndentInsert(self):
-        # TODO: should accept count
-        self.BeginUndo()
-        self.GotoLineIndent(self.ctrl.GetCurrentLine())
-        self.TruncateLineAndInsert()
-        self.EndUndo()
 
     def InsertAtLineStart(self):
         # Goto line places the caret at the start of the line
@@ -7193,6 +7289,12 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def TruncateLine(self, check_line_end=True):
+        text, pos = self.ctrl.GetCurLine()
+
+        # If line is empty do nothing (blank line has eol char)
+        if len(text) < 2:
+            return
+
         self.ctrl.LineEndExtend()
         self.ctrl.CharLeftExtend()
         self.ctrl.CharRightExtend()
