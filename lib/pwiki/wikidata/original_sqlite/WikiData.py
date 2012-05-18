@@ -299,7 +299,7 @@ class WikiData:
             filePath = self.getWikiWordFileName(word, mustExist=False)
             writeEntireFile(filePath, content, True)
 
-            fileSig = getFileSignatureBlock(filePath)
+            fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
             self.connWrap.execSql("update wikiwords set filesignature = ?, "
                     "metadataprocessed = 0 where word = ?",
                     (sqlite.Binary(fileSig), word))
@@ -644,7 +644,7 @@ class WikiData:
 #                 self.refreshWikiPageLinkTerms(deleteFully=True)
 #                 return True
 
-            fileSig = getFileSignatureBlock(filePath)
+            fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
 
             dbFileSig = self.connWrap.execSqlQuerySingleItem(
                     "select filesignature from wikiwords where word = ?",
@@ -662,7 +662,7 @@ class WikiData:
         """
         try:
             filePath = self.getWikiWordFileName(word)
-            fileSig = getFileSignatureBlock(filePath)
+            fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
         except (IOError, OSErro, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -679,7 +679,7 @@ class WikiData:
 #             self.execSql("update wikiwords set filesignature = ?, "
 #                     "metadataprocessed = ? where word = ?", (fileSig, 0, word))
 # 
-#                     fileSig = getFileSignatureBlock(fullPath)
+#                     fileSig = self.wikiDocument.getFileSignatureBlock(fullPath)
 
     
 
@@ -1155,7 +1155,7 @@ class WikiData:
                 wikiWord = self._findNewWordForFile(path)
 
                 if wikiWord is not None:
-                    fileSig = getFileSignatureBlock(fullPath)
+                    fileSig = self.wikiDocument.getFileSignatureBlock(fullPath)
                     
                     self.connWrap.execSql("insert into wikiwords(word, created, "
                             "modified, filepath, filenamelowercase, "
@@ -2057,7 +2057,8 @@ class WikiData:
                     writeEntireFile(join(self.dataDir, filePath), newdata,
                             isinstance(newdata, unicode))
 
-                    fileSig = getFileSignatureBlock(join(self.dataDir, filePath))
+                    fileSig = self.wikiDocument.getFileSignatureBlock(
+                            join(self.dataDir, filePath))
                     self.connWrap.execSql("update datablocksexternal "
                             "set filesignature = ?", (sqlite.Binary(fileSig),))
                     return
@@ -2087,7 +2088,7 @@ class WikiData:
                 filePath = join(self.dataDir, fileName)
                 writeEntireFile(filePath, newdata,
                         isinstance(newdata, unicode))
-                fileSig = getFileSignatureBlock(filePath)
+                fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
 
                 # It may be in internal data blocks, so try to delete
                 self.deleteDataBlock(unifName)

@@ -20,7 +20,7 @@ from .. import ParseUtilities
 from .. import StringOps
 from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool, pathnameFromUrl, urlFromPathname, \
-        relativeFilePath
+        relativeFilePath, getFileSignatureBlock
 from ..DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 # from ..timeView.Versioning import VersionOverview
 
@@ -2245,6 +2245,31 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 # Remove index
                 self.removeSearchIndex()
+
+
+    def getFileSignatureBlock(self, filename):
+        """
+        Mainly called by WikiData. Returns the file signature block for a
+        given file. It is a bytestring containing size and modification date
+        of the file and can be compared to a db-stored version to check for
+        file changes outside of WikidPad.
+        
+        It calls StringOps.getFileSignatureBlock with the time coarsening
+        given in the wiki options.
+        """
+        
+        coarseStr = self.getWikiConfig().get("main",
+                "fileSignature_timeCoarsening", "0")
+
+        try:
+            if "." in coarseStr:
+                coarsening = float(coarseStr)
+            else:
+                coarsening = int(coarseStr)
+        except ValueError:
+            coarsening = None
+            
+        return getFileSignatureBlock(filename, coarsening)
 
 
 

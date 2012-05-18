@@ -3420,6 +3420,40 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>File signature</label>
+          <font>
+            <size>8</size>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Time coarsening:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfFileSignatureTimeCoarsening"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
     </object>
   </object>
   <object class="wxDialog" name="FontFaceDialog">
@@ -6814,6 +6848,7 @@
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
         <object class="wxListBox" name="viInputListBox">
+          <content/>
           <style>wxLB_SINGLE</style>
         </object>
         <option>1</option>

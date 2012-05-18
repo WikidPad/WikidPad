@@ -665,8 +665,9 @@ class OptionsDialog(wx.Dialog):
 
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
-            ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b")
-            
+            ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b"),
+            ("fileSignature_timeCoarsening", "tfFileSignatureTimeCoarsening",
+                    "f0+")
     )
 
 

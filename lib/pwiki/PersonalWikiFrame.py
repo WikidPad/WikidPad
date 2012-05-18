@@ -5269,7 +5269,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def _updateStatusBarByStack(self):
-        self.statusBarTimer.Stop()
+        Utilities.callInMainThreadAsync(self.statusBarTimer.Stop)
+#         self.statusBarTimer.Stop()
 
         if len(self.statusBarStack) == 0:
             self.statusBar.SetStatusText(u"", 0)
@@ -5283,7 +5284,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.statusBar.SetStatusText(msg, 0)
         if duration != 0:
-            self.statusBarTimer.Start(duration, True)
+            Utilities.callInMainThreadAsync(self.statusBarTimer.Start, duration,
+                    True)
+#             self.statusBarTimer.Start(duration, True)
 
 
     def OnStatusBarTimer(self, evt):

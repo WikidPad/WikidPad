@@ -837,6 +837,9 @@ WIKIDEFAULTS = {
     ("main", "fileStorage_identity_modDateIsEnough"): "False",
             # Same modification date is enough to claim files identical (no content compare)
 
+    ("main", "fileSignature_timeCoarsening"): "0", # Coarsening of time stamp in file signature blocks (helpful when
+            # transferring wikis between different file systems)
+
     ("main", "wikiPageTitlePrefix"): "++",   # Prefix for main title of new pages
     ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
             # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")

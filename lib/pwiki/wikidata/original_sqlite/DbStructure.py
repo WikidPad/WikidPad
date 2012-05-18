@@ -899,6 +899,8 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
             filename = wikiWord + pagefileSuffix
             fullPath = join(dataDir, filename)
             try:
+                # We don't use coarsening here for the FSB because a different
+                # coarsening setting can't exist for the old wiki format
                 filesig = getFileSignatureBlock(fullPath)
             except (IOError, WindowsError):
                 traceback.print_exc()
@@ -931,6 +933,8 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
 
                 try:
                     rename(pathEnc(fullPath), pathEnc(newPath))
+                    # We don't use coarsening here for the FSB because a different
+                    # coarsening setting can't exist for the old wiki format
                     connwrap.execSql(
                         "insert into datablocksexternal(unifiedname, filepath, "
                         "filenamelowercase, filesignature) values (?, ?, ?, ?)",

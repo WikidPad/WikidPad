@@ -9,7 +9,7 @@ import os, traceback
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile
+import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile, math
 
 # import urllib_red as urllib
 import urllib, urlparse, cgi
@@ -377,10 +377,29 @@ def writeEntireFile(filename, content, textMode=False):
 
 
 
-def getFileSignatureBlock(filename):
+def getFileSignatureBlock(filename, timeCoarsening=None):
+    """
+    Returns the file signature block for a given file. It is a bytestring
+    containing size and modification date of the file and can be compared to a
+    db-stored version to check for file changes outside of WikidPad.
+    
+    The  timeCoarsening  can be a number of seconds (or fractions thereof).
+    The modification time is rounded UP to a number divisible by timeCoarsening.
+    
+    If a wiki is moved between file systems with different time granularity
+    (e.g. NTFS uses 100ns, FAT uses 2s for mod. time) the file would be seen as
+    dirty and cache data would be rebuild without need without coarsening.
+    """
     statinfo = os.stat(pathEnc(filename))
+    
+    if timeCoarsening is None or timeCoarsening <= 0:
+        return pack(">BQd", 0, statinfo.st_size, statinfo.st_mtime)
+    
+    ct = int(math.ceil(statinfo.st_mtime / timeCoarsening)) * timeCoarsening
+    
+    return pack(">BQd", 0, statinfo.st_size, ct)
 
-    return pack(">BQd", 0, statinfo.st_size, statinfo.st_mtime)
+    
 
 
 def removeBracketsFilename(fn):
