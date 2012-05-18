@@ -848,7 +848,8 @@ class ViHelper():
 
         selection_range = None
         if self.mode == ViHelper.VISUAL:
-            initial_input = u"'<,'>"
+            if initial_input is None:
+                initial_input = u"'<,'>"
             selection_range = self.ctrl.vi._GetSelectionRange()
 
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
@@ -1273,7 +1274,11 @@ class CmdParser():
             "dlpage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
 
             "renamepage" : (self.GetDefinedWikiPages, self.Pass),
+
+            # Currently bdelete and bwipeout are currently synonymous
             "quit" : (self.GetTabs, self.CloseTab),
+            "bdelete" : (self.GetTabs, self.CloseTab),
+            "bwipeout" : (self.GetTabs, self.CloseTab),
             "quitall" : (self.Pass, self.CloseWiki),
             "tabonly" : (self.GetTabs, self.CloseOtherTabs),
             "exit" : (self.Pass, self.CloseWiki),
@@ -1776,7 +1781,7 @@ class ViInputDialog(wx.Panel):
 
         self.closeDelay = 0 # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_SET_FOCUS(self.ctrls.viInputListBox, self.FocusInputField)
+        #wx.EVT_SET_FOCUS(self.ctrls.viInputListBox, self.FocusInputField)
 
         wx.EVT_TEXT(self, GUI_ID.viInputTextField, self.OnText)
         wx.EVT_KEY_DOWN(self.ctrls.viInputTextField, self.OnKeyDownInput)
@@ -1784,16 +1789,16 @@ class ViInputDialog(wx.Panel):
                 self.OnTimerIncViInputClose)
         wx.EVT_MOUSE_EVENTS(self.ctrls.viInputTextField, self.OnMouseAnyInput)
 
+        wx.EVT_LEFT_DOWN(self.ctrls.viInputListBox, self.OnLeftMouseListBox)
+        wx.EVT_LEFT_DCLICK(self.ctrls.viInputListBox, self.OnLeftMouseDoubleListBox)
+
         if self.closeDelay:
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
             self.closeTimer.Start(self.closeDelay, True)
 
         self.selection_range = None
 
-
         wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
-
-        return
 
     def StartCmd(self, ctrl, cmd_history, text, selection_range=None):
         self.search = False
@@ -1804,7 +1809,6 @@ class ViInputDialog(wx.Panel):
         """
         Called to start a search input
         """
-
         self.search = True
 
         self.search_args = {
@@ -1823,6 +1827,10 @@ class ViInputDialog(wx.Panel):
         Code common to both search and cmd inputs
         """
         self.ctrl = ctrl
+
+        self.cmd_list = []
+
+        self.cmd_parser = CmdParser(self.ctrl, self.selection_range)
         
         self.initial_scroll_pos = self.ctrl.GetScrollAndCaretPosition()
 
@@ -1832,9 +1840,6 @@ class ViInputDialog(wx.Panel):
             self.ctrls.viInputTextField.AppendText(initial_input)
             self.ctrls.viInputTextField.SetSelection(-1, -1)
 
-
-        self.cmd_parser = CmdParser(self.ctrl, self.selection_range)
-        self.cmd_list = []
 
         self.cmd_history = cmd_history
 
@@ -1864,7 +1869,8 @@ class ViInputDialog(wx.Panel):
         """
         Called if a user clicks outside of the viInputPanel
         """
-        self.Close()
+        if self.search:
+            self.Close()
 
     def FocusInputField(self, evt=None):
         self.ctrls.viInputTextField.SetFocus()
@@ -1877,15 +1883,38 @@ class ViInputDialog(wx.Panel):
         return self.ctrls.viInputTextField.GetValue()
 
     def SetInput(self, text):
+        # Check if we just want to change the cmd argument
+        current_text = self.GetInput().split(" ")
+        if len(current_text) > 1:
+            text = "{0} {1}".format(current_text[0], text)
+        
         if text:
             self.ctrls.viInputTextField.SetValue(text)
             self.ctrls.viInputTextField.SetInsertionPointEnd()
+
+    def OnLeftMouseListBox(self, evt):
+        evt.Skip()
+        wx.CallAfter(self.FocusInputField)
+        wx.CallAfter(self.PostLeftMouseListBox)
+
+    def OnLeftMouseDoubleListBox(self, evt):
+        evt.Skip()
+        wx.CallAfter(self.PostLeftMouseDoubleListBox)
+
+    def PostLeftMouseListBox(self):
+        self.block_list_reload = True
+        self.SetInput(self.ctrls.viInputListBox.GetStringSelection())
+        self.block_list_reload = False
+
+    def PostLeftMouseDoubleListBox(self):
+        self.PostLeftMouseListBox()
+        self.ExecuteCmd(self.GetInput())
+        self.Close()
 
     def OnText(self, evt):
         """
         Called whenever new text is inserted into the input box
         """
-
         if self.search:
             text = self.GetInput()
 
@@ -1927,6 +1956,7 @@ class ViInputDialog(wx.Panel):
                 self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_RED)
 
     def ExecuteCmd(self, text_input):
+        # Should this close the input?
         if len(text_input) < 1:
             return False
         self.cmd_history.AddCmd(text_input)
@@ -1978,6 +2008,7 @@ class ViInputDialog(wx.Panel):
         """
         Called if user cancels the input.
         """
+        # Set previous selection?
         self.cmd_history.AddCmd(self.ctrls.viInputTextField.GetValue())
         pos, x, y = self.initial_scroll_pos
         wx.CallAfter(self.ctrl.SetScrollAndCaretPosition, pos, x, y)
@@ -1986,6 +2017,10 @@ class ViInputDialog(wx.Panel):
         self.ctrls.viInputListBox.Clear()
 
     def PopulateListBox(self, data):
+        
+        if data is None or len(data) < 1:
+            # No items
+            return
         self.list_data = data
 
         self.ctrls.viInputListBox.Clear()
@@ -2015,6 +2050,8 @@ class ViInputDialog(wx.Panel):
 
         searchString = self.GetInput()
 
+        print accP
+
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
                 (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
@@ -2024,7 +2061,8 @@ class ViInputDialog(wx.Panel):
 
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE) or \
                 (accP == (wx.ACCEL_NORMAL, wx.WXK_BACK) 
-                        and len(searchString) == 0):
+                    and len(searchString) == 0) or \
+                        accP == (wx.ACCEL_CTRL, 91):
             # TODO: add ctrl-c (ctrl-[)?
             # Esc -> Abort input, go back to start
             self.ForgetViInput()
@@ -2093,13 +2131,14 @@ class ViInputDialog(wx.Panel):
 
         self.ctrls.viInputListBox.SetSelection(select(n, 
                                     self.ctrls.viInputListBox.GetSelection() + offset))
-        split_text = self.GetInput().split(u" ")
+        #split_text = self.GetInput().split(u" ")
 
         self.block_list_reload = True
-        if len(split_text) > 1:# and split_text[1] != u"":
-            self.ctrls.viInputTextField.SetValue("{0} {1}".format(self.ctrls.viInputTextField.GetValue().split(u" ")[0], self.ctrls.viInputListBox.GetStringSelection()))
-        else:
-            self.ctrls.viInputTextField.SetValue("{0}".format(self.ctrls.viInputListBox.GetStringSelection()))
+        self.SetInput(self.ctrls.viInputListBox.GetStringSelection())
+        #if len(split_text) > 1:# and split_text[1] != u"":
+        #    self.ctrls.viInputTextField.SetValue("{0} {1}".format(self.ctrls.viInputTextField.GetValue().split(u" ")[0], self.ctrls.viInputListBox.GetStringSelection()))
+        #else:
+        #    self.ctrls.viInputTextField.SetValue("{0}".format(self.ctrls.viInputListBox.GetStringSelection()))
         self.ctrls.viInputTextField.SetInsertionPointEnd()
         self.block_list_reload = False
         self.run_cmd_timer.Stop()
