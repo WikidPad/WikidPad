@@ -1998,8 +1998,7 @@ class SimpleInfoDialog(wx.Dialog):
         mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 0)
         
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_CLOSE(self, self.OnOk)
-
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnOk)
 
         self.SetSizer(mainsizer)
         self.Fit()
@@ -2009,7 +2008,7 @@ class SimpleInfoDialog(wx.Dialog):
 
 
 
-    def _addLine(self, label, value, multiLine=False):
+    def _addTextLine(self, label, value, multiLine=False):
 
         if value is not None:
             self.lineSizer.Add(wx.StaticText(self, -1, label), 0,
@@ -2030,12 +2029,18 @@ class SimpleInfoDialog(wx.Dialog):
 
         return ctl
 
+    # Compatiblity.  TODO: 2.4: Remove
+    _addLine = _addTextLine
         
     def fillInfoLines(self):
         raise NotImplementedError #abstract
         
+        
+    def close(self):
+        pass
     
     def OnOk(self, evt):
+        self.close()
         evt.Skip()
         
 
@@ -2055,12 +2060,12 @@ class WikiPropertiesDialog(SimpleInfoDialog):
         wd = self.mainControl.getWikiDocument()
         if wd is None:
             label = _(u"No wiki loaded")
-            self._addLine(label, None)
+            self._addTextLine(label, None)
             return
 
         label = _(u"Wiki config. path:")
         value = wd.getWikiConfigPath()
-        self._addLine(label, value)
+        self._addTextLine(label, value)
 
 #         wikiData = wd.getWikiData()
 
@@ -2070,7 +2075,7 @@ class WikiPropertiesDialog(SimpleInfoDialog):
 #         else:
         value = wd.getDbtype()
 
-        self._addLine(label, value)
+        self._addTextLine(label, value)
 
         label = _(u"Number of wiki pages:")
 #         if wd is None:
@@ -2078,7 +2083,7 @@ class WikiPropertiesDialog(SimpleInfoDialog):
 #         else:
         value = unicode(len(wd.getAllDefinedWikiPageNames()))
 
-        self._addLine(label, value)
+        self._addTextLine(label, value)
 
         if wd.isReadOnlyEffect():
             label = _(u"Wiki is read-only. Reason:")
@@ -2097,7 +2102,7 @@ class WikiPropertiesDialog(SimpleInfoDialog):
             else:
                 value = _("Unknown reason")
             
-            self._addLine(label, value, multiLine=True)
+            self._addTextLine(label, value, multiLine=True)
 
 
 class WikiJobDialog(SimpleInfoDialog):
@@ -2110,6 +2115,13 @@ class WikiJobDialog(SimpleInfoDialog):
 
         SimpleInfoDialog.__init__(self, parent, id, _(u'Jobs'),
                           size=(470, 330) )
+                          
+        wd = self.mainControl.getWikiDocument()
+        if wd is not None:
+            exe = wd.getUpdateExecutor()
+            if exe is not None:
+                exe.startDoneJobCount()
+                exe.resetDoneJobCount()
 
         # Start timer
         self.timer = wx.Timer(self, GUI_ID.TIMER_JOBDIALOG)
@@ -2119,13 +2131,14 @@ class WikiJobDialog(SimpleInfoDialog):
         wx.EVT_TIMER(self, GUI_ID.TIMER_JOBDIALOG, self.OnTimer)
 
 
-    def OnOk(self, evt):
-        evt.Skip()
-        self.timer.Stop()
+#     def OnOk(self, evt):
+#         evt.Skip()
+#         self.timer.Stop()
         
 
     def fillInfoLines(self):
-        self.jobTxtCtrl = self._addLine(_(u"Number of Jobs:"), u"0")
+        self.jobTxtCtrl = self._addTextLine(_(u"Number of Jobs:"), u"0")
+        self.jobDoneTxtCtrl = self._addTextLine(_(u"Number of Done Jobs:"), u"0")
 
     def OnTimer(self, evt):
         wd = self.mainControl.getWikiDocument()
@@ -2133,4 +2146,16 @@ class WikiJobDialog(SimpleInfoDialog):
             exe = wd.getUpdateExecutor()
             if exe is not None:
                 self.jobTxtCtrl.SetValue(unicode(exe.getJobCount()))
+                self.jobDoneTxtCtrl.SetValue(unicode(exe.getDoneJobCount()))
 
+    def close(self):
+        self.timer.Stop()
+        wd = self.mainControl.getWikiDocument()
+        if wd is not None:
+            exe = wd.getUpdateExecutor()
+            if exe is not None:
+                exe.stopDoneJobCount()
+
+        SimpleInfoDialog.close(self)
+        
+        

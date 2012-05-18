@@ -139,6 +139,9 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
         self.thread = None
         self.paused = False
         self.currentThreadStop = None
+        
+        self.doneJobCount = 0
+        self.incDoneJobCount = self._inactiveIncDoneJobCount
 
     def isValidThread(self):
         return self.deques is not None
@@ -217,6 +220,25 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                 return sum((len(deque) for deque in self.deques[start:end]), 0)
 
 
+    def _activeIncDoneJobCount(self):
+        self.doneJobCount += 1
+    
+    def _inactiveIncDoneJobCount(self):
+        pass
+    
+    def resetDoneJobCount(self):
+        self.doneJobCount = 0
+
+    def getDoneJobCount(self):
+        return self.doneJobCount
+        
+    def startDoneJobCount(self):
+        self.incDoneJobCount = self._activeIncDoneJobCount
+
+    def stopDoneJobCount(self):
+        self.incDoneJobCount = self._inactiveIncDoneJobCount
+        
+
     def _fireStateChange(self, running=None):
         if running is None:
             # Detect self
@@ -274,6 +296,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
 
             try:
                 retObj.setResult(fct(*args, **kwargs))
+                self.incDoneJobCount()
 
             except Exception, e:
                 traceback.print_exc() # ?

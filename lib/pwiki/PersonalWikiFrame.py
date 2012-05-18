@@ -3223,6 +3223,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.wikiDataManager.getMiscEvent())
         self.wikiDataManager.getUpdateExecutor().getMiscEvent().addListener(self)
 
+        if self.wikiDataManager.getUpdateExecutor().getJobCount() > 0:
+            self.updateStatusMessage(
+                    _("Performing background jobs..."),
+                    key="jobInfo", duration=300000)
+        else:
+            self.dropStatusMessageByKey("jobInfo")
+
         self.wikiData = wikiDataManager.getWikiData()
 
         self.wikiName = self.wikiDataManager.getWikiName()
@@ -5236,7 +5243,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self._updateStatusBarByStack()
 
 
-    def updateStatusMessage(self, msg, duration, key):
+    def updateStatusMessage(self, msg, key, duration=0):
         """
         Delete all messages with key  key  and place this new one on the top.
         """
@@ -5389,7 +5396,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if jobCount > 0:
                         self.updateStatusMessage(
                                 _("Performing background jobs..."),
-                                duration=120000, key="jobInfo")
+                                key="jobInfo", duration=300000)
                     else:
                         self.dropStatusMessageByKey("jobInfo")
 
