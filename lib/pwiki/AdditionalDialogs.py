@@ -1102,9 +1102,6 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         self.continuousExport = continuousExport
         self.savedExports = None
         
-        # In addition to exporter list, this set will contain type tags of all
-        # supported exports (used for saved exports list).
-        self.supportedExportTypes = set()
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.mainControl, "ExportDialog")
 
@@ -1112,6 +1109,10 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
 
         if continuousExport:
             self.SetTitle(_(u"Continuous Export"))
+
+        # In addition to exporter list, this set will contain type tags of all
+        # supported exports (used for saved exports list).
+        self.supportedExportTypes = set()
 
         self.emptyPanel = None
 

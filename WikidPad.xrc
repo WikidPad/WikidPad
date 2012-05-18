@@ -6251,34 +6251,9 @@
           </object>
           <object class="sizeritem">
             <object class="wxChoice" name="chExportTo">
-              <content>
-                <item>Plain text</item>
-                <item>HTML</item>
-              </content>
+              <content/>
               <selection>0</selection>
             </object>
-            <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
-            <border>5</border>
-          </object>
-        </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-      </object>
-      <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
-          <object class="sizeritem">
-            <object class="wxStaticText">
-              <label>Page separator:</label>
-              <style>wxALIGN_RIGHT</style>
-            </object>
-            <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxTextCtrl" name="tfWikiPageSeparator"/>
             <option>1</option>
             <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
             <border>5</border>
@@ -6321,13 +6296,6 @@
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
-          <object class="sizeritem">
-            <object class="wxButton" name="btnChoosePlainTextFont">
-              <label>Choose plain text font</label>
-            </object>
-            <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -6353,6 +6321,40 @@
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="PrintSubPlainText">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Page separator:</label>
+              <style>wxALIGN_RIGHT</style>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfWikiPageSeparator"/>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxButton" name="btnChoosePlainTextFont">
+          <label>Choose plain text font</label>
+        </object>
+        <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
       </object>
     </object>
   </object>

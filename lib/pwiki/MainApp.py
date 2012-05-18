@@ -431,6 +431,9 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.describeExportersApi = self.pluginManager.registerSimplePluginAPI(
                 ("Exporters", 1), ("describeExportersV01",))
+
+        self.describePrintsApi = self.pluginManager.registerSimplePluginAPI(
+                ("Prints", 1), ("describePrintsV01",))
                 
         menuModifierApi = self.pluginManager.registerSimplePluginAPI(
                 ("MenuModifier", 1), ("modifyMenuV01",))
@@ -729,6 +732,11 @@ class App(wx.App, MiscEventSourceMixin):
     def describeExporters(self, mainControl):
         return reduce(lambda a, b: a+list(b),
                 self.describeExportersApi.describeExporters(mainControl), [])
+
+    def describePrints(self, mainControl):
+        return reduce(lambda a, b: a+list(b),
+                self.describePrintsApi.describePrintsV01(mainControl), [])
+
 
     def createDefaultGlobalConfig(self, globalConfigLoc):
         self.globalConfig.createEmptyConfig(globalConfigLoc)

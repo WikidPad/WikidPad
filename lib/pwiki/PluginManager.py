@@ -584,7 +584,7 @@ def getExporterTypeDict(mainControl, continuousExport):
     """
     result = {}
 
-    # External plugins can overwrite internal exporter types (good idea?)
+    # External plugins can overwrite internal exporter types
     for c in getExporterClasses(mainControl):
         for tnt in c.getExportTypes(mainControl, continuousExport):
             tname, tnameHr = tnt[:2]
@@ -594,20 +594,19 @@ def getExporterTypeDict(mainControl, continuousExport):
 
 
 
-
-def getSupportedExportTypes(mainControl, guiParent=None, continuousExport=False):
+def groupOptPanelPlugins(mainControl, typeDict, guiParent=None):
     """
-    Returns dictionary {exporterTypeName: (exportObject, exporterTypeName,
+    Returns dictionary {pluginTypeName: (pluginObject, pluginTypeName,
         humanReadableName, addOptPanel)}
-    addOptPanel is the additional options GUI panel and is always None if
-    guiParent is None
+        addOptPanel: additional options GUI panel and is always None if
+            guiParent is None
+    typeDict -- dictionary {pluginTypeName: (class, pluginTypeName,
+        humanReadableName)}
     """
     preResult = []
 
     classIdToInstanceDict = {}
     
-    typeDict = getExporterTypeDict(mainControl, continuousExport)
-
     # First create an object of each exporter class and create list of 
     # objects with the respective exportType (and human readable export type)
     for ctt in typeDict.values():
@@ -661,4 +660,47 @@ def getSupportedExportTypes(mainControl, guiParent=None, continuousExport=False)
                     exportTypeToPanelDict[expType])
 
         return result
+
+
+
+def getSupportedExportTypes(mainControl, guiParent=None, continuousExport=False):
+    """
+    Returns dictionary {exporterTypeName: (exportObject, exporterTypeName,
+        humanReadableName, addOptPanel)}
+    addOptPanel is the additional options GUI panel and is always None if
+    guiParent is None
+    """
+    return groupOptPanelPlugins(mainControl,
+            getExporterTypeDict(mainControl, continuousExport),
+            guiParent=guiParent)
+
+
+
+
+def getPrintTypeDict(mainControl):
+    """
+    Returns dictionary {printTypeName: (class, printTypeName, humanReadableName)}
+    """
+    result = {}
+
+    # External plugins can overwrite internal exporter types
+    for c in wx.GetApp().describePrints(mainControl):
+        for tnt in c.getPrintTypes(mainControl):
+            tname, tnameHr = tnt[:2]
+            result[tname] = (c, tname, tnameHr)
+
+    return result
+
+
+
+def getSupportedPrintTypes(mainControl, guiParent=None):
+    """
+    Returns dictionary {printTypeName: (printObject, printTypeName,
+        humanReadableName, addOptPanel)}
+    addOptPanel is the additional options GUI panel and is always None if
+    guiParent is None
+    """
+    return groupOptPanelPlugins(mainControl,
+            getPrintTypeDict(mainControl), guiParent=guiParent)
+
 

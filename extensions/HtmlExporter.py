@@ -621,7 +621,7 @@ class HtmlExporter(AbstractExporter):
         exportDest -- Path to destination directory or file to export to
         compatFilenames -- Should the filenames be encoded to be lowest
                            level compatible (ascii only)?
-        addOpt -- additional options returned by getAddOpt()
+        addOpt -- additional options as returned by getAddOpt()
         """
         if not self.setJobData(wikiDocument, wordList, exportType, exportDest,
                 compatFilenames, addOpt, progressHandler):
