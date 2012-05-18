@@ -1693,6 +1693,10 @@ class ViFunctions(ViHelper):
 (k["$"],)  : (0, (self.DocumentNavigation, k["$"]), 0, 0), # $
 (k["^"],)  : (0, (self.DocumentNavigation, k["^"]), 0, 0), # ^
 (k["0"],)  : (0, (self.DocumentNavigation, k["0"]), 0, 0), # 0
+
+(k["}"],) : (0, (self.JumpToNextHeading, None), 0, 0), # }
+(k["{"],) : (0, (self.JumpToPreviousHeading, None), 0, 0), # {
+
 (k["f"],) : (0, (self.startFollowHint, 0), 0, 0), # f
 (k["F"],) : (0, (self.startFollowHint, 2), 0, 0), # F
 (k["Y"],)  : (0, (self.ctrl.OnClipboardCopy, None), 0, 0), # Y
@@ -1707,6 +1711,8 @@ class ViFunctions(ViHelper):
     
         }
         }
+
+        self.LoadPlugins(u"preview_wk")
 
         # Generate possible key modifiers
         self.key_mods = self.GenerateKeyModifiers(self.keys)
@@ -1819,6 +1825,82 @@ class ViFunctions(ViHelper):
 
         elif key == 48: # 0
             hadj.set_value(x_lower)
+
+    def JumpToNextHeading(self):
+        self._JumpHeading(True)
+
+    def JumpToPreviousHeading(self):
+        self._JumpHeading(False)
+
+    def _JumpHeading(self, forward=True):
+        # TODO: optimise
+
+        if forward:
+            f = u"true" 
+        else:
+            f = u"false"
+
+        self.ctrl.html.getWebkitWebView().execute_script(
+        """
+
+var forward = {0}
+
+function getOffset( el ) {{
+    var _x = 0;
+    var _y = 0;
+    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {{
+        _x += el.offsetLeft - el.scrollLeft;
+        _y += el.offsetTop - el.scrollTop;
+        el = el.offsetParent;
+    }}
+    return {{ top: _y, left: _x }};
+}}
+
+
+//Get all headings
+var headings = new Array();
+
+for( i = 1; i<= 6; i++ ) {{ 
+    var tag = 'h' + i;
+    var heads = document.getElementsByTagName( tag );
+    for ( j = 0; j < heads.length; j++ ) {{ 
+        headings.push(heads[j])
+    }}
+}}
+
+doc_height = document.body.scrollHeight
+
+scroll_height = window.pageYOffset
+
+// We start by scrolling to the end of the document
+if (forward) {{
+    var to_scroll = doc_height - scroll_height
+    }} else {{
+    var to_scroll = - scroll_height
+    }}
+
+
+//distances = new Array();
+
+for (var i=0; i<headings.length; i++) {{
+    //heading_pos = getOffset(headings[i]).top
+    x = getOffset(headings[i]).top
+    if (forward) {{
+        if (0 < x && x < to_scroll) {{
+            to_scroll = x
+            }}
+        }} else {{
+        if (x < 0 && x > to_scroll) {{
+            to_scroll = x
+            }}
+        }}
+    }}
+
+
+window.scrollTo(0, scroll_height + to_scroll)
+""".format(f))
+
+
             
     # Numbers
     def SetNumber(self, n):

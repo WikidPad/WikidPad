@@ -279,6 +279,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     )
                 )
 
+        self.viPluginFunctions = plm.registerSimplePluginAPI(("ViFunctions",1), 
+                                ("describeViFunctions",))
+
         # interfaces for menu and toolbar plugins
         self.menuFunctions = plm.registerSimplePluginAPI(("MenuFunctions",1), 
                                 ("describeMenuItems",))
@@ -2696,6 +2699,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.mainmenu is not None:
             self.menuFunctions = self.pluginManager.registerSimplePluginAPI((
                     "MenuFunctions",1), ("describeMenuItems",))
+
+            # Will only take affect for new tabs
+            self.viPluginFunctions = self.pluginManager.registerSimplePluginAPI(
+                    ("ViFunctions",1), ("describeViFunctions",))
 
             self.loadFixedExtensions()
             self.pluginManager.loadPlugins([ u'KeyBindings.py',

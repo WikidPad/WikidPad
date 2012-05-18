@@ -3479,6 +3479,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.GotoPos(pos)
         self.scrollXY(x, y)
 
+    def GetViHandler(self):
+        return self.vi
+
 
     # TODO
 #     def setMouseCursor(self):
@@ -3987,9 +3990,9 @@ class ViHandler(ViHelper):
     (k["'"], "*")  : (1, (self.GotoMarkIndent, None), 0, 0), # '
     (k["m"], "*") : (0, (self.Mark, None), 0, 0), # m
     (k["f"], "*") : (1, (self.FindNextChar, None), 4, 0), # f*
-    (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 4, 0), # F*
+    (k["F"], "*")  : (2, (self.FindNextCharBackwards, None), 4, 0), # F*
     (k["t"], "*") : (1, (self.FindUpToNextChar, None), 5, 0), # t*
-    (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 5, 0), # T*
+    (k["T"], "*")  : (2, (self.FindUpToNextCharBackwards, None), 5, 0), # T*
     (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
 
     (k["d"], k["c"], u"motion", u"*") : (0, (self.DeleteCharMotion, 
@@ -4211,33 +4214,33 @@ class ViHandler(ViHelper):
         self.keys[2] = self.keys[0].copy()
         self.keys[2].update({
 
-                (k["'"], "*")  : (1, (self.GotoMark, None), 0, 0), # '
-                (k["`"], "*")  : (1, (self.GotoMarkIndent, None), 0, 0), # `
-                (k["m"], "*") : (0, (self.Mark, None), 0, 0), # m
-                (k["f"], "*") : (1, (self.FindNextChar, None), 0, 0), # f
-                (k["F"], "*")  : (1, (self.FindNextCharBackwards, None), 0, 0), # F
-                (k["t"], "*") : (1, (self.FindUpToNextChar, None), 0, 0), # t
-                (k["T"], "*")  : (1, (self.FindUpToNextCharBackwards, None), 0, 0), # T
-                (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
-                (k["S"], "*")  : (0, (self.SurroundSelection, None), 2, 0), # S
+    (k["'"], "*")  : (1, (self.GotoMark, None), 0, 0), # '
+    (k["`"], "*")  : (1, (self.GotoMarkIndent, None), 0, 0), # `
+    (k["m"], "*") : (0, (self.Mark, None), 0, 0), # m
+    (k["f"], "*") : (1, (self.FindNextChar, None), 0, 0), # f
+    (k["F"], "*")  : (2, (self.FindNextCharBackwards, None), 0, 0), # F
+    (k["t"], "*") : (1, (self.FindUpToNextChar, None), 0, 0), # t
+    (k["T"], "*")  : (2, (self.FindUpToNextCharBackwards, None), 0, 0), # T
+    (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
+    (k["S"], "*")  : (0, (self.SurroundSelection, None), 2, 0), # S
 
 
-                (k["c"],)  : (0, (self.DeleteSelectionAndInsert, None), 2, 0), # c
-                (k["d"],)  : (0, (self.DeleteSelection, None), 1, 0), # d
-                (k["D"],) : (0, (self.DeleteSelectionLines, None), 2, 0), # D
-                (k["x"],)  : (0, (self.DeleteSelection, None), 1, 0), # x
-                (k["y"],) : (0, (self.Yank, False), 0, 0), # y
-                (k["Y"],) : (0, (self.Yank, True), 0, 0), # Y
-                (k["<"],) : (0, (self.Indent, {"forward":False, "visual":True}), 1, 0), # <
-                (k[">"],) : (0, (self.Indent, {"forward":True, "visual":True}), 1, 0), # >
-                (k["u"],) : (0, (self.SelectionToLowerCase, None), 1, 0), # u
-                (k["U"],) : (0, (self.SelectionToUpperCase, None), 1, 0), # U
-                (k["g"], k["u"]) : (0, (self.SelectionToLowerCase, None), 1, 0), # gu
-                (k["g"], k["U"]) : (0, (self.SelectionToUpperCase, None), 1, 0), # gU
-                (k["g"], k["s"]) : (0, (self.SelectionToSubscript, None), 1, 0), # gs
-                (k["g"], k["S"]) : (0, (self.SelectionToSuperscript, None), 1, 0), # gS
+    (k["c"],)  : (0, (self.DeleteSelectionAndInsert, None), 2, 0), # c
+    (k["d"],)  : (0, (self.DeleteSelection, None), 1, 0), # d
+    (k["D"],) : (0, (self.DeleteSelectionLines, None), 2, 0), # D
+    (k["x"],)  : (0, (self.DeleteSelection, None), 1, 0), # x
+    (k["y"],) : (0, (self.Yank, False), 0, 0), # y
+    (k["Y"],) : (0, (self.Yank, True), 0, 0), # Y
+    (k["<"],) : (0, (self.Indent, {"forward":False, "visual":True}), 1, 0), # <
+    (k[">"],) : (0, (self.Indent, {"forward":True, "visual":True}), 1, 0), # >
+    (k["u"],) : (0, (self.SelectionToLowerCase, None), 1, 0), # u
+    (k["U"],) : (0, (self.SelectionToUpperCase, None), 1, 0), # U
+    (k["g"], k["u"]) : (0, (self.SelectionToLowerCase, None), 1, 0), # gu
+    (k["g"], k["U"]) : (0, (self.SelectionToUpperCase, None), 1, 0), # gU
+    (k["g"], k["s"]) : (0, (self.SelectionToSubscript, None), 1, 0), # gs
+    (k["g"], k["S"]) : (0, (self.SelectionToSuperscript, None), 1, 0), # gS
 
-                (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection, 
+    (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection, 
                                                                 None), 1), # \dc* 
             })
         # And delete a few so our key mods are correct
@@ -4250,6 +4253,9 @@ class ViHandler(ViHelper):
         del self.keys[2][(k["S"],)] # S
 
         self.keys[3] = {}
+
+            
+        self.LoadPlugins(u"editor")
 
 
         #self._motion_chains = self.GenerateMotionKeyChains(self.keys)
@@ -4379,7 +4385,7 @@ class ViHandler(ViHelper):
 
     # Need to overide Undo and Redo to goto positions
     # TODO: Tidy up
-    def BeginUndo(self, use_start_pos=False, force=False):
+    def BeginUndo(self, use_start_pos=True, force=False):
         
         if self._undo_state == 0:
             self.ctrl.BeginUndoAction()
@@ -5237,11 +5243,12 @@ class ViHandler(ViHelper):
                     # Only select the brackets if required
                     if not extra:
                         sel_start = self.StartSelection(sel_start+len(bracket), set_visual_start=True)
-                        self.ctrl.GotoPos(sel_end-len(bracket))
+                        self.ctrl.GotoPos(sel_end - len(bracket))
                         #self.ctrl.SetSelection(sel_start+len(bracket), sel_end-len(bracket))
                         #self.ctrl.CharLeftExtend()
                     else:
                         sel_start = self.StartSelection(sel_start, set_visual_start=True)
+                        self.ctrl.GotoPos(sel_end - len(bracket) + 1)
                         if linewise:
                             self.ctrl.CharRightExtend()
             else:
@@ -5699,33 +5706,29 @@ class ViHandler(ViHelper):
 
 
     def PreUppercase(self):
-        #start = self.ExtendSelectionIfRequired()
         start = self.ctrl.GetSelectionStart()
-        self.BeginUndo(force=True)
+        self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().upper())
         self.ctrl.GotoPos(start)
         self.EndUndo()
 
     def PreLowercase(self):
-        #start = self.ExtendSelectionIfRequired()
         start = self.ctrl.GetSelectionStart()
-        self.BeginUndo(force=True)
+        self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection(self.ctrl.GetSelectedText().lower())
         self.ctrl.GotoPos(start)
         self.EndUndo()
 
     def SubscriptMotion(self):
-        #start = self.ExtendSelectionIfRequired()
         start = self.ctrl.GetSelectionStart()
-        self.BeginUndo(force=True)
+        self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection("<sub>{0}</sub>".format(self.ctrl.GetSelectedText()))
         self.ctrl.GotoPos(start)
         self.EndUndo()
 
     def SuperscriptMotion(self):
-        #start = self.ExtendSelectionIfRequired()
         start = self.ctrl.GetSelectionStart()
-        self.BeginUndo(force=True)
+        self.BeginUndo(use_start_pos=True)
         self.ctrl.ReplaceSelection("<sup>{0}</sup>".format(self.ctrl.GetSelectedText()))
         self.ctrl.GotoPos(start)
         self.EndUndo()
@@ -6032,13 +6035,14 @@ class ViHandler(ViHelper):
         # prevent any unicode warnings that may otherwise occur
         brace_bytes = bytes(brace)
         search_brace_bytes = bytes(search_brace)
-        for j in range(len(text)-brace_length):
+        for j in range(len(text)-brace_length + 1):
             i = bytes(text[j:j+brace_length])
             if i == brace_bytes:
                 brace_count += 1
             elif i == search_brace_bytes:
                 brace_count -= 1
 
+            # brace_count will be 0 when we have found our matching brace
             if brace_count < 1:
                 if forward:
                     pos = start_pos + j + len(search_brace)
@@ -6411,6 +6415,7 @@ class ViHandler(ViHelper):
 
         # If the text to copy ends with an eol char we treat the text
         # as a line(s) (only for internal pastes)
+        # TODO: fix for cross tab pasting
         is_line = False
         if current_reg != "+":
             eol = self.ctrl.GetEOLChar()
@@ -7044,7 +7049,6 @@ class ViHandler(ViHelper):
         It may be better to seperate this into multiple functions
         """
         k = self.KEY_BINDINGS
-        # TODO: fix these for remapped keys!!!
         if key in [k["G"], (k["g"], k["g"]), k["%"]]:
             self.AddJumpPosition()
         
@@ -7202,5 +7206,4 @@ class ViHandler(ViHelper):
     def TruncateLineAndInsert(self):
         self.TruncateLine(check_line_end=False)
         self.Insert()
-
 

@@ -8,6 +8,7 @@ import ConfigParser
 import re
 import copy
 import string
+import PluginManager
 
 from wxHelper import * # Needed for  XrcControls
 
@@ -189,6 +190,47 @@ class ViHelper():
 
 
         self.LoadSettings()
+
+        self.RegisterPlugins()
+
+    def RegisterPlugins(self):
+        """
+        Register the plugins to be loaded.
+        """
+        self.pluginFunctions = []
+        main_control = self.ctrl.presenter.getMainControl()
+
+        self.pluginFunctions = reduce(lambda a, b: a+list(b), 
+                main_control.viPluginFunctions.describeViFunctions(
+                main_control), [])
+
+    def LoadPlugins(self, presenter):
+        """
+        Helper which loads the plugins.
+
+        To be called by derived class.
+        """
+        # Load plugin functions
+        k = self.KEY_BINDINGS
+        for keys, presenter_type, vi_mode, function in self.pluginFunctions:
+            try:
+                if presenter in presenter_type:
+                    def returnKey(key):
+                        if len(key) > 1 and key[0] == u"key":
+                            return k[key[1]]
+                        elif key == "motion" or "m":
+                            return "m"
+                        elif key == "*":
+                            return "*"
+                        else:
+                            raise PluginKeyError(u"ERROR LOADING PLUGIN")
+                            
+                    key_chain = tuple([returnKey(i) for i in keys])
+                    for mode in vi_mode:
+                        self.keys[mode][key_chain] = function
+            except PluginKeyError:
+                continue
+
 
     def LoadSettings(self):
         """
@@ -1625,7 +1667,7 @@ class CmdParser():
     def CloseTab(self, text_input):
         if text_input is None:
             self.ctrl.vi.CloseCurrentTab()
-            return
+            return True
             #currentTabNum = mainAreaPanel.GetSelection() + 1
 
         if text_input in self.data:
@@ -1705,9 +1747,8 @@ class CmdParser():
  
         # If no parents give a notification and exit
         if len(parents) == 0:
-            
-            self.visualBell()
-            return False
+            self.ctrl.vi.visualBell()
+            return None
 
         return parents
 
@@ -2019,12 +2060,16 @@ class ViInputDialog(wx.Panel):
     def PopulateListBox(self, data):
         
         if data is None or len(data) < 1:
+            self.list_data = None
             # No items
+            self.ctrls.viInputListBox.Clear()
+            self.ctrls.viInputListBox.AppendItems([u"No items / data found."])
             return
-        self.list_data = data
+        else:
+            self.list_data = data
 
-        self.ctrls.viInputListBox.Clear()
-        self.ctrls.viInputListBox.AppendItems(data)
+            self.ctrls.viInputListBox.Clear()
+            self.ctrls.viInputListBox.AppendItems(data)
         #self.ctrls.viInputListBox.SetSelection(0)
 
         self.UpdateLayout(show_viInputListBox=True)
@@ -2049,8 +2094,6 @@ class ViInputDialog(wx.Panel):
         matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
 
         searchString = self.GetInput()
-
-        print accP
 
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
@@ -2119,7 +2162,8 @@ class ViInputDialog(wx.Panel):
         self.MoveListBoxSelection(-1)
 
     def MoveListBoxSelection(self, offset):
-        if self.ctrls.viInputListBox.GetCount() < 1:
+        if self.ctrls.viInputListBox.GetCount() < 1 or self.list_data is None:
+            self.ctrl.vi.visualBell(u"RED")
             return
 
         if offset < 0:
@@ -2155,3 +2199,6 @@ class ViInputDialog(wx.Panel):
     def ShowPanel(self):
         self.mainControl.windowLayouter.expandWindow("vi input")
         self.FocusInputField()
+
+
+class PluginKeyError(Exception): pass
