@@ -690,11 +690,6 @@ class App(wx.App, MiscEventSourceMixin):
 
         # set the icon of the app
         try:
-            # Method lookupIcon returns a wx.Bitmap
-#             icon = wx.IconFromBitmap(self.iconCache.lookupIcon("boy"))
-#             wikiFrame.SetIcon(icon)
-#             wikiFrame.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons',
-#                     'pwiki.ico'), wx.BITMAP_TYPE_ICO))
             wikiFrame.SetIcon(self.standardIcon)
         except:
             pass

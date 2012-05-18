@@ -341,15 +341,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # get the position of the splitter
         self.lastSplitterPos = self.configuration.getint("main", "splitter_pos")
                 
-#         self.layoutMainTreePosition = self.configuration.getint("main",
-#                 "mainTree_position", 0)
-#         self.layoutViewsTreePosition = self.configuration.getint("main",
-#                 "viewsTree_position", 0)
-#         self.layoutDocStructurePosition = self.configuration.getint("main",
-#                 "docStructure_position", 0)
-#         self.layoutTimeViewPosition = self.configuration.getint("main",
-#                 "timeView_position", 0)
-
         # if a wiki to open wasn't passed in use the last_wiki from the global config
         self.cmdLineAction = cmdLineAction
         wikiToOpen = cmdLineAction.wikiToOpen

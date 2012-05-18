@@ -17,7 +17,7 @@ class StdErrReplacement:
 #             return
 
         try:
-            f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
+            f = open(getLogDestDir(), "a")
             try:
                 if not EL._timestampPrinted:
                     # Only write for first occurrence in session
@@ -42,7 +42,7 @@ def onException(typ, value, trace):
     try:
 #         import ExceptionLogger as EL
 ##        traceback.print_exception(typ, value, trace, file=EL._previousStdOut)
-        f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
+        f = open(getLogDestDir(), "a")
         try:
             if not EL._timestampPrinted:
                 # Only write for first exception in session
@@ -82,12 +82,13 @@ def setLogDestDir(path):
         pass
 
     EL._exceptionDestDir = path
+    EL._exceptionLogFileName = "WikidPad_Error.log"
 
 
 def getLogDestDir():
     global EL
     
-    return os.path.join(EL._exceptionDestDir, "WikidPad_Error.log")
+    return os.path.join(EL._exceptionDestDir, EL._exceptionLogFileName)
 
 
 
@@ -98,6 +99,7 @@ def startLogger(versionstring):
     EL = EL2
     
     EL._exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+    EL._exceptionLogFileName = "WikidPad_Init_Error.log"
     EL._exceptionSessionTimeStamp = \
             time.strftime("\n\nVersion: '" + versionstring +
                     "' Session start: %Y-%m-%d %H:%M:%S\n")
