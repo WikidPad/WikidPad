@@ -110,23 +110,26 @@ class PWikiNonCore:
 
 
     def OnRecoverWikiDatabase(self, evt):
-        if self.mainControl.stdDialog("yn", _(u"Continue?"),
-                _(u"You should run this function only if you know what you are doing\n"
-                "Continue?")) == "no":
-            return
+#         if self.mainControl.stdDialog("yn", _(u"Continue?"),
+#                 _(u"You should run this function only if you know what you are doing\n"
+#                 "Continue?")) == "no":
+#             return
         
-        wf = self.mainControl.stdDialog("text", _(u"Wiki file"),
-                _(u"Wiki file") + u":")
+        with wxHelper.TopLevelLocker:
+            wf = wx.FileSelector(_(u"Wiki file"),
+                    u"", wildcard=u"*.wiki",
+                    flags=wx.FD_OPEN, parent=self.mainControl)
 
-        if not wf:
-            return
+            if not wf:
+                return
 
-        exportDest = self.mainControl.stdDialog("text",
-                _(u"MPT export target file"),
-                _(u"MPT export target file") + u":")
+            exportDest = wx.FileSelector(_(u"MPT export target file"),
+                    u"", wildcard=u"*.mpt",
+                    flags=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+                    parent=self.mainControl)
 
-        if not exportDest:
-            return
+            if not exportDest:
+                return
 
         wikiDoc = WikiDataManager.WikiDataManager(wf, None, None, ignoreLock=True,
             createLock=False, recoveryMode=True)
