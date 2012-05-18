@@ -964,7 +964,6 @@ class MultiPageTextExporter(AbstractExporter):
         
 
 
-
     def _recoveryExportWikiWords(self):
         def writeWord(word, content, modified, created, visited):
             if isinstance(content, str):
@@ -973,12 +972,26 @@ class MultiPageTextExporter(AbstractExporter):
             self.exportFile.writeSeparator()
 
             self.exportFile.write(u"wikipage/%s\n" % word)
-
+            
             # Do not use StringOps.strftimeUB here as its output
             # relates to local time, but we need UTC here.
-            timeStrings = [unicode(time.strftime(
-                    "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-                    for ts in (modified, created, visited)]
+            timeStrings = []
+            for ts in (modified, created, visited):
+                try:
+                    tstr = unicode(time.strftime("%Y-%m-%d/%H:%M:%S",
+                            time.gmtime(ts)))
+                except ValueError:
+                    print "bad timestamp", repr(ts)
+                    traceback.print_exc()
+                    tstr = unicode(time.strftime("%Y-%m-%d/%H:%M:%S",
+                            time.gmtime(0)))
+
+                timeStrings.append(tstr)
+
+
+#             timeStrings = [unicode(time.strftime(
+#                     "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+#                     for ts in (modified, created, visited)]
 
             self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
             self.exportFile.write(content)

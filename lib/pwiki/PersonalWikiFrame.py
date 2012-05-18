@@ -5269,24 +5269,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def _updateStatusBarByStack(self):
-        Utilities.callInMainThreadAsync(self.statusBarTimer.Stop)
-#         self.statusBarTimer.Stop()
+#         print "--_updateStatusBarByStack1", repr((wx.Thread_IsMain(), wx.GetApp().IsMainLoopRunning()))
+        try:
+            if not wx.GetApp().IsMainLoopRunning():
+                return
 
-        if len(self.statusBarStack) == 0:
-            self.statusBar.SetStatusText(u"", 0)
-            return
-            
-        # Just in case: Restrict stack size
-        if len(self.statusBarStack) > 50:
-            self.statusBarStack = self.statusBarStack[(len(self.statusBarStack) - 50):]
+            Utilities.callInMainThreadAsync(self.statusBarTimer.Stop)
+    #         self.statusBarTimer.Stop()
 
-        msg, duration, key = self.statusBarStack[-1]
-
-        self.statusBar.SetStatusText(msg, 0)
-        if duration != 0:
-            Utilities.callInMainThreadAsync(self.statusBarTimer.Start, duration,
-                    True)
-#             self.statusBarTimer.Start(duration, True)
+            if len(self.statusBarStack) == 0:
+                self.statusBar.SetStatusText(u"", 0)
+                return
+                
+            # Just in case: Restrict stack size
+            if len(self.statusBarStack) > 50:
+                self.statusBarStack = self.statusBarStack[(len(self.statusBarStack) - 50):]
+    
+            msg, duration, key = self.statusBarStack[-1]
+    
+            self.statusBar.SetStatusText(msg, 0)
+            if duration != 0:
+                    Utilities.callInMainThreadAsync(self.statusBarTimer.Stop)
+        #             self.statusBarTimer.Start(duration, True)
+        except:
+            print "----- Caught error start -----"
+            traceback.print_exc()
+            print "----- Caught error end -----"
 
 
     def OnStatusBarTimer(self, evt):
