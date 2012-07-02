@@ -69,6 +69,8 @@ If you chose IE renderer above you can set if an iframe (this is like a browser 
 *Use vi keys in Webkit preview*
 Activates some vi-like shortcut keys to navigate in Webkit renderer. See [Webkit].
 
+A basic documentation which covers the possibilities of the vi emulation is available at http://xkjq.org/wikidpad/
+
 
 +++ HTML header settings
 

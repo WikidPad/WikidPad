@@ -379,6 +379,8 @@ Windows only. Translates accelerators (aka shortcuts) of the menus to work with 
 *Use vi keys in editor*
 Partly emulates behavior of the vi editor. If you are not used to vi (or one of its clones) you should not check this!
 
+A basic documentation which covers the possibilities of the vi emulation is available at http://xkjq.org/wikidpad/
+
 *Forbid cancel on search*
 Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
 
