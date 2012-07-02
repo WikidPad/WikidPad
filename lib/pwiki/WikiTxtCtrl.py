@@ -3931,6 +3931,71 @@ class ViHandler(ViHelper):
                     u"/" : (True, self.SelectInForwardslashes),
                 }
 
+        self.LoadKeybindings()
+        self.LoadPlugins(u"editor")
+        self.GenerateKeyBindings()
+
+        self.SINGLE_LINE_WHITESPACE = [9, 11, 12, 32]
+        self.WORD_BREAK =   '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
+        self.WORD_BREAK_INCLUDING_WHITESPACE = \
+                            '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
+        self.SENTENCE_ENDINGS = (".", "!", "?", "\n\n")
+        self.SENTENCE_ENDINGS_SUFFIXS = '\'")]'
+
+        self.BRACES = {
+                        u"(" : u")",
+                        u"[" : u"]",
+                        u"{" : u"}",
+                        u"<" : u">",
+                        u"<<" : u">>",
+                      }
+        self.REVERSE_BRACES = dict((v,k) for k, v in self.BRACES.iteritems())
+
+
+        self.SURROUND_REPLACEMENTS = {
+                        ")" : ("(", ")"),
+                        "b" : ("(", ")"),
+                        "}" : ("{", "}"),
+                        "B" : ("{", "}"),
+                        "]" : ("[", "]"),
+                        "r" : ("[", "]"),
+                        ">" : ("<", ">"),
+                        "a" : ("<", ">"),
+
+                        "(" : ("( ", " )"),
+                        "{" : ("{ ", " }"),
+                        "[" : ("[ ", " ]"),
+
+                        # TODO
+                        #"t" : ("<{0}>", "</{0}>"),
+                        #"<" : ("<{0}>", "</{0}>"),
+
+                        "'" : ("'", "'"),
+                        '"' : ('"', '"'),
+                        "`" : ("`", "`"),
+
+                        }
+
+
+
+
+        self._undo_state = 0
+        self._undo_pos = -1
+        self._undo_start_position = None
+        self._undo_positions = []
+
+        self._line_column_pos = 0
+
+        self._visual_start_pos = None
+
+        self.isLinux = isLinux()
+
+    def LoadKeybindings(self):
+        """
+        Function called to load keybindings.
+
+        Must call GenerateKeyBindings after this.
+        """
     # Format
     # key code : (command type, (function, arguments), repeatable, selection_type)
 
@@ -4261,9 +4326,8 @@ class ViHandler(ViHelper):
 
         self.keys[3] = {}
 
-            
-        self.LoadPlugins(u"editor")
 
+    def GenerateKeyBindings(self):
 
         #self._motion_chains = self.GenerateMotionKeyChains(self.keys)
         self.key_mods = self.GenerateKeyModifiers(self.keys)
@@ -4272,62 +4336,6 @@ class ViHandler(ViHelper):
 
         # Used for rewriting menu shortcuts
         self.viKeyAccels = self.GenerateKeyAccelerators(self.keys)
-
-
-        self.SINGLE_LINE_WHITESPACE = [9, 11, 12, 32]
-        self.WORD_BREAK =   '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
-        self.WORD_BREAK_INCLUDING_WHITESPACE = \
-                            '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
-        self.SENTENCE_ENDINGS = (".", "!", "?", "\n\n")
-        self.SENTENCE_ENDINGS_SUFFIXS = '\'")]'
-
-        self.BRACES = {
-                        u"(" : u")",
-                        u"[" : u"]",
-                        u"{" : u"}",
-                        u"<" : u">",
-                        u"<<" : u">>",
-                      }
-        self.REVERSE_BRACES = dict((v,k) for k, v in self.BRACES.iteritems())
-
-
-        self.SURROUND_REPLACEMENTS = {
-                        ")" : ("(", ")"),
-                        "b" : ("(", ")"),
-                        "}" : ("{", "}"),
-                        "B" : ("{", "}"),
-                        "]" : ("[", "]"),
-                        "r" : ("[", "]"),
-                        ">" : ("<", ">"),
-                        "a" : ("<", ">"),
-
-                        "(" : ("( ", " )"),
-                        "{" : ("{ ", " }"),
-                        "[" : ("[ ", " ]"),
-
-                        # TODO
-                        #"t" : ("<{0}>", "</{0}>"),
-                        #"<" : ("<{0}>", "</{0}>"),
-
-                        "'" : ("'", "'"),
-                        '"' : ('"', '"'),
-                        "`" : ("`", "`"),
-
-                        }
-
-
-
-
-        self._undo_state = 0
-        self._undo_pos = -1
-        self._undo_start_position = None
-        self._undo_positions = []
-
-        self._line_column_pos = 0
-
-        self._visual_start_pos = None
-
-        self.isLinux = isLinux()
 
 
     def Setup(self):

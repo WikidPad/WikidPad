@@ -231,6 +231,9 @@ class ViHelper():
             except PluginKeyError:
                 continue
 
+    def ReloadPlugins(self, name):
+        self.RegisterPlugins()
+        self.LoadPlugins(name)
 
     def LoadSettings(self):
         """
@@ -494,6 +497,7 @@ class ViHelper():
         # command can be repeated
         selected_text = None
         if self.mode == ViHelper.VISUAL:
+            # TODO: fix line selection mode
             selected_text = self.GetSelectionDetails(selection_type)
 
         if type(key) == tuple and "*" in key:
@@ -1082,7 +1086,7 @@ class ViHintDialog(wx.Frame):
 
         searchString = self.tfInput.GetValue()
 
-        foundPos = -2
+        foundPos = -26
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
                 (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
             # Return pressed
@@ -1299,6 +1303,7 @@ class CmdParser():
             "parents" : (self.GetParentPages, self.OpenWikiPageCurrentTab),
             "tabparents" : (self.GetParentPages, self.OpenWikiPageNewTab),
             "bgparents" : (self.GetParentPages, self.OpenWikiPageBackgroundTab),
+            "w" : (self.Pass, self.SaveCurrentPage),
             "write" : (self.Pass, self.SaveCurrentPage),
             "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
             "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
@@ -1313,9 +1318,9 @@ class CmdParser():
 
             # TODO: rewrite with vi like confirmation
             "deletepage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
-            "dlpage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
+            "delpage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
 
-            "renamepage" : (self.GetDefinedWikiPages, self.Pass),
+            #"renamepage" : (self.GetDefinedWikiPages, self.Pass),
 
             # Currently bdelete and bwipeout are currently synonymous
             "quit" : (self.GetTabs, self.CloseTab),
@@ -1324,6 +1329,8 @@ class CmdParser():
             "quitall" : (self.Pass, self.CloseWiki),
             "tabonly" : (self.GetTabs, self.CloseOtherTabs),
             "exit" : (self.Pass, self.CloseWiki),
+
+            "reloadplugins" : (self.Pass, self.ReloadPlugins),
             }
 
         # marks? search patterns?
@@ -1590,6 +1597,25 @@ class CmdParser():
     def ClearInput(self):
         self.data = []
 
+    def ReloadPlugins(self, args=None):
+        """
+        Reload plugins globally using reloadMenuPlugins() and then
+        on a per tab basis
+        """
+        self.ctrl.presenter.getMainControl().reloadMenuPlugins()
+
+        # NOTE: should probably unify names
+        for scName, name in (("textedit", "editor"), ("preview", "preview")):
+            for tab in self.ctrl.presenter.getMainControl().getMainAreaPanel().getPresenters():
+                # Try and reload key bindings for each presenter on each tab
+                # (if they exist)
+                try:
+                    tab.getSubControl(scName).vi.ReloadPlugins(name)
+                except AttributeError:
+                    pass
+
+        
+
     def OpenPageInGoogle(self, text_input=None):
         if type(text_input) == tuple:
             text_input = text_input[0]
@@ -1839,6 +1865,7 @@ class ViInputDialog(wx.Panel):
 
         self.selection_range = None
 
+        self.block_kill_focus = False
         wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
 
     def StartCmd(self, ctrl, cmd_history, text, selection_range=None):
@@ -1910,7 +1937,7 @@ class ViInputDialog(wx.Panel):
         """
         Called if a user clicks outside of the viInputPanel
         """
-        if self.search:
+        if self.search and not self.block_kill_focus:
             self.Close()
 
     def FocusInputField(self, evt=None):
@@ -1923,11 +1950,12 @@ class ViInputDialog(wx.Panel):
         """
         return self.ctrls.viInputTextField.GetValue()
 
-    def SetInput(self, text):
+    def SetInput(self, text, clear=False):
         # Check if we just want to change the cmd argument
-        current_text = self.GetInput().split(" ")
-        if len(current_text) > 1:
-            text = "{0} {1}".format(current_text[0], text)
+        if not clear:
+            current_text = self.GetInput().split(" ")
+            if len(current_text) > 1:
+                text = "{0} {1}".format(current_text[0], text)
         
         if text:
             self.ctrls.viInputTextField.SetValue(text)
@@ -1957,26 +1985,7 @@ class ViInputDialog(wx.Panel):
         Called whenever new text is inserted into the input box
         """
         if self.search:
-            text = self.GetInput()
-
-            if len(text) < 1:
-                return
-
-            self.search_args[u"text"] = text
-
-            # would .copy() be better?
-            temp_search_args = dict(self.search_args)
-
-            temp_search_args[u"select_text"] = True
-
-            # TODO: set flags from config?
-            result = self.ctrl.vi._SearchText(**temp_search_args)
-
-            if not result:
-                self.ctrl.vi.visualBell("RED")
-                self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_YELLOW)
-            else:
-                self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
+            self.RunSearch()
 
         # cmd
         else:
@@ -1995,6 +2004,31 @@ class ViInputDialog(wx.Panel):
                     self.CheckViInput()
             else:
                 self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_RED)
+
+    def RunSearch(self):
+        text = self.GetInput()
+
+        if len(text) < 1:
+            return
+
+        self.search_args[u"text"] = text
+
+        # would .copy() be better?
+        temp_search_args = dict(self.search_args)
+
+        temp_search_args[u"select_text"] = True
+
+        self.block_kill_focus = True
+        # TODO: set flags from config?
+        result = self.ctrl.vi._SearchText(**temp_search_args)
+        self.FocusInputField()
+        self.block_kill_focus = False
+
+        if not result:
+            self.ctrl.vi.visualBell("RED")
+            self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_YELLOW)
+        else:
+            self.ctrls.viInputTextField.SetBackgroundColour(ViInputDialog.COLOR_GREEN)
 
     def ExecuteCmd(self, text_input):
         # Should this close the input?
@@ -2119,10 +2153,10 @@ class ViInputDialog(wx.Panel):
 
         # Arrow keys can be used to navigate the cmd_lie history
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_UP):
-            self.SetInput(self.cmd_history.GoBackwardsInHistory())
+            self.SetInput(self.cmd_history.GoBackwardsInHistory(), clear=True)
 
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_DOWN):
-            self.SetInput(self.cmd_history.GoForwardInHistory())
+            self.SetInput(self.cmd_history.GoForwardInHistory(), clear=True)
 
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_TAB):
             self.SelectNextListBoxItem()
