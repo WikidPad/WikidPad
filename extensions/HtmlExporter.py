@@ -1441,6 +1441,7 @@ class HtmlExporter(AbstractExporter):
         with self.optsStack:
             self.optsStack["innermostFullPageAst"] = self.basePageAst
             self.optsStack["innermostPageUnifName"] = u"wikipage/" + word
+            self.optsStack["innermostDocPage"] = wikiPage
             self.processAst(content, self.basePageAst)
 
         if self.asHtmlPreview and facename:
@@ -1693,6 +1694,17 @@ class HtmlExporter(AbstractExporter):
                 # Prevent infinite recursion
                 return
 
+            containingPage = self.optsStack["innermostDocPage"]
+            
+            langHelper = wx.GetApp().createWikiLanguageHelper(
+                    containingPage.getWikiLanguageName())
+                    
+            if langHelper.checkForInvalidWikiLink(value,
+                    self.mainControl.getWikiDocument()):
+                return
+
+            value = langHelper.resolveWikiWordLink(value, containingPage)
+
             docpage = self.wikiDocument.getWikiPageNoError(value)
             pageAst = docpage.getLivePageAst()
             
@@ -1735,6 +1747,7 @@ class HtmlExporter(AbstractExporter):
                     self.optsStack["innermostFullPageAst"] = pageAst
                     self.optsStack["innermostPageUnifName"] = \
                             docpage.getUnifiedPageName()
+                    self.optsStack["innermostDocPage"] = docpage
 
                     self.optsStack["anchorForHeading"] = False
                     if offsetHead != 0:
