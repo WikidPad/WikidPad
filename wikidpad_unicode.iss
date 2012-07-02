@@ -51,8 +51,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.2rc04"
-#define verNo "002.002.204.000"
+#define verStr "2.2rc05"
+#define verNo "002.002.205.000"
 
 SolidCompression=true
 AppName=WikidPad
@@ -68,7 +68,7 @@ ShowLanguageDialog=yes
 Compression=lzma/ultra
 OutputBaseFilename=WikidPad-{#verStr}
 InternalCompressLevel=ultra
-AppCopyright=© 2005-2011 Jason Horman, Michael Butscher, Gerhard Reitmayr
+AppCopyright=© 2005-2012 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
 PrivilegesRequired=none
 CreateUninstallRegKey=not PortableInstall

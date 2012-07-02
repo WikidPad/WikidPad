@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-05-18 22:57\n"
+"POT-Creation-Date: 2012-07-02 13:29\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1802,11 +1802,11 @@ msgstr ""
 msgid "Exporting %s"
 msgstr ""
 
-#: extensions\HtmlExporter.py:1618
+#: extensions\HtmlExporter.py:1631
 msgid "<pre class=\"wikidpad\">[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: extensions\HtmlExporter.py:2267
+#: extensions\HtmlExporter.py:2280
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr ""
 
