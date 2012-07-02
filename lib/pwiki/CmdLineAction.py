@@ -330,10 +330,10 @@ class CmdLineAction:
         # Handle self.exportType
         exporterList = []
         for obtp in PluginManager.getSupportedExportTypes(
-                mainControl, None).values():
+                pWiki, None).values():
             exporterList.append((obtp[0], obtp[1]))
             
-        mainControl.getCollator().sortByItem(exporterList, 1)
+        pWiki.getCollator().sortByItem(exporterList, 1)
 
         exporter = None
         for ei in exporterList:
