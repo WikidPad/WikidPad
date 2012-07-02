@@ -11,7 +11,7 @@ import traceback, os.path
 
 import wx
 
-from . import wxHelper, StringOps, Exporters
+from . import wxHelper, StringOps, Exporters, DocPages
 
 from .wikidata import WikiDataManager
 
@@ -139,6 +139,26 @@ class PWikiNonCore:
         exp = Exporters.MultiPageTextExporter(self.mainControl)
         exp.recoveryExport(wikiDoc, exportDest, progressHandler=None)
         
+        
+    def OnSelectionToLink(self, evt):
+        editor = self.mainControl.getActiveEditor()
+        if editor is None:
+            return
+            
+        docPage = editor.getLoadedDocPage()
+        
+        if docPage is None or not isinstance(docPage, (DocPages.AliasWikiPage,
+                DocPages.AbstractWikiPage)):
+            return
+        
+        if docPage.isReadOnlyEffect():
+            return
+
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                docPage.getWikiLanguageName())
+        
+        editor.ReplaceSelection(langHelper.createWikiLinkFromText(
+                editor.GetSelectedText(), bracketed=True))
 
 
 
@@ -199,6 +219,14 @@ class PWikiNonCore:
                 
             "recoverWikiDatabase": (self.OnRecoverWikiDatabase, _(u'Recover DB'),
                 _(u'Recover wiki database')),
+                
+            "selectionToLink": (self.OnSelectionToLink, _(u'Selection to &Link'),
+                _(u'Remove non-allowed characters and make sel. a wiki word link'),
+                kb.MakeWikiWord, "tb_wikize",
+                wxHelper.GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
+                (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit)),
+
             }
+
 
         return descriptorDict

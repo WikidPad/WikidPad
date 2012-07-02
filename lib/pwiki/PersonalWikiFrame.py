@@ -1762,13 +1762,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         convertMenu = wx.Menu()
         formatMenu.AppendMenu(wx.NewId(), _(u'&Convert'), convertMenu)
+        
+        self.addMenuItemByUnifNameTable(convertMenu,
+        """
+        menuItem/mainControl/builtin/selectionToLink
+        """
+        )
 
-        self.addMenuItem(convertMenu,
-                _(u'Selection to &Link') + u'\t' + self.keyBindings.MakeWikiWord,
-                _(u'Remove non-allowed characters and make sel. a wiki word link'),
-                lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()),
-                "tb_wikize", menuID=GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
-                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+#         self.addMenuItem(convertMenu,
+#                 _(u'Selection to &Link') + u'\t' + self.keyBindings.MakeWikiWord,
+#                 _(u'Remove non-allowed characters and make sel. a wiki word link'),
+#                 lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()),
+#                 "tb_wikize", menuID=GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
+#                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
         
         self.addMenuItem(convertMenu, _(u'Selection to &Wiki Word') + u'\t' + 
                 self.keyBindings.ReplaceTextByWikiword,
@@ -4555,13 +4561,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.isReadOnlyPage():
             return
 
-        wikiWord = ""
         newWord = True
         try:
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     self.getWikiDefaultWikiLanguage())
                 
             absoluteLink = False
+            
+            text = self.getActiveEditor().GetSelectedText()
+
+            wikiWord = langHelper.createWikiLinkFromText(
+                    self.getActiveEditor().GetSelectedText().splitlines()[0],
+                    bracketed=False)
 
             while True:
                 wikiWord = guiToUni(wx.GetTextFromUser(
@@ -4604,7 +4615,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                 break
 
-            text = self.getActiveEditor().GetSelectedText()
             if newWord:
                 page = self.wikiDataManager.createWikiPage(validWikiWord)
                 # TODO Respect template attribute?

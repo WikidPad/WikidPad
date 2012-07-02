@@ -133,9 +133,10 @@ def addHeading(editor):
     editor.AddText(u'+')
     editor.GotoPos(bytePos)
 
-def makeWikiWord(editor):
-    text = editor.GetSelectedText()
-    text = text.replace(u"'", u"")
-    text = text[0:1].upper() + text[1:]
-    text = u"[" + text + u"]"
-    editor.ReplaceSelection(text)
+# Replaced by "createWikiLinkFromText" in wiki language helper
+# def makeWikiWord(editor):
+#     text = editor.GetSelectedText()
+#     text = text.replace(u"'", u"")
+#     text = text[0:1].upper() + text[1:]
+#     text = u"[" + text + u"]"
+#     editor.ReplaceSelection(text)

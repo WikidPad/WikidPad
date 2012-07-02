@@ -1761,7 +1761,7 @@ class _TheHelper(object):
     @staticmethod   # isValidWikiWord
     def checkForInvalidWikiLink(word, wikiDocument=None, settings=None):
         """
-        Test if word is syntactically a valid wiki word and no settings
+        Test if word is syntactically a valid wiki link and no settings
         are against it. The camelCase black list is not checked.
         The function returns None IFF THE WORD IS VALID, an error string
         otherwise
@@ -1961,6 +1961,25 @@ class _TheHelper(object):
                 
 #     # For compatibility. TODO: Remove
 #     createStableLinksFromWikiWords = createAbsoluteLinksFromWikiWords
+
+
+    @staticmethod
+    def createWikiLinkFromText(text, bracketed=True):
+        text = text.replace(BracketStart, u"").replace(BracketEnd, u"")
+        while text.startswith(u"+"):
+            text = text[1:]
+        
+        text = text.strip()
+
+        if len(text) == 0:
+            return u""
+
+        text = text[0:1].upper() + text[1:]
+        if bracketed:
+            text = BracketStart + text + BracketEnd
+
+        return text
+
 
     @staticmethod
     def createRelativeLinkFromWikiWord(word, baseWord, downwardOnly=True):
