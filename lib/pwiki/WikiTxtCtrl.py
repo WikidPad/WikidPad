@@ -1743,35 +1743,92 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def processFolding(self, pageAst, threadstop):
         # TODO: allow folding of tables / boxes / figures
         foldingseq = []
-        currLine = 0
+        #currLine = 0
         prevLevel = 0
         levelStack = []
         foldHeader = False
 
-        for node in pageAst:
-            threadstop.testValidThread()
+        # TODO: Should be set in wikilanguage
 
-            if node.name == "heading":
-                while levelStack and (levelStack[-1][0] != "heading" or
-                        levelStack[-1][1] > node.level):
+        # These nodes will be folded as is
+        nodes_to_fold = ("table", "attribute", "insertion")
+        # These nodes will be foldable and will be searched recursively for
+        # additional nodes
+        recursive_nodes = ("figureBlock", "boxBlock")
+        # These nodes will not be foldable but will be search for additional 
+        # nodes
+        recursive_nodes_no_fold = ("figureContent", "boxContent")
+
+        def searchAst(ast, foldingseq, prevLevel, levelStack, foldHeader):
+
+            for node in ast:
+
+                threadstop.testValidThread()
+
+                recursive = False
+
+                if node.name is None:
+                    pass
+                elif node.name == "heading":
+                    while levelStack and (levelStack[-1][0] != "heading" or
+                            levelStack[-1][1] > node.level) and \
+                            levelStack[-1][0] != "recursive-node":
+                        del levelStack[-1]
+                    if not levelStack or \
+                            levelStack[-1] != ("heading", node.level):
+                        levelStack.append(("heading", node.level))
+                    foldHeader = True
+
+                elif node.name in nodes_to_fold:
+                    # No point in folding single line items
+                    if node.getString().count(u"\n") > 1:
+                        levelStack.append(("node", 0))
+                        foldHeader = True
+
+
+                elif node.name in recursive_nodes:
+                    levelStack.append(("recursive-node", 0))
+                    foldHeader = True
+                    foldingseq, prevLevel, levelStack, foldHeader = \
+                            searchAst(node, foldingseq, prevLevel, levelStack, 
+                            foldHeader)
+                    while levelStack[-1][0] == "heading":
+                        del levelStack[-1]
+                        
                     del levelStack[-1]
-                if not levelStack or levelStack[-1] != ("heading", node.level):
-                    levelStack.append(("heading", node.level))
-                foldHeader = True
 
-            lfc = node.getString().count(u"\n")
-            if len(levelStack) > prevLevel:
-                foldHeader = True
+                    recursive = True
 
-            if foldHeader and lfc > 0:
-                foldingseq.append(len(levelStack) | wx.stc.STC_FOLDLEVELHEADERFLAG)
-                foldHeader = False
-                lfc -= 1
+                elif node.name in recursive_nodes_no_fold:
+                    foldingseq, prevLevel, levelStack, foldHeader = \
+                            searchAst(node, foldingseq, prevLevel, levelStack, 
+                            foldHeader)
+                    recursive = True
 
-            if lfc > 0:
-                foldingseq += [len(levelStack) + 1] * lfc
+                if not recursive:
+                    lfc = node.getString().count(u"\n")
+                    
+                    if len(levelStack) > prevLevel:
+                        foldHeader = True
 
-            prevLevel = len(levelStack) + 1
+                    if foldHeader and lfc > 0:
+                        foldingseq.append(len(levelStack) | wx.stc.STC_FOLDLEVELHEADERFLAG)
+                        foldHeader = False
+                        lfc -= 1
+
+                    if lfc > 0:
+                        foldingseq += [len(levelStack) + 1] * lfc
+
+                    if levelStack and levelStack[-1][0] == "node":
+                        del levelStack[-1]
+
+                    prevLevel = len(levelStack) + 1
+
+
+            return foldingseq, prevLevel, levelStack, foldHeader
+
+        foldingseq, prevLevel, levelStack, foldHeader = searchAst(pageAst, 
+                foldingseq, prevLevel, levelStack, foldHeader)
 
         # final line
         foldingseq.append(len(levelStack) + 1)
@@ -1789,7 +1846,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 len(foldingseq) == self.GetLineCount():
             for ln in xrange(len(foldingseq)):
                 self.SetFoldLevel(ln, foldingseq[ln])
+            print "Folding Applied"
             self.repairFoldingVisibility()
+        else:
+            print "Folding does not match", len(foldingseq), self.GetLineCount() 
 
 
     def unfoldAll(self):
@@ -4382,13 +4442,14 @@ class ViHandler(ViHelper):
         self.SetLineColumnPos()
 
         if mode == ViHelper.NORMAL:
-            # Set block caret (Not in wxpython < ?)
+            # Set block caret (Not in wxpython < 2.9)
             self.ctrl.SendMsg(2512, 2)
+            self.ctrl.SetCaretWidth(40)
+
             self.ctrl.SetCaretPeriod(800)
             #self.ctrl.SetSelectionMode(0)
             self.RemoveSelection()
             self.ctrl.SetCaretForeground(wx.Colour(255, 0, 0))
-            self.ctrl.SetCaretWidth(40)
             self.ctrl.SetOvertype(False)
             self.SetSelMode("NORMAL")
             # Vim never goes right to the end of the line
@@ -4399,6 +4460,7 @@ class ViHandler(ViHelper):
             self.ctrl.SetOvertype(False)
         elif mode == ViHelper.INSERT:
             self.insert_action = []
+            self.ctrl.SendMsg(2512, 1)
             self.ctrl.SetCaretWidth(1)
             self.ctrl.SetCaretForeground(self.default_caret_colour)
             self.ctrl.SetOvertype(False)
