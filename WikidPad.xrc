@@ -733,7 +733,7 @@
             <border>5</border>
           </object>
           <cols>3</cols>
-          <rows>2</rows>
+          <rows>4</rows>
           <object class="spacer">
             <size>0,0</size>
           </object>
@@ -1783,7 +1783,7 @@
             <border>5</border>
           </object>
           <cols>2</cols>
-          <rows>2</rows>
+          <rows>7</rows>
           <object class="sizeritem">
             <object class="wxStaticText">
               <label>Left double click in preview:</label>
