@@ -194,6 +194,7 @@ class ViHelper():
         # Settings are stored as a dict
         self.settings = { 
                 "filter_wikipages" : True,
+                "caret_scroll" : False, # Large performance hit
                 
              }
         self.LoadSettings()

@@ -1068,8 +1068,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # TODO: Replace with seperate scroll events
             #self.Bind(wx.EVT_SCROLLWIN, self.vi.OnScroll)
 
-            caret_scroll = False
-            if caret_scroll:
+            if self.vi.settings["caret_scroll"]:
                 self.Bind(wx.EVT_MOUSEWHEEL, self.vi.OnMouseScroll)
 
             # Should probably store shortcut state in a global
