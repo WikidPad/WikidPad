@@ -181,6 +181,8 @@ class ViHelper():
         self.insert_action = []
 
         self.selection_mode = u"NORMAL"
+
+        self.tag_input = False
                     
         # The following dictionary holds the menu shortcuts that have been
         # disabled upon entering ViMode
@@ -189,6 +191,11 @@ class ViHelper():
         self.register = ViRegister(self.ctrl)
 
 
+        # Settings are stored as a dict
+        self.settings = { 
+                "filter_wikipages" : True,
+                
+             }
         self.LoadSettings()
 
         self.RegisterPlugins()
@@ -231,6 +238,10 @@ class ViHelper():
             except PluginKeyError:
                 continue
 
+        self.pluginFunctions = []
+
+        self.GenerateKeyKindings()
+
     def ReloadPlugins(self, name):
         self.RegisterPlugins()
         self.LoadPlugins(name)
@@ -239,6 +250,10 @@ class ViHelper():
         """
         Settings are loaded from the file vi.rc in the wikidpad global config
         dir
+
+        Can be called at any time to update / reload settings
+
+        ? May need to regenerate keybindings if they have been changed
         """
         rc_file = None
         rc_file_names = (".WikidPad.virc", "WikidPad.virc")
@@ -255,11 +270,28 @@ class ViHelper():
             config = ConfigParser.ConfigParser()
             config.read(rc_file)
 
-            for key in config.options("keys"):
-                try:
-                    self.KEY_BINDINGS[key] = int(config.get("keys", key))
-                except ValueError:
-                    print "Invalid keycode: {0}".format(key)
+            # Load custom key bindings
+            try:
+                for key in config.options("keys"):
+                    try:
+                        self.KEY_BINDINGS[key] = config.getint("keys", key)
+                    except ValueError:
+                        print "Keycode must be a integer: {0}".format(key)
+            except ConfigParser.NoSectionError:
+                pass
+                
+
+            try:
+                for setting in config.options("settings"):
+                    if setting in self.settings:
+                        try:
+                            self.settings[setting] = config.getboolean(
+                                    "settings", setting)
+                        except ValueError:
+                            print "Setting '{0}' must be boolean".format(setting)
+
+            except ConfigParser.NoSectionError:
+                pass
 
 
     def SetCount(self):
@@ -329,6 +361,9 @@ class ViHelper():
 
     def SetDefaultCaretColour(self):
         self.default_caret_colour = self.ctrl.GetCaretForeground()
+
+    def GenerateKeyKindings(self):
+        """Stub to be overridden by derived class"""
         
     def GenerateMotionKeys(self, keys):
         key_mods = defaultdict(dict)
@@ -460,6 +495,12 @@ class ViHelper():
         com_type, command, repeatable, selection_type = keys[key]
         func, args = command
 
+        
+        # If in visual mode need to prep in case we change selection direction
+        start_selection_direction = None
+        if self.mode == ViHelper.VISUAL:
+            start_selection_direction = self.SelectionIsForward()
+
     
         # If a motion is present in the command (but not the main command)
         # it needs to be run first
@@ -520,15 +561,17 @@ class ViHelper():
         if self.mode == ViHelper.VISUAL:
             if com_type < 1:
                 self.SetMode(ViHelper.NORMAL)
-            elif com_type == 4:
-                self._visual_start_pos = self._anchor
             else:
-                # TODO: fix this _visual_start_pos and _anchor should be 1 off
-                if self.ctrl.GetCurrentPos() < self._visual_start_pos:
-                    self.StartSelection(self._visual_start_pos + 1)
-                else:
-                    self.StartSelection(self._visual_start_pos)
-                    
+                if start_selection_direction is not None:
+                    end_selection_direction = \
+                            self.ctrl.GetCurrentPos() > self._anchor
+
+                    if start_selection_direction != end_selection_direction:
+                        if end_selection_direction:
+                            self._anchor = self._anchor - 1
+                        else:
+                            self._anchor = self._anchor + 1
+                        
                 self.SelectSelection(com_type)
 
         self.FlushBuffers()
@@ -1212,7 +1255,7 @@ class ViRegister():
         return self.current_reg
 
     def SetCurrentRegister(self, value, yank_register=False):
-        # Whenever a register is set the unnamed ("") register is also.
+        # Whenever a register is set the unnamed (") register is also.
         self.registers['"'] = value
         if self.current_reg is None:
             if yank_register:
@@ -1336,7 +1379,8 @@ class CmdParser():
         # marks? search patterns?
         self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, u".", u"$", u"%", u",")
         self.range_cmds = {
-                            u"s" : self.SearchAndReplace
+                            u"s" : self.SearchAndReplace,
+                            u"sort" : self.Sort
                           }
         # TODO: :s repeats last command
 
@@ -1413,6 +1457,12 @@ class CmdParser():
         self.last_sub_cmd = pattern
 
         return True
+
+    def Sort(self, sort_type=None):
+        eol_char = self.ctrl.GetEOLChar()
+        sorted_text = eol_char.join(
+                sorted(self.ctrl.GetSelectedText().split(eol_char)))
+        self.ctrl.ReplaceSelection(sorted_text)
 
     def RepeatSubCmdWithFlags(self):
         self.RepeatSubCmd(ignore_flags=False)
@@ -1662,8 +1712,14 @@ class CmdParser():
         else:
             value = (link_info,)
 
+        wikiword = value[0][2]
+
+        strip_whitespace_from_wikiword = True
+        if strip_whitespace_from_wikiword:
+            wikiword = wikiword.strip()
+
         self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
-                u"wikipage/" + value[0][2], tabMode=tab_mode, 
+                u"wikipage/" + wikiword, tabMode=tab_mode, 
                 firstcharpos=value[0][3], charlength=value[0][4])
 
         return True
@@ -1755,6 +1811,36 @@ class CmdParser():
         results = self.ctrl.presenter.getMainControl().getWikiData().\
                     getWikiWordMatchTermsWith(
                             search_text, orderBy="word", descend=False)
+
+        filter_results = True
+        # Quick hack to filter repetative alias'
+        if filter_results:
+            print results
+            pages = [x[2] for x in results if x[4] > -1 and x[3] == -1]
+            
+            l = []
+            for x in results:
+                # Orginial wikiwords are always displayed
+                if x[4] > -1:
+                    pass
+                else:
+                    alias = x[0].lower()
+                    wikiword = x[2]
+                    wikiword_mod = wikiword.lower()
+                    
+                    for r in (("'s", ""), ("disease", ""), ("syndrome", ""), ("-", ""), (" ", ""), ("cancer", ""), ("carcinoma", "")):
+                        alias = alias.replace(*r)
+                        wikiword_mod = wikiword_mod.replace(*r)
+
+                    # Only hide aliases if the actually page is in the list
+                    if (alias in wikiword_mod or wikiword_mod in alias) and \
+                            wikiword in pages:
+                        continue
+
+                l.append(x)
+
+            results = l
+                
 
         self.data = results
 
