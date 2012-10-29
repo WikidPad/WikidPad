@@ -1377,9 +1377,9 @@ class CmdParser():
             "tab" : (self.GetTabs, self.GotoTab, "Goto tab"),
             "buffer" : (self.GetTabs, self.GotoTab, "Goto tab"),
 
-            "google" : (self.GetWikiPages, self.OpenPageInGoogle, 
+            "google" : (self.GetWikiPagesOrSearch, self.OpenPageInGoogle, 
                         "Search google for ..."),
-            "wikipedia" : (self.GetWikiPages, self.OpenPageInWikipedia,
+            "wikipedia" : (self.GetWikiPagesOrSearch, self.OpenPageInWikipedia,
                         "Search wikipedia for ..."),
 
             # TODO: rewrite with vi like confirmation
@@ -1403,7 +1403,7 @@ class CmdParser():
                         "Close all other tabs"),
 
             "reloadplugins" : (self.Pass, self.ReloadPlugins, 
-                        "Reload plugins"),
+                    "Reload plugins (use sparingly)"),
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
@@ -1700,6 +1700,15 @@ class CmdParser():
 ##############################################
 
     def GetTabFromArgs(self, args, default_to_current=True):
+        """
+        Helper to get a tab (buffer) from an argument
+
+        @param args: The tab to select
+        @param default_to_current: Default - True. If True and no arg
+            current tab will be return, else None.
+
+        @return: The presenter belonging to the current tab.
+        """
         if args is None:
             if default_to_current:
                 return self.ctrl.presenter
@@ -1721,6 +1730,11 @@ class CmdParser():
             return tabs[0][0]
 
     def GetWikiPageFromArgs(self, args, default_to_current_page=False):
+        """
+        Helper to get wikipage from string / list data
+
+        @return: wikipage (formatted in link format)
+        """
         if args is None:
             if default_to_current_page:
                 current_page = self.ctrl.getMainControl().getCurrentWikiWord()
@@ -1745,6 +1759,11 @@ class CmdParser():
 
              
     def OpenWikiPage(self, args, tab_mode):
+        """
+        Helper to open wikipage
+
+        Parses args through GetWikiPagesFromArgs()
+        """
         #if not type(link_info) == tuple:
         #    value = ((link_info, 0, link_info, -1, -1),)
         #else:
@@ -1772,7 +1791,13 @@ class CmdParser():
     def ReloadPlugins(self, args=None):
         """
         Reload plugins globally using reloadMenuPlugins() and then
-        on a per tab basis
+        on a per tab basis. i.e. applies changes to all open tabs -
+        reloadMenuPlugins() does not reload vi plugins.
+
+
+        NOTE: Excessive use of this function will lead to a noticable
+              increase in memory usage. i.e. should only be used for
+              dev purposes.
         """
         self.ctrl.presenter.getMainControl().reloadMenuPlugins()
 
@@ -1788,6 +1813,13 @@ class CmdParser():
 
         
     def EditWithVim(self, args=None):
+        """
+        Edit "page" in vim (using a subprocess)
+
+        If no pages specified current page is used
+
+        Only works with original_sqlite backend
+        """
         page = self.GetWikiPageFromArgs(args, 
                 default_to_current_page=True)[0][0]
 
@@ -1804,6 +1836,9 @@ class CmdParser():
         return True
         
     def EditWithGvim(self, args=None):
+        """
+        Same as above (EditWithVim) but using gvim instead
+        """
         page = self.GetWikiPageFromArgs(args, 
                 default_to_current_page=True)[0][0]
 
@@ -1819,6 +1854,11 @@ class CmdParser():
         return True
 
     def OpenPageInGoogle(self, args=None):
+        """
+        Searches google for "args" (default = current page)
+        
+        Suggested args: Wikipages
+        """
         page = self.GetWikiPageFromArgs(args, 
                 default_to_current_page=True)[0][0]
 
@@ -1843,11 +1883,21 @@ class CmdParser():
         return True
 
     def CloseOtherTabs(self, args=None):
+        """
+        Closes all tabs except for one specified by "args"
+
+        @return True if successful, False if not (tab does not exist)
+        """
         if self.GotoTab(args):
             self.ctrl.presenter.getMainControl().getMainAreaPanel()\
                     ._closeAllButCurrentTab()
+            return True
+        return False
 
     def SaveCurrentPage(self, args=None):
+        """
+        Force save of current page
+        """
         self.ctrl.presenter.saveCurrentDocPage()
         return True
 
@@ -1861,6 +1911,13 @@ class CmdParser():
         return self.OpenWikiPage(args, 3)
 
     def CloseTab(self, args=None):
+        """
+        Close specified tab
+
+        @args: tab to close
+
+        @return: True if successful, False if not
+        """
         #if text_input is None:
         #    self.ctrl.vi.CloseCurrentTab()
         #    return True
@@ -1874,6 +1931,10 @@ class CmdParser():
         return True
 
     def GotoTab(self, args=None):
+        """
+        Goto specified tab
+        """
+        
         tab = self.GetTabFromArgs(args)
 
         if tab is None:
@@ -1885,11 +1946,20 @@ class CmdParser():
         #return False
         
     def CloseWiki(self, arg=None):
+        """
+        Close current wiki
+        """
         self.ctrl.presenter.getMainControl().exitWiki()
 
 ###########################################################
 
     def GetTabs(self, text_input):
+        """
+        Return a list of currently open tabs (suitable for suggest box)
+
+        @return_type: tuple - (list, list, list)
+        @return: (tab instances, tab names, tab names)
+        """
         mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
         page_count = mainAreaPanel.GetPageCount()
 
@@ -1926,6 +1996,11 @@ class CmdParser():
 
         return results
 
+    def GetWikiPagesOrSearch(self, search_text):
+        if search_text is None or search_text.strip() == u"":
+            return None, (_(u"Enter wikiword (or text) to search for..."),), \
+                    None
+        return self.GetWikiPages(search_text)
 
     def GetWikiPages(self, search_text):
         if search_text is None or search_text.strip() == u"":
