@@ -1460,6 +1460,10 @@ class WikiHtmlViewWK(wx.Panel):
             ##decision.ignore()
             return True
 
+        elif href == (internaljumpPrefix + u"event/pageBuilt"):
+            # Should we be doing anything here?
+            return True
+
         elif href.startswith(u"file:"):
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
