@@ -6849,9 +6849,8 @@
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
-        <object class="wxListBox" name="viInputListBox">
+        <object class="unknown" name="viInputListBox">
           <content/>
-          <style>wxLB_SINGLE</style>
         </object>
         <option>1</option>
         <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>

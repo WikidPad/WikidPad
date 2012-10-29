@@ -24,6 +24,10 @@ from WindowLayout import setWindowSize
 # TODO: should be configurable
 AUTOCOMPLETE_BOX_HEIGHT = 50
 
+def formatListBox(x, y):
+    html = "<table width=100% height=5px><tr><td>{0}</td><td align='right'><font color='gray'>{1}</font></td></tr></table>".format(x, y)
+    return html
+
 class ViHelper():
     """
     Base class for ViHandlers to inherit from.
@@ -296,7 +300,7 @@ class ViHelper():
                             self.settings[setting] = config.getboolean(
                                     "settings", setting)
                         except ValueError:
-                            print "Setting '{0}' must be boolean".format(setting)
+                            print "Setting '{1}' must be boolean".format(setting)
 
             except ConfigParser.NoSectionError:
                 pass
@@ -1338,56 +1342,76 @@ class ViRegister():
         return text
 
 
-
 class CmdParser():
-    def __init__(self, ctrl, selection_range=None):
+    def __init__(self, ctrl, viInputListBox, selection_range=None, ):
         self.ctrl = ctrl
+
+        self.viInputListBox = viInputListBox
 
         self.selection_range = selection_range
         self.last_sub_cmd = None
 
-        self.data = []
-
         self.cmds = {
-            "&" : (self.Pass, self.RepeatSubCmd),
-            "&&" : (self.Pass, self.RepeatSubCmdWithFlags),
-            "parents" : (self.GetParentPages, self.OpenWikiPageCurrentTab),
-            "tabparents" : (self.GetParentPages, self.OpenWikiPageNewTab),
-            "bgparents" : (self.GetParentPages, self.OpenWikiPageBackgroundTab),
-            "w" : (self.Pass, self.SaveCurrentPage),
-            "write" : (self.Pass, self.SaveCurrentPage),
-            "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
-            "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab),
-            "tabopen" : (self.GetWikiPages, self.OpenWikiPageNewTab),
-            "bgtabopen" : (self.GetWikiPages, self.OpenWikiPageBackgroundTab),
+            "&" : (self.Pass, self.RepeatSubCmd, "Repeat last command"),
+            "&&" : (self.Pass, self.RepeatSubCmdWithFlags,
+                        "Repeat last command with flags"),
+            "parents" : (self.GetParentPages, self.OpenWikiPageCurrentTab,
+                        "Goto parent page in current page"),
+            "tabparents" : (self.GetParentPages, self.OpenWikiPageNewTab,
+                        "Goto parent page in new tab"),
+            "bgparents" : (self.GetParentPages, self.OpenWikiPageBackgroundTab,
+                        "Goto parent page in background tab"),
+            "w" : (self.Pass, self.SaveCurrentPage, 
+                        "Write (save) current page"),
+            "write" : (self.Pass, self.SaveCurrentPage, 
+                        "Write (save) current page"),
+            "open" : (self.GetWikiPages, self.OpenWikiPageCurrentTab,
+                        "Open page in current tab"),
+            "edit" : (self.GetWikiPages, self.OpenWikiPageCurrentTab,
+                        "Open page in current tab"),
+            "tabopen" : (self.GetWikiPages, self.OpenWikiPageNewTab,
+                        "Open pagge in new tab"),
+            "bgtabopen" : (self.GetWikiPages, self.OpenWikiPageBackgroundTab,
+                        "Open page in new background tab"),
 
-            "tab" : (self.GetTabs, self.GotoTab),
-            "buffer" : (self.GetTabs, self.GotoTab),
+            "tab" : (self.GetTabs, self.GotoTab, "Goto tab"),
+            "buffer" : (self.GetTabs, self.GotoTab, "Goto tab"),
 
-            "google" : (self.GetWikiPages, self.OpenPageInGoogle),
-            "wikipedia" : (self.GetWikiPages, self.OpenPageInWikipedia),
+            "google" : (self.GetWikiPages, self.OpenPageInGoogle, 
+                        "Search google for ..."),
+            "wikipedia" : (self.GetWikiPages, self.OpenPageInWikipedia,
+                        "Search wikipedia for ..."),
 
             # TODO: rewrite with vi like confirmation
-            "deletepage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
-            "delpage" : (self.GetDefinedWikiPages, self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog),
+            "deletepage" : (self.GetDefinedWikiPages, 
+                self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog,
+                "Delete page"),
+            "delpage" : (self.GetDefinedWikiPages, 
+                self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog,
+                "Delete page"),
 
             #"renamepage" : (self.GetDefinedWikiPages, self.Pass),
 
             # Currently bdelete and bwipeout are currently synonymous
-            "quit" : (self.GetTabs, self.CloseTab),
-            "bdelete" : (self.GetTabs, self.CloseTab),
-            "bwipeout" : (self.GetTabs, self.CloseTab),
-            "quitall" : (self.Pass, self.CloseWiki),
-            "tabonly" : (self.GetTabs, self.CloseOtherTabs),
-            "exit" : (self.Pass, self.CloseWiki),
+            "quit" : (self.GetTabs, self.CloseTab, "Close tab"),
+            "bdelete" : (self.GetTabs, self.CloseTab, "Close tab"),
+            "bwipeout" : (self.GetTabs, self.CloseTab, "Close tab"),
+            "quitall" : (self.Pass, self.CloseWiki, "Close wiki"),
+            "tabonly" : (self.GetTabs, self.CloseOtherTabs, 
+                        "Close all other tabs"),
+            "exit" : (self.Pass, self.CloseWiki,
+                        "Close all other tabs"),
 
-            "reloadplugins" : (self.Pass, self.ReloadPlugins),
+            "reloadplugins" : (self.Pass, self.ReloadPlugins, 
+                        "Reload plugins"),
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
                 u"original_sqlite":
-            self.cmds["vim"] = (self.GetWikiPages, self.EditWithVim)
-            self.cmds["gvim"] = (self.GetWikiPages, self.EditWithGvim)
+            self.cmds["vim"] = (self.GetWikiPages, self.EditWithVim,
+                        "Edit page with vim")
+            self.cmds["gvim"] = (self.GetWikiPages, self.EditWithGvim,
+                        "Edit page with gvim")
 
         # marks? search patterns?
         self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, u".", u"$", u"%", u",")
@@ -1620,6 +1644,7 @@ class CmdParser():
             arg = u" ".join(split_cmd[1:])
 
         cmd_list = []
+        list_box = []
         
         for cmd in self.cmds:
             if cmd.startswith(action):
@@ -1627,15 +1652,16 @@ class CmdParser():
                     return self.cmds[cmd][0](arg)
                 else:
                     cmd_list.append(cmd)
+                    list_box.append(formatListBox(cmd, self.cmds[cmd][2]))
 
-        return cmd_list
+        return cmd_list, list_box, cmd_list
 
     def RunCmd(self, text_input, viInputListBox_selection):
         if self.CheckForRangeCmd(text_input):
             return self.ExecuteRangeCmd(text_input)
 
-        if viInputListBox_selection > -1 and self.data:
-            arg = self.data[viInputListBox_selection]
+        if viInputListBox_selection > -1 and self.viInputListBox.HasData():
+            arg = (0, self.viInputListBox.GetData(viInputListBox_selection))
         else:
             arg = None
 
@@ -1643,7 +1669,7 @@ class CmdParser():
 
         action = split_cmd[0]
         if arg is None and len(split_cmd) > 1 and len(split_cmd[1]) > 0:
-            arg = u" ".join(split_cmd[1:])
+            arg = (1, u" ".join(split_cmd[1:]))
 
         # If a full cmd name has been entered use it
         if action in self.cmds:
@@ -1658,7 +1684,81 @@ class CmdParser():
         self.ClearInput()
         
     def ClearInput(self):
-        self.data = []
+        self.cmd_list = []
+
+##############################################
+### Helpers
+##############################################
+
+    def GetTabFromArgs(self, args, default_to_current=True):
+        if args is None:
+            if default_to_current:
+                return self.ctrl.presenter
+            else:
+                return None
+            
+        arg_type, arg = args
+
+        if arg_type == 0:
+            return arg
+        elif arg_type == 1:
+            if arg.strip() == u"":
+                return self.ctrl.presenter
+            tabs = self.GetTabs(arg)
+
+            if not tabs[0]:
+                return None
+            
+            return tabs[0][0]
+
+    def GetWikiPageFromArgs(self, args, default_to_current_page=False):
+        if args is None:
+            if default_to_current_page:
+                current_page = self.ctrl.getMainControl().getCurrentWikiWord()
+                return ((current_page, 0, current_page, -1, -1),)
+
+            else:
+                return False
+
+        arg_type, arg = args
+
+        # If args is a string just use it as a wikiword directly
+        if arg_type == 1:
+            if arg.strip() == u"":
+                return False
+
+            # We create the required link format here
+            return ((arg, 0, arg, -1, -1),)
+
+        # If arg type is data the format should be correct already
+        elif arg_type == 0:
+            return args
+
+             
+    def OpenWikiPage(self, args, tab_mode):
+        #if not type(link_info) == tuple:
+        #    value = ((link_info, 0, link_info, -1, -1),)
+        #else:
+        #    value = (link_info,)
+
+        # TODO: think about using more of the link data
+
+        value = self.GetWikiPageFromArgs(args)
+
+        wikiword = value[0][2]
+
+        strip_whitespace_from_wikiword = True
+        if strip_whitespace_from_wikiword:
+            wikiword = wikiword.strip()
+
+        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
+                u"wikipage/" + wikiword, tabMode=tab_mode, 
+                firstcharpos=value[0][3], charlength=value[0][4])
+
+        return True
+
+
+##############################################
 
     def ReloadPlugins(self, args=None):
         """
@@ -1678,58 +1778,63 @@ class CmdParser():
                     pass
 
         
-    def EditWithVim(self, text_input=None):
-        if type(text_input) == tuple:
-            text_input = text_input[0]
+    def EditWithVim(self, args=None):
+        page = self.GetWikiPageFromArgs(args, 
+                default_to_current_page=True)[0][0]
+
         mainCtrl = self.ctrl.presenter.getMainControl()
-        if text_input is None:
-            text_input = self.ctrl.presenter.getWikiWord()
+        if page is None:
+            page = self.ctrl.presenter.getWikiWord()
 
         file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
-                getDataDir(), u"{0}.wiki".format(text_input))
+                getDataDir(), u"{0}.wiki".format(page))
         
-        p = subprocess.Popen([self.settings['vim_path'], file_path], shell=True)
+        p = subprocess.Popen([self.ctrl.vi.settings['vim_path'], file_path], 
+                shell=True)
 
         return True
         
-    def EditWithGvim(self, text_input=None):
-        if type(text_input) == tuple:
-            text_input = text_input[0]
+    def EditWithGvim(self, args=None):
+        page = self.GetWikiPageFromArgs(args, 
+                default_to_current_page=True)[0][0]
+
         mainCtrl = self.ctrl.presenter.getMainControl()
-        if text_input is None:
-            text_input = self.ctrl.presenter.getWikiWord()
+        if page is None:
+            page = self.ctrl.presenter.getWikiWord()
 
         file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
-                getDataDir(), u"{0}.wiki".format(text_input))
+                getDataDir(), u"{0}.wiki".format(page))
         
-        p = subprocess.Popen([self.settings['gvim_path'], file_path])
+        p = subprocess.Popen([self.ctrl.vi.settings['gvim_path'], file_path])
 
         return True
 
-    def OpenPageInGoogle(self, text_input=None):
-        if type(text_input) == tuple:
-            text_input = text_input[0]
+    def OpenPageInGoogle(self, args=None):
+        page = self.GetWikiPageFromArgs(args, 
+                default_to_current_page=True)[0][0]
+
         mainCtrl = self.ctrl.presenter.getMainControl()
-        if text_input is None:
-            text_input = self.ctrl.presenter.getWikiWord()
+        if page is None:
+            page = self.ctrl.presenter.getWikiWord()
 
         mainCtrl.launchUrl("https://www.google.com/search?q={0}".format(
-                urlQuote(text_input)))
+                urlQuote(page)))
         return True
 
-    def OpenPageInWikipedia(self, text_input=None):
-        if type(text_input) == tuple:
-            text_input = text_input[0]
+    def OpenPageInWikipedia(self, args=None):
+        page = self.GetWikiPageFromArgs(args, 
+                default_to_current_page=True)[0][0]
+
         mainCtrl = self.ctrl.presenter.getMainControl()
-        if text_input is None:
-            text_input = self.ctrl.presenter.getWikiWord()
+        if page is None:
+            page = self.ctrl.presenter.getWikiWord()
  
         mainCtrl.launchUrl("https://www.wikipedia.org/wiki/{0}".format(
-                urlQuote(text_input)))
+                urlQuote(page)))
         return True
 
-    def CloseOtherTabs(self, text_input=None):
-        if self.GotoTab(text_input):
+    def CloseOtherTabs(self, args=None):
+        if self.GotoTab(args):
             self.ctrl.presenter.getMainControl().getMainAreaPanel()\
                     ._closeAllButCurrentTab()
 
@@ -1737,32 +1842,43 @@ class CmdParser():
         self.ctrl.presenter.saveCurrentDocPage()
         return True
 
-    def OpenWikiPageCurrentTab(self, link_info):
-        return self.OpenWikiPage(link_info, 0)
+    def OpenWikiPageCurrentTab(self, args):
+        return self.OpenWikiPage(args, 0)
 
-    def OpenWikiPageNewTab(self, link_info):
-        return self.OpenWikiPage(link_info, 2)
+    def OpenWikiPageNewTab(self, args):
+        return self.OpenWikiPage(args, 2)
 
-    def OpenWikiPageBackgroundTab(self, link_info):
-        return self.OpenWikiPage(link_info, 3)
+    def OpenWikiPageBackgroundTab(self, args):
+        return self.OpenWikiPage(args, 3)
 
-    def OpenWikiPage(self, link_info, tab_mode):
-        if not type(link_info) == tuple:
-            value = ((link_info, 0, link_info, -1, -1),)
-        else:
-            value = (link_info,)
+    def CloseTab(self, args=None):
+        #if text_input is None:
+        #    self.ctrl.vi.CloseCurrentTab()
+        #    return True
+        tab = self.GetTabFromArgs(args)
 
-        wikiword = value[0][2]
-
-        strip_whitespace_from_wikiword = True
-        if strip_whitespace_from_wikiword:
-            wikiword = wikiword.strip()
-
-        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
-                u"wikipage/" + wikiword, tabMode=tab_mode, 
-                firstcharpos=value[0][3], charlength=value[0][4])
-
+        if tab is None:
+            return False
+        
+        wx.CallAfter(self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                .closePresenterTab, tab)
         return True
+
+    def GotoTab(self, args=None):
+        tab = self.GetTabFromArgs(args)
+
+        if tab is None:
+            return False
+        
+        self.ctrl.presenter.getMainControl().getMainAreaPanel()\
+                .showPresenter(tab)
+        return True
+        #return False
+        
+    def CloseWiki(self, arg=None):
+        self.ctrl.presenter.getMainControl().exitWiki()
+
+###########################################################
 
     def GetTabs(self, text_input):
         mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
@@ -1770,7 +1886,7 @@ class CmdParser():
 
         tabs = []
 
-        return_data = []
+        tab_names = []
 
         for i in range(page_count):
             page = mainAreaPanel.GetPage(i)
@@ -1778,83 +1894,40 @@ class CmdParser():
             wikiword = page.getWikiWord()
 
             if wikiword.startswith(text_input):
-                return_data.append(wikiword)
+                tab_names.append(wikiword)
                 tabs.append(page)
 
-        self.data = tabs
-
-        return return_data
-
-
-    def CloseTab(self, text_input):
-        if text_input is None:
-            self.ctrl.vi.CloseCurrentTab()
-            return True
-            #currentTabNum = mainAreaPanel.GetSelection() + 1
-
-        if text_input in self.data:
-            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
-                    .closePresenterTab(text_input)
-            return True
-        elif len(self.data) == 1:
-            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
-                    .closePresenterTab(self.data[0])
-            return True
-        else:
-            self.ctrl.vi.visualBell("RED")
-            return False
-
-
-    def GotoTab(self, text_input):
-        if text_input is None:
-            return False
-
-        if text_input in self.data:
-            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
-                    .showPresenter(text_input)
-            return True
-        elif len(self.data) == 1:
-            self.ctrl.presenter.getMainControl().getMainAreaPanel()\
-                    .showPresenter(self.data[0])
-            return True
-        return False
-        
-    def CloseWiki(self, arg=None):
-        self.ctrl.presenter.getMainControl().exitWiki()
+        return tabs, tab_names, tab_names
 
     def GetDefinedWikiPages(self, search_text):
-        if search_text is None:
-            return [(_(u"Enter wikiword..."),)]
+        if search_text is None or search.text.strip() == u"":
+            return None, (_(u"Enter wikiword..."),), None
 
         results = self.ctrl.presenter.getMainControl().getWikiData().\
                                                 getAllDefinedWikiPageNames()
-        self.data = results
+        self.cmd_list = results
 
         if search_text.strip() == u"":
             return results
 
-        results = [i for i in self.data if i.find(search_text) > -1]
+        results = [i for i in self.cmd_list if i.find(search_text) > -1]
 
         if not results:
-            return None
+            return None, None, None
 
         return results
 
 
     def GetWikiPages(self, search_text):
-        if search_text is None:
-            return [(_(u"Enter wikiword..."),)]
-
-        if search_text.strip() == u"":
-            return [_(u"Enter wikiword...")]
+        if search_text is None or search_text.strip() == u"":
+            return None, (_(u"Enter wikiword..."),), None
 
         results = self.ctrl.presenter.getMainControl().getWikiData().\
                     getWikiWordMatchTermsWith(
                             search_text, orderBy="word", descend=False)
 
-        filter_results = True
         # Quick hack to filter repetative alias'
-        if filter_results:
+        if self.ctrl.vi.settings["filter_wikipages"]:
             pages = [x[2] for x in results if x[4] > -1 and x[3] == -1]
             
             l = []
@@ -1866,8 +1939,13 @@ class CmdParser():
                     alias = x[0].lower()
                     wikiword = x[2]
                     wikiword_mod = wikiword.lower()
+
+                    # Ignore alias if it points to the same page as the
+                    # the item above it in the list
+                    if l and l[-1][2] == wikiword:
+                        continue
                     
-                    for r in (("'s", ""), ("disease", ""), ("syndrome", ""), ("-", ""), (" ", ""), ("cancer", ""), ("carcinoma", "")):
+                    for r in (("'s", ""), ("-", ""), (" ", "")):
                         alias = alias.replace(*r)
                         wikiword_mod = wikiword_mod.replace(*r)
 
@@ -1880,14 +1958,15 @@ class CmdParser():
 
             results = l
                 
-
-        self.data = results
-
-        results = [i[0] for i in self.data]
         if not results:
-            return None
+            return None, None, None
 
-        return results
+        formatted_results = [formatListBox(i[0], i[2]) for i in results]
+
+        # NOTE: it would be possible to open pages at specific positions
+        pages = [i[2] for i in results]
+
+        return pages, formatted_results, pages
 
     def GetParentPages(self, search_text):
         presenter = self.ctrl.presenter
@@ -1895,13 +1974,14 @@ class CmdParser():
 
         parents = presenter.getMainControl().getWikiData(). \
                     getParentRelationships(word)
+
  
         # If no parents give a notification and exit
         if len(parents) == 0:
             self.ctrl.vi.visualBell()
-            return None
+            return None, (_(u"Page has no parents"),), None
 
-        return parents
+        return parents, parents, parents
 
 class ViInputHistory():
     def __init__(self):
@@ -1953,9 +2033,15 @@ class ViInputDialog(wx.Panel):
 
         self.mainControl = mainControl
 
+        listBox = ViCmdList(parent)
+
         res = wx.xrc.XmlResource.Get()
         res.LoadOnPanel(self, parent, "ViInputDialog")
         self.ctrls = XrcControls(self)
+
+        res.AttachUnknownControl("viInputListBox", listBox, self)
+
+
 
         self.sizeVisible = True
 
@@ -2025,7 +2111,7 @@ class ViInputDialog(wx.Panel):
 
         self.cmd_list = []
 
-        self.cmd_parser = CmdParser(self.ctrl, self.selection_range)
+        self.cmd_parser = CmdParser(self.ctrl, self.ctrls.viInputListBox, self.selection_range)
         
         self.initial_scroll_pos = self.ctrl.GetScrollAndCaretPosition()
 
@@ -2099,11 +2185,12 @@ class ViInputDialog(wx.Panel):
 
     def PostLeftMouseListBox(self):
         self.block_list_reload = True
-        self.SetInput(self.ctrls.viInputListBox.GetStringSelection())
+        self.SetInput(self.ctrls.viInputListBox.GetCurrentArg())
         self.block_list_reload = False
 
     def PostLeftMouseDoubleListBox(self):
         self.PostLeftMouseListBox()
+        self.list_selectionn = True
         self.ExecuteCmd(self.GetInput())
         self.Close()
 
@@ -2195,11 +2282,13 @@ class ViInputDialog(wx.Panel):
 
 
     def ParseViInput(self, input_text):
-        data = self.cmd_parser.ParseCmdWithArgs(input_text)
+        data, formatted_data, args = self.cmd_parser.ParseCmdWithArgs(input_text)
 
-        if data != self.cmd_list:
-            self.cmd_list = data
-            self.PopulateListBox(data)
+        #if cmd_list != self.cmd_list:
+        #    self.cmd_list = cmd_list
+        #    self.PopulateListBox(data)
+
+        self.PopulateListBox(data, formatted_data, args)
 
         if not data:
             return False
@@ -2218,19 +2307,14 @@ class ViInputDialog(wx.Panel):
     def ClearListBox(self):
         self.ctrls.viInputListBox.Clear()
 
-    def PopulateListBox(self, data):
-        
-        if data is None or len(data) < 1:
-            self.list_data = None
+    def PopulateListBox(self, data, formatted_data, args):
+        if data is None or not data:
             # No items
-            self.ctrls.viInputListBox.Clear()
-            self.ctrls.viInputListBox.AppendItems([u"No items / data found."])
+            self.ctrls.viInputListBox.SetData(None)
             return
         else:
-            self.list_data = data
 
-            self.ctrls.viInputListBox.Clear()
-            self.ctrls.viInputListBox.AppendItems(data)
+            self.ctrls.viInputListBox.SetData(data, formatted_data, args)
         #self.ctrls.viInputListBox.SetSelection(0)
 
         self.UpdateLayout(show_viInputListBox=True)
@@ -2325,7 +2409,7 @@ class ViInputDialog(wx.Panel):
         self.MoveListBoxSelection(-1)
 
     def MoveListBoxSelection(self, offset):
-        if self.ctrls.viInputListBox.GetCount() < 1 or self.list_data is None:
+        if not self.ctrls.viInputListBox.HasData():
             self.ctrl.vi.visualBell(u"RED")
             return
 
@@ -2344,7 +2428,7 @@ class ViInputDialog(wx.Panel):
         self.list_selection = sel_no
 
         self.block_list_reload = True
-        self.SetInput(self.ctrls.viInputListBox.GetStringSelection())
+        self.SetInput(self.ctrls.viInputListBox.GetCurrentArg())
         #if len(split_text) > 1:# and split_text[1] != u"":
         #    self.ctrls.viInputTextField.SetValue("{0} {1}".format(self.ctrls.viInputTextField.GetValue().split(u" ")[0], self.ctrls.viInputListBox.GetStringSelection()))
         #else:
@@ -2366,5 +2450,79 @@ class ViInputDialog(wx.Panel):
         self.mainControl.windowLayouter.expandWindow("vi input")
         self.FocusInputField()
 
+
+class ViCmdList(wx.HtmlListBox):
+    def __init__(self, parent):
+        """
+        Html list box which holds completion info.p
+
+        Consists of 3 parts
+          
+        formatted_data: html formatted string as will appear in the list box
+        data: associated data (is not restricted to a particular type)
+        args: simple string that will be used as the arg if listbox item is
+          selected
+        """
+
+        wx.HtmlListBox.__init__(self, parent, -1)
+
+        self.parent = parent
+
+        wx.EVT_LISTBOX_DCLICK(self, -1, self.OnDClick)
+
+        self.ClearData()
+
+    def ClearData(self):
+        self.data = None
+        self.formatted_data = []
+        self.args = []
+
+    def HasData(self):
+        if self.data is None:
+            return False
+        else:
+            return True
+
+    def SetData(self, data, formatted_data=[], args=[]):
+        if data is None:
+            self.formatted_data = [u"No items / data found."]
+            self.data = None
+
+        else:
+            self.formatted_data = formatted_data
+            self.data = data
+            self.args = args
+
+        self.SetItemCount(len(self.formatted_data))
+
+        self.Refresh()
+
+    def GetArg(self, n):
+        return self.args[n]
+
+    def GetData(self, n):
+        return self.data[n]
+
+    def GetCurrentArg(self):
+        return self.args[self.GetSelection()]
+
+    def GetCurrentData(self):
+        return self.data[self.GetSelection()]
+
+    #def AppendItems(self, formatted_data, data, args):
+    #    self.data.append(data)
+    #    self.Refresh()
+
+    def OnGetItem(self, n):
+        if self.formatted_data is not None:
+            return self.formatted_data[n]
+        else:
+            return None
+
+    def GetCount(self):
+        return len(self.data)
+
+    def OnDClick(self, evt):
+        pass
 
 class PluginKeyError(Exception): pass
