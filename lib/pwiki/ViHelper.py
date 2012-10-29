@@ -9,6 +9,7 @@ import re
 import copy
 import string
 import PluginManager
+import subprocess
 
 from wxHelper import * # Needed for  XrcControls
 
@@ -195,6 +196,9 @@ class ViHelper():
         self.settings = { 
                 "filter_wikipages" : True,
                 "caret_scroll" : False, # Large performance hit
+
+                "gvim_path" : u"gvim", 
+                "vim_path" : u"vim", 
                 
              }
         self.LoadSettings()
@@ -255,6 +259,9 @@ class ViHelper():
         Can be called at any time to update / reload settings
 
         ? May need to regenerate keybindings if they have been changed
+
+        NOTE: Should move out of ViHelper as per tab setting are probably
+              not required
         """
         rc_file = None
         rc_file_names = (".WikidPad.virc", "WikidPad.virc")
@@ -1377,6 +1384,11 @@ class CmdParser():
             "reloadplugins" : (self.Pass, self.ReloadPlugins),
             }
 
+        if self.ctrl.presenter.getWikiDocument().getDbtype() == \
+                u"original_sqlite":
+            self.cmds["vim"] = (self.GetWikiPages, self.EditWithVim)
+            self.cmds["gvim"] = (self.GetWikiPages, self.EditWithGvim)
+
         # marks? search patterns?
         self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, u".", u"$", u"%", u",")
         self.range_cmds = {
@@ -1666,6 +1678,33 @@ class CmdParser():
                     pass
 
         
+    def EditWithVim(self, text_input=None):
+        if type(text_input) == tuple:
+            text_input = text_input[0]
+        mainCtrl = self.ctrl.presenter.getMainControl()
+        if text_input is None:
+            text_input = self.ctrl.presenter.getWikiWord()
+
+        file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
+                getDataDir(), u"{0}.wiki".format(text_input))
+        
+        p = subprocess.Popen([self.settings['vim_path'], file_path], shell=True)
+
+        return True
+        
+    def EditWithGvim(self, text_input=None):
+        if type(text_input) == tuple:
+            text_input = text_input[0]
+        mainCtrl = self.ctrl.presenter.getMainControl()
+        if text_input is None:
+            text_input = self.ctrl.presenter.getWikiWord()
+
+        file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
+                getDataDir(), u"{0}.wiki".format(text_input))
+        
+        p = subprocess.Popen([self.settings['gvim_path'], file_path])
+
+        return True
 
     def OpenPageInGoogle(self, text_input=None):
         if type(text_input) == tuple:
@@ -1816,7 +1855,6 @@ class CmdParser():
         filter_results = True
         # Quick hack to filter repetative alias'
         if filter_results:
-            print results
             pages = [x[2] for x in results if x[4] > -1 and x[3] == -1]
             
             l = []
@@ -1951,6 +1989,8 @@ class ViInputDialog(wx.Panel):
             self.closeTimer.Start(self.closeDelay, True)
 
         self.selection_range = None
+
+        self.list_selection = None
 
         self.block_kill_focus = False
         wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
@@ -2128,7 +2168,7 @@ class ViInputDialog(wx.Panel):
 
             self.ctrl.vi.GotoSelectionStart()
         else:
-            if self.cmd_parser.RunCmd(text_input, self.ctrls.viInputListBox.GetSelection()):
+            if self.cmd_parser.RunCmd(text_input, self.list_selection):
                 self.ctrl.vi.visualBell("GREEN")
             else:
                 self.ctrls.viInputTextField.SetBackgroundColour(
@@ -2216,6 +2256,8 @@ class ViInputDialog(wx.Panel):
 
         searchString = self.GetInput()
 
+        self.list_selection = None
+
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
                 (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
@@ -2294,9 +2336,12 @@ class ViInputDialog(wx.Panel):
             select = min
             n = self.ctrls.viInputListBox.GetCount()
 
-        self.ctrls.viInputListBox.SetSelection(select(n, 
-                                    self.ctrls.viInputListBox.GetSelection() + offset))
+        sel_no = select(n, self.ctrls.viInputListBox.GetSelection() + offset)
+
+        self.ctrls.viInputListBox.SetSelection(sel_no)
         #split_text = self.GetInput().split(u" ")
+
+        self.list_selection = sel_no
 
         self.block_list_reload = True
         self.SetInput(self.ctrls.viInputListBox.GetStringSelection())

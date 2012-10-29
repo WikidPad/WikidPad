@@ -4310,6 +4310,7 @@ class ViHandler(ViHelper):
 
     (k["c"],)  : (0, (self.DeleteSelectionAndInsert, None), 2, 0), # c
     (k["d"],)  : (0, (self.DeleteSelection, None), 1, 0), # d
+    (wx.WXK_DELETE,)  : (0, (self.DeleteSelection, None), 1, 0), # del key
     (k["D"],) : (0, (self.DeleteSelectionLines, None), 2, 0), # D
     (k["x"],)  : (0, (self.DeleteSelection, None), 1, 0), # x
     (k["y"],) : (0, (self.Yank, False), 0, 0), # y
