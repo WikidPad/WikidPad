@@ -4252,8 +4252,8 @@ class ViHandler(ViHelper):
     #(k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
     
     # TODO: think of suitable commands for the following
-    (wx.WXK_F1,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F1
-    (wx.WXK_F2,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F2
+    (wx.WXK_F3,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F3
+    (wx.WXK_F4,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F4
             }
             }
 
@@ -5956,9 +5956,23 @@ class ViHandler(ViHelper):
 
         self.BeginUndo()
         self.SelectCurrentLine()
+
+        # Check if heading needs line padding above
+        extra = u""
+        if self.settings["blank_line_above_headings"]:
+            start = self.ctrl.GetSelectionStart()
+            if self.GetUnichrAt(start-2) != self.ctrl.GetEOLChar():
+                extra = self.ctrl.GetEOLChar()
+
         line = self.ctrl.GetSelectedText()
-        new_line = "".join([level * u"+", line.lstrip("+")])
+
+        if line.lstrip().startswith("* "):
+            line = line.lstrip().lstrip("* ")
+
+        new_line = "".join([extra, level * u"+", self.ctrl.vi.settings["pad_headings"] * u" ", line.lstrip("+")])
         self.ctrl.ReplaceSelection(new_line)
+
+
         self.EndUndo()
         self.MoveCaretUp(1)
 

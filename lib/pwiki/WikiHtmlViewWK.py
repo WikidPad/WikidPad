@@ -1717,8 +1717,12 @@ class ViFunctions(ViHelper):
 (k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0, 0), # gs
 (k["g"], k["."])  : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # ge
 (k["g"], k["p"])  : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # gp
-(65470,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F1
-(65471,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F2
+
+# F3 and F4 switch directly to editor / preview mode
+(65472,)     : (0, (self.SwitchEditorPreview, "textedit"), 0, 0), # F3
+(65473,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F4
+# F5 refreshes the current page
+(65475,)     : (0, (self.SwitchEditorPreview, "preview"), 0, 0), # F5
     
         }
         }
@@ -1740,6 +1744,9 @@ class ViFunctions(ViHelper):
 
         May be used in the future
         """
+
+    def RefreshPage(self):
+        self.ctrl.refresh()
 
     # Document navigation
     def HalfPageJumpDown(self):

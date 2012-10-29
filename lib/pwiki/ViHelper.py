@@ -200,6 +200,11 @@ class ViHelper():
         self.settings = { 
                 "filter_wikipages" : True,
                 "caret_scroll" : False, # Large performance hit
+                
+                # The following settings apply to SetHeading()
+                "blank_line_above_headings" : True,
+                # No. spaces to put between +++ and heading text
+                "pad_headings" : 0,
 
                 "gvim_path" : u"gvim", 
                 "vim_path" : u"vim", 
@@ -1737,7 +1742,8 @@ class CmdParser():
         """
         if args is None:
             if default_to_current_page:
-                current_page = self.ctrl.getMainControl().getCurrentWikiWord()
+                current_page = self.ctrl.presenter.getMainControl().\
+                        getCurrentWikiWord()
                 return ((current_page, 0, current_page, -1, -1),)
 
             else:
@@ -2431,6 +2437,10 @@ class ViInputDialog(wx.Panel):
         searchString = self.GetInput()
 
         self.list_selection = None
+
+        # If shift is presesd (by itself) we can safely skip it
+        if key == 306:
+            pass
 
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
