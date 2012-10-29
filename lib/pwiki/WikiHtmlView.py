@@ -496,7 +496,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         if self.deferredScrollPos is not None:
             return self.deferredScrollPos
         else:
-            return self.GetViewStart()
+            return tuple(self.GetViewStart())
 
 
     def _activateLink(self, href, tabMode=0):

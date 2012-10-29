@@ -129,7 +129,7 @@ class WikiLangOptionsPanel(PluginOptionsPanel):
 #         self.tfDot = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(1, 1, 0, 0)
-        mainsizer.AddGrowableCol(1, 1)
+        mainsizer.AddGrowableCol(0, 1)
 
         mainsizer.Add(self.cbFootnotesAsWws, 1, wx.ALL | wx.EXPAND, 5)
         
