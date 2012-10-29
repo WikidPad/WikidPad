@@ -1509,6 +1509,13 @@ class WikiHtmlViewWK(wx.Panel):
     def SetFocus(self):
         self.html.ctrl.grab_focus()
 
+    def ViewSource(self, arg=None):
+        self.html.getWebkitWebView().set_view_source_mode(
+                not self.html.getWebkitWebView().get_view_source_mode())
+
+        self.outOfSync = True
+        self.refresh()
+
 
 #_CONTEXT_MENU_INTERNAL_JUMP = \
 #u"""
@@ -1900,8 +1907,6 @@ for (var i=0; i<headings.length; i++) {{
 window.scrollTo(0, scroll_height + to_scroll)
 """.format(f))
 
-
-            
     # Numbers
     def SetNumber(self, n):
 

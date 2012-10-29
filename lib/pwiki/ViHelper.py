@@ -1413,6 +1413,15 @@ class CmdParser():
             self.cmds["gvim"] = (self.GetWikiPages, self.EditWithGvim,
                         "Edit page with gvim")
 
+        # Attempt to load webkit specific commands
+        try:
+            if self.ctrl.ViewSource:
+                self.cmds["viewsource"] = (self.Pass, self.ctrl.ViewSource, 
+                        "View current pages HTML source")
+        except AttributeError:
+            pass
+            
+
         # marks? search patterns?
         self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, u".", u"$", u"%", u",")
         self.range_cmds = {
@@ -1516,7 +1525,7 @@ class CmdParser():
         
 
     def Pass(self, junk=None):
-        pass
+        return None, None, None
 
     def CheckForRangeCmd(self, text_input):
         # TODO: improve cmd checking
@@ -2109,6 +2118,8 @@ class ViInputDialog(wx.Panel):
         """
         self.ctrl = ctrl
 
+        self.ctrls.viInputListBox.ClearData()
+
         self.cmd_list = []
 
         self.cmd_parser = CmdParser(self.ctrl, self.ctrls.viInputListBox, self.selection_range)
@@ -2305,12 +2316,16 @@ class ViInputDialog(wx.Panel):
         wx.CallAfter(self.ctrl.SetScrollAndCaretPosition, pos, x, y)
 
     def ClearListBox(self):
-        self.ctrls.viInputListBox.Clear()
+        self.ctrls.viInputListBox.ClearData()
 
     def PopulateListBox(self, data, formatted_data, args):
         if data is None or not data:
-            # No items
-            self.ctrls.viInputListBox.SetData(None)
+            if formatted_data:
+                self.ctrls.viInputListBox.SetData(data=None, 
+                        formatted_data=formatted_data)
+            else:
+                # No items
+                self.ctrls.viInputListBox.SetData(None)
             return
         else:
 
@@ -2388,8 +2403,14 @@ class ViInputDialog(wx.Panel):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.Close()
             self.ctrl.OnKeyDown(evt)
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_SPACE):
+            # This may be used in the future
+            self.ctrls.viInputListBox.SetSelection(-1)
+            evt.Skip()
+            pass
         # handle the other keys
         else:
+            self.ctrls.viInputListBox.SetSelection(-1)
             evt.Skip()
 
         if foundPos == False:
@@ -2476,6 +2497,7 @@ class ViCmdList(wx.HtmlListBox):
         self.data = None
         self.formatted_data = []
         self.args = []
+        self.SetItemCount(0)
 
     def HasData(self):
         if self.data is None:
@@ -2485,7 +2507,10 @@ class ViCmdList(wx.HtmlListBox):
 
     def SetData(self, data, formatted_data=[], args=[]):
         if data is None:
-            self.formatted_data = [u"No items / data found."]
+            if formatted_data:
+                self.formatted_data = formatted_data
+            else:
+                self.formatted_data = [u"No items / data found."]
             self.data = None
 
         else:
