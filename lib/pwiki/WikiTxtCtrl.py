@@ -5587,7 +5587,7 @@ class ViHandler(ViHelper):
     def SelectFullLines(self, include_eol=False):
         """
         Could probably be replaced by SetSectionMode,
-        if it can be made to work.
+        if it can be made to work. (retest with wx >= 2.9)
         """
         start_line, end_line = self._GetSelectedLines(exclusive=True)
         
@@ -5595,14 +5595,21 @@ class ViHandler(ViHelper):
             reverse = False
 
             # If selection is not on an empty line
-            if not self.ctrl.GetLine(start_line) == self.ctrl.GetEOLChar():
+            if self.ctrl.GetLine(start_line) != self.ctrl.GetEOLChar():
                 end_line -= 1
+
+            if self.GetUnichrAt(self.GetSelectionAnchor()) == \
+                    self.ctrl.GetEOLChar():
+                start_line += 1
+
+            if self.ctrl.GetCurrentPos() > \
+                    self.ctrl.GetLineEndPosition(end_line):
+                end_line += 1
 
         else:
             reverse = True
             end_line -= 1
 
-        #cur_line = self.ctrl.GetCurrentLine()
         self.SelectLines(start_line, end_line, reverse=reverse, 
                 include_eol=include_eol)
 
@@ -6966,6 +6973,11 @@ class ViHandler(ViHelper):
             self.MoveCaretVertically(-count)
 
     def MoveCaretDown(self, count=None, visual=False):
+        """
+        Moves caret down
+
+        @param visual: If False ignore linewrap
+        """
         if count is None: count = self.count
         
         if visual:
