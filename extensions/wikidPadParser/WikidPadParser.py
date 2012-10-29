@@ -2459,6 +2459,30 @@ These are your default global settings.
         WikiTxtCtrl.processTokens() should process children recursively.
         """
         return _TheHelper._RECURSIVE_STYLING_NODE_NAMES
+        
+        
+    _FOLDING_NODE_DICT = {
+            "table": (True, False),
+            "attribute": (True, False),
+            "insertion": (True, False)
+        }
+
+
+    def getFoldingNodeDict(self):
+        """
+        Retrieve the folding node dictionary which tells
+        which AST nodes (other than "heading") should be processed by
+        folding.
+        The folding node dictionary has the names of the AST node types as keys,
+        each value is a tuple (fold, recursive) where
+        fold -- True iff node should be folded
+        recursive -- True iff node should be processed recursively
+        
+        The value tuples may contain more than these two items, processFolding()
+        must be able to handle that.
+        """
+        return _TheHelper._FOLDING_NODE_DICT
+
             
 
 

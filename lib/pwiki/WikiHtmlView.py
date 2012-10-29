@@ -27,7 +27,6 @@ from .TempFileSet import TempFileSet
 from . import PluginManager
 
 
-import WikiHtmlViewWK
 # Try and load webkit renderer
 try:
     import WikiHtmlViewWK

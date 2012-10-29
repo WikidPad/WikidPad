@@ -1740,6 +1740,25 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return stylebytes.value()
 
 
+    def getFoldingNodeDict(self):
+        """
+        Retrieve the folding node dictionary from wiki language which tells
+        which AST nodes (other than "heading") should be processed by
+        folding.
+        The folding node dictionary has the names of the AST node types as keys,
+        each value is a tuple (fold, recursive) where
+        fold -- True iff node should be folded
+        recursive -- True iff node should be processed recursively
+        
+        The value tuples may contain more than these two items, processFolding()
+        must be able to handle that.
+        """
+        # TODO: Add option to remove additional nodes from folding
+        #   (or some of them)
+
+        return self.wikiLanguageHelper.getFoldingNodeDict()
+        
+
     def processFolding(self, pageAst, threadstop):
         # TODO: allow folding of tables / boxes / figures
         foldingseq = []
@@ -1747,17 +1766,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         prevLevel = 0
         levelStack = []
         foldHeader = False
-
-        # TODO: Should be set in wikilanguage
-
-        # These nodes will be folded as is
-        nodes_to_fold = ("table", "attribute", "insertion")
-        # These nodes will be foldable and will be searched recursively for
-        # additional nodes
-        recursive_nodes = ("figureBlock", "boxBlock")
-        # These nodes will not be foldable but will be search for additional 
-        # nodes
-        recursive_nodes_no_fold = ("figureContent", "boxContent")
+        
+        foldNodeDict = self.getFoldingNodeDict()
 
         def searchAst(ast, foldingseq, prevLevel, levelStack, foldHeader):
 
@@ -1778,32 +1788,33 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             levelStack[-1] != ("heading", node.level):
                         levelStack.append(("heading", node.level))
                     foldHeader = True
-
-                elif node.name in nodes_to_fold:
-                    # No point in folding single line items
-                    if node.getString().count(u"\n") > 1:
-                        levelStack.append(("node", 0))
+                elif node.name in foldNodeDict:
+                    fndMode = foldNodeDict[node.name][:2]
+                    
+                    if fndMode == (True, False):  # Fold, non recursive
+                        # No point in folding single line items
+                        if node.getString().count(u"\n") > 1:
+                            levelStack.append(("node", 0))
+                            foldHeader = True
+    
+                    elif fndMode == (True, True):  # Fold, recursive
+                        levelStack.append(("recursive-node", 0))
                         foldHeader = True
-
-
-                elif node.name in recursive_nodes:
-                    levelStack.append(("recursive-node", 0))
-                    foldHeader = True
-                    foldingseq, prevLevel, levelStack, foldHeader = \
-                            searchAst(node, foldingseq, prevLevel, levelStack, 
-                            foldHeader)
-                    while levelStack[-1][0] == "heading":
+                        foldingseq, prevLevel, levelStack, foldHeader = \
+                                searchAst(node, foldingseq, prevLevel, levelStack, 
+                                foldHeader)
+                        while levelStack[-1][0] == "heading":
+                            del levelStack[-1]
+                            
                         del levelStack[-1]
-                        
-                    del levelStack[-1]
-
-                    recursive = True
-
-                elif node.name in recursive_nodes_no_fold:
-                    foldingseq, prevLevel, levelStack, foldHeader = \
-                            searchAst(node, foldingseq, prevLevel, levelStack, 
-                            foldHeader)
-                    recursive = True
+    
+                        recursive = True
+    
+                    elif fndMode == (False, True):  # No fold, but recursive
+                        foldingseq, prevLevel, levelStack, foldHeader = \
+                                searchAst(node, foldingseq, prevLevel, levelStack, 
+                                foldHeader)
+                        recursive = True
 
                 if not recursive:
                     lfc = node.getString().count(u"\n")
@@ -1846,10 +1857,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 len(foldingseq) == self.GetLineCount():
             for ln in xrange(len(foldingseq)):
                 self.SetFoldLevel(ln, foldingseq[ln])
-            print "Folding Applied"
             self.repairFoldingVisibility()
-        else:
-            print "Folding does not match", len(foldingseq), self.GetLineCount() 
 
 
     def unfoldAll(self):
