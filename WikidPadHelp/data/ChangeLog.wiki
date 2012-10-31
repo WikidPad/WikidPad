@@ -1,5 +1,11 @@
 ﻿++ Change Log
 
+Oct. 31, 2012 (2.2rc06)
+
+    * Bug fixes: Better source compatibility with wxPython 2.9
+      (thanks to Ross, Windows binary not affected)
+
+
 
 Jul. 02, 2012 (2.2rc05)
 
