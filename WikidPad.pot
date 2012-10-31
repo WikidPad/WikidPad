@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-07-02 13:26\n"
+"POT-Creation-Date: 2012-10-30 16:26\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1579,17 +1579,17 @@ msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\DiffGui.py:509
 #: lib\pwiki\Kopie von PersonalWikiFrame.py:1389
-#: lib\pwiki\PersonalWikiFrame.py:1368 lib\pwiki\WikiTxtCtrl.py:3732
+#: lib\pwiki\PersonalWikiFrame.py:1368 lib\pwiki\WikiTxtCtrl.py:3807
 msgid "Copy"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\DiffGui.py:510
 #: lib\pwiki\Kopie von PersonalWikiFrame.py:1398
-#: lib\pwiki\PersonalWikiFrame.py:1377 lib\pwiki\WikiTxtCtrl.py:3735
+#: lib\pwiki\PersonalWikiFrame.py:1377 lib\pwiki\WikiTxtCtrl.py:3810
 msgid "Select All"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:512 lib\pwiki\WikiTxtCtrl.py:3752
+#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:512 lib\pwiki\WikiTxtCtrl.py:3827
 msgid "Close Tab"
 msgstr ""
 
@@ -1607,7 +1607,7 @@ msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\FileCleanup.py:529 lib\pwiki\FileCleanup.py:531
 #: lib\pwiki\FileCleanup.py:687 lib\pwiki\FileCleanup.py:1265
-#: lib\pwiki\WikiTxtCtrl.py:3734
+#: lib\pwiki\WikiTxtCtrl.py:3809
 msgid "Delete"
 msgstr ""
 
@@ -1617,22 +1617,22 @@ msgid "Collect"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1364
-#: lib\pwiki\PersonalWikiFrame.py:1343 lib\pwiki\WikiTxtCtrl.py:3729
+#: lib\pwiki\PersonalWikiFrame.py:1343 lib\pwiki\WikiTxtCtrl.py:3804
 msgid "Undo"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1368
-#: lib\pwiki\PersonalWikiFrame.py:1347 lib\pwiki\WikiTxtCtrl.py:3730
+#: lib\pwiki\PersonalWikiFrame.py:1347 lib\pwiki\WikiTxtCtrl.py:3805
 msgid "Redo"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1384
-#: lib\pwiki\PersonalWikiFrame.py:1363 lib\pwiki\WikiTxtCtrl.py:3731
+#: lib\pwiki\PersonalWikiFrame.py:1363 lib\pwiki\WikiTxtCtrl.py:3806
 msgid "Cut"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1393
-#: lib\pwiki\PersonalWikiFrame.py:1372 lib\pwiki\WikiTxtCtrl.py:3733
+#: lib\pwiki\PersonalWikiFrame.py:1372 lib\pwiki\WikiTxtCtrl.py:3808
 msgid "Paste"
 msgstr ""
 
@@ -4546,11 +4546,11 @@ msgstr ""
 msgid "Plugins"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:670 lib\pwiki\WikiTxtCtrl.py:2407
+#: lib\pwiki\MainAreaPanel.py:670 lib\pwiki\WikiTxtCtrl.py:2480
 msgid "This can only be done for the page of a wiki word"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:671 lib\pwiki\WikiTxtCtrl.py:2408
+#: lib\pwiki\MainAreaPanel.py:671 lib\pwiki\WikiTxtCtrl.py:2481
 msgid "Not a wiki page"
 msgstr ""
 
@@ -4964,25 +4964,32 @@ msgstr ""
 msgid "Delete all elements from trashcan?"
 msgstr ""
 
-#: lib\pwiki\ViHelper.py:1005
+#: lib\pwiki\ViHelper.py:1065
 msgid "Follow Hint:"
 msgstr ""
 
-#: lib\pwiki\ViHelper.py:1731 lib\pwiki\ViHelper.py:1750
-#: lib\pwiki\ViHelper.py:1753
+#: lib\pwiki\ViHelper.py:1989 lib\pwiki\ViHelper.py:2013
 msgid "Enter wikiword..."
+msgstr ""
+
+#: lib\pwiki\ViHelper.py:2007
+msgid "Enter wikiword (or text) to search for..."
+msgstr ""
+
+#: lib\pwiki\ViHelper.py:2072
+msgid "Page has no parents"
 msgstr ""
 
 #: lib\pwiki\WikiExceptions.py:72
 msgid "Multiple words rename to same word"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:593 lib\pwiki\WikiTxtCtrl.py:2247
+#: lib\pwiki\WikiHtmlView.py:593 lib\pwiki\WikiTxtCtrl.py:2320
 msgid "Folder does not exist"
 msgstr ""
 
 #: lib\pwiki\WikiHtmlView.py:685 lib\pwiki\WikiHtmlViewIE.py:536
-#: lib\pwiki\WikiHtmlViewWK.py:1026 lib\pwiki\WikiTxtCtrl.py:3218
+#: lib\pwiki\WikiHtmlViewWK.py:1026 lib\pwiki\WikiTxtCtrl.py:3291
 msgid "Link to page: %s"
 msgstr ""
 
@@ -5058,165 +5065,169 @@ msgstr ""
 msgid "Prepend Wiki Word"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1300
+#: lib\pwiki\WikiTxtCtrl.py:1303
 msgid "Select Template"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1302
+#: lib\pwiki\WikiTxtCtrl.py:1305
 msgid "Select Template (deletes current content!)"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1426
+#: lib\pwiki\WikiTxtCtrl.py:1429
 msgid "Use Template"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2277 lib\pwiki\WikiTxtCtrl.py:2316
+#: lib\pwiki\WikiTxtCtrl.py:2350 lib\pwiki\WikiTxtCtrl.py:2389
 msgid "File does not exist"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2283
+#: lib\pwiki\WikiTxtCtrl.py:2356
 msgid "Are you sure you want to delete the file: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2284
+#: lib\pwiki\WikiTxtCtrl.py:2357
 msgid "Delete File"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2324
+#: lib\pwiki\WikiTxtCtrl.py:2397
 msgid "Enter new name"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2325
+#: lib\pwiki\WikiTxtCtrl.py:2398
 msgid "Rename File"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2335
+#: lib\pwiki\WikiTxtCtrl.py:2408
 msgid "Target is not a file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2339
+#: lib\pwiki\WikiTxtCtrl.py:2412
 msgid "Target file exists already. Overwrite?"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2340
+#: lib\pwiki\WikiTxtCtrl.py:2413
 msgid "Overwrite File"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2429
+#: lib\pwiki\WikiTxtCtrl.py:2502
 msgid "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2432
+#: lib\pwiki\WikiTxtCtrl.py:2505
 msgid "Script execution disabled"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2504
+#: lib\pwiki\WikiTxtCtrl.py:2577
 msgid "\n"
 "Exception: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2999 lib\pwiki\WikiTxtCtrl.py:4669
+#: lib\pwiki\WikiTxtCtrl.py:3072 lib\pwiki\WikiTxtCtrl.py:4768
 msgid "No more fields in this 'form' page"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3168
+#: lib\pwiki\WikiTxtCtrl.py:3241
 msgid "Line: %d Col: %d Pos: %d"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3274
+#: lib\pwiki\WikiTxtCtrl.py:3347
 msgid "Not a valid image"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3452
+#: lib\pwiki\WikiTxtCtrl.py:3350
+msgid "Image does not exist"
+msgstr ""
+
+#: lib\pwiki\WikiTxtCtrl.py:3527
 msgid "Couldn't copy file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3725
+#: lib\pwiki\WikiTxtCtrl.py:3800
 msgid "Ignore"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3726
+#: lib\pwiki\WikiTxtCtrl.py:3801
 msgid "Add Globally"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3727
+#: lib\pwiki\WikiTxtCtrl.py:3802
 msgid "Add Locally"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3737
+#: lib\pwiki\WikiTxtCtrl.py:3812
 msgid "Follow Link"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3738
+#: lib\pwiki\WikiTxtCtrl.py:3813
 msgid "Follow Link New Tab"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3739
+#: lib\pwiki\WikiTxtCtrl.py:3814
 msgid "Follow Link New Tab Backgrd."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3740
+#: lib\pwiki\WikiTxtCtrl.py:3815
 msgid "Follow Link New Window"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3742
+#: lib\pwiki\WikiTxtCtrl.py:3817
 msgid "Convert Absolute/Relative File URL"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3743
+#: lib\pwiki\WikiTxtCtrl.py:3818
 msgid "Open Containing Folder"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3744
+#: lib\pwiki\WikiTxtCtrl.py:3819
 msgid "Rename file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3745
+#: lib\pwiki\WikiTxtCtrl.py:3820
 msgid "Delete file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3747
+#: lib\pwiki\WikiTxtCtrl.py:3822
 msgid "Copy anchor URL to clipboard"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3749
+#: lib\pwiki\WikiTxtCtrl.py:3824
 msgid "Other..."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3750
+#: lib\pwiki\WikiTxtCtrl.py:3825
 msgid "Use Template..."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3754
+#: lib\pwiki\WikiTxtCtrl.py:3829
 msgid "Show folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3755
+#: lib\pwiki\WikiTxtCtrl.py:3830
 msgid "Show folding marks and allow folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3756
+#: lib\pwiki\WikiTxtCtrl.py:3831
 msgid "&Toggle current folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3757
+#: lib\pwiki\WikiTxtCtrl.py:3832
 msgid "Toggle folding of the current line"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3758
+#: lib\pwiki\WikiTxtCtrl.py:3833
 msgid "&Unfold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3759
+#: lib\pwiki\WikiTxtCtrl.py:3834
 msgid "Unfold everything in current editor"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3760
+#: lib\pwiki\WikiTxtCtrl.py:3835
 msgid "&Fold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3761
+#: lib\pwiki\WikiTxtCtrl.py:3836
 msgid "Fold everything in current editor"
 msgstr ""
 

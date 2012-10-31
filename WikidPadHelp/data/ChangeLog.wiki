@@ -1,5 +1,32 @@
 ﻿++ Change Log
 
+Oct. 31, 2012 (2.3beta06)
+
+    Thanks to Ross for all of the enhancements
+
+    * Vi improvements
+        * Initial support for loading settings from rc file
+        * Add :[range]sort command
+        * Add ':gvim' command to open wikipage in gvim (only for
+          when using original_sqlite database)
+        * Add 'viewsource' command
+        * Disable caret scrolling by default as it causes a large
+          performance hit
+        * Reset cmd selection after typing
+
+        * Fix bug when deleting in line visual mode
+        * Fix :command selection
+        * Fix line visual selection mode when moving caret down
+        * Fix shift in ViInputDialog, add option to refresh page
+          (F5) in preview
+        * Fix a number of other small bugs
+
+    * Add support for folding addition 'blocks' in the editor
+
+    * Bug fixes: Better source compatibility with wxPython 2.9 (Windows binary not affected)
+
+
+
 Jul. 02, 2012 (2.3beta05)
 
     * Function to convert editor selection to wiki word now suggests
@@ -8,9 +35,7 @@ Jul. 02, 2012 (2.3beta05)
     * Moved function to convert editor selection to link from
       "KeyBindings.py" to "PWikiNonCore.py" and into wiki
       language helper
-    * Vi improvements (Ross' repSVN:
-      533b0ba5dd4f899f4d73f3ac3e17ceeea421477a,
-      8061c1f34cf07d09d6bef8b8e7746c1f9568aa40)
+    * Vi improvements
 
     * Bug fixed: "page" insertion processed value as wiki words,
       not wiki links (different with subpages)
