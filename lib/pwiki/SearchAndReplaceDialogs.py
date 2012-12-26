@@ -827,7 +827,7 @@ class SearchPageDialog(wx.Dialog):
                 _(u"Do you want to delete %i search(es)?") % len(sels),
                 _(u"Delete search"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-        if answer == wx.NO:
+        if answer != wx.YES:
             return
 
         for s in sels:
@@ -903,7 +903,7 @@ class SearchPageDialog(wx.Dialog):
                             _(u"Do you want to overwrite existing search '%s'?") %
                             title, _(u"Overwrite search"),
                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-                    if answer == wx.NO:
+                    if answer != wx.YES:
                         continue
 
 #                 self.mainControl.getWikiData().saveSearch(title,
@@ -957,7 +957,7 @@ class SearchPageDialog(wx.Dialog):
                         u"Continue at beginning?"),
                         _(u"Continue at beginning?"),
                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
-                if result == wx.NO:
+                if result != wx.YES:
                     return
 
                 start, end = editor.executeSearch(
@@ -1571,7 +1571,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         answer = wx.MessageBox(_(u"Replace all occurrences?"), _(u"Replace All"),
                 wx.YES_NO | wx.NO_DEFAULT, self)
 
-        if answer == wx.NO:
+        if answer != wx.YES:
             return
 
         try:
@@ -1708,7 +1708,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                             _(u"Do you want to overwrite existing search '%s'?") %
                             title, _(u"Overwrite search"),
                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-                    if answer == wx.NO:
+                    if answer != wx.YES:
                         continue
 
 #                 self.pWiki.getWikiData().saveSearch(title,
@@ -1824,7 +1824,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 _(u"Do you want to delete %i search(es)?") % len(sels),
                 _(u"Delete search"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-        if answer == wx.NO:
+        if answer != wx.YES:
             return
 
         for s in sels:

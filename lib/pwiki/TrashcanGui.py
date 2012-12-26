@@ -197,12 +197,12 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
         if len(bags) == 0:
             return
         
-        result = wx.MessageBox(
+        answer = wx.MessageBox(
                 _(u"Delete %i elements from trashcan?") %
                 len(bags), _(u"Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-        if result == wx.NO:
+        if answer != wx.YES:
             return
         
         for bag in bags:
@@ -223,12 +223,12 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
         if trashcan is None:
             return
 
-        result = wx.MessageBox(
+        answer = wx.MessageBox(
                 _(u"Delete all elements from trashcan?"),
                 _(u"Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-        if result == wx.NO:
+        if answer != wx.YES:
             return
         
         trashcan.clear()

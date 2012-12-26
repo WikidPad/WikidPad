@@ -326,13 +326,13 @@ class App(wx.App, MiscEventSourceMixin):
                     if len(otherProcIds) > 0:
                         procIdString = u", ".join([unicode(procId)
                                 for procId in otherProcIds])
-                        result = wx.MessageBox(
+                        answer = wx.MessageBox(
                                 _(u"Other WikidPad process(es) seem(s) to run already\n"
                                 "Process identifier(s): %s\nContinue?") % procIdString,
                                 _(u"Continue?"),
                                 wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
     
-                        if result == wx.NO:
+                        if answer != wx.YES:
                             return False
 
                 if port != -1:
@@ -349,23 +349,23 @@ class App(wx.App, MiscEventSourceMixin):
     
                     Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
                 else:
-                    result = wx.MessageBox(
+                    answer = wx.MessageBox(
                             _(u"WikidPad couldn't detect if other processes are "
                             "already running.\nContinue anyway?"),
                             _(u"Continue?"),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
-                    if result == wx.NO:
+                    if answer != wx.YES:
                         return False
                     
             except socket.error, e:
-                result = wx.MessageBox(
+                answer = wx.MessageBox(
                         _(u"WikidPad couldn't detect if other processes are "
                         "already running.\nSocket error: %s\nContinue anyway?") %
                         unicode(e), _(u"Continue?"),
                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
-                if result == wx.NO:
+                if answer != wx.YES:
                     return False
 
 

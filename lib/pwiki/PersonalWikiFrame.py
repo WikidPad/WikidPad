@@ -2439,13 +2439,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         evt.Skip()
 
     def OnCmdReconnectDatabase(self, evt):
-        result = wx.MessageBox(_(u"Are you sure you want to reconnect? "
+        answer = wx.MessageBox(_(u"Are you sure you want to reconnect? "
                 u"You may lose some data by this process."),
                 _(u'Reconnect database'),
                 wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
         wd = self.getWikiDocument()
-        if result == wx.YES and wd is not None:
+        if answer == wx.YES and wd is not None:
             wd.setReadAccessFailed(True)
             wd.setWriteAccessFailed(True)
             # Try reading
@@ -2457,12 +2457,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbAccessError), e:
                     sys.stderr.write(_(u"Error while trying to reconnect:\n"))
                     traceback.print_exc()
-                    result = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(uniToGui(_(
                             u'There was an error while reconnecting the database\n\n'
                             u'Would you like to try it again?\n%s') %
                             e), _(u'Error reconnecting!'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
-                    if result == wx.NO:
+                    if answer != wx.YES:
                         return
 
             # Try writing
@@ -2478,12 +2478,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbWriteAccessError), e:
                     sys.stderr.write(_(u"Error while trying to write:\n"))
                     traceback.print_exc()
-                    result = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(uniToGui(_(
                             u'There was an error while writing to the database\n\n'
                             u'Would you like to try it again?\n%s') %
                             e), _(u'Error writing!'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
-                    if result == wx.NO:
+                    if answer != wx.YES:
                         break
 
                 
@@ -2913,12 +2913,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     uniToGui(_(u"A wiki already exists in '%s', overwrite? "
                     u"(This deletes everything in and below this directory!)") %
                     wikiDir), _(u'Warning'), wx.YES_NO)
-            result = dlg.ShowModal()
+            answer = dlg.ShowModal()
             dlg.Destroy()
-            if result == wx.ID_YES:
+            if answer == wx.ID_YES:
                 os.rmdir(wikiDir)  # TODO bug
                 createIt = True
-            elif result == wx.ID_NO:
+            elif answer == wx.ID_NO:
                 createIt = False
 
         if createIt:
@@ -2956,8 +2956,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 dlg=wx.MessageDialog(self, _(u'A wiki database already exists '
                         u'in this location, overwrite?'),
                         _(u'Wiki DB Exists'), wx.YES_NO)
-                result = dlg.ShowModal()
-                if result == wx.ID_YES:
+                answer = dlg.ShowModal()
+                if answer == wx.ID_YES:
                     WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
                         True)
                 else:
@@ -3170,7 +3170,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 answer = wx.MessageBox(_(u"Wiki '%s' is probably in use by different\n"
                         u"instance of WikidPad. Connect anyway (dangerous!)?") % cfgPath,
                         _(u"Wiki already in use"), wx.YES_NO, self)
-                if answer == wx.NO:
+                if answer != wx.YES:
                     return False
                 else:
                     ignoreLock = True
@@ -3458,7 +3458,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         self.saveCurrentWikiState()
                 except (IOError, OSError, DbAccessError), e:
                     self.lostAccess(e)
-                    if errCloseAnywayMsg() == wx.NO:
+                    if errCloseAnywayMsg() != wx.YES:
                         raise
                     else:
                         traceback.print_exc()
@@ -3485,7 +3485,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.wikiDataManager = None
             else:
                 # We had already a problem, so ask what to do
-                if errCloseAnywayMsg() == wx.NO:
+                if errCloseAnywayMsg() != wx.YES:
                     raise LossyWikiCloseDeniedException
                 
                 self.fireMiscEventKeys(("dropping current wiki",))
@@ -3549,11 +3549,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 return False
 
             self.SetFocus()
-            result = wx.MessageBox(_(u"No connection to database. "
+            answer = wx.MessageBox(_(u"No connection to database. "
                     u"Try to reconnect?"), _(u'Reconnect database?'),
                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wx.NO:
+            if answer != wx.YES:
                 return False
 
             self.showStatusMessage(_(u"Trying to reconnect database..."), 0,
@@ -3593,12 +3593,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 return False
 
             self.SetFocus()
-            result = wx.MessageBox(
+            answer = wx.MessageBox(
                     _(u"This operation needs write access to database\n"
                     u"Try to write?"), _(u'Try writing?'),
                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wx.NO:
+            if answer != wx.YES:
                 return False
 
             self.showStatusMessage(_(u"Trying to write to database..."), 0,
@@ -4465,11 +4465,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def showDeleteAllVersionsDialog(self):
-        result = wx.MessageBox(_(u"Do you want to delete all stored versions?"),
+        answer = wx.MessageBox(_(u"Do you want to delete all stored versions?"),
                 _(u"Delete All Versions"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-        if result == wx.YES:
+        if answer == wx.YES:
             self.getWikiData().deleteVersioningData()
 
 
@@ -4522,12 +4522,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return   # TODO Error message
 
         if self.getConfig().getboolean("main", "trashcan_askOnDelete", True):
-            result = wx.MessageBox(
+            answer = wx.MessageBox(
                     _(u"Are you sure you want to delete wiki word '%s'?") %
                     wikiWord, _(u'Delete Wiki Word'),
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wx.NO:
+            if answer != wx.YES:
                 return
 
         try:
@@ -4601,13 +4601,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         .getWikiPageNameForLinkTerm(validWikiWord)
 
                 if knownWikiWord is not None:
-                    result = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(uniToGui(_(
                             u'Wiki word %s exists already\n'
                             u'Would you like to append to the word?') %
                             knownWikiWord), _(u'Word exists'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                     
-                    if result == wx.NO:
+                    if answer != wx.YES:
                         continue
                         
                     validWikiWord = knownWikiWord
@@ -4676,12 +4676,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dlg = OptionsDialog(self, -1, startPanelName=startPanelName)
         dlg.CenterOnParent(wx.BOTH)
 
-        result = dlg.ShowModal()
+        answer = dlg.ShowModal()
         oldSettings = dlg.getOldSettings()
         
         dlg.Destroy()
 
-        if result == wx.ID_OK:
+        if answer == wx.ID_OK:
             # Perform operations to reset GUI parts after option changes
             self.autoSaveDelayAfterKeyPressed = self.configuration.getint(
                     "main", "auto_save_delay_key_pressed")
@@ -4933,12 +4933,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         if not skipConfirm:
-            result = wx.MessageBox(_(u"Are you sure you want to start a full "
+            answer = wx.MessageBox(_(u"Are you sure you want to start a full "
                     u"rebuild of wiki in background?"),
                     _(u'Initiate update'),
                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-        if skipConfirm or result == wx.YES :
+        if skipConfirm or answer == wx.YES :
             try:
                 self.saveAllDocPages()
                 progresshandler = ProgressHandler(
@@ -4966,12 +4966,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         if not skipConfirm:
-            result = wx.MessageBox(_(u"Are you sure you want to rebuild this wiki? "
+            answer = wx.MessageBox(_(u"Are you sure you want to rebuild this wiki? "
                     u"You may want to backup your data first!"),
                     _(u'Rebuild wiki'),
                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-        if skipConfirm or result == wx.YES :
+        if skipConfirm or answer == wx.YES :
             try:
                 self.saveAllDocPages()
                 progresshandler = ProgressHandler(
@@ -5003,12 +5003,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # Removed from .pot
 
 #         if not skipConfirm:
-#             result = wx.MessageBox(_(u"Are you sure you want to rebuild this wiki? "
+#             answer = wx.MessageBox(_(u"Are you sure you want to rebuild this wiki? "
 #                     u"You may want to backup your data first!"),
 #                     _(u'Rebuild wiki'),
 #                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 # 
-#         if skipConfirm or result == wx.YES :
+#         if skipConfirm or answer == wx.YES :
 #             try:
 #                 self.saveAllDocPages()
 #                 progresshandler = ProgressHandler(
@@ -5084,8 +5084,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u"This could overwrite pages in the database. Continue?"),
                 _(u"Import pagefiles"), wx.YES_NO)
 
-        result = dlg.ShowModal()
-        if result == wx.ID_YES:
+        answer = dlg.ShowModal()
+        if answer == wx.ID_YES:
             self.getWikiData().copyWikiFilesToDatabase()
 
 
@@ -5209,15 +5209,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if style is None:
                 raise RuntimeError(_(u"Unknown dialog type"))
 
-            result = wx.MessageBox(uniToGui(message), uniToGui(title), style, self)
+            answer = wx.MessageBox(uniToGui(message), uniToGui(title), style, self)
             
-            if result == wx.OK:
+            if answer == wx.OK:
                 return "ok"
-            elif result == wx.CANCEL:
-                return "cancel"
-            elif result == wx.YES:
+            elif answer == wx.CANCEL:
+                if dlgtype == "yn":
+                    return "no"
+                else:
+                    return "cancel"
+            elif answer == wx.YES:
                 return "yes"
-            elif result == wx.NO:
+            elif answer == wx.NO:
                 return "no"
                 
             raise InternalError(u"Unexpected result from MessageBox in stdDialog()")

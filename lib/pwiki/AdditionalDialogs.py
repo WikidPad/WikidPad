@@ -299,12 +299,12 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
                                 "openWordDialog_askForCreateWhenNonexistingWord",
                                 True):
                             # wikiWord is valid but nonexisting, so maybe create it?
-                            result = wx.MessageBox(
+                            answer = wx.MessageBox(
                                     uniToGui(_(u"'%s' is not an existing wikiword. Create?") %
                                     wikiWord), uniToGui(_(u"Create")),
                                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-                            if result == wx.NO:
+                            if answer != wx.YES:
                                 self.ctrls.text.SetFocus()
                                 return False
 
@@ -1419,7 +1419,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
                         _(u"Do you want to overwrite existing export '%s'?") %
                         title, _(u"Overwrite export"),
                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-                if answer == wx.NO:
+                if answer != wx.YES:
                     continue
 
             xmlDoc = minidom.getDOMImplementation().createDocument(None, None, None)
@@ -1459,7 +1459,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
                 _(u"Do you want to delete %i export(s)?") % len(sels),
                 _(u"Delete export"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-        if answer == wx.NO:
+        if result != wx.YES:
             return
 
         for s in sels:
