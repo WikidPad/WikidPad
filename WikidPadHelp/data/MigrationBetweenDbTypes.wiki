@@ -5,7 +5,7 @@ The following procedure describes how to migrate a wiki from one database type t
 It is recommended to make a backup before applying it.
 
 
-    1. Open dialog from menu "Wiki" -> "Export" -> "Other Export..."
+    1. Open dialog from menu "Extra" -> "Export..."
     2. Set in dialog:
     
         What to export: Whole wiki
@@ -14,12 +14,12 @@ It is recommended to make a backup before applying it.
         Format version: 1
         Write wiki func. page: Check
         Write saved searches: Check
-        Destination file: (Choose a non existing filename in an existing directory)
+        Destination file: (Choose a non-existing filename in an existing directory)
     
     3. Hit OK
     4. Create a new wiki with same name and the desired new database type
     5. Delete "WikiSettings" page in the new wiki
-    6. Open dialog from menu "Wiki" -> "Import..."
+    6. Open dialog from menu "Extra" -> "Import..."
     7. Set in dialog:
     
         Import format: Multipage text
