@@ -190,14 +190,27 @@ class SizeValue(object):
 
 
 
-TEXT_ALIGN_CSS_ATTR = {
+HOR_ALIGN_CSS_ATTR = {
     u"l" : (u'text-align: left',   u'align="left"'),
     u"c" : (u'text-align: center', u'align="center"'),
-    u"m" : (u'text-align: center', u'align="center"'),
+#     u"m" : (u'text-align: center', u'align="center"'),
     u"r" : (u'text-align: right',  u'align="right"'),
     }
 
-  
+VERT_ALIGN_CSS_ATTR = {
+    u"t" : (u'vertical-align: top',   u'valign="top"'),
+    u"m" : (u'vertical-align: middle', u'valign="middle"'),
+    u"b" : (u'vertical-align: bottom',  u'valign="bottom"'),
+    }
+ 
+IMG_ALIGN_ATTR = {
+    u"t": u' align="top"',
+    u"m": u' align="middle"',
+    u"b": u' align="bottom"',
+    u"l": u' align="left"',
+    u"r": u' align="right"',
+    }
+
 
 
 class TableCell(object):
@@ -262,30 +275,27 @@ class TableCell(object):
         tableCellAppendix = self.astNode.findFlatByName("tableCellAppendix")
 
         css, styles, attribs = exporter.getCommonStylesFromAppendix(
-                tableCellAppendix, self.astNode)
+                tableCellAppendix)
                 
         if self.infoRow > 1:
             attribs.append('rowspan="{0}"'.format(self.infoRow))
         if self.infoCol > 1:
             attribs.append('colspan="{0}"'.format(self.infoCol))
 
-        if tableCellAppendix:
-            styleAttr = TEXT_ALIGN_CSS_ATTR.get(getattr(tableCellAppendix,
-                    "text_align", None))
-            if styleAttr is not None:
-                styles.append(styleAttr[0])
-                attribs.append(styleAttr[1])
-
-
 #         if tableCellAppendix:
-#             colspan = tableCellAppendix.colSpan
-#             if colspan != 1:
-#                 colspanHtml = ' colspan="{0}"'.format(colspan)
-# 
-#             rowspan = tableCellAppendix.rowSpan
-#             if rowspan != 1:
-#                 rowspanHtml = ' rowspan="{0}"'.format(rowspan)
+#             styleAttr = HOR_ALIGN_CSS_ATTR.get(getattr(tableCellAppendix,
+#                     "text_align", None))
+#             if styleAttr is not None:
+#                 styles.append(styleAttr[0])
+#                 attribs.append(styleAttr[1])
 
+        if tableCellAppendix:
+            for key, data in tableCellAppendix.entries:
+                if key == "a" or key == "A" or key == "align":
+                    styleAttr = VERT_ALIGN_CSS_ATTR.get(data)
+                    if styleAttr is not None:
+                        styles.append(styleAttr[0])
+                        attribs.append(styleAttr[1])
 
         attrStr = exporter.combineStyles(css, styles, attribs)
 
@@ -1587,7 +1597,7 @@ class HtmlExporter(AbstractExporter):
         return u"".join(self.result)
 
 
-    def getCommonStylesFromAppendix(self, appendix, astNode):
+    def getCommonStylesFromAppendix(self, appendix):
         if appendix is None:
             return u"", [], []
 
@@ -1598,7 +1608,12 @@ class HtmlExporter(AbstractExporter):
 
         if hasattr(appendix, "cssClass") and appendix.cssClass is not None:
             cssClass = appendix.cssClass
-        
+            
+        styleAttr = HOR_ALIGN_CSS_ATTR.get(getattr(appendix, "text_align", None))
+        if styleAttr is not None:
+            styles.append(styleAttr[0])
+            attributes.append(styleAttr[1])
+
         return cssClass, styles, attributes
 
 
@@ -1630,11 +1645,16 @@ class HtmlExporter(AbstractExporter):
         # Retrieve table appendix values
         tableModeAppendix = astNode.findFlatByName("tableModeAppendix")
         css, styles, attribs = self.getCommonStylesFromAppendix(
-                tableModeAppendix, astNode)
-                
-        attrStr = self.combineStyles(css, styles, attribs)
-        self.outAppend(u'<table border="2"{0}>\n'.format(attrStr))
+                tableModeAppendix)
         
+        attrStr = self.combineStyles(css, styles, attribs)
+        
+        # TODO: Move border definition to CSS-file (except for internal preview)
+#         if self.asIntHtmlPreview:
+        self.outAppend(u'<table border="2"{0}>\n'.format(attrStr))
+#         else:
+#             self.outAppend(u'<table{0}>\n'.format(attrStr))
+
         grid = []
         
         for posRow, row in enumerate(astNode.iterFlatByName("tableRow")):
@@ -2302,7 +2322,9 @@ class HtmlExporter(AbstractExporter):
 
         if urlAsImage:
             # Ignore title, use image
-            sizeInTag = u""
+
+            css, styles, attribs = self.getCommonStylesFromAppendix(
+                    astNode.appendixNode)
 
             # Size info for direct setting in HTML code
             sizeInfo = appendixDict.get("s")
@@ -2314,8 +2336,8 @@ class HtmlExporter(AbstractExporter):
                     widthStr, heightStr = sizeInfo.split(u"x")
                     if self.isHtmlSizeValue(widthStr) and \
                             self.isHtmlSizeValue(heightStr):
-                        sizeInTag = ' width="%s" height="%s"' % \
-                                (widthStr, heightStr)
+                        attribs.append(u'width="{0}" height="{1}"'.format(
+                                widthStr, heightStr))
                 except:
                     # something does not meet syntax requirements
                     pass
@@ -2337,43 +2359,35 @@ class HtmlExporter(AbstractExporter):
                         (width.getUnit() == height.getUnit()):
                     imgWidth, imgHeight = self._getImageDims(absUrl)
                     if imgWidth is not None:
-                        # TODO !!!
                         if width.getUnit() == width.UNIT_FACTOR:
                             imgWidth = int(imgWidth * width.getValue())
                             imgHeight = int(imgHeight * height.getValue())
 
-                        sizeInTag = ' width="%s" height="%s"' % \
-                                (imgWidth, imgHeight)
+                        attribs.append(u'width="{0}" height="{1}"'.format(
+                                imgWidth, imgHeight))
 
-            alignInTag = u""
-            alignInfo = appendixDict.get("a")
-            if alignInfo is not None:
-                try:
-                    if alignInfo == u"t":
-                        alignInTag = u' align="top"'
-                    elif alignInfo == u"m":
-                        alignInTag = u' align="middle"'
-                    elif alignInfo == u"b":
-                        alignInTag = u' align="bottom"'
-                    elif alignInfo == u"l":
-                        alignInTag = u' align="left"'
-                    elif alignInfo == u"r":
-                        alignInTag = u' align="right"'
-                except:
-                    # something does not match syntax requirements
-                    pass
+            for key in (u"align", u"a", u"A"):
+                alignInTag = IMG_ALIGN_ATTR.get(appendixDict.get(key), u"")
+                if alignInTag != u'':
+                    attribs.append(alignInTag)
+                    break
 
-            if self.asIntHtmlPreview and lowerLink.startswith("file:"):
-                # At least under Windows, wxWidgets has another
-                # opinion how a local file URL should look like
-                # than Python
-                p = pathnameFromUrl(link)
-                link = wx.FileSystem.FileNameToURL(p)
-            self.outAppend(u'<img src="%s" alt="" border="0"%s%s class="wikidpad" />' % 
-                    (link, sizeInTag, alignInTag))
+            if self.asIntHtmlPreview:
+                attribs.append(u'border="0"')
+                if lowerLink.startswith("file:"):
+                    # At least on Windows, wxWidgets has another
+                    # opinion how a local file URL should look like
+                    # than Python
+                    p = pathnameFromUrl(link)
+                    link = wx.FileSystem.FileNameToURL(p)
+                    
+            attrStr = self.combineStyles(css, styles, attribs)
+
+            self.outAppend(u'<img src="{0}"{1} />'.format(link, attrStr))
         else:
             if not self.optsStack.get("suppressLinks", False):
-                # If we would be in a title, only image urls are allowed
+                # If we are in a title, only image urls would be allowed
+                # but we are not
                 self.outAppend(u'<span class="wikidpad url-link"><a href="%s" class="wikidpad">' % link)
                 if astNode.titleNode is not None:
                     with self.optsStack:

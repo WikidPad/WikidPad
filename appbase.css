@@ -8,6 +8,10 @@ BODY {
 }
 
 
+img.wikidpad {
+    border-width: 0px;
+}
+
 .wiki-name-ref {
 	color: #888888; font-size: 75%;
 }

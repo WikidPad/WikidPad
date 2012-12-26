@@ -169,6 +169,9 @@ def actionModeAppendix(s, l, st, t):
 
     for entry in t.iterFlatByName("entry"):
         key = entry.findFlatByName("key").getText()
+        if key.endswith(u":") or key.endswith(u"="):
+            key = key[:-1]
+
         data = entry.findFlatByName("data").getText()
         entries.append((key, data))
         
@@ -177,7 +180,8 @@ def actionModeAppendix(s, l, st, t):
 
 
 
-modeAppendixEntry = buildRegex(ur"(?![;\|\]])\S", "key") + buildRegex(ur"(?:(?![;\|\]])\S)*", "data")
+modeAppendixEntry = buildRegex(ur"(?:(?![;\|\]=:])\S)+[=:]|(?![;\|\]=:])\S",
+        "key") + buildRegex(ur"(?:(?![;\|\]])\S)*", "data")
 modeAppendixEntry = modeAppendixEntry.setResultsNameNoCopy("entry")
 modeAppendix = modeAppendixEntry + ZeroOrMore(buildRegex(ur";") + modeAppendixEntry)
 modeAppendix = modeAppendix.addParseAction(actionModeAppendix)
@@ -509,7 +513,7 @@ tableCellWhitespace = Choice([whitespace, uselessSpaces],
 def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
     """
     Handles the global appendix attributes that can be set for any
-    item that supports appendicies
+    item that supports appendices
     """
     t.cssClass = None
     t.text_align = None
@@ -521,18 +525,20 @@ def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
         if key in ignore:
             continue
 
-        # Styles are designated by "s" or s. They will result in the css style
-        # being applied to the element. Multiple styles can be seperated my a
-        # comma (,)
-        # Styles are designated by "s=". They will result in the css class
-        # s being applied to all table elements. E. g. "s=foo" uses class
-        # "foo". The '=' can be omitted, therefore "sfoo" does the same.
-        if key == "s":
-            if data.startswith(u"="):
-                data = data[1:]
+        # CSS classes are designated by "s" or "class". They will result in the
+        # css class(es) being applied to the element. Multiple classes can be
+        # separated by comma (,)
+        # E. g. "s=foo" uses class "foo". The '=' can be omitted for the
+        # short form "s", therefore "sfoo" does the same. The same is also:
+        # "class=foo", "s:foo" and "class:foo".
+        
+        # The longer form is recommended, the short "s" e.g. does not work
+        # in appendices for image URLs due to a name clash
+        if key == u"s" or key == u"class":
             t.cssClass = data.replace(u",", u" ")
-        elif key == u"A":
-            t.text_align = data
+        elif key == u"A" or key == u"align":
+            if data in (u"l", u"c", u"r"):
+                t.text_align = data
         # Element width can be specified by the "w" key. If the entry ends in
         # px or % it will be used directly, otherwise size is assumed to be in
         # pixels.
@@ -894,6 +900,21 @@ def actionAnchorDef(s, l, st, t):
     t.anchorLink = t.findFlatByName("anchor").getString()
 
 
+def actionUrlModeAppendix(s, l, st, t):
+    s, l, st, t = parseGlobalAppendixEntries(s, l, st, t, ignore=(u"s",))
+    
+#     t.border = None
+# 
+#     for key, data in t.entries:
+#         if key == u"b":
+#             if data.endswith(u"px"):
+#                 t.border = data
+#             else:
+#                 t.border = "{0}px".format(data)
+
+
+
+
 searchFragmentExtern = buildRegex(ur"#") + \
         buildRegex(ur"(?:(?:#.)|[^ \t\n#])+", "searchFragment")\
         .setParseAction(actionSearchFragmentExtern)
@@ -932,7 +953,8 @@ AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
 
 
 
-urlModeAppendix = modeAppendix.setResultsName("urlModeAppendix")
+urlModeAppendix = modeAppendix.setResultsName("urlModeAppendix").addParseAction(
+        actionUrlModeAppendix)
 
 urlWithAppend = buildRegex(UrlPAT, "url") + Optional(buildRegex(ur">") + \
         urlModeAppendix)
