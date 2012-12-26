@@ -2410,9 +2410,16 @@ class _TheHelper(object):
             if wrapPosition < 5:
                 wrapPosition = 5
 
-            filledText = fill(text, width=wrapPosition,
-                    initial_indent=indent, 
-                    subsequent_indent=subIndent)
+            if editor.isCharWrap():
+                lines = []
+                for s in xrange(0, len(text), wrapPosition):
+                    lines.append(text[s:s+wrapPosition])
+                    
+                filledText = u"\n".join(lines)
+            else:
+                filledText = fill(text, width=wrapPosition,
+                        initial_indent=indent, 
+                        subsequent_indent=subIndent)
 
             # replace the text based on targetting
             editor.SetTargetStart(startPos)

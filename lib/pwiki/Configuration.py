@@ -162,6 +162,25 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
                 result = default
 
         return result
+
+
+    def getDefault(self, section, option):
+        """
+        Return the default configuration value as string/unicode
+        """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        if self.isOptionAllowed(section, option):
+            return self.configDefaults[(section, option)]
+        else:
+            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+        
+        
+        
         
     def setWriteAccessDenied(self, flag):
         self.writeAccessDenied = flag
@@ -175,10 +194,16 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
 
     def isOptionAllowed(self, section, option):
         """
-        The function test if an option is valid.
+        The function tests if an option is valid.
         Only options can be set/retrieved which have an entry in the
         defaults and if the configParserObject is valid.
         """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+
         return self.configParserObject is not None and \
                 self.configDefaults.has_key((section, option))
 
@@ -319,25 +344,84 @@ class CombinedConfiguration(_AbstractConfiguration):
             else:
                 raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
-
-#         if self.wikiConfig is not None and \
-#                 self.wikiConfig.isOptionAllowed(section, option):
-#             result = self.wikiConfig.get(section, option, default)
-#         # TODO more elegantly
-#         elif WIKIDEFAULTS.has_key((section, option)):
-#             result = default
-#         elif self.globalConfig is not None and \
-#                 self.globalConfig.isOptionAllowed(section, option):
-#             result = self.globalConfig.get(section, option, default)
-#         else:
-#             raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
-
         if result is None:
             return default
 
         return result
+
         
+    def getDefault(self, section, option):
+        """
+        Return the default configuration value as string/unicode
+        """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        result = None
         
+        checkWiki = True
+        checkGlobal = True
+        
+        if option.startswith("option/wiki/"):
+            option = option[12:]
+            checkGlobal = False
+        elif option.startswith("option/user/"):
+            option = option[12:]
+            checkWiki = False
+
+        if checkWiki:
+            # TODO more elegantly
+            if WIKIDEFAULTS.has_key((section, option)):
+                result = WIKIDEFAULTS.get((section, option))
+                if not WIKIFALLTHROUGH.has_key((section, option)) or \
+                        WIKIFALLTHROUGH[(section, option)] != result:
+                    checkGlobal = False
+
+            elif not checkGlobal:
+                raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+
+        if checkGlobal:
+            if self.globalConfig is not None:
+                result = self.globalConfig.getDefault(section, option)
+            else:
+                raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+
+        return result
+
+
+    def isOptionAllowed(self, section, option):
+        """
+        The function tests if an option is valid.
+        Only options can be set/retrieved which have an entry in the
+        defaults and if the configParserObject is valid.
+        """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        checkWiki = True
+        checkGlobal = True
+        
+        if option.startswith("option/wiki/"):
+            option = option[12:]
+            checkGlobal = False
+        elif option.startswith("option/user/"):
+            option = option[12:]
+            checkWiki = False
+
+        if checkWiki and WIKIDEFAULTS.has_key((section, option)):
+            return True
+
+        if checkGlobal and GLOBALDEFAULTS.has_key((section, option)):
+            return True
+
+        return False
+
 
     def set(self, section, option, value):
         if type(section) is unicode:
@@ -606,6 +690,8 @@ GLOBALDEFAULTS = {
             # for synchronization of both.
     ("main", "editor_colorizeSearchFragments"): "False", # Search fragments (part after # in wiki link) are colored
             # separately in syntax coloring (by default blue if present, black if not). May slow down highlighting.
+    ("main", "attributeDefault_global.wrap_type"): "word", # Default for attribute "global.wrap_type".
+            # word: wrap lines word-wise, char: wrap lines character-wise (for Asian languages)
     ("main", "editor_tabWidth"): "4",  # How many spaces should a tab be wide?
     ("main", "editor_onlineSpellChecker_active"): "False",  # Online-spellchecker (check as you type)?
     ("main", "editor_imageTooltips_localUrls"): "True",  # Show image preview as tooltip for local image URL

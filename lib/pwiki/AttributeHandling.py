@@ -128,6 +128,8 @@ _BUILTINS = {
     u"global.template": None,
     u"global.template_head": (u"auto", u"manual"),
     u"global.view_pane": (u"off", u"editor", u"preview"),
+    u"global.wrap_type": (u"word", u"char"),
+
 
     u"html.linkcolor": None,
     u"html.alinkcolor": None,
@@ -147,6 +149,7 @@ _BUILTINS = {
     u"template_head": (u"auto", u"manual"),
     u"tree_position": None,
     u"view_pane": (u"off", u"editor", u"preview"),
+    u"wrap_type": (u"word", u"char"),
 
     u"parent": None,
 }

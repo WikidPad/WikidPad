@@ -479,6 +479,12 @@ class OptionsDialog(wx.Dialog):
             ("editor_sync_byPreviewSelection", "cbEditorSyncByPreviewSelection",
                 "b"),
             ("editor_colorizeSearchFragments", "cbEditorColorizeSearchFragments", "b"),
+            ("attributeDefault_global.wrap_type",
+                    "chAttributeDefaultGlobalWrapType", "selt",
+                    [
+                    u"word",
+                    u"char"
+                    ]),
             ("editor_tabWidth", "scEditorTabWidth", "spin"),
 
             ("editor_imageTooltips_localUrls", "cbEditorImageTooltipsLocalUrls",

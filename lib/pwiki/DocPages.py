@@ -472,6 +472,17 @@ class DataCarryingPage(DocPage):
         Mainly called when an external file change is detected.
         """
         self.liveTextPlaceHold = object()
+        
+        
+    def getAttributeOrGlobal(self, attrkey, default=None):
+        """
+        Tries to find an attribute on this page and returns the first value.
+        If it can't be found for page, it is searched for a global
+        attribute with this name. If this also can't be found,
+        default (normally None) is returned.
+        """
+        raise NotImplementedError #abstract
+
 
 
 class AbstractWikiPage(DataCarryingPage):
@@ -548,7 +559,7 @@ class AbstractWikiPage(DataCarryingPage):
 
     def getWikiData(self):
         return self.wikiDocument.getWikiData()
-        
+
     def getMetaDataState(self):
         return self.getWikiData().getMetaDataState(self.wikiPageName)
 
@@ -720,9 +731,19 @@ class AbstractWikiPage(DataCarryingPage):
             attrs = self.getAttributes()
             if attrs.has_key(attrkey):
                 return attrs[attrkey][-1]
-            else:
-                globalAttrs = self.getWikiData().getGlobalAttributes()     
-                return globalAttrs.get(u"global."+attrkey, default)
+
+            globalAttrs = self.getWikiData().getGlobalAttributes() 
+            attrkey = u"global." + attrkey
+            if globalAttrs.has_key(attrkey):
+                return globalAttrs[attrkey]
+
+            option = "attributeDefault_" + attrkey
+            config = wx.GetApp().getGlobalConfig()
+            if config.isOptionAllowed("main", option):
+                return config.get("main", option, default)
+            
+            return default
+
 
     getPropertyOrGlobal = getAttributeOrGlobal # TODO remove "property"-compatibility
     
@@ -2539,6 +2560,30 @@ class FunctionalPage(DataCarryingPage):
         """Dummy"""
         pass
         
+    def getAttributeOrGlobal(self, attrkey, default=None):
+        """
+        Because a functional page can't contain attributes,
+        it is only searched for a global attribute with this name.
+        If this can't be found, default (normally None) is returned.
+        """
+        attrkey = u"global." + attrkey
+
+        if self.wikiDocument is not None:
+            wikiData = self.wikiDocument.getWikiData()
+            if wikiData is not None:
+                with self.textOperationLock:
+                    globalAttrs = wikiData.getGlobalAttributes()
+                    if globalAttrs.has_key(attrkey):
+                        return globalAttrs[attrkey]
+
+        option = "attributeDefault_" + attrkey
+        config = wx.GetApp().getGlobalConfig()
+        if config.isOptionAllowed("main", option):
+            return config.get("main", option, default)
+
+        return default
+
+
 
 
 

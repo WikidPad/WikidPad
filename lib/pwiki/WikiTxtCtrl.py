@@ -526,14 +526,29 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             self.Enable(True)
         self.Enable(vis)
 
-    def setWrapMode(self, onOrOff):
+
+    def isCharWrap(self):
+        docPage = self.getLoadedDocPage()
+        if docPage is not None:
+            return docPage.getAttributeOrGlobal(u"wrap_type", u"word").lower()\
+                    .startswith(u"char")
+        else:
+            return False
+
+    def setWrapMode(self, onOrOff, charWrap=None):
+        if charWrap is None:
+            charWrap = self.isCharWrap()
+
         if onOrOff:
-            self.SetWrapMode(wx.stc.STC_WRAP_WORD)
+            if charWrap:
+                self.SetWrapMode(wx.stc.STC_WRAP_CHAR)
+            else:
+                self.SetWrapMode(wx.stc.STC_WRAP_WORD)
         else:
             self.SetWrapMode(wx.stc.STC_WRAP_NONE)
 
     def getWrapMode(self):
-        return self.GetWrapMode() == wx.stc.STC_WRAP_WORD
+        return self.GetWrapMode() != wx.stc.STC_WRAP_NONE
 
     def setAutoIndent(self, onOff):
         self.autoIndent = onOff
@@ -775,6 +790,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
+        # this updates depending on attribute "wrap_type" (word or character)
+        self.setWrapMode(self.getWrapMode())
+
 #         p2 = evtprops.copy()
 #         p2.update({"loading current page": True})
 #         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
@@ -862,6 +880,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
+        
+        # this updates depending on attribute "wrap_type" (word or character)
+        self.setWrapMode(self.getWrapMode())
 
         self.pageType = docPage.getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
@@ -1042,7 +1063,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.SetIndent(tabWidth)
         self.SetTabWidth(tabWidth)
-
+        # this updates depending on attribute "wrap_type" (word or character)
+        self.setWrapMode(self.getWrapMode())
 
         # To allow switching vi keys on and off without restart
         use_vi_navigation = self.presenter.getConfig().getboolean("main",
@@ -1134,6 +1156,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
+            
+        # this updates depending on attribute "wrap_type" (word or character)
+        self.setWrapMode(self.getWrapMode())
 
         self.pageType = self.getLoadedDocPage().getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
@@ -2793,7 +2818,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     def rewrapText(self):
+        wrapType = "word" if self.GetWrapMode() != wx.stc.STC_WRAP_CHAR else "char"
         return self.wikiLanguageHelper.handleRewrapText(self, {})
+
+    def getWrapMode(self):
+        return self.GetWrapMode() != wx.stc.STC_WRAP_NONE
+
+
+
 
 
     def getNearestWordPositions(self, bytepos=None):

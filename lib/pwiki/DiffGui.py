@@ -133,14 +133,25 @@ class InlineDiffControl(SearchableScintillaControl):
         return self.baseDocPage
 
 
-    def setWrapMode(self, onOrOff):
+    def setWrapMode(self, onOrOff, charWrap=None):
+        if charWrap is None:
+            docPage = self.baseDocPage
+            if docPage is not None:
+                charWrap = docPage.getAttributeOrGlobal(u"wrap_type",
+                        u"word").lower().startswith(u"char")
+            else:
+                charWrap = False
         if onOrOff:
-            self.SetWrapMode(wx.stc.STC_WRAP_WORD)
+            if charWrap:
+                self.SetWrapMode(wx.stc.STC_WRAP_CHAR)
+            else:
+                self.SetWrapMode(wx.stc.STC_WRAP_WORD)
         else:
             self.SetWrapMode(wx.stc.STC_WRAP_NONE)
 
+
     def getWrapMode(self):
-        return self.GetWrapMode() == wx.stc.STC_WRAP_WORD
+        return self.GetWrapMode() != wx.stc.STC_WRAP_NONE
 
 
     def showDiffs(self, baseDocPage, fromText, toText, fromVerNo, toVerNo):
@@ -153,6 +164,9 @@ class InlineDiffControl(SearchableScintillaControl):
 
         font = self.baseDocPage.getAttributeOrGlobal("font",
                 self.defaultFont)
+                
+        # this updates depending on attribute "wrap_type" (word or character)
+        self.setWrapMode(self.getWrapMode())
 
         faces = self.mainControl.getPresentationExt().faces.copy()
         faces["mono"] = font
