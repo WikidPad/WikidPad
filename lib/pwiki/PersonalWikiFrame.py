@@ -1371,6 +1371,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
+        self.addMenuItem(editMenu, _(u'&Paste Raw HTML') + u'\t' +
+                self.keyBindings.PasteRawHtml,
+                _(u'Paste HTML data as is if available'), self._OnRoundtripEvent,
+                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML,
+                updatefct=(self.OnUpdateDisReadOnlyPage,
+                    self.OnUpdateDisNotTextedit,self.OnUpdateDisNotHtmlOnClipboard))
+
         self.addMenuItem(editMenu, _(u'Select &All') + u'\t' + self.keyBindings.SelectAll,
                 _(u'Select All'), self._OnRoundtripEvent,
                  menuID=GUI_ID.CMD_SELECT_ALL)
@@ -5650,6 +5657,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Disables item if current presenter doesn't show a real wiki page.
         """
         if self.getCurrentWikiWord() is None:
+            evt.Enable(False)            
+
+    def OnUpdateDisNotHtmlOnClipboard(self, evt):
+        """
+        Disables item if HTML data is not available on clipboard
+        """
+        if not wxHelper.getHasHtmlOnClipboard()[0]:
             evt.Enable(False)            
 
 

@@ -308,6 +308,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML,
+                lambda evt: self.pasteRawHtml())
         wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
 
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
@@ -444,37 +446,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 # Couldn't find unused filename or saving denied
                 return True
 
-#                 destPath = fs.findDestPathNoSource(u".png", u"")
-#
-#                 print "Paste6", repr(destPath)
-#                 if destPath is None:
-#                     # Couldn't find unused filename
-#                     return
-#
-#                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
-
             url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
             if url is None:
                 url = u"file:" + StringOps.urlFromPathname(destPath)
 
             self.ReplaceSelection(url)
-
-#             locPath = self.presenter.getMainControl().getWikiConfigPath()
-#
-#             if locPath is not None:
-#                 locPath = dirname(locPath)
-#                 relPath = relativeFilePath(locPath, destPath)
-#                 url = None
-#                 if relPath is None:
-#                     # Absolute path needed
-#                     url = "file:%s" % urlFromPathname(destPath)
-#                 else:
-#                     url = "rel://%s" % urlFromPathname(relPath)
-#
-#             if url:
-#                 self.ReplaceSelection(url)
-
             return True
 
         if not WindowsHacks:
@@ -491,22 +468,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.ReplaceSelection(url)
             return True
 
+        return False
 
-#         if destPath is not None:
-#             locPath = self.presenter.getMainControl().getWikiConfigPath()
-#
-#             if locPath is not None:
-#                 locPath = dirname(locPath)
-#                 relPath = relativeFilePath(locPath, destPath)
-#                 url = None
-#                 if relPath is None:
-#                     # Absolute path needed
-#                     url = "file:%s>i" % urlFromPathname(destPath)
-#                 else:
-#                     url = "rel://%s>i" % urlFromPathname(relPath)
-#
-#                 if url:
-#                     self.ReplaceSelection(url)
+
+    def pasteRawHtml(self):
+        rawHtml, url = wxHelper.getHtmlFromClipboard()
+        if rawHtml:
+            return self.wikiLanguageHelper.handlePasteRawHtml(self, rawHtml, {})
 
         return False
 

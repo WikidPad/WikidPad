@@ -203,6 +203,20 @@ def getTextFromClipboard():
 
 if SystemInfo.isWindows():
     # Windows variant
+    def getHasHtmlOnClipboard():
+        """
+        Returns tuple (hasHtml, hasUrl) where both items can be boolean
+        or None (meaning unknown) to inform if HTML data and the source URL
+        respectively are available on clipboard
+        """
+        cb = wx.TheClipboard
+        df = wx.CustomDataFormat("HTML Format")
+        avail = cb.IsSupported(df)
+#         avail = wx.IsClipboardFormatAvailable(df.GetType())
+        
+        return (avail, avail)
+
+
     def getHtmlFromClipboard():
         """
         Retrieve HTML source from clipboard. Returns a tuple (source, URL)
@@ -214,7 +228,8 @@ if SystemInfo.isWindows():
         cb = wx.TheClipboard
         cb.Open()
         try:
-            dataob = wx.CustomDataObject(wx.CustomDataFormat("HTML Format"))
+            df = wx.CustomDataFormat("HTML Format")
+            dataob = wx.CustomDataObject(df)
     
             if cb.GetData(dataob):
                 if dataob.GetSize() > 0:
@@ -290,7 +305,21 @@ if SystemInfo.isWindows():
 
 
 else:
-    # GTK variant
+    # Default variant, works for GTK, probably also for other systems
+    
+    def getHasHtmlOnClipboard():
+        """
+        Returns tuple (hasHtml, hasUrl) where both items can be boolean
+        or None (meaning unknown) to inform if HTML data and the source URL
+        respectively are available on clipboard
+        """
+        cb = wx.TheClipboard
+        df = wx.CustomDataFormat("text/html")
+        avail = cb.IsSupported(df)
+
+        return (avail, False)
+
+
     def getHtmlFromClipboard():
         """
         Retrieve HTML source from clipboard. Returns a tuple (source, URL)

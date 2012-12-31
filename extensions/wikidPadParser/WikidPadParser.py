@@ -676,7 +676,7 @@ def actionBodyHtmlTag(s, l, st, t):
 
 bodyHtmlStart = buildRegex(ur"<body(?: [^\n>]*)?>", "htmlTag")
  
-bodyHtmlEnd = buildRegex(ur"</body(?: [^\n>]*)?>", "htmlTag")
+bodyHtmlEnd = buildRegex(ur"</body>", "htmlTag")
 
 bodyHtmlText = buildRegex(ur".*?(?=" + bodyHtmlEnd.getPattern() + ")",
         "bodyHtmlText")
@@ -2082,7 +2082,7 @@ class _TheHelper(object):
         TODO: Check for necessary escaping
         """
         return u"%s%s: %s%s\n" % (BracketStart, key, value, BracketEnd)
-
+        
 
     @staticmethod
     def isCcWikiWord(word):
@@ -2472,6 +2472,17 @@ class _TheHelper(object):
             editor.GotoPos(endPos)
 
 
+    @staticmethod 
+    def handlePasteRawHtml(editor, rawHtml, settings):
+        # Remove possible body end tags
+        rawHtml = rawHtml.replace(u"</body>", u"")
+        if rawHtml:
+            editor.ReplaceSelection(u"<body>" + rawHtml + u"</body>")
+            return True
+
+        return False
+
+
     @staticmethod
     def getNewDefaultWikiSettingsPage(mainControl):
         """
@@ -2506,7 +2517,7 @@ These are your default global settings.
     @staticmethod
     def getRecursiveStylingNodeNames():
         """
-        Returns a set of those node names of NonTerminalNode s  for which the
+        Returns a set of those node names of NonTerminalNode-s  for which the
         WikiTxtCtrl.processTokens() should process children recursively.
         """
         return _TheHelper._RECURSIVE_STYLING_NODE_NAMES
