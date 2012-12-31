@@ -307,9 +307,12 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         del self.presenters[idx]
         self._mruTabIndexDelete(idx)
 
-        self.DeletePage(idx)        
         self.updateConfig()
-        
+        # If the close command came from a popup menu then directly deleting the
+        # page while the menu wasn't closed yet leads to an error or
+        # a crash depending on OS (thanks to Ross)
+        wx.CallAfter(self.DeletePage, idx)
+
         return True
 
 
