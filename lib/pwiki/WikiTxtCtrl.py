@@ -3948,11 +3948,6 @@ class ViHandler(ViHelper):
         wx.CallAfter(self.SetMode, ViHelper.NORMAL)
         wx.CallAfter(self.Setup)
 
-        self.key_map = {}
-        for varName in vars(wx):
-            if varName.startswith("WXK_"):
-                self.key_map[getattr(wx, varName)] = varName
-
         self.text_object_map = {
                     "w" : (False, self.SelectInWord),
                     "W" : (False, self.SelectInWORD),
@@ -4062,8 +4057,6 @@ class ViHandler(ViHelper):
         self._undo_positions = []
 
         self._line_column_pos = 0
-
-        self.isLinux = isLinux()
 
     def LoadKeybindings(self):
         """
@@ -4415,7 +4408,7 @@ class ViHandler(ViHelper):
         self.motion_key_mods = self.GenerateKeyModifiers(self.motion_keys)
 
         # Used for rewriting menu shortcuts
-        self.viKeyAccels = self.GenerateKeyAccelerators(self.keys)
+        self.GenerateKeyAccelerators(self.keys)
 
 
     def Setup(self):
@@ -4716,242 +4709,6 @@ class ViHandler(ViHelper):
 
         #wx.PostEvent(self.ctrl, evt)
 
-    def OnChar(self, evt):
-	"""
-	Handles EVT_CHAR events necessary for windows
-	"""
-        m = self.mode
-
-        key = evt.GetKeyCode()
-
-	# OnChar seems to throw different keycodes if ctrl is pressed.
-	# a = 1, b = 2 ... z = 26
-	# will not handle different cases
-        if evt.ControlDown():
-	    key = key + 96
-            key = ("Ctrl", key)
-
-	self.HandleKey(key, m, evt)
-
-
-    def OnViKeyDown(self, evt):
-        """
-        Handle keypresses when in Vi mode
-
-        Ideally much of this would be moved to ViHelper
-
-        """
-            
-        m = self.mode
-        key = evt.GetKeyCode()
-
-        if m == ViHelper.INSERT:
-
-            # TODO: Allow navigation with Ctrl-N / Ctrl-P
-            accP = getAccelPairFromKeyDown(evt)
-            matchesAccelPair = self.ctrl.presenter.getMainControl().\
-                                    keyBindings.matchesAccelPair
-
-            if matchesAccelPair("AutoComplete", accP):
-                # AutoComplete is normally Ctrl-Space
-                # Handle autocompletion
-                self.ctrl.autoComplete()
-
-            # The following code is mostly duplicated from OnKeyDown (should be
-            # rewritten to avoid duplication)
-            # TODO Check all modifiers
-            if not evt.ControlDown() and not evt.ShiftDown():  
-                if key == wx.WXK_TAB:
-                    if self.ctrl.pageType == u"form":
-                        if not self.ctrl._goToNextFormField():
-                            self.ctrl.presenter.getMainControl().showStatusMessage(
-                                    _(u"No more fields in this 'form' page"), -1)
-                        return
-                    evt.Skip()
-                elif key == wx.WXK_RETURN and not self.ctrl.AutoCompActive():
-                    text = self.ctrl.GetText()
-                    wikiDocument = self.ctrl.presenter.getWikiDocument()
-                    bytePos = self.ctrl.GetCurrentPos()
-                    lineStartBytePos = self.ctrl.PositionFromLine(
-                                            self.ctrl.LineFromPosition(bytePos))
-
-                    lineStartCharPos = len(self.ctrl.GetTextRange(0, 
-                                                            lineStartBytePos))
-                    charPos = lineStartCharPos + len(self.ctrl.GetTextRange(
-                                                    lineStartBytePos, bytePos))
-
-                    autoUnbullet = self.ctrl.presenter.getConfig().getboolean("main",
-                            "editor_autoUnbullets", False)
-
-                    settings = {
-                            "autoUnbullet": autoUnbullet,
-                            "autoBullets": self.ctrl.autoBullets,
-                            "autoIndent": self.ctrl.autoIndent
-                            }
-
-                    if self.ctrl.wikiLanguageHelper.handleNewLineBeforeEditor(
-                            self.ctrl, text, charPos, lineStartCharPos, 
-                            wikiDocument, settings):
-                        evt.Skip()
-                        return
-                    # Hack to maintain consistency when pressing return
-                    # on an empty bullet
-                    elif bytePos != self.ctrl.GetCurrentPos():
-                        return
-
-        # Pass modifier keys on
-        if key in (wx.WXK_CONTROL, wx.WXK_ALT, wx.WXK_SHIFT):
-            return
-
-        # On linux we can just use GetRawKeyCode() and work directly with
-	# its return. On windows we have to skip this event (for keys which 
-	# will produce a char event to wait for EVT_CHAR (self.OnChar()) to 
-	# get the correct key translation
-        elif key not in self.key_map:
-            key = evt.GetRawKeyCode()
-        else:
-	    # Keys present in the key_map should be consitent across
-	    # all platforms and can be handled directly.
-            if evt.ControlDown():
-                key = ("Ctrl", key)
-	    self.HandleKey(key, m, evt)
-	    return
-
-	
-    	# What about os-x?
-	if not self.isLinux:
-	    # Manual fix for some windows problems may be necessary
-	    # e.g. Ctrl-[ won't work
-	    evt.Skip()
-	    return
-
-        if evt.ControlDown():
-            key = ("Ctrl", key)
-
-	self.HandleKey(key, m, evt)
-
-    def HandleKey(self, key, m, evt):
-
-        # There should be a better way to monitor for selection changed
-        if self.HasSelection():
-            self.EnterVisualMode()
-
-
-        # TODO: Replace with override keys? break and run function
-        # Escape, Ctrl-[, Ctrl-C
-        # In VIM Ctrl-C triggers *InsertLeave*
-        if key == wx.WXK_ESCAPE or key == ("Ctrl", 91) or key == ("Ctrl", 99): 
-            # TODO: Move into ViHandler?
-            self.EndInsertMode()
-            self.EndReplaceMode()
-            self.LeaveVisualMode()
-            self.FlushBuffers()
-            return True
-
-        # Registers
-        if m != 1 and key == 34 and self._acceptable_keys is None \
-                and not self.key_inputs: # "
-            self.register.select_register = True
-            return True
-        elif self.register.select_register:
-            self.register.SelectRegister(key)
-            self.register.select_register = False
-            return True
-
-
-        if m in [1, 3]: # Insert mode, replace mode, 
-            # Store each keyevent
-            # NOTE:
-            #       !!may need to seperate insert and replace modes!!
-            #       what about autocomplete?
-            # It would be possbile to just store the text that is inserted
-            # however then actions would be ignored
-            self.insert_action.append(key)
-
-            # Data is reset if the mouse is used or if a non char is pressed
-            # Arrow up / arrow down
-            if key in [wx.WXK_UP, wx.WXK_DOWN, wx.WXK_LEFT, wx.WXK_RIGHT]: 
-                self.EndBeginUndo()
-                self.insert_action = []
-            if not self.RunKeyChain((key,), m):
-                evt.Skip()
-                return False
-            return True
-
-
-
-
-
-        if self._acceptable_keys is None or \
-                                "*" not in self._acceptable_keys:
-            if 48 <= key <= 57: # Normal
-                if self.SetNumber(key-48):
-                    return True
-            elif 65456 <= key <= 65465: # Numpad
-                if self.SetNumber(key-65456):
-                    return True
-
-        self.SetCount()
-
-        if self._motion and self._acceptable_keys is None:
-            #self._acceptable_keys = None
-            self._motion.append(key)
-
-            temp = self._motion[:-1]
-            temp.append("*")
-            if tuple(self._motion) in self.motion_keys[m]:
-                self.RunKeyChain(tuple(self.key_inputs), m)
-                return True
-                #self._motion = []
-            elif tuple(temp) in self.motion_keys[m]:
-                self._motion[-1] = "*"
-                self._motion_wildcard.append(key)
-                self.RunKeyChain(tuple(self.key_inputs), m)
-                #self._motion = []
-                return True
-                
-            elif tuple(self._motion) in self.motion_key_mods[m]:
-                #self._acceptable_keys = self.motion_key_mods[m][tuple(self._motion)]
-                return True
-
-            self.FlushBuffers()
-            return True
-
-
-        if self._acceptable_keys is not None:
-            if key in self._acceptable_keys:
-                self._acceptable_keys = None
-                pass
-            elif "*" in self._acceptable_keys:
-                self._wildcard.append(key)
-                self.key_inputs.append("*")
-                self._acceptable_keys = None
-                self.RunKeyChain(tuple(self.key_inputs), m)
-
-                return True
-            elif "m" in self._acceptable_keys:
-                self._acceptable_keys = None
-                self._motion.append(key)
-                if (key,) in self.motion_keys[m]:
-                    self.key_inputs.append("m")
-                    self.RunKeyChain(tuple(self.key_inputs), m)
-                    return True
-                if (key,) in self.motion_key_mods[m]:
-                    self.key_inputs.append("m")
-                    return True
-
-
-        self.key_inputs.append(key)
-        self.updateViStatus()
-
-        key_chain = tuple(self.key_inputs)
-
-        if self.RunKeyChain(key_chain, m):
-            return True
-
-        self.FlushBuffers()
-
-	return True
             
     def TurnOff(self):
         self._enableMenuShortcuts(True)

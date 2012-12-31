@@ -24,6 +24,12 @@ from WindowLayout import setWindowSize
 # TODO: should be configurable
 AUTOCOMPLETE_BOX_HEIGHT = 50
 
+# Key accels use a different sep in >= 2.9
+if wx.version() >= 2.9:
+    ACCEL_SEP = "+"
+else:
+    ACCEL_SEP = "-"
+
 def formatListBox(x, y):
     html = "<table width=100% height=5px><tr><td>{0}</td><td align='right'><font color='gray'>{1}</font></td></tr></table>".format(x, y)
     return html
@@ -153,6 +159,12 @@ class ViHelper():
         # WikiHtmlViewWk for the preview mode.
         self.ctrl = ctrl
 
+        self.key_map = {}
+        for varName in vars(wx):
+            if varName.startswith("WXK_"):
+                self.key_map[getattr(wx, varName)] = varName
+
+
         self.mode = 0
 
         self._motion = []
@@ -192,6 +204,8 @@ class ViHelper():
         # The following dictionary holds the menu shortcuts that have been
         # disabled upon entering ViMode
         self.menuShortCuts = {}
+
+        self.viKeyAccels = set()
 
         self.register = ViRegister(self.ctrl)
 
@@ -310,6 +324,252 @@ class ViHelper():
             except ConfigParser.NoSectionError:
                 pass
 
+    def OnChar(self, evt):
+	"""
+	Handles EVT_CHAR events necessary for windows
+	"""
+        m = self.mode
+
+        key = evt.GetKeyCode()
+
+	# OnChar seems to throw different keycodes if ctrl is pressed.
+	# a = 1, b = 2 ... z = 26
+	# will not handle different cases
+        if evt.ControlDown():
+	    key = key + 96
+            key = ("Ctrl", key)
+
+	self.HandleKey(key, m, evt)
+
+
+    def OnViKeyDown(self, evt):
+        """
+        Handle keypresses when in Vi mode
+
+        Ideally much of this would be moved to ViHelper
+
+        """
+            
+        m = self.mode
+        key = evt.GetKeyCode()
+
+        if m == ViHelper.INSERT:
+
+            # TODO: Allow navigation with Ctrl-N / Ctrl-P
+            accP = getAccelPairFromKeyDown(evt)
+            matchesAccelPair = self.ctrl.presenter.getMainControl().\
+                                    keyBindings.matchesAccelPair
+
+            if matchesAccelPair("AutoComplete", accP):
+                # AutoComplete is normally Ctrl-Space
+                # Handle autocompletion
+                self.ctrl.autoComplete()
+
+            # The following code is mostly duplicated from OnKeyDown (should be
+            # rewritten to avoid duplication)
+            # TODO Check all modifiers
+            if not evt.ControlDown() and not evt.ShiftDown():  
+                if key == wx.WXK_TAB:
+                    if self.ctrl.pageType == u"form":
+                        if not self.ctrl._goToNextFormField():
+                            self.ctrl.presenter.getMainControl().showStatusMessage(
+                                    _(u"No more fields in this 'form' page"), -1)
+                        return
+                    evt.Skip()
+                elif key == wx.WXK_RETURN and not self.ctrl.AutoCompActive():
+                    text = self.ctrl.GetText()
+                    wikiDocument = self.ctrl.presenter.getWikiDocument()
+                    bytePos = self.ctrl.GetCurrentPos()
+                    lineStartBytePos = self.ctrl.PositionFromLine(
+                                            self.ctrl.LineFromPosition(bytePos))
+
+                    lineStartCharPos = len(self.ctrl.GetTextRange(0, 
+                                                            lineStartBytePos))
+                    charPos = lineStartCharPos + len(self.ctrl.GetTextRange(
+                                                    lineStartBytePos, bytePos))
+
+                    autoUnbullet = self.ctrl.presenter.getConfig().getboolean("main",
+                            "editor_autoUnbullets", False)
+
+                    settings = {
+                            "autoUnbullet": autoUnbullet,
+                            "autoBullets": self.ctrl.autoBullets,
+                            "autoIndent": self.ctrl.autoIndent
+                            }
+
+                    if self.ctrl.wikiLanguageHelper.handleNewLineBeforeEditor(
+                            self.ctrl, text, charPos, lineStartCharPos, 
+                            wikiDocument, settings):
+                        evt.Skip()
+                        return
+                    # Hack to maintain consistency when pressing return
+                    # on an empty bullet
+                    elif bytePos != self.ctrl.GetCurrentPos():
+                        return
+
+        # Pass modifier keys on
+        if key in (wx.WXK_CONTROL, wx.WXK_ALT, wx.WXK_SHIFT):
+            return
+
+        # On linux we can just use GetRawKeyCode() and work directly with
+	# its return. On windows we have to skip this event (for keys which 
+	# will produce a char event to wait for EVT_CHAR (self.OnChar()) to 
+	# get the correct key translation
+        elif key not in self.key_map:
+            key = evt.GetRawKeyCode()
+        else:
+	    # Keys present in the key_map should be consitent across
+	    # all platforms and can be handled directly.
+            if evt.ControlDown():
+                key = ("Ctrl", key)
+	    self.HandleKey(key, m, evt)
+	    return
+
+	
+    	# What about os-x?
+	if not SystemInfo.isLinux():
+	    # Manual fix for some windows problems may be necessary
+	    # e.g. Ctrl-[ won't work
+	    evt.Skip()
+	    return
+
+        if evt.ControlDown():
+            key = ("Ctrl", key)
+
+	self.HandleKey(key, m, evt)
+
+    def EndInsertMode(self):
+        pass
+
+    def EndReplaceMode(self):
+        pass
+
+    def LeaveVisualMode(self):
+        pass
+
+    def HandleKey(self, key, m, evt):
+
+        # There should be a better way to monitor for selection changed
+        if self.HasSelection():
+            self.EnterVisualMode()
+
+
+        # TODO: Replace with override keys? break and run function
+        # Escape, Ctrl-[, Ctrl-C
+        # In VIM Ctrl-C triggers *InsertLeave*
+        if key == wx.WXK_ESCAPE or key == ("Ctrl", 91) or key == ("Ctrl", 99): 
+            # TODO: Move into ViHandler?
+            self.EndInsertMode()
+            self.EndReplaceMode()
+            self.LeaveVisualMode()
+            self.FlushBuffers()
+            return True
+
+        # Registers
+        if m != 1 and key == 34 and self._acceptable_keys is None \
+                and not self.key_inputs: # "
+            self.register.select_register = True
+            return True
+        elif self.register.select_register:
+            self.register.SelectRegister(key)
+            self.register.select_register = False
+            return True
+
+
+        if m in [1, 3]: # Insert mode, replace mode, 
+            # Store each keyevent
+            # NOTE:
+            #       !!may need to seperate insert and replace modes!!
+            #       what about autocomplete?
+            # It would be possbile to just store the text that is inserted
+            # however then actions would be ignored
+            self.insert_action.append(key)
+
+            # Data is reset if the mouse is used or if a non char is pressed
+            # Arrow up / arrow down
+            if key in [wx.WXK_UP, wx.WXK_DOWN, wx.WXK_LEFT, wx.WXK_RIGHT]: 
+                self.EndBeginUndo()
+                self.insert_action = []
+            if not self.RunKeyChain((key,), m):
+                evt.Skip()
+                return False
+            return True
+
+
+
+
+
+        if self._acceptable_keys is None or \
+                                "*" not in self._acceptable_keys:
+            if 48 <= key <= 57: # Normal
+                if self.SetNumber(key-48):
+                    return True
+            elif 65456 <= key <= 65465: # Numpad
+                if self.SetNumber(key-65456):
+                    return True
+
+        self.SetCount()
+
+        if self._motion and self._acceptable_keys is None:
+            #self._acceptable_keys = None
+            self._motion.append(key)
+
+            temp = self._motion[:-1]
+            temp.append("*")
+            if tuple(self._motion) in self.motion_keys[m]:
+                self.RunKeyChain(tuple(self.key_inputs), m)
+                return True
+                #self._motion = []
+            elif tuple(temp) in self.motion_keys[m]:
+                self._motion[-1] = "*"
+                self._motion_wildcard.append(key)
+                self.RunKeyChain(tuple(self.key_inputs), m)
+                #self._motion = []
+                return True
+                
+            elif tuple(self._motion) in self.motion_key_mods[m]:
+                #self._acceptable_keys = self.motion_key_mods[m][tuple(self._motion)]
+                return True
+
+            self.FlushBuffers()
+            return True
+
+
+        if self._acceptable_keys is not None:
+            if key in self._acceptable_keys:
+                self._acceptable_keys = None
+                pass
+            elif "*" in self._acceptable_keys:
+                self._wildcard.append(key)
+                self.key_inputs.append("*")
+                self._acceptable_keys = None
+                self.RunKeyChain(tuple(self.key_inputs), m)
+
+                return True
+            elif "m" in self._acceptable_keys:
+                self._acceptable_keys = None
+                self._motion.append(key)
+                if (key,) in self.motion_keys[m]:
+                    self.key_inputs.append("m")
+                    self.RunKeyChain(tuple(self.key_inputs), m)
+                    return True
+                if (key,) in self.motion_key_mods[m]:
+                    self.key_inputs.append("m")
+                    return True
+
+
+        self.key_inputs.append(key)
+        self.updateViStatus()
+
+        key_chain = tuple(self.key_inputs)
+
+        if self.RunKeyChain(key_chain, m):
+            return True
+
+        self.FlushBuffers()
+
+	return True
+
 
     def SetCount(self):
         self.count = 1
@@ -421,9 +681,10 @@ class ViHelper():
             for accels in keys[j]:
                 for accel in accels:
                     if type(accel) == tuple and len(accel) > 1:
-                        key_accels.add("{0}-{1}".format(accel[0], unichr(accel[1]).upper()))
+                        key_accels.add("{0}{1}{2}".format(accel[0], \
+                                ACCEL_SEP, unichr(accel[1]).upper()))
                 
-        return key_accels
+        self.viKeyAccels.update(key_accels)
 
     def Repeat(self, func, count=None, arg=None):
         """
@@ -650,6 +911,7 @@ class ViHelper():
         self.ctrl.presenter.getMainControl().statusBar.SetStatusText(text , 0)
 
     def _enableMenuShortcuts(self, enable):
+        # TODO: should only be called once (at startup / plugin load)
         if enable and len(self.menuShortCuts) < 1:
             return
 
@@ -679,7 +941,7 @@ class ViHelper():
                 
             for menu, x in menus:
                 getMenuItems(menu)
-            
+
             for i in menu_items:
                 menu_item = self.menu_bar.FindItemById(i)
                 accel = menu_item.GetAccel()

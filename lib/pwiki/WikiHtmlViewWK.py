@@ -1735,7 +1735,7 @@ class ViFunctions(ViHelper):
         self.motion_key_mods = self.GenerateKeyModifiers(self.motion_keys)
 
         # Used for rewriting menu shortcuts
-        self.viKeyAccels = self.GenerateKeyAccelerators(self.keys)
+        self.GenerateKeyAccelerators(self.keys)
 
     # Vi Helper functions
     def SetMode(self, mode):
