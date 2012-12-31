@@ -16,11 +16,9 @@ import wx, wx.html
 # import urllib_red as urllib
 # import urllib
 
-from .wxHelper import GUI_ID, getAccelPairFromKeyDown, \
-        getAccelPairFromString, appendToMenuByMenuDesc, \
-        setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
-        copyTextToClipboard, ProgressHandler, TopLevelLocker, \
+from .wxHelper import GUI_ID, clearMenu, ProgressHandler, TopLevelLocker, \
         WindowUpdateLocker
+from . import wxHelper
 
 from . import TextTree
 
@@ -98,7 +96,7 @@ class KeyBindingsCache:
         try:
             return self.accelPairCache[attr]
         except KeyError:
-            ap = getAccelPairFromString("\t" + getattr(self, attr))
+            ap = wxHelper.getAccelPairFromString("\t" + getattr(self, attr))
             self.accelPairCache[attr] = ap
             return ap
 
@@ -213,13 +211,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu = None
 
         self.recentWikisMenu = None
-        self.recentWikisActivation = IdRecycler()
+        self.recentWikisActivation = wxHelper.IdRecycler()
 
         self.textBlocksMenu = None
-        self.textBlocksActivation = IdRecycler() # See self.fillTextBlocksMenu()
+        self.textBlocksActivation = wxHelper.IdRecycler() # See self.fillTextBlocksMenu()
 
         self.favoriteWikisMenu = None
-        self.favoriteWikisActivation = IdRecycler() 
+        self.favoriteWikisActivation = wxHelper.IdRecycler() 
 
         self.pluginsMenu = None
         self.fastSearchField = None   # Text field in toolbar
@@ -1630,7 +1628,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         tabsMenu.AppendSeparator()
 
-        appendToMenuByMenuDesc(tabsMenu, FOLD_MENU, self.keyBindings)
+        wxHelper.appendToMenuByMenuDesc(tabsMenu, FOLD_MENU, self.keyBindings)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_SHOW_FOLDING,
                 self.OnCmdCheckShowFolding)
@@ -2415,7 +2413,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Process wx.EVT_KEY_DOWN in the fast search text field
         """
-        acc = getAccelPairFromKeyDown(evt)
+        acc = wxHelper.getAccelPairFromKeyDown(evt)
         if acc == (wx.ACCEL_NORMAL, wx.WXK_RETURN) or \
                 acc == (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER):
             from .SearchAndReplaceDialogs import FastSearchPopup
@@ -2520,7 +2518,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
         
         path = self.getWikiDocument().getWikiConfigPath()
-        copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
+        wxHelper.copyTextToClipboard(pathWordAndAnchorToWikiUrl(path,
+                wikiWord, None))
 
 
     def OnCmdVersionAdd(self, evt):
@@ -2564,16 +2563,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.hotKeyDummyWindow is not None:
             self.hotKeyDummyWindow.Destroy()
 
-        self.hotKeyDummyWindow = DummyWindow(self, id=GUI_ID.WND_HOTKEY_DUMMY)
+        self.hotKeyDummyWindow = wxHelper.DummyWindow(self,
+                id=GUI_ID.WND_HOTKEY_DUMMY)
         if self.configuration.getboolean("main",
                 "hotKey_showHide_byApp_isActive"):
-            setHotKeyByString(self.hotKeyDummyWindow,
+            wxHelper.setHotKeyByString(self.hotKeyDummyWindow,
                     self.HOTKEY_ID_HIDESHOW_BYAPP,
                     self.configuration.get("main",
                     "hotKey_showHide_byApp", u""))
 
         if self.getWikiDocument() is not None:
-            setHotKeyByString(self.hotKeyDummyWindow,
+            wxHelper.setHotKeyByString(self.hotKeyDummyWindow,
                     self.HOTKEY_ID_HIDESHOW_BYWIKI,
                     self.configuration.get("main",
                     "hotKey_showHide_byWiki", u""))
@@ -5878,7 +5878,7 @@ class TaskBarIcon(wx.TaskBarIcon):
             tbMenu.AppendSeparator()
 
 
-        appendToMenuByMenuDesc(tbMenu, _SYSTRAY_CONTEXT_MENU_BASE)
+        wxHelper.appendToMenuByMenuDesc(tbMenu, _SYSTRAY_CONTEXT_MENU_BASE)
 
 
         return tbMenu
