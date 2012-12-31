@@ -4415,6 +4415,11 @@ class ViHandler(ViHelper):
         # Used for rewriting menu shortcuts
         self.GenerateKeyAccelerators(self.keys)
 
+    def ApplySettings(self):
+        # Set wrap indent mode 
+        self.ctrl.SendMsg(2472, self.settings["set_wrap_indent_mode"])
+
+        #self.ctrl.SendMsg(, self.settings["set_wrap_start_indent"])
 
     def Setup(self):
         self.AddJumpPosition(self.ctrl.GetCurrentPos())
@@ -4464,7 +4469,7 @@ class ViHandler(ViHelper):
             # Vim never goes right to the end of the line
             self.CheckLineEnd()
         elif mode == ViHelper.VISUAL:
-            self.SetCaretStyle("block")
+            self.SetCaretStyle("line")
             #self.ctrl.SetCaretWidth(1)
             self.SetCaretColour(self.settings['caret_colour_visual'])
             self.ctrl.SetOvertype(False)
@@ -5835,6 +5840,14 @@ class ViHandler(ViHelper):
 
         if line.lstrip().startswith("* "):
             line = line.lstrip().lstrip("* ")
+
+        # The heading still has its EOL character present
+        if self.settings["strip_headings"]:
+            if line[0] == "*" and line[-2] == "*":
+                line = line[1:-2] + line[-1]
+            if line[0] == "_" and line[-2] == "_":
+                line = line[1:-2] + line[-1]
+
 
         new_line = "".join([extra, level * u"+", self.ctrl.vi.settings["pad_headings"] * u" ", line.lstrip("+")])
         self.ctrl.ReplaceSelection(new_line)

@@ -217,6 +217,8 @@ class ViHelper():
                 
                 # The following settings apply to SetHeading()
                 "blank_line_above_headings" : True,
+                "strip_headings" : True,
+
                 # No. spaces to put between +++ and heading text
                 "pad_headings" : 0,
 
@@ -228,6 +230,9 @@ class ViHelper():
                 "caret_colour_insert" : "#0000FF",
                 "caret_colour_replace" : "#8B0000",
                 "caret_colour_command" : "#00FFFF",
+
+                "set_wrap_indent_mode": 1,
+                "set_wrap_start_indent": 0,
                 
              }
         self.LoadSettings()
@@ -329,6 +334,11 @@ class ViHelper():
 
             except ConfigParser.NoSectionError:
                 pass
+
+        self.ApplySettings()
+
+    def ApplySettings(self):
+        pass
 
     def OnChar(self, evt):
 	"""
