@@ -537,7 +537,7 @@ def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
         if key == u"s" or key == u"class":
             t.cssClass = data.replace(u",", u" ")
         elif key == u"A" or key == u"align":
-            if data in (u"l", u"c", u"r"):
+            if data in (u"l", u"c", u"r", u"left", u"center", u"right"):
                 t.text_align = data
         # Element width can be specified by the "w" key. If the entry ends in
         # px or % it will be used directly, otherwise size is assumed to be in

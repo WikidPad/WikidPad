@@ -195,12 +195,18 @@ HOR_ALIGN_CSS_ATTR = {
     u"c" : (u'text-align: center', u'align="center"'),
 #     u"m" : (u'text-align: center', u'align="center"'),
     u"r" : (u'text-align: right',  u'align="right"'),
+    u"left" : (u'text-align: left',   u'align="left"'),
+    u"center" : (u'text-align: center', u'align="center"'),
+    u"right" : (u'text-align: right',  u'align="right"'),
     }
 
 VERT_ALIGN_CSS_ATTR = {
     u"t" : (u'vertical-align: top',   u'valign="top"'),
     u"m" : (u'vertical-align: middle', u'valign="middle"'),
     u"b" : (u'vertical-align: bottom',  u'valign="bottom"'),
+    u"top" : (u'vertical-align: top',   u'valign="top"'),
+    u"middle" : (u'vertical-align: middle', u'valign="middle"'),
+    u"bottom" : (u'vertical-align: bottom',  u'valign="bottom"'),
     }
  
 IMG_ALIGN_ATTR = {
@@ -209,6 +215,11 @@ IMG_ALIGN_ATTR = {
     u"b": u' align="bottom"',
     u"l": u' align="left"',
     u"r": u' align="right"',
+    u"top": u' align="top"',
+    u"middle": u' align="middle"',
+    u"bottom": u' align="bottom"',
+    u"left": u' align="left"',
+    u"right": u' align="right"',
     }
 
 
