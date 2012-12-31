@@ -187,6 +187,15 @@ Currently only type "form" is supported (see [FormPages] for details).
 Controls language of a page or the wiki (with "global." prepended) for [SpellChecking].
 
 
+*wrap: number of characters*
+Specifies the number of characters after which a text should be wrapped when using menu item "Format"->"Rewrap Text"
+
+*wrap_type: "word" or "char"*
+Set if the automatic word wrap in editor and the "Rewrap Text" feature should wrap by words or should just before the first character no longer fitting on a line. The latter is mainly useful for Asian languages. The attribute can be prefixed with "global." to apply to all pages of the wiki.
+
+If attribute is not set the default is taken from option "Wrap by", see [OptionsDialog#*Wrap by*].
+
+
 *html.linkcolor*
 Specify the color of a link in preview/HTML export with a numeric HTML color (e.g. "#000000" for black).
 

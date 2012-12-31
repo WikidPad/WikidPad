@@ -73,6 +73,18 @@ A hidden markup is written as \<<\hide >> either on a single line (no newline in
 You only see this in editor
 >>
 
+++++ HTML as is
+To send HTML content without any modifications by WikidPad to HTML preview/export enclose it in << <body></body> >> tags.
+
+<body>
+This
+would
+be placed 
+
+on multiple 
+
+lines without the body tag
+</body>
 
 ++++ Escaping characters
 To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in HTML preview and export. If you want to really write a backslash, write two of them: \\.

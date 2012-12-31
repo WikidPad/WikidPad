@@ -176,6 +176,9 @@ If this option is checked, you can select some text in the preview and when swit
 *Colorize search fragments of links separately*
 When checked the search fragments (part after '#' at the end of a wiki link) are shown in black if the search string can't be found on target page (or, as usual, if target page doesn't exist). Using this option makes syntax highlighting slightly slower.
 
+*Wrap by*
+Set if editor should wrap (if "Auto-Wrap" is active) by word or by character. The latter is mainly useful for Asian languages.
+
 *Tab width*
 How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
 

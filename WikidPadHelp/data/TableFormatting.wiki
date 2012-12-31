@@ -1,4 +1,4 @@
-﻿++ Table Formatting
+﻿+ Table Formatting
 
 A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
 Each line with text is a table row, cells are separated by '|'. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
@@ -12,7 +12,7 @@ with two| rows and| three columns delimited by \| and \
 >>
 
 
-+++ Table appendix
+++ Table appendix
 
 To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
 
@@ -37,22 +37,41 @@ styled	and tab separated
 >>
 
 
-+++ Cell appendix
+++ Cell appendix
 
 You can also format a single cell in a similar way. If the first non-whitespace character in a cell is a semicolon, you can append some format options (separated by further semicolons). The appendix ends with a space.
 
-Allowed options:
-*s* sets CSS stylename for the cell
-*A* control text alignment by the following character:
-    *l*: left
-    *c* or *m*: center
-    *r*: right
+The format option can be a single code character possibly followed directly by some nearer specification.
+
+For some settings the format option can also be a keyword followed by colon or equal sign possibly followed by some nearer specification.
+
+The following code characters are defined:
+
+    s sets CSS stylename for the cell
+    A control text alignment by the following character:
+        l left
+        c horizontally centered
+        r right
+        t top
+        m vertically middle
+        b bottom
+      You can use one horizontal and one vertical alignment in
+      the same appendix but not in the same format option
+      (right: "Ar;Ab", wrong: "Arb")
+
+The following keywords are defined:
+
+*class*
+Same as code "s"
+
+*align*
+Same as code "A"
 
 
 To start a cell with a plain semicolon, precede it with a backslash: \;
 
 
-Examples:
++++ Examples
 
 <<|
 simple | ;sStylename thing
@@ -62,7 +81,7 @@ The "thing" cell gets CSS style "Stylename".
 
 
 <<|
-;Al left | ;Ar right
+;Al left | ;align=b;Ar bottom right | rel://files/testimg.gif>s90x90
 wiiiiiiiiiiiideeeeeeeeee | wiiiiiiiiiiiideeeeeeeeee
 >>
 
@@ -75,7 +94,7 @@ wiiiiiiiiiiiideeeeeeeeee | wiiiiiiiiiiiideeeeeeeeee
 >>
 
 
-+++ Continuation cells
+++ Continuation cells
 
 Sometimes you want a cell to span over multiple rows or columns. This is done with a "continuation cell" which only contains a < or ^ to continue the cell to the left or above respectively.
 
@@ -91,7 +110,7 @@ tall and wide cell | cell 1
 >>
 
 
-++++ Caveats
++++ Caveats
 
 If a cell spans multiple rows and columns there may be cells which are taken as continuation cells even if not marked as such. Example:
 

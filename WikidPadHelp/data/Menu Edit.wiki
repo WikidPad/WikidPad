@@ -13,6 +13,9 @@ Do search or replace operation on a single page.
 The usual clipboard operations, as in any text editor.
 Note: From the HTML preview, only "Copy" may be used, of course, as there is no editing possible.
 
+++ Paste Raw HTML
+If data in HTML format is available on clipboard (e.g. if you copied something from Firefox or Internet Explorer) paste it as raw text into the editor. The content is enclosed in << <body></body> >> so the code will be shown nearly as it is in HTML preview/export (see [TextFormatting#++++ HTML as is]).
+
 ++ Copy to ScratchPad
 Copy selected text to the special ScratchPad page which is automatically inserted into each WikidPad wiki.
 

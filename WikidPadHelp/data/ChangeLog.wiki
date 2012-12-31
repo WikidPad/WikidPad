@@ -1,5 +1,47 @@
 ﻿++ Change Log
 
+Dec. 31, 2012 (2.3beta07)
+
+    * Added attribute "wrap_type" to switch visual wrap in editor
+      between word and char(acter)-wrap (for Asian languages).
+      See [WikiDocumentAttributes#*wrap_type: "word" or "char"*]
+    * Added additional option to set wrap type (attributes have
+      priority). See [OptionsDialog#*Wrap by*]
+    * Wrap function in menu "Format"->"Rewrap Text" also respects
+      above settings
+
+    * Introduced "body" HTML-tag to enclose text which should be
+      exported to HTML as is. See [TextFormatting#++++ HTML as is]
+    * Added menu item to paste raw HTML if available on clipboard
+      (it is pasted with << <body></body> >> around it).
+      See [Menu Edit#++ Paste Raw HTML]
+
+    * Appendix for table cells now can have multi-letter keys if
+      key is terminated by '=' or ':'.
+      See [TableFormatting#++ Cell appendix]
+    * Appendix for image URL supports key "class" to set one or
+      more CSS-classes. See [UrlLinking#++ URL Appendix]
+    * Images in HTML don't get automatic attribute 'border="0"'
+      anymore (except for internal preview). Instead there is a
+      CSS setting now which can be overwritten
+
+    * Tree hidden by default for new installations
+
+    * Vi changes (thanks to Ross):
+        * Fixes for wxPython version >= 2.9
+        * Make caret colours definable in WikidPad.virc, options are
+            - "caret_colour_normal"
+            - "caret_colour_visual"
+            - "caret_colour_insert"
+            - "caret_colour_replace"
+            - "caret_colour_command"
+        * add option ('strip_headings') to strip _ and * from headings
+
+    * Bug fix: Closing tab from context menu in editor led to error
+      or crash (thanks to Ross)
+
+
+
 Oct. 31, 2012 (2.3beta06)
 
     Thanks to Ross for all of the enhancements

@@ -1,4 +1,4 @@
-﻿++ Url Linking
+﻿+ Url Linking
 
 You may enter URLs to websites or local files into your document.  To
 open the link double click on it or press the Ctrl-L. If you drag a
@@ -82,7 +82,14 @@ The above menu entry is also available in context menus for wiki word tree items
 
 
 ++ URL Appendix
-You can control details of URL presentation, especially for images, by using an URL appendix. This consists of a '>' character directly after the URL (no space) and some code characters which can be delimited by semicolons. The following codes are defined:
+You can control details of URL presentation, especially for images, by using an URL appendix. This consists of a '>' character directly after the URL (no space) and some format options which can be delimited by semicolons.
+
+The format option can be a single code character possibly followed directly by some nearer specification.
+
+For some settings the format option can also be a keyword followed by colon or equal sign possibly followed by some nearer specification.
+
+
+The following code characters are defined:
 
     i Show URL as image, even if it has none of the default suffixes
     l Show URL as link. 'i' and 'l' are mutually exclusive.
@@ -91,19 +98,35 @@ You can control details of URL presentation, especially for images, by using an 
       delimited by 'x' (e.g. '200x300', "60%x70%")
     r Set size in percent relative to image size (e.g. "50%x30%"). Only one given
       percent value is used for width and height ("40%" is same as "40%x40%"). No value
-      at all is interpreted as "100%x100%".
+      at all is interpreted as "100%x100%" which explicitly sets the dimensions in HTML
+      attributes
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
       *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
+      Instead of single characters you can also use the full words "top", "middle", "bottom",
+      "right", "left"
+    A Same as "a"
     p Set *rel*ative or *abs*olute linking on HTML export for "file:" and "rel:" links.
       If relative link is not possible, absolute link is used.
       Use *rnr* (=relative, no relocation) if you want a relative link which is not modified on
       export in any way (compatibility to behavior of previous WikidPad versions)
 
 
-Examples:
+The following keywords are defined:
+
+*align*
+Same as codes "a" and "A"
+
+*class*
+Set the CSS class of the image (should be defined in your own [CSS]-file)
+
+
++++ Examples
 
 Control size and alignment:
 rel://files/testimg.gif>s50x50;al
+
+Same as above with keyword:
+rel://files/testimg.gif>s50x50;align:left
 
 Show the URL as link:
 rel://files/testimg.gif>l
