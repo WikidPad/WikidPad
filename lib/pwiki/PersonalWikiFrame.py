@@ -4482,7 +4482,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiWord, _(u'Delete Wiki Word'),
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wx.NO:
+            if result != wx.YES:
                 return
 
         try:
