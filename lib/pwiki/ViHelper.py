@@ -222,6 +222,12 @@ class ViHelper():
 
                 "gvim_path" : u"gvim", 
                 "vim_path" : u"vim", 
+
+                "caret_colour_normal" : "#FF0000",
+                "caret_colour_visual" : "#FFD700",
+                "caret_colour_insert" : "#0000FF",
+                "caret_colour_replace" : "#8B0000",
+                "caret_colour_command" : "#00FFFF",
                 
              }
         self.LoadSettings()
@@ -717,10 +723,8 @@ class ViHelper():
         else:
             if key_chain in self.key_mods[mode]:
                 # TODO: better fix
-                try:
-                    self.ctrl.SetCaretForeground(wx.Colour(0, 255, 255))
-                except:
-                    pass
+                self.SetCaretColour(self.settings['caret_colour_command'])
+
                 self._acceptable_keys = self.key_mods[mode][key_chain]
                 return True
         return False
@@ -892,6 +896,9 @@ class ViHelper():
         Should be overridden by child class if necessary
         """
         return False
+
+    def SetCaretColour(self):
+        pass
 
     def minmax(self, a, b):
         return min(a, b), max(a, b)
@@ -2702,7 +2709,7 @@ class ViInputDialog(wx.Panel):
 
         # If shift is presesd (by itself) we can safely skip it
         if key == 306:
-            pass
+            return
 
         foundPos = -2
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),

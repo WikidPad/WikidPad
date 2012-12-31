@@ -127,6 +127,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # configurable editor settings
         config = self.presenter.getConfig()
+
+        # TODO: set wrap indent mode (for wx >= 2.9)
         self.setWrapMode(config.getboolean("main", "wrap_mode"))
         self.SetIndentationGuides(config.getboolean("main", "indentation_guides"))
         self.autoIndent = config.getboolean("main", "auto_indent")
@@ -4058,6 +4060,8 @@ class ViHandler(ViHelper):
 
         self._line_column_pos = 0
 
+        self.ctrl.SendMsg(2472, 1)
+
     def LoadKeybindings(self):
         """
         Function called to load keybindings.
@@ -4254,6 +4258,7 @@ class ViHandler(ViHelper):
 
     (k["v"],)   : (3, (self.EnterVisualMode, None), 0, 0), # v
     (k["V"],)   : (3, (self.EnterLineVisualMode, None), 0, 0), # V
+    #(("Ctrl", k["v"]),)   : (3, (self.EnterBlockVisualMode, None), 0, 0), # <c-v>
 
     (k["J"],)   : (0, (self.JoinLines, None), 1, 1), # J
 
@@ -4437,38 +4442,66 @@ class ViHandler(ViHelper):
         possible at the moment
         """
         
-        self.mode = mode
+        if mode is None:
+            mode = self.mode
+        else:
+            self.mode = mode
 
         # Save caret position
         self.SetLineColumnPos()
 
         if mode == ViHelper.NORMAL:
             # Set block caret (Not in wxpython < 2.9)
-            self.ctrl.SendMsg(2512, 2)
-            self.ctrl.SetCaretWidth(40)
+            self.SetCaretStyle("block")
+            #self.ctrl.SetCaretWidth(40)
 
             self.ctrl.SetCaretPeriod(800)
             #self.ctrl.SetSelectionMode(0)
             self.RemoveSelection()
-            self.ctrl.SetCaretForeground(wx.Colour(255, 0, 0))
+            self.SetCaretColour(self.settings['caret_colour_normal'])
             self.ctrl.SetOvertype(False)
             self.SetSelMode("NORMAL")
             # Vim never goes right to the end of the line
             self.CheckLineEnd()
         elif mode == ViHelper.VISUAL:
-            self.ctrl.SetCaretWidth(1)
-            self.ctrl.SetCaretForeground(wx.Colour(250, 250, 210))
+            self.SetCaretStyle("block")
+            #self.ctrl.SetCaretWidth(1)
+            self.SetCaretColour(self.settings['caret_colour_visual'])
             self.ctrl.SetOvertype(False)
         elif mode == ViHelper.INSERT:
             self.insert_action = []
-            self.ctrl.SendMsg(2512, 1)
-            self.ctrl.SetCaretWidth(1)
-            self.ctrl.SetCaretForeground(self.default_caret_colour)
+            self.SetCaretStyle("line")
+            #self.ctrl.SetCaretWidth(1)
+            self.SetCaretColour(self.settings['caret_colour_insert'])
             self.ctrl.SetOvertype(False)
         elif mode == ViHelper.REPLACE:
-            self.ctrl.SetCaretWidth(1)
-            self.ctrl.SetCaretForeground(self.default_caret_colour)
+            self.SetCaretStyle("block")
+            #self.ctrl.SetCaretWidth(1)
+            self.SetCaretColour(self.settings['caret_colour_replace'])
             self.ctrl.SetOvertype(True)
+
+    def SetCaretStyle(self, style):
+        """
+        Helper to set the caret style
+
+        @param style: Caret style
+        """
+        # default caret style is line
+        sci_style = 1
+        if style == "block":
+            sci_style = 2
+        elif style == "invisible":
+            sci_style = 0
+
+        self.ctrl.SendMsg(2512, sci_style)
+
+    def SetCaretColour(self, colour):
+        """
+        Helper to set the caret colour
+
+        @param colour: wx colour
+        """
+        self.ctrl.SetCaretForeground(colour)
 
     # Starting code to allow correct postitioning when undoing and redoing
     # actions
@@ -4573,7 +4606,8 @@ class ViHandler(ViHelper):
         self.ctrl.GotoLine(line)
 
     def FlushBuffersExtra(self):
-        self.ctrl.SetCaretForeground(wx.Colour(255, 100, 100))
+        #self.SetCaretColour(self.settings['caret_colour_normal'])
+        self.SetMode(None)
         self.register.SelectRegister(None)
 
     def OnMouseScroll(self, evt):
@@ -5409,7 +5443,8 @@ class ViHandler(ViHelper):
 
         if include_eol:
             end += 1
-        self.ctrl.SetSelection(end, start)
+        #self.ctrl.SetSelection(end, start)
+        self.ctrl.SetSelection(start, end)
 
     def SelectFullLines(self, include_eol=False):
         """
@@ -5622,8 +5657,11 @@ class ViHandler(ViHelper):
 
         current_pos = self.ctrl.GetCurrentPos()
 
-
-        self.ctrl.SetSelection(self._anchor, current_pos)
+        if current_pos > self._anchor:
+            self.ctrl.SetSelectionStart(self._anchor)
+            self.ctrl.SetSelectionEnd(current_pos)
+        else:
+            self.ctrl.SetAnchor(self._anchor)
 
         #self.SetSelMode(u"LINE")
         if self.GetSelMode() == u"LINE":
@@ -5729,8 +5767,10 @@ class ViHandler(ViHelper):
         if include_eol or end == max_line_count:
             end_pos += 1
 
+
         if reverse:
-            self.ctrl.SetSelection(end_pos, start_pos)
+            self.ctrl.GotoPos(start_pos)
+            self.ctrl.SetAnchor(end_pos)
         else:
             self.ctrl.SetSelection(start_pos, end_pos)
 
@@ -5937,6 +5977,14 @@ class ViHandler(ViHelper):
     #--------------------------------------------------------------------
     # Visual mode
     #--------------------------------------------------------------------
+    #def SetSelMode(self, mode):
+    #    if mode == "LINE":
+    #        self.ctrl.SetSelectionMode(wx.stc.STC_SEL_LINES)
+    #    else:
+    #        self.ctrl.SetSelectionMode(wx.stc.STC_SEL_STREAM)
+
+    def EnterBlockVisualMode(self):
+        pass
 
     def EnterLineVisualMode(self):
         """
