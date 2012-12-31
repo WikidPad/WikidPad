@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-10-30 14:26\n"
+"POT-Creation-Date: 2012-12-31 15:02\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2808,11 +2808,11 @@ msgstr ""
 msgid "Plugins"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:670 lib\pwiki\WikiTxtCtrl.py:2411
+#: lib\pwiki\MainAreaPanel.py:673 lib\pwiki\WikiTxtCtrl.py:2411
 msgid "This can only be done for the page of a wiki word"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:671 lib\pwiki\WikiTxtCtrl.py:2412
+#: lib\pwiki\MainAreaPanel.py:674 lib\pwiki\WikiTxtCtrl.py:2412
 msgid "Not a wiki page"
 msgstr ""
 
