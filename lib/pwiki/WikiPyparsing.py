@@ -2152,6 +2152,12 @@ class Regex(Token, NecessaryRegexProvider):
         
     def getRegex(self):
         return self.re
+    
+    def getPattern(self):
+        if self.re is None:
+            return None
+        
+        return self.re.pattern
         
     def getRegexFlagsMask(self):
         return self.flagsMask

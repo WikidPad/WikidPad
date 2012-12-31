@@ -2489,6 +2489,8 @@ class HtmlExporter(AbstractExporter):
                         not self.asIntHtmlPreview)
                 if self.asIntHtmlPreview:
                     self.outAppend(u'<br class="wikidpad" />\n')
+            elif tname == "bodyHtmlTag":
+                self.outAppend(node.content)
             elif tname == "todoEntry":
                 self.outAppend(u'<span class="wikidpad todo">%s%s' %
                         (node.key, node.delimiter))

@@ -659,11 +659,32 @@ noExportSingleLine = noExportSingleLine.setResultsNameNoCopy("noExportSl")\
 
 # -------------------- Pre block --------------------
 
+PRE_BLOCK_END = ur"^[ \t]*>>[ \t]*(?:\n|$)"
+
 preBlock = buildRegex(ur"<<pre[ \t]*\n")\
         .setParseStartAction(preActCheckNothingLeft) + \
-        buildRegex(ur".*?(?=^[ \t]*>>[ \t]*(?:\n|$))", "preText") + \
-        buildRegex(ur"^[ \t]*>>[ \t]*(?:\n|$)")
+        buildRegex(ur".*?(?=" + PRE_BLOCK_END + ")", "preText") + \
+        buildRegex(PRE_BLOCK_END)
 preBlock = preBlock.setResultsNameNoCopy("preBlock")
+
+
+# -------------------- <body> html tag --------------------
+
+def actionBodyHtmlTag(s, l, st, t):
+    t.content = t.findFlatByName("bodyHtmlText").getString()
+
+
+bodyHtmlStart = buildRegex(ur"<body(?: [^\n>]*)?>", "htmlTag")
+ 
+bodyHtmlEnd = buildRegex(ur"</body(?: [^\n>]*)?>", "htmlTag")
+
+bodyHtmlText = buildRegex(ur".*?(?=" + bodyHtmlEnd.getPattern() + ")",
+        "bodyHtmlText")
+
+
+bodyHtmlTag = bodyHtmlStart + bodyHtmlText + bodyHtmlEnd
+bodyHtmlTag = bodyHtmlTag.setResultsNameNoCopy("bodyHtmlTag")\
+        .setParseAction(actionBodyHtmlTag)
 
 
 # -------------------- Auto generated area --------------------
@@ -1232,7 +1253,7 @@ endTokenInCharacterAttribution = endToken | heading
 findMarkupInCell = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
         urlRef, insertion, escapedChar, footnote, wikiWord,
-        htmlTag, htmlEntity], endTokenInTable)
+        bodyHtmlTag, htmlTag, htmlEntity], endTokenInTable)
 findMarkupInCell = findMarkupInCell.setPseudoParseAction(pseudoActionFindMarkup)
 
 temp = ZeroOrMore(NotAny(endTokenInTable) + findMarkupInCell)
@@ -1243,7 +1264,8 @@ tableContentInCell << temp
 
 findMarkupInTitle = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
-        urlRef, insertion, escapedChar, footnote, htmlTag, htmlEntity],
+        urlRef, insertion, escapedChar, footnote, bodyHtmlTag, htmlTag,
+        htmlEntity],
         endTokenInTitle)
 findMarkupInTitle = findMarkupInTitle.setPseudoParseAction(pseudoActionFindMarkup)
 
@@ -1255,8 +1277,8 @@ titleContent << temp
 
 findMarkupInHeading = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
-        urlRef, insertion, escapedChar, footnote, wikiWord, htmlTag,
-        htmlEntity], endToken)
+        urlRef, insertion, escapedChar, footnote, wikiWord, bodyHtmlTag,
+        htmlTag, htmlEntity], endToken)
 findMarkupInHeading = findMarkupInHeading.setPseudoParseAction(
         pseudoActionFindMarkup)
 
@@ -1269,7 +1291,7 @@ headingContent << temp
 findMarkupInTodo = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
         urlRef, attribute, insertion, escapedChar, footnote, wikiWord,
-        htmlTag, htmlEntity], endToken)
+        bodyHtmlTag, htmlTag, htmlEntity], endToken)
 findMarkupInTodo = findMarkupInTodo.setPseudoParseAction(
         pseudoActionFindMarkup)
 
@@ -1284,7 +1306,7 @@ findMarkupInCharacterAttribution = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
         attribute, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace,
-        todoEntry, anchorDef, preHtmlTag, htmlTag,
+        todoEntry, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
         suppressHighlightingMultipleLines, equivalIndentation],
@@ -1303,7 +1325,7 @@ findMarkup = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
         attribute, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace, heading,
-        todoEntry, anchorDef, preHtmlTag, htmlTag,
+        todoEntry, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
         suppressHighlightingMultipleLines,
