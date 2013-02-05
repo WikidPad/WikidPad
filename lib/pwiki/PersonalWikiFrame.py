@@ -1959,10 +1959,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         extraMenu.AppendSeparator()
 
+        self.addMenuItem(extraMenu, _(u'Optional component &log...'),
+                _(u'Show error while initializing optional components'),
+                self.OnShowOptionalComponentErrorLog)
+
+        extraMenu.AppendSeparator()
+
         self.addMenuItem(extraMenu, _(u'O&ptions...'),
                 _(u'Set options'), lambda evt: self.showOptionsDialog(),
                 menuID = wx.ID_PREFERENCES)
-
 
 
         helpMenu = wx.Menu()
@@ -5357,6 +5362,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dlg = AdditionalDialogs.AboutDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
+    
+    def OnShowOptionalComponentErrorLog(self, evt):
+        import ExceptionLogger
+        AdditionalDialogs.ShowStaticHtmlTextDialog.runModal(self,
+                _(u"Optional component error log"),
+                textContent=ExceptionLogger.getOptionalComponentErrorLog())
+
 
     def OnShowPrintMainDialog(self, evt=None, exportTo=-1):
         if self.printer is None:

@@ -24,7 +24,9 @@ try:
 #     tracer.runctx('import gadfly', globals(), locals())
     import gadfly
 except ImportError:
-#     traceback.print_exc()
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException(
+            "Initialize gadfly for original_gadfly/WikiData.py")
     gadfly = None
 # finally:
 #     pass

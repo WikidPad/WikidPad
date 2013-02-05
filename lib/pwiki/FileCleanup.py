@@ -1245,9 +1245,6 @@ class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
 
         self.EndModal(wx.ID_OK)
 
-# FileCleanupInitialDialog.runModal = staticmethod(runDialogModalFactory(
-#         FileCleanupInitialDialog))
-
 
 
 
@@ -1467,11 +1464,6 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
         Called after double click on a cell in missing items table
         """
         self.ctrls.htmllbMissingLinkingPages.activateSelection(0)
-
-
-
-# FileCleanupDialog.runModal = staticmethod(runDialogModalFactory(
-#         FileCleanupDialog))
 
 
 

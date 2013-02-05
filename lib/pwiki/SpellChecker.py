@@ -19,7 +19,11 @@ try:
     from EnchantDriver import Dict
     import EnchantDriver
 except (AttributeError, ImportError, WindowsError):
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException(
+            "Initialize enchant driver (spell checking)")
     Dict = None
+
     # traceback.print_exc()
     
     # WindowsError may happen if an incomplete enchant installation is found

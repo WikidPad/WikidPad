@@ -171,9 +171,6 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
             self.ctrls.text.SetSelection(-1, -1)
         else:
             evt.Skip()
-            
-
-# SelectWikiWordDialog.runModal = staticmethod(runDialogModalFactory(SelectWikiWordDialog))
 
      
 
@@ -476,8 +473,6 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def OnNewTabBackground(self, evt):
         self.activateSelectedWikiWords(3)
 
-# OpenWikiWordDialog.runModal = staticmethod(runDialogModalFactory(OpenWikiWordDialog))
-
 
 
 class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
@@ -760,20 +755,6 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
 
 
-# RenameWikiWordDialog.runModal = staticmethod(runDialogModalFactory(RenameWikiWordDialog))
-
-
-
-
-
-
-
-
-
-
-
-
-
 class SelectIconDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
@@ -856,12 +837,6 @@ class SelectIconDialog(wx.Dialog, ModalDialogMixin):
             self.value = None
             
         self.EndModal(wx.ID_OK)
-
-
-
-
-# SelectIconDialog.runModal = staticmethod(runDialogModalFactory(SelectIconDialog))
-
 
 
 
@@ -1582,11 +1557,6 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
                     "saved export: ") + e.message)
 
 
-# ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
-
-
-
-
 
 class ImportDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Import",
@@ -1875,11 +1845,56 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
 
         self.EndModal(wx.ID_OK)
 
-# NewWikiSettings.runModal = staticmethod(runDialogModalFactory(NewWikiSettings))
+
+
+class ShowStaticHtmlTextDialog(wx.Dialog, ModalDialogMixin):
+    """ Show static content in an HTML window """
+
+    def __init__(self, parent, title, htmlContent=None, textContent=None,
+            size=(470, 330)):
+        """
+        In the constructor you can either give html source or plain text
+        which is escaped to html
+        """
+        wx.Dialog.__init__(self, parent, -1, title, size=size)
+        
+        if htmlContent is None and textContent is not None:
+            htmlContent = escapeHtml(textContent)
+            
+        html = wx.html.HtmlWindow(self, -1)
+        
+        if htmlContent is not None:
+            html.SetPage(htmlContent)
+
+        button = wx.Button(self, wx.ID_OK, _(u"Okay"))
+
+        # constraints for the html window
+        lc = wx.LayoutConstraints()
+        lc.top.SameAs(self, wx.Top, 5)
+        lc.left.SameAs(self, wx.Left, 5)
+        lc.bottom.SameAs(button, wx.Top, 5)
+        lc.right.SameAs(self, wx.Right, 5)
+        html.SetConstraints(lc)
+
+        # constraints for the button
+        lc = wx.LayoutConstraints()
+        lc.bottom.SameAs(self, wx.Bottom, 5)
+        lc.centreX.SameAs(self, wx.CentreX)
+        lc.width.AsIs()
+        lc.height.AsIs()
+        button.SetConstraints(lc)
+
+        self.SetAutoLayout(True)
+        self.Layout()
+        self.CentreOnParent(wx.BOTH)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
 
 
-class AboutDialog(wx.Dialog):
+
+class AboutDialog(ShowStaticHtmlTextDialog):
     """ An about box that uses an HTML window """
 
     TEXT_TEMPLATE = N_(u'''
@@ -1933,48 +1948,27 @@ What makes wikidPad different from other notepad applications is the ease with w
 ''')
 
     def __init__(self, pWiki):
-        wx.Dialog.__init__(self, pWiki, -1, _(u'About WikidPad'),
-                          size=(470, 330) )
+#         wx.Dialog.__init__(self, pWiki, -1, _(u'About WikidPad'),
+#                           size=(470, 330) )
         
         if sqlite is None:
             sqliteVer = _(u"N/A")
         else:
             sqliteVer = sqlite.getLibVersion()
 
-        text = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
+        content = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
                 escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer),
                 escapeHtml(wx.__version__))
 
-        html = wx.html.HtmlWindow(self, -1)
-        html.SetPage(text)
-        button = wx.Button(self, wx.ID_OK, _(u"Okay"))
-
-        # constraints for the html window
-        lc = wx.LayoutConstraints()
-        lc.top.SameAs(self, wx.Top, 5)
-        lc.left.SameAs(self, wx.Left, 5)
-        lc.bottom.SameAs(button, wx.Top, 5)
-        lc.right.SameAs(self, wx.Right, 5)
-        html.SetConstraints(lc)
-
-        # constraints for the button
-        lc = wx.LayoutConstraints()
-        lc.bottom.SameAs(self, wx.Bottom, 5)
-        lc.centreX.SameAs(self, wx.CentreX)
-        lc.width.AsIs()
-        lc.height.AsIs()
-        button.SetConstraints(lc)
-
-        self.SetAutoLayout(True)
-        self.Layout()
-        self.CentreOnParent(wx.BOTH)
-        
-        # Fixes focus bug under Linux
-        self.SetFocus()
+        ShowStaticHtmlTextDialog.__init__(self, pWiki, _(u'About WikidPad'),
+                htmlContent=content, size=(470, 330))
 
 
 
 class SimpleInfoDialog(wx.Dialog):
+    """
+    Show a dialog with a static list of key-value pairs
+    """
     def __init__(self, *args, **kwargs):
         wx.Dialog.__init__(self, *args, **kwargs)
 

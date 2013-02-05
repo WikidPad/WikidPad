@@ -30,7 +30,10 @@ try:
     import DbStructure
     from DbStructure import createWikiDB, WikiDBExistsException
 except:
-    traceback.print_exc()
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException(
+            "Initialize external sqlite for compact_sqlite/WikiData.py")
+
     sqlite = None
 # finally:
 #     pass

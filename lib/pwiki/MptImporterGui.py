@@ -591,8 +591,3 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
     def getDefaultVersionImportValue(self):
         return self.ctrls.chDefaultVersionImport.GetSelection() + 1
 
-
-
-
-# MultiPageTextImporterDialog.runModal = staticmethod(runDialogModalFactory(MultiPageTextImporterDialog))
-

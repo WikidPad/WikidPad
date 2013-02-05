@@ -278,9 +278,6 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
             self.EndModal(wx.ID_OK)
 
 
-# FilePasteDialog.runModal = staticmethod(runDialogModalFactory(FilePasteDialog))
-
-
 
 
 class ImagePasteSaver:

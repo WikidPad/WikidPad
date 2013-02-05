@@ -116,3 +116,25 @@ def startLogger(versionstring):
     EL._previousExcepthook = sys.excepthook
     sys.excepthook = onException
     
+    
+# Record errors while initializing optional components (external renderers,
+# spell checking). User can then retrieve the log and send it as bug report
+# if a component fails unexpectedly.
+_optionalComponentErrorLog = []
+
+
+def logOptionalComponentException(header):
+    global _optionalComponentErrorLog
+    
+    log = traceback.format_exc()
+    _optionalComponentErrorLog.append(
+            "---- " + header + " ----\n" + log + "\n")
+
+
+def getOptionalComponentErrorLog():
+    global _optionalComponentErrorLog
+    
+    return "".join(_optionalComponentErrorLog)
+
+
+    

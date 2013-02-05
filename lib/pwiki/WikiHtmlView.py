@@ -31,7 +31,8 @@ from . import PluginManager
 try:
     import WikiHtmlViewWK
 except:
-#         traceback.print_exc()
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException("Initialize webkit HTML renderer")
     WikiHtmlViewWK = None
 
 
@@ -40,7 +41,8 @@ if isWindows():
     try:
         import WikiHtmlViewIE
     except:
-#         traceback.print_exc()
+        import ExceptionLogger
+        ExceptionLogger.logOptionalComponentException("Initialize IE HTML renderer")
         WikiHtmlViewIE = None
 else:
     WikiHtmlViewIE = None

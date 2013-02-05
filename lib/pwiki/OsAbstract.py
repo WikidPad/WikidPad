@@ -21,7 +21,9 @@ except:
 try:
     import GtkHacks
 except:
-#     traceback.print_exc()
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException(
+            "Initialize GTK hacks in OsAbstract.py")
     GtkHacks = None
 
 

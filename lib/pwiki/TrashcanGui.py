@@ -239,10 +239,6 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
 
 
 
-# TrashcanDialog.runModal = staticmethod(runDialogModalFactory(
-#         TrashcanDialog))
-
-
 
 class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
     """
@@ -381,12 +377,6 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
         # Word is OK
         return None
 
-
-
-
-
-# TrashBagRenameDialog.runModal = staticmethod(runDialogModalFactory(
-#         TrashBagRenameDialog))
 
 
 
