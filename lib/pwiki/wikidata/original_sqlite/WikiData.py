@@ -1141,7 +1141,10 @@ class WikiData:
                                 "select word from wikiwords "
                                 "where filepath = ?", (path,))
                         for word in words:
-                            self.deleteWord(word, delContent=False)
+                            try:
+                                self.deleteWord(word, delContent=False)
+                            except WikiDataException, e:
+                                pass
 
                     self.connWrap.execSql("delete from wikiwords "
                             "where filepath = ?", (path,))
