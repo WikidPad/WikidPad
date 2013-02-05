@@ -272,6 +272,13 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def closePresenterTab(self, presenter):
+        # If the close command came from a popup menu then directly deleting the
+        # page while the menu wasn't closed yet leads to an error or
+        # a crash depending on OS (thanks to Ross)
+        wx.CallAfter(self.closePresenterTabDirectly, presenter)
+
+
+    def closePresenterTabDirectly(self, presenter):
         if isinstance(presenter, BasicDocPagePresenter) and \
                 len(self.getDocPagePresenters()) < 2:
             # At least one tab must stay
@@ -308,10 +315,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self._mruTabIndexDelete(idx)
 
         self.updateConfig()
-        # If the close command came from a popup menu then directly deleting the
-        # page while the menu wasn't closed yet leads to an error or
-        # a crash depending on OS (thanks to Ross)
-        wx.CallAfter(self.DeletePage, idx)
+
+        self.DeletePage(idx)
 
         return True
 
