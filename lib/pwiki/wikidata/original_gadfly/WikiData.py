@@ -511,7 +511,9 @@ class WikiData:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
         else:
-            raise WikiDataException(_(u"You cannot delete the root wiki node"))
+            raise WikiDataException(_(u"You cannot delete the root wiki node"),
+                    "delete rootPage")
+
 
 
     def setMetaDataState(self, word, state):
@@ -1045,7 +1047,12 @@ class WikiData:
                                 "select word from wikiwords "
                                 "where filepath = ?", (path,))
                         for word in words:
-                            self.deleteWord(word, delContent=False)
+                            try:
+                                self.deleteWord(word, delContent=False)
+                            except WikiDataException, e:
+                                if e.getTag() != "delete rootPage":
+                                    raise
+
 
                     self.connWrap.execSql("delete from wikiwords "
                             "where filepath = ?", (path,))

@@ -1,10 +1,19 @@
 # Thrown by WikiData classes
-class WikiDataException(Exception): pass
+class AppBaseException(Exception):
+    def __init__(self, message="", tag=None):
+        Exception.__init__(self, message)
+        self.tag = tag
+
+    def getTag(self):
+        return self.tag
+
+
+class WikiDataException(AppBaseException): pass
 class WikiWordNotFoundException(WikiDataException): pass
 class WikiFileNotFoundException(WikiDataException): pass
 class WikiDBExistsException(WikiDataException): pass
 
-class NoPageAstException(Exception): pass
+class NoPageAstException(AppBaseException): pass
 
 # For non-Windows systems
 try:
@@ -13,14 +22,14 @@ except NameError:
     class WindowsError(Exception): pass
 
 
-class DbAccessError(Exception):
+class DbAccessError(AppBaseException):
     """
     Base classes for read or write errors when acessing database
     where "database" also means wiki configuration and additional
     files.
     """
     def __init__(self, originalException):
-        Exception.__init__(self, str(originalException))
+        AppBaseException.__init__(self, str(originalException))
         self.originalException = originalException
     
     def getOriginalException(self):
@@ -40,7 +49,7 @@ class DbWriteAccessError(DbAccessError):
 
 
 
-class RenameWikiWordException(Exception):
+class RenameWikiWordException(AppBaseException):
     """
     Raised on problems with renaming multiple wikiwords at once.
     Constructed in 
@@ -83,38 +92,38 @@ class RenameWikiWordException(Exception):
 
 
 
-class InternalError(Exception): pass
+class InternalError(AppBaseException): pass
 
 
-class ExportException(Exception): pass
-class ImportException(Exception): pass
+class ExportException(AppBaseException): pass
+class ImportException(AppBaseException): pass
 
 # See Serialization.py
-class SerializationException(Exception): pass
-class VersioningException(Exception): pass
+class SerializationException(AppBaseException): pass
+class VersioningException(AppBaseException): pass
 
 # See WikiDataManager.py. Thrown if requested handler for db backend isn't
 #     available
-class NoDbHandlerException(Exception): pass
-class WrongDbHandlerException(Exception): pass
-class DbHandlerNotAvailableException(Exception): pass
-class UnknownDbHandlerException(Exception): pass
+class NoDbHandlerException(AppBaseException): pass
+class WrongDbHandlerException(AppBaseException): pass
+class DbHandlerNotAvailableException(AppBaseException): pass
+class UnknownDbHandlerException(AppBaseException): pass
 
 
 # See WikiDataManager.py. Thrown if requested handler for wiki language isn't
 #     available
-class UnknownWikiLanguageException(Exception): pass
-class WrongWikiLanguageException(Exception): pass
+class UnknownWikiLanguageException(AppBaseException): pass
+class WrongWikiLanguageException(AppBaseException): pass
 
 
-class MissingConfigurationFileException(Exception): pass
-class BadConfigurationFileException(Exception): pass
-class LockedWikiException(Exception): pass
+class MissingConfigurationFileException(AppBaseException): pass
+class BadConfigurationFileException(AppBaseException): pass
+class LockedWikiException(AppBaseException): pass
 
 
-class NotCurrentThreadException(Exception): pass
-class UserAbortException(Exception): pass
+class NotCurrentThreadException(AppBaseException): pass
+class UserAbortException(AppBaseException): pass
 
 class DeadBlockPreventionTimeOutError(InternalError): pass
 
-class BadFuncPageTagException(Exception): pass
+class BadFuncPageTagException(AppBaseException): pass
