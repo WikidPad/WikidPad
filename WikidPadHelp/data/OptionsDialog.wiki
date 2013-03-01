@@ -627,3 +627,12 @@ If one of the file systems is FAT set this value to 2.
 If you use NTFS and ext2 or ext3 set it to 1.
 
 Modifying this setting does not change already recorded file signatures (until associated wiki page is modified). You can either [RebuildTheWiki] or just let WikidPad change it when it thinks it is necessary.
+
+*Force editor to write platform dependent files*
+Usually it makes sense to store the wiki text files always in the same format (regarding line endings).
+
+Then it's easier to share a wiki between computers with different operating system (Windows, Linux, OSX), especially when using a version control system like Mercurial, Git, Subversion.
+
+So this option is off by default.
+
+If you really want to have platform dependent files (line endings as CR/LF, LF or CR) you may want to set this option.

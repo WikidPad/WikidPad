@@ -935,6 +935,9 @@ WIKIDEFAULTS = {
     ("main", "fileSignature_timeCoarsening"): "0", # Coarsening of time stamp in file signature blocks (helpful when
             # transferring wikis between different file systems)
 
+    ("main", "editor_text_mode"): u"False",  # force the editor to write platform dependent files to disk
+            # (line endings as CR/LF, LF or CR)
+
     ("main", "wikiPageTitlePrefix"): "++",   # Prefix for main title of new pages
     ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
             # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")

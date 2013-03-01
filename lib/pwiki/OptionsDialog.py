@@ -673,7 +673,8 @@ class OptionsDialog(wx.Dialog):
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
             ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b"),
             ("fileSignature_timeCoarsening", "tfFileSignatureTimeCoarsening",
-                    "f0+")
+                    "f0+"),
+            ("editor_text_mode", "cbEditorForceTextMode", "b"),
     )
 
 
@@ -971,7 +972,8 @@ class OptionsDialog(wx.Dialog):
                     fppCap is not None)
             self.ctrls.chVersioningStorageLocation.Enable(
                     fppCap is not None)
-
+            self.ctrls.cbEditorForceTextMode.Enable(
+                    fppCap is not None)
 
         self.OnUpdateUiAfterChange(None)
 

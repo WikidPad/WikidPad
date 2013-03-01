@@ -72,6 +72,11 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
+        # If true, forces the editor to write platform dependent files to disk
+        # (line endings as CR/LF, LF or CR)
+        # If false, LF is used always
+        self.editorTextMode = False
+        
         # Set temporary directory if this is first sqlite use after prog. start
         if not GetApp().sqliteInitFlag:
             globalConfig = GetApp().getGlobalConfig()
@@ -299,7 +304,7 @@ class WikiData:
             self._updatePageEntry(word, moddate, creadate)
 
             filePath = self.getWikiWordFileName(word, mustExist=False)
-            writeEntireFile(filePath, content, True)
+            writeEntireFile(filePath, content, self.editorTextMode)
 
             fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
             self.connWrap.execSql("update wikiwords set filesignature = ?, "
@@ -2062,7 +2067,7 @@ class WikiData:
                 if filePath is not None:
                     # The entry is already in an external file, so overwrite it
                     writeEntireFile(join(self.dataDir, filePath), newdata,
-                            isinstance(newdata, unicode))
+                            self.editorTextMode and isinstance(newdata, unicode))
 
                     fileSig = self.wikiDocument.getFileSignatureBlock(
                             join(self.dataDir, filePath))
@@ -2094,7 +2099,7 @@ class WikiData:
                 
                 filePath = join(self.dataDir, fileName)
                 writeEntireFile(filePath, newdata,
-                        isinstance(newdata, unicode))
+                        self.editorTextMode and isinstance(newdata, unicode))
                 fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
 
                 # It may be in internal data blocks, so try to delete
@@ -2223,6 +2228,18 @@ class WikiData:
         Function must work for read-only wiki.
         """
         return WikiData._CAPABILITIES.get(capkey, None)
+
+
+    def setEditorTextMode(self, mode):
+        """
+        If true, forces the editor to write platform dependent files to disk
+        (line endings as CR/LF, LF or CR).
+        If false, LF is used always.
+        
+        Must be implemented if checkCapability returns a version number
+        for "filePerPage".
+        """           
+        self.editorTextMode = mode
 
 
         # TODO drop and recreate tables and indices!

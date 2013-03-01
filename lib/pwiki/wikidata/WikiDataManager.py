@@ -2223,6 +2223,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def _handleWikiConfigurationChanged(self, miscevt):
+        wikiData = self.getWikiData()
+        
         if self.getWikiConfig().getboolean("main",
                 "indexSearch_enabled", False):
             self.pushDirtyMetaDataUpdate()
@@ -2233,7 +2235,6 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 # Check for wiki pages with wrong metadata state and adjust
                 # TODO: Faster?
-                wikiData = self.getWikiData()
 
                 wikiData.commit()
                 finalState = self.getFinalMetaDataState()
@@ -2245,6 +2246,10 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 # Remove index
                 self.removeSearchIndex()
+
+        if wikiData.checkCapability("filePerPage") is not None:
+            wikiData.setEditorTextMode(self.getWikiConfig().getboolean("main",
+                    "editor_text_mode", False))
 
 
     def getFileSignatureBlock(self, filename):
