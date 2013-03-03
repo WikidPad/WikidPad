@@ -1768,7 +1768,7 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
         self.PostCreate(d)
 
         self.mainControl = mainControl
-        self.value = None, None
+        self.value = None, None, None
 
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "NewWikiSettingsDialog")
