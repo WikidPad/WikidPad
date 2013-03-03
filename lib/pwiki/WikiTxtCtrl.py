@@ -3362,20 +3362,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 # first see if we can just reposition the calltip
                 if x <= callTipWidth + mouseX:
                     # if this fails wrap the calltip to a more reasonable size
-                    if x < callTipWidth:
-                        # Split the CallTip
-                        ratio = x / float(callTipWidth)
-                        maxTextLen = int(ratio * callTipLen * 0.8)
-
-                        lines = callTip.split("\n")
-                        formatedLines = []
-                        
-                        # By default wrap ignores newlines so rewrap each line
-                        # seperately
-                        for line in lines:
-                            formatedLines.append("\n".join(textwrap.wrap(line, maxTextLen)))
-
-                        callTip = "\n".join(formatedLines)
+#                    if x < callTipWidth:
+#                        # Split the CallTip
+#                        ratio = x / float(callTipWidth)
+#                        maxTextLen = int(ratio * callTipLen * 0.8)
+#
+#                        lines = callTip.split("\n")
+#                        formatedLines = []
+#                        
+#                        # By default wrap ignores newlines so rewrap each line
+#                        # seperately
+#                        for line in lines:
+#                            formatedLines.append("\n".join(textwrap.wrap(line, maxTextLen)))
+#
+#                        callTip = "\n".join(formatedLines)
                             
                     bytePos = bytePos - self.GetColumn(bytePos) 
                     
