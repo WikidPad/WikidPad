@@ -4448,8 +4448,10 @@ class ViHandler(ViHelper):
         else:
             self.mode = mode
 
-        # Save caret position
-        self.SetLineColumnPos()
+        # ! there may be some situations in which we want to do this
+        #   but it is probably better handled in the calling function
+        ## Save caret position
+        #self.SetLineColumnPos()
 
         if mode == ViHelper.NORMAL:
             # Set block caret (Not in wxpython < 2.9)
@@ -6866,7 +6868,7 @@ class ViHandler(ViHelper):
         if visual:
             self.Repeat(self.ctrl.LineUp, count)
             self.CheckLineEnd()
-            self.SetLineColumnPos()
+            #self.SetLineColumnPos()
         else:
             self.MoveCaretVertically(-count)
 
@@ -6881,7 +6883,7 @@ class ViHandler(ViHelper):
         if visual:
             self.Repeat(self.ctrl.LineDown, count)
             self.CheckLineEnd()
-            self.SetLineColumnPos()
+            #self.SetLineColumnPos()
         else:
             self.MoveCaretVertically(count)
 
