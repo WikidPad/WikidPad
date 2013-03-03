@@ -852,7 +852,7 @@ class Dict(_EnchantObject):
         else:
             if tag is None:
                 tag = "No tag specified."
-                raise Error(err)
+                raise Error("No tag specified.")
             # Use module-level broker if none given
             if broker is None:
                 broker = _broker

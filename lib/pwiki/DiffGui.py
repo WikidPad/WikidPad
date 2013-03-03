@@ -230,8 +230,8 @@ class InlineDiffControl(SearchableScintillaControl):
 
         self.procTokens = NonTerminalNode(procList, 2, "diff")
 
-
-    def _divideToWords(unself, text):
+    @staticmethod
+    def _divideToWords(text):
         divided = _WORD_DIVIDER.split(text)
         if len(divided) == 0:
             return [], []

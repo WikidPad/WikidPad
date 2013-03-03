@@ -12,6 +12,7 @@ import sqlite3, traceback
 from wx import GetApp
 
 from pwiki.WikiExceptions import *
+from .StringOps import utf8Enc
 
 
 # Connection (and Cursor)-Wrapper to simplify some operations
@@ -182,7 +183,7 @@ class ConnectWrapBase:
             try:
                 self.execSql("pragma temp_store_directory = '%s'" %
                         utf8Enc(tempDir)[0])
-            except sqlite.Error:
+            except sqlite3.Error:
                 self.execSql("pragma temp_store_directory = ''")
     
             self.execSql("pragma temp_store = 1")

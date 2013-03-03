@@ -5053,16 +5053,6 @@ def oneOf( strs, caseless=False, useRegex=True ):
     # last resort, just use MatchFirst
     return MatchFirst( [ parseElementClass(sym) for sym in symbols ] )
 
-def dictOf( key, value ):
-    """Helper to easily and clearly define a dictionary by specifying the respective patterns
-       for the key and value.  Takes care of defining the Dict, ZeroOrMore, and Group tokens
-       in the proper order.  The key pattern can include delimiting markers or punctuation,
-       as long as they are suppressed, thereby leaving the significant key text.  The value
-       pattern can include named results, so that the Dict results can include named token
-       fields.
-    """
-    return Dict( ZeroOrMore( Group ( key + value ) ) )
-
 def originalTextFor(expr, asString=True):    # TODO From original. Check if OK.
     """Helper to return the original, untokenized text for a given expression.  Useful to
        restore the parsed fields of an HTML start tag into the raw tag text itself, or to

@@ -10,7 +10,6 @@ import threading
 import thread
 
 import subprocess
-import string
 import textwrap
 
 from os.path import exists, dirname, isfile, join, basename
@@ -2790,9 +2789,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def rewrapText(self):
         wrapType = "word" if self.GetWrapMode() != wx.stc.STC_WRAP_CHAR else "char"
         return self.wikiLanguageHelper.handleRewrapText(self, {})
-
-    def getWrapMode(self):
-        return self.GetWrapMode() != wx.stc.STC_WRAP_NONE
 
 
 

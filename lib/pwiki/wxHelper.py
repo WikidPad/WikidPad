@@ -1147,8 +1147,8 @@ class ProgressHandler(object):
 
 
 class EnhancedListControl(wx.ListCtrl):
-    def __init__(*args, **kwargs):
-        wx.ListCtrl.__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        wx.ListCtrl.__init__(self, *args, **kwargs)
 
     def GetAllSelected(self):
         result = []

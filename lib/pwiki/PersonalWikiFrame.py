@@ -1233,7 +1233,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                                 anchorToOpen=anchorToOpen)
                     else:
                         self.displayErrorMessage(
-                                _(u"Wiki doesn't exist: %s") % wikiToOpen)
+                                _(u"Wiki doesn't exist: %s") % filePath)
                 else:
                     self.openWiki(os.path.abspath(entry.value))
 

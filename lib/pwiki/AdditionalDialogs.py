@@ -1434,7 +1434,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
                 _(u"Do you want to delete %i export(s)?") % len(sels),
                 _(u"Delete export"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-        if result != wx.YES:
+        if answer != wx.YES:
             return
 
         for s in sels:

@@ -94,7 +94,8 @@ class _AbstractConfiguration:
         
         return strToBool(result, False)
 
-    def isUnicode(unself):
+    @staticmethod
+    def isUnicode():
         """
         Return if GUI is in unicode mode
         """

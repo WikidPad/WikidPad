@@ -11,6 +11,7 @@ from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
 import wx
 
 from .wxHelper import getTextFromClipboard
+from .WikiExceptions import InternalError
 
 from .StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
 from . import SystemInfo

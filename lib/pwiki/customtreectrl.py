@@ -5006,7 +5006,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             event = TreeEvent(wxEVT_TREE_ITEM_MENU, self.GetId())
             event._item = self._current
             # Use the left edge, vertical middle
-            event._pointDrag = wx.Point(ItemRect.GetX(), ItemRect.GetY() + ItemRect.GetHeight()/2)
+            event._pointDrag = wx.Point(itemRect.GetX(), itemRect.GetY() + itemRect.GetHeight()/2)
             event.SetEventObject(self)
             self.GetEventHandler().ProcessEvent(event)
                 
