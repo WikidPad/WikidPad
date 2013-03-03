@@ -1103,7 +1103,7 @@ attrInsQuotedValue = FindFirst([], attrInsQuoteEnd)\
         .setPseudoParseAction(pseudoActionAttrInsQuotedValue)
 
 # attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
-attrInsNonQuotedValue = buildRegex(ur"(?:[ \t]*[\w\-\_:,.!?#%|/]+)*", "value")
+attrInsNonQuotedValue = buildRegex(ur"(?:[ \t]*[\w\-\_=:,.!?#%|/]+)*", "value")
 
 
 attrInsValue = whitespace + ((attrInsQuoteStart + attrInsQuotedValue + \

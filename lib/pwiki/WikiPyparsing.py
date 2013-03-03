@@ -95,7 +95,7 @@ __all__ = [
 'White', 'Word', 'WordEnd', 'WordStart', 'ZeroOrMore',
 'alphanums', 'alphas', 'alphas8bit', 'buildSyntaxNode', 'cStyleComment', 'col',   # 'anyCloseTag', 'anyOpenTag'
 'commaSeparatedList', 'commonHTMLEntity', 'countedArray', 'cppStyleComment', 'dblQuotedString',
-'dblSlashComment', 'delimitedList', 'dictOf', 'downcaseTokens', 'empty', 'getTokenLength', 'getTokensEndLoc', 'hexnums',
+'dblSlashComment', 'delimitedList', 'downcaseTokens', 'empty', 'getTokenLength', 'getTokensEndLoc', 'hexnums',
 'htmlComment', 'javaStyleComment', 'keepOriginalText', 'line', 'lineEnd', 'lineStart', 'lineno',
 'matchOnlyAtCol', 'matchPreviousExpr', 'matchPreviousLiteral',    # 'makeHTMLTags', 'makeXMLTags'
 'nestedExpr', 'nullDebugAction', 'nums', 'oneOf', 'opAssoc', 'operatorPrecedence', 'printables',

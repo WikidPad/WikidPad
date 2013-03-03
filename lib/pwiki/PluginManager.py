@@ -1,6 +1,7 @@
 from __future__ import with_statement
 
-import os, sys, traceback, os.path, imp, collections
+from zipimport import zipimporter
+import os, sys, traceback, os.path, imp, new, collections
 
 # sys.path.append(ur"C:\Daten\Projekte\Wikidpad\Next20\extensions")
 
@@ -333,10 +334,20 @@ class PluginManager(object):
                     ( moduleName, ext ) = os.path.splitext(name)
                     if name in exclusions:
                         continue
-                    if os.path.isfile(fullname) and ext == '.py':
-                        with open(fullname) as f:
-                            module = imp.load_module(packageName + "." + moduleName, f,
-                                    mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
+                    if os.path.isfile(fullname):
+                        if ext == '.py':
+                            with open(fullname) as f:
+                                module = imp.load_module(packageName + "." + moduleName, f,
+                                        mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
+                        elif ext == '.zip':
+                            module = imp.new_module(
+                                    packageName + "." + moduleName)
+                            module.__path__ = [fullname]
+                            module.__zippath__ = fullname
+                            sys.modules[packageName + "." + moduleName] = module
+                            zi = zipimporter(fullname)
+                            co = zi.get_code("__init__")
+                            exec co in module.__dict__
 
                     if module:
                         setattr(package, moduleName, module)
