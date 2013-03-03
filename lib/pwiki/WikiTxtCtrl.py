@@ -5422,12 +5422,12 @@ class ViHandler(ViHelper):
     def CheckLineEnd(self):
         if self.mode not in [ViHelper.VISUAL, ViHelper.INSERT]:
             line_text, line_pos = self.ctrl.GetCurLine()
-            if len(line_text) > 1:
+            if len(line_text) > 1 and line_text != self.ctrl.GetEOLChar():
                 if self.OnLastLine():
-                    if line_pos >= len(line_text):
+                    if line_pos >= len(bytes(line_text)):
                         self.ctrl.CharLeft()
                 else:
-                    if line_pos >= len(line_text) - 1:
+                    if line_pos >= len(bytes(line_text)) - 1:
                         self.ctrl.CharLeft()
                 
     def OnLastLine(self):
@@ -6711,6 +6711,11 @@ class ViHandler(ViHelper):
         """
         if pos is None: pos = self.count
         line = self.ctrl.GetCurrentLine()
+
+        line_text = self.ctrl.GetLine(line)
+        if len(line_text) < 2:
+            return
+
         lstart = self.ctrl.PositionFromLine(line)
 
         # Use CharRight for correct handling of unicode chars
@@ -6913,10 +6918,11 @@ class ViHandler(ViHelper):
 
     def MoveCaretPos(self, offset, allow_last_char=False, save_column_pos=True):
         """
-        Move caret by a given offset
+        Move caret by a given offset along the current line.
 
         """
         line, line_pos = self.ctrl.GetCurLine()
+        line_no = self.ctrl.GetCurrentLine()
 
         # Last line doesn't have an EOL char which the code below requires
         if self.OnLastLine():
@@ -6947,61 +6953,93 @@ class ViHandler(ViHelper):
 
         return
 
-        # The code below works but is slower than the above implementation (i think)
-        
-        # TODO: Speedup
-        line, line_pos = self.ctrl.GetCurLine()
-        line_no = self.ctrl.GetCurrentLine()
-
-        if self.mode == ViHelper.VISUAL:
-            if offset > 0:
-                move_right = True
-                move = self.ctrl.CharRightExtend
-                stop_pos = self.GetLineStartPos(line_no) + \
-                                self.ctrl.LineLength(line_no)-1
-            else:
-                move_right = False
-                move = self.ctrl.CharLeftExtend
-                stop_pos = self.GetLineStartPos(line_no)
-        else:
-            if offset > 0:
-                move_right = True
-                move = self.ctrl.CharRight
-                stop_pos = self.GetLineStartPos(line_no) + \
-                                self.ctrl.LineLength(line_no)-2
-
-                # Fix for last line (no EOL char present)
-                if line_no+1 == self.ctrl.GetLineCount():
-                    stop_pos += 1
-            else:
-                move_right = False
-                move = self.ctrl.CharLeft
-                stop_pos = self.GetLineStartPos(line_no)
-
-        if allow_last_char:
-            stop_pos += 1
-
-        for i in range(abs(offset)):
-            if (move_right and self.ctrl.GetCurrentPos() < stop_pos) or \
-               (not move_right and self.ctrl.GetCurrentPos() > stop_pos):
-                move()
-            else:
-                break
-
-        if save_column_pos:
-            self.SetLineColumnPos()
-
-        ## The code below is faster but does not handle
-        ## unicode charcters nicely
-        #line, line_pos = self.ctrl.GetCurLine()
-        #line_no = self.ctrl.GetCurrentLine()
-        #pos = max(line_pos + offset, 0)
-        #if self.mode == ViHelper.VISUAL:
-        #    pos = min(pos, self.ctrl.LineLength(line_no)-1)
-        #else:
-        #    pos = min(pos, self.ctrl.LineLength(line_no)-2)
-        #self.ctrl.GotoPos(self.GetLineStartPos(line_no) + pos)
-        #self.SetLineColumnPos()
+# Code below is left as a reminder that trying to improve this function
+# is probably more trouble than its worth.
+#
+#        pos = self.ctrl.GetCurrentPos()
+#
+#        if offset > 0:
+#
+#            end_offset = 0
+#            if allow_last_char and len(line) > 2:
+#                end_offset = len(bytes(line[-2]))
+#
+#            line_end = self.ctrl.GetLineEndPosition(line_no)
+#
+#            if pos + offset >= line_end + end_offset:
+#                self.ctrl.GotoPos(line_end - 1)
+#            else:
+#                self.ctrl.GotoPos(pos + offset + end_offset)
+#
+#        else:
+#            line_start = self.ctrl.PositionFromLine(line_no)
+#
+#            if pos + offset < line_start:
+#                self.ctrl.GotoPos(line_start)
+#            else:
+#                self.ctrl.GotoPos(pos + offset)
+#
+#        if save_column_pos:
+#            self.SetLineColumnPos()
+#
+#        return
+#               
+#
+#        # The code below works but is slower than the above implementation (i think)
+#        
+#        # TODO: Speedup
+#        line, line_pos = self.ctrl.GetCurLine()
+#        line_no = self.ctrl.GetCurrentLine()
+#
+#        if self.mode == ViHelper.VISUAL:
+#            if offset > 0:
+#                move_right = True
+#                move = self.ctrl.CharRightExtend
+#                stop_pos = self.GetLineStartPos(line_no) + \
+#                                self.ctrl.LineLength(line_no)-1
+#            else:
+#                move_right = False
+#                move = self.ctrl.CharLeftExtend
+#                stop_pos = self.GetLineStartPos(line_no)
+#        else:
+#            if offset > 0:
+#                move_right = True
+#                move = self.ctrl.CharRight
+#                stop_pos = self.GetLineStartPos(line_no) + \
+#                                self.ctrl.LineLength(line_no)-2
+#
+#                # Fix for last line (no EOL char present)
+#                if line_no+1 == self.ctrl.GetLineCount():
+#                    stop_pos += 1
+#            else:
+#                move_right = False
+#                move = self.ctrl.CharLeft
+#                stop_pos = self.GetLineStartPos(line_no)
+#
+#        if allow_last_char:
+#            stop_pos += 1
+#
+#        for i in range(abs(offset)):
+#            if (move_right and self.ctrl.GetCurrentPos() < stop_pos) or \
+#               (not move_right and self.ctrl.GetCurrentPos() > stop_pos):
+#                move()
+#            else:
+#                break
+#
+#        if save_column_pos:
+#            self.SetLineColumnPos()
+#
+#        ## The code below is faster but does not handle
+#        ## unicode charcters nicely
+#        #line, line_pos = self.ctrl.GetCurLine()
+#        #line_no = self.ctrl.GetCurrentLine()
+#        #pos = max(line_pos + offset, 0)
+#        #if self.mode == ViHelper.VISUAL:
+#        #    pos = min(pos, self.ctrl.LineLength(line_no)-1)
+#        #else:
+#        #    pos = min(pos, self.ctrl.LineLength(line_no)-2)
+#        #self.ctrl.GotoPos(self.GetLineStartPos(line_no) + pos)
+#        #self.SetLineColumnPos()
 
     def MoveCaretLinePos(self, offset):
         """
