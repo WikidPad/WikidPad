@@ -786,6 +786,12 @@ GLOBALDEFAULTS = {
             # "visited" column in wiki-wide history panel
 
 
+    # New wiki defaults
+    ("main", "newWikiDefault_editor_text_mode"): u"False",  # force the editor to write platform dependent files to disk
+            # (line endings as CR/LF, LF or CR)
+    ("main", "newWikiDefault_wikiPageFiles_asciiOnly"): "False", # Use only ASCII characters in filenames of wiki page files.
+
+
     # Search options
     ("main", "search_wiki_searchType"): "0",  # Default search type for wiki-wide search
             # 0: Regex; 1: Boolean regex; 2: Text as is; 3: Indexed search

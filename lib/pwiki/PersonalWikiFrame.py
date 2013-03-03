@@ -2998,6 +2998,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiConfig.set("main", "wiki_database_type", wdhName)
                     wikiConfig.set("main", "wiki_wikiLanguage", wlangName)
                     wikiConfig.set("main", "wikiPageFiles_asciiOnly", asciiOnly)
+                    wikiConfig.set("main", "editor_text_mode",
+                            self.getConfig().getboolean("main",
+                            "newWikiDefault_editor_text_mode", False))
+
                     wikiConfig.set("wiki_db", "data_dir", "data")
                     wikiConfig.save()
 

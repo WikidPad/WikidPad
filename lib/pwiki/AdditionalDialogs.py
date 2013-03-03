@@ -1820,6 +1820,10 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
             self.ctrls.lbWikiLanguage.Enable(False)
             self.ctrls.lbWikiLanguage.SetBackgroundColour(wx.LIGHT_GREY)
 
+        self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(
+                self.mainControl.getConfig().getboolean(
+                "main", "newWikiDefault_wikiPageFiles_asciiOnly", False))
+
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 

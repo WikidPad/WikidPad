@@ -583,6 +583,11 @@ class OptionsDialog(wx.Dialog):
             ("wikiWideHistory_dateFormat", "tfWikiWideHistoryDateFormat", "ttdf",
                 "btnSelectWikiWideHistoryDateFormat"),
 
+            ("newWikiDefault_editor_text_mode",
+                "cbNewWikiDefaultEditorForceTextMode", "b"),
+            ("newWikiDefault_wikiPageFiles_asciiOnly",
+                "cbNewWikiDefaultWikiPageFilesAsciiOnly", "b"),
+
             ("search_stripSpaces", "cbSearchStripSpaces", "b"),
             ("search_wiki_searchType", "rboxWwSearchSearchType", "seli"),
             ("search_wiki_caseSensitive", "cbWwSearchCaseSensitive", "b"),
@@ -708,6 +713,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageMouse", 2 * u" " + N_(u"Mouse")),
             ("OptionsPageChronView", 2 * u" " + N_(u"Chron. view")),
             ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
+            ("OptionsPageNewWikiDefaults", 2 * u" " + N_(u"New wiki defaults")),  
             ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
             ("OptionsPageAdvTiming", 4 * u" " + N_(u"Timing")),
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),

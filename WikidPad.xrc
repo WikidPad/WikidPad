@@ -2411,6 +2411,35 @@
       </object>
     </object>
   </object>
+  <object class="wxPanel" name="OptionsPageNewWikiDefaults">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>File storage identity check</label>
+          <hidden>1</hidden>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbNewWikiDefaultEditorForceTextMode">
+          <label>Force editor to write platform dependent files</label>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbNewWikiDefaultWikiPageFilesAsciiOnly">
+          <label>Page file names ASCII only</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+    </object>
+  </object>
   <object class="wxPanel" name="OptionsPageAdvanced">
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
@@ -2892,14 +2921,6 @@
         <object class="wxCheckBox" name="cbLogWindowAutoShowWiki">
           <label>Auto-show log window</label>
           <style>wxCHK_3STATE|wxCHK_ALLOW_3RD_STATE_FOR_USER</style>
-        </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxCheckBox" name="cbWikiPageFilesAsciiOnly">
-          <label>Page file names ASCII only</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -3457,7 +3478,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
-          <cols>2</cols>
+          <cols>3</cols>
           <growablecols>1</growablecols>
           <object class="sizeritem">
             <object class="wxStaticText">
@@ -3469,6 +3490,13 @@
           <object class="sizeritem">
             <object class="wxTextCtrl" name="tfFileSignatureTimeCoarsening"/>
             <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>seconds</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
         </object>
@@ -3493,6 +3521,14 @@
         <object class="wxCheckBox" name="cbEditorForceTextMode">
           <label>Force editor to write platform dependent files</label>
         </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiPageFilesAsciiOnly">
+          <label>Page file names ASCII only</label>
+        </object>
+        <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
