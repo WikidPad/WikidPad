@@ -19,5 +19,8 @@ If no text selected, all scripts on the page, including
 +++ Run Function #
 Run one of six numbered scripts on the page (or imported from another page).
 
+++ Optional component log
+Shows a log with error messages during initialization of optional components (external HTML renderer, spell checking). If an optional component fails to initialize (which is normal for some, e.g. for Internet Explorer HTML renderer on Linux) it is not available. If you expected a component to work but it doesn't, this log may give hints why.
+
 ++ Options
 Starts the options dialog. See [OptionsDialog].

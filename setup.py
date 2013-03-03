@@ -8,9 +8,9 @@ from py2exe.build_exe import Target
 
 wikidpad = Target(
     # used for the versioninfo resource
-    version = '2.2',
+    version = '2.3',
     name = 'WikidPad',
-    copyright = '(C) 2005-2011 Jason Horman, Michael Butscher, Gerhard Reitmayr',
+    copyright = '(C) 2005-2013 Jason Horman, Michael Butscher, Gerhard Reitmayr',
     description = 'Single user wiki notepad',
     comments='',
 
@@ -31,7 +31,7 @@ setup(
                           "dll_excludes": ["msvcp90.dll"]}},
 
     name='WikidPad',
-    version = '2.2',
+    version = '2.3',
     author = 'Michael Butscher',
     author_email = 'mbutscher@gmx.de',
     url = 'http://www.mbutscher.de/software.html',

@@ -1,13 +1,13 @@
-﻿++ Options Dialog
+﻿+ Options Dialog
 
 The options dialog controls the behavior of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
 
-+++ Application-wide
+++ Application-wide
 
 The following options apply to the whole application and therefore to each wiki opened in it.
 
 
-++++ General options
++++ General options
 
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
@@ -62,7 +62,7 @@ Set the kind of location of temporary files:
 If "Temporary file directory" is set to "Given", enter here the path to temporary directory.
 
 
-++++ User interface
++++ User interface
 
 *Minimize to Tray*
 Minimize to system tray instead of the normal taskbar.
@@ -113,7 +113,7 @@ After double-clicking an entry in PageStructureWindow the window is collapsed (h
 If checked and document structure window is visible, changing cursor position in editor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
 
 
-++++ Security options
++++ Security options
 
 *Process insertion scripts*
 Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [Insertions].
@@ -125,7 +125,7 @@ Set the security level for script execution, see [InlinePythonEval#+++ Security 
 If checked, the order for searching of executable scripts is reversed, global imports are searched first (if allowed by the security setting above). See [InlinePythonEval#+++ Security concerns].
 
 
-++++ Tree options
++++ Tree options
 
 These apply to the tree on the left of the main window.
 
@@ -156,12 +156,12 @@ You can also have a second tree which has the "Views" node as root. You can plac
 *KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See RestartWikidPad for details.
 
 
-++++ HTML preview/export
++++ HTML preview/export
 
 See [Options HTML preview_export].
 
 
-++++ Editor
++++ Editor
 
 *Auto-unbullets*
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
@@ -183,7 +183,7 @@ Set if editor should wrap (if "Auto-Wrap" is active) by word or by character. Th
 How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
 
 
-+++++ Image pasting
+++++ Image pasting
 
 When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:
 
@@ -202,7 +202,7 @@ Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
 If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.
 
 
-+++++ File dropping
+++++ File dropping
 
 *Prepend before links*
 *Between links*
@@ -216,7 +216,7 @@ When dropping files into editor (which are shown as file URLS then) you can set 
 Set if you want to have file links in brackets. If so, spaces are kept as they are instead of escaping them as %20 to increase readability.
 
 
-++++ Editor colors
++++ Editor colors
 
 *Plain text color*
 Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
@@ -243,7 +243,7 @@ Specify the color of the editor margin on the left (normally gray) which can als
 Set the color of the text cursor (the small blinking vertical bar).
 
 
-++++ Clipboard catcher
++++ Clipboard catcher
 
 This page is only visible if the necessary prerequisites are met to make the clipboard catcher work, see [ClipboardCatcher#+ Prerequisites].
 
@@ -263,7 +263,7 @@ Choose if you want to hear a sound when a clipboard snippet is inserted.
 Choose the sound file to play (if you have chosen to be notified by sound above). If the field is empty, a default sound is played.
 
 
-++++ File Launcher
++++ File Launcher
 
 This page is only visible on non-Windows systems.
 
@@ -271,7 +271,7 @@ This page is only visible on non-Windows systems.
 Enter here the path to a script or program which takes the path or URL of a file and runs the application associated with this file. For Linux, find the "xdg-open" script (or install it first) which should do that.
 
 
-++++ Mouse
++++ Mouse
 
 *Middle button without CTRL*
 Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background, in the same (active) tab or in a new window.
@@ -297,10 +297,10 @@ Possible choices are:
     * Relative URL: URL(s) starting with "rel:"
     * Copy into file storage: Copy file(s) into file storage and create relative URL(s) to it
     * Move into file storage: Copy file(s) into file storage and create relative URL(s) to it
-    * Ask: Show dialog to ask what to do. Allows also to set what to prepend/append/set between links (see [OptionsDialog#+++++ File dropping])
+    * Ask: Show dialog to ask what to do. Allows also to set what to prepend/append/set between links (see [OptionsDialog#++++ File dropping])
 
 
-++++ Chron. view
++++ Chron. view
 
 *Position*
 Where (relative to main window) should the ChronViewWindow be positioned? "Hidden" deactivates it.
@@ -334,7 +334,7 @@ Set the time format the version list should use to show the dates. The format ca
 Set date format for the wiki-wide history list.
 
 
-++++ Searching
++++ Searching
 
 *Strip leading/trailing spaces*
 If set, leading and trailing spaces are removed from search expressions before they are processed. This may be helpful if you copy and paste a word into a search field 
@@ -371,7 +371,14 @@ Set the search options to use for the small search field in toolbar. Same option
 Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".
 
 
-++++ Advanced
++++ New wiki defaults
+This page contains some default settings for newly created wikis. They have the same meaning as the wiki-bound options with the same name.
+Currently there is available:
+[.#*Force editor to write platform dependent files*| Force editor to write platform dependent files]
+[.#*Page file names ASCII only*| Page file names ASCII only]
+
+
++++ Advanced
 
 *Use IME workaround for editor input*
 Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
@@ -431,7 +438,7 @@ Windows only. Suppresses some updating of contents in Internet Explorer. Check t
 Change these settings only if you know what you are doing! See [WikiLockFile].
 
 
-+++++ Timing
+++++ Timing
 
 *Sync. highlighting limit*
 Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 300 to 500 bytes
@@ -447,7 +454,7 @@ After each change the tree(s) are updated to reflect changes like added or remov
 Recommended value: 0.0 to 0.2 seconds
 
 
-++++ Autosave
++++ Autosave
 
 *Autosave active*
 Save current page content to disk (if modified) after a few seconds of inactivity.
@@ -461,11 +468,11 @@ How long to wait after the last keypress in the editor (default: 3 seconds). Rec
 How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
 
 
-+++ Current wiki
+++ Current wiki
 These options apply to the active wiki only
 
 
-++++ General options
++++ General options
 
 *Default export dir.*
 Set the default export directory into which exports should go.
@@ -499,11 +506,6 @@ Check this if you want to prevent the wiki from acidental modifications.
 Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
 If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
 
-*Page file names ASCII only*
-If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renamed even if the file content is modified afterwards.
-This option is especially recommended on Mac OS or for wikis which will be interchanged with Mac users.
-This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
-
 *Graceful handling of missing page files*
 If a page file is deleted or inserted into the "data" directory externally tries to update the core database if it encounters this change.
 
@@ -518,7 +520,7 @@ Set here the name of icon to use in the system tray instead of the default icon.
 Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
 
 
-+++++ Trashcan
+++++ Trashcan
 Controls behavior of the trashcan which temporarily stores deleted wiki pages to undo their deletion
 
 *Max. number of entries*
@@ -533,7 +535,7 @@ The database backend "Compact Sqlite" only supports storing in database so this 
 If you switch this off wiki words will be moved to trashcan or deleted without previously asking if you are sure. The maximum number of entries in trashcan should be reasonably high (recommended: 200) if you switch this off.
 
 
-++++ On Open
++++ On Open
 Set what should happen when a wiki is opened.
 
 *First word at startup*
@@ -549,7 +551,7 @@ Control if wiki should be rebuilt on open
 Allows to override the previously saved state of open tabs (if tab should show editor or preview). 
 
 
-++++ Headings
++++ Headings
 
 *Heading prefix*
 Control the heading level of the initial main title of new pages and fill between one and fifteen '+' in this field (if using default wiki language). Default is "++".
@@ -566,9 +568,9 @@ If you came to a not yet created page through a titled link (e.g. [WikiWord| Thi
 *Headings as aliases: Up to heading depth*
 All headings with a level less or equal this number are shown in the "Open Wiki Word" dialog. You can select them to come to the wiki page they are on. If value is 0, no headings are processed. After changing this value, you may have to rebuild the wiki to see an effect.
 
-++++ Chronological
++++ Chronological
 
-+++++ Versioning
+++++ Versioning
 
 *Where to store*
 Set where version information should be stored, either in the main "Database" files or as "Separate files" which creates one file for each version to save and additionally one file for each wiki page which has versions, so "Database" is the recommended option.
@@ -584,31 +586,31 @@ So you can set that versions are stored as complete from time to time. If you e.
 
 Regardless of this setting a version is always saved as complete if the reverse difference data would be larger than the complete data.
 
-+++++ Tab history
+++++ Tab history
 
 *Max. entries*
 Maximum number of history items to record for each tab.
 
 
-+++++ Wiki-wide history
+++++ Wiki-wide history
 
 *Max. entries*
 Maximum number of history items to record for wiki-wide history.
 
 
-++++ Wiki language
++++ Wiki language
 
 *Wiki language*
 Choose the language (syntax) of the wiki. Each language is provided by a plugin.
 
 
-+++++ WikidPad default 2.0
+++++ WikidPad default 2.0
 
 *Footnotes as wiki words*
 Interpret [Footnotes] (e.g. "[42]") as wiki words.
 
 
-++++ Advanced
++++ Advanced
 
 *Modif. date must match*
 *Filename must match*
@@ -629,10 +631,16 @@ If you use NTFS and ext2 or ext3 set it to 1.
 Modifying this setting does not change already recorded file signatures (until associated wiki page is modified). You can either [RebuildTheWiki] or just let WikidPad change it when it thinks it is necessary.
 
 *Force editor to write platform dependent files*
-Usually it makes sense to store the wiki text files always in the same format (regarding line endings).
+Use line endings of text files depending on operating system (CR/LF, LF or CR). By default this option is off to always make Linux/Unix line endings (LF only). If you use an external text editor to edit page files and it e.g. shows the content without line breaks you need to switch this on (or switch to a better editor).
 
-Then it's easier to share a wiki between computers with different operating system (Windows, Linux, OSX), especially when using a version control system like Mercurial, Git, Subversion.
-
-So this option is off by default.
+Usually it makes sense to store the wiki text files always in the same format (regarding line endings). Then it's easier to share a wiki between computers with different operating system (Windows, Linux, OSX), especially when using a version control system like Mercurial, Git, Subversion.
 
 If you really want to have platform dependent files (line endings as CR/LF, LF or CR) you may want to set this option.
+
+Changing this settings only affects changed or newly created wiki page files.
+
+*Page file names ASCII only*
+If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renamed even if the file content is modified afterwards.
+This option is especially recommended on Mac OS or for wikis which will be interchanged with Mac users.
+This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
+

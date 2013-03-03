@@ -2,6 +2,8 @@
 Source: dist\WikidPad.exe; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\appbase.css; DestDir: {app}
 Source: dist\extensions\*.py; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: extensions\*.zipf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Flags: onlyifdoesntexist
 Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Flags: recursesubdirs ignoreversion
@@ -38,7 +40,6 @@ Source: dist\langlist.txt; DestDir: {app}; Flags: replacesameversion ignoreversi
 Source: dist\gadfly.zip; DestDir: {app}; Flags: nocompression
 Source: dist\library.zip; DestDir: {app}; Flags: nocompression
 Source: docs\MenuHandling_contextInfo.txt; DestDir: {app}\docs\; Flags: recursesubdirs ignoreversion
-Source: extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: WikidPad-winport.config; DestDir: {app}; DestName: WikidPad.config; Flags: onlyifdoesntexist; Check: PortableInstall
 Source: Microsoft.VC90.CRT.manifest; DestDir: {app}
 Source: winBinAdditions\msvcp90.dll; DestDir: {app}
@@ -53,8 +54,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.3beta07"
-#define verNo "002.003.107.000"
+#define verStr "2.3beta08"
+#define verNo "002.003.108.000"
 
 SolidCompression=true
 AppName=WikidPad
@@ -70,7 +71,7 @@ ShowLanguageDialog=yes
 Compression=lzma/ultra
 OutputBaseFilename=WikidPad-{#verStr}
 InternalCompressLevel=ultra
-AppCopyright=© 2005-2012 Jason Horman, Michael Butscher, Gerhard Reitmayr
+AppCopyright=© 2005-2013 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
 PrivilegesRequired=none
 CreateUninstallRegKey=not PortableInstall

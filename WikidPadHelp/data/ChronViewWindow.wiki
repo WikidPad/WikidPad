@@ -44,4 +44,4 @@ This tab records which pages you visited last (and when). With double-click or m
 
 +++ Options
 
-See [OptionsDialog#++++ Chron. view] and [OptionsDialog#++++ Chronological]
+See [OptionsDialog#+++ Chron. view] and [OptionsDialog#+++ Chronological]

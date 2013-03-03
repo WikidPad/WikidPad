@@ -1,5 +1,36 @@
 ﻿++ Change Log
 
+Mar. 03, 2013 (2.3beta08)
+
+    * Support for plugins in ZIP-files. In folder "extensions" rename
+      "demoZipPlugin.zipf" by deleting the "f" at end and look into
+      the ZIP-file for a demo plugin.
+    * Added option to use either Unix or system-dependent line endings
+      in wiki page files (thanks to Christian Ziemski).
+      See [OptionsDialog#*Force editor to write platform dependent files*]
+    * New options page "New wiki defaults" to set some defaults for newly
+      created wikis. See [OptionsDialog#+++ New wiki defaults]
+    * Added optional component log which shows errors during initialization
+      of optional components like spellchecking or external HTML renderers.
+      See [Menu Extra#++ Optional component log]
+
+    * Vi improvements (thanks to Ross):
+        * Small fix for line position
+        * Fix 'gvim' and 'vim' for pages that have special characters,
+        * i.e. all subpages
+
+    * Moved option "wiki page files ascii only" to "Advanced"
+      options page
+
+    * Bug fix: Missing file for wiki root page could cause problems
+      with e.g. exporting HTML
+    * Bug fix: Regression which raised an \IndexError when closing
+      WikidPad
+    * Bug fix: Error in log when cancelling new wiki creation in
+      basic wiki settings dialog
+
+
+
 Dec. 31, 2012 (2.3beta07)
 
     * Added attribute "wrap_type" to switch visual wrap in editor
@@ -307,7 +338,7 @@ Jul. 31, 2011 (2.2beta06)
 Jun. 25, 2011 (2.2beta05)
 
     * Trashcan support. See [Menu Wiki#++ Open trashcan],
-      [OptionsDialog#+++++ Trashcan]
+      [OptionsDialog#++++ Trashcan]
     * New insertion "search" to create arbitrary searches.
       See [Insertions#* *search* ]
     * Added "page:" prefix for boolean regex search to search for
