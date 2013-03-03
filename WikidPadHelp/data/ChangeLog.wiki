@@ -1,5 +1,16 @@
 ﻿++ Change Log
 
+Mar. 03, 2013 (2.2rc08)
+
+    * Bug fix: Missing file for wiki root page could cause problems
+      with e.g. exporting HTML
+    * Bug fix: Regression which raised an \IndexError when closing
+      WikidPad
+    * Bug fix: Error in log when cancelling new wiki creation in
+      basic wiki settings dialog
+
+
+
 Dec. 31, 2012 (2.2rc07)
 
     * Bug fixed: Closing tab from context menu in editor led to error
