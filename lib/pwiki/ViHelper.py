@@ -2112,8 +2112,8 @@ class CmdParser():
         if page is None:
             page = self.ctrl.presenter.getWikiWord()
 
-        file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
-                getDataDir(), u"{0}.wiki".format(page))
+        file_path = self.ctrl.presenter.getMainControl().getWikiData().\
+                    getWikiWordFileName(page)
         
         p = subprocess.Popen([self.ctrl.vi.settings['vim_path'], file_path], 
                 shell=True)
@@ -2131,8 +2131,8 @@ class CmdParser():
         if page is None:
             page = self.ctrl.presenter.getWikiWord()
 
-        file_path = os.path.join(self.ctrl.presenter.getWikiDocument().
-                getDataDir(), u"{0}.wiki".format(page))
+        file_path = self.ctrl.presenter.getMainControl().getWikiData().\
+                    getWikiWordFileName(page)
         
         p = subprocess.Popen([self.ctrl.vi.settings['gvim_path'], file_path])
 
