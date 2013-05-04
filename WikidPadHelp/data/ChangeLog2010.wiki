@@ -1,0 +1,290 @@
+﻿++ Change Log2010
+
+
+Dec. 27, 2010 (2.1beta10)
+
+Creators of derived WikidPad parsers should merge changes from
+official parser
+
+    * Basic support for indexed search. See [SearchingTheWiki/Index]
+    * Menu item and toolbar icon to move up from subpage to
+      its superpage. See [Menu Navigate#++ Upward]
+
+    * Bug fixed: Stack overflow for too deeply nested wikis on
+      tree-sorted print/export
+    * Bug fixed: Deprecated os.popen...() functions used
+
+    * Internal: Layout changes to better support
+      internationalization
+
+
+
+Dec. 05, 2010 (2.1beta09)
+
+Creators of derived WikidPad parsers should merge changes from
+official parser
+
+    * Autocompletion now also suggests builtin attributes
+    * Command line options to run a saved export profile either once
+      or as continuous export.
+      See [CommandLineSupport#*--export-saved <name of saved export>*]
+
+    * Bug fixed: Autocompletion of attribute keys didn't work
+    * Bug fixed: Printing didn't work
+    * Bug fixed: Empty line after table was eaten in HTML export
+
+
+
+Oct. 30, 2010 (2.1beta08)
+
+    * Chinese translation of user interface (thanks to yuxiaoxu)
+    * Hungarian translation of user interface (thanks to Török Árpád)
+    * Hungarian translation of help wiki (separate download)
+
+    * Small change in logic to find a template: If a newly created
+      page has multiple parents it will be created from a template
+      if there are no contradictory "template" attributes in the
+      parents but at least one "template" attribute exists.
+
+    * Bug fixed: Problem with selection of tree item using keyboard
+    * Bug fixed: Bad link in exported html for list of parents of
+      a page
+    * Bug fixed: Error due to subtle change in API of newer Sqlite
+      versions
+
+    * Internal: Changes in GUI layout to better support internationalization
+
+
+
+Sep. 25, 2010 (2.1beta07)
+
+    * "WikidPadParser.py" modified. If you have your own version
+      you must update it!
+
+    * Some changes to better support of subpages (pages with
+      slashes to create some kind of path). If you do not use
+      them you shouldn't notice a difference.
+    * See [Subpages#+++ Wiki links versus wiki page names]:
+        * "alias" and "template" attributes now process wiki links
+          instead of wiki page names
+        * Replace text by wikiword dialog now processes wiki links
+          instead of wiki page names
+        * Auto-completion updated
+
+    * If an attribute value in "Views" subtree is empty it is
+      replaced by its children (the wiki pages containing the
+      attribute)
+
+    * Bug fixed: Linux: Problem when opening a wiki where not
+      the left-most tab was selected last
+    * Bug fixed: Menu item "Search and Replace" remained gray
+      after going back from preview to editor
+    * Bug fixed: Harmless exception during searching
+    * Bug fixed: No update of syntax highlighting under some
+      circumstances
+
+
+
+Aug. 29, 2010 (2.1beta06)
+
+    * Inline diff between versions.
+      See [ChronViewWindow#++++ Compare differences]
+    * Windows: Option to warn about other WikidPad processes running
+      in single process mode.
+      See [OptionsDialog#*Warn about other processes*]
+    * Option "coldir down" in appendix of "rel" insertions to sort
+      found wiki words downwards in columns instead of rightwards.
+      See [Insertions#multi-column table is sorted rightwards]
+    * Wiki properties dialog now also shows configuration path and
+      if wiki is read-only explains why
+
+    * Bug fixed: Homepage not prepared properly when creating new wiki
+    * Small problems with non-ascii paths fixed
+
+
+
+Jul. 27, 2010 (2.1beta05)
+
+    * When dropping files you now have options to move files to
+      file storage (instead of copying) and to be asked every time
+      what to do. See [OptionsDialog#*Dropping files*]
+    * Option to define what to insert before, after and between file
+      links when dropping files.
+      See [OptionsDialog#+++++ File dropping] 
+    * Spell check while type.
+      See [SpellChecking#++ Spell check while type]
+    * Commandline options to start tabs in preview mode and to
+      prevent list of recent opened wikis from updating.
+      See [CommandLineSupport#++++ General]
+    * WikidPad now remembers active tab and view mode
+      (editor/preview) of each tab
+
+    * Bug fixed: Missing string <<"Set of *.wiki files">>
+      for i18n
+
+
+
+Jul. 04, 2010 (2.1alpha04)
+
+    * Export of previous versions of a wiki page in multipage text
+      file format is supported now.
+      See [WikiExport#+++ Additional options for multipage text format]
+    * Fine grained import control of multipage text files: Rename on
+      name collision, decide which data to import, decide if
+      versioning data should be imported for each wiki page.
+      See [WikiImport#+++ Additional options for multipage text format]
+    * Simple log rotation for error log to keep maximum disc space
+      needed for log at about 1 MByte. If log is over 512 KBytes on
+      WikidPad startup, it is renamed to "WikidPad_Error_bak.log"
+      (if this file existed already, it is deleted).
+
+    * Bug fixed: Errors due to bad cache when using different
+      versions side-by-side with non-English UI language
+    * Workaround: Option to forbid cancelling of running
+      wiki-wide search.
+      See [OptionsDialog#*Forbid cancel on search*]
+
+
+
+Jun. 05, 2010 (2.1alpha03)
+
+    * When creating new wiki, dialog also asks if ascii-only
+      file names should be used for wiki page files (default is on
+      for Mac OS, see [OptionsDialog#*Page file names ASCII only*])
+    * Option to slow down background tree update (to reduce
+      response delay of WikidPad).
+      See [OptionsDialog#*Update step min. delay*]
+    * Support for processing right-clicks on toolbar icons from
+      plugins (see file "extensions/referrals.py" as an example)
+
+    * Process "binInst.ini"-file (needed for Windows binary
+      wxPython downgrade)
+    * Windows: Workaround for too short labels in wxListCtrl
+    * Mac OS: Further changes to keybindings
+    * Bug fixed: Setting wiki to readonly failed
+    * Bug fixed: Linux: Problems when switching tabs too fast
+      (thanks to Christian Ziemski)
+    * Bug fixed: Wrong focus position after opening wiki in
+      same window
+    * Bug fixed: Linux: Crash when closing WikidPad
+
+    * Internal: Changes to multipage text file import (you should not
+      notice a change)
+
+
+
+May 04, 2010 (2.1alpha02)
+
+    * CSS style classes for the heading levels (named "heading-level1"
+      to "heading-level15")
+    * Appendix "adjheading" for insertion "page" to adjust headings of
+      a page included into another. See [Insertions#    * *page*]
+    * Menu item to convert between absolute and relative URL.
+      See [UrlLinking#++ Converting between relative and absolute URL]
+    * Context menu item for file: and rel: URLs to open
+      containing folder
+
+    * Internal: Function stdDialog() now also accepts type "listmcstr"
+      to show a list where user can select zero or more list entries.
+      See [ApiDocs#stdDialog(]
+
+    * Mac OS: Several enhancements and bug fixes (thanks to
+      Christian Ziemski)
+    * Reduction of used CPU time while WikidPad is minimized
+    * Workaround for problems to detect screen size
+      in multi-display environments
+    * Internal: Clearer error message for missing XML-ID
+    * Internal: Windows binary: Plugins are now compiled at
+      run-time with "-O" option (keeps doc-strings)
+
+
+
+Apr. 05, 2010 (2.1alpha01)
+
+    * New database format! It is recommended to make a backup before
+      updating and run "Maintenance"->"Update cache" after that
+
+    * Storing of timestamp of last visit to a page. The
+      "Open Wiki Word" dialog allows now to sort by newest or oldest
+      visit time. See [Menu Navigate#++ Go to Page]
+    * Context menu entry to apply a particular page as template on
+      a newly created page (and option to define which pages to offer
+      as templates). See [ChangeLog#+++ Using templates explicitly]
+    * In wiki-wide search in boolean search mode, the "\todo:" prefix
+      now behaves exactly as the "attr:" prefix.
+      See [SearchingTheWiki/BooleanRegex#++++ todo:]
+    * Tabs close now if a wikiword is deleted and no other word is
+      in the history of this tab
+    * Context menu of "file:" and "rel:" URLs now offers to open
+      containing folder of a file
+    * When using headings as wiki word links and opening a heading,
+      cursors now jumps to this heading in editor
+
+    * Internal: Renaming "properties" of a wiki page to "attributes"
+      in function and token names to get a more consistent naming.
+      Currently there is compatibility code to keep plugins working.
+    * Internal: Todos are now processed (and especially parsed) in
+      a similar way as attributes. If you have your own parser, update
+      it according to "extensions\wikidPadParser\WikidPadParser.py".
+
+    * Some key bindings in Scintilla editor component removed to avoid
+      interference with WikidPad key bindings
+    * Some changes to better handle missing Unicode support for
+      filesystem in Python (affects mainly Mac OS)
+
+    * Bug fixed: Keyboard shortcut for ActivateLinkBackground
+      doesn't work
+    * Bug fixed: Updating wiki database fails if a pagefile is missing
+    * Bug fixed: Linux: Sometimes focus doesn't switch from tab label
+      to tab automatically
+    * Bug fixed: Focus not going back when aborting the opening of
+      a wiki
+
+
+
+Feb. 28, 2010 (2.0beta13)
+
+    * It's now possible to copy whole directories into the
+      file storage of a wiki
+    * F6 cycles now also through chronological view and page structure
+      if they are visible
+
+    * Bug fixed: No meaningful error message if exporting from
+      commandline fails
+    * Bug fixed: HTML export of subpages failed
+    * Bug fixed: Using F6 to switch between tree and tabs switched
+      also to invisible tree. 
+
+    * Bug fixed: Linux: Automatic focus shift from tab to tab content
+      did not always work
+    * Bug fixed: Linux: Selecting page in tree shifted focus to
+      tab content, therefore no keyboard navigation in tree
+    * Bug fixed: Linux: Problems with tab switching by keyboard
+
+    * Bug fixed: Windows: Incomplete or foreign enchant installation
+      may crash WikidPad on startup
+    * Bug fixed: Windows 7: Error message when using font dialog
+
+
+
+Jan. 31, 2010 (2.0beta12)
+
+    * Support for renaming of subpages when renaming superpage.
+      See [RenamingWikiWords]
+    * More logical behavior when closing tab if MRU order is active
+
+    * Bug fixed: In wiki-wide search "Replace All" didn't work
+
+
+
+Jan. 06, 2010 (2.0beta11)
+
+    * Support for clipboard catcher on Linux (at least Gnome).
+      See [ClipboardCatcher#+ Prerequisites]
+
+    * Bug fixed: Linux: Spell checking did not work (thanks to
+      Christian Ziemski)
+    * Bug fixed: Linux: Character input not working after
+      switching of keyboard layout for certain languages
+      (e.g. Russian). Can now be fixed with the
+      IME workaround

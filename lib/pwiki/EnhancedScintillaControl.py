@@ -45,11 +45,22 @@ class StyleCollector(StringOps.SnippetCollector):
 
 
     def bindStyle(self, targetCharPos, targetLength, styleNo):
-        bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
-        self.append(chr(self.defaultStyleNo) * bytestylelen)
-       
-        self.charPos = targetCharPos + targetLength
+        if targetCharPos < 0:
+            return
         
+        if targetCharPos < self.charPos:
+            # Due to some unknown reason we had overlapping styles and
+            # must remove some bytes
+            bytestylelen = self.bytelenSct(self.text[targetCharPos:self.charPos])
+            self.drop(bytestylelen)
+        else:
+            # There is possibly a gap between end of last style and current one
+            # -> fill it with default style
+            bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
+            self.append(chr(self.defaultStyleNo) * bytestylelen)
+
+        self.charPos = targetCharPos + targetLength
+            
         bytestylelen = self.bytelenSct(self.text[targetCharPos:self.charPos])
         self.append(chr(styleNo) * bytestylelen)
 

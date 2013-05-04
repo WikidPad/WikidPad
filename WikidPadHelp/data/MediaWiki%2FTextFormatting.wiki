@@ -1,0 +1,85 @@
+﻿++ Media Wiki/Text Formatting
+
+Since 2.3beta09 there is support for another syntax which is a subset of MediaWiki syntax (Wikipedia uses MediaWiki).
+
+To use it for an existing wiki, go to menu "Extra"->"Options", options page "Wiki language" on the left and choose "MediaWiki 1.0" (version number may change).
+
+A detailed syntax explanation for MediaWiki can be found at http://www.mediawiki.org/wiki/Help:Formatting
+
+The following language elements are supported:
+
+= Heading1 =
+== Heading2 ==
+=== Heading3 ===
+==== Heading4 ====
+
+Text in '''bold''' and ''italics''.
+
+Horizontal
+----
+rule
+
+* Simple
+* bullet
+* list
+
+# Numbered
+# list
+
+; definition term and
+: data
+
+# Mixed
+#; variants
+#: of
+#* this
+#** with
+#**# nesting
+#**# of levels
+
+ Preformatted
+     blocks starting with
+         space
+
+
+<nowiki><nowiki> to avoid ''markup''</nowiki>
+
+<tt>HTML tags</tt>, &copy; entities and <!-- hidden --> comments
+
+Wiki links in double brackets, including
+linktrails as part of link title:
+
+[[TextFormatting]]s
+
+
+URL links:
+http://www.google.com/
+
+[http://www.google.com/ With title]
+
+Image links:
+[[rel://files/testimg.gif]]
+
+[[rel://files/testimg.gif|left|100pxx100px]] Some options are supported
+
+
+{|
+|+Tables with caption
+|-
+!Header cells
+over multiple lines
+|-
+|bgcolor="#ffff00"| and HTML attributes
+|}
+
+
+From WikidPad syntax also supported:
+
+todo: Todo entries
+
+[[attributes:as usual but with double brackets]]
+
+Insertions (also with double brackets):
+
+[[:page: ../TextFormatting]]
+

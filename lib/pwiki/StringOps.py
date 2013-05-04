@@ -531,6 +531,128 @@ def escapeHtmlNoBreaks(data):
             replace(u"<", u"&lt;")
 
 
+
+
+class AbstractHtmlItem:
+    """
+    Abstract base for some "things" appearing in HTML. This and derived classes
+    mainly needed for the "htmlEquivalent" token in a wiki AST
+    """
+    def __init__(self):
+        pass
+    
+    def asString(self):
+        raise NotImplementedError
+
+    def clone(self):
+        raise NotImplementedError
+
+    def __repr__(self):
+        return self.__class__.__name__ + ":" + self.asString()
+
+
+class HtmlStartTag(AbstractHtmlItem):
+    """
+    Regular start tag
+    """
+    def __init__(self, tag, attributes=None):
+        self.tag = tag
+        if attributes is None:
+            self.attributes = {}
+        else:
+            self.attributes = dict((k, escapeHtml(v).replace(u"\"", u"&quot;"))
+                    for k, v in attributes.iteritems())
+    
+    def addAttribute(self, key, value):
+        if value is None:
+            value = key
+
+        self.attributes[key] = escapeHtml(value).replace(u"\"", u"&quot;")
+
+
+    def addEscapedAttribute(self, key, value):
+        if value is None:
+            value = key
+
+        self.attributes[key] = value
+
+
+    def addEscapedAttributes(self, attrSeq):
+        for key, value in attrSeq:
+            self.addEscapedAttribute(key, value)
+
+
+    def getTag(self):
+        return self.tag
+
+    def getStringForAttributes(self):
+        return u" ".join(
+                k + u"=\"" + v + u"\""
+                for k, v in self.attributes.iteritems())
+    
+    def asString(self):
+        if len(self.attributes) == 0:
+            return u"<" + self.tag + u">"
+        
+        attrString = self.getStringForAttributes()
+        return u"<" + self.tag + u" " + attrString + u">"
+
+
+    def clone(self):
+        return HtmlStartTag(self.tag, self.attributes)
+
+
+class HtmlEmptyTag(HtmlStartTag):
+    """
+    Start tag which is also end tag
+    """
+    
+    def asString(self):
+        if len(self.attributes) == 0:
+            return u"<" + self.tag + u" />"
+        
+        attrString = self.getStringForAttributes()
+        return u"<" + self.tag + u" " + attrString + u" />"
+
+    def clone(self):
+        return HtmlEmptyTag(self.tag, self.attributes)
+
+
+class HtmlEndTag(AbstractHtmlItem):
+    """
+    Regular end tag
+    """
+    def __init__(self, tag):
+        self.tag = tag
+    
+    def asString(self):
+        return u"</" + self.tag + u">"
+
+    def clone(self):
+        return HtmlEndTag(self.tag)
+
+
+class HtmlEntity(AbstractHtmlItem):
+    """
+    Entity
+    """
+    def __init__(self, entity):
+        if entity[0] != "&":
+            entity = "&" + entity
+        
+        if entity[-1] != ";":
+            entity += ";"
+        
+        self.entity = entity
+
+    def asString(self):
+        return self.entity
+    
+    def clone(self):
+        return HtmlEntity(self.entity)
+
+    
+
 def escapeForIni(text, toEscape=u""):
     """
     Return an escaped version of string. Always escaped will be backslash and
@@ -1500,6 +1622,22 @@ class SnippetCollector(object):
         self.snippets = []
         self.length = 0
 
+    def drop(self, length):
+        """
+        Remove last  length  (byte/uni)characters
+        """
+        assert self.length >= length
+
+        while length > 0 and len(self.snippets) > 0:
+            if length < len(self.snippets[-1]):
+                self.snippets[-1] = self.snippets[-1][:-length]
+                self.length -= length
+                break;
+            
+            if length >= len(self.snippets[-1]):
+                length -= len(self.snippets[-1])
+                self.length -= len(self.snippets[-1])
+                del self.snippets[-1]
 
     def append(self, s):
         if len(s) == 0:

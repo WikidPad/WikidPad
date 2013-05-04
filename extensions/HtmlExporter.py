@@ -19,6 +19,7 @@ import Consts
 from pwiki.WikiExceptions import WikiWordNotFoundException, ExportException, \
         InternalError
 from pwiki.ParseUtilities import getFootnoteAnchorDict
+from pwiki.Utilities import calcResizeArIntoBoundingBox
 from pwiki.StringOps import *
 from pwiki import StringOps, Serialization
 from pwiki.WikiPyparsing import StackedCopyDict, SyntaxNode
@@ -1499,6 +1500,7 @@ class HtmlExporter(AbstractExporter):
             return None, None
 
 
+    @staticmethod
     def isHtmlSizeValue(sizeStr):
         """
         Test unistring sizestr if it is a valid HTML size info and returns
@@ -1516,8 +1518,6 @@ class HtmlExporter(AbstractExporter):
             return val >= 0
         except ValueError:
             return False
-
-    isHtmlSizeValue = staticmethod(isHtmlSizeValue)
 
 
     def outAppend(self, toAppend, eatPreBreak=False, eatPostBreak=False):
@@ -2373,6 +2373,18 @@ class HtmlExporter(AbstractExporter):
                         if width.getUnit() == width.UNIT_FACTOR:
                             imgWidth = int(imgWidth * width.getValue())
                             imgHeight = int(imgHeight * height.getValue())
+                        elif width.getUnit() == width.UNIT_PIXEL:
+                            if width.getValue() <= 0 or height.getValue() <= 0 or \
+                                    imgWidth <= 0 or imgHeight <= 0:
+                                imgWidth = 0
+                                imgHeight = 0
+                            else:
+                                imgWidth, imgHeight = calcResizeArIntoBoundingBox(
+                                        imgWidth, imgHeight, 
+                                        width.getValue(), height.getValue(),
+                                        appendixDict.has_key("upright") and
+                                        strToBool(appendixDict.get("upright"),
+                                        True))
 
                         attribs.append(u'width="{0}" height="{1}"'.format(
                                 imgWidth, imgHeight))
@@ -2417,162 +2429,187 @@ class HtmlExporter(AbstractExporter):
         self.astNodeStack.append(pageAst)
 
         for node in pageAst.iterFlatNamed():
-            tname = node.name
-            
-            if tname is None:
-                continue            
-            elif tname == "plainText":
-                self.outAppend(escapeHtml(node.getString()))
-            elif tname == "lineBreak":
-                self.outAppend(u'<br class="wikidpad" />\n')
-            elif tname == "newParagraph":
-                self.outAppend(u'\n<p class="wikidpad" />')
-            elif tname == "whitespace":
-                self.outAppend(u" ")
-
-            elif tname == "indentedText":
-                self.outStartIndentation("normalindent")
-                self.processAst(content, node)
-                self.outEndIndentation("normalindent")
-            elif tname == "orderedList":
-                self.outStartIndentation("ol")
-                self.processAst(content, node)
-                self.outEndIndentation("ol")
-            elif tname == "unorderedList":
-                self.outStartIndentation("ul")
-                self.processAst(content, node)
-                self.outEndIndentation("ul")
-            elif tname == "romanList":
-                self.outStartIndentation("ol-roman")
-                self.processAst(content, node)
-                self.outEndIndentation("ol-roman")
-            elif tname == "alphaList":
-                self.outStartIndentation("ol-alpha")
-                self.processAst(content, node)
-                self.outEndIndentation("ol-alpha")
-
-            elif tname == "bullet":
-                self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
-            elif tname == "number":
-                self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
-            elif tname == "roman":
-                self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
-            elif tname == "alpha":
-                self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
-
-            elif tname == "italics":
-                self.outAppend(u'<i class="wikidpad">')
-                self.processAst(content, node)
-                self.outAppend(u'</i>')
-            elif tname == "bold":
-                self.outAppend(u'<b class="wikidpad">')
-                self.processAst(content, node)
-                self.outAppend(u'</b>')
-
-            elif tname == "htmlTag" or tname == "htmlEntity":
-                self.outAppend(node.getString())
-
-            elif tname == "heading":
-                if self.optsStack.get("anchorForHeading", True):
-                    if self.wordAnchor:
-                        anchor = self.wordAnchor + (u'#.h%i' % node.pos)
-                    else:
-                        anchor = u'.h%i' % node.pos
-
-                    self.outAppend(u'<a name="%s" class="wikidpad"></a>' % anchor)
-
-                headLevel = node.level + self.optsStack.get(
-                        "offsetHeadingLevel", 0)
-
-                boundHeadLevel = min(6, headLevel)
-                self.outAppend(u'<h%i class="wikidpad heading-level%i">' %
-                        (boundHeadLevel, headLevel), eatPreBreak=True)
-                self.processAst(content, node.contentNode)
-                self.outAppend(u'</h%i>\n' % boundHeadLevel, eatPostBreak=True)
-
-            elif tname == "horizontalLine":
-                self.outEatBreaks(u'<hr class="wikidpad" />\n')
-
-            elif tname == "preBlock":
-                self.outAppend(u'<pre class="wikidpad">%s</pre>\n' %
-                        escapeHtmlNoBreaks(
-                        node.findFlatByName("preText").getString()), True,
-                        not self.asIntHtmlPreview)
-                if self.asIntHtmlPreview:
-                    self.outAppend(u'<br class="wikidpad" />\n')
-            elif tname == "bodyHtmlTag":
-                self.outAppend(node.content)
-            elif tname == "todoEntry":
-                self.outAppend(u'<span class="wikidpad todo">%s%s' %
-                        (node.key, node.delimiter))
-                self.processAst(content, node.valueNode)
-                self.outAppend(u'</span>')
-            # TODO remove "property"-compatibility
-            elif tname in ("property", "attribute"):  # for compatibility with old language plugins
-                for propKey, propValue in node.attrs:
-                    standardAttribute = u"%s: %s" % (propKey, propValue)
-                    standardAttributeMatching = \
-                            bool(self.proppattern.match(standardAttribute))
-                    # Output only for different truth values
-                    # (Either it matches and matching attrs should not be
-                    # hidden or vice versa)
-                    if standardAttributeMatching != self.proppatternExcluding:
-                        # TODO remove "property"-compatibility
-                        self.outAppend( u'<span class="wikidpad property attribute">[%s: %s]</span>' % 
-                                (escapeHtml(propKey),
-                                escapeHtml(propValue)) )
-            elif tname == "insertion":
-                self._processInsertion(content, node)
-            elif tname == "script":
-                pass  # Hide scripts
-            elif tname == "noExport":
-                pass  # Hide no export areas
-            elif tname == "anchorDef":
-                if self.wordAnchor:
-                    self.outAppend('<a name="%s" class="wikidpad"></a>' %
-                            (self.wordAnchor + u"#" + node.anchorLink))
-                else:
-                    self.outAppend('<a name="%s" class="wikidpad"></a>' % node.anchorLink)                
-            elif tname == "wikiWord":
-                self._processWikiWord(node, content)
-            elif tname == "table":
-                self._processTable(content, node)
-            elif tname == "tableCellAppendix":
-                pass
-            elif tname == "footnote":
-                footnoteId = node.footnoteId
-                fnAnchorNode = getFootnoteAnchorDict(self.basePageAst).get(
-                        footnoteId)
-
-                if fnAnchorNode is None:
-                    self.outAppend(escapeHtml(node.getString()))
-                else:
-                    if self.wordAnchor:
-                        fnAnchor = self.wordAnchor + u'#.f' + _escapeAnchor(
-                                footnoteId)
-                    else:
-                        fnAnchor = u'.f' + _escapeAnchor(footnoteId)
-
-                    if fnAnchorNode.pos == node.pos:
-                        # Current footnote token tok is an anchor (=last
-                        # footnote token with this footnoteId)
-
-                        self.outAppend(u'<a name="%s" class="wikidpad"></a>' % fnAnchor)
-                        self.outAppend(escapeHtml(node.getString()))
-                    else:
-                        if not self.optsStack.get("suppressLinks", False):
-                            # Current token is not an anchor -> make it a link.
-                            self.outAppend(u'<a href="#%s" class="wikidpad">%s</a>' % (fnAnchor,
-                            escapeHtml(node.getString())))
-            elif tname == "urlLink":
-                self._processUrlLink(content, node)
-            elif tname == "stringEnd":
-                pass
-            else:
+            if not self.processAstNode(node, content, pageAst):
                 self.outAppend(u'<tt class="wikidpad">' + escapeHtmlNoBreaks(
-                        _(u'[Unknown parser node with name "%s" found]') % tname) + \
-                        u'</tt>')
+                    _(u'[Unknown parser node with name "%s" found]') % node.name) + \
+                    u'</tt>')
 
         self.astNodeStack.pop()
+
+
+    def processAstNode(self, node, content, pageAst):
+        tname = node.name
+        
+        if tname is None:
+            return True
+        elif tname == "plainText":
+            self.outAppend(escapeHtmlNoBreaks(node.getString()))
+        elif tname == "lineBreak":
+            self.outAppend(u'<br class="wikidpad" />\n')
+        elif tname == "newParagraph":
+            self.outAppend(u'\n<p class="wikidpad" />')
+        elif tname == "whitespace":
+            self.outAppend(u" ")
+
+        elif tname == "indentedText":
+            self.outStartIndentation("normalindent")
+            self.processAst(content, node)
+            self.outEndIndentation("normalindent")
+        elif tname == "orderedList":
+            self.outStartIndentation("ol")
+            self.processAst(content, node)
+            self.outEndIndentation("ol")
+        elif tname == "unorderedList":
+            self.outStartIndentation("ul")
+            self.processAst(content, node)
+            self.outEndIndentation("ul")
+        elif tname == "romanList":
+            self.outStartIndentation("ol-roman")
+            self.processAst(content, node)
+            self.outEndIndentation("ol-roman")
+        elif tname == "alphaList":
+            self.outStartIndentation("ol-alpha")
+            self.processAst(content, node)
+            self.outEndIndentation("ol-alpha")
+
+        elif tname == "bullet":
+            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+        elif tname == "number":
+            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+        elif tname == "roman":
+            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+        elif tname == "alpha":
+            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+
+        elif tname == "italics":
+            self.outAppend(u'<i class="wikidpad">')
+            self.processAst(content, node)
+            self.outAppend(u'</i>')
+        elif tname == "bold":
+            self.outAppend(u'<b class="wikidpad">')
+            self.processAst(content, node)
+            self.outAppend(u'</b>')
+
+        elif tname == "htmlTag" or tname == "htmlEntity":
+            self.outAppend(node.getString())
+        elif tname == "htmlEquivalent":
+            htmlContent = node.htmlContent
+            if isinstance(htmlContent, HtmlStartTag):
+                htmlContent = htmlContent.clone()
+                htmlContent.addAttribute(u"class", u"wikidpad")
+                if htmlContent.getTag() in (u"li", u"dl", u"dt", u"dd", u"tr"):
+                    self.outAppend(u"\n")
+                
+                if htmlContent.getTag() == u"table":
+                    # TODO: Remove for external HTML viewer
+                    htmlContent.addAttribute(u"border", u"2") 
+
+            self.outAppend(htmlContent.asString())
+
+        elif tname == "heading":
+            if self.optsStack.get("anchorForHeading", True):
+                if self.wordAnchor:
+                    anchor = self.wordAnchor + (u'#.h%i' % node.pos)
+                else:
+                    anchor = u'.h%i' % node.pos
+
+                self.outAppend(u'<a name="%s" class="wikidpad"></a>' % anchor)
+
+            headLevel = node.level + self.optsStack.get(
+                    "offsetHeadingLevel", 0)
+
+            boundHeadLevel = min(6, headLevel)
+            self.outAppend(u'<h%i class="wikidpad heading-level%i">' %
+                    (boundHeadLevel, headLevel), eatPreBreak=True)
+            self.processAst(content, node.contentNode)
+            self.outAppend(u'</h%i>\n' % boundHeadLevel, eatPostBreak=True)
+
+        elif tname == "horizontalLine":
+            self.outEatBreaks(u'<hr class="wikidpad" />\n')
+
+        elif tname == "preBlock":
+            self.outAppend(u'<pre class="wikidpad">%s</pre>\n' %
+                    escapeHtmlNoBreaks(
+                    node.findFlatByName("preText").getString()), True,
+                    not self.asIntHtmlPreview)
+            if self.asIntHtmlPreview:
+                self.outAppend(u'<br class="wikidpad" />\n')
+        elif tname == "bodyHtmlTag":
+            self.outAppend(node.content)
+        elif tname == "todoEntry":
+            self.outAppend(u'<span class="wikidpad todo">%s%s' %
+                    (node.key, node.delimiter))
+            self.processAst(content, node.valueNode)
+            self.outAppend(u'</span>')
+        # TODO remove "property"-compatibility
+        elif tname in ("property", "attribute"):  # for compatibility with old language plugins
+            for propKey, propValue in node.attrs:
+                standardAttribute = u"%s: %s" % (propKey, propValue)
+                standardAttributeMatching = \
+                        bool(self.proppattern.match(standardAttribute))
+                # Output only for different truth values
+                # (Either it matches and matching attrs should not be
+                # hidden or vice versa)
+                if standardAttributeMatching != self.proppatternExcluding:
+                    # TODO remove "property"-compatibility
+                    self.outAppend( u'<span class="wikidpad property attribute">[%s: %s]</span>' % 
+                            (escapeHtml(propKey),
+                            escapeHtml(propValue)) )
+        elif tname == "insertion":
+            self._processInsertion(content, node)
+        elif tname == "script":
+            pass  # Hide scripts
+        elif tname == "noExport":
+            pass  # Hide no export areas
+        elif tname == "anchorDef":
+            if self.wordAnchor:
+                self.outAppend('<a name="%s" class="wikidpad"></a>' %
+                        (self.wordAnchor + u"#" + node.anchorLink))
+            else:
+                self.outAppend('<a name="%s" class="wikidpad"></a>' % node.anchorLink)                
+        elif tname == "wikiWord":
+            self._processWikiWord(node, content)
+        elif tname == "table":
+            self._processTable(content, node)
+        elif tname == "tableCellAppendix":
+            pass
+        elif tname == "footnote":
+            footnoteId = node.footnoteId
+            fnAnchorNode = getFootnoteAnchorDict(self.basePageAst).get(
+                    footnoteId)
+
+            if fnAnchorNode is None:
+                self.outAppend(escapeHtml(node.getString()))
+            else:
+                if self.wordAnchor:
+                    fnAnchor = self.wordAnchor + u'#.f' + _escapeAnchor(
+                            footnoteId)
+                else:
+                    fnAnchor = u'.f' + _escapeAnchor(footnoteId)
+
+                if fnAnchorNode.pos == node.pos:
+                    # Current footnote token tok is an anchor (=last
+                    # footnote token with this footnoteId)
+
+                    self.outAppend(u'<a name="%s" class="wikidpad"></a>' % fnAnchor)
+                    self.outAppend(escapeHtml(node.getString()))
+                else:
+                    if not self.optsStack.get("suppressLinks", False):
+                        # Current token is not an anchor -> make it a link.
+                        self.outAppend(u'<a href="#%s" class="wikidpad">%s</a>' % (fnAnchor,
+                        escapeHtml(node.getString())))
+        elif tname == "urlLink":
+            self._processUrlLink(content, node)
+        elif tname == "stringEnd":
+            pass
+        elif getattr(node, "helperNode", False):
+            if not node.isTerminal() and getattr(node, "helperRecursive", False):
+                self.processAst(content, node)
+        else:
+            return False
+        
+        return True
+
+
 
 

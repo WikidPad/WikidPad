@@ -1724,7 +1724,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
 
                 elif node.name in \
-                        self.wikiLanguageHelper.getRecursiveStylingNodeNames():
+                        self.wikiLanguageHelper.getRecursiveStylingNodeNames() or \
+                        (getattr(node, "helperRecursive", False) and \
+                        not node.isTerminal()):
                     process(node, stack[:])
 
         process(pageAst, [])

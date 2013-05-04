@@ -99,7 +99,9 @@ The following code characters are defined:
     r Set size in percent relative to image size (e.g. "50%x30%"). Only one given
       percent value is used for width and height ("40%" is same as "40%x40%"). No value
       at all is interpreted as "100%x100%" which explicitly sets the dimensions in HTML
-      attributes
+      attributes (avoids "jumping"-effects if image was loaded later than HTML page)
+      If pixel values are given (without %) they are interpreted as size of a bounding box.
+      The image is then resized (aspect ratio is preserved) to fit into the box
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
       *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
       Instead of single characters you can also use the full words "top", "middle", "bottom",
@@ -119,6 +121,9 @@ Same as codes "a" and "A"
 *class*
 Set the CSS class of the image (should be defined in your own [CSS]-file)
 
+*upright*
+In conjunction with a bounding box defined by code character "r" this automatically switches dimensions of the bounding box if this  fits the image better. Typically this is helpful if the bounding box is wider than tall (landscape format) while image may be upright (portray format). A value for the keyword is actually not needed but a trailing colon or equal sign must be there so write it as "upright:".
+
 
 +++ Examples
 
@@ -133,3 +138,6 @@ rel://files/testimg.gif>l
 
 Relative size:
 rel://files/testimg.gif>r110%x60%
+
+Bounding box, upright if necessary:
+rel://files/testimg.gif>r120x80;upright=

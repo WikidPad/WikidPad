@@ -776,16 +776,40 @@ class IdentityList(list):
 
         return -1
 
+def sgn(value):
+    """
+    Signum function
+    """
+    if value < 0:
+        return -1
+    if value > 0:
+        return 1
+    
+    return 0
 
-def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight):
+
+def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight, upright=False):
     """
     For an image with dimensions  width  and  height, calculate new dimension
     which optimally fill bounding box given by  bbWidth  and  bbHeight  so that
     aspect ratio (AR) is not changed.
+    If  upright  is True the bounding box dimensions can be switched to create
+    a larger resized image (typically if box has landscape format while
+    image is portray format aka upright).
+
     Returns tuple (newWidth, newHeight).
     """
     assert bbWidth > 0 and bbHeight > 0, "Invalid bounding box values"
     assert width > 0 and height > 0, "Invalid image size values"
+    
+    
+    if ( upright and
+            # if bounding box or image is quadratic there is nothing to do
+            (bbWidth != bbHeight) and (width != height) and 
+            # check for different formats
+            (sgn(bbWidth - bbHeight) != sgn(width - height)) ):
+
+        bbWidth, bbHeight = bbHeight, bbWidth
     
     # Mathematically equal to bbWidth / width < bbHeight / height
     # but without floating point arithmetic
@@ -799,5 +823,6 @@ def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight):
         newHeight = bbHeight
 
     return (newWidth, newHeight)
+
 
 

@@ -707,6 +707,8 @@ class NonTerminalNode(SyntaxNode):
     def append(self, item):
         self.sub.append(item)
 
+    def prepend(self, item):
+        self.sub.insert(0, item)
 
 
 
@@ -799,6 +801,7 @@ class ParsingState(object):
             self.threadstop = threadstop
         self.fullText = fullText
         self.revText = u"".join(reversed(fullText))
+        self.debugIndent = 0
 
 
 
@@ -851,16 +854,18 @@ def line( loc, strg ):
     else:
         return strg[lastCR+1:]
 
-def _defaultStartDebugAction( instring, loc, expr ):
-    print ("Match " + _ustr(expr) + " at loc " + _ustr(loc) + "(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
-
-def _defaultSuccessDebugAction( instring, startloc, endloc, expr, toks ):
-    if isinstance(toks, SyntaxNode):
-        toks = toks.asList()
-    print ("Matched " + _ustr(expr) + " -> " + str(toks))
-
-def _defaultExceptionDebugAction( instring, loc, expr, exc ):
-    print ("Exception raised:" + _ustr(exc))
+# def _defaultStartDebugAction( instring, loc, expr ):
+#     print ("Match " + _ustr(expr) + " at loc " + _ustr(loc) + "(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
+#     
+# 
+# def _defaultSuccessDebugAction( instring, startloc, endloc, expr, toks ):
+#     if isinstance(toks, SyntaxNode):
+#         toks = toks.asList()
+#     print ("Matched " + _ustr(expr) + " -> " + str(toks))
+# 
+# def _defaultExceptionDebugAction( instring, loc, expr, exc ):
+#     print ("Exception raised:" + _ustr(exc))
+    
 
 
 def nullDebugAction(*args):
@@ -1174,6 +1179,45 @@ class ParserElement(object):
     def postParse( self, instring, loc, state, tokenlist ):
         return tokenlist
 
+    def _defaultStartDebugAction( self, instring, loc, expr, state ):
+        if not self.debug:
+            return
+
+        if (self.debugActions[0] ):
+            self.debugActions[0]( instring, loc, self )
+        else:
+            print (" " * state.debugIndent + "Match " + _ustr(expr) +
+                    " at loc " + _ustr(loc) + "(%d,%d)" %
+                    ( lineno(loc,instring), col(loc,instring) ))
+            state.debugIndent += 2
+
+
+    def _defaultSuccessDebugAction( self, instring, startloc, endloc, expr,
+            toks, state ):
+        if not self.debug:
+            return
+
+        if (self.debugActions[1] ):
+            self.debugActions[1]( instring, loc, self )
+        else:
+            if isinstance(toks, SyntaxNode):
+                toks = toks.asList()
+            
+            state.debugIndent -= 2
+            print (" " * state.debugIndent + "Matched " + _ustr(expr) + " -> " + str(toks))
+
+
+    def _defaultExceptionDebugAction( self, instring, loc, expr, exc, state ):
+        if not self.debug:
+            return
+
+        if self.debugActions[2]:
+            self.debugActions[2]( instring, tokensStart, self, err )
+        else:
+            state.debugIndent -= 2
+            print (" " * state.debugIndent + "Exception raised:" + _ustr(exc))
+
+
     #~ @profile
     def _parseNoCache( self, instring, loc, state, doActions=True, callPreParse=True ):
 ##         global _profRunning
@@ -1185,16 +1229,16 @@ class ParserElement(object):
         if validResultName:
             state.nameStack.append(self.resultsName) # push to namestack
 
-        state.dictStack.push(self.resultsName)["parserElement"] = self
+        ds = state.dictStack.push(self.resultsName)
+        ds["parserElement"] = self
+        ds["location"] = loc
 
         try:
             for psa in self.parseStartAction:
                 psa(instring, loc, state, self)
 
             if debugging or self.failAction:
-                #~ print ("Match",self,"at loc",loc,"(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
-                if (self.debugActions[0] ):
-                    self.debugActions[0]( instring, loc, self )
+                self._defaultStartDebugAction( instring, loc, self, state )
                 if callPreParse and self.callPreparse:
                     preloc = self.preParse( instring, loc, state )
                 else:
@@ -1207,8 +1251,8 @@ class ParserElement(object):
                         raise ParseException( instring, len(instring), self.errmsg, self )
                 except ParseBaseException, err:
                     #~ print ("Exception raised:", err)
-                    if self.debugActions[2]:
-                        self.debugActions[2]( instring, tokensStart, self, err )
+                    self._defaultExceptionDebugAction( instring, tokensStart,
+                            self, err, state )
                     if self.failAction:
                         self.failAction( instring, tokensStart, self, err )
                     raise
@@ -1246,8 +1290,8 @@ class ParserElement(object):
                     pc(instring, preloc, state, retTokens)
             except ParseBaseException, err:
                 #~ print "Exception raised in user validate action:", err
-                if (self.debugActions[2] ):
-                    self.debugActions[2]( instring, tokensStart, self, err )
+                self._defaultExceptionDebugAction( instring, tokensStart,
+                        self, err, state )
                 raise
 
             if self.parseAction and (doActions or self.callDuringTry):
@@ -1259,8 +1303,8 @@ class ParserElement(object):
                                 retTokens = tokens
                     except ParseBaseException, err:
                         #~ print "Exception raised in user parse action:", err
-                        if (self.debugActions[2] ):
-                            self.debugActions[2]( instring, tokensStart, self, err )
+                        self._defaultExceptionDebugAction( instring, tokensStart,
+                                self, err, state )
                         raise
                 else:
                     for fn in self.parseAction:
@@ -1270,8 +1314,8 @@ class ParserElement(object):
 
             if debugging:
                 #~ print ("Matched",self,"->",retTokens.asList())
-                if (self.debugActions[1] ):
-                    self.debugActions[1]( instring, tokensStart, loc, self, retTokens )
+                self._defaultSuccessDebugAction( instring, tokensStart, loc,
+                        self, retTokens, state )
 
             if isinstance(retTokens, SyntaxNode):
                 if retTokens.name:
@@ -1672,9 +1716,9 @@ class ParserElement(object):
 
     def setDebugActions( self, startAction, successAction, exceptionAction ):
         """Enable display of debugging messages while doing pattern matching."""
-        self.debugActions = (startAction or _defaultStartDebugAction,
-                             successAction or _defaultSuccessDebugAction,
-                             exceptionAction or _defaultExceptionDebugAction)
+        self.debugActions = (startAction or None,
+                             successAction or None,
+                             exceptionAction or None)
         self.debug = True
         return self
 
@@ -1682,7 +1726,8 @@ class ParserElement(object):
         """Enable display of debugging messages while doing pattern matching.
            Set flag to True to enable, False to disable."""
         if flag:
-            self.setDebugActions( _defaultStartDebugAction, _defaultSuccessDebugAction, _defaultExceptionDebugAction )
+            self.setDebugActions(None, None, None)
+            self.debug = True
         else:
             self.debug = False
         return self
@@ -1690,12 +1735,12 @@ class ParserElement(object):
     def getDebug(self):
         return self.debug
 
-    def setDebugRecurs(self, flag=True):
-        self._setDebugRecursIntern(flag, set())
+    def setDebugRecurs(self, flag=True, deepness=-1):
+        self._setDebugRecursIntern(flag, set(), deepness)
         
-    def _setDebugRecursIntern(self, flag, visited):
+    def _setDebugRecursIntern(self, flag, visited, deepness):
         idv = id(self)
-        if idv in visited:
+        if (idv in visited) or (deepness == 0):
             return False
         visited.add(idv)
 
@@ -2777,10 +2822,12 @@ class ParseExpression(ParserElement):
         super(ParseExpression,self)._optimizeSub(options)
         self.exprs = [e._realOptimize(options) for e in self.exprs]
 
-    def _setDebugRecursIntern(self, flag, visited):
-        if super(ParseExpression,self)._setDebugRecursIntern(flag, visited):
+    def _setDebugRecursIntern(self, flag, visited, deepness):
+        if super(ParseExpression,self)._setDebugRecursIntern(flag, visited,
+                deepness):
             for e in self.exprs:
-                e._setDebugRecursIntern(flag, visited)
+                e._setDebugRecursIntern(flag, visited,
+                        deepness - 1 if deepness > 0 else -1)
             return True
         return False
 
@@ -3138,6 +3185,28 @@ class Choice(ParseExpression, NecessaryRegexProvider):
 
         return expr._parse(instring, loc, state, doActions, callPreParse=False)
 
+    def parseImpl_debug( self, instring, loc, state, doActions=True ):
+        maxExcLoc = -1
+        maxException = None
+
+        if self.parseChoiceAction is None or not self.exprs:
+            raise ParseException(instring,len(instring),
+                    "Choice: No choice action or no expressions given", self)
+
+        expr = self.parseChoiceAction(instring, loc, state, self)
+        if expr is None:
+            raise ParseException(instring,len(instring),
+                    "Choice: Choice action returned None", self)
+                    
+        print " " * state.debugIndent + "Choice choose: ", _ustr(expr)
+
+        return expr._parse(instring, loc, state, doActions, callPreParse=False)
+
+
+    def setDebug( self, flag=True ):
+        super(Choice, self).setDebug(flag)
+        if flag:
+            self.parseImpl = self.parseImpl_debug
 
     def getRegex(self):
         if self.regexCombiner is not None:
@@ -3152,7 +3221,7 @@ class Choice(ParseExpression, NecessaryRegexProvider):
         return self.regexCombiner.getFlagsMask()
 
 
-    def __ior__(self, other ):    # TOD Remove?
+    def __ior__(self, other ):    # TODO Remove?
         if isinstance( other, basestring ):
             other = Literal( other )
         return self.append( other ) #MatchFirst( [ self, other ] )
@@ -3449,10 +3518,12 @@ class FindFirst(ParseExpression):
 
         return self
 
-    def _setDebugRecursIntern(self, flag, visited):
-        if super(FindFirst,self)._setDebugRecursIntern(flag, visited):
+    def _setDebugRecursIntern(self, flag, visited, deepness):
+        if super(FindFirst,self)._setDebugRecursIntern(flag, visited,
+                deepness):
             if self.endExpr is not None:
-                self.endExpr._setDebugRecursIntern(flag, visited)
+                self.endExpr._setDebugRecursIntern(flag, visited,
+                        deepness - 1 if deepness > 0 else -1)
             return True
         return False
 
@@ -3609,10 +3680,12 @@ class ParseElementEnhance(ParserElement):
             self.expr.validate(tmp)
         self.checkRecursion( [] )
 
-    def _setDebugRecursIntern(self, flag, visited):
-        if super(ParseElementEnhance,self)._setDebugRecursIntern(flag, visited):
+    def _setDebugRecursIntern(self, flag, visited, deepness):
+        if super(ParseElementEnhance,self)._setDebugRecursIntern(flag, visited,
+                deepness):
             if self.expr is not None:
-                self.expr._setDebugRecursIntern(flag, visited)
+                self.expr._setDebugRecursIntern(flag, visited,
+                        deepness - 1 if deepness > 0 else -1)
             return True
         return False
 
@@ -3633,7 +3706,7 @@ class ParseElementEnhance(ParserElement):
 
 
 
-class FollowedBy(ParseElementEnhance):
+class FollowedBy(ParseElementEnhance, NecessaryRegexProvider):
     """Lookahead matching of the given parse expression.  FollowedBy
     does *not* advance the parsing position within the input string, it only
     verifies that the specified parse expression matches at the current
@@ -3646,9 +3719,51 @@ class FollowedBy(ParseElementEnhance):
         self.expr.tryParse( instring, loc, state )
         return loc, []
 
+    def getRegex(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return None
+
+        if self.buildingRegex:
+            return None
+
+        self.buildingRegex = True
+        try:
+            r = self.expr.getRegex()
+            return re.compile(u"(?=" + r.pattern + u")", r.flags)
+        finally:
+            self.buildingRegex = False
 
 
-class NotAny(ParseElementEnhance):
+    def getRegexFlagsMask(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return 0
+
+        if self.buildingRegex:
+            return None
+        self.buildingRegex = True
+        try:
+            return self.expr.getRegexFlagsMask()
+        finally:
+            self.buildingRegex = False
+
+
+    def isRegexComplete(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return False
+
+        if self.buildingRegex:
+            return None
+        self.buildingRegex = True
+        try:
+            return self.expr.isRegexComplete()
+        finally:
+            self.buildingRegex = False
+
+
+
+
+
+class NotAny(ParseElementEnhance, NecessaryRegexProvider):
     """Lookahead to disallow matching with the given parse expression.  NotAny
     does *not* advance the parsing position within the input string, it only
     verifies that the specified parse expression does *not* match at the current
@@ -3683,6 +3798,46 @@ class NotAny(ParseElementEnhance):
             self.strRepr = "~{" + _ustr(self.expr) + "}"
 
         return self.strRepr
+
+    def getRegex(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return None
+
+        if self.buildingRegex:
+            return None
+
+        self.buildingRegex = True
+        try:
+            r = self.expr.getRegex()
+            return re.compile(u"(?!" + r.pattern + u")", r.flags)
+        finally:
+            self.buildingRegex = False
+
+
+    def getRegexFlagsMask(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return 0
+
+        if self.buildingRegex:
+            return None
+        self.buildingRegex = True
+        try:
+            return self.expr.getRegexFlagsMask()
+        finally:
+            self.buildingRegex = False
+
+
+    def isRegexComplete(self):
+        if not isinstance(self.expr, NecessaryRegexProvider):
+            return False
+
+        if self.buildingRegex:
+            return None
+        self.buildingRegex = True
+        try:
+            return self.expr.isRegexComplete()
+        finally:
+            self.buildingRegex = False
 
 
 class ZeroOrMore(ParseElementEnhance):
@@ -4519,7 +4674,7 @@ class RegexCombiner(object):
     def find(self, instring, loc):
         assert self.reMode in (RegexCombiner.REMODE_SEARCH,
                 RegexCombiner.REMODE_MATCH)
-
+                
         if self.reMode == RegexCombiner.REMODE_SEARCH:
             m = self.regEx.search(instring, loc)
         else: # self.reMode == RegexCombiner.REMODE_MATCH:
@@ -4539,7 +4694,7 @@ class RegexCombiner(object):
     def findAll(self, instring, loc):
         assert self.reMode in (RegexCombiner.REMODE_SEARCH_ALL,
                 RegexCombiner.REMODE_MATCH_ALL)
-
+                
         if self.reMode == RegexCombiner.REMODE_SEARCH_ALL:
             m = self.regEx.search(instring, loc)
         else: # self.reMode == RegexCombiner.REMODE_MATCH:
@@ -4671,231 +4826,6 @@ class StackedCopyDict:
 
     def has_key(self, key):
         return self.getTopDict().has_key(key)
-
-
-
-# class StackedCopyDict:
-#     """
-#     A stacked dictionary is technically a stack of dictionaries plus one base
-#     dictionary which is at the bottom of the stack and can't be dropped off.
-#     Along with get and set operations which are always executed on the
-#     stack top dictionary there are functions to push() a new dictionary on
-#     the stack (which is automatically a copy of the previous stack top) and
-#     to pop() the stack top dict.
-#     
-#     The class fulfills the context manager protocol and can be used with
-#     "with"-statement (returning itself as variable)
-#     """
-#     def __init__(self, baseDict=None, baseName=None):
-#         if baseDict is None:
-#             self.baseDict = {}
-#         else:
-#             self.baseDict = baseDict
-#         self.dictStack = []
-# 
-#         self.baseName = baseName
-#         self.nameStack = []
-# 
-# 
-#     def _findDict(self, idx):
-#         if idx < 0:
-#             return self.baseDict
-# 
-#         for i in range(idx, -1, -1):
-#             dct = self.dictStack[i]
-#             if dct is not None:
-#                 return dct
-# 
-#         return self.baseDict
-#         
-# 
-#     def _resolveDict(self, idx):
-#         if idx < 0:
-#             return self.baseDict
-# 
-#         dct = self.dictStack[idx]
-#         if dct is not None:
-#             return dct
-# 
-#         for i in range(idx - 1, -1, -1):
-#             dct = self.dictStack[i]
-#             if dct is not None:
-#                 dct = dct.copy()
-#                 self.dictStack[idx] = dct
-#                 return dct
-# 
-#         dct = self.baseDict.copy()
-#         self.dictStack[idx] = dct
-#         return dct
-# 
-# 
-#     def getTopDict(self):
-#         return self._resolveDict(len(self.dictStack) - 1)
-#             
-#     def getSubTopDict(self):
-#         return self._resolveDict(len(self.dictStack) - 2)
-#             
-#     def getNamedDict(self, name, default=None):
-#         for i in xrange(len(self.nameStack) - 1, -1, -1):
-#             if self.nameStack[i] == name:
-#                 return self._resolveDict(i)
-#         
-#         if self.baseName == name:
-#             return self.baseDict
-#         
-#         return default
-# 
-# 
-#     def __repr__(self):
-#         return "<StackedCopyDict " + repr(self.getTopDict()) + ">"
-# 
-#     def __getitem__(self, key):
-#         return self._findDict(len(self.dictStack) - 1)[key]
-# 
-#     def get(self, key, failobj=None):
-#         return self._findDict(len(self.dictStack) - 1).get(key, failobj)
-# 
-#     def __setitem__(self, key, item):
-#         self.getTopDict()[key] = item
-#         
-#     def __delitem__(self, key):
-#         del self.getTopDict()[key]
-# 
-#     def __enter__(self):
-#         self.push()
-#         return self
-#     
-#     def __exit__(self, type, value, traceback):
-#         self.pop()
-# 
-# 
-#     def push(self, newName=None, newDict=None):
-#         """
-#         Push new dictionary on stack, normally a copy of previous top stack dict.
-#         For convenience it returns the new stack top dict.
-#         """
-#         self.dictStack.append(newDict)
-#         self.nameStack.append(newName)
-# 
-#         return self
-# 
-# 
-#     def pop(self):
-#         """
-#         May throw exception if only base dictionary is available.
-#         """
-#         self.nameStack.pop()
-#         return self.dictStack.pop()
-#         
-# 
-#     def has_key(self, key):
-#         return self.findDict(len(self.dictStack) - 1).has_key(key)
-
-
-
-
-
-
-# class StackedCopyDict(object):
-#     """
-#     A stacked dictionary is technically a stack of dictionaries plus one base
-#     dictionary which is at the bottom of the stack and can't be dropped off.
-#     Along with get and set operations which are always executed on the
-#     stack top dictionary there are functions to push() a new dictionary on
-#     the stack (which is automatically a copy of the previous stack top) and
-#     to pop() the stack top dict.
-#     """
-#     def __init__(self, baseDict=None):
-#         if baseDict is None:
-#             self.baseDict = {}
-#         else:
-#             self.baseDict = baseDict
-# 
-#         self.dictStack = []
-# 
-#     def getTopDict(self):
-#         if len(self.dictStack) > 0:
-#             return self.dictStack[-1]
-#         else:
-#             return self.baseDict
-#             
-#     def getSubTopDict(self):
-#         result = StackedCopyDict(self.baseDict)
-#         result.dictStack = self.dictStack[:-1]
-#         
-#         return result
-# 
-# 
-#     def __repr__(self):
-#         return "<StackedCopyDict " + repr(self.getTopDict()) + ">"
-# 
-#     def _getDictForKey(self, key):
-#         for d in reversed(self.dictStack):
-#             if d.has_key(key):
-#                 return d
-#         if self.baseDict.has_key(key):
-#             return self.baseDict
-#         
-#         return None
-# 
-# 
-#     def __getitem__(self, key):
-#         d = self._getDictForKey(key)
-#         if d is None:
-#             raise KeyError(key)
-# 
-#         return d[key]
-# 
-# 
-#     def __setitem__(self, key, item):
-#         self.getTopDict()[key] = item
-# 
-# 
-#     def get(self, key, failobj=None):
-#         d = self._getDictForKey(key)
-#         if d is None:
-#             return failobj
-# 
-#         return d[key]
-#         
-#     
-#     def push(self, newDict=None):
-#         """
-#         Push new dictionary on stack, normally a copy of previous top stack dict.
-#         For convenience it returns the new stack top dict.
-#         """
-#         if newDict is None:
-#             newDict = {}
-# #             newDict = self.getTopDict().copy()
-#         
-#         self.dictStack.append(newDict)
-#         return self
-# 
-# 
-#     def pop(self):
-#         """
-#         May throw exception if only base dictionary is available.
-#         """
-#         return self.dictStack.pop()
-# 
-# 
-#     def has_key(self, key):
-#         return self._getDictForKey(key) is not None
-
-
-# This description may be used later for another type of stacked dict
-#     """
-#     A stacked dictionary is technically a stack of dictionaries plus one base
-#     dictionary which is at the bottom of the stack and can't be dropped off.
-#     If executing a get operation on a key, it starts at stack top and looks
-#     if the dict there contains the key. If not, it goes down in stack until it
-#     finds the key or reaches stack bottom. If even the base dict does not
-#     contain the key, the default given in get() or None or an exception
-#     (for __getitem__()) is the answer.
-#     A set operation is always done
-#     """
-
-
 
 
 #
