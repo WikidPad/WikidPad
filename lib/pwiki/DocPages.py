@@ -2383,6 +2383,23 @@ class FunctionalPage(DataCarryingPage):
 #             return u""
 
 
+    def getWikiLanguageName(self):
+        """
+        Returns the internal name of the wiki language of this page.
+        """
+        if self.wikiDocument is None:
+            return ParseUtilities.getBasicLanguageHelper().getWikiLanguageName()
+
+        return super(FunctionalPage, self).getWikiLanguageName()
+
+
+    def createWikiLanguageHelper(self):
+        if self.wikiDocument is None:
+            return ParseUtilities.getBasicLanguageHelper()
+
+        return super(FunctionalPage, self).createWikiLanguageHelper()
+
+
     def getLiveTextNoTemplate(self):
         """
         Return None if page isn't existing instead of creating an automatic

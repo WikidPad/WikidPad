@@ -785,6 +785,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.SetReadOnly(False)
             self.SetText(content)
 
+        if self.wikiLanguageHelper is None or \
+                self.wikiLanguageHelper.getWikiLanguageName() != \
+                self.getLoadedDocPage().getWikiLanguageName():
+
+            wx.GetApp().freeWikiLanguageHelper(self.wikiLanguageHelper)
+            self.wikiLanguageHelper = self.getLoadedDocPage().createWikiLanguageHelper()
+
         self.getLoadedDocPage().addTxtEditor(self)
         self._checkForReadOnly()
         self.presenter.setTitle(self.getLoadedDocPage().getTitle())
