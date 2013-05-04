@@ -374,6 +374,15 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         """
         Prepare for destruction
         """
+        # We need to delete (all?) these references otherwise we get a small
+        # (but noticable) memory leak when calling cloneForThread
+        self.enchantDict = None
+        self.dictLanguage = None
+        self.globalPwlPage = None
+        self.spellChkAddedGlobal = None
+        self.spellChkAddedLocal = None
+        self.localPwlPage = None
+        self.wikiDocument = None
         self.__sinkWikiDocument.disconnect()
         self.__sinkApp.disconnect()
 
