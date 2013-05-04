@@ -4320,6 +4320,8 @@ class ViHandler(ViHelper):
 
     (k["\\"], k["s"]) : (0, (self.CreateShortHint, None), 2, 0), # \s
 
+    (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <a-g>
+
     #(k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
     
     # TODO: think of suitable commands for the following
@@ -4400,7 +4402,7 @@ class ViHandler(ViHelper):
 
     # Use Ctrl-r in visual mode to start a replace
     (("Ctrl", k["r"]),)    : (0, (self.StartReplaceOnSelection, None), 1, 0), # <c-r>
-    (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <c-r>
+    (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <a-g>
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
@@ -6379,10 +6381,10 @@ class ViHandler(ViHelper):
         self._SearchCaretWord(False, True, False)
 
     def GoogleSelection(self):
-        if not self.HasSelection():
+        text = self.ctrl.GetSelectedText()
+
+        if not text:
             text = self.ctrl.presenter.getWikiWord()
-        else:
-            text = self.ctrl.GetSelectedText()
 
         self.StartCmdInput("google {0}".format(text), run_cmd=True)
 
