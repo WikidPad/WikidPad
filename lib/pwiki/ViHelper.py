@@ -438,6 +438,8 @@ class ViHelper():
 	    # all platforms and can be handled directly.
             if evt.ControlDown():
                 key = ("Ctrl", key)
+            elif evt.AltDown():
+                key = ("Alt", key)
 	    self.HandleKey(key, m, evt)
 	    return
 
@@ -451,6 +453,8 @@ class ViHelper():
 
         if evt.ControlDown():
             key = ("Ctrl", key)
+        elif evt.AltDown():
+            key = ("Alt", key)
 
 	self.HandleKey(key, m, evt)
 
@@ -1229,7 +1233,7 @@ class ViHelper():
 
         bell = ViVisualBell(self.ctrl, -1, rect, colour)
 
-    def StartCmdInput(self, initial_input=None):
+    def StartCmdInput(self, initial_input=None, run_cmd=False):
 
         selection_range = None
         if self.mode == ViHelper.VISUAL:
@@ -1239,6 +1243,9 @@ class ViHelper():
 
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
                                             initial_input, selection_range=selection_range)
+
+        if run_cmd:
+            wx.CallAfter(self.input_window.ExecuteCurrentCmd)
 
     def RepeatLastSubCmd(self, ignore_flags):
         self.input_window.cmd_parser.RepeatSubCmd(ignore_flags)
@@ -1718,7 +1725,17 @@ class CmdParser():
                                             "|".join(self.range_cmds.keys()))
     
     def SearchAndReplace(self, pattern, ignore_flags=False):
-        # TODO: implement flags
+        """
+        Function to mimic the :s behavior of vi(m)
+
+        It is designed to be mostly compatable but it currently (and for at
+        least the forseable future) has a number of important differences from 
+        the native implementation.
+
+        TODO: implement flags
+        """
+        # As in vim the expression delimeter can be one of a number of 
+        # characters
         if pattern.startswith(u"/"):
             delim = u"\/"
         elif pattern.startswith(u";"):
@@ -1736,6 +1753,14 @@ class CmdParser():
             search, replace, flags = re.split(r"(?<!\\){0}".format(delim), pattern)[1:]
         except ValueError:
             return False
+
+        # First check if there are any pattern modifiers
+        #
+        # Currently we only check for \V
+        # if it exists we escape the search pattern (so it acts as a literal string)
+        if search.startswith("\V"):
+            search = re.escape(search[2:])
+
 
         count = 1
         # TODO: Flags
@@ -2562,8 +2587,7 @@ class ViInputDialog(wx.Panel):
     def PostLeftMouseDoubleListBox(self):
         self.PostLeftMouseListBox()
         self.list_selectionn = True
-        self.ExecuteCmd(self.GetInput())
-        self.Close()
+        self.ExecuteCurrentCmd()
 
     def OnText(self, evt):
         """
@@ -2725,8 +2749,7 @@ class ViInputDialog(wx.Panel):
         if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
                 (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
             # Return pressed
-            self.ExecuteCmd(self.GetInput())
-            self.Close()
+            self.ExecuteCurrentCmd()
 
         elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE) or \
                 (accP == (wx.ACCEL_NORMAL, wx.WXK_BACK) 
@@ -2786,6 +2809,9 @@ class ViInputDialog(wx.Panel):
 
         # Else don't change
 
+    def ExecuteCurrentCmd(self):
+        self.ExecuteCmd(self.GetInput())
+        self.Close()
 
     def SelectNextListBoxItem(self):
         self.MoveListBoxSelection(1)

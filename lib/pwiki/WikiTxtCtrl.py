@@ -4397,6 +4397,10 @@ class ViHandler(ViHelper):
 
     (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection, 
                                                     None), 1), # \dc* 
+
+    # Use Ctrl-r in visual mode to start a replace
+    (("Ctrl", k["r"]),)    : (0, (self.StartReplaceOnSelection, None), 1, 0), # <c-r>
+    (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <c-r>
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
@@ -6374,9 +6378,28 @@ class ViHandler(ViHelper):
     def SearchPartialCaretWordBackwards(self):
         self._SearchCaretWord(False, True, False)
 
+    def GoogleSelection(self):
+        if not self.HasSelection():
+            text = self.ctrl.presenter.getWikiWord()
+        else:
+            text = self.ctrl.GetSelectedText()
+
+        self.StartCmdInput("google {0}".format(text), run_cmd=True)
+
     #--------------------------------------------------------------------
     # Replace
     #--------------------------------------------------------------------
+    def StartReplaceOnSelection(self):
+        """
+        Starts a search and replace cmd using the currently selected text
+        """
+        if not self.HasSelection():
+            return
+
+        text = self.ctrl.GetSelectedText()
+
+        # \V is used as we want a direct text replace
+        self.StartCmdInput("%s/\V{0}/".format(text))
     
     def ReplaceChar(self, keycode):
         """
