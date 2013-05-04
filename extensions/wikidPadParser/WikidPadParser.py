@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2012-02-17
+# Last modified (format YYYY-MM-DD): 2013-04-30
 
 
 import locale, pprint, time, sys, string, traceback
@@ -264,11 +264,12 @@ todoKey = buildRegex(ur"\b(?:todo|done|wait|action|track|issue|"
 
 todoEnd = buildRegex(ur"\n|\||(?!.)")
 
-todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent + \
-        Optional(buildRegex(ur"\|"))
+todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent
 
 todoEntry = todoEntry.setResultsNameNoCopy("todoEntry")\
         .setParseAction(actionTodoEntry)
+        
+todoEntryWithTermination = todoEntry + Optional(buildRegex(ur"\|"))
 
 # Only for LanguageHelper.parseTodoEntry()
 todoAsWhole = todoEntry + stringEnd
@@ -1306,7 +1307,7 @@ findMarkupInCharacterAttribution = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
         attribute, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace,
-        todoEntry, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
+        todoEntryWithTermination, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
         suppressHighlightingMultipleLines, equivalIndentation],
@@ -1325,7 +1326,7 @@ findMarkup = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
         attribute, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace, heading,
-        todoEntry, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
+        todoEntryWithTermination, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
         suppressHighlightingMultipleLines,

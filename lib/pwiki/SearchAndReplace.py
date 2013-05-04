@@ -1665,6 +1665,22 @@ class SearchReplaceOperation:
         return self.searchOpTree.searchDocPageAndText(docPage, text,
                 searchCharStartPos, self.cycleToStart)
 
+    def iterSearchDocPageAndText(self, docPage, text, searchCharStartPos=0):
+        """
+        Returns iterator to consecutively find all places where the search
+        matches as tuples with at least two elements <first char>, <after last char>
+        """
+        while True:
+            found = self.searchDocPageAndText(docPage, text, searchCharStartPos)
+            if found[0] is None:
+                return
+                
+            if found[1] <= searchCharStartPos:
+                searchCharStartPos += 1
+            else:
+                searchCharStartPos = found[1]
+            
+            yield found
 
 
     def searchText(self, text, searchCharStartPos=0):

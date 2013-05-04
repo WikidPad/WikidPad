@@ -323,11 +323,12 @@ todoKey = buildRegex(ur"\b(?:todo|done|wait|action|track|issue|"
 
 todoEnd = buildRegex(ur"\n|\||(?!.)")
 
-todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent + \
-        Optional(buildRegex(ur"\|"))
+todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent
 
 todoEntry = todoEntry.setResultsNameNoCopy("todoEntry")\
         .setParseAction(actionTodoEntry)
+        
+todoEntryWithTermination = todoEntry + Optional(buildRegex(ur"\|"))
 
 # Only for LanguageHelper.parseTodoEntry()
 todoAsWhole = todoEntry + stringEnd
@@ -1433,8 +1434,8 @@ findMarkupInCharacterAttribution = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlighting, urlRef, imageUrl,
         attribute, insertion, escapedChar, nowikiStandalone, footnote, wikiWord,
         newLinesParagraph, newLineWhitespace,
-        todoEntry, anchorDef, preBySpace, preHtmlTag, bodyHtmlTag, htmlTag,
-        htmlEntity, htmlComment, 
+        todoEntryWithTermination, anchorDef, preBySpace, preHtmlTag, bodyHtmlTag,
+        htmlTag, htmlEntity, htmlComment, 
         tableMediaWiki],
         endTokenInCharacterAttribution)
 findMarkupInCharacterAttribution = findMarkupInCharacterAttribution\
@@ -1451,8 +1452,9 @@ findMarkup = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlighting, urlRef, imageUrl,
         attribute, insertion, escapedChar, nowikiStandalone, footnote, wikiWord,
         newLinesParagraph, newLineWhitespace, heading,
-        todoEntry, anchorDef, preBySpace, preHtmlTag, bodyHtmlTag, htmlTag,
-        htmlEntity, htmlComment, bulletCombination, bulletCombinationContinuation,
+        todoEntryWithTermination, anchorDef, preBySpace, preHtmlTag, bodyHtmlTag,
+        htmlTag, htmlEntity, htmlComment,
+        bulletCombination, bulletCombinationContinuation,
         tableMediaWiki,
         script, horizontalLine], endToken)
 findMarkup = findMarkup.setPseudoParseAction(pseudoActionFindMarkup)
