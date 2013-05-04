@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+May  04, 2013 (2.2rc09)
+
+    * Bug fixed: Problems when using menu
+      "Wiki"->"Favorites"->"Manage favorites"
+
+
+
 Mar. 03, 2013 (2.2rc08)
 
     * Bug fix: Missing file for wiki root page could cause problems
