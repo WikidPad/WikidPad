@@ -1,7 +1,7 @@
 [Files]
 Source: dist\WikidPad.exe; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\appbase.css; DestDir: {app}
-Source: dist\extensions\*.py; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: extensions\*.py; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: extensions\*.zipf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Flags: onlyifdoesntexist
@@ -54,8 +54,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.3beta09"
-#define verNo "002.003.109.000"
+#define verStr "2.3beta09_01"
+#define verNo "002.003.109.001"
 
 SolidCompression=true
 AppName=WikidPad
