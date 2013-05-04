@@ -1,4 +1,4 @@
-﻿++ Insertions
+﻿+ Insertions
 
 Insertions allow to insert some dynamic text into preview and HTML export of a page. This text can either be the content of another page or a list of wikipage links to pages which are parents or children of a page or to pages which form the result of a saved search.
 
@@ -11,7 +11,7 @@ To insert, for example, the content of the IncrementalSearch page, write:
 If you switch now to the preview, you will see the content of the IncrementalSearch page above, instead of the insertion tag.
 
 
-+++ Syntax
+++ Syntax
 The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
 after that there may be appendices, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
 
@@ -65,11 +65,6 @@ The following keys and values are built into WikidPad (further are possible by p
         * *casesensitive*: Search case sensitive (default is
           insensitive)
         * *wholewordsonly*: Search whole words only 
-        * *removeself*: Page on which the insertion is placed is
-          omitted from search result (if you e.g. place a search
-          insertion for "foo" on a page this page itself would be
-          found just because it contains the search insertion
-          with "foo" in it)
     * *toc* shows a little table of contents with the headings of 
       the current page. In HTML preview/export you can click on
       the lines to go to the actual headings. The value of this
@@ -83,7 +78,19 @@ The following keys and values are built into WikidPad (further are possible by p
       "Security" options page to make it work.
     * *self* Shows the name of the current page.
 
-++++ Lists of wiki links
+
++++ Special appendices for "savedsearch" and "search" insertions
+
+*removeself*
+Page on which the insertion is placed is omitted from search result (if you e.g. place a search insertion for "foo" on a page this page itself would be found just because it contains the search insertion with "foo" in it). This is mainly useful for "search"-insertions.
+
+*showtext*
+Don't show the page name, instead show the text found by the search expression (the text links to the wiki page where it is located). This works only for search expressions for which a particular text position can be found. For instance the boolean regex search "page:Wiki" (search for all pages starting with "Wiki") does not relate to anything in the page content.
+
+This appendix is useful when searching for todos or attributes.
+
+
++++ Lists of wiki links
 
 For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendix *"columns 123"* where 123 stands for the number of columns the list should have. By default, there is only one column.
 
@@ -108,7 +115,7 @@ Appendix *"aslist"* shows a comma-separated list instead of a table. All other s
 Appendix *"table_border_width 1"* shows a visible grid.
 
 
-+++ Examples
+++ Examples
 
 At first a few wiki links to demonstrate the functions: (KeyBindings, DeadLink, DeadLinkToo, ScratchPad, TextBlocks)
 
@@ -135,6 +142,11 @@ It is recommended to switch to preview to see the effect of the tags:
 *\[:savedsearch: nanny; columns 4; colwidth equal; table_border_width 1]*  (all pages containing "any")
 [:savedsearch: nanny; columns 4; colwidth equal; table_border_width 1]
 
+*\[:search: "\todo:todo"]*
+[:search:"todo:todo"]
+
+*\[:search: "\todo:todo";showtext]*
+[:search:"todo:todo";showtext]
 
 *\[:toc:]*
 [:toc:]

@@ -121,8 +121,7 @@ class AbstractSearchNode:
         to support the additonal AbstractContentSearchNode methods
         searchText(), matchesPart(), replace() ).
 
-        Call it for the root of a tree, it will return True iff the node itself
-        and all children (recursively) support it.
+        Call it for the root of a tree, it will automatically ask its children.
         """
         return False
 
