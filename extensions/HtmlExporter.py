@@ -1696,6 +1696,135 @@ class HtmlExporter(AbstractExporter):
         self.astNodeStack.pop()
 
 
+
+    def _buildInsertionResultList(self, resultList, resultItemProcessor,
+            appendices):
+
+        if len(resultList) == 0:
+            return
+
+        # resultList was set, so build a nicely formatted list of wiki words
+
+        # Check for desired number of columns (as appendix e.g.
+        # "columns 3" was set) and other settings
+        cols = 1
+        coldirDown = False
+        asList = False
+        colwidth = None
+        tableBorderWidth = 0
+
+        for ap in appendices:
+            if ap.startswith(u"columns "):
+                try:
+                    v = int(ap[8:])
+                    if v > 0:
+                        cols = v
+                except ValueError:
+                    pass
+            elif ap == "aslist":
+                # No table but comma-separated list
+                asList = True
+            elif ap == u"coldir down":
+                # Order in table goes downward first then right
+                # Default is right first then downward
+                coldirDown = True
+            elif ap == u"colwidth equal":
+                # All columns will have same width
+                colwidth = u"equal"
+            elif ap.startswith(u"table_border_width "):
+                try:
+                    v = int(ap[18:])
+                    if v >= 0:
+                        tableBorderWidth = v
+                except ValueError:
+                    pass
+
+        # To ensure that the sum of percentages is 100 there is a bit
+        # work to do. On the other hand this means that the columns
+        # don't have exactly equal width
+        if colwidth == u"equal":
+            colwidth = []
+            usedPerc = 0
+            for i in range(1, cols + 1):
+                cw = i * 100 // cols - usedPerc
+                usedPerc += cw
+                colwidth.append(u"%i%%" % cw)
+
+        if asList:
+            firstItem = True
+            for resultItem in resultList:
+                if firstItem:
+                    firstItem = False
+                else:
+                    self.outAppend(", ")
+                resultItemProcessor(resultItem)
+        else:
+            # Convert colwidth to HTML attribute
+            if colwidth is None:
+                colwidthAttr = [u""] * cols
+            else:
+                colwidthAttr = [u' width="%s"' % cw for cw in colwidth]
+            
+            tableAttrs = u""
+            if tableBorderWidth > 0:
+                tableAttrs += u' border="%s"' % tableBorderWidth
+            
+            # We need a table for the resultList
+            self.outAppend(u'<table%s class="wikidpad">\n' % tableAttrs)
+            colpos = 0
+            firstRow = True
+
+            if coldirDown:
+                # Reorder words for downwards direction
+
+                result = []
+                itemCount = len(resultList)
+                rowCount = (itemCount + cols - 1) // cols
+                for r in range(rowCount):
+                    result += [resultList[i]
+                            for i in range(r, itemCount, rowCount)]
+                resultList = result
+            
+            for resultItem in resultList:
+                if colpos == 0:
+                    # Start table row
+                    self.outAppend(u'<tr class="wikidpad">')
+                    
+                if firstRow:
+                    self.outAppend(u'<td valign="top"%s class="wikidpad">' %
+                            colwidthAttr[colpos])
+                else:
+                    self.outAppend(u'<td valign="top" class="wikidpad">')
+                resultItemProcessor(resultItem)
+                self.outAppend(u'</td>')
+                
+                colpos += 1
+                if colpos == cols:
+                    # At the end of a row
+                    colpos = 0
+                    firstRow = False
+                    self.outAppend(u"</tr>\n")
+                    
+            # Fill the last incomplete row with empty cells if necessary
+            if colpos > 0:
+                if firstRow:
+                    while colpos < cols:
+                        self.outAppend(u'<td%s class="wikidpad"></td>' %
+                                colwidthAttr[colpos])
+                        colpos += 1
+                else:
+                    while colpos < cols:
+                        self.outAppend(u'<td class="wikidpad"></td>')
+                        colpos += 1
+
+                self.outAppend(u'</tr>\n')
+            
+            self.outAppend(u'</table>')
+
+
+
+
+
     def _processInsertion(self, fullContent, astNode):
         self.astNodeStack.append(astNode)
         astNode.astNodeStack = self.astNodeStack
@@ -1714,6 +1843,7 @@ class HtmlExporter(AbstractExporter):
         astNode -- node of type "insertion"
         """
         wordList = None
+        searchOp = None
         content = None
         htmlContent = None
         key = astNode.key
@@ -1829,7 +1959,7 @@ class HtmlExporter(AbstractExporter):
                 searchOp = SearchReplaceOperation()
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
-                wordList = self.wikiDocument.searchWiki(searchOp)
+#                 wordList = self.wikiDocument.searchWiki(searchOp)
         elif key == u"search":
             searchOp = SearchReplaceOperation()
             searchOp.replaceOp = False
@@ -1853,8 +1983,8 @@ class HtmlExporter(AbstractExporter):
                     searchOp.caseSensitive = True
                 elif ap == "wholewordsonly":
                     searchOp.wholeWord = True
-                elif ap == "removeself" or ap == "removethis":
-                    removeSelf = True
+#                 elif ap == "removeself" or ap == "removethis":
+#                     removeSelf = True
 
             searchOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
             searchOp.indexSearch = 'no' if searchType != Consts.SEARCHTYPE_INDEX \
@@ -1862,20 +1992,20 @@ class HtmlExporter(AbstractExporter):
             searchOp.wildCard = 'regex' if searchType != Consts.SEARCHTYPE_ASIS \
                     else 'no'
 
-            wordList = self.wikiDocument.searchWiki(searchOp)
-
-            # Because a simple search for "foo" includes the page containing
-            # the insertion searching for "foo" there is option "removeself"
-            # to remove the page containing the insertion from the list
-            if removeSelf and self.optsStack["innermostPageUnifName"]\
-                    .startswith(u"wikipage/"):
-                
-                selfPageName = self.wikiDocument.getWikiPageNameForLinkTermOrAsIs(
-                        self.optsStack["innermostPageUnifName"][9:])
-                try:
-                    wordList.remove(selfPageName)
-                except ValueError:
-                    pass
+#             wordList = self.wikiDocument.searchWiki(searchOp)
+# 
+#             # Because a simple search for "foo" includes the page containing
+#             # the insertion searching for "foo" there is option "removeself"
+#             # to remove the page containing the insertion from the list
+#             if removeSelf and self.optsStack["innermostPageUnifName"]\
+#                     .startswith(u"wikipage/"):
+#                 
+#                 selfPageName = self.wikiDocument.getWikiPageNameForLinkTermOrAsIs(
+#                         self.optsStack["innermostPageUnifName"][9:])
+#                 try:
+#                     wordList.remove(selfPageName)
+#                 except ValueError:
+#                     pass
                     
 
 
@@ -1993,149 +2123,32 @@ class HtmlExporter(AbstractExporter):
                         traceback.print_exc(file=s)
                         htmlContent = u'<pre class="wikidpad">' + mbcsDec(s.getvalue(), 'replace')[0] + u'</pre>'
 
+        if searchOp is not None:
+            wordList = self.wikiDocument.searchWiki(searchOp)
+            if ("removeself" in appendices) or ("removethis" in appendices):
+                # Because a simple search for "foo" includes the page containing
+                # the insertion searching for "foo" there is option "removeself"
+                # to remove the page containing the insertion from the list
+                if self.optsStack["innermostPageUnifName"].startswith(u"wikipage/"):
+                    selfPageName = self.wikiDocument.getWikiPageNameForLinkTermOrAsIs(
+                            self.optsStack["innermostPageUnifName"][9:])
+                    try:
+                        wordList.remove(selfPageName)
+                    except ValueError:
+                        pass
+
+
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words
+
+            self.mainControl.getCollator().sort(wordList)
 
             if len(wordList) == 0:
                 content = u""
             else:
-                # wordList was set, so build a nicely formatted list of wiki words
-
-                # Check for desired number of columns (as appendix e.g.
-                # "columns 3" was set) and other settings
-                cols = 1
-                coldirDown = False
-                asList = False
-                colwidth = None
-                tableBorderWidth = 0
-
-                for ap in appendices:
-                    if ap.startswith(u"columns "):
-                        try:
-                            v = int(ap[8:])
-                            if v > 0:
-                                cols = v
-                        except ValueError:
-                            pass
-                    elif ap == "aslist":
-                        # No table but comma-separated list
-                        asList = True
-                    elif ap == u"coldir down":
-                        # Order in table goes downward first then right
-                        # Default is right first then downward
-                        coldirDown = True
-                    elif ap == u"colwidth equal":
-                        # All columns will have same width
-                        colwidth = u"equal"
-                    elif ap.startswith(u"table_border_width "):
-                        try:
-                            v = int(ap[18:])
-                            if v >= 0:
-                                tableBorderWidth = v
-                        except ValueError:
-                            pass
-
-                # To ensure that the sum of percentages is 100 there is a bit
-                # work to do. On the other hand this means that the columns
-                # don't have exactly equal width
-                if colwidth == u"equal":
-                    colwidth = []
-                    usedPerc = 0
-                    for i in range(1, cols + 1):
-                        cw = i * 100 // cols - usedPerc
-                        usedPerc += cw
-                        colwidth.append(u"%i%%" % cw)
-
-                self.mainControl.getCollator().sort(wordList)
-    
-                if asList:
-                    firstWord = True
-                    for word in wordList:
-                        if firstWord:
-                            firstWord = False
-                        else:
-                            self.outAppend(", ")
-                        self._processWikiWord(word)
-                else:
-#                 if cols > 1:
-                    # Convert colwidth to HTML attribute
-                    if colwidth is None:
-                        colwidthAttr = [u""] * cols
-                    else:
-                        colwidthAttr = [u' width="%s"' % cw for cw in colwidth]
-                    
-                    tableAttrs = u""
-                    if tableBorderWidth > 0:
-                        tableAttrs += u' border="%s"' % tableBorderWidth
-                    
-                    # We need a table for the wordlist
-                    self.outAppend(u'<table%s class="wikidpad">\n' % tableAttrs)
-                    colpos = 0
-                    firstRow = True
-
-                    if coldirDown:
-                        # Reorder words for downwards direction
-
-                        result = []
-                        wordCount = len(wordList)
-                        rowCount = (wordCount + cols - 1) // cols
-                        for r in range(rowCount):
-                            result += [wordList[i]
-                                    for i in range(r, wordCount, rowCount)]
-                        wordList = result
-                    
-                    for word in wordList:
-                        if colpos == 0:
-                            # Start table row
-                            self.outAppend(u'<tr class="wikidpad">')
-                            
-                        if firstRow:
-                            self.outAppend(u'<td valign="top"%s class="wikidpad">' %
-                                    colwidthAttr[colpos])
-                        else:
-                            self.outAppend(u'<td valign="top" class="wikidpad">')
-                        self._processWikiWord(word)
-                        self.outAppend(u'</td>')
-                        
-                        colpos += 1
-                        if colpos == cols:
-                            # At the end of a row
-                            colpos = 0
-                            firstRow = False
-                            self.outAppend(u"</tr>\n")
-                            
-                    # Fill the last incomplete row with empty cells if necessary
-                    if colpos > 0:
-                        if firstRow:
-                            while colpos < cols:
-                                self.outAppend(u'<td%s class="wikidpad"></td>' %
-                                        colwidthAttr[colpos])
-                                colpos += 1
-                        else:
-                            while colpos < cols:
-                                self.outAppend(u'<td class="wikidpad"></td>')
-                                colpos += 1
-    
-                        self.outAppend(u'</tr>\n')
-                    
-                    self.outAppend(u'</table>')
-
-
-#                 else:   # cols == 1 and not asList
-#                     firstWord = True
-#                     for word in wordList:
-#                         if firstWord:
-#                             firstWord = False
-#                         else:
-#                             self.outAppend('<br class="wikidpad" />\n')
-#                         
-#                         # TODO:  td  without  table ?
-#                         self.outAppend(u'<td valign="top" class="wikidpad">')
-#                         self._processWikiWord(word)
-#                         self.outAppend(u'</td>')
-                    
+                self._buildInsertionResultList(wordList, self._processWikiWord,
+                        appendices)
                 return
-
 
         if content is not None:
             # Content was set, so use standard formatting rules to create
@@ -2427,14 +2440,14 @@ class HtmlExporter(AbstractExporter):
         Actual token to HTML converter. May be called recursively
         """
         self.astNodeStack.append(pageAst)
-
-        for node in pageAst.iterFlatNamed():
-            if not self.processAstNode(node, content, pageAst):
-                self.outAppend(u'<tt class="wikidpad">' + escapeHtmlNoBreaks(
-                    _(u'[Unknown parser node with name "%s" found]') % node.name) + \
-                    u'</tt>')
-
-        self.astNodeStack.pop()
+        try:
+            for node in pageAst.iterFlatNamed():
+                if not self.processAstNode(node, content, pageAst):
+                    self.outAppend(u'<tt class="wikidpad">' + escapeHtmlNoBreaks(
+                        _(u'[Unknown parser node with name "%s" found]') % node.name) + \
+                        u'</tt>')
+        finally:
+            self.astNodeStack.pop()
 
 
     def processAstNode(self, node, content, pageAst):

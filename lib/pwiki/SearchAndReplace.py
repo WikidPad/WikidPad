@@ -121,7 +121,8 @@ class AbstractSearchNode:
         to support the additonal AbstractContentSearchNode methods
         searchText(), matchesPart(), replace() ).
 
-        Call it for the root of a tree, it will automatically ask its children.
+        Call it for the root of a tree, it will return True iff the node itself
+        and all children (recursively) support it.
         """
         return False
 
@@ -1136,131 +1137,6 @@ class TodoNode(AbstractContentSearchNode):
         self.wordSet = None
 
 
-
-
-
-
-# class TodoNode(AbstractContentSearchNode):
-#     CLASS_PERSID = "Todo"  # Class id for persistence storage
-# 
-#     def __init__(self, sarOp, pattern, valuePattern):
-#         AbstractContentSearchNode.__init__(self, sarOp)
-#         self.compPat = re.compile(pattern,
-#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
-# 
-#         # wordSet and wordList always contain the same words
-#         self.wordSet = None    # used for testWikiPage()
-# 
-#     def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
-#             cycleToStart=False):
-#         """
-#         """
-#         if docPage is None:
-#             return (None, None)
-# 
-# #         wikiWord = docPage.getWikiWord()
-# 
-#         pageAst = docPage.getLivePageAst()
-#         if pageAst is None:
-#             return (None, None)
-# 
-#         for node in pageAst.iterDeepByName("todoEntry"):
-#             if node.pos < searchCharStartPos:
-#                 continue
-#             
-#             entry = node.key + node.delimiter + node.valueNode.getString()
-#             if self.compPat.search(entry):
-#                 return (node.pos, node.pos + node.strLength)
-# 
-#         if cycleToStart and searchCharStartPos > 0:
-#             # Try again from beginning
-#             for node in pageAst.iterDeepByName("todoEntry"):
-#                 if node.pos >= searchCharStartPos:
-#                     break
-#                 entry = node.key + node.delimiter + node.valueNode.getString()
-#                 if self.compPat.search(entry):
-#                     return (node.pos, node.pos + node.strLength)
-# 
-#         # Not found
-#         return (None, None)
-# 
-# 
-#     def _getAllTodos(self, wikiDocument, commonCache):
-#         allTodos = commonCache.get("allTodos")
-#         
-#         if allTodos is None:
-#             allTodos = wikiDocument.getTodos()
-#             commonCache["allTodos"] = allTodos
-# 
-#         return allTodos
-# 
-# 
-#     def beginWikiSearch(self, wikiDocument, commonCache):
-#         """
-#         Always called before a new wiki-wide search operation begins.
-#         Fills wordSet.
-#         TODO: Maybe use alternative implementation if only a few words are
-#         checked
-#         """
-#         wordSet = set()
-#         
-#         for w, t in self._getAllTodos(wikiDocument, commonCache):
-#             if self.compPat.search(t):
-#                 wordSet.add(w)
-# 
-#         self.wordSet = wordSet
-# 
-# 
-#     def testWikiPage(self, word, text):
-#         return word in self.wordSet
-# 
-# 
-#     def serializeBin(self, stream):
-#         """
-#         Read or write content of this object to or from a serialize stream
-# 
-#         stream -- StringOps.SerializeStream object
-#         """
-#         version = stream.serUint32(0)
-#         
-#         if version != 0:
-#             raise SerializationException
-#             
-#         pattern = stream.serUniUtf8(self.compPat.pattern)
-# 
-#         if pattern != self.compPat.pattern:
-#             self.compPat = re.compile(pattern,
-#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
-# 
-#     def serializeToXml(self, xmlNode, xmlDoc):
-#         """
-#         Modify XML node to contain all information about this object.
-#         """
-#         serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
-# 
-# 
-#     def serializeFromXml(self, xmlNode):
-#         """
-#         Set object state from data in xmlNode)
-#         """
-#         pattern = serFromXmlUnicode(xmlNode, u"pattern")
-#         if pattern != self.compPat.pattern:
-#             self.compPat = re.compile(pattern,
-#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
-# 
-#     def getPattern(self):
-#         """
-#         Return the pattern string
-#         """
-#         return self.compPat.pattern
-# 
-# 
-#     def endWikiSearch(self):
-#         """
-#         Called after a wiki-wide search operation ended.
-#         Clears wordList
-#         """
-#         self.wordSet = None
 
 
 # ----------------------------------------------------------------------
