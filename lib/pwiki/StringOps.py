@@ -24,7 +24,6 @@ from WikiExceptions import *
 
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
-
 from SystemInfo import isUnicode, isOSX, isLinux, isWindows, isWin9x
 
 
@@ -454,6 +453,87 @@ def splitIndent(text):
 def measureIndent(indent):
     return len(indent)
 
+
+def findLineStart(text, pos):
+    # This is even right if no newline is found
+    return text.rfind(u"\n", 0, pos) + 1
+
+
+def findLineEnd(text, pos):
+    result = text.find(u"\n", pos)
+    if result == -1:
+        return len(text)
+    else:
+        return result
+    
+    
+
+LASTWORDSTART_RE = _re.compile(r"(?:.*\W)?()\w", _re.UNICODE)
+FIRSTWORDEND_RE = _re.compile(r".*?()(?:\W|(?!.))", _re.UNICODE)
+
+
+
+def getNearestWordStart(text, pos):
+    lsPos = findLineStart(text, pos)
+
+    match = LASTWORDSTART_RE.match(text, lsPos, pos + 1)
+    if match is not None:
+        return match.start(1)
+    else:
+        return pos
+        
+
+def getNearestWordEnd(text, pos):
+    match = FIRSTWORDEND_RE.match(text, pos)
+    if match is not None:
+        return match.start(1)
+    else:
+        return pos
+
+
+def styleSelection(text, start, afterEnd, startChars, endChars=None):
+    """
+    Called when selected text (between start and afterEnd)
+    e.g. in editor should be styled with startChars and endChars
+    text -- Whole text
+    start -- Start position of selection
+    afterEnd -- After end position of selection
+
+    startChars -- Characters to place before selection
+    endChars -- Characters to place after selection. If None, startChars
+            is used for that, too
+    
+    Returns tuple (replacement, repStart, repAfterEnd, selStart, selAfterEnd) where
+
+        replacement -- replacement text
+        repStart -- Start of characters to delete in original text
+        repAfterEnd -- After end of characters to delete
+        selStart -- Recommended start of editor selection after replacement
+            was done
+        selAfterEnd -- Recommended after end of editor selection after replacement
+    """
+    if endChars is None:
+        endChars = startChars
+
+    if start == afterEnd:
+        start = getNearestWordStart(text, start)
+        afterEnd = getNearestWordEnd(text, start)
+        
+    emptySelection = start == afterEnd  # is selection empty
+
+    replacement = startChars + text[start:afterEnd] + endChars
+
+    if emptySelection:
+        # If selection is empty, cursor should in the end
+        # stand between the style characters
+        cursorPos = afterEnd + len(startChars)
+    else:
+        # If not, it will stand after styled word
+        cursorPos = afterEnd + len(startChars) + len(endChars)
+
+    return (replacement, start, afterEnd, cursorPos, cursorPos)
+
+    
 
 def splitFill(text, delim, count, fill=u""):
     """

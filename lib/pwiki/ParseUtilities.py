@@ -270,7 +270,6 @@ class BasicLanguageHelper(object):
     def createAttributeFromComponents(key, value, wikiPage=None):
         """
         Build an attribute from key and value.
-        TODO: Check for necessary escaping
         """
         raise InternalError()
         
@@ -366,6 +365,31 @@ class BasicLanguageHelper(object):
         return False
 
 
+    @staticmethod 
+    def formatSelectedText(text, start, afterEnd, formatType, settings):
+        """
+        Called when selected text (between start and afterEnd)
+        e.g. in editor should be formatted (e.g. bold or as heading)
+        text -- Whole text
+        start -- Start position of selection
+        afterEnd -- After end position of selection
+
+        formatType -- string to describe type of format
+        settings -- dict with additional information, currently ignored
+        
+        Returns None if operation wasn't supported or possible or 
+            tuple (replacement, repStart, repAfterEnd, selStart, selAfterEnd) where
+    
+            replacement -- replacement text
+            repStart -- Start of characters to delete in original text
+            repAfterEnd -- After end of characters to delete
+            selStart -- Recommended start of editor selection after replacement
+                was done
+            selAfterEnd -- Recommended after end of editor selection after replacement
+        """
+        return None
+
+
     @staticmethod
     def getNewDefaultWikiSettingsPage(mainControl):
         """
@@ -392,6 +416,7 @@ class BasicLanguageHelper(object):
         return []
         
         
+    @staticmethod
     def getFoldingNodeDict(self):
         """
         Retrieve the folding node dictionary which tells

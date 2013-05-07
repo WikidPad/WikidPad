@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for MediaWiki language "MediaWiki 1"
-# Last modified (format YYYY-MM-DD): 2013-04-29
+# Last modified (format YYYY-MM-DD): 2013-05-06
 
 
 import locale, pprint, time, sys, string, traceback
@@ -13,8 +13,8 @@ import wx
 
 import re    # from pwiki.rtlibRepl import re
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import revStr, urlFromPathname, \
-        urlQuoteSpecific, HtmlStartTag, HtmlEmptyTag, HtmlEndTag
+from pwiki import StringOps
+from pwiki.StringOps import revStr, HtmlStartTag, HtmlEmptyTag, HtmlEndTag
 
 from pwiki.WikiDocument import WikiDocument
 from pwiki.OptionsDialog import PluginOptionsPanel
@@ -184,7 +184,6 @@ whitespace = whitespace.setParseAction(actionHideOnEmpty)
 whitespaceOrNl = buildRegex(ur"[ \t\n]*")
 whitespaceOrNl = whitespaceOrNl.setParseAction(actionHideOnEmpty)
 
-
 eolOrEot = buildRegex(ur"\n|(?!.)")
 
 
@@ -293,6 +292,8 @@ def actionHeading(s, l, st, t):
     t.contentNode = t.findFlatByName("headingContent")
     if t.contentNode is None:
         raise ParseException(s, l, "a heading needs content")
+#     if t.contentNode.findFlatByName("newlineInHeading") is not None:
+#         raise ParseException(s, l, "heading must not contain newline")
 
 
 headingStartTag = buildRegex(ur"^={1,15}", "headingStartTag")
@@ -303,6 +304,8 @@ headingEnd = buildRegex(ur"={1,15}", "headingEndTag") + whitespace + \
 heading = headingStartTag + Optional(buildRegex(ur" ")) + \
         headingContent + headingEnd
 heading = heading.setResultsNameNoCopy("heading").setParseAction(actionHeading)
+
+newlineInHeading = buildRegex(ur"\n", "newlineInHeading")
 
 
 
@@ -1406,11 +1409,11 @@ titleContent << temp
 findMarkupInHeading = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlighting,
         urlRef, imageUrl, insertion, escapedChar, nowikiStandalone, footnote, wikiWord, bodyHtmlTag,
-        htmlTag, htmlEntity, htmlComment], endToken)
+        htmlTag, htmlEntity, htmlComment], endToken | buildRegex(ur"\n"))
 findMarkupInHeading = findMarkupInHeading.setPseudoParseAction(
         pseudoActionFindMarkup)
 
-temp = ZeroOrMore(NotAny(endToken) + findMarkupInHeading)
+temp = ZeroOrMore(NotAny(endToken | buildRegex(ur"\n")) + findMarkupInHeading)
 temp = temp.leaveWhitespace().parseWithTabs()
 headingContent << temp
 
@@ -2196,9 +2199,9 @@ class _TheHelper(object):
 
         if not relative:
             if protocol == "wiki":
-                url = u"wiki:" + urlFromPathname(path, addSafe=addSafe)
+                url = u"wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
             else:
-                url = u"file:" + urlFromPathname(path, addSafe=addSafe)
+                url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
 
         if bracketed:
             url = BracketStart + url + BracketEnd
@@ -2541,21 +2544,61 @@ class _TheHelper(object):
         return False
 
 
+    @staticmethod 
+    def formatSelectedText(text, start, afterEnd, formatType, settings):
+        """
+        Called when selected text (between start and afterEnd)
+        e.g. in editor should be formatted (e.g. bold or as heading)
+        text -- Whole text
+        start -- Start position of selection
+        afterEnd -- After end position of selection
+
+        formatType -- string to describe type of format
+        settings -- dict with additional information, currently ignored
+        
+        Returns None if operation wasn't supported or possible or 
+            tuple (replacement, repStart, repAfterEnd, selStart, selAfterEnd) where
+    
+            replacement -- replacement text
+            repStart -- Start of characters to delete in original text
+            repAfterEnd -- After end of characters to delete
+            selStart -- Recommended start of editor selection after replacement
+                was done
+            selAfterEnd -- Recommended after end of editor selection after replacement
+        """
+        if formatType == "bold":
+            return StringOps.styleSelection(text, start, afterEnd, u"'''")
+        elif formatType == "italics":
+            return StringOps.styleSelection(text, start, afterEnd, u"''")
+        elif formatType == "plusHeading":
+            level = settings.get("headingLevel", 1)
+            ls = StringOps.findLineStart(text, start)
+            le = StringOps.findLineEnd(text, start)
+            titleSurrounding = settings.get("titleSurrounding", u"")
+            cursorShift = level + len(titleSurrounding)
+
+            return (u'=' * level + titleSurrounding + text[ls:le] +
+                    titleSurrounding + u'=' * level, ls, le,
+                    start + cursorShift, start + cursorShift)
+
+        return None
+
+
     @staticmethod
     def getNewDefaultWikiSettingsPage(mainControl):
         """
         Return default text of the "WikiSettings" page for a new wiki.
         """
-        return _(u"""++ Wiki Settings
+        return _(u"""== Wiki Settings ==
 
 These are your default global settings.
 
-[global.importance.low.color: grey]
-[global.importance.high.bold: true]
-[global.contact.icon: contact]
-[global.wrap: 70]
+[[global.importance.low.color: grey]]
+[[global.importance.high.bold: true]]
+[[global.contact.icon: contact]]
+[[global.wrap: 70]]
 
-[icon: cog]
+[[icon: cog]]
 """)  # TODO Localize differently?
 
 
@@ -2588,7 +2631,8 @@ These are your default global settings.
         }
 
 
-    def getFoldingNodeDict(self):
+    @staticmethod
+    def getFoldingNodeDict():
         """
         Retrieve the folding node dictionary which tells
         which AST nodes (other than "heading") should be processed by

@@ -553,14 +553,19 @@ Allows to override the previously saved state of open tabs (if tab should show e
 
 +++ Headings
 
-*Heading prefix*
-Control the heading level of the initial main title of new pages and fill between one and fifteen '+' in this field (if using default wiki language). Default is "++".
-
 *Wikiword to heading*
 How should the main heading of new pages be generated from the wikiword:
     * As is: Use wikiword as heading
     * Add spaces: Add spaces to wikiword in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
     * No title: Don't show a heading at all
+
+*Heading prefix*
+Control the heading level of the initial main title of new pages and fill between one and fifteen '+' in this field (if using default wiki language). Default was "++".
+
+This option is deprecated and should be empty for new wikis. Use "Heading level" option instead.
+
+*Heading level*
+Set the heading level of the initial main title of new pages. If it is set to 0, no heading level formatting is added. Default for existing wikis is 0, for new wikis it is 2.
 
 *Use link title if present*
 If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.

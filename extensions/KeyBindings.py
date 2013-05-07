@@ -121,23 +121,3 @@ Plugin_GraphVizStructure_ShowRelationGraphSource = ""
 Plugin_GraphVizStructure_ShowChildGraph = ""
 Plugin_GraphVizStructure_ShowChildGraphSource = ""
 
-
-def makeBold(editor):
-    editor.styleSelection(u'*')
-
-def makeItalic(editor):
-    editor.styleSelection(u'_')
-
-def addHeading(editor):
-    bytePos = editor.PositionAfter(editor.GetCurrentPos())
-    editor.CmdKeyExecute(wx.stc.STC_CMD_HOME)
-    editor.AddText(u'+')
-    editor.GotoPos(bytePos)
-
-# Replaced by "createWikiLinkFromText" in wiki language helper
-# def makeWikiWord(editor):
-#     text = editor.GetSelectedText()
-#     text = text.replace(u"'", u"")
-#     text = text[0:1].upper() + text[1:]
-#     text = u"[" + text + u"]"
-#     editor.ReplaceSelection(text)

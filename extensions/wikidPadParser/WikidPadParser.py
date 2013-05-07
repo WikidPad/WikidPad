@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2013-04-30
+# Last modified (format YYYY-MM-DD): 2013-05-06
 
 
 import locale, pprint, time, sys, string, traceback
@@ -13,8 +13,8 @@ import wx
 
 import re    # from pwiki.rtlibRepl import re
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr, urlFromPathname, \
-        urlQuoteSpecific
+from pwiki import StringOps
+from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr
 
 from pwiki.WikiDocument import WikiDocument
 from pwiki.OptionsDialog import PluginOptionsPanel
@@ -913,7 +913,7 @@ def actionUrlLink(s, l, st, t):
     t.coreNode = t.findFlatByName("url")
 
     # Valid URL but may differ from original input
-    t.url = urlQuoteSpecific(t.coreNode.getString(), ' ')
+    t.url = StringOps.urlQuoteSpecific(t.coreNode.getString(), ' ')
     t.titleNode = t.findFlatByName("title")
 #     print "--actionUrlLink3", repr(t.url)
 
@@ -2066,9 +2066,9 @@ class _TheHelper(object):
 
         if not relative:
             if protocol == "wiki":
-                url = u"wiki:" + urlFromPathname(path, addSafe=addSafe)
+                url = u"wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
             else:
-                url = u"file:" + urlFromPathname(path, addSafe=addSafe)
+                url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
 
         if bracketed:
             url = BracketStart + url + BracketEnd
@@ -2484,6 +2484,44 @@ class _TheHelper(object):
         return False
 
 
+    @staticmethod 
+    def formatSelectedText(text, start, afterEnd, formatType, settings):
+        """
+        Called when selected text (between start and afterEnd)
+        e.g. in editor should be formatted (e.g. bold or as heading)
+        text -- Whole text
+        start -- Start position of selection
+        afterEnd -- After end position of selection
+
+        formatType -- string to describe type of format
+        settings -- dict with additional information, currently ignored
+        
+        Returns None if operation wasn't supported or possible or 
+            tuple (replacement, repStart, repAfterEnd, selStart, selAfterEnd) where
+    
+            replacement -- replacement text
+            repStart -- Start of characters to delete in original text
+            repAfterEnd -- After end of characters to delete
+            selStart -- Recommended start of editor selection after replacement
+                was done
+            selAfterEnd -- Recommended after end of editor selection after replacement
+        """
+        if formatType == "bold":
+            return StringOps.styleSelection(text, start, afterEnd, u"*")
+        elif formatType == "italics":
+            return StringOps.styleSelection(text, start, afterEnd, u"_")
+        elif formatType == "plusHeading":
+            level = settings.get("headingLevel", 1)
+            titleSurrounding = settings.get("titleSurrounding", u"")
+            cursorShift = level + len(titleSurrounding)
+
+            ls = StringOps.findLineStart(text, start)
+            return (u'+' * level + titleSurrounding, ls, ls,
+                    start + cursorShift, start + cursorShift)
+
+        return None
+
+
     @staticmethod
     def getNewDefaultWikiSettingsPage(mainControl):
         """
@@ -2531,7 +2569,8 @@ These are your default global settings.
         }
 
 
-    def getFoldingNodeDict(self):
+    @staticmethod
+    def getFoldingNodeDict():
         """
         Retrieve the folding node dictionary which tells
         which AST nodes (other than "heading") should be processed by

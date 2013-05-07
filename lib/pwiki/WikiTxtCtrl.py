@@ -2046,6 +2046,21 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.EndUndoAction()
 
 
+    def formatSelection(self, formatType):
+        start, afterEnd = self.GetSelectionCharPos()    
+        info = self.wikiLanguageHelper.formatSelectedText(self.GetText(),
+                start, afterEnd, formatType, {})
+        if info is None:
+            return False
+        
+        replacement, repStart, repAfterEnd, selStart, selAfterEnd = info[:5]
+        
+        self.SetSelectionByCharPos(repStart, repAfterEnd)
+        self.ReplaceSelection(replacement)
+        self.SetSelectionByCharPos(selStart, selAfterEnd)
+        return True    
+        
+
     def getPageAst(self):
         docPage = self.getLoadedDocPage()
         if docPage is None:

@@ -1273,37 +1273,45 @@ class WikiPage(AbstractWikiPage):
         super(WikiPage, self).informVisited()
 
 
-    def _changeHeadingForTemplate(self, content):
+    def _changeHeadingForTemplate(self, templatePage):
         """
         Modify the heading of a template page's content to match the page
         created from the template.
         """
         # Prefix is normally u"++"
-        pageTitlePrefix = \
-                self.getWikiDocument().getPageTitlePrefix() + u" "
-                
+#         pageTitlePrefix = \
+#                 self.getWikiDocument().getPageTitlePrefix() + u" "
+
+        content = templatePage.getContent()
+        templatePage = templatePage.getNonAliasPage()
+        wikiDoc = self.getWikiDocument()
+
         if self.suggNewPageTitle is None:
-            wikiWordHead = self.getWikiDocument().getWikiPageTitle(
-                    self.getWikiWord())
+            wikiWordHead = wikiDoc.getWikiPageTitle(self.getWikiWord())
         else:
             wikiWordHead = self.suggNewPageTitle
 
         if wikiWordHead is None:
             return content
 
-        wikiWordHead = pageTitlePrefix + wikiWordHead + u"\n"
+        wikiWordHead = wikiDoc.formatPageTitle(wikiWordHead) + u"\n"
+                
+        # Based on parts of WikiDocument.renameWikiWord()
+        # Maybe refactor
 
-        # Remove current heading, if present. removeFirst holds number of
-        # characters to remove at beginning when prepending new title 
+        templateWordTitle = wikiDoc.getWikiPageTitle(templatePage.getWikiWord())
+        
+        if templateWordTitle is not None:
+            prevTitle = wikiDoc.formatPageTitle(templateWordTitle) + u"\n"
+        else:
+            prevTitle = None
 
-        removeFirst = 0
-        if content.startswith(pageTitlePrefix):
-            try:
-                removeFirst = content.index(u"\n", len(pageTitlePrefix)) + 1
-            except ValueError:
-                pass
+        if prevTitle is not None and content.startswith(prevTitle):
+            # Replace previous title with new one
+            content = content[len(prevTitle):]
 
-        return wikiWordHead + content[removeFirst:]
+        return wikiWordHead + content
+
 
 
     def getContentOfTemplate(self, templatePage, parentPage):
@@ -1316,7 +1324,7 @@ class WikiPage(AbstractWikiPage):
         tplHeading = parentPage.getAttributeOrGlobal(
                 u"template_head", u"auto")
         if tplHeading in (u"auto", u"automatic"):
-            content = self._changeHeadingForTemplate(content)
+            content = self._changeHeadingForTemplate(templatePage)
 
         return content
 
@@ -1417,9 +1425,7 @@ class WikiPage(AbstractWikiPage):
                     title = self.suggNewPageTitle
 
                 if title is not None:
-                    content = u"%s %s\n\n" % \
-                            (self.wikiDocument.getPageTitlePrefix(),
-                            title)
+                    content = self.wikiDocument.formatPageTitle(title) + u"\n\n"
                 else:
                     content = u""
 

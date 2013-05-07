@@ -663,6 +663,8 @@ class OptionsDialog(wx.Dialog):
                     ]),
 
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
+            ("wikiPageTitle_headingLevel", "scWikiPageTitleHeadingLevel" , "spin"),
+
             ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
             ("wikiPageTitle_fromLinkTitle", "cbWikiPageTitleFromLinkTitle", "b"),
             ("headingsAsAliases_depth", "scHeadingsAsAliasesDepth", "spin"),

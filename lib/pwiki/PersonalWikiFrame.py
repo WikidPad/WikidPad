@@ -1737,21 +1737,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu = wx.Menu()
         
         self.addMenuItem(formatMenu, _(u'&Bold') + u'\t' + self.keyBindings.Bold,
-                _(u'Bold'), lambda evt: self.keyBindings.makeBold(self.getActiveEditor()),
+                _(u'Bold'), lambda evt: self.getActiveEditor().formatSelection("bold"),
                 "tb_bold",
                 menuID=GUI_ID.CMD_FORMAT_BOLD,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
                     self.OnUpdateDisNotWikiPage))
 
         self.addMenuItem(formatMenu, _(u'&Italic') + u'\t' + self.keyBindings.Italic,
-                _(u'Italic'), lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()),
+                _(u'Italic'), lambda evt: self.getActiveEditor().formatSelection("italics"),
                 "tb_italic",
                 menuID=GUI_ID.CMD_FORMAT_ITALIC,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
                     self.OnUpdateDisNotWikiPage))
 
         self.addMenuItem(formatMenu, _(u'&Heading') + u'\t' + self.keyBindings.Heading,
-                _(u'Add Heading'), lambda evt: self.keyBindings.addHeading(self.getActiveEditor()),
+                _(u'Add Heading'), lambda evt: self.getActiveEditor().formatSelection("plusHeading"),
                 "tb_heading",
                 menuID=GUI_ID.CMD_FORMAT_HEADING_PLUS,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
@@ -3001,6 +3001,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiConfig.set("main", "editor_text_mode",
                             self.getConfig().getboolean("main",
                             "newWikiDefault_editor_text_mode", False))
+                            
+                    # Set here because of legacy support.
+                    # See option description in "Configuration.py"
+                    wikiConfig.set("main", "wikiPageTitle_headingLevel", "2")
 
                     wikiConfig.set("wiki_db", "data_dir", "data")
                     wikiConfig.save()
@@ -4636,8 +4640,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # TODO Respect template attribute?
                 title = self.wikiDataManager.getWikiPageTitle(validWikiWord)
                 if title is not None:
-                    ptp = self.wikiDataManager.getPageTitlePrefix()
-                    page.replaceLiveText(u"%s %s\n\n%s" % (ptp, title, text))
+                    page.replaceLiveText(u"%s\n\n%s" % \
+                            (self.wikiDataManager.formatPageTitle(title), text))
                     self.saveDocPage(page)
                 else:
                     page.replaceLiveText(text)

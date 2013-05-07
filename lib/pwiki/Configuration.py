@@ -907,17 +907,17 @@ WIKIDEFAULTS = {
                                          # "compact_sqlite" for WikidPadCompact
                                          # or "original_sqlite"
 #     ("main", "footnotes_as_wikiwords"): "False",  # Interpret footnotes (e.g. [42]) as wiki words?
-    ("main", "db_pagefile_suffix"): ".wiki",  # Suffix of the page files for "Original ..."
+    ("main", "db_pagefile_suffix"): u".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
     ("main", "export_default_dir"): u"",  # Default directory for exports, u"" means fill in last active directory
     
-    ("main", "wiki_readOnly"): "False",   # Should wiki be read only?
+    ("main", "wiki_readOnly"): u"False",   # Should wiki be read only?
 
-    ("main", "log_window_autoshow"): "Gray", # Automatically show log window if messages added? "Gray" means to look at
+    ("main", "log_window_autoshow"): u"Gray", # Automatically show log window if messages added? "Gray" means to look at
             # global configuration for same setting
 
-    ("main", "wikiPageFiles_asciiOnly"): "False", # Use only ASCII characters in filenames of wiki page files.
-    ("main", "wikiPageFiles_gracefulOutsideAddAndRemove"): "True",   # Handle missing wiki page files gracefully and try
+    ("main", "wikiPageFiles_asciiOnly"): u"False", # Use only ASCII characters in filenames of wiki page files.
+    ("main", "wikiPageFiles_gracefulOutsideAddAndRemove"): u"True",   # Handle missing wiki page files gracefully and try
             # to find existing files even if they are not in database.
 
     ("main", "headingsAsAliases_depth"): "0",  # Maximum heading depth for which aliases should be generated for
@@ -934,28 +934,32 @@ WIKIDEFAULTS = {
 
 
     # For file storage (esp. identity check)
-    ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical
-    ("main", "fileStorage_identity_filenameMustMatch"): "False",  # Filename must match for file 
-    ("main", "fileStorage_identity_modDateIsEnough"): "False",
+    ("main", "fileStorage_identity_modDateMustMatch"): u"False",  # Modification date must match for file to be identical
+    ("main", "fileStorage_identity_filenameMustMatch"): u"False",  # Filename must match for file 
+    ("main", "fileStorage_identity_modDateIsEnough"): u"False",
             # Same modification date is enough to claim files identical (no content compare)
 
-    ("main", "fileSignature_timeCoarsening"): "0", # Coarsening of time stamp in file signature blocks (helpful when
+    ("main", "fileSignature_timeCoarsening"): u"0", # Coarsening of time stamp in file signature blocks (helpful when
             # transferring wikis between different file systems)
 
     ("main", "editor_text_mode"): u"False",  # force the editor to write platform dependent files to disk
             # (line endings as CR/LF, LF or CR)
 
-    ("main", "wikiPageTitlePrefix"): "++",   # Prefix for main title of new pages
-    ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
+    ("main", "wikiPageTitlePrefix"): u"",   # Prefix for main title of new pages.
+            # The prefix would be put before the formatted heading title (formatted according to heading level from next option)
+    ("main", "wikiPageTitle_headingLevel"): u"0",   # Heading level for main title of new pages.
+            # 0 means to not modify title. The default "0" is intended for existing wikis with a "wikiPageTitlePrefix"
+            # set. For newly created wikis this option is set to "2
+    ("main", "wikiPageTitle_creationMode"): u"1",   # How to create title from name of a new wiki word:
             # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")
             # 1: Add spaces before uppercase letter ("NewWikiWord" -> "New Wiki Word")
             # 2: No title at all
-    ("main", "wikiPageTitle_fromLinkTitle"): "False",   # If clicking on a title link, e.g. [wiki word|interesting title]
+    ("main", "wikiPageTitle_fromLinkTitle"): u"False",   # If clicking on a title link, e.g. [wiki word|interesting title]
             # of a non-existing page use that title as title of the page.
 
-    ("main", "wiki_icon"): "",   # Name of the wiki icon. Empty if default icon should be used
+    ("main", "wiki_icon"): u"",   # Name of the wiki icon. Empty if default icon should be used
 
-    ("main", "hotKey_showHide_byWiki"): ""   # System-wide hotkey to show/hide program. It is described
+    ("main", "hotKey_showHide_byWiki"): u""   # System-wide hotkey to show/hide program. It is described
             # in the usual shortcut syntax e.g. "Ctrl-Alt-A".
             # This key is bound to the wiki. Another key above can be bound to the whole app
     }

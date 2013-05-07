@@ -679,13 +679,39 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiConfig().get("main", "wiki_wikiLanguage",
                 "wikidpad_default_2_0")
 
+    def formatPageTitle(self, rawTitle, basePage=None):
+        ptp = unescapeWithRe(self.getWikiConfig().get(
+                "main", "wikiPageTitlePrefix", u""))
+                
+        level = self.getWikiConfig().getint("main",
+                "wikiPageTitle_headingLevel", 0)
+        
+        if level > 0:
+            langHelper = GetApp().createWikiLanguageHelper(
+                    self.getWikiDefaultWikiLanguage())
+    
+            info = langHelper.formatSelectedText(rawTitle,
+                    0, len(rawTitle), "plusHeading",
+                    {"headingLevel": level, "titleSurrounding": u" "}) # TODO level
+
+            if info is None:
+                return ptp + u" " + rawTitle
+    
+            replacement, repStart, repAfterEnd, selStart, selAfterEnd = info[:5]
+            
+            return ptp + rawTitle[:repStart] + replacement + rawTitle[repAfterEnd:]
+        else:
+            return ptp + u" " + rawTitle
+
+
+
     def getPageTitlePrefix(self):
         """
         Return the default prefix for a wiki page main title.
         By default, it is u"++ "
         """
         return unescapeWithRe(self.getWikiConfig().get(
-                "main", "wikiPageTitlePrefix", "++"))
+                "main", "wikiPageTitlePrefix", u"++"))
 
     def getWikiTempDir(self):
 #         if GetApp().getGlobalConfig().getboolean("main", "tempFiles_inWikiDir",
@@ -1605,12 +1631,10 @@ class WikiDataManager(MiscEventSourceMixin):
         
         # Check if replacing previous title of page with new one
 
-        # Prefix is normally u"++"
-        pageTitlePrefix = self.getPageTitlePrefix() + u" "
         wikiWordTitle = self.getWikiPageTitle(wikiWord)
         
         if wikiWordTitle is not None:
-            prevTitle = pageTitlePrefix + self.getWikiPageTitle(wikiWord) + u"\n"
+            prevTitle = self.formatPageTitle(wikiWordTitle) + u"\n"
         else:
             prevTitle = None
 
@@ -1689,7 +1713,7 @@ class WikiDataManager(MiscEventSourceMixin):
         content = page.getLiveText()
         if prevTitle is not None and content.startswith(prevTitle):
             # Replace previous title with new one
-            content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
+            content = self.formatPageTitle(self.getWikiPageTitle(toWikiWord)) + \
                     u"\n" + content[len(prevTitle):]
             page.replaceLiveText(content)
 
