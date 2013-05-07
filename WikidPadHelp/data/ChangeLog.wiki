@@ -1,6 +1,18 @@
 ﻿++ Change Log
 
 
+May  07, 2013 (2.3beta09_02)
+
+    * New wiki-bound option to set heading level for main title of
+      new pages. Old option to set title prefix is outdated.
+      See [OptionsDialog#*Heading level*]
+    * Bug fixed: Headings in MediaWiki language could span over
+      multiple lines
+    * Bug fixed: Basic formatting (bold, italics, heading)
+      didn't work for MediaWiki syntax
+
+
+
 May  04, 2013 (2.3beta09)
 
     * Support for alternative MediaWiki syntax.
