@@ -9,6 +9,9 @@ An effort has been made to try to maintain an API as similar to that of :class:`
 
 The default theme that is used is :class:`~lib.agw.aui.tabart.AuiDefaultTabArt`, which provides a modern, glossy
 look and feel. The theme can be changed by calling :meth:`AuiNotebook.SetArtProvider() <AuiNotebook.SetArtProvider>`.
+
+
+Modified by Michael Butscher, last change 2013/05/18
 """
 
 __author__ = "Andrea Gavana <andrea.gavana@gmail.com>"
@@ -17,17 +20,18 @@ __date__ = "31 March 2009"
 
 import wx
 import types
-import datetime
+import datetime, traceback
 
 from wx.lib.expando import ExpandoTextCtrl
 
+# TODO: from . import framemanager   doesn't work
 import framemanager
-import tabart as TA
+from . import tabart as TA
 
-from aui_utilities import LightColour, MakeDisabledBitmap, TabDragImage
-from aui_utilities import TakeScreenShot, RescaleScreenShot
+from .aui_utilities import LightColour, MakeDisabledBitmap, TabDragImage
+from .aui_utilities import TakeScreenShot, RescaleScreenShot
 
-from aui_constants import *
+from .aui_constants import *
 
 # AuiNotebook events
 wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE = wx.NewEventType()
@@ -50,6 +54,8 @@ wxEVT_COMMAND_AUINOTEBOOK_BG_MIDDLE_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_DOWN = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_DCLICK = wx.NewEventType()
+
+wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED = wx.NewEventType()
 
 # Define a new event for a drag cancelled
 wxEVT_COMMAND_AUINOTEBOOK_CANCEL_DRAG = wx.NewEventType()
@@ -106,6 +112,8 @@ EVT_AUINOTEBOOK_BEGIN_LABEL_EDIT = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_BE
 EVT_AUINOTEBOOK_END_LABEL_EDIT = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_END_LABEL_EDIT, 1)
 """ The user finished editing a tab label. """
 
+EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED, 1)
+""" Visibility of a page changed. """
 
 # -----------------------------------------------------------------------------
 # Auxiliary class: TabTextCtrl
@@ -382,6 +390,7 @@ class CommandNotebookEvent(wx.PyCommandEvent):
         self.dispatched = 0
         self.label = ""
         self.editCancelled = False
+        self.visible = False
         self.page = None
 
 
@@ -469,6 +478,22 @@ class CommandNotebookEvent(wx.PyCommandEvent):
         self.editCancelled = editCancelled
 
 
+    def IsVisible(self):
+        """ Returns current visibility of page (for ``EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED`` only)."""
+
+        return self.visible
+
+
+    def SetVisible(self, visible):
+        """
+        Sets current visibility of page (for ``EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED`` only).
+
+        :param bool `editCancelled`: whether the editing action has been cancelled or not.
+        """
+
+        self.visible = visible
+
+
     def GetLabel(self):
         """Returns the label-itemtext (for ``EVT_AUINOTEBOOK_BEGIN`` | ``END_LABEL_EDIT`` only)."""
 
@@ -483,6 +508,22 @@ class CommandNotebookEvent(wx.PyCommandEvent):
         """
 
         self.label = label
+        
+    def GetPageWindow(self):
+        """Returns the page window (for ???``EVT_AUINOTEBOOK_BEGIN`` | ``END_LABEL_EDIT`` only)."""
+
+        return self.page
+
+
+    def SetPageWindow(self, page):
+        """
+        Sets the page window. Useful only for ??? ``EVT_AUINOTEBOOK_END_LABEL_EDIT``.
+
+        :param string `label`: the new label.
+        """
+
+        self.page = page
+    
 
 
     Page      = property(lambda self: self.page,
@@ -1091,7 +1132,6 @@ class AuiTabContainer(object):
 
         :param `wndOrInt`: an instance of :class:`Window` or an integer specifying a tab index.
         """
-
         if type(wndOrInt) == types.IntType:
 
             if wndOrInt >= len(self._pages):
@@ -1749,26 +1789,6 @@ class AuiTabContainer(object):
         return None
 
 
-    def DoShowHide(self):
-        """
-        This function shows the active window, then hides all of the other windows
-        (in that order).
-        """
-
-        pages = self.GetPages()
-
-        # show new active page first
-        for page in pages:
-            if page.active:
-                page.window.Show(True)
-                break
-
-        # hide all other pages
-        for page in pages:
-            if not page.active:
-                page.window.Show(False)
-
-
 # ----------------------------------------------------------------------
 # -- AuiTabCtrl class implementation --
 
@@ -1816,6 +1836,8 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_UP, self.PropagateEventToNotebook)
+        self.Bind(wx.EVT_CHAR, self.PropagateEventToNotebook)
         self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.OnCaptureLost)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)
@@ -2047,7 +2069,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
         if wnd:
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_UP, self.GetId())
             e.SetEventObject(self)
-            e.Page = wnd
+            e.SetPageWindow(wnd)
             e.SetSelection(self.GetIdxFromWindow(wnd))
             self.GetEventHandler().ProcessEvent(e)
         elif not self.ButtonHitTest(x, y):
@@ -2074,7 +2096,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
         if wnd:
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN, self.GetId())
             e.SetEventObject(self)
-            e.Page = wnd
+            e.SetPageWindow(wnd)
             e.SetSelection(self.GetIdxFromWindow(wnd))
             self.GetEventHandler().ProcessEvent(e)
         elif not self.ButtonHitTest(x, y):
@@ -2097,7 +2119,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_UP, self.GetId())
             e.SetEventObject(self)
             e.Selection = self.GetIdxFromWindow(wnd)
-            e.Page = wnd
+            e.SetPageWindow(wnd)
             self.GetEventHandler().ProcessEvent(e)
         elif not self.ButtonHitTest(x, y):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_UP, self.GetId())
@@ -2119,7 +2141,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_DOWN, self.GetId())
             e.SetEventObject(self)
             e.SetSelection(self.GetIdxFromWindow(wnd))
-            e.Page = wnd
+            e.SetPageWindow(wnd)
             self.GetEventHandler().ProcessEvent(e)
         elif not self.ButtonHitTest(x, y):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_DOWN, self.GetId())
@@ -2141,7 +2163,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_DCLICK, self.GetId())
             e.SetEventObject(self)
             e.SetSelection(self.GetIdxFromWindow(wnd))
-            e.Page = wnd
+            e.SetPageWindow(wnd)
             self.GetEventHandler().ProcessEvent(e)
         elif not self.ButtonHitTest(x, y):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_BG_DCLICK, self.GetId())
@@ -2384,121 +2406,64 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
                     win = self.GetWindowFromIdx(self.GetActivePage())
                     if win:
                         win.SetFocus()
-
                 self.SetFocus()
 
                 return
 
         else:
-            event.Skip()
+            # event.Skip()
+            self.PropagateEventToNotebook(event)
 
 
-    def OnKeyDown2(self, event):
+    def PropagateEventToNotebook(self, event):
         """
-        Handles the ``wx.EVT_KEY_DOWN`` event for :class:`AuiTabCtrl`.
+        Just ensures that parent AuiNotebook receives this event
+        """
+        event.Skip()
+        event.ResumePropagation(1)
 
-        :param `event`: a :class:`KeyEvent` event to be processed.
 
-        .. deprecated:: 0.6
-           This implementation is now deprecated. Refer to :meth:`OnKeyDown` for the correct one.
+    def DoShowHide(self):
+        """
+        This function shows the active window, then hides all of the other windows
+        (in that order).
         """
 
-        if self.GetActivePage() == -1:
-            event.Skip()
-            return
+        pages = self.GetPages()
 
-        # We can't leave tab processing to the system on Windows, tabs and keys
-        # get eaten by the system and not processed properly if we specify both
-        # wxTAB_TRAVERSAL and wxWANTS_CHARS. And if we specify just wxTAB_TRAVERSAL,
-        # we don't key arrow key events.
+        # show new active page first
+        for indx, page in enumerate(pages):
+#             print "--DoShowHide10", repr(page.window), page.window.IsShown()
+            if page.active and not page.window.IsShown():
+                page.window.Show(True)
+                event = AuiNotebookEvent(
+                        wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
+                        self.GetId())
+                event.SetSelection(indx)
+                event.SetVisible(True)
+                event.SetEventObject(self)
+                event.SetPageWindow(page.window)
+                self.GetEventHandler().ProcessEvent(event)
 
-        key = event.GetKeyCode()
+                break
 
-        if key == wx.WXK_NUMPAD_PAGEUP:
-            key = wx.WXK_PAGEUP
-        if key == wx.WXK_NUMPAD_PAGEDOWN:
-            key = wx.WXK_PAGEDOWN
-        if key == wx.WXK_NUMPAD_HOME:
-            key = wx.WXK_HOME
-        if key == wx.WXK_NUMPAD_END:
-            key = wx.WXK_END
-        if key == wx.WXK_NUMPAD_LEFT:
-            key = wx.WXK_LEFT
-        if key == wx.WXK_NUMPAD_RIGHT:
-            key = wx.WXK_RIGHT
+        # hide all other pages
+        for indx, page in enumerate(pages):
+#             print "--DoShowHide20", repr(page.window), page.window.IsShown()
+            if not page.active and page.window.IsShown():
+                page.window.Show(False)
+                event = AuiNotebookEvent(
+                        wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
+                        self.GetId())
+                event.SetSelection(indx)
+                event.SetVisible(False)
+                event.SetEventObject(self)
+                event.SetPageWindow(page.window)
+                self.GetEventHandler().ProcessEvent(event)
+                
+        self.SetFocus()
 
-        if key == wx.WXK_TAB or key == wx.WXK_PAGEUP or key == wx.WXK_PAGEDOWN:
 
-            bCtrlDown = event.ControlDown()
-            bShiftDown = event.ShiftDown()
-
-            bForward = (key == wx.WXK_TAB and not bShiftDown) or (key == wx.WXK_PAGEDOWN)
-            bWindowChange = (key == wx.WXK_PAGEUP) or (key == wx.WXK_PAGEDOWN) or bCtrlDown
-            bFromTab = (key == wx.WXK_TAB)
-
-            nb = self.GetParent()
-            if not nb or not isinstance(nb, AuiNotebook):
-                event.Skip()
-                return
-
-            keyEvent = wx.NavigationKeyEvent()
-            keyEvent.SetDirection(bForward)
-            keyEvent.SetWindowChange(bWindowChange)
-            keyEvent.SetFromTab(bFromTab)
-            keyEvent.SetEventObject(nb)
-
-            if not nb.GetEventHandler().ProcessEvent(keyEvent):
-
-                # Not processed? Do an explicit tab into the page.
-                win = self.GetWindowFromIdx(self.GetActivePage())
-                if win:
-                    win.SetFocus()
-
-            return
-
-        if len(self._pages) < 2:
-            event.Skip()
-            return
-
-        newPage = -1
-
-        if self.GetLayoutDirection() == wx.Layout_RightToLeft:
-            forwardKey = wx.WXK_LEFT
-            backwardKey = wx.WXK_RIGHT
-        else:
-            forwardKey = wx.WXK_RIGHT
-            backwardKey = wx.WXK_LEFT
-
-        if key == forwardKey:
-            if self.GetActivePage() == -1:
-                newPage = 0
-            elif self.GetActivePage() < len(self._pages) - 1:
-                newPage = self.GetActivePage() + 1
-
-        elif key == backwardKey:
-            if self.GetActivePage() == -1:
-                newPage = len(self._pages) - 1
-            elif self.GetActivePage() > 0:
-                newPage = self.GetActivePage() - 1
-
-        elif key == wx.WXK_HOME:
-            newPage = 0
-
-        elif key == wx.WXK_END:
-            newPage = len(self._pages) - 1
-
-        else:
-            event.Skip()
-
-        if newPage != -1:
-            e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING, self.GetId())
-            e.SetSelection(newPage)
-            e.SetOldSelection(newPage)
-            e.SetEventObject(self)
-            self.GetEventHandler().ProcessEvent(e)
-
-        else:
-            event.Skip()
 
 
 # ----------------------------------------------------------------------
@@ -2890,6 +2855,9 @@ class AuiNotebook(wx.PyPanel):
         self.Bind(EVT_AUINOTEBOOK_BG_DCLICK, self.OnTabBgDClick,
                   id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
         self.Bind(EVT_AUINOTEBOOK_TAB_DCLICK, self.OnTabDClick,
+                  id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
+        self.Bind(EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
+                  self.OnTabVisibilityChanged,
                   id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
 
         self.Bind(wx.EVT_NAVIGATION_KEY, self.OnNavigationKeyNotebook)
@@ -3393,6 +3361,15 @@ class AuiNotebook(wx.PyPanel):
         # hide the window in advance, as this will
         # prevent flicker
         wnd.Show(False)
+        # and send event
+        event = AuiNotebookEvent(
+                wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED, self.GetId())
+        event.SetSelection(page_idx)
+        event.SetVisible(False)
+        event.SetEventObject(self)
+        event.SetPageWindow(wnd)
+        self.GetEventHandler().ProcessEvent(event)
+
 
         self.RemoveControlFromPage(page_idx)
 
@@ -3999,11 +3976,9 @@ class AuiNotebook(wx.PyPanel):
             self._curpage = new_page
 
             # program allows the page change
-            evt.SetEventType(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED)
-            self.GetEventHandler().ProcessEvent(evt)
 
-            if not evt.IsAllowed(): # event is no longer allowed after handler
-                return self._curpage
+#             if not evt.IsAllowed(): # event is no longer allowed after handler
+#                 return self._curpage
 
             ctrl, ctrl_idx = self.FindTab(wnd)
 
@@ -4033,6 +4008,10 @@ class AuiNotebook(wx.PyPanel):
                 # This is Firefox-like behaviour.
                 if wnd.IsShownOnScreen() and wx.Window.FindFocus() != ctrl:
                     wnd.SetFocus()
+                    
+                # Inform that page changed
+                evt.SetEventType(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED)
+                self.GetEventHandler().ProcessEvent(evt)
 
                 return old_curpage
 
@@ -4095,6 +4074,12 @@ class AuiNotebook(wx.PyPanel):
             raise Exception("invalid notebook page")
 
         return self._tabs.GetWindowFromIdx(page_idx)
+
+
+    def GetAllPages(self):
+        """ Returns the windows of the pages in the notebook. """
+
+        return [info.window for info in self._tabs.GetPages()]
 
 
     def GetPageInfo(self, page_idx):
@@ -4498,7 +4483,7 @@ class AuiNotebook(wx.PyPanel):
 
         :param `event`: a :class:`AuiNotebookEvent` event to be processed.
         """
-
+        
         if self._textCtrl is not None:
             self._textCtrl.StopEditing()
 
@@ -4547,6 +4532,34 @@ class AuiNotebook(wx.PyPanel):
             return
 
         self.EditTab(event.GetSelection())
+        
+        
+    def OnTabVisibilityChanged(self, event):
+        """
+        Handles the ``EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED`` event for :class:`AuiNotebook`.
+
+        :param `event`: a :class:`AuiNotebookEvent` event to be processed.
+        """
+
+        ctrl = event.GetEventObject()
+        assert ctrl != None
+
+        wnd = ctrl.GetWindowFromIdx(event.GetSelection())
+        assert wnd != None
+        
+        newIdx = self._tabs.GetIdxFromWindow(wnd)
+        if newIdx == wx.NOT_FOUND:
+            return
+            
+        # Send new event with adjusted selection
+        e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
+            self.GetId())
+
+        e.SetSelection(newIdx)
+        e.SetVisible(event.IsVisible())
+        e.SetEventObject(self)
+        e.SetPageWindow(event.GetPageWindow())
+        self.GetEventHandler().ProcessEvent(e)
 
 
     def OnTabBeginDrag(self, event):
@@ -4897,7 +4910,8 @@ class AuiNotebook(wx.PyPanel):
 
             if src_tabs.GetPageCount() > 0:
                 src_tabs.SetActivePage(0)
-                src_tabs.DoShowHide()
+#                 print "--enddrag32"
+#                 src_tabs.DoShowHide()
                 src_tabs.Refresh()
 
             # add the page to the destination tabs
@@ -4906,10 +4920,13 @@ class AuiNotebook(wx.PyPanel):
 
             dest_tabs.InsertPage(page_info.window, page_info, insert_idx)
 
+            src_tabs.DoShowHide()
+
             if src_tabs.GetPageCount() == 0:
                 self.RemoveEmptyTabFrames()
 
             self.DoSizing()
+
             dest_tabs.DoShowHide()
             dest_tabs.Refresh()
 
@@ -5237,6 +5254,7 @@ class AuiNotebook(wx.PyPanel):
             raise TypeError("SetNavigatorIcon requires a valid bitmap")
 
 
+    # TODO
     def OnNavigationKeyNotebook(self, event):
         """
         Handles the ``wx.EVT_NAVIGATION_KEY`` event for :class:`AuiNotebook`.
@@ -5310,7 +5328,6 @@ class AuiNotebook(wx.PyPanel):
                     #else: page manages focus inside it itself
 
                 else: # otherwise set the focus to the notebook itself
-
                     self.SetFocus()
 
             else:

@@ -775,6 +775,10 @@ class IdentityList(list):
                 return i
 
         return -1
+        
+    def remove(self, elem):
+        del self[self.index(elem)]
+
 
 def sgn(value):
     """
