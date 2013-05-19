@@ -623,6 +623,16 @@ icons/zoomin.gif -text
 icons/zoomout.gif -text
 /langlist.txt -text
 lib/__init__.py -text
+lib/aui/__init__.py -text
+lib/aui/aui_constants.py -text
+lib/aui/aui_switcherdialog.py -text
+lib/aui/aui_utilities.py -text
+lib/aui/auibar.py -text
+lib/aui/auibook.py -text
+lib/aui/dockart.py -text
+lib/aui/framemanager.py -text
+lib/aui/tabart.py -text
+lib/aui/tabmdi.py -text
 lib/gadfly/__init__.py -text
 lib/gadfly/bindings.py -text
 lib/gadfly/client.py -text
