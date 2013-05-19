@@ -2794,6 +2794,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # Show lines
         self.ShowLines(startLine, endLine)
         self.SetSelection(byteStart, byteEnd)
+        self.EnsureCaretVisible()
 
 
 
