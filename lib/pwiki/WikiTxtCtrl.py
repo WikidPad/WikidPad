@@ -297,6 +297,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # when was a key pressed last. used to check idle time.
         self.lastKeyPressed = time()
         self.eolMode = self.GetEOLMode()
+        
+        # Check if modifiers where pressed since last extended logical line move
+        # See self.moveSelectedLinesOneUp() for the reason of this
+        self.modifiersPressedSinceExtLogLineMove = False
 
         self.contextMenuTokens = None
         self.contextMenuSpellCheckSuggestions = None
@@ -1079,6 +1083,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.Unbind(wx.EVT_CHAR)
         self.Unbind(wx.EVT_KEY_DOWN)
+        self.Unbind(wx.EVT_KEY_UP)
         self.Unbind(wx.EVT_LEFT_UP)
         #self.Unbind(wx.EVT_SCROLLWIN)
         self.Unbind(wx.EVT_MOUSEWHEEL)
@@ -1114,6 +1119,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     "editor_useImeWorkaround", False):
                 wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
             self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+            self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
             self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
             if not isLinux():
                 self.Bind(wx.EVT_CHAR, None)
@@ -3022,9 +3028,21 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         Extend current selection to full logical lines and move selected lines
         upward one line.
+        
         extendOverChildren -- iff true, extend selection over lines more indented
-            below the initial selection
+            below the initial selection. It should only be set True for first move
+            in a sequence of moves (until all modifier keys are released) otherwise:
+            
+            If you have e.g. 
+            A
+                B
+            C
+                D
+
+            and move up C with children two times then B would be moved above A
+            as well which is not intended
         """
+        
         self.BeginUndoAction()
         try:
             selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
@@ -3095,9 +3113,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
 
+    def OnKeyUp(self, evt):
+        evt.Skip()
+        
+        if not self.modifiersPressedSinceExtLogLineMove:
+            return
+
+        if wxHelper.isAllModKeysReleased(evt):
+            self.modifiersPressedSinceExtLogLineMove = False
+
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
-
+        
         self.lastKeyPressed = time()
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
@@ -3157,13 +3184,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.moveSelectedLinesOneUp(False)
         elif matchesAccelPair("LogLineUpWithIndented", accP):
             # LogLineUp is by default undefined
-            self.moveSelectedLinesOneUp(True)
+            self.moveSelectedLinesOneUp(
+                    not self.modifiersPressedSinceExtLogLineMove)
+            self.modifiersPressedSinceExtLogLineMove = True
         elif matchesAccelPair("LogLineDown", accP):
             # LogLineUp is by default undefined
             self.moveSelectedLinesOneDown(False)
         elif matchesAccelPair("LogLineDownWithIndented", accP):
             # LogLineUp is by default undefined
-            self.moveSelectedLinesOneDown(True)
+            self.moveSelectedLinesOneDown(
+                    not self.modifiersPressedSinceExtLogLineMove)
+            self.modifiersPressedSinceExtLogLineMove = True
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:

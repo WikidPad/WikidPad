@@ -568,6 +568,23 @@ def setHotKeyByString(win, hotKeyId, keyString):
     return False
 
 
+if SystemInfo.isLinux():
+    def isAllModKeysReleased(evt):
+        # For Linux the test must be done this way.
+        # Meta is always reported as pressed (at least for PC), so ignore it
+        mstate = wx.GetMouseState()
+        return not (mstate.ControlDown() or mstate.ShiftDown() or 
+                mstate.AltDown() or mstate.CmdDown())
+
+else:
+    def isAllModKeysReleased(evt):
+        return not (evt.GetModifiers() & \
+                (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD))
+
+
+
+
+
 def cloneFont(font):
     return wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(),
                 font.GetWeight(), font.GetUnderlined(), font.GetFaceName(),
@@ -1031,7 +1048,7 @@ class DummyWindow(wx.Window):
         wx.Window.__init__(self, parent, id, size=(0,0))
 
 
-# class ProxyPanel(wx.Panel):
+
 class ProxyPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)

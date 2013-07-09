@@ -10,7 +10,7 @@ import aui
 # import wx.xrc as xrc
 
 from .wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown, \
-        WindowUpdateLocker
+        WindowUpdateLocker, isAllModKeysReleased
 
 from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
@@ -697,39 +697,20 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             self.tabSwitchByKey = 1
 
 
-    if SystemInfo.isLinux():
-        def OnKeyUp(self, evt):
-            if self.tabSwitchByKey == 0:
-                evt.Skip()
-                return
+    def OnKeyUp(self, evt):
+        if self.tabSwitchByKey == 0:
+            evt.Skip()
+            return
 
-            # For Linux the test must be done this way.
-            # Meta is always reported as pressed (at least for PC), so ignore it
-            mstate = wx.GetMouseState()
-            if mstate.ControlDown() or mstate.ShiftDown() or mstate.AltDown() or \
-                    mstate.CmdDown():
-                # Some modifier keys are pressed yet
-                evt.Skip()
-                return
+        if not isAllModKeysReleased(evt):
+            # Some modifier keys are pressed yet
+            evt.Skip()
+            return
 
-            self.tabSwitchByKey = 0
-            self._mruTabWindowPushToTop(self.GetCurrentPage())
-            self.GetPage(self.GetSelection()).SetFocus()
-    else:
-        def OnKeyUp(self, evt):
-            if self.tabSwitchByKey == 0:
-                evt.Skip()
-                return
+        self.tabSwitchByKey = 0
+        self._mruTabWindowPushToTop(self.GetCurrentPage())
+        self.GetPage(self.GetSelection()).SetFocus()
 
-            if evt.GetModifiers() & \
-                    (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD):
-                # Some modifier keys are pressed yet
-                evt.Skip()
-                return
-                
-            self.tabSwitchByKey = 0
-            self._mruTabWindowPushToTop(self.GetCurrentPage())
-            self.GetPage(self.GetSelection()).SetFocus()
 
 
     def OnCmdSwitchThisEditorPreview(self, evt):
