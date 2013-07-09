@@ -7294,7 +7294,7 @@ class AuiManager(wx.EvtHandler):
 
         if obj and isinstance(obj, auibook.AuiTabCtrl):
 
-            page_idx = obj.GetActivePage()
+            page_idx = obj.GetActivePageIdx()
 
             if page_idx >= 0:
                 page = obj.GetPage(page_idx)

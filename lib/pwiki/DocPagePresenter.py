@@ -10,15 +10,16 @@ import wx.xrc as xrc
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
-from MiscEvent import ProxyMiscEvent  # , KeyFunctionSink
-import DocPages
+from .MiscEvent import ProxyMiscEvent  # , KeyFunctionSink
+from .WikiHtmlView import createWikiHtmlView
+from . import DocPages
 
-import SystemInfo
-from StringOps import uniToGui
+from . import SystemInfo
+from .StringOps import uniToGui, escapeForIni, unescapeForIni
 
-from WindowLayout import LayeredControlPresenter, LayerSizer
+from .WindowLayout import LayeredControlPresenter, LayerSizer, StorablePerspective
 
-from PageHistory import PageHistory
+from .PageHistory import PageHistory
 
 
 
@@ -349,7 +350,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.mainControl.displayErrorMessage(errorStr, e)
 
 
-class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
+class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
     """
     Controls the group of all widgets (subcontrols) used to present/edit 
     a particular doc page, currently only WikiTxtCtrl and WikiHtmlView.
@@ -526,4 +527,64 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         
         return BasicDocPagePresenter.miscEventHappened(self, miscevt)
 
+
+    def fillDefaultSubControls(self):
+        self.setLayerVisible(False)
+        self.Hide()
+
+        editor = self.getMainControl().createWindow({"name": "txteditor1",
+                "presenter": self}, self)
+        editor.setLayerVisible(False, "textedit")
+        self.setSubControl("textedit", editor)
+
+        htmlView = createWikiHtmlView(self, self, -1)
+        htmlView.setLayerVisible(False, "preview")
+        self.setSubControl("preview", htmlView)
+
+        self.switchSubControl("textedit")
+    
+
+# ----- Implementation of StorablePerspective methods -----
+
+
+    @staticmethod
+    def getPerspectiveType():
+        return u"DocPagePresenter"
         
+    def getStoredPerspective(self):
+        unifName = self.getUnifiedPageName()
+        if unifName is None:
+            return None
+        
+        return escapeForIni(self.getCurrentSubControlName(), u"|") + u"|" + \
+                escapeForIni(unifName, u"|")
+
+
+#     def setByStoredPerspective(self, perspectType, data, typeFactory):
+#         raise NotImplementedError
+
+
+
+
+    @staticmethod
+    def createFromPerspective(mainControl, parent, perspectType, wndPerspective,
+            typeFactory):
+        """
+        Not part of StorablePerspective, called by the type factory
+        """
+        # if more parts are available after a second '|' they are ignored
+        subControl, unifName = wndPerspective.split(u"|", 2)[:2]
+        
+        # unescape
+        subControl = unescapeForIni(subControl)
+        unifName = unescapeForIni(unifName)
+
+        wnd = DocPagePresenter(parent, mainControl)
+        wnd.fillDefaultSubControls()
+        wnd.openDocPage(unifName)
+        wnd.switchSubControl(subControl)
+        
+        return wnd
+
+
+

@@ -902,8 +902,9 @@ WIKIDEFAULTS = {
     ("main", "wiki_lastTabsSubCtrls"): u"", # Semicolon separated list of the subcontrols active in each presenter, normally "textedit" or "preview"
     ("main", "wiki_lastActiveTabNo"): u"-1", # Number of the tab which was last active. Non-wikiwords are ignored
             # for this index
-
-    ("main", "maincontrol_perspective"): u"", # Number of the tab which was last active. Non-wikiwords are ignored
+    ("main", "wiki_mainArea_auiPerspective"): u"", # AUI perspective data for the main area panel.
+            # If this setting is not empty it overrides "wiki_lastTabsSubCtrls", "wiki_lastActiveTabNo",
+            # "last_wiki_word", "further_wiki_words" for 2.3beta10 and later
 
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact

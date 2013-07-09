@@ -2342,6 +2342,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.CallAfter(presenter.makeCurrent)
 
     def OnActivateNewWindowThis(self, evt):
+        ed = self.GetEditorToActivate(direction, True)
+        
         if self.contextMenuTokens:
             ed.activateTokens(self.contextMenuTokens, 6)
 
@@ -3294,7 +3296,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     def onIdleVisible(self, miscevt):
-        if (self.IsEnabled() and self.HasFocus()):
+        if (self.IsEnabled() and (wx.Window.FindFocus() is self)):
             if self.presenter.isCurrent():
                 # fix the line, pos and col numbers
                 currentLine = self.GetCurrentLine()+1
@@ -3373,10 +3375,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     # Decide if this is an image link
                     if appendixDict.has_key("l"):
                         urlAsImage = False
-                    # If we have an external link prevent its attemped render
-                    elif astNode.url.lower().startswith("http"):
-                        urlAsImage = False
-                        callTip = _(u"External (http) link")
                     elif appendixDict.has_key("i"):
                         urlAsImage = True
 #                     elif self.asHtmlPreview and \

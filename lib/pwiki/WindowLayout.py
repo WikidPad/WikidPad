@@ -964,3 +964,77 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
                 "title": shortTitle})
 
 
+class StorablePerspective(object):
+    """
+    Interface for window objects which can save and restore their state
+    """
+    
+    def getPerspectiveType(self):
+        """
+        Returns a unistring which identifies the basic type of window.
+        Currently this is always empty, later versions may have different
+        types. The idea is to create a central registry which calls
+        appropriate factory function based on this type
+        """
+        raise NotImplementedError
+        
+    def getStoredPerspective(self):
+        """
+        Returns a unistring describing the contents of the window for
+        later recreation or None if this window can't be stored.
+        If a window doesn't need to store additional perspective data,
+        return empty unistring
+        """
+        raise NotImplementedError
+        
+    def setByStoredPerspective(self, perspectType, data, typeFactory):
+        """
+        Modify this window from the unistring  data  which was previously returned
+        by a call to getStoredPerspective() and return it. May raise
+        NotImplementedError if in-place change is not supported.
+        
+        perspectType -- Unistring identifier previously returned by
+            getPerspectiveType()
+        data -- Unistring with data for reconstruction
+        typeFactory -- Factory function to create subwindows or None
+            (see below)
+        
+        If the window contains child windows with own perspective data,
+        the type factory is used.  typeFactory  is a function:
+
+            typeFactory(parent, perspectType, data, typeFactory)
+            
+        where:
+                
+            parent -- Designated parent window for newly created window
+            perspectType -- Unistring type of desired child window
+            data -- Unistring perspective data
+            typeFactory -- Normally the same factory function, may be
+                another one or None in special cases
+                
+        
+        typeFactory is allowed to be None if it is sure that no child windows
+        need to be created from perspective data.
+        """
+        raise NotImplementedError
+
+
+#     @staticmethod
+#     def createFromStoredPerspective(parent, perspectType, data, typeFactory):
+#         """
+#         Create a window from the unistring  data  which was previously returned
+#         by a call to getStoredPerspective() and return it. May return None
+#         in case of an error, otherwise the returned window has parent  parent.
+#         
+#         If the window contains child windows with own perspective data,
+#         the type factory is used.  typeFactory  is a function which takes
+#         a perspective type identifier as single parameter and returns either
+#         a class or an object implementing StorablePerspective interface
+#         or None if the requested perspective type is unknown.
+#         
+#         typeFactory  is allowed to be None if it is sure that no child windows
+#         need to be created from perspective data.
+#         """
+#         raise NotImplementedError
+
+

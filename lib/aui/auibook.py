@@ -1126,6 +1126,24 @@ class AuiTabContainer(object):
         return False
 
 
+    def DeleteAllPages(self):
+        """
+        Delete all pages. Does not send visiblity events.
+        """
+        minMaxTabWidth = self._auiNotebook.GetMinMaxTabWidth()
+
+        for page in self._pages:
+            page.window.Destroy()
+
+        self._pages = []
+
+        self._tab_offset = min(self._tab_offset, -1)
+
+        # let the art provider know how many pages we have
+        if self._art:
+            self._art.SetSizingInfo(self._rect.GetSize(), 0, minMaxTabWidth)
+        
+
     def SetActivePage(self, wndOrInt):
         """
         Sets the :class:`AuiNotebook` active page.
@@ -1161,7 +1179,7 @@ class AuiTabContainer(object):
             page.active = False
 
 
-    def GetActivePage(self):
+    def GetActivePageIdx(self):
         """ Returns the current selected tab or ``wx.NOT_FOUND`` if none is selected. """
 
         for indx, page in enumerate(self._pages):
@@ -1842,10 +1860,6 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
         self.Bind(wx.EVT_MOTION, self.OnMotion)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)
         self.Bind(EVT_AUINOTEBOOK_BUTTON, self.OnButton)
-    
-        # Always pass the focus onto the child. Is there any situation inwhich
-        # we don't want this?
-        self.SetCanFocus(False)
 
 
     def IsDragging(self):
@@ -1932,11 +1946,11 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
             # AuiNotebooks always want to receive this event
             # even if the tab is already active, because they may
             # have multiple tab controls
-            if (new_selection != self.GetActivePage() or isinstance(self.GetParent(), AuiNotebook)) and \
+            if (new_selection != self.GetActivePageIdx() or isinstance(self.GetParent(), AuiNotebook)) and \
                not self._hover_button:
                 e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING, self.GetId())
                 e.SetSelection(new_selection)
-                e.SetOldSelection(self.GetActivePage())
+                e.SetOldSelection(self.GetActivePageIdx())
                 e.SetEventObject(self)
                 self.GetEventHandler().ProcessEvent(e)
 
@@ -1946,7 +1960,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
 
             wnd.SetFocus()
         else:
-            page_index = self.GetActivePage()
+            page_index = self.GetActivePageIdx()
             if page_index != wx.NOT_FOUND:
                 self.GetWindowFromIdx(page_index).SetFocus()
 
@@ -2320,13 +2334,13 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
                 self.Update()
 
         elif button == AUI_BUTTON_WINDOWLIST:
-            idx = self.GetArtProvider().ShowDropDown(self, self._pages, self.GetActivePage())
+            idx = self.GetArtProvider().ShowDropDown(self, self._pages, self.GetActivePageIdx())
 
             if idx != -1:
 
                 e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING, self.GetId())
                 e.SetSelection(idx)
-                e.SetOldSelection(self.GetActivePage())
+                e.SetOldSelection(self.GetActivePageIdx())
                 e.SetEventObject(self)
                 self.GetEventHandler().ProcessEvent(e)
 
@@ -2407,7 +2421,7 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
                 if not nb.GetEventHandler().ProcessEvent(keyEvent):
 
                     # Not processed? Do an explicit tab into the page.
-                    win = self.GetWindowFromIdx(self.GetActivePage())
+                    win = self.GetWindowFromIdx(self.GetActivePageIdx())
                     if win:
                         win.SetFocus()
                 self.SetFocus()
@@ -2913,7 +2927,7 @@ class AuiNotebook(wx.PyPanel):
                 if p:
                     tabs += ","
 
-                if p == tabframe._tabs.GetActivePage():
+                if p == tabframe._tabs.GetActivePageIdx():
                     tabs += "+"
                 elif page_idx == self._curpage:
                     tabs += "*"
@@ -3951,6 +3965,9 @@ class AuiNotebook(wx.PyPanel):
         :param integer `new_page`: the index of the new selection;
         :param bool `force`: whether to force the selection or not.
         """
+        if new_page < 0 or new_page >= self.GetPageCount():
+            return
+
         wnd = self._tabs.GetWindowFromIdx(new_page)
 
         #Update page access time
@@ -5362,7 +5379,7 @@ class AuiNotebook(wx.PyPanel):
 
                 # if the close button is to the right, use the active
                 # page selection to determine which page to close
-                selection = tabs.GetActivePage()
+                selection = tabs.GetActivePageIdx()
 
             if selection == -1 or not tabs.GetEnabled(selection):
                 return
@@ -5618,7 +5635,7 @@ class AuiNotebook(wx.PyPanel):
         newPage = -1
 
         focusWin = tabCtrl.FindFocus()
-        activePage = tabCtrl.GetActivePage()
+        activePage = tabCtrl.GetActivePageIdx()
         lenPages = len(tabCtrl.GetPages())
 
         if lenPages == 1:
@@ -5672,7 +5689,7 @@ class AuiNotebook(wx.PyPanel):
         """
 
         tabCtrl = self.GetActiveTabCtrl()
-        idx = tabCtrl.GetArtProvider().ShowDropDown(tabCtrl, tabCtrl.GetPages(), tabCtrl.GetActivePage())
+        idx = tabCtrl.GetArtProvider().ShowDropDown(tabCtrl, tabCtrl.GetPages(), tabCtrl.GetActivePageIdx())
 
         if not self.GetEnabled(idx):
             return False
@@ -5680,7 +5697,7 @@ class AuiNotebook(wx.PyPanel):
         if idx != -1:
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING, tabCtrl.GetId())
             e.SetSelection(idx)
-            e.SetOldSelection(tabCtrl.GetActivePage())
+            e.SetOldSelection(tabCtrl.GetActivePageIdx())
             e.SetEventObject(tabCtrl)
             self.GetEventHandler().ProcessEvent(e)
 
@@ -5776,7 +5793,7 @@ class AuiNotebook(wx.PyPanel):
             return False
 
         tabCtrl = self.GetActiveTabCtrl()
-        activePage = tabCtrl.GetActivePage()
+        activePage = tabCtrl.GetActivePageIdx()
         pages = tabCtrl.GetPages()
 
         pageStatus, pageText = [], []

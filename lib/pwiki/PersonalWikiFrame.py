@@ -2656,26 +2656,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         elif winName == "vi input":
             from .ViHelper import ViInputDialog
             return ViInputDialog(parent, -1, self)
-                
+            
 
+    def perspectiveTypeFactory(self, parent, perspectType, data, typeFactory):
+        """
+        Type factory function as needed by
+        WindowLayout.StorablePerspective.setByStoredPerspective()
+        """
+        if perspectType == u"DocPagePresenter":
+            return DocPagePresenter.createFromPerspective(self, parent,
+                    perspectType, data, typeFactory)
+                    
+        return None
 
 
     def createNewDocPagePresenterTab(self):
-        presenter = DocPagePresenter(self.mainAreaPanel, self)
-        presenter.setLayerVisible(False)
-        presenter.Hide()
-
-        editor = self.createWindow({"name": "txteditor1",
-                "presenter": presenter}, presenter)
-        editor.setLayerVisible(False, "textedit")
-        presenter.setSubControl("textedit", editor)
-
-        htmlView = createWikiHtmlView(presenter, presenter, -1)
-        htmlView.setLayerVisible(False, "preview")
-        presenter.setSubControl("preview", htmlView)
-
-        presenter.switchSubControl("textedit")
-
+        presenter = DocPagePresenter(self, self)
+        presenter.fillDefaultSubControls()
         return self.mainAreaPanel.appendPresenterTab(presenter)
 
 
@@ -3080,6 +3077,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if wikiWordsToOpen == (None,):
             wikiWordsToOpen = None
 
+        lastWordsOverridden = wikiWordsToOpen is not None
+
         # Save the state of the currently open wiki, if there was one open
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
@@ -3261,10 +3260,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
         
+        # Open wiki pages which were previously opened (old method before
+        # introducing AUI and perspectives)
+        
+        # Collect information
+        
+        mainAreaPerspective = self.getConfig().get("main",
+                "wiki_mainArea_auiPerspective", u"");
+
+        defLtsc = None
+        
         if lastTabsSubCtrls is None:
             defLtsc = self.getConfig().get("main", "wiki_onOpen_tabsSubCtrl", u"")
             if defLtsc:
-                # Actually multiple values aren't support but just in case
+                # Actually multiple values aren't supported but just in case
                 defLtsc = unescapeForIni(defLtsc.split(u";", 1)[0])
                 lastTabsSubCtrls = [defLtsc]
 
@@ -3281,6 +3290,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         "first_wiki_word", u"")
                     if firstWikiWord != u"":
                         wikiWordsToOpen = (firstWikiWord,)
+                        lastWordsOverridden = True
                     else:
                         # Nothing worked so take the last open wiki words
                         lastWikiWord = self.getConfig().get("main",
@@ -3341,7 +3351,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     viewsTree.readExpandedNodesFromConfig()
                     viewsTree.expandRoot()
     
-    
                 # Normalize lastTabsSubCtrls
                 if not lastTabsSubCtrls:
                     lastTabsSubCtrls = ["textedit"]
@@ -3366,44 +3375,55 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     # Omitting word, so adjust activeTabNo
                     activeTabNo -= 1
 
-                # now try and open the last wiki page as leftmost tab
-                if len(wwo) > 0: ## and wwo[0][0] != self.wikiName:
-                    firstWikiWord = wwo[0][0]
 
-                    self.openWikiPage(firstWikiWord, anchor=anchorToOpen)
-                    self.findCurrentWordInTree()
-                    targetPresenter = self.getMainAreaPanel().getPresenters()[0]
-                    if targetPresenter.hasSubControl(wwo[0][1]):
-                        targetPresenter.switchSubControl(wwo[0][1])
-#                 else:
-#                     self.openWikiPage(self.wikiName)
+
+                if lastWordsOverridden or not mainAreaPerspective:
+                    # now try and open the last wiki page as leftmost tab
+                    if len(wwo) > 0: ## and wwo[0][0] != self.wikiName:
+                        firstWikiWord = wwo[0][0]
     
-                # If present, open further words in tabs on the right
-                for word, subCtrl in wwo[1:]:
-                    targetPresenter = self.activatePageByUnifiedName(
-                            u"wikipage/" + word, tabMode=3)
-                    if targetPresenter is None:
-                        break    # return instead?
-
-                    if targetPresenter.hasSubControl(subCtrl):
-                        targetPresenter.switchSubControl(subCtrl)
-
-                if activeTabNo > 0 and \
-                        len(self.getMainAreaPanel().getPresenters()) > 0:
-                    activeTabNo = min(activeTabNo,
-                            len(self.getMainAreaPanel().getPresenters()) - 1)
-
-                    targetPresenter = self.getMainAreaPanel().getPresenters()[
-                            activeTabNo]
-                    self.getMainAreaPanel().showPresenter(targetPresenter)
+                        self.openWikiPage(firstWikiWord, anchor=anchorToOpen)
+                        self.findCurrentWordInTree()
+                        targetPresenter = self.getMainAreaPanel().getPresenters()[0]
+                        if targetPresenter.hasSubControl(wwo[0][1]):
+                            targetPresenter.switchSubControl(wwo[0][1])
+    #                 else:
+    #                     self.openWikiPage(self.wikiName)
+        
+                    # If present, open further words in tabs on the right
+                    for word, subCtrl in wwo[1:]:
+                        targetPresenter = self.activatePageByUnifiedName(
+                                u"wikipage/" + word, tabMode=3)
+                        if targetPresenter is None:
+                            break    # return instead?
+    
+                        if targetPresenter.hasSubControl(subCtrl):
+                            targetPresenter.switchSubControl(subCtrl)
+    
+                    if activeTabNo > 0 and \
+                            len(self.getMainAreaPanel().getPresenters()) > 0:
+                        activeTabNo = min(activeTabNo,
+                                len(self.getMainAreaPanel().getPresenters()) - 1)
+    
+                        targetPresenter = self.getMainAreaPanel().getPresenters()[
+                                activeTabNo]
+                        self.getMainAreaPanel().showPresenter(targetPresenter)
+                        
+                else:
+                    self.getMainAreaPanel().setByStoredPerspective(
+                            u"MainAreaPanel", mainAreaPerspective,
+                            self.perspectiveTypeFactory)
+                    
+                    if self.getMainAreaPanel().GetPageCount() == 0:
+                        self.openWikiPage(self.getWikiDocument().getWikiName())
 
                 self.tree.SetScrollPos(wx.HORIZONTAL, 0)
 
                 # enable the editor control whether or not the wiki root was found
-                for dpp in self.getMainAreaPanel().getPresenters():
-                    if isinstance(dpp, DocPagePresenter):
-                        e = dpp.getSubControl("textedit")
-                        e.Enable(True)
+#                 for dpp in self.getMainAreaPanel().getPresenters():
+#                     if isinstance(dpp, DocPagePresenter):
+#                         e = dpp.getSubControl("textedit")
+#                         e.Enable(True)
 
             # update the last accessed wiki config var
             self.lastAccessedWiki(self.getWikiConfigPath())

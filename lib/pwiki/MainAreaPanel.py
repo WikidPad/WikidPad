@@ -17,8 +17,9 @@ from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 from WikiExceptions import *
 
 from . import SystemInfo
-from .StringOps import escapeForIni, pathWordAndAnchorToWikiUrl
+from .StringOps import escapeForIni, unescapeForIni, pathWordAndAnchorToWikiUrl
 from . import Utilities
+from .WindowLayout import StorablePerspective
 
 
 from .SearchAndReplace import stripSearchString
@@ -28,7 +29,7 @@ from .DocPagePresenter import BasicDocPagePresenter
 import DocPages
 
 
-class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
+class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
     """
     The main area panel is embedded in the PersonalWikiFrame and holds and
     controls the doc page presenters.
@@ -40,33 +41,28 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         #         associated with this notebook (so SetSelection order fails)
         #       * Check how day order is affected when splitting the page
         #
-        #       * MRU tabs
-        #
         #aui.AuiNotebook.__init__(self, parent, id, agwStyle=aui.AUI_NB_TAB_MOVE|aui.AUI_NB_TAB_SPLIT|aui.AUI_NB_TAB_FLOAT|aui.AUI_NB_ORDER_BY_ACCESS)
-        aui.AuiNotebook.__init__(self, parent, id)
+        aui.AuiNotebook.__init__(self, parent, id, agwStyle=aui.AUI_NB_DEFAULT_STYLE & ~aui.AUI_NB_MIDDLE_CLICK_CLOSE)
 
 #         nb = wx.PreNotebook()
 #         self.PostCreate(nb)
         MiscEventSourceMixin.__init__(self)
 
-        flags = aui.AUI_NB_TAB_SPLIT |\
-                aui.AUI_NB_TAB_MOVE |\
-                aui.AUI_NB_TAB_EXTERNAL_MOVE |\
-                aui.AUI_NB_TAB_FLOAT
-
-        # Playing around (testing different style flags)
-        self.SetAGWWindowStyleFlag(flags)
+#         flags = aui.AUI_NB_TAB_SPLIT |\
+#                 aui.AUI_NB_TAB_MOVE |\
+#                 aui.AUI_NB_TAB_EXTERNAL_MOVE |\
+#                 aui.AUI_NB_TAB_FLOAT
+# 
+#         # Playing around (testing different style flags)
+#         self.SetAGWWindowStyleFlag(flags)
 
         self.mainControl = mainControl
         self.mainControl.getMiscEvent().addListener(self)
-
-        self.loadingWiki = True
 
         self.preparingPresenter = False
         self.currentPresenter = None
         # References to all tab windows
         self._mruTabSequence = Utilities.IdentityList()
-        #self.mruTabIndex = []
         self.tabSwitchByKey = 0  # 2: Key hit, notebook change not processed;
                 # 1: Key hit, nb. change processed
                 # 0: Processing done
@@ -84,6 +80,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged)
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGING, self.OnNotebookPageChanging)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.OnTabContextMenu, self)
+        self.Bind(aui.EVT_AUINOTEBOOK_TAB_MIDDLE_DOWN, self.OnTabMiddleDown, self)
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
                 self.OnNotebookPageVisibilityChanged)
         
@@ -326,48 +323,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         return possible_directions
         
 
-
-    def loadLayout(self):
-        """
-        Load the Aui Perspective layout if it is set in the config
-
-        """
-        layout = self.mainControl.getConfig().get("main",
-                "maincontrol_perspective", u"")
-
-        if layout:
-            try:
-                self.LoadPerspective(layout)
-            # Occurs when opening a new window
-            except IndexError:
-                print "Perspectives no. does not match."
-
-        # Check for orphan tabs (i.e those not associated with a tab ctrl)
-        for page in self:
-            pinfo, pid = self.FindTab(page)
-
-            # If we find any add them to the current tab ctrl
-            if pinfo is None:
-                index = self.GetPageIndex(page)
-                pinfo = self.GetPageInfo(index)
-                self.GetActiveTabCtrl().AddPage(page, pinfo)
-
-
-    def saveLayout(self):
-        # Consider merging with updateConfig?
-        config = self.mainControl.getConfig()
-        config.set("main", "maincontrol_perspective", self.SavePerspective())
-
-
     def updateConfig(self):
         """
         Update configuration info about open tabs
         """
-
-        # Do not update the config when loading a wiki
-        if self.loadingWiki:
-            return
-
         config = self.mainControl.getConfig()
 
         openWikiWords, subCtrls, activeNo = \
@@ -390,7 +349,13 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 
             config.set("main", "wiki_lastActiveTabNo", activeNo)
 
-        self.saveLayout()
+        # Above settings are only stored for compatibility with earlier
+        # versions (before 2.3beta10)
+
+        config.set("main", "wiki_mainArea_auiPerspective",
+                self.getStoredPerspective())
+
+
 
     #    # TODO What about WikidPadHooks?
     def prepareCurrentPresenter(self, currentPresenter):
@@ -411,7 +376,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
             self.mainControl.refreshPageStatus()
             self.fireMiscEventKeys(("changed current presenter",))
 
-            # Make the currenty notebook tab active
+            # Make the current notebook tab active
             pres_id = self.getIndexForPresenter(currentPresenter)
             if self.GetSelection() != pres_id:
                 self.SetSelection(pres_id)
@@ -688,54 +653,6 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
             return self._mruTabSequence[-1]
 
 
-
-
-# 
-#     # Handle self.mruTabIndex
-#     def _mruTabIndexPushToTop(self, idx):
-#         """
-#         Push idx to top in mru list.
-#         """
-#         if idx == -1:
-#             return
-# 
-#         try:
-#             self.mruTabIndex.remove(idx)
-#         except ValueError:
-#             pass
-#         
-#         self.mruTabIndex.insert(0, idx)
-# 
-#     def _mruTabIndexAppend(self, idx):
-#         self.mruTabIndex = [(i if i < idx else i + 1) for i in self.mruTabIndex]
-#         self.mruTabIndex.append(idx)
-# 
-#     def _mruTabIndexDelete(self, idx):
-#         """
-#         Delete idx. Indices > idx must be decremented by one.
-#         """
-#         self.mruTabIndex = [(i if i < idx else i - 1) for i in self.mruTabIndex
-#                 if i != idx]
-# 
-#     def _mruTabIndexGetNext(self, idx):
-#         """
-#         Get next index after idx
-#         """
-#         try:
-#             return self.mruTabIndex[self.mruTabIndex.index(idx) + 1]
-#         except (ValueError, IndexError):
-#             return self.mruTabIndex[0]
-# 
-#     def _mruTabIndexGetPrevious(self, idx):
-#         """
-#         Get next index after idx
-#         """
-#         try:
-#             return self.mruTabIndex[self.mruTabIndex.index(idx) - 1]
-#         except ValueError:
-#             return self.mruTabIndex[-1]
-
-
     def OnGoTab(self, evt):
         pageCount = self.GetPageCount()
         if pageCount < 2:
@@ -835,15 +752,11 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 
 
     def OnTabMiddleDown(self, evt):
-        #tab = self.HitTest(evt.GetPosition())[0]
-        #if tab == wx.NOT_FOUND:
-        #    return
+        tab = evt.GetSelection()
+        if tab == wx.NOT_FOUND:
+            return
 
-        #pres = self.GetPage(tab)
-
-        # GetSelection returns the tab from the current TabCtrl
-        # instead we can just access the tab directly
-        pres = evt.Page
+        pres = self.GetPage(tab)
         mc = self.mainControl
 
         paramDict = {"presenter": pres, "main control": mc}
@@ -867,4 +780,249 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
                 self._closeAllButCurrentTab()
 
 
+# ----- Implementation of StorablePerspective methods -----
+
+    def getPerspectiveType(self):
+        return u"MainAreaPanel"
+        
+    def getStoredPerspective(self):
+        # Based on AuiNotebook.SavePerspective()
+        
+        # Build list of panes/tabs
+        # Version code
+        tabs = u"v1/"
+        all_panes = self._mgr.GetAllPanes()
+
+        sel_wnd = self.GetCurrentPage()
+
+        paneDescs = []
+        
+        for pane in all_panes:
+            paneDesc = u""
+
+            if pane.name == "dummy":
+                continue
+
+            tabframe = pane.window
+
+#             if tabs:
+#                 tabs += u"|"
+
+            paneDesc += pane.name + u"="
+
+            # add tab id's
+            page_count = tabframe._tabs.GetPageCount()
+
+            tabDescs = []
+
+            for p in xrange(page_count):
+                tabDesc = u""
+
+                page = tabframe._tabs.GetPage(p)
+                if not isinstance(page.window, StorablePerspective):
+                    continue
+                    
+                tabPerspect = page.window.getStoredPerspective()
+                if tabPerspect is None:
+                    continue
+
+                # page_idx = self._tabs.GetIdxFromWindow(page.window)
+
+                if sel_wnd is page.window:
+                    tabDesc += u"*"
+                elif p == tabframe._tabs.GetActivePageIdx():
+                    tabDesc += u"+"
+                else:
+                    tabDesc += u" "
+                    
+                tabDesc += escapeForIni(page.window.getPerspectiveType(), u"|=,@") + u"="
+                tabDesc += escapeForIni(page.caption, u"|=,@") + u"="
+                tabDesc += unicode(self._mruTabSequence.find(page.window)) + u"="
+                tabDesc += escapeForIni(tabPerspect, u"|=,@")
+                
+                tabDescs.append(tabDesc)
+
+            paneDesc += u",".join(tabDescs)
+            
+            paneDescs.append(paneDesc)
+
+
+        tabs += u"|".join(paneDescs) + u"@"
+
+        # Add frame perspective
+        tabs += self._mgr.SavePerspective()
+
+        return tabs
+    
+        
+    def setByStoredPerspective(self, perspectType, data, typeFactory):
+        """
+        Unlike the default LoadPerspective() function the necessary tabs are
+        created here on-demand instead of pre-creating them. This ensures
+        that the perspective can be reconstructed even if one or more tabs
+        can't be recreated. Each tab is built by the typeFactory which
+        is normally the function PersonalWikiFrame.perspectiveTypeFactory()
+        """
+        # Based on AuiNotebook.LoadPerspective()
+
+        if not data.startswith(u"v1/"):
+            return False
+
+        data = data[3:]
+
+        # Delete all tab ctrls
+        tab_count = self._tabs.GetPageCount()
+        for i in xrange(tab_count):
+            wnd = self._tabs.GetWindowFromIdx(i)
+
+            # find out which onscreen tab ctrl owns this tab
+            ctrl, ctrl_idx = self.FindTab(wnd)
+            if not ctrl:
+                return False
+
+            # remove the tab from ctrl
+            if not ctrl.RemovePage(wnd):
+                return False
+            
+            wnd.Destroy()
+
+        self.RemoveEmptyTabFrames()
+
+        sel_wnd = None
+        tabs = data[0:data.index(u"@")]
+        to_break1 = False
+        
+        mruList = []
+
+        while 1:
+            if u"|" not in tabs:
+                to_break1 = True
+                tab_part = tabs
+            else:
+                tab_part = tabs[0:tabs.index(u'|')]
+
+            if u"=" not in tab_part:
+                # No pages in this perspective...
+                return False
+
+            # Get pane name
+            pane_name = tab_part[0:tab_part.index(u"=")]
+
+            # create a new tab frame
+            new_tabs = aui.TabFrame(self)
+            self._tab_id_counter += 1
+            new_tabs._tabs = aui.AuiTabCtrl(self, self._tab_id_counter)
+            new_tabs._tabs.SetArtProvider(self._tabs.GetArtProvider().Clone())
+            new_tabs.SetTabCtrlHeight(self._tab_ctrl_height)
+            new_tabs._tabs.SetAGWFlags(self._agwFlags)
+            dest_tabs = new_tabs._tabs
+
+            # create a pane info structure with the information
+            # about where the pane should be added
+            pane_info = aui.framemanager.AuiPaneInfo().Name(pane_name).Bottom().CaptionVisible(False)
+            self._mgr.AddPane(new_tabs, pane_info)
+
+            # Get list of tab id's and move them to pane
+            tab_list = tab_part[tab_part.index(u"=")+1:]
+            to_break2, active_found = False, False
+
+            for tab in tab_list.split(u","):
+#                 if u"," not in tab_list:
+#                     to_break2 = True
+#                     tab = tab_list
+#                 else:
+#                     tab = tab_list[0:tab_list.index(u",")]
+#                     tab_list = tab_list[tab_list.index(u",")+1:]
+
+                # Store possible 'active' marker for later use
+                c = tab[0]
+                tab = tab[1:]
+
+#                 tab_idx = int(tab)
+#                 if tab_idx >= self.GetPageCount():
+#                     to_break1 = True
+#                     break
+
+                # if more parts are available after an additional '=' they are ignored
+                perspectType, caption, mruOrder, wndPerspective = tab.split(u"=", 4)[:4]
+                perspectType = unescapeForIni(perspectType)
+                caption = unescapeForIni(caption)
+                wndPerspective = unescapeForIni(wndPerspective)
+
+                page = aui.AuiNotebookPage()
+                page.window = typeFactory(self, perspectType, wndPerspective,
+                        typeFactory)
+
+                if page.window is None:
+                    continue
+
+                page.caption = caption
+                page.bitmap = wx.NullBitmap
+                page.dis_bitmap = wx.NullBitmap
+                page.active = False
+                page.control = None
+                
+                self._tabs.AddPage(page.window, page)
+                # Move tab to pane
+                newpage_idx = dest_tabs.GetPageCount()
+                dest_tabs.InsertPage(page.window, page, newpage_idx)
+                
+                try:
+                    mruOrder = int(mruOrder)
+                    if mruOrder >= 0:
+                        while len(mruList) <= mruOrder:
+                            mruList.append(None)
+                        mruList[mruOrder] = page.window
+                except ValueError:
+                    traceback.print_exc()
+                    
+                if c == u'+':
+                    dest_tabs.SetActivePage(newpage_idx)
+                    active_found = True
+                elif c == u'*':
+                    sel_wnd = page.window
+
+#                 if to_break2:
+#                     break
+
+            if not active_found:
+                dest_tabs.SetActivePage(0)
+                
+            self._mruTabSequence = Utilities.IdentityList(
+                    wnd for wnd in mruList if wnd is not None)
+
+            new_tabs.DoSizing()
+            dest_tabs.DoShowHide()
+            dest_tabs.Refresh()
+
+            if to_break1:
+                break
+
+            tabs = tabs[tabs.index(u'|')+1:]
+
+        # Load the frame perspective
+        frames = data[data.index(u'@')+1:]
+        self._mgr.LoadPerspective(frames)
+
+        self.RemoveEmptyTabFrames()
+
+        # Force refresh of selection
+        self._curpage = -1
+        
+        if sel_wnd is None:
+            self.SetSelection(0)
+        else:
+            self.SetSelectionToWindow(sel_wnd)
+            self._mruTabWindowPushToTop(sel_wnd)
+
+        self.UpdateTabCtrlHeight()
+
+        return True
+
+
+#     @staticmethod
+#     def createFromStoredPerspective(parent, perspectType, data, typeFactory):
+#         result = MainAreaPanel(parent, parent, -1)
+#         result.setByStoredPerspective(perspectType, data, typeFactory)
+#         return result
 
