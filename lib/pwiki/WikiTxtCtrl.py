@@ -3208,6 +3208,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             except (IOError, OSError, DbAccessError), e:
                 self.presenter.getMainControl().lostAccess(e)
 
+            evt.Skip()
+            # NOTE: we seem to lose a mouse up evt here
+            self.presenter.makeCurrent()
 
     else:
         def OnSetFocus(self, evt):
@@ -4474,6 +4477,8 @@ class ViHandler(ViHelper):
         del self.keys[2][(k["i"],)] # i
         del self.keys[2][(k["a"],)] # a
         del self.keys[2][(k["S"],)] # S
+        del self.keys[2][(k["<"], k["<"])] # <<
+        del self.keys[2][(k[">"], k[">"])] # <<
 
         self.keys[3] = {}
 
@@ -5680,6 +5685,10 @@ class ViHandler(ViHelper):
         return False
 
     def GetSelectionDetails(self, selection_type):
+        """
+        Returns the type of selection
+
+        """
         # Test if selection is lines
         if selection_type == 1 or self.GetSelMode() == u"LINE" or \
         (self.GetLineStartPos(self.ctrl.LineFromPosition(
@@ -6450,13 +6459,6 @@ class ViHandler(ViHelper):
     def SearchPartialCaretWordBackwards(self):
         self._SearchCaretWord(False, True, False)
 
-    def GoogleSelection(self):
-        text = self.ctrl.GetSelectedText()
-
-        if not text:
-            text = self.ctrl.presenter.getWikiWord()
-
-        self.StartCmdInput("google {0}".format(text), run_cmd=True)
 
     #--------------------------------------------------------------------
     # Replace

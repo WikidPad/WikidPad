@@ -3781,8 +3781,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if tabMode & 2:
             if tabMode == 6:
                 # New Window
-                presenter = self.presenter.getMainControl().\
-                        createNewDocPagePresenterTabInNewFrame()
+                #??
+                #presenter = self.presenter.getMainControl().\
+                #        createNewDocPagePresenterTabInNewFrame()
+                presenter = self.createNewDocPagePresenterTabInNewFrame()
             else:
                 # New tab
                 presenter = self.createNewDocPagePresenterTab()

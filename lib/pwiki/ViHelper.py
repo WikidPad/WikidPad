@@ -573,6 +573,9 @@ class ViHelper():
                     self.key_inputs.append("m")
                     self.RunKeyChain(tuple(self.key_inputs), m)
                     return True
+                elif (key,) == -999:
+                    self.key_inputs.append("m")
+                    self.RunKeyChain(tuple(self.key_inputs), m)
                 if (key,) in self.motion_key_mods[m]:
                     self.key_inputs.append("m")
                     return True
@@ -589,6 +592,15 @@ class ViHelper():
         self.FlushBuffers()
 
 	return True
+
+    def NextKeyCommandCanBeMotion(self):
+        """
+        Checks if the next key can be a motion cmd
+        """
+        if "m" in self._acceptable_keys:
+            return True
+
+        return False
 
 
     def SetCount(self):
@@ -630,7 +642,7 @@ class ViHelper():
                     return keycode
             try:
                 return unichr(keycode)
-            except TypeError:
+            except TypeError, ValueError: # >wx2.9 ?valueerror?
                 return keycode
         else:
             return u""
@@ -801,34 +813,37 @@ class ViHelper():
         # If a motion is present in the command (but not the main command)
         # it needs to be run first
         if "m" in key:
-            # If in visual mode we don't want to change the selection start point
-            if self.mode != ViHelper.VISUAL:
-                # Otherwise the "pre motion" commands work by setting a start point
-                # at the current positions, running the motion command and
-                # finishing with a "post motion" command, i.e. deleting the
-                # text that was selected.
-                self.StartSelection()
+            # TODO: finish
+            # If the motion is a mouse event it should have already been run
+            if motion != -999:
+                # If in visual mode we don't want to change the selection start point
+                if self.mode != ViHelper.VISUAL:
+                    # Otherwise the "pre motion" commands work by setting a start point
+                    # at the current positions, running the motion command and
+                    # finishing with a "post motion" command, i.e. deleting the
+                    # text that was selected.
+                    self.StartSelection()
 
-            motion_key = tuple(motion)
+                motion_key = tuple(motion)
 
-            # Extract the cmd we need to run (it is irrelevent if it is
-            # repeatable or if it has a different selection_type)
-            motion_com_type, (motion_func, motion_args), junk, junk = keys[motion_key]
-            if motion_wildcard:
-                motion_args = tuple(motion_wildcard)
-                if len(motion_args) == 1:
-                    motion_args = motion_args[0]
-                else:
-                    motion_args = tuple(motion_args)
- 
-            RunFunc(motion_func, motion_args)
+                # Extract the cmd we need to run (it is irrelevent if it is
+                # repeatable or if it has a different selection_type)
+                motion_com_type, (motion_func, motion_args), junk, junk = keys[motion_key]
+                if motion_wildcard:
+                    motion_args = tuple(motion_wildcard)
+                    if len(motion_args) == 1:
+                        motion_args = motion_args[0]
+                    else:
+                        motion_args = tuple(motion_args)
+     
+                RunFunc(motion_func, motion_args)
 
-            # Test if the motion has caused a movement in the caret
-            # If not consider it an invalid cmd
-            if self._anchor == self.ctrl.GetCurrentPos():
-                return False
+                # Test if the motion has caused a movement in the caret
+                # If not consider it an invalid cmd
+                if self._anchor == self.ctrl.GetCurrentPos():
+                    return False
 
-            self.SelectSelection(motion_com_type)
+                self.SelectSelection(motion_com_type)
             
         # If in visual mode we save some details about the selection so the
         # command can be repeated
@@ -911,7 +926,23 @@ class ViHelper():
         """
         return False
 
-    def SetCaretColour(self):
+    def SelectionIsForward(self):
+        """
+        Should be overridden by child class if necessary
+        """
+        return True
+
+    def GetSelectionDetails(self, selection_type=None):
+        """
+        Should be overridden by child class if necessary
+        """
+        return (True, len(self.ctrl.GetSelectedText()))
+
+    def _GetSelectionRange(self):
+        return None
+
+    def SetCaretColour(self, colour):
+        # TODO: implement this
         pass
 
     def minmax(self, a, b):
@@ -1176,7 +1207,7 @@ class ViHelper():
 
         # Switch tab
         mainAreaPanel.SetSelection(newTabNum-1)
-        mainAreaPanel.presenters[mainAreaPanel.GetSelection()].SetFocus()
+        #mainAreaPanel.presenters[mainAreaPanel.GetSelection()].SetFocus()
 
     def CloseCurrentTab(self, junk=None):
         """
@@ -1209,12 +1240,7 @@ class ViHelper():
         presenter.SetFocus()
 
     def GoogleSelection(self):
-        text = self.ctrl.GetSelectedText()
-
-        if not text:
-            text = self.ctrl.presenter.getWikiWord()
-
-        self.StartCmdInput("google {0}".format(text), run_cmd=True)
+        self.StartCmdInput("google", run_cmd=True)
 
 
 #--------------------------------------------------------------------
@@ -1255,6 +1281,8 @@ class ViHelper():
         if self.mode == ViHelper.VISUAL:
             if initial_input is None:
                 initial_input = u"'<,'>"
+            else:
+                initial_input = "{0} {1}".format(initial_input, self.ctrl.GetSelectedText())
             selection_range = self.ctrl.vi._GetSelectionRange()
 
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
@@ -1705,9 +1733,13 @@ class CmdParser():
                         "Open pagge in new tab"),
             "bgtabopen" : (self.GetWikiPages, self.OpenWikiPageBackgroundTab,
                         "Open page in new background tab"),
+            "winopen" : (self.GetWikiPages, self.OpenWikiPageNewWindow,
+                        "Open page in new window"),
 
             "tab" : (self.GetTabs, self.GotoTab, "Goto tab"),
             "buffer" : (self.GetTabs, self.GotoTab, "Goto tab"),
+
+            "split" : (self.GetWikiPages, self.SplitTab, "Split tab"),
 
             "google" : (self.GetWikiPagesOrSearch, self.OpenPageInGoogle, 
                         "Search google for ..."),
@@ -2145,11 +2177,9 @@ class CmdParser():
         if strip_whitespace_from_wikiword:
             wikiword = wikiword.strip()
 
-        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
+        return self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
                 u"wikipage/" + wikiword, tabMode=tab_mode, 
                 firstcharpos=value[0][3], charlength=value[0][4])
-
-        return True
 
 
 ##############################################
@@ -2276,6 +2306,9 @@ class CmdParser():
     def OpenWikiPageBackgroundTab(self, args):
         return self.OpenWikiPage(args, 3)
 
+    def OpenWikiPageNewWindow(self, args):
+        return self.OpenWikiPage(args, 6)
+
     def CloseTab(self, args=None):
         """
         Close specified tab
@@ -2310,7 +2343,23 @@ class CmdParser():
                 .showPresenter(tab)
         return True
         #return False
-        
+
+    def SplitTab(self, args=None):
+        if args is None:
+            presenter = self.CloneCurrentTab()
+        else:
+            presenter = self.OpenWikiPageNewTab(args)
+
+        presenter.makeCurrent()
+
+        mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
+        page = mainAreaPanel.GetPageIndex(presenter)
+
+        mainAreaPanel.Split(page, wx.RIGHT)
+
+    def CloneCurrentTab(self):
+        return self.ctrl.presenter.getMainControl().activatePageByUnifiedName(u"wikipage/" + self.ctrl.presenter.getWikiWord(), tabMode=2)
+            
     def CloseWiki(self, arg=None):
         """
         Close current wiki
