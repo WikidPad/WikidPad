@@ -2471,6 +2471,7 @@ class _TheHelper(object):
             editor.SetTargetEnd(endPos)
             editor.ReplaceTarget(filledText)
             editor.GotoPos(endPos)
+            editor.scrollXY(0, editor.GetScrollPos(wx.VERTICAL))
 
 
     @staticmethod 
