@@ -49,6 +49,14 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 #         self.PostCreate(nb)
         MiscEventSourceMixin.__init__(self)
 
+        flags = aui.AUI_NB_TAB_SPLIT |\
+                aui.AUI_NB_TAB_MOVE |\
+                aui.AUI_NB_TAB_EXTERNAL_MOVE |\
+                aui.AUI_NB_TAB_FLOAT
+
+        # Playing around (testing different style flags)
+        self.SetAGWWindowStyleFlag(flags)
+
         self.mainControl = mainControl
         self.mainControl.getMiscEvent().addListener(self)
 
@@ -83,7 +91,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 
         wx.EVT_KEY_UP(self, self.OnKeyUp)
 
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
+        #wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
 
 
         #wx.EVT_SET_FOCUS(self, self.OnFocused)
@@ -674,12 +682,16 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
 
 
-    def OnMiddleDown(self, evt):
-        tab = self.HitTest(evt.GetPosition())[0]
-        if tab == wx.NOT_FOUND:
-            return
+    def OnTabMiddleDown(self, evt):
+        #tab = self.HitTest(evt.GetPosition())[0]
+        #if tab == wx.NOT_FOUND:
+        #    return
 
-        pres = self.GetPage(tab)
+        #pres = self.GetPage(tab)
+
+        # GetSelection returns the tab from the current TabCtrl
+        # instead we can just access the tab directly
+        pres = evt.Page
         mc = self.mainControl
 
         paramDict = {"presenter": pres, "main control": mc}
