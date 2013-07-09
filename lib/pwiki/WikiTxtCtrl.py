@@ -7,7 +7,6 @@ from cStringIO import StringIO
 import string, itertools, contextlib
 import re # import pwiki.srePersistent as re
 import threading
-import thread
 
 import subprocess
 import textwrap
@@ -1073,6 +1072,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # variable otherwise this will be run each time
             # a new tab is opened
             wx.CallAfter(self.vi._enableMenuShortcuts, False)
+
         else:
             if self.vi is not None:
                 self.vi.TurnOff()
@@ -1085,7 +1085,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
             if not isLinux():
                 self.Bind(wx.EVT_CHAR, None)
-
 
 
     def onChangedConfiguration(self, miscevt):
@@ -2144,6 +2143,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     presenter.getMainControl().getMainAreaPanel().\
                             showPresenter(presenter)
 
+                presenter.makeCurrent()
                 return True
 
             elif node.name == "urlLink":
@@ -2412,11 +2412,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         newName = filename
         while True:
-            newName = wx.GetTextFromUser(_(u"Enter new name"),
-                    _(u"Rename File"), newName, self)
-            if not newName:
+            dlg = WikiTxtDialogs.RenameFileDialog(self,
+                    _(u"Enter new name for file: {0}".format(filename)),
+                    _(u"Rename File"), newName)
+
+            if dlg.ShowModal() != wx.ID_OK:
                 # User cancelled
+                dlg.Destroy()
                 return
+
+            newName = dlg.GetValue()
+            dlg.Destroy()
 
             newfile = join(path, newName)
             
@@ -3152,7 +3158,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     if isLinux():
         def OnSetFocus(self, evt):
-#             self.presenter.makeCurrent()
+            self.presenter.makeCurrent()
             evt.Skip()
 
             wikiPage = self.getLoadedDocPage()
@@ -3334,6 +3340,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     # Decide if this is an image link
                     if appendixDict.has_key("l"):
                         urlAsImage = False
+                    # If we have an external link prevent its attemped render
+                    elif astNode.url.lower().startswith("http"):
+                        urlAsImage = False
+                        callTip = _(u"External (http) link")
                     elif appendixDict.has_key("i"):
                         urlAsImage = True
 #                     elif self.asHtmlPreview and \

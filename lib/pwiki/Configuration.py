@@ -903,6 +903,8 @@ WIKIDEFAULTS = {
     ("main", "wiki_lastActiveTabNo"): u"-1", # Number of the tab which was last active. Non-wikiwords are ignored
             # for this index
 
+    ("main", "maincontrol_perspective"): u"", # Number of the tab which was last active. Non-wikiwords are ignored
+
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact
                                          # or "original_sqlite"

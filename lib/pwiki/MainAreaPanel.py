@@ -35,6 +35,14 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
     """
 
     def __init__(self, mainControl, parent, id):
+        # TODO: test some of the style flags
+        #       * Floating tabs produces issues as the tabs are not longer
+        #         associated with this notebook (so SetSelection order fails)
+        #       * Check how day order is affected when splitting the page
+        #
+        #       * MRU tabs
+        #
+        #aui.AuiNotebook.__init__(self, parent, id, agwStyle=aui.AUI_NB_TAB_MOVE|aui.AUI_NB_TAB_SPLIT|aui.AUI_NB_TAB_FLOAT|aui.AUI_NB_ORDER_BY_ACCESS)
         aui.AuiNotebook.__init__(self, parent, id)
 
 #         nb = wx.PreNotebook()
@@ -44,9 +52,13 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         self.mainControl = mainControl
         self.mainControl.getMiscEvent().addListener(self)
 
+        self.loadingWiki = True
+
+        self.pageQueue = False
         self.currentPresenter = None
         # References to all tab windows
         self._mruTabSequence = Utilities.IdentityList()
+        #self.mruTabIndex = []
         self.tabSwitchByKey = 0  # 2: Key hit, notebook change not processed;
                 # 1: Key hit, nb. change processed
                 # 0: Processing done
@@ -169,10 +181,43 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         return self.GetPageIndex(presenter)
 
 
+    def loadLayout(self):
+        """
+        Load the Aui Perspective layout if it is set in the config
+
+        """
+        layout = self.mainControl.getConfig().get("main",
+                "maincontrol_perspective", u"")
+
+        if layout:
+            self.LoadPerspective(layout)
+
+        # Check for orphan tabs (i.e those not associated with a tab ctrl)
+        for page in self:
+            pinfo, pid = self.FindTab(page)
+
+            # If we find any add them to the current tab ctrl
+            if pinfo is None:
+                index = self.GetPageIndex(page)
+                pinfo = self.GetPageInfo(index)
+                self.GetActiveTabCtrl().AddPage(page, pinfo)
+
+
+    def saveLayout(self):
+        # Consider merging with updateConfig?
+        config = self.mainControl.getConfig()
+        config.set("main", "maincontrol_perspective", self.SavePerspective())
+
+
     def updateConfig(self):
         """
         Update configuration info about open tabs
         """
+
+        # Do not update the config when loading a wiki
+        if self.loadingWiki:
+            return
+
         config = self.mainControl.getConfig()
 
         openWikiWords, subCtrls, activeNo = \
@@ -195,6 +240,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 
             config.set("main", "wiki_lastActiveTabNo", activeNo)
 
+        self.saveLayout()
 
     #    # TODO What about WikidPadHooks?
     def prepareCurrentPresenter(self, currentPresenter):
