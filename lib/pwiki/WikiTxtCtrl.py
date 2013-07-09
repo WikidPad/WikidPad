@@ -2300,22 +2300,50 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     break
 
 
+    def GetEditorToActivate(self, direction, makePresenterCurrent=False):
+        """
+        Helper for OnActive* functions.
 
-    def OnActivateThis(self, evt):
-        if self.contextMenuTokens:
-            self.activateTokens(self.contextMenuTokens, 0)
+        Returns the editor to activate the link on (based on the direction
+        parameter)
+        """
+        if direction is not None:
+            presenter = self.presenter.getMainControl().getMainAreaPanel().\
+                            getActivePresenterTo(direction, self.presenter)
+            if makePresenterCurrent:
+                presenter.makeCurrent()
+            ed = presenter.getSubControl("textedit")
+        else:
+            ed = self
 
-    def OnActivateNewTabThis(self, evt):
-        if self.contextMenuTokens:
-            self.activateTokens(self.contextMenuTokens, 2)
+        return ed
 
-    def OnActivateNewTabBackgroundThis(self, evt):
+    def OnActivateThis(self, evt, direction=None):
+        ed = self.GetEditorToActivate(direction)
+            
         if self.contextMenuTokens:
-            self.activateTokens(self.contextMenuTokens, 3)
+            ed.activateTokens(self.contextMenuTokens, 0)
+
+    def OnActivateNewTabThis(self, evt, direction=None):
+        ed = self.GetEditorToActivate(direction, True)
+
+        if self.contextMenuTokens:
+            ed.activateTokens(self.contextMenuTokens, 2)
+
+    def OnActivateNewTabBackgroundThis(self, evt, direction=None):
+        # If we are opening a background tab assume we want the current
+        # tabCtrl to remain active
+        presenter = self.presenter
+        ed = self.GetEditorToActivate(direction, True)
+
+        if self.contextMenuTokens:
+            ed.activateTokens(self.contextMenuTokens, 3)
+
+        wx.CallAfter(presenter.makeCurrent)
 
     def OnActivateNewWindowThis(self, evt):
         if self.contextMenuTokens:
-            self.activateTokens(self.contextMenuTokens, 6)
+            ed.activateTokens(self.contextMenuTokens, 6)
 
 
     def OnOpenContainingFolderThis(self, evt):
@@ -3266,7 +3294,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     def onIdleVisible(self, miscevt):
-        if (self.IsEnabled()):
+        if (self.IsEnabled() and self.HasFocus()):
             if self.presenter.isCurrent():
                 # fix the line, pos and col numbers
                 currentLine = self.GetCurrentLine()+1
@@ -4352,6 +4380,11 @@ class ViHandler(ViHelper):
     (k["\\"], k["s"]) : (0, (self.CreateShortHint, None), 2, 0), # \s
 
     (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <a-g>
+
+    (("Ctrl", k["w"]), k["l"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "right"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["h"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "left"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["j"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "below"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["k"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "above"), 0, 0), # <c-w>l
 
     #(k["g"], k["s"])  : (0, (self.SwitchEditorPreview, None), 0), # gs
     

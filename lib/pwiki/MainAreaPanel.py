@@ -62,7 +62,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
 
         self.loadingWiki = True
 
-        self.pageQueue = False
+        self.preparingPresenter = False
         self.currentPresenter = None
         # References to all tab windows
         self._mruTabSequence = Utilities.IdentityList()
@@ -189,6 +189,144 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         return self.GetPageIndex(presenter)
 
 
+    def getTabCtrlsAndTheirPositions(self):
+        panePosDict = {}
+        for pane in self.GetAuiManager().GetAllPanes():
+            if pane.name == u"dummy":
+                continue
+
+            tabCtrl = pane.window._tabs
+            panePosDict[tabCtrl] = (tabCtrl.GetPosition())
+
+        return panePosDict
+
+
+    def getTabCtrlByPresenter(self, presenter):
+        """
+        Returns the TabCtrl which contains a giver presenter
+        """
+        return self.GetTabFrameFromWindow(presenter)._tabs
+
+
+    def getTabCtrlTo(self, direction, presenter=None):
+        """
+        Returns the TabCtrl *direction* (of) the currently active one.
+
+        @param direction: the direction to search, can be u"right", u"left"
+                u"above", u"below"
+        @param presenter: the presenter around which to search. If None the
+                current presenter is used
+
+        """
+
+        tabCtrlPos = self.getTabCtrlsAndTheirPositions()
+
+        if presenter is None:
+            searchTabCtrl = self.GetActiveTabCtrl()
+        else:
+            searchTabCtrl = self.getTabCtrlByPresenter(presenter)
+
+        curPos = tabCtrlPos.pop(searchTabCtrl)
+
+        x, y = curPos
+
+        # Hey I can't think of a better way to do this at the moment
+        x_coord = None
+        y_coord = None
+        try:
+            if direction == u"right":
+                x_coord = min([i[0] for i in tabCtrlPos.values() if i[0]-x > 0])
+                y_coord = min([i[1] for i in tabCtrlPos.values() if i[0] == x_coord and i[1]-y >= 0])
+            elif direction == u"left":
+                x_coord = max([i[0] for i in tabCtrlPos.values() if x-i[0] > 0])
+                y_coord = min([i[1] for i in tabCtrlPos.values() if i[0] == x_coord and i[1]-y >= 0])
+            elif direction == u"above":
+                y_coord = max([i[1] for i in tabCtrlPos.values() if y-i[1] > 0])
+                x_coord = min([i[0] for i in tabCtrlPos.values() if i[1] == y_coord and i[0]-x >= 0])
+            elif direction == u"below":
+                y_coord = min([i[1] for i in tabCtrlPos.values() if i[1] - y > 0])
+                x_coord = min([i[0] for i in tabCtrlPos.values() if i[1] == y_coord and i[0]-x >= 0])
+            else:
+                return None
+        except ValueError:
+            # ValueError is raised if max() or min() is run on an empty list
+            # i.e. if no valid x or y coord can be found
+            pass
+
+
+        new_ctrl = None
+        for ctrl, pos in tabCtrlPos.iteritems():
+            if x_coord is None:
+                if pos[1] == y_coord:
+                    new_ctrl = ctrl
+                    break
+                continue
+            elif y_coord is None:
+                if pos[0] == x_coord:
+                    new_ctrl = ctrl
+                    break
+                continue
+            if pos == (x_coord, y_coord):
+                new_ctrl = ctrl
+                break
+
+        return new_ctrl
+
+
+    def switchPresenterByPosition(self, direction):
+        """
+        Activate the TabCtrl to the *direction* of the active one.
+
+        see getTabCtrlTo for available directions
+        """
+        if direction is None:
+            return
+
+        newTabCtrl = self.getTabCtrlTo(direction)
+
+        if newTabCtrl is not None:
+            for page in newTabCtrl.GetPages():
+                if page.window.IsShown():
+                    self.SetSelectionToPage(page)
+                    return
+
+    def getActivePresenterInTabCtrl(self, tabCtrl):
+        """
+        Return the active (visible) presenter for a given TabCtrl
+
+        """
+        if tabCtrl is None:
+            return None
+
+        for page in tabCtrl.GetPages():
+            if page.window.IsShown():
+                return page.window
+
+    def getActivePresenterTo(self, direction, presenter=None):
+        """
+        Returns the active (visible) presenter to the *direction* of the
+        given presenter
+
+        """
+        return self.getActivePresenterInTabCtrl(
+                self.getTabCtrlTo(direction, presenter))
+        
+
+    def getPossibleTabCtrlDirections(self, presenter=None):
+        """
+        Returns a dict of the TabCtrls surrounding a given presenter.
+
+        If not presenter specified active presenter is used.
+
+        """
+        possible_directions = {}
+        for direction in [u"left", u"right", u"above", u"below"]:
+            possible_directions[direction] = self.getTabCtrlTo(direction, presenter)
+
+        return possible_directions
+        
+
+
     def loadLayout(self):
         """
         Load the Aui Perspective layout if it is set in the config
@@ -260,7 +398,11 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         Mainly called by OnNotebookPageChanged to inform presenters
         about change
         """
+        if self.preparingPresenter:
+            return
+
         if currentPresenter is not self.currentPresenter:
+            self.preparingPresenter = True
             self.currentPresenter = currentPresenter
 
             proxyEvent = self.getCurrentPresenterProxyEvent()
@@ -269,12 +411,18 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
             self.mainControl.refreshPageStatus()
             self.fireMiscEventKeys(("changed current presenter",))
 
+            # Make the currenty notebook tab active
             pres_id = self.getIndexForPresenter(currentPresenter)
             if self.GetSelection() != pres_id:
                 self.SetSelection(pres_id)
 
         # The currently active tab should always be visible (and enabled)
-        currentPresenter.setLayerVisible(True)
+        #currentPresenter.setLayerVisible(True) # Causes the page to gain focus
+
+        wx.CallAfter(self.presenterPrepared)
+
+    def presenterPrepared(self):
+        self.preparingPresenter = False
 
 
     def showPresenter(self, currentPresenter):
@@ -434,6 +582,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
             presenter.switchSubControl("preview", gainFocus=True)
 
     def OnNotebookPageChanging(self, evt):
+        if self.preparingPresenter:
+            evt.Veto()
+            return
+
         evt.Skip()
 
     def OnNotebookPageChanged(self, evt):
