@@ -657,6 +657,7 @@ lib/pwiki/AttributeHandling.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/ConnectWrapPysqlite.py -text
+lib/pwiki/CustomListBox.py -text
 lib/pwiki/DiffGui.py -text
 lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
