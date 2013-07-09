@@ -190,7 +190,11 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
                 "maincontrol_perspective", u"")
 
         if layout:
-            self.LoadPerspective(layout)
+            try:
+                self.LoadPerspective(layout)
+            # Occurs when opening a new window
+            except IndexError:
+                print "Perspectives no. does not match."
 
         # Check for orphan tabs (i.e those not associated with a tab ctrl)
         for page in self:
@@ -249,20 +253,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         about change
         """
         if currentPresenter is not self.currentPresenter:
-#             # As multiple pages can now be shown on screen we check if its
-#             # shown on screen, making sure the sub ctrl is visable if so.
-#             for i in range(self.GetPageCount()):
-#                 self.presenters[i].setLayerVisible(self.GetPage(i).IsShown())
-
-    #        #if not (self.currentPresenter is currentPresenter):
-        
-            # TODO: Either keep currentPresenter up to date when switching pages
-            #       (which I don't seem to be able to do) or rewrite the
-            #       editor/preview switching so that currentPresenter is not
-            #       required
             self.currentPresenter = currentPresenter
-    #        #    #for p in self.presenters:
-    #        #    #    p.setLayerVisible(p is currentPresenter)
+
             proxyEvent = self.getCurrentPresenterProxyEvent()
             proxyEvent.setWatchedEvents(
                     (self.currentPresenter.getMiscEvent(),))
@@ -272,6 +264,9 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
             pres_id = self.getIndexForPresenter(currentPresenter)
             if self.GetSelection() != pres_id:
                 self.SetSelection(pres_id)
+
+        # The currently active tab should always be visible (and enabled)
+        currentPresenter.setLayerVisible(True)
 
 
     def showPresenter(self, currentPresenter):
@@ -297,8 +292,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin):
         self.AddPage(presenter, "    ")
         presenter.getMiscEvent().addListener(self)
 
-        if SystemInfo.isLinux():
-            presenter.Show(True)
+        # Is not needed with AuiNotebook (and breaks new background tab 
+        # compatability)
+        #if SystemInfo.isLinux():
+        #    presenter.Show(True)
 
         if self.getCurrentPresenter() is None:
             self.prepareCurrentPresenter(presenter)

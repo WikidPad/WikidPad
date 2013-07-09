@@ -1842,6 +1842,10 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
         self.Bind(wx.EVT_MOTION, self.OnMotion)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)
         self.Bind(EVT_AUINOTEBOOK_BUTTON, self.OnButton)
+    
+        # Always pass the focus onto the child. Is there any situation inwhich
+        # we don't want this?
+        self.SetCanFocus(False)
 
 
     def IsDragging(self):

@@ -2143,7 +2143,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     presenter.getMainControl().getMainAreaPanel().\
                             showPresenter(presenter)
 
-                presenter.makeCurrent()
                 return True
 
             elif node.name == "urlLink":
@@ -3158,7 +3157,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     if isLinux():
         def OnSetFocus(self, evt):
-            self.presenter.makeCurrent()
+            #self.presenter.makeCurrent()
+
+            # We need to make sure makeCurrent uses CallAfter overwise we
+            # get a selection bug if the mouse is moved quickly after
+            # clicking on the TxtCtrl (not sure if this is required for 
+            # windows)
+            wx.CallAfter(self.presenter.makeCurrent)
             evt.Skip()
 
             wikiPage = self.getLoadedDocPage()
@@ -4717,9 +4722,17 @@ class ViHandler(ViHelper):
 #        evt.Skip()
 
     def OnMouseClick(self, evt):
-        # TODO: block mouse movement whilst entering a command?
+        # Vim runs the command after changing the mouse position
         self.ctrl.OnClick(evt)
         wx.CallAfter(self.SetLineColumnPos)
+
+        # TODO::
+        # Get Mouse Pos and save it as motion cmd
+        #if self.NextKeyCommandCanBeMotion:
+        #    self.StartSelection()
+        #    evt = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
+        #    evt.m_keyCode = -999 # Should this be done?
+        #    wx.PostEvent(self.ctrl, evt)
 
     def OnLeftMouseUp(self, evt):
         """Enter visual mode if text is selected by mouse"""
