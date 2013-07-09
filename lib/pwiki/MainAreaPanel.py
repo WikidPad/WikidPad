@@ -389,6 +389,11 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
     def presenterPrepared(self):
         self.preparingPresenter = False
 
+        wx.CallAfter(self.presenterPrepared)
+
+    def presenterPrepared(self):
+        self.preparingPresenter = False
+
 
     def showPresenter(self, currentPresenter):
         """

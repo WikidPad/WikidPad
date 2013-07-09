@@ -1276,7 +1276,20 @@ class ViHelper():
         bell = ViVisualBell(self.ctrl, -1, rect, colour, close_delay, text)
 
     def StartCmdInput(self, initial_input=None, run_cmd=False):
+        """
+        Starts a : cmd input for the currently active (or soon to be 
+        activated) tab.
 
+        We have use CallAfter if there is a page change event currently
+        in progress (may result in some incorrectly sent key/char evts)
+        """
+        if self.ctrl.getMainControl().getMainAreaPanel().preparingPresenter:
+            wx.CallAfter(self.StartCmdInputPostEvents, initial_input, run_cmd)
+            return
+
+        self.StartCmdInputPostEvents(initial_input, run_cmd)
+
+    def StartCmdInputPostEvents(self, initial_input=None, run_cmd=False):
         selection_range = None
         if self.mode == ViHelper.VISUAL:
             if initial_input is None:
@@ -1286,10 +1299,9 @@ class ViHelper():
             selection_range = self.ctrl.vi._GetSelectionRange()
 
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
-                                            initial_input, selection_range=selection_range)
+                    initial_input, selection_range=selection_range, 
+                            run_cmd=run_cmd)
 
-        if run_cmd:
-            wx.CallAfter(self.input_window.ExecuteCurrentCmd)
 
     def RepeatLastSubCmd(self, ignore_flags):
         self.input_window.cmd_parser.RepeatSubCmd(ignore_flags)
@@ -2063,6 +2075,9 @@ class CmdParser():
         return cmd_list, list_box, cmd_list
 
     def RunCmd(self, text_input, viInputListBox_selection):
+        """
+        Handles the executing of a : command
+        """
         if self.CheckForRangeCmd(text_input):
             return self.ExecuteRangeCmd(text_input)
 
@@ -2355,7 +2370,7 @@ class CmdParser():
         mainAreaPanel = self.ctrl.presenter.getMainControl().getMainAreaPanel()
         page = mainAreaPanel.GetPageIndex(presenter)
 
-        mainAreaPanel.Split(page, wx.RIGHT)
+        wx.CallAfter(mainAreaPanel.Split, page, wx.RIGHT)
 
     def CloneCurrentTab(self):
         return self.ctrl.presenter.getMainControl().activatePageByUnifiedName(u"wikipage/" + self.ctrl.presenter.getWikiWord(), tabMode=2)
@@ -2580,10 +2595,14 @@ class ViInputDialog(wx.Panel):
         self.block_kill_focus = False
         wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
 
-    def StartCmd(self, ctrl, cmd_history, text, selection_range=None):
+    def StartCmd(self, ctrl, cmd_history, text, selection_range=None, 
+                                                            run_cmd=False):
         self.search = False
         self.selection_range = selection_range
         self.StartInput(text, ctrl, cmd_history)
+
+        if run_cmd:
+            wx.CallAfter(self.ExecuteCurrentCmd)
 
     def StartSearch(self, ctrl, cmd_history, text, forward):
         """

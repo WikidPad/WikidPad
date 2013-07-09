@@ -329,6 +329,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL,
                 self.OnAddThisSpellingToIgnoreLocal)
 
+
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)
@@ -336,6 +337,37 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 self.OnActivateNewTabBackgroundThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
                 self.OnActivateNewWindowThis)
+
+        # Passing the evt here is not strictly necessary, but it may be
+        # used in the future
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_LEFT, 
+                lambda evt: self.OnActivateThis(evt, u"left"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT,
+                lambda evt: self.OnActivateNewTabThis(evt, u"left"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT,
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"left"))
+
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_RIGHT, 
+                lambda evt: self.OnActivateThis(evt, u"right"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT,
+                lambda evt: self.OnActivateNewTabThis(evt, u"right"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT,
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"right"))
+
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_ABOVE, 
+                lambda evt: self.OnActivateThis(evt, u"above"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE,
+                lambda evt: self.OnActivateNewTabThis(evt, u"above"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE,
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"above"))
+
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_BELOW,
+                lambda evt: self.OnActivateThis(evt, u"below"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW,
+                lambda evt: self.OnActivateNewTabThis(evt, u"below"))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW,
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"below"))
+
 
         wx.EVT_MENU(self, GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS,
                 self.OnConvertUrlAbsoluteRelativeThis)
@@ -1407,6 +1439,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             if addActivateItem:
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
+
+                # Check if their are any surrounding viewports that we can use
+                viewports = self.presenter.getMainControl().\
+                        getMainAreaPanel().getPossibleTabCtrlDirections(
+                                self.presenter)
+                for direction in viewports:
+                    if viewports[direction] is not None:
+                        appendToMenuByMenuDesc(menu, 
+                                    _CONTEXT_MENU_INTEXT_ACTIVATE_DIRECTION[
+                                            direction])
+                        
 
                 if addFileUrlItem:
                     appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_FILE_URL)
@@ -3160,6 +3203,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         else:
             super(WikiTxtCtrl, self).OnKeyDown(evt)
 
+            # CallAfter is used as otherwise we seem to lose a mouseup
+            # evt. TODO: check what happens on windows
+            wx.CallAfter(self.presenter.makeCurrent)
+
 
     def OnChar_ImeWorkaround(self, evt):
         """
@@ -3209,8 +3256,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 self.presenter.getMainControl().lostAccess(e)
 
             evt.Skip()
-            # NOTE: we seem to lose a mouse up evt here
-            self.presenter.makeCurrent()
 
     else:
         def OnSetFocus(self, evt):
@@ -3809,6 +3854,33 @@ Follow Link New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 Follow Link New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 """
 
+_CONTEXT_MENU_INTEXT_ACTIVATE_DIRECTION = {
+    u"left" : u"""
+-
+Follow Link in pane|Left;CMD_ACTIVATE_THIS_LEFT
+Follow Link in pane|Left New Tab;CMD_ACTIVATE_NEW_TAB_THIS_LEFT
+Follow Link in pane|Left New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT
+""",
+    u"right" : u"""
+-
+Follow Link in pane|Right;CMD_ACTIVATE_THIS_RIGHT
+Follow Link in pane|Right New Tab;CMD_ACTIVATE_NEW_TAB_THIS_RIGHT
+Follow Link in pane|Right New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT
+""",
+    u"above" : u"""
+-
+Follow Link in pane|Above;CMD_ACTIVATE_THIS_ABOVE
+Follow Link in pane|Above New Tab;CMD_ACTIVATE_NEW_TAB_THIS_ABOVE
+Follow Link in pane|Above New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE
+""",
+    u"below" : u"""
+-
+Follow Link in pane|Below;CMD_ACTIVATE_THIS_BELOW
+Follow Link in pane|Below New Tab;CMD_ACTIVATE_NEW_TAB_THIS_BELOW
+Follow Link in pane|Below New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW
+""",
+    }
+
 _CONTEXT_MENU_INTEXT_WIKI_URL = \
 u"""
 -
@@ -4381,6 +4453,11 @@ class ViHandler(ViHelper):
     (k["\\"], k["s"]) : (0, (self.CreateShortHint, None), 2, 0), # \s
 
     (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <a-g>
+
+    (("Ctrl", k["w"]), k["l"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "right"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["h"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "left"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["j"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "below"), 0, 0), # <c-w>l
+    (("Ctrl", k["w"]), k["k"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "above"), 0, 0), # <c-w>l
 
     (("Ctrl", k["w"]), k["l"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "right"), 0, 0), # <c-w>l
     (("Ctrl", k["w"]), k["h"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "left"), 0, 0), # <c-w>l
