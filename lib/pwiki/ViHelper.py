@@ -1208,10 +1208,26 @@ class ViHelper():
                     showPresenter(presenter)
         presenter.SetFocus()
 
+    def GoogleSelection(self):
+        text = self.ctrl.GetSelectedText()
+
+        if not text:
+            text = self.ctrl.presenter.getWikiWord()
+
+        self.StartCmdInput("google {0}".format(text), run_cmd=True)
+
+
 #--------------------------------------------------------------------
 # Misc commands
 #--------------------------------------------------------------------
-    def visualBell(self, colour="RED"):
+    def viError(self, text):
+        """
+        Display a visual error message
+
+        """
+        self.visualBell(close_delay=10000, text=text)
+
+    def visualBell(self, colour="RED", close_delay=100, text="" ):
         """
         Display a visual sign to alert user input has been
         recieved.
@@ -1231,7 +1247,7 @@ class ViHelper():
 
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
 
-        bell = ViVisualBell(self.ctrl, -1, rect, colour)
+        bell = ViVisualBell(self.ctrl, -1, rect, colour, close_delay, text)
 
     def StartCmdInput(self, initial_input=None, run_cmd=False):
 
@@ -1294,6 +1310,9 @@ class ViVisualBell(wxPopupOrFrame):
     
     Its intention is to give visual feedback that a command has 
     been received in cases where no other visual change is observed
+
+    It can also be used to display error messages (set close_delay to -1 and
+    the popup will remain open until the next keyevent).
     """
     
     COLOURS = {
@@ -1301,21 +1320,41 @@ class ViVisualBell(wxPopupOrFrame):
         "GREEN" : wx.Colour(0, 255, 0),
         "YELLOW" : wx.Colour(255, 255, 0),
         "BLUE" : wx.Colour(0, 0, 255),
+        "WHITE" : wx.Colour(0, 0, 0),
             }
               
     
-    def __init__(self, parent, id, rect, colour="RED", close_delay=100):
+    def __init__(self, parent, id, rect, colour="RED", close_delay=100, 
+            text=""):
         wxPopupOrFrame.__init__(self, parent)
         self.SetPosition(rect.GetPosition())
         self.SetSize(rect.GetSize())
         self.SetBackgroundColour(ViVisualBell.COLOURS[colour])
         self.Show()
 
-        wx.EVT_TIMER(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE,
-                self.OnClose)
+        if text:
+            self.text = wx.TextCtrl(self, -1,
+                text, style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
+            self.text.SetBackgroundColour(ViVisualBell.COLOURS[colour])
+            self.text.SetForegroundColour(ViVisualBell.COLOURS["WHITE"])
 
-        self.closeTimer = wx.Timer(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE)
-        self.closeTimer.Start(close_delay, True)
+            sizer = wx.BoxSizer(wx.HORIZONTAL)
+            sizer.Add(self.text, 1, wx.ALL | wx.EXPAND, 0)
+
+            self.SetSizer(sizer)
+            self.Layout()
+
+        self.Show()
+        if close_delay > 0:
+            wx.EVT_TIMER(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE,
+                    self.OnClose)
+
+            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE)
+            self.closeTimer.Start(close_delay, True)
+        else:
+            wx.EVT_KEY_DOWN(self.text, self.OnClose)
+            wx.EVT_KILL_FOCUS(self.text, self.OnClose)
+            self.SetFocus()
 
 
     def OnClose(self, evt):
@@ -1646,6 +1685,8 @@ class CmdParser():
             "&" : (self.Pass, self.RepeatSubCmd, "Repeat last command"),
             "&&" : (self.Pass, self.RepeatSubCmdWithFlags,
                         "Repeat last command with flags"),
+            "reloadplugins" : (self.Pass, self.ReloadPlugins, 
+                    "Reload plugins (use sparingly)"),
             "parents" : (self.GetParentPages, self.OpenWikiPageCurrentTab,
                         "Goto parent page in current page"),
             "tabparents" : (self.GetParentPages, self.OpenWikiPageNewTab,
@@ -1681,7 +1722,9 @@ class CmdParser():
                 self.ctrl.presenter.getMainControl().showWikiWordDeleteDialog,
                 "Delete page"),
 
-            #"renamepage" : (self.GetDefinedWikiPages, self.Pass),
+            "renamepage" : (self.GetDefinedWikiPages, 
+                self.ctrl.presenter.getMainControl().showWikiWordRenameDialog, 
+                "Rename page"),
 
             # Currently bdelete and bwipeout are currently synonymous
             "quit" : (self.GetTabs, self.CloseTab, "Close tab"),
@@ -1695,6 +1738,9 @@ class CmdParser():
 
             "reloadplugins" : (self.Pass, self.ReloadPlugins, 
                     "Reload plugins (use sparingly)"),
+
+            "start_pdb_debug" : (self.Pass, self.StartPDBDebug,
+                        "Begin a PDB debug session"),
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
@@ -1723,6 +1769,9 @@ class CmdParser():
 
         self.range_regex = u"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
                                             "|".join(self.range_cmds.keys()))
+
+    def StartPDBDebug(self, args=None):
+        import pdb; pdb.set_trace()
     
     def SearchAndReplace(self, pattern, ignore_flags=False):
         """
@@ -1736,23 +1785,22 @@ class CmdParser():
         """
         # As in vim the expression delimeter can be one of a number of 
         # characters
-        if pattern.startswith(u"/"):
-            delim = u"\/"
-        elif pattern.startswith(u";"):
-            delim = u"\;"
-        elif pattern.startswith(u"$"):
-            delim = u"\$"
-        elif pattern.startswith(u"|"):
-            delim = u"\|"
-        elif pattern.startswith(u"^"):
-            delim = u"\^"
+        delims = "/;$|^%,"
+        if pattern[0] in delims:
+            delim = u"\{0}".format(pattern[0])
         else:
-            return False
+            self.ctrl.vi.viError(
+                    _("Error: {0} is not a valid delimiter".format(
+                        pattern[0])))
+            return 2
 
+        # NOTE: Vim does not require all arguments to be present
+        #       Current implementation here does
         try:
             search, replace, flags = re.split(r"(?<!\\){0}".format(delim), pattern)[1:]
         except ValueError:
-            return False
+            self.ctrl.vi.viError(_("Incorrect :sub cmd (unable to split patterns using '{0}')".format(delim)))
+            return 2
 
         # First check if there are any pattern modifiers
         #
@@ -1783,7 +1831,8 @@ class CmdParser():
 
         try:
             search_regex = re.compile(search, flags=re_flags)
-        except re.error:
+        except re.error as e:
+            self.ctrl.vi.viError(_("re compile error: {0}".format(e)))
             return False
 
         self.ctrl.vi.AddJumpPosition()
@@ -1807,7 +1856,11 @@ class CmdParser():
             self.ctrl.ReplaceSelection("\n".join(new_text))
 
         else:
-            self.ctrl.ReplaceSelection(search_regex.sub(replace, text_to_sub))
+            try:
+                self.ctrl.ReplaceSelection(search_regex.sub(replace, text_to_sub))
+            except re.error as e:
+                self.ctrl.vi.viError(_("Error '{0}')".format(e)))
+                return False
 
         self.last_sub_cmd = pattern
 
@@ -1853,7 +1906,10 @@ class CmdParser():
             return False
 
     def ExecuteRangeCmd(self, text_input):
-        start_range, end_range, cmd, args = re.match(self.range_regex, text_input).groups()
+        try:
+            start_range, end_range, cmd, args = re.match(self.range_regex, text_input).groups()
+        except AttributeError as e:
+            self.ctrl.vi.viError(_("Error '{0}')".format(e)))
 
         try:
             if start_range is not None:
