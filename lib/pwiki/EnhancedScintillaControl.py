@@ -233,6 +233,23 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
             self.SetSelection(bs, be)
 
 
+    def getCharPosBySciPos(self, sciPos):
+        """
+        Get character position by the byte position returned by Scintilla's
+        own methods
+        """
+        return len(self.GetTextRange(0, sciPos))
+
+
+    def getSciPosByCharPos(self, charPos):
+        """
+        Get byte position returned by Scintilla's own methods by
+        the character position
+        """
+        text = self.GetText()
+        return self.bytelenSct(text[:charPos])
+                
+
     def GetSelectionCharPos(self):
         """
         Same as GetSelection(), but returned (start, end) are character positions

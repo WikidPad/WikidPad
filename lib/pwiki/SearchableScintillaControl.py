@@ -53,7 +53,6 @@ class SearchableScintillaControl(EnhancedScintillaControl):
     def OnKeyDown(self, evt):
         """
         wx.Event handler for key down.
-        Can be overwritten, default calls only evt.Skip()
         """
         accP = wxHelper.getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
