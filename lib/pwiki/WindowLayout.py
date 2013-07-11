@@ -1017,6 +1017,16 @@ class StorablePerspective(object):
         need to be created from perspective data.
         """
         raise NotImplementedError
+        
+    def deleteForNewPerspective(self):
+        """
+        When a new perspective is set for a parent window it has to remove existing
+        children. It does that by detaching this window and later calling this method.
+        By default the method just destroys this window. Overridden methods
+        should call this base method
+        """
+        self.Destroy()
+
 
 
 #     @staticmethod

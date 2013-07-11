@@ -9,8 +9,9 @@ from WikiExceptions import *
 
 from .SystemInfo import isWindows, isOSX
 
-from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
-        wxKeyFunctionSink, appendToMenuByMenuDesc
+from . import wxHelper
+from .wxHelper import getAccelPairFromKeyDown, GUI_ID, wxKeyFunctionSink, \
+        appendToMenuByMenuDesc
 
 from .MiscEvent import KeyFunctionSink
 
@@ -384,6 +385,9 @@ class WikiHtmlView(wx.html.HtmlWindow):
             wx.CallAfter(self._scrollAndThaw)
         
     def _scrollAndThaw(self):
+        if wxHelper.isDead(self):
+            return
+            
         self.Scroll(self.deferredScrollPos[0], self.deferredScrollPos[1])
         self.Thaw()
         self.deferredScrollPos = None
@@ -406,7 +410,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         if len(text) == 0:
             return
 
-        copyTextToClipboard(text)
+        wxHelper.copyTextToClipboard(text)
 
 
     def OnLeftDClick(self, evt):

@@ -492,7 +492,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             
         # Actual remove
         self._mruTabWindowDelete(presenter)
-        self.RemovePage(idx)
+        self.RemovePageByIdx(idx)
         self.updateConfig()
 
 
@@ -621,11 +621,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         if wnd is None:
             return
 
-        try:
-            self._mruTabSequence.remove(wnd)
-        except ValueError:
-            pass
-
+        self._mruTabSequence.drop(wnd)
         self._mruTabSequence.insert(0, wnd)
 
 
@@ -637,7 +633,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         """
         Delete wnd.
         """
-        self._mruTabSequence.remove(wnd)
+        self._mruTabSequence.drop(wnd)
 
     def _mruTabWindowGetNext(self, wnd):
         """
@@ -858,6 +854,12 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         # Delete all tab ctrls
         tab_count = self._tabs.GetPageCount()
+        
+        # Contains a list of windows which should be deleted finally
+        # Deletion is postponed as typeFactory may be able to recycle
+        # some of them (currently not)
+        windowsToDel = []
+
         for i in xrange(tab_count):
             wnd = self._tabs.GetWindowFromIdx(i)
 
@@ -865,20 +867,24 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             ctrl, ctrl_idx = self.FindTab(wnd)
             if not ctrl:
                 return False
-
+                
             # remove the tab from ctrl
             if not ctrl.RemovePage(wnd):
                 return False
+                
+            windowsToDel.append(wnd)
             
-            wnd.Destroy()
-
         self.RemoveEmptyTabFrames()
+        
+        self._tabs.RemoveAllPages()
+
+        mruList = []
+        
+        # Main area panel is empty at this point
 
         sel_wnd = None
         tabs = data[0:data.index(u"@")]
         to_break1 = False
-        
-        mruList = []
 
         while 1:
             if u"|" not in tabs:
@@ -913,6 +919,9 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             to_break2, active_found = False, False
 
             for tab in tab_list.split(u","):
+                if tab == u"":
+                    continue
+
 #                 if u"," not in tab_list:
 #                     to_break2 = True
 #                     tab = tab_list
@@ -1002,6 +1011,18 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             self._mruTabWindowPushToTop(sel_wnd)
 
         self.UpdateTabCtrlHeight()
+        
+        # Now delete all orphaned windows
+        
+        for wnd in windowsToDel:
+            if self._tabs.GetIdxFromWindow(wnd) != wx.NOT_FOUND:
+                # Window in again use
+                continue
+        
+            if isinstance(wnd, StorablePerspective):
+                wnd.deleteForNewPerspective()
+            else:
+                wnd.Destroy()
 
         return True
 

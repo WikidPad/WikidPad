@@ -4966,7 +4966,7 @@ class AuiManager(wx.EvtHandler):
                 elif p.IsNotebookPage():
                     notebook = self._notebooks[p.notebook_id]
                     id = notebook.GetPageIndex(p.window)
-                    notebook.RemovePage(id)
+                    notebook.RemovePageByIdx(id)
 
                 # make sure there are no references to this pane in our uiparts,
                 # just in case the caller doesn't call Update() immediately after
@@ -5028,7 +5028,7 @@ class AuiManager(wx.EvtHandler):
                     notebook = self._notebooks[nid]
                     page_idx = notebook.GetPageIndex(pane_info.window)
                     if page_idx >= 0:
-                        notebook.RemovePage(page_idx)
+                        notebook.RemovePageByIdx(page_idx)
 
         # now we need to either destroy or hide the pane
         to_destroy = 0
@@ -5048,7 +5048,7 @@ class AuiManager(wx.EvtHandler):
             notebook = self._notebooks[pane_info.notebook_id]
             while notebook.GetPageCount():
                 window = notebook.GetPage(0)
-                notebook.RemovePage(0)
+                notebook.RemovePageByIdx(0)
                 info = self.GetPane(window)
                 if info.IsOk():
                     info.notebook_id = -1
@@ -6550,7 +6550,7 @@ class AuiManager(wx.EvtHandler):
                 window = notebook.GetPage(pageCounter)
                 paneInfo = self.GetPane(window)
                 if paneInfo.IsOk() and paneInfo.notebook_id != nb:
-                    notebook.RemovePage(pageCounter)
+                    notebook.RemovePageByIdx(pageCounter)
                     window.Hide()
                     window.Reparent(self._frame)
                     pageCounter -= 1
@@ -6610,7 +6610,7 @@ class AuiManager(wx.EvtHandler):
 
                     self.DetachPane(notebook)
 
-                    notebook.RemovePage(0)
+                    notebook.RemovePageByIdx(0)
                     notebook.Destroy()
 
                 else:
@@ -6640,7 +6640,7 @@ class AuiManager(wx.EvtHandler):
                     page = notebook.GetPage(idx)
                     pane = self.GetPane(page)
                     pages_and_panes.append((page, pane))
-                    notebook.RemovePage(idx)
+                    notebook.RemovePageByIdx(idx)
                 sorted_pnp = sorted(pages_and_panes, key=lambda tup: tup[1].dock_pos)
 
                 # Grab the attributes from the panes which are ordered
@@ -7379,7 +7379,7 @@ class AuiManager(wx.EvtHandler):
             p = self.PaneFromTabEvent(event)
             if p.IsOk():
 
-                # veto it because we will call "RemovePage" ourselves
+                # veto it because we will call "RemovePageByIdx" ourselves
                 event.Veto()
 
                 # Now ask the app if they really want to close...

@@ -779,6 +779,16 @@ class IdentityList(list):
     def remove(self, elem):
         del self[self.index(elem)]
 
+    def drop(self, elem):
+        """
+        Same as remove() but fails silently if elem not found
+        """
+        idx = self.find(elem)
+        if idx == -1:
+            return
+
+        del self[idx]
+
 
 def sgn(value):
     """

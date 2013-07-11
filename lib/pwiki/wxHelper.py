@@ -853,6 +853,12 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
                 repr(self.ifdestroyed) + ">"
 
 
+def isDead(wxObj):
+    """
+    Check if C++ part of a wx-object is dead already
+    """
+    return wxObj.__class__ is wx._core._wxPyDeadObject
+
 
 class IconCache:
     def __init__(self, iconDir):

@@ -1142,6 +1142,21 @@ class AuiTabContainer(object):
         # let the art provider know how many pages we have
         if self._art:
             self._art.SetSizingInfo(self._rect.GetSize(), 0, minMaxTabWidth)
+
+
+    def RemoveAllPages(self):
+        """
+        Remove all pages. Does not send visiblity events.
+        """
+        minMaxTabWidth = self._auiNotebook.GetMinMaxTabWidth()
+
+        self._pages = []
+
+        self._tab_offset = min(self._tab_offset, -1)
+
+        # let the art provider know how many pages we have
+        if self._art:
+            self._art.SetSizingInfo(self._rect.GetSize(), 0, minMaxTabWidth)
         
 
     def SetActivePage(self, wndOrInt):
@@ -3369,7 +3384,7 @@ class AuiNotebook(wx.PyPanel):
 
          :meth:`DeletePage` removes a tab from the multi-notebook, and destroys the window as well.
 
-        :see: :meth:`RemovePage`
+        :see: :meth:`RemovePageByIdx`
         """
 
         if page_idx >= self._tabs.GetPageCount():
@@ -3391,7 +3406,7 @@ class AuiNotebook(wx.PyPanel):
 
         self.RemoveControlFromPage(page_idx)
 
-        if not self.RemovePage(page_idx):
+        if not self.RemovePageByIdx(page_idx):
             return False
 
         wnd.Destroy()
@@ -3399,7 +3414,7 @@ class AuiNotebook(wx.PyPanel):
         return True
 
 
-    def RemovePage(self, page_idx):
+    def RemovePageByIdx(self, page_idx):
         """
         Removes a page, without deleting the window pointer.
 
@@ -4360,7 +4375,7 @@ class AuiNotebook(wx.PyPanel):
             # get page bitmap
             bmp = self.GetPageBitmap(idx)
             # remove from notebook
-            self.RemovePage(idx)
+            self.RemovePageByIdx(idx)
             # re-add in the same position so it will tab
             self.InsertPage(idx, win, title, False, bmp)
         # restore orignial selected tab
@@ -4816,7 +4831,7 @@ class AuiNotebook(wx.PyPanel):
                     page_info = self._tabs.GetPage(main_idx)
 
                     # remove the page from the source notebook
-                    self.RemovePage(main_idx)
+                    self.RemovePageByIdx(main_idx)
 
                     # reparent the page
                     src_page.Reparent(nb)
@@ -5034,7 +5049,7 @@ class AuiNotebook(wx.PyPanel):
                 info.control.Hide()
                 info.control = None
 
-            self.RemovePage(page_index)
+            self.RemovePageByIdx(page_index)
             self.RemoveEmptyTabFrames()
 
             pane_info = framemanager.AuiPaneInfo().Float().FloatingPosition(wx.GetMousePosition()). \
@@ -5063,7 +5078,7 @@ class AuiNotebook(wx.PyPanel):
             frame.Bind(wx.EVT_CLOSE, self.OnCloseFloatingPage)
             frame.Move(wx.GetMousePosition())
             frame.Show()
-            self.RemovePage(page_index)
+            self.RemovePageByIdx(page_index)
 
             self.RemoveEmptyTabFrames()
 

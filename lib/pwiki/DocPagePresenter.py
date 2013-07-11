@@ -563,7 +563,9 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
 #     def setByStoredPerspective(self, perspectType, data, typeFactory):
 #         raise NotImplementedError
 
-
+    def deleteForNewPerspective(self):
+        self.close()
+        StorablePerspective.deleteForNewPerspective(self)
 
 
     @staticmethod
