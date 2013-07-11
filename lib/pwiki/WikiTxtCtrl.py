@@ -333,6 +333,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL,
                 self.OnAddThisSpellingToIgnoreLocal)
 
+        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_UP,
+                self.OnLogicalLineMove)
+        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT,
+                self.OnLogicalLineMove)
+        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_DOWN,
+                self.OnLogicalLineMove)
+        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT,
+                self.OnLogicalLineMove)
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
@@ -3122,6 +3130,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if wxHelper.isAllModKeysReleased(evt):
             self.modifiersPressedSinceExtLogLineMove = False
 
+
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
         
@@ -3179,22 +3188,22 @@ class WikiTxtCtrl(SearchableScintillaControl):
         elif matchesAccelPair("ActivateLinkNewWindow", accP):
             self.activateLink(tabMode=6)
 
-        elif matchesAccelPair("LogLineUp", accP):
-            # LogLineUp is by default undefined
-            self.moveSelectedLinesOneUp(False)
-        elif matchesAccelPair("LogLineUpWithIndented", accP):
-            # LogLineUp is by default undefined
-            self.moveSelectedLinesOneUp(
-                    not self.modifiersPressedSinceExtLogLineMove)
-            self.modifiersPressedSinceExtLogLineMove = True
-        elif matchesAccelPair("LogLineDown", accP):
-            # LogLineUp is by default undefined
-            self.moveSelectedLinesOneDown(False)
-        elif matchesAccelPair("LogLineDownWithIndented", accP):
-            # LogLineUp is by default undefined
-            self.moveSelectedLinesOneDown(
-                    not self.modifiersPressedSinceExtLogLineMove)
-            self.modifiersPressedSinceExtLogLineMove = True
+#         elif matchesAccelPair("LogLineUp", accP):
+#             # LogLineUp is by default undefined
+#             self.moveSelectedLinesOneUp(False)
+#         elif matchesAccelPair("LogLineUpWithIndented", accP):
+#             # LogLineUp is by default undefined
+#             self.moveSelectedLinesOneUp(
+#                     not self.modifiersPressedSinceExtLogLineMove)
+#             self.modifiersPressedSinceExtLogLineMove = True
+#         elif matchesAccelPair("LogLineDown", accP):
+#             # LogLineUp is by default undefined
+#             self.moveSelectedLinesOneDown(False)
+#         elif matchesAccelPair("LogLineDownWithIndented", accP):
+#             # LogLineUp is by default undefined
+#             self.moveSelectedLinesOneDown(
+#                     not self.modifiersPressedSinceExtLogLineMove)
+#             self.modifiersPressedSinceExtLogLineMove = True
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
@@ -3261,6 +3270,25 @@ class WikiTxtCtrl(SearchableScintillaControl):
             unichar = StringOps.mbcsDec(chr(key))[0]
 
         self.ReplaceSelection(unichar)
+
+
+    def OnLogicalLineMove(self, evt):
+        evtId = evt.GetId()
+        
+        if evtId == GUI_ID.CMD_LOGICAL_LINE_UP:
+            self.moveSelectedLinesOneUp(False)
+        elif evtId == GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT:
+            self.moveSelectedLinesOneUp(
+                    not self.modifiersPressedSinceExtLogLineMove)
+            self.modifiersPressedSinceExtLogLineMove = \
+                    not wxHelper.isAllModKeysReleased(None)
+        elif evtId == GUI_ID.CMD_LOGICAL_LINE_DOWN:
+            self.moveSelectedLinesOneDown(False)
+        elif evtId == GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT:
+            self.moveSelectedLinesOneDown(
+                    not self.modifiersPressedSinceExtLogLineMove)
+            self.modifiersPressedSinceExtLogLineMove = \
+                    not wxHelper.isAllModKeysReleased(None)
 
 
     if isLinux():

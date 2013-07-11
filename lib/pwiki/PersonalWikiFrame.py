@@ -1428,6 +1428,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     kind=wx.ITEM_RADIO)
 
 
+        logLineMoveMenu = wx.Menu()
+        editMenu.AppendMenu(wx.NewId(), _(u'&Line Move'), logLineMoveMenu)
+        
+        self.addMenuItem(logLineMoveMenu, _(u'&Up') +
+                u'\t' + self.keyBindings.LogLineUp,
+                _(u"Move line upward"), self._OnRoundtripEvent,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_UP,
+                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+        self.addMenuItem(logLineMoveMenu, _(u'Up with indented') +
+                u'\t' + self.keyBindings.LogLineUpWithIndented,
+                _(u"Move line with more indented lines below upward"),
+                self._OnRoundtripEvent,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT,
+                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+        self.addMenuItem(logLineMoveMenu, _(u'&Down') +
+                u'\t' + self.keyBindings.LogLineDown,
+                _(u"Move line downward"), self._OnRoundtripEvent,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN,
+                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+        self.addMenuItem(logLineMoveMenu, _(u'Down with indented') +
+                u'\t' + self.keyBindings.LogLineDownWithIndented,
+                _(u"Move line with more indented lines below downward"),
+                self._OnRoundtripEvent,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT,
+                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+
         if SpellChecker.isSpellCheckSupported():
             editMenu.AppendSeparator()
 

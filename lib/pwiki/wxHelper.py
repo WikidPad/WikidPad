@@ -569,7 +569,7 @@ def setHotKeyByString(win, hotKeyId, keyString):
 
 
 if SystemInfo.isLinux():
-    def isAllModKeysReleased(evt):
+    def isAllModKeysReleased(keyEvent):
         # For Linux the test must be done this way.
         # Meta is always reported as pressed (at least for PC), so ignore it
         mstate = wx.GetMouseState()
@@ -577,12 +577,15 @@ if SystemInfo.isLinux():
                 mstate.AltDown() or mstate.CmdDown())
 
 else:
-    def isAllModKeysReleased(evt):
-        return not (evt.GetModifiers() & \
-                (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD))
-
-
-
+    def isAllModKeysReleased(keyEvent):
+        if keyEvent is None:
+            # No key event available
+            mstate = wx.GetMouseState()
+            return not (mstate.ControlDown() or mstate.ShiftDown() or 
+                    mstate.AltDown() or mstate.CmdDown() or mstate.MetaDown())
+        else:
+            return not (keyEvent.GetModifiers() & \
+                    (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD))
 
 
 def cloneFont(font):
