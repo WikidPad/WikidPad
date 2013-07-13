@@ -1,5 +1,13 @@
 ﻿++ Change Log
 
+
+Jul. 13, 2013 (2.2rc10)
+
+    * Ensure incremental search focuses text on wxpython > 2.9)
+      (thanks to Ross)
+
+
+
 May  04, 2013 (2.2rc09)
 
     * Bug fixed: Problems when using menu
