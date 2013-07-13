@@ -1,5 +1,29 @@
 ﻿++ Change Log
 
+Jul. 13, 2013 (2.3beta10)
+
+    * Support for advanced user interface (AUI) to drag around wiki
+      page tabs to place multiple ones side by side (also thanks to Ross)
+
+    * Vi (thanks to Ross):
+        * Add "GoogleSelection" cmd to preview mode
+        * Inital support for displaying errors with ":" cmds
+        * Add ":start_pdb_debug" cmd
+        * Add ":winopen" and ":split" commands
+        * Fix indent/deindent in visual mode
+        * Various other fixes
+        * ctrl-w l [or h,j,k] can now be used to navigate viewports
+          as per vim
+
+    * Custom listbox (right click to copy selected items of listbox
+      to clipboard) (thanks to Ross)
+    * Ensure incremental search focuses text on wxpython > 2.9)
+      (thanks to Ross)
+
+    * Menu items to reorder lines. See [Menu Edit#++ Line Move]
+    * Enhancement: Scroll leftmost after applying line wrapping
+
+
 
 May  07, 2013 (2.3beta09_02)
 

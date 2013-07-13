@@ -1,4 +1,4 @@
-﻿++ Menu Edit
+﻿+ Menu Edit
 
 ++ Undo
 Undo last editing.
@@ -25,6 +25,11 @@ Select an item from the submenu to add a textblock to the current page. See [Tex
 ++ Clipboard Catcher
 (Windows and Linux/GTK only, Linux/GTK needs pyGTK)
 Allows to catch arbitrary text from clipboard regardless which application has sent it. See [ClipboardCatcher].
+
+++ Line Move
+Provides functions to move logical lines up and down. "Logical lines" means lines terminated by pressing RETURN key and may span multiple visible lines in the editor. If the cursor is just placed in a single line, this one is moved. If one or more lines are selected, all of them are moved.
+
+The variants "with indented" also automatically select and move all lines below the already selected area which are more indented than the first selected line.
 
 ++ Spell check
 (Only available if pyEnchant or the WikidPad spell check addon is installed properly)

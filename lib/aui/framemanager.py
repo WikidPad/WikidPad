@@ -112,12 +112,14 @@ from aui_constants import *
 _ = wx.GetTranslation
 
 _winxptheme = False
-if wx.Platform == "__WXMSW__":
-    try:
-        import winxptheme
-        _winxptheme = True
-    except ImportError:
-        pass
+
+# Avoid unnecessary dependency
+# if wx.Platform == "__WXMSW__":
+#     try:
+#         import winxptheme
+#         _winxptheme = True
+#     except ImportError:
+#         pass
 
 # wxPython version string
 _VERSION_STRING = wx.VERSION_STRING

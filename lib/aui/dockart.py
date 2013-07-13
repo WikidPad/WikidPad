@@ -26,14 +26,15 @@ optionActive = 2**14
 
 _ctypes = False
 
+# Avoid unnecessary dependency
 # Try to import winxptheme for ModernDockArt
-if wx.Platform == "__WXMSW__":
-    try:
-        import ctypes
-        import winxptheme
-        _ctypes = True
-    except ImportError:
-        pass
+# if wx.Platform == "__WXMSW__":
+#     try:
+#         import ctypes
+#         import winxptheme
+#         _ctypes = True
+#     except ImportError:
+#         pass
 
 # -- AuiDefaultDockArt class implementation --
 
