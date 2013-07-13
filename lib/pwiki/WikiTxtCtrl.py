@@ -3000,14 +3000,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         selByteStart = self.GetSelectionStart();
         selByteEnd = self.GetSelectionEnd();
+        firstLine = self.LineFromPosition(selByteStart)
         lastLine = self.LineFromPosition(selByteEnd)
         selByteStart = self.PositionFromLine(self.LineFromPosition(selByteStart))
         selByteEnd = self.PositionFromLine(lastLine + 1)
 
         if extendOverChildren:
-            # Extend over all lines which are more indented than the last line
+            # Extend over all lines which are more indented than the first line
 
-            lastLineDeep = StringOps.splitIndentDeepness(self.GetLine(lastLine))[0]
+            firstLineDeep = StringOps.splitIndentDeepness(self.GetLine(firstLine))[0]
 
             testLine = lastLine + 1
             while True:
@@ -3016,7 +3017,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     # End of text reached
                     break
 
-                if StringOps.splitIndentDeepness(testLineContent)[0] <= lastLineDeep:
+                if StringOps.splitIndentDeepness(testLineContent)[0] <= firstLineDeep:
                     break
 
                 testLine += 1
