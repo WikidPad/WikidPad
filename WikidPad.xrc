@@ -82,7 +82,7 @@
                 <border>5</border>
               </object>
               <object class="sizeritem">
-                <object class="wxListBox" name="lbPages" subclass="lib.pwiki.CustomListBox.CustomListBox">
+                <object class="wxListBox" name="lbPages" subclass="pwiki.CustomListBox.CustomListBox">
                   <content/>
                 </object>
                 <option>1</option>
@@ -3556,7 +3556,7 @@
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
-        <object class="wxListBox" name="lbFacenames" subclass="lib.pwiki.CustomListBox.CustomListBox">
+        <object class="wxListBox" name="lbFacenames" subclass="pwiki.CustomListBox.CustomListBox">
           <content/>
         </object>
         <option>3</option>
@@ -3625,7 +3625,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxListBox" name="lb" subclass="lib.pwiki.CustomListBox.CustomListBox">
+        <object class="wxListBox" name="lb" subclass="pwiki.CustomListBox.CustomListBox">
           <content/>
         </object>
         <option>1</option>
@@ -3694,7 +3694,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxListBox" name="lb" subclass="lib.pwiki.CustomListBox.CustomListBox">
+        <object class="wxListBox" name="lb" subclass="pwiki.CustomListBox.CustomListBox">
           <content/>
           <style>wxLB_EXTENDED</style>
         </object>
@@ -3833,7 +3833,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxListBox" name="lb" subclass="lib.pwiki.CustomListBox.CustomListBox">
+        <object class="wxListBox" name="lb" subclass="pwiki.CustomListBox.CustomListBox">
           <content/>
           <style>wxLB_EXTENDED</style>
         </object>
@@ -4362,7 +4362,7 @@
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
-                          <object class="wxListBox" name="lbSavedSearches" subclass="lib.pwiki.CustomListBox.CustomListBox">
+                          <object class="wxListBox" name="lbSavedSearches" subclass="pwiki.CustomListBox.CustomListBox">
                             <content/>
                             <style>wxLB_EXTENDED</style>
                           </object>
@@ -4581,7 +4581,7 @@
                         <object class="sizeritem">
                           <object class="wxFlexGridSizer">
                             <object class="sizeritem">
-                              <object class="wxListBox" name="lbPageList" subclass="lib.pwiki.CustomListBox.CustomListBox">
+                              <object class="wxListBox" name="lbPageList" subclass="pwiki.CustomListBox.CustomListBox">
                                 <content/>
                               </object>
                               <option>1</option>
@@ -4781,7 +4781,7 @@
                       <flag>wxALL|wxEXPAND</flag>
                     </object>
                     <object class="sizeritem">
-                      <object class="wxListBox" name="lbResultPreview" subclass="lib.pwiki.CustomListBox.CustomListBox">
+                      <object class="wxListBox" name="lbResultPreview" subclass="pwiki.CustomListBox.CustomListBox">
                         <content/>
                       </object>
                       <option>1</option>
@@ -5739,7 +5739,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxListBox" name="lbSavedExports" subclass="lib.pwiki.CustomListBox.CustomListBox">
+        <object class="wxListBox" name="lbSavedExports" subclass="pwiki.CustomListBox.CustomListBox">
           <content/>
           <style>wxLB_EXTENDED</style>
         </object>
