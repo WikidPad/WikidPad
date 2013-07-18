@@ -2398,7 +2398,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         wx.CallAfter(presenter.makeCurrent)
 
-    def OnActivateNewWindowThis(self, evt):
+    def OnActivateNewWindowThis(self, evt, direction=None):
         ed = self.GetEditorToActivate(direction, True)
         
         if self.contextMenuTokens:
