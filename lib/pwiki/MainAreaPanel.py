@@ -735,11 +735,15 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
 
     def OnTabMiddleDown(self, evt):
-        tab = evt.GetSelection()
-        if tab == wx.NOT_FOUND:
-            return
+        #tab = evt.GetSelection()
+        #if tab == wx.NOT_FOUND:
+        #    return
 
-        pres = self.GetPage(tab)
+        #pres = self.GetPage(tab)
+
+        # GetSelection returns the tab from the current TabCtrl
+        # instead we can just access the tab directly
+        pres = evt.Page
         mc = self.mainControl
 
         paramDict = {"presenter": pres, "main control": mc}
