@@ -78,11 +78,13 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.OnCloseAuiTab)
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged)
-        self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGING, self.OnNotebookPageChanging)
+#         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGING, self.OnNotebookPageChanging)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.OnTabContextMenu, self)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_MIDDLE_DOWN, self.OnTabMiddleDown, self)
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
                 self.OnNotebookPageVisibilityChanged)
+        self.Bind(aui.EVT_AUINOTEBOOK_SET_FOCUS,
+                self.OnNotebookPageSetFocus)
         
         #wx.EVT_CONTEXT_MENU(self, self.OnTabContextMenu)
 
@@ -91,7 +93,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         #wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
 
 
-        #wx.EVT_SET_FOCUS(self, self.OnFocused)
+#         wx.EVT_SET_FOCUS(self, self.OnFocused)
         wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_THIS_TAB, self.OnCloseThisTab)
@@ -552,12 +554,12 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         else:
             presenter.switchSubControl("preview", gainFocus=True)
 
-    def OnNotebookPageChanging(self, evt):
-        if self.preparingPresenter:
-            evt.Veto()
-            return
-
-        evt.Skip()
+#     def OnNotebookPageChanging(self, evt):
+#         if self.preparingPresenter:
+#             evt.Veto()
+#             return
+# 
+#         evt.Skip()
 
     def OnNotebookPageChanged(self, evt):
         presenter = self.GetPage(evt.GetSelection())
@@ -582,7 +584,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
 
 
-    def OnFocused(self, evt):
+    def OnNotebookPageSetFocus(self, evt):
         if self.tabSwitchByKey == 0:
             p = self.GetCurrentPage()
             if p is not None:
@@ -967,6 +969,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
                 newpage_idx = dest_tabs.GetPageCount()
                 dest_tabs.InsertPage(page.window, page, newpage_idx)
                 
+                # --- begin WikidPad specific ---
+                page.window.getMiscEvent().addListener(self)
                 try:
                     mruOrder = int(mruOrder)
                     if mruOrder >= 0:
@@ -975,6 +979,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
                         mruList[mruOrder] = page.window
                 except ValueError:
                     traceback.print_exc()
+                # --- end WikidPad specific ---
                     
                 if c == u'+':
                     dest_tabs.SetActivePage(newpage_idx)
@@ -988,8 +993,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             if not active_found:
                 dest_tabs.SetActivePage(0)
                 
+            # --- begin WikidPad specific ---
             self._mruTabSequence = Utilities.IdentityList(
                     wnd for wnd in mruList if wnd is not None)
+            # --- end WikidPad specific ---
 
             new_tabs.DoSizing()
             dest_tabs.DoShowHide()

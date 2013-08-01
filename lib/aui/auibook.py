@@ -56,6 +56,7 @@ wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_DCLICK = wx.NewEventType()
 
 wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED = wx.NewEventType()
+wxEVT_COMMAND_AUINOTEBOOK_SET_FOCUS = wx.NewEventType()
 
 # Define a new event for a drag cancelled
 wxEVT_COMMAND_AUINOTEBOOK_CANCEL_DRAG = wx.NewEventType()
@@ -114,6 +115,8 @@ EVT_AUINOTEBOOK_END_LABEL_EDIT = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_END_
 
 EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED, 1)
 """ Visibility of a page changed. """
+EVT_AUINOTEBOOK_SET_FOCUS = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_SET_FOCUS, 1)
+""" A tab control got focus """
 
 # -----------------------------------------------------------------------------
 # Auxiliary class: TabTextCtrl
@@ -2369,6 +2372,10 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
 
         :param `event`: a :class:`FocusEvent` event to be processed.
         """
+        event = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_SET_FOCUS,
+                self.GetId())
+        event.SetEventObject(self)
+        self.GetEventHandler().ProcessEvent(event)
 
         self.Refresh()
 
@@ -2466,7 +2473,6 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
 
         # show new active page first
         for indx, page in enumerate(pages):
-#             print "--DoShowHide10", repr(page.window), page.window.IsShown()
             if page.active and not page.window.IsShown():
                 page.window.Show(True)
                 event = AuiNotebookEvent(
@@ -2482,7 +2488,6 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
 
         # hide all other pages
         for indx, page in enumerate(pages):
-#             print "--DoShowHide20", repr(page.window), page.window.IsShown()
             if not page.active and page.window.IsShown():
                 page.window.Show(False)
                 event = AuiNotebookEvent(
@@ -2892,6 +2897,11 @@ class AuiNotebook(wx.PyPanel):
         self.Bind(EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
                   self.OnTabVisibilityChanged,
                   id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
+        self.Bind(EVT_AUINOTEBOOK_SET_FOCUS,
+                  self.OnTabSetFocus,
+                  id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
+
+
 
         self.Bind(wx.EVT_NAVIGATION_KEY, self.OnNavigationKeyNotebook)
 
@@ -3994,7 +4004,7 @@ class AuiNotebook(wx.PyPanel):
         # don't change the page unless necessary
         # however, clicking again on a tab should give it the focus.
         if new_page == self._curpage and not force:
-
+            
             ctrl, ctrl_idx = self.FindTab(wnd)
             if wx.Window.FindFocus() != ctrl:
                 ctrl.SetFocus()
@@ -4595,6 +4605,24 @@ class AuiNotebook(wx.PyPanel):
         e.SetVisible(event.IsVisible())
         e.SetEventObject(self)
         e.SetPageWindow(event.GetPageWindow())
+        self.GetEventHandler().ProcessEvent(e)
+
+
+
+    def OnTabSetFocus(self, event):
+        """
+        Handles the ``EVT_AUINOTEBOOK_SET_FOCUS`` event for :class:`AuiNotebook`.
+
+        :param `event`: a :class:`AuiNotebookEvent` event to be processed.
+        """
+        ctrl = event.GetEventObject()
+        assert ctrl != None
+
+        # Send new event
+        e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_SET_FOCUS,
+                self.GetId())
+
+        e.SetEventObject(self)
         self.GetEventHandler().ProcessEvent(e)
 
 
