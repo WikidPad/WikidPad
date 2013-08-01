@@ -367,8 +367,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             return
 
         if currentPresenter is not self.currentPresenter:
-            self.preparingPresenter = True
             self.currentPresenter = currentPresenter
+            self.preparingPresenter = currentPresenter
 
             proxyEvent = self.getCurrentPresenterProxyEvent()
             proxyEvent.setWatchedEvents(
@@ -384,7 +384,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         # The currently active tab should always be visible (and enabled)
         #currentPresenter.setLayerVisible(True) # Causes the page to gain focus
 
-        wx.CallAfter(self.presenterPrepared)
+            wx.CallAfter(self.presenterPrepared)
+
 
     def presenterPrepared(self):
         self.preparingPresenter = False

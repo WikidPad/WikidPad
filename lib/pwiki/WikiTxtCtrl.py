@@ -2367,16 +2367,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if direction is not None:
             presenter = self.presenter.getMainControl().getMainAreaPanel().\
                             getActivePresenterTo(direction, self.presenter)
+            ed = presenter.getSubControl("textedit")
+
             if makePresenterCurrent:
                 presenter.makeCurrent()
-            ed = presenter.getSubControl("textedit")
         else:
             ed = self
+
 
         return ed
 
     def OnActivateThis(self, evt, direction=None):
-        ed = self.GetEditorToActivate(direction)
+        ed = self.GetEditorToActivate(direction, True)
             
         if self.contextMenuTokens:
             ed.activateTokens(self.contextMenuTokens, 0)
@@ -4430,10 +4432,14 @@ class ViHandler(ViHelper):
     (("Ctrl", k["f"]),)    : (0, (self.ScrollViewportDownFullScreen, 
                                                         None), 0, 0), # <c-f>
 
-    (("Ctrl", k["e"]),)    : (0, (self.ScrollViewportLineDown, 
+    (("Ctrl", k["e"]),)    : (0, (self.ctrl.LineScrollDown, 
                                                         None), 0, 0), # <c-e>
-    (("Ctrl", k["y"]),)    : (0, (self.ScrollViewportLineUp, 
+    (("Ctrl", k["y"]),)    : (0, (self.ctrl.LineScrollUp, 
                                                         None), 0, 0), # <c-y>
+#    (("Ctrl", k["e"]),)    : (0, (self.ScrollViewportLineDown, 
+#                                                        None), 0, 0), # <c-e>
+#    (("Ctrl", k["y"]),)    : (0, (self.ScrollViewportLineUp, 
+#                                                        None), 0, 0), # <c-y>
 
     (k["Z"], k["Z"])    : (0, (self.ctrl.presenter.getMainControl().\
                                         exitWiki, None), 0, 0), # ZZ
@@ -4553,6 +4559,10 @@ class ViHandler(ViHelper):
     (("Ctrl", k["w"]),)  : (0, (self.DeleteBackword, False), 0, 0), # Ctrl-w
     (("Ctrl", k["W"]),)  : (0, (self.DeleteBackword, True), 0, 0), # Ctrl-W
     (("Ctrl", k["v"]),)       : (0, (self.PutClipboard, True), 0, 0), # <c-v>
+
+    # Ctrl-t and -d indent / deindent respectively
+    (("Ctrl", k["t"]),)       : (0, (self.ctrl.Tab, None), 0, 0), # <c-t>
+    (("Ctrl", k["d"]),)       : (0, (self.ctrl.BackTab, None), 0, 0), # <c-d>
 
     # F1 and F2 in insert mode will still switch between editor and preview
     # Should it revert back to normal mode?
@@ -5312,6 +5322,8 @@ class ViHandler(ViHelper):
         #       and vims implementation
 
         # NOTE: Does not select single characters
+
+        # TODO: Does not select the word if on final character
         pos = self.ctrl.GetCurrentPos()
 
         if not WORD:
@@ -7551,11 +7563,11 @@ class ViHandler(ViHelper):
     def ScrollViewportDownFullScreen(self):
         self._ScrollViewport(1)
 
-    def ScrollViewportLineDown(self):
-        self._ScrollViewportByLines(1)
-
-    def ScrollViewportLineUp(self):
-        self._ScrollViewportByLines(-1)
+#    def ScrollViewportLineDown(self):
+#        self._ScrollViewportByLines(1)
+#
+#    def ScrollViewportLineUp(self):
+#        self._ScrollViewportByLines(-1)
 
     # TODO: FIX UNDO / REDO 
     def CanUndo(self):
