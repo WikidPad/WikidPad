@@ -392,11 +392,6 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
     def presenterPrepared(self):
         self.preparingPresenter = False
 
-        wx.CallAfter(self.presenterPrepared)
-
-    def presenterPrepared(self):
-        self.preparingPresenter = False
-
 
     def showPresenter(self, currentPresenter):
         """
@@ -687,6 +682,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         if newWnd is not None:
             self.SetSelectionToWindow(newWnd)
+            self.SetFocus()
             # self.mainControl.tree.SetFocus()
             # wx.CallAfter(self.SetFocus)
         else:

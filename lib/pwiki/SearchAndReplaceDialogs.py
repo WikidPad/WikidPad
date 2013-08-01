@@ -128,7 +128,7 @@ class _SearchResultItemInfo(object):
 
 
 
-class SearchResultListBox(wx.HtmlListBox):
+class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
     def __init__(self, parent, pWiki, ID):
         wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
 
@@ -438,6 +438,8 @@ class SearchResultListBox(wx.HtmlListBox):
             # Works in fast search popup only if called twice
             editor.SetFocus()
             editor.SetFocus()
+            # Sometimes not even then
+            self.fireMiscEventKeys(("opened in foreground",))
 
 
     def OnLeftDown(self, evt):
@@ -510,6 +512,8 @@ class SearchResultListBox(wx.HtmlListBox):
             # Works in fast search popup only if called twice
             self.pWiki.getActiveEditor().SetFocus()
             self.pWiki.getActiveEditor().SetFocus()
+            
+            self.fireMiscEventKeys(("opened in foreground",))
 
         
     def OnKeyDown(self, evt):
@@ -572,6 +576,9 @@ class SearchResultListBox(wx.HtmlListBox):
             # Works in fast search popup only if called twice
             self.pWiki.getActiveEditor().SetFocus()
             self.pWiki.getActiveEditor().SetFocus()
+            
+            # Context menu is open yet -> send later
+            wx.CallAfter(self.fireMiscEventKeys, ("opened in foreground",))
 
 
     def OnActivateNewTabThis(self, evt):
@@ -592,6 +599,9 @@ class SearchResultListBox(wx.HtmlListBox):
             # Works in fast search popup only if called twice
             self.pWiki.getActiveEditor().SetFocus()
             self.pWiki.getActiveEditor().SetFocus()
+            
+            # Context menu is open yet -> send later
+            wx.CallAfter(self.fireMiscEventKeys, ("opened in foreground",))
 
 
     def OnActivateNewTabBackgroundThis(self, evt):
@@ -2262,10 +2272,9 @@ class FastSearchPopup(wx.Frame):
         wx.Frame.__init__(self, parent, ID, _(u"Fast Search"), pos=pos,
                 style=wx.RESIZE_BORDER | wx.FRAME_FLOAT_ON_PARENT | wx.SYSTEM_MENU |
                 wx.FRAME_TOOL_WINDOW | wx.CAPTION | wx.CLOSE_BOX ) # wx.FRAME_NO_TASKBAR)
-
+                
         self.mainControl = mainControl
         self.sarOp = None
-        self.firstMove = True  # Consume first move event
         self.fixed = False  # if window was moved, fix it to not close automatically 
 
         if srListBox is None:
@@ -2304,19 +2313,24 @@ class FastSearchPopup(wx.Frame):
 
         # Fixes focus bug under Linux
         self.resultBox.SetFocus()
+        
+        self.resultBox.getMiscEvent().addListener(self)
 
 #         self.Bind(wx.EVT_BUTTON, self.OnCloseMe, button)
 
         self.resultBox.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.btnAsWwSearch.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.btnAsTab.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 #         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
         wx.EVT_BUTTON(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH, self.OnCmdAsWwSearch)
         wx.EVT_BUTTON(self, GUI_ID.CMD_SEARCH_AS_TAB, self.OnCmdAsTab)
         wx.EVT_CLOSE(self, self.OnClose)
         wx.EVT_KEY_DOWN(self.resultBox, self.OnKeyDown)
 #         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
-        self.Bind(wx.EVT_MOVE, self.OnMove)
+        
+        # To avoid unwanted move events (resulting in calls to fixate)      
+        wx.CallAfter(self.Bind, wx.EVT_MOVE, self.OnMove)
 
 
     def fixate(self):
@@ -2331,11 +2345,6 @@ class FastSearchPopup(wx.Frame):
         
 
     def OnMove(self, evt):
-        if self.firstMove:
-            self.firstMove = False
-            evt.Skip()
-            return
-
         evt.Skip()
         self.fixate()
 
@@ -2388,6 +2397,13 @@ class FastSearchPopup(wx.Frame):
         maPanel.showPresenter(presenter)
         self.Close()
         
+    
+    def miscEventHappened(self, miscevt):
+        if miscevt.getSource() is self.resultBox and miscevt.has_key(
+                "opened in foreground"):
+
+            if not self.fixed:
+                self.Close()
 
         
     def displayErrorMessage(self, errorStr, e=u""):
@@ -2413,9 +2429,10 @@ class FastSearchPopup(wx.Frame):
     if isLinux():
         def OnKillFocus(self, evt):
             evt.Skip()
+            
             if self.resultBox.contextMenuSelection == -2 and \
                     not wx.Window.FindFocus() in \
-                    (self.resultBox, self.btnAsWwSearch, self.btnAsTab):
+                    (None, self.resultBox, self.btnAsWwSearch, self.btnAsTab):
                 # Close only if context menu is not open
                 # otherwise crashes on GTK
                 self.Close()

@@ -2498,8 +2498,6 @@ class AuiTabCtrl(wx.PyControl, AuiTabContainer):
                 event.SetEventObject(self)
                 event.SetPageWindow(page.window)
                 self.GetEventHandler().ProcessEvent(event)
-                
-        self.SetFocus()
 
 
 
@@ -2869,6 +2867,7 @@ class AuiNotebook(wx.PyPanel):
         self._mgr.Update()
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_CHILD_FOCUS, self.OnChildFocusNotebook)
         self.Bind(EVT_AUINOTEBOOK_PAGE_CHANGING, self.OnTabClicked,
                   id=AuiBaseTabCtrlId, id2=AuiBaseTabCtrlId+500)
@@ -4407,6 +4406,19 @@ class AuiNotebook(wx.PyPanel):
         control.Reparent(dest_tabs)
 
 
+    def SetFocus(self):
+        """
+        For unknown reason it seems impossible to set focus to notebook directly
+        so it is set to active tab control in this case
+        """
+        wx.PyPanel.SetFocus(self)
+        if self.FindFocus() is self:
+            return
+        
+        self.GetActiveTabCtrl().SetFocus()
+        
+
+
     def UnsplitDClick(self, part, sash_size, pos):
         """
         Unsplit the :class:`AuiNotebook` on sash double-click.
@@ -5273,6 +5285,13 @@ class AuiNotebook(wx.PyPanel):
 
         if not self.IsBeingDeleted():
             self._mgr.Update()
+
+
+    def OnSetFocus(self, event):
+        """
+        Function seems to be useless but just in case...
+        """
+        self.GetActiveTabCtrl().SetFocus()
 
 
     def OnChildFocusNotebook(self, event):
