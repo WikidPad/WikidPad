@@ -52,11 +52,18 @@ class WikiData:
         self.dataDir = dataDir
         self.cachedWikiPageLinkTermDict = None
 
-        dbfile = join(dataDir, "wiki.sli")
+        dbPath = self.wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
+                u"").strip()
+                
+        if (dbPath == u""):
+            dbPath = u"wiki.sli"
+
+        dbfile = join(dataDir, dbPath)
 
         try:
             if (not exists(longPathEnc(dbfile))):
-                DbStructure.createWikiDB(None, dataDir)  # , True
+                DbStructure.createWikiDB(None, dataDir,
+                        wikiDocument=self.wikiDocument)
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)

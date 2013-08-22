@@ -60,8 +60,14 @@ class WikiData:
         # This is necessary for read-only databases
         self.commitNeeded = False
 
+#         dbName = self.wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
+#                 u"").strip()
+#                 
+#         if (dbName == u""):
+        dbName = u"wikidb"
+
         try:
-            conn = gadfly.gadfly("wikidb", self.dataDir)
+            conn = gadfly.gadfly(dbName, self.dataDir)
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

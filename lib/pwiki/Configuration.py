@@ -861,6 +861,10 @@ GLOBALDEFAULTS = {
 
 WIKIDEFAULTS = {
     ("wiki_db", "data_dir"): u"data",
+    ("wiki_db", "db_filename"): u"", # Name of database (overview databases without page data for "original ..." types,
+            # full database for "compact sqlite")
+            # If name is empty, defaults are used (original gadfly: "wikidb", original sqlite: "wikiovw.sli",
+            # compact sqlite: "wiki.sli")
     ("main", "wiki_name"): None,
     ("main", "wiki_wikiLanguage"): "wikidpad_default_2_0", # Internal name of wiki language of the wiki
     ("main", "last_wiki_word"): None, # Show this wiki word as leftmost wiki word on startup if first_wiki_word is empty

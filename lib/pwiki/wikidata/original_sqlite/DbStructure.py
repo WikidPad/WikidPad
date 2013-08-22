@@ -655,12 +655,22 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
 
 
 
-def createWikiDB(wikiName, dataDir, overwrite=False):
+def createWikiDB(wikiName, dataDir, overwrite=False, wikiDocument=None):
     """
     creates the initial db
     Warning: If overwrite is True, a previous file will be deleted!
     """
-    dbfile = join(dataDir, "wikiovw.sli")
+    
+    if (wikiDocument is not None):
+        dbPath = wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
+                    u"").strip()
+                    
+        if (dbPath == u""):
+            dbPath = u"wikiovw.sli"
+    else:
+        dbPath = u"wikiovw.sli"
+
+    dbfile = join(dataDir, dbPath)
     if (not exists(pathEnc(dbfile)) or overwrite):
         if (not exists(pathEnc(dataDir))):
             mkdir(pathEnc(dataDir))

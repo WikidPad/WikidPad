@@ -686,9 +686,19 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
             if exists(pathEnc(dbfile)) and overwrite:
                 unlink(pathEnc(dbfile))
 
+#         if (wikiDocument is not None):
+#             dbName = self.wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
+#                     u"").strip()
+#                     
+#             if (dbName == u""):
+#                 dbName = u"wikidb"
+#         else:
+
+        dbName = u"wikidb"
+
         # create the database
         connection = gadfly.gadfly()
-        connection.startup("wikidb", dataDir)
+        connection.startup(dbName, dataDir)
         connwrap = ConnectWrap(connection)
 
         try:
