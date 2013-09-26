@@ -51,8 +51,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.2rc10"
-#define verNo "002.002.210.000"
+#define verStr "2.2rc10_01"
+#define verNo "002.002.210.001"
 
 SolidCompression=true
 AppName=WikidPad

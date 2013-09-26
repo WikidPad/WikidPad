@@ -561,7 +561,7 @@ class PlainTextPrintout(wx.Printout):
                     textpos += len(part)
                     currLineWidth = linewidth
 
-            if textpos == len(text) or flushPage:
+            if i == len(cuttedText) - 1 or textpos == len(text) or flushPage:
                 flushLine = True
 
             if flushLine:
