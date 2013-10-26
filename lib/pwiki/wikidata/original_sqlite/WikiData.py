@@ -1166,6 +1166,10 @@ class WikiData:
                             "values (?, ?, ?, ?, ?, ?, 0)",
                             (wikiWord, ti, st.st_mtime, path, path.lower(),
                                     sqlite.Binary(fileSig)))
+
+                    page = self.wikiDocument.getWikiPage(wikiWord)
+                    page.refreshSyncUpdateMatchTerms()
+
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)

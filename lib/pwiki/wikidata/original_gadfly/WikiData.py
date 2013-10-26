@@ -1069,6 +1069,9 @@ class WikiData:
                             fileSig, 0))
                     self.commitNeeded = True
 
+                    page = self.wikiDocument.getWikiPage(wikiWord)
+                    page.refreshSyncUpdateMatchTerms()
+
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
