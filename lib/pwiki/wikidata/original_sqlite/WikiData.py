@@ -1142,7 +1142,7 @@ class WikiData:
         """
         diskFiles = frozenset(self._getAllWikiFileNamesFromDisk())
         dbFiles = frozenset(self._getAllWikiFileNamesFromDb())
-
+        
         self.cachedWikiPageLinkTermDict = None
         try:
             # Delete words for which no file is present anymore
@@ -1167,12 +1167,13 @@ class WikiData:
 
             # Add new words:
             ti = time()
+            
             for path in (diskFiles - dbFiles):
                 fullPath = os.path.join(self.dataDir, path)
                 st = os.stat(longPathEnc(fullPath))
                 
                 wikiWord = self._findNewWordForFile(path)
-
+                
                 if wikiWord is not None:
                     fileSig = self.wikiDocument.getFileSignatureBlock(fullPath)
                     
@@ -1182,6 +1183,10 @@ class WikiData:
                             "values (?, ?, ?, ?, ?, ?, 0)",
                             (wikiWord, ti, st.st_mtime, path, path.lower(),
                                     sqlite.Binary(fileSig)))
+                                    
+                    page = self.wikiDocument.getWikiPage(wikiWord)
+                    page.refreshSyncUpdateMatchTerms()
+                    
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)

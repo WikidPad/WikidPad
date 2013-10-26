@@ -882,7 +882,7 @@ class AbstractWikiPage(DataCarryingPage):
 
     def getLivePageAstIfAvailable(self):
         """
-        Return the current, up-to-data page AST if available, None otherwise
+        Return the current, up-to-date page AST if available, None otherwise
         """
         with self.textOperationLock:
             # Current state

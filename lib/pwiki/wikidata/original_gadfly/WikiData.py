@@ -1079,12 +1079,17 @@ class WikiData:
 
                 if wikiWord is not None:
                     fileSig = self.wikiDocument.getFileSignatureBlock(fullPath)
+
                     self.connWrap.execSqlInsert("wikiwords", ("word", "created", 
                             "modified", "filepath", "filenamelowercase",
                             "filesignature", "metadataprocessed"),
                             (wikiWord, ti, st.st_mtime, path, path.lower(),
                             fileSig, 0))
                     self.commitNeeded = True
+
+                    page = self.wikiDocument.getWikiPage(wikiWord)
+                    page.refreshSyncUpdateMatchTerms()
+
 
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
