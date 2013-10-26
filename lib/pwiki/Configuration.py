@@ -661,6 +661,7 @@ GLOBALDEFAULTS = {
     ("main", "html_export_pics_as_links"): u"False",  # Same for HTML exporting
     ("main", "export_table_of_contents"): u"0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
+    ("main", "export_lastDialogTag"): u"",  # Tag of the last used export tag to set as default in export dialog
     ("main", "html_toc_title"): u"Table of Contents",  # title of table of contents
     ("main", "html_export_singlePage_sepLineCount"): u"10",  # How many empty lines to separate
             # two wiki pages in a single HTML page
@@ -821,6 +822,7 @@ GLOBALDEFAULTS = {
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
     ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n", # How to separate wikiword pages (uses re escaping)
+    ("main", "print_lastDialogTag"): "", # Tag of the last used print tag to set as default in print main dialog
 
     ("main", "windowmode"): "0",
     ("main", "frame_stayOnTop"): "False",  # Should frame stay on top of all other windows?

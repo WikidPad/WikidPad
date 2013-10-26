@@ -5426,7 +5426,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 textContent=ExceptionLogger.getOptionalComponentErrorLog())
 
 
-    def OnShowPrintMainDialog(self, evt=None, exportTo=-1):
+    def OnShowPrintMainDialog(self, evt=None, exportTo=None):
         if self.printer is None:
             from .Printing import Printer
             self.printer = Printer(self)

@@ -1151,7 +1151,16 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
 #         self.exporterList[0][3].Enable(True)
 #         self.exporterList[0][3].Show(True)
 
-        self.ctrls.chExportTo.SetSelection(0)  
+        exportTo = self.mainControl.getConfig().get("main",
+                "export_lastDialogTag", "")
+
+        selection = 0
+        for i, e in enumerate(self.exporterList):
+            if exportTo == e[1]:
+                selection = i
+                break
+
+        self.ctrls.chExportTo.SetSelection(selection)
         self._refreshForEtype()
         self._refreshSavedExportsList()
 
@@ -1195,6 +1204,8 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
 
     def OnExportTo(self, evt):
         self._refreshForEtype()
+        self.mainControl.getConfig().set("main", "export_lastDialogTag",
+                self.exporterList[self.ctrls.chExportTo.GetSelection()][1])
         evt.Skip()
 
 

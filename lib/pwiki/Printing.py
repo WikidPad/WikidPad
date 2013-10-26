@@ -22,7 +22,7 @@ class PrintMainDialog(wx.Dialog):
 #     EXPORT_TO_HTML_WEBKIT = 2
     
     def __init__(self, mainControl, ID, title="Print",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize, exportTo=-1):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize, exportTo=None):
         d = wx.PreDialog()
         self.PostCreate(d)
 
@@ -98,12 +98,19 @@ class PrintMainDialog(wx.Dialog):
             e[3].Enable(False)
             self.ctrls.chExportTo.Append(e[2])
 
-        self.ctrls.chExportTo.SetSelection(0)  
+        if exportTo is None:
+            exportTo = self.mainControl.getConfig().get("main",
+                    "print_lastDialogTag", "")
+
+        selection = 0
+        
+        for i, e in enumerate(self.printList):
+            if exportTo == e[1]:
+                selection = i
+                break
+
+        self.ctrls.chExportTo.SetSelection(selection)  
         self._refreshForPtype()
-
-
-
-
 
         # Fixes focus bug under Linux
         self.SetFocus()
@@ -148,6 +155,8 @@ class PrintMainDialog(wx.Dialog):
 
     def OnExportTo(self, evt):
         self._refreshForPtype()
+        self.mainControl.getConfig().set("main", "print_lastDialogTag",
+                self.printList[self.ctrls.chExportTo.GetSelection()][1])
         evt.Skip()
 
 
@@ -292,7 +301,7 @@ class Printer:
         return wordList
 
 
-    def showPrintMainDialog(self, exportTo=-1):
+    def showPrintMainDialog(self, exportTo=None):
         self._ensurePrintData()
         dlg = PrintMainDialog(self.pWiki, -1, exportTo=exportTo)
         dlg.CenterOnParent(wx.BOTH)
