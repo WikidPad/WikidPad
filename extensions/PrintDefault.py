@@ -391,6 +391,9 @@ class PlainTextPrintout(wx.Printout):
         text = self.text
         
         if pageNum == -1:
+            # Build a list of cuttedText. Each item is either a newline,
+            # a new page command '\f', one or more spaces or one or more
+            # other characters
             cuttedText = _CUT_RE.findall(text[textpos:])
         else:
             if pageNum + 1 >= len(self.pageCharStartIndex):
@@ -407,7 +410,7 @@ class PlainTextPrintout(wx.Printout):
         
         posxLu, posyLu = printRectLu[0:2]
         prAreaWidth = printRectLu[2] - printRectLu[0]
-
+        
         i = 0
         while i < len(cuttedText):    # _CUT_RE.finditer(text[textpos:]):
             part = cuttedText[i]
@@ -416,7 +419,8 @@ class PlainTextPrintout(wx.Printout):
             flushPage = False
             
             if part[0] == u" ":
-                # One or more spaces
+                # One or more spaces -> Append to current line if possible,
+                # throw away and start new print line if not
                 partWidth = dc.GetTextExtent(part)[0]
                 linewidth = currLineWidth + partWidth
 #                 linewidth = dc.GetTextExtent(currLine + part)[0]
@@ -431,6 +435,7 @@ class PlainTextPrintout(wx.Printout):
                 flushLine = True
                 textpos += 1
             elif part[0] == u"\f":
+                # New page
                 flushPage = True
                 textpos += 1
             else:
@@ -438,7 +443,10 @@ class PlainTextPrintout(wx.Printout):
                 linewidth = currLineWidth + partWidth
 #                 linewidth = dc.GetTextExtent(currLine + part)[0]
                 if linewidth > prAreaWidth:
+                    # Part doesn't fit into current print line
                     if currLine != u"":
+                        # Current print line already contains text ->
+                        # Make new print line and reread part
                         flushLine = True
                         i -= 1
                     else:
@@ -459,13 +467,16 @@ class PlainTextPrintout(wx.Printout):
                     textpos += len(part)
                     currLineWidth = linewidth
 
-            if textpos == len(text) or flushPage:
+            i += 1
+
+            if i == len(cuttedText) or flushPage:
                 flushLine = True
 
             if flushLine:
                 # Draw current row, start new one
                 if pageNum != -1:
                     dc.DrawText(currLine, posxLu, posyLu)
+
                 currLine = u""
                 currLineWidth = 0
                 posyLu += stepY
@@ -477,12 +488,12 @@ class PlainTextPrintout(wx.Printout):
                 if pageNum != -1 or textpos == len(text):
                     break
                 pagepos += 1
+                
 #                 print "PagePos", pagepos
 #                 if pagepos > 100: break
                 posyLu = printRectLu[1]
                 self.pageCharStartIndex.append(textpos)
 
-            i += 1
 
         dc.SetFont(wx.NullFont)
         
