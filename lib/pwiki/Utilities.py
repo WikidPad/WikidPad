@@ -800,6 +800,14 @@ def sgn(value):
         return 1
     
     return 0
+    
+    
+def between(lower, value, upper):
+    """
+    Return number that is nearest to value and is between lower and upper
+    (including)
+    """
+    return max(lower, min(value, upper))
 
 
 def calcResizeArIntoBoundingBox(width, height, bbWidth, bbHeight, upright=False):

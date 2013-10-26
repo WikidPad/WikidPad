@@ -13,7 +13,7 @@ from os.path import exists, join
 import Consts
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        removeBracketsFilename, pathEnc, iterCompatibleFilename
+        removeBracketsFilename, pathEnc
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite

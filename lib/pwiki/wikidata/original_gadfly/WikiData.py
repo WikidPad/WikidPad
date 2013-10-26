@@ -1201,9 +1201,12 @@ class WikiData:
         """
         asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
                 "wikiPageFiles_asciiOnly", False)
+                
+        maxFnLength = self.wikiDocument.getWikiConfig().getint("main",
+                "wikiPageFiles_maxNameLength", 120)
 
         icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
-                asciiOnly=asciiOnly)
+                asciiOnly=asciiOnly, maxLength=maxFnLength)
         try:
             for i in range(30):   # "while True" would be too dangerous
                 fileName = icf.next()
@@ -1234,9 +1237,12 @@ class WikiData:
             asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
                     "wikiPageFiles_asciiOnly", False)
             
+            maxFnLength = self.wikiDocument.getWikiConfig().getint("main",
+                    "wikiPageFiles_maxNameLength", 120)
+
             # Try first with current ascii-only setting
             icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
-                    asciiOnly=asciiOnly)
+                    asciiOnly=asciiOnly, maxLength=maxFnLength)
     
             for i in range(2):
                 fileName = icf.next()
@@ -1253,7 +1259,7 @@ class WikiData:
 
             # Then the same with opposite ascii-only setting
             icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
-                    asciiOnly=not asciiOnly)
+                    asciiOnly=not asciiOnly, maxLength=maxFnLength)
     
             for i in range(2):
                 fileName = icf.next()
@@ -2072,9 +2078,12 @@ class WikiData:
                 asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
                         "wikiPageFiles_asciiOnly", False)
 
+                maxFnLength = self.wikiDocument.getWikiConfig().getint("main",
+                        "wikiPageFiles_maxNameLength", 120)
+
                 # Find unused filename
                 icf = iterCompatibleFilename(unifName, u".data",
-                        asciiOnly=asciiOnly)
+                        asciiOnly=asciiOnly, maxLength=maxFnLength)
 
                 for i in range(30):   # "while True" would be too dangerous
                     fileName = icf.next()

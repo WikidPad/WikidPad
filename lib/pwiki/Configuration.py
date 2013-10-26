@@ -867,6 +867,7 @@ WIKIDEFAULTS = {
             # full database for "compact sqlite")
             # If name is empty, defaults are used (original gadfly: "wikidb", original sqlite: "wikiovw.sli",
             # compact sqlite: "wiki.sli")
+
     ("main", "wiki_name"): None,
     ("main", "wiki_wikiLanguage"): "wikidpad_default_2_0", # Internal name of wiki language of the wiki
     ("main", "last_wiki_word"): None, # Show this wiki word as leftmost wiki word on startup if first_wiki_word is empty
@@ -926,6 +927,7 @@ WIKIDEFAULTS = {
             # global configuration for same setting
 
     ("main", "wikiPageFiles_asciiOnly"): u"False", # Use only ASCII characters in filenames of wiki page files.
+    ("main", "wikiPageFiles_maxNameLength"): u"120", # Maximum length of overall name of a wiki page file
     ("main", "wikiPageFiles_gracefulOutsideAddAndRemove"): u"True",   # Handle missing wiki page files gracefully and try
             # to find existing files even if they are not in database.
 

@@ -21,6 +21,8 @@ import wx
 import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as _re
 from WikiExceptions import *
 
+from Utilities import between
+
 
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
@@ -1434,6 +1436,8 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
     randomLength - Length of the random sequence (without leading tilde)
 
     """
+    maxLength = between(20 + len(suffix) + randomLength, maxLength, 250)
+
     baseName = mbcsDec(baseName)[0]
 
     if len(baseName) > 0:

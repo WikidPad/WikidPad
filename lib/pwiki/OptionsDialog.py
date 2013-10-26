@@ -641,10 +641,12 @@ class OptionsDialog(wx.Dialog):
 
             ("option/wiki/log_window_autoshow", "cbLogWindowAutoShowWiki", "b3"),
 
-            # The following two need special handling on dialog construction
+            # The following three need special handling on dialog construction
             ("wikiPageFiles_asciiOnly", "cbWikiPageFilesAsciiOnly", "b"),
+            ("wikiPageFiles_maxNameLength", "tfWikiPageFilesMaxNameLength", "i0+"),
             ("wikiPageFiles_gracefulOutsideAddAndRemove",
                     "cbWikiPageFilesGracefulOutsideAddAndRemove", "b"),
+            
 
             ("wiki_icon", "tfWikiIcon", "t"),
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
@@ -974,6 +976,7 @@ class OptionsDialog(wx.Dialog):
             fppCap = wikiDocument.getWikiData().checkCapability("filePerPage")
             
             self.ctrls.cbWikiPageFilesAsciiOnly.Enable(fppCap is not None)
+            self.ctrls.tfWikiPageFilesMaxNameLength.Enable(fppCap is not None)
             self.ctrls.cbWikiPageFilesGracefulOutsideAddAndRemove.Enable(
                     fppCap is not None)
             self.ctrls.chTrashcanStorageLocation.Enable(
