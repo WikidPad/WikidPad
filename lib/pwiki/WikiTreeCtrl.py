@@ -39,13 +39,15 @@ class NodeStyle(object):
     A simple structure to hold all necessary information to present a tree node.
     """
     
-    __slots__ = ("__weakref__", "label", "bold", "icon", "color", "hasChildren")
+    __slots__ = ("__weakref__", "label", "bold", "icon", "color", "bgcolor",
+            "hasChildren")
     def __init__(self):
         self.label = u""
         
         self.bold = u"False"
         self.icon = u"page"
         self.color = u"null"
+        self.bgcolor = u"null"
         
         self.hasChildren = False
     
@@ -55,10 +57,11 @@ class NodeStyle(object):
         self.bold = u""
         self.icon = u""
         self.color = u"null"
+        self.bgcolor = u"null"
 
 
 
-_SETTABLE_ATTRS = (u"bold", u"icon", u"color")
+_SETTABLE_ATTRS = (u"bold", u"icon", u"color", u"bgcolor")
 
 
 # New style class to allow __slots__ for efficiency
@@ -1685,7 +1688,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
     def _generatorRefreshNodeAndChildren(self, parentnodeid):
         """
-        This is some sort of user-space thread. It is executed inside
+        This is some sort of user-space thread (aka "fiber"). It is executed inside
         the main thread as most things are GUI operations which must
         be done in GUI thread.
         Some non-GUI things are handed over to the refreshExecutor which
@@ -2248,14 +2251,23 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def setNodeColor(self, node, color):
-        if color == "null":
-            self.SetItemTextColour(node, wx.NullColour)
-        else:
+        if color != "null":
             coltuple = colorDescToRgbTuple(color)
             if coltuple is not None:            
                 self.SetItemTextColour(node, wx.Colour(*coltuple))
-            else:
-                self.SetItemTextColour(node, wx.NullColour)
+                return
+                
+        self.SetItemTextColour(node, wx.NullColour)
+
+
+    def setNodeBgcolor(self, node, color):
+        if color != "null":
+            coltuple = colorDescToRgbTuple(color)
+            if coltuple is not None:            
+                self.SetItemBackgroundColour(node, wx.Colour(*coltuple))
+                return
+                
+        self.SetItemBackgroundColour(node, wx.NullColour)
 
 
     def setNodePresentation(self, node, style):
@@ -2263,6 +2275,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.setNodeImage(node, style.icon)
         self.SetItemBold(node, strToBool(style.bold, False))
         self.setNodeColor(node, style.color)
+        self.setNodeBgcolor(node, style.bgcolor)
         self.SetItemHasChildren(node, style.hasChildren)
         
     

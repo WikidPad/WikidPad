@@ -103,6 +103,7 @@ _COLORS = [
 _BUILTINS = {
     u"alias": None,
     u"auto_link": (u"off", u"relax"),
+    u"bgcolor": _COLORS,
     u"bold": (u"true", u"false"),
     u"camelCaseWordsEnabled": (u"false", u"true"),
     u"child_sort_order": ("ascending", u"descending", u"mod_oldest",
