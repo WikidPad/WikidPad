@@ -1,5 +1,39 @@
 ﻿++ Change Log
 
+
+Oct. 27, 2013 (2.3beta11)
+
+    * Added attribute "bgcolor" to set tree item background color.
+      See [WikiDocumentAttributes#+ Attribute Based Tree Formatting]
+
+    * Vi (thanks to Ross):
+        * Add ctrl-t, ctrl-d in insert mode (indent/deindent line)
+        * Switch ctrl-e, ctrl-y to use native scintilla
+          line movements
+
+    * Remember last print and export type chosen in the respective
+      dialogs
+    * Wiki configuration file entry   [wiki_db] / db_filename   to
+      set db filename (works for Original Sqlite and Compact Sqlite)
+
+    * Advanced user interface fixes:
+        * Opening tabs in adjacent tabs (thanks to Ross)
+        * Middle clicking tab selection (thanks to Ross)
+        * Tab title may not be changed when switching page, tab
+          focused instead of content
+
+    * Linux: Quick search window vanishes now when page is opened
+      in foreground (similar but not exactly same behavior as
+      on Windows)
+    * Windows: Bug fixed: Quick search window did vanish even when
+      opening found item in background
+
+    * Bug fixed: Last line of page could vanish in plain text print
+    * Bug fixed: "Update external files" didn't add externally added
+      .wiki files
+
+
+
 Jul. 13, 2013 (2.3beta10)
 
     * Support for advanced user interface (AUI) to drag around wiki

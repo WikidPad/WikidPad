@@ -49,11 +49,12 @@ Place cursor after the m and press CTRL-SPACE
 
 +++ Attribute Based Tree Formatting
 
-There are 3 special attributes you can attach to a page that control
+There are 4 special attributes you can attach to a page that control
 the appearance of the page's node in the tree. These attributes override any global settings (see below): 
 
 icon: name (see TreeIcons)
-color: (white, blue, etc., see TreeNodeColors)
+color: Text color (white, blue, etc., see TreeNodeColors)
+bgcolor: Background color
 bold: (true or false)
 
 Example:
