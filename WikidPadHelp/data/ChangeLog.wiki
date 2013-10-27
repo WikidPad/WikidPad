@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+Oct. 27, 2013 (2.2rc11)
+
+    * Bug fixed: Last line of page could vanish in plain text print
+    * Bug fixed: "Update external files" didn't add externally added
+      .wiki files
+
+
 
 Jul. 13, 2013 (2.2rc10)
 
