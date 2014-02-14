@@ -2,7 +2,12 @@
 from distutils.core import setup
 import os
 from glob import glob
-import py2exe
+try:
+    import py2exe
+except ImportError:
+    print "This setup.py file is solely made for building the Windows binary"
+    print ""
+    raise
 from py2exe.build_exe import Target
 
 
@@ -10,7 +15,7 @@ wikidpad = Target(
     # used for the versioninfo resource
     version = '2.3',
     name = 'WikidPad',
-    copyright = '(C) 2005-2013 Jason Horman, Michael Butscher, Gerhard Reitmayr',
+    copyright = '(C) 2005-2014 Jason Horman, Michael Butscher, Gerhard Reitmayr',
     description = 'Single user wiki notepad',
     comments='',
 

@@ -1019,12 +1019,12 @@ class WikiDataManager(MiscEventSourceMixin):
         return not self.getWikiPageNameForLinkTerm(wikiWord)
 
 
-    def getNormcasedWikiWord(self, word):
-        """
-        Get normcased version of word. It isn't checked if word exists.
-        Currently this function just calls word.lower().
-        """
-        return word.lower()
+#     def getNormcasedWikiWord(self, word):
+#         """
+#         Get normcased version of word. It isn't checked if word exists.
+#         Currently this function just calls word.lower().
+#         """
+#         return word.lower()
 
     def getAllDefinedWikiPageNames(self):
         """
@@ -1104,7 +1104,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if value is not None and isinstance(value, AliasWikiPage):
                 # Check if existing alias page is up to date
                 realWikiWord1 = value.getNonAliasPage().getWikiWord()
-                realWikiWord2 = self.wikiData.getWikiPageNameForLinkTerm(wikiWord)
+                realWikiWord2 = self.getWikiPageNameForLinkTerm(wikiWord)
                 
                 if realWikiWord1 != realWikiWord2:
                     # if not, retrieve new page
@@ -2110,7 +2110,7 @@ class WikiDataManager(MiscEventSourceMixin):
         returns word itself if word isn't an alias (may mean it's a real word
                 or doesn't exist!)
         """
-        result = self.getWikiData().getWikiPageNameForLinkTerm(word)
+        result = self.getWikiPageNameForLinkTerm(word)
 
         if result is None:
             return word
