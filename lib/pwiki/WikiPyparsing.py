@@ -1352,6 +1352,116 @@ class ParserElement(object):
 ##             _profRunning -= 1
 ##             if _profRunning == 0: _prof.stop()
 
+
+
+    def _parseNoAction( self, instring, loc, state, doActions=True, callPreParse=True ):
+        """
+        Optimizer ensures that this function is called instead of
+        _parseNoCache() iff no actions are present
+        (neither parse start nor validation nor parse).
+        """
+##         global _profRunning
+##         if _profRunning == 0: _prof.start()
+##         _profRunning += 1
+
+        assert loc > -1
+#         assert len(self.parseStartAction) == 0 and len(self.validateAction) == 0 \
+#                 and len(self.parseAction) == 0
+
+        debugging = ( self.debug ) #and doActions )
+        
+        validResultName = bool(self.resultsName)
+        if validResultName:
+            state.nameStack.append(self.resultsName) # push to namestack
+
+        ds = state.dictStack.push(self.resultsName)
+        ds["parserElement"] = self
+        ds["location"] = loc
+
+        try:
+            if debugging:
+                self._defaultStartDebugAction( instring, loc, self, state )
+                if callPreParse and self.callPreparse:
+                    preloc = self.preParse( instring, loc, state )
+                else:
+                    preloc = loc
+                tokensStart = loc
+                try:
+                    try:
+                        loc,tokens = self.parseImpl( instring, preloc, state, doActions )
+                        if loc == -1:
+                            err = tokens
+                            self._defaultExceptionDebugAction( instring, tokensStart,
+                                    self, err, state )
+                            if self.failAction:
+                                self.failAction( instring, tokensStart, self, err )
+                            return -1, err
+                    except IndexError:
+                        raise ParseException( instring, len(instring), self.errmsg, self )
+                except ParseBaseException, err:
+                    #~ print ("Exception raised:", err)
+                    self._defaultExceptionDebugAction( instring, tokensStart,
+                            self, err, state )
+                    if self.failAction:
+                        self.failAction( instring, tokensStart, self, err )
+                    raise
+            else:
+                if callPreParse and self.callPreparse:
+                    preloc = self.preParse( instring, loc, state )
+                else:
+                    preloc = loc
+                tokensStart = loc
+
+                if self.mayIndexError or loc >= len(instring):
+                    try:
+                        loc,tokens = self.parseImpl( instring, preloc, state, doActions )
+                        if loc == -1:
+                            return -1, tokens
+                    except IndexError:
+                        raise ParseException( instring, len(instring), self.errmsg, self )
+                else:
+                    loc,tokens = self.parseImpl( instring, preloc, state, doActions )
+                    if loc == -1:
+                        return -1, tokens
+
+            if not isinstance(tokens, list):   # not tokens.__class__ is list:
+                tokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
+
+            tokens = self.postParse( instring, loc, state, tokens )
+            if not isinstance(tokens, list):   # not tokens.__class__ is list:
+                retTokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
+            else:
+                if self.getNamedElementNeedsPacking() and self.resultsName:
+                    retTokens = [buildSyntaxNode(tokens, tokensStart,
+                            self.resultsName)]
+                else:
+                    retTokens = tokens
+
+            if debugging:
+                #~ print ("Matched",self,"->",retTokens.asList())
+                self._defaultSuccessDebugAction( instring, tokensStart, loc,
+                        self, retTokens, state )
+
+#             if retTokens.name:
+#                 retTokens = [retTokens]
+#             else:
+#                 retTokens = retTokens.asList()
+
+            state.threadstop.testValidThread()
+#             print "--Clock" , time.clock()
+#             elif isinstance(retTokens, list) and len(retTokens) > 0 and self.resultsName:
+#                 retTokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
+            return loc, retTokens
+        finally:
+            state.dictStack.pop()
+
+            if validResultName:
+                state.nameStack.pop()
+##             _profRunning -= 1
+##             if _profRunning == 0: _prof.stop()
+
+
+
     def tryParse( self, instring, loc, state ):
         try:
             return self._parse( instring, loc, state, doActions=False )
@@ -1466,76 +1576,76 @@ class ParserElement(object):
 
         return tokens
 
-    def scanString( self, instring, maxMatches=_MAX_INT, baseDict=None ):
-        """Scan the input string for expression matches.  Each match will return the
-           matching tokens, start location, and end location.  May be called with optional
-           maxMatches argument, to clip scanning after 'n' matches are found.
-
-           Note that the start and end locations are reported relative to the string
-           being parsed.  See L{I{parseString}<parseString>} for more information on parsing
-           strings with embedded tabs."""
-        if not self.streamlined:
-            self.streamline()
-        for e in self.ignoreExprs:
-            e.streamline()
-
-        if not self.keepTabs:
-            instring = _ustr(instring).expandtabs()
-        instrlen = len(instring)
-        loc = 0
-        preparseFn = self.preParse
-        parseFn = self._parse
-        ParserElement.resetCache()
-        matches = 0
-        state = self.buildStartState(instring, baseDict)
-
-        while loc <= instrlen and matches < maxMatches:
-            try:
-                preloc = preparseFn( instring, loc, state )
-                nextLoc,tokens = parseFn( instring, preloc, state, callPreParse=False )
-                if loc == -1:
-                    loc = preloc+1
-                    continue
-            except ParseException:
-                loc = preloc+1
-            else:
-                matches += 1
-                yield tokens, preloc, nextLoc
-                loc = nextLoc
-
-    def transformString( self, instring, baseDict=None ):
-        # TODO Check if it works
-        """Extension to scanString, to modify matching text with modified tokens that may
-           be returned from a parse action.  To use transformString, define a grammar and
-           attach a parse action to it that modifies the returned token list.
-           Invoking transformString() on a target string will then scan for matches,
-           and replace the matched text patterns according to the logic in the parse
-           action.  transformString() returns the resulting transformed string."""
-        out = []
-        lastE = 0
-        # force preservation of <TAB>s, to minimize unwanted transformation of string, and to
-        # keep string locs straight between transformString and scanString
-        self.keepTabs = True
-        for t,s,e in self.scanString( instring, baseDict=baseDict ):
-            out.append( instring[lastE:s] )
-            if t:
-                if isinstance(t, SyntaxNode):
-                    out += t.asList()
-                elif isinstance(t,list):
-                    out += t
-                else:
-                    out.append(t)
-            lastE = e
-        out.append(instring[lastE:])
-        return "".join(map(_ustr,out))
-
-    def searchString( self, instring, maxMatches=_MAX_INT, baseDict=None ):
-        """Another extension to scanString, simplifying the access to the tokens found
-           to match the given parse expression.  May be called with optional
-           maxMatches argument, to clip searching after 'n' matches are found.
-        """
-        return buildSyntaxNode(
-                [ t for t,s,e in self.scanString( instring, maxMatches, baseDict ) ])
+#     def scanString( self, instring, maxMatches=_MAX_INT, baseDict=None ):
+#         """Scan the input string for expression matches.  Each match will return the
+#            matching tokens, start location, and end location.  May be called with optional
+#            maxMatches argument, to clip scanning after 'n' matches are found.
+# 
+#            Note that the start and end locations are reported relative to the string
+#            being parsed.  See L{I{parseString}<parseString>} for more information on parsing
+#            strings with embedded tabs."""
+#         if not self.streamlined:
+#             self.streamline()
+#         for e in self.ignoreExprs:
+#             e.streamline()
+# 
+#         if not self.keepTabs:
+#             instring = _ustr(instring).expandtabs()
+#         instrlen = len(instring)
+#         loc = 0
+#         preparseFn = self.preParse
+#         parseFn = self._parse
+#         ParserElement.resetCache()
+#         matches = 0
+#         state = self.buildStartState(instring, baseDict)
+# 
+#         while loc <= instrlen and matches < maxMatches:
+#             try:
+#                 preloc = preparseFn( instring, loc, state )
+#                 nextLoc,tokens = parseFn( instring, preloc, state, callPreParse=False )
+#                 if loc == -1:
+#                     loc = preloc+1
+#                     continue
+#             except ParseException:
+#                 loc = preloc+1
+#             else:
+#                 matches += 1
+#                 yield tokens, preloc, nextLoc
+#                 loc = nextLoc
+# 
+#     def transformString( self, instring, baseDict=None ):
+#         # TODO Check if it works
+#         """Extension to scanString, to modify matching text with modified tokens that may
+#            be returned from a parse action.  To use transformString, define a grammar and
+#            attach a parse action to it that modifies the returned token list.
+#            Invoking transformString() on a target string will then scan for matches,
+#            and replace the matched text patterns according to the logic in the parse
+#            action.  transformString() returns the resulting transformed string."""
+#         out = []
+#         lastE = 0
+#         # force preservation of <TAB>s, to minimize unwanted transformation of string, and to
+#         # keep string locs straight between transformString and scanString
+#         self.keepTabs = True
+#         for t,s,e in self.scanString( instring, baseDict=baseDict ):
+#             out.append( instring[lastE:s] )
+#             if t:
+#                 if isinstance(t, SyntaxNode):
+#                     out += t.asList()
+#                 elif isinstance(t,list):
+#                     out += t
+#                 else:
+#                     out.append(t)
+#             lastE = e
+#         out.append(instring[lastE:])
+#         return "".join(map(_ustr,out))
+# 
+#     def searchString( self, instring, maxMatches=_MAX_INT, baseDict=None ):
+#         """Another extension to scanString, simplifying the access to the tokens found
+#            to match the given parse expression.  May be called with optional
+#            maxMatches argument, to clip searching after 'n' matches are found.
+#         """
+#         return buildSyntaxNode(
+#                 [ t for t,s,e in self.scanString( instring, maxMatches, baseDict ) ])
 
     def __add__(self, other ):
         """Implementation of + operator - returns And"""
@@ -1779,10 +1889,18 @@ class ParserElement(object):
 
     def __repr__( self ):
         return _ustr(self)
+        
+    def getContainedElements(self):
+        return []
 
     def streamline( self ):
-        self.streamlined = True
-        self.strRepr = None
+        if not self.streamlined:
+            self.streamlined = True
+            self.strRepr = None
+            
+            for e in self.getContainedElements():
+                e.streamline()
+
         return self
 
     def optimize(self, options=None):
@@ -1796,6 +1914,11 @@ class ParserElement(object):
         pass
         
     def _optimizeSelf(self, options):
+        # TODO: Add option for that
+        if len(self.parseStartAction) == 0 and len(self.validateAction) == 0 \
+                and len(self.parseAction) == 0:
+            self._parse = self._parseNoAction
+
         return self
     
     def _realOptimize(self, options):
@@ -2790,11 +2913,14 @@ class ParseExpression(ParserElement):
             self.strRepr = "%s:(%s)" % ( self.__class__.__name__, _ustr(self.exprs) )
         return self.strRepr
 
+    def getContainedElements(self):
+        return self.exprs
+
     def streamline( self ):
         super(ParseExpression,self).streamline()
 
-        for e in self.exprs:
-            e.streamline()
+#         for e in self.exprs:
+#             e.streamline()
 
         # collapse nested And's of the form And( And( And( a,b), c), d) to And( a,b,c,d )
         # but only if there are no parse actions or resultsNames on the nested And's
@@ -3573,6 +3699,11 @@ class FindFirst(ParseExpression):
         for e in self.exprs:
             e.checkRecursion( subRecCheckList )
 
+
+    def getContainedElements(self):
+        return self.exprs + [self.endExpr]
+
+
     def _optimizeSub(self, options):
         super(FindFirst, self)._optimizeSub(options)
         self.endExpr._optimizeSub(options)
@@ -3589,16 +3720,16 @@ class FindFirst(ParseExpression):
 #         print "--optimize combined", repr((self, self.regexCombinerAll))
 
 
-    def streamline( self ):
-        if not self.streamlined:
-            self.streamlined = True
-            if self.endExpr is not None:
-                self.endExpr.streamline()
-
-            for e in self.exprs:
-                e.streamline()
-
-        return self
+#     def streamline( self ):
+#         if not self.streamlined:
+#             self.streamlined = True
+#             if self.endExpr is not None:
+#                 self.endExpr.streamline()
+# 
+#             for e in self.exprs:
+#                 e.streamline()
+# 
+#         return self
 
     def _setDebugRecursIntern(self, flag, visited, deepness):
         if super(FindFirst,self)._setDebugRecursIntern(flag, visited,
@@ -3762,11 +3893,17 @@ class ParseElementEnhance(ParserElement):
                 self.expr.ignore( self.ignoreExprs[-1] )
         return self
 
-    def streamline( self ):
-        super(ParseElementEnhance,self).streamline()
+    def getContainedElements(self):
         if self.expr is not None:
-            self.expr.streamline()
-        return self
+            return [self.expr]
+        else:
+            return []
+
+#     def streamline( self ):
+#         super(ParseElementEnhance,self).streamline()
+#         if self.expr is not None:
+#             self.expr.streamline()
+#         return self
 
     def checkRecursion( self, parseElementList ):
         if self in parseElementList:
@@ -4448,12 +4585,13 @@ class Forward(ParseElementEnhance, NecessaryRegexProvider):
 
         return newLoc, tokens
 
-    def streamline( self ):
-        if not self.streamlined:
-            self.streamlined = True
-            if self.expr is not None:
-                self.expr.streamline()
-        return self
+#     def streamline( self ):
+#         if not self.streamlined:
+#             self.streamlined = True
+#             if self.expr is not None:
+#                 self.expr.streamline()
+#         return self
+
 
     def validate( self, validateTrace=[] ):
         if self not in validateTrace:
@@ -4904,12 +5042,15 @@ class StackedCopyDict:
 
         self.baseName = baseName
         self.nameStack = []
+        self.topDict = self.baseDict
 
     def getTopDict(self):
-        if len(self.dictStack) > 0:
-            return self.dictStack[-1]
-        else:
-            return self.baseDict
+        return self.topDict
+
+#         if len(self.dictStack) > 0:
+#             return self.dictStack[-1]
+#         else:
+#             return self.baseDict
             
     def getSubTopDict(self):
         if len(self.dictStack) > 1:
@@ -4964,9 +5105,11 @@ class StackedCopyDict:
             newDict = self.getTopDict().copy()
 
         self.dictStack.append(newDict)
+        self.topDict = newDict
+
         self.nameStack.append(newName)
 
-        return self.dictStack[-1]
+        return newDict
 
 
     def pop(self):
@@ -4974,8 +5117,15 @@ class StackedCopyDict:
         May throw exception if only base dictionary is available.
         """
         self.nameStack.pop()
-        return self.dictStack.pop()
+        result = self.dictStack.pop()
         
+        if len(self.dictStack) > 0:
+            self.topDict = self.dictStack[-1]
+        else:
+            self.topDict = self.baseDict
+        
+        return result
+
 
     def has_key(self, key):
         return self.getTopDict().has_key(key)
