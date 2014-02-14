@@ -52,6 +52,7 @@ class ViHelper():
                     3 : u"--REPLACE--" 
                 }
 
+    # Default key bindings - can be overridden by wikidrc
     KEY_BINDINGS = {
                         u"!" : 33,
                         u"\"" : 34,
@@ -234,6 +235,9 @@ class ViHelper():
                 "set_wrap_indent_mode": 1,
                 "set_wrap_start_indent": 0,
                 
+
+                "min_wikipage_search_len" : 2,
+                
              }
         self.LoadSettings()
 
@@ -342,7 +346,7 @@ class ViHelper():
 
     def OnChar(self, evt):
 	"""
-	Handles EVT_CHAR events necessary for windows
+	Handles EVT_CHAR events necessary for MS Windows
 	"""
         m = self.mode
 
@@ -1783,8 +1787,12 @@ class CmdParser():
             "reloadplugins" : (self.Pass, self.ReloadPlugins, 
                     "Reload plugins (use sparingly)"),
 
+            # Stuff below is for debugging
             "start_pdb_debug" : (self.Pass, self.StartPDBDebug,
                         "Begin a PDB debug session"),
+
+            "inspect" : (self.Pass, self.StartInspection,
+                        "Launch the wxPython inspection tool"),
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
@@ -1816,6 +1824,10 @@ class CmdParser():
 
     def StartPDBDebug(self, args=None):
         import pdb; pdb.set_trace()
+
+    def StartInspection(self, args=None):
+        import wx.lib.inspection
+        wx.lib.inspection.InspectionTool().Show()
     
     def SearchAndReplace(self, pattern, ignore_flags=False):
         """
@@ -2433,7 +2445,8 @@ class CmdParser():
         return self.GetWikiPages(search_text)
 
     def GetWikiPages(self, search_text):
-        if search_text is None or search_text.strip() == u"":
+        if search_text is None or \
+                len(search_text.strip()) < self.ctrl.vi.settings['min_wikipage_search_len']:
             return None, (_(u"Enter wikiword..."),), None
 
         results = self.ctrl.presenter.getMainControl().getWikiData().\
