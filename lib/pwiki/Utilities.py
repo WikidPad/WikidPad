@@ -496,7 +496,7 @@ class _TimeoutRLock(threading._Verbose):
         self.__owner = None
         self.__count = 0
         self.__timeout = timeout
-        self.__acquiredStackTrace = None
+#         self.__acquiredStackTrace = None
 
     def __repr__(self):
         owner = self.__owner
@@ -572,6 +572,7 @@ class _TimeoutRLock(threading._Verbose):
         self.__count = count = self.__count - 1
         if not count:
             self.__owner = None
+#             self.__acquiredStackTrace = None
             self.__block.release()
             if __debug__:
                 self._note("%s.release(): final release", self)

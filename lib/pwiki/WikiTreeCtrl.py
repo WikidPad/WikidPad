@@ -95,9 +95,19 @@ class AbstractNode(object):
 
     def getNodePresentation(self):
         """
-        return a NodeStyle object for the node
+        return a NodeStyle object for the node. This should be called mainly
+        in background threads.
         """
         return NodeStyle()
+
+    def getNodePresentationFast(self):
+        """
+        return a NodeStyle object for the node or None. If a style is returned it
+        may be inaccurate because calculation is time-consuming. In this case
+        call getNodePresentation() later in background to get proper style.
+        If None is returned just call getNodePresentation() directly
+        """
+        return None
         
     def representsFamilyWikiWord(self):
         """
@@ -112,13 +122,26 @@ class AbstractNode(object):
         a defined one).
         """
         return False
-        
+
     def listChildren(self):
         """
         Returns a sequence of Nodes for the children of this node.
-        This is called before expanding the node
+        This is called before expanding the node. This should be called mainly
+        in background threads.
         """
         return ()
+        
+    def listChildrenFast(self):
+        """
+        Returns a sequence of Nodes for the children of this node or None.
+        This is called before expanding the node. If a sequence is returned it
+        may be inaccurate because calculation is time-consuming. In this case
+        call listChildren() later in background to get proper style.
+        If None is returned just call listChildren() directly.
+        
+        If a node doesn't have children an empty sequence is returned (not None!)
+        """
+        return None
 
     def onSelected(self):
         """
@@ -179,7 +202,6 @@ class WikiWordNode(AbstractNode):
     def __init__(self, tree, parentNode, wikiWord):
         AbstractNode.__init__(self, tree, parentNode)
         self.wikiWord = wikiWord
-        self.flagChildren = None
         self.unifiedName = u"wikipage/" + self.wikiWord
 
         self.flagRoot = False
@@ -200,6 +222,9 @@ class WikiWordNode(AbstractNode):
                 if relLink is not None:
                     self.newLabel = relLink
 
+
+    def getNodePresentationFast(self):
+        return None # self._createNodePresentation(self.newLabel, fast=True)
 
     def getNodePresentation(self):
         return self._createNodePresentation(self.newLabel)
@@ -270,7 +295,7 @@ class WikiWordNode(AbstractNode):
         return False
 
 
-    def _createNodePresentation(self, baselabel):
+    def _createNodePresentation(self, baselabel, fast=False):
         """
         Splitted to support derived class WikiWordSearchNode
         """
@@ -286,12 +311,10 @@ class WikiWordNode(AbstractNode):
 
         # Has children?
         if self.flagRoot:
-            self.flagChildren = True # Has at least Views
+            style.hasChildren = True # Has at least Views
         else:
-            self.flagChildren = self._hasValidChildren(wikiPage)
+            style.hasChildren = fast or self._hasValidChildren(wikiPage)
 
-        style.hasChildren = self.flagChildren
-        
         # apply custom attributes to nodes
         wikiPage = wikiPage.getNonAliasPage() # Ensure we don't have an alias
 
@@ -541,6 +564,35 @@ class MainViewNode(AbstractNode):
         style.hasChildren = True
         return style
         
+    def listChildrenFast(self):
+##         _prof.start()
+        wikiData = self.treeCtrl.pWiki.getWikiData()
+        result = []
+
+        # add to do list nodes
+        result += TodoNode(self.treeCtrl, self, ()).listChildren()
+        # add property names   
+        result += AttrCategoryNode(self.treeCtrl, self, ()).listChildren()
+        # add "searches" view
+        node = MainSearchesNode(self.treeCtrl, self)
+        result.append(node)
+        # add "last modified" view
+        result.append(MainModifiedWithinNode(self.treeCtrl, self))
+        # add "parentless" view
+        node = MainParentlessNode(self.treeCtrl, self)
+        # Checking visibility takes some time, so it is just listed
+        # if node.isVisible():
+        result.append(node)
+        # add "undefined" view
+        node = MainUndefinedNode(self.treeCtrl, self)
+        # if node.isVisible():
+        result.append(node)
+
+        result.append(MainFuncPagesNode(self.treeCtrl, self))
+##         _prof.stop()
+
+        return result
+
     def listChildren(self):
 ##         _prof.start()
         wikiData = self.treeCtrl.pWiki.getWikiData()
@@ -944,11 +996,18 @@ class MainSearchesNode(AbstractNode):
         AbstractNode.__init__(self, tree, parentNode)
         self.unifiedName = u"helpernode/main/searches"
 
-    def getNodePresentation(self):
+    def getNodePresentationFast(self):
         style = NodeStyle()
         style.label = _(u"searches")
         style.icon = u"lens"
         style.hasChildren = True
+        return style
+        
+    def getNodePresentation(self):
+        style = NodeStyle()
+        style.label = _(u"searches")
+        style.icon = u"lens"
+        style.hasChildren = self.isVisible()
         return style
         
     def isVisible(self):
@@ -1094,11 +1153,20 @@ class MainParentlessNode(AbstractNode):
         AbstractNode.__init__(self, tree, parentNode)
         self.unifiedName = u"helpernode/main/parentless"
 
-    def getNodePresentation(self):
+    def getNodePresentationFast(self):
         style = NodeStyle()
         style.label = _(u"parentless-nodes")
         style.icon = u"link"
         style.hasChildren = True
+        return style
+
+    def getNodePresentation(self):
+        style = NodeStyle()
+        style.label = _(u"parentless-nodes")
+        style.icon = u"link"
+        
+        wikiData = self.treeCtrl.pWiki.getWikiData()
+        style.hasChildren = self.isVisible()
         return style
 
     def isVisible(self):
@@ -1125,11 +1193,18 @@ class MainUndefinedNode(AbstractNode):
         AbstractNode.__init__(self, tree, parentNode)
         self.unifiedName = u"helpernode/main/undefined"
 
-    def getNodePresentation(self):
+    def getNodePresentationFast(self):
         style = NodeStyle()
         style.label = _(u"undefined-nodes")
         style.icon = u"question"
         style.hasChildren = True
+        return style
+
+    def getNodePresentation(self):
+        style = NodeStyle()
+        style.label = _(u"undefined-nodes")
+        style.icon = u"question"
+        style.hasChildren = self.isVisible()
         return style
 
     def isVisible(self):
@@ -1594,9 +1669,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
     def onEndForegroundUpdate(self, miscEvt):
         self.refreshStartLock = False
-        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
-                self.GetRootItem())
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self._startBackgroundRefresh()
 
     def onBeginForegroundUpdate(self, miscEvt):
         self._stopBackgroundRefresh()
@@ -1730,8 +1803,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
             # This is time consuming
             retObj = self.refreshExecutor.executeAsync(0, nodeObj.listChildren)
-            while retObj.state == 0:  # Dangerous!
-#                 print "--_generatorRefreshNodeAndChildren34"
+            while retObj.state == 0:
                 yield None
             children = retObj.getReturn() 
 
@@ -1767,10 +1839,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         else:
                             retObj = self.refreshExecutor.executeAsync(0,
                                     nodeObj.getNodePresentation)
-                            while retObj.state == 0:  # Dangerous!
+                            while retObj.state == 0:
                                 yield None
                             nodeStyle = retObj.getReturn()
-#                             nodeStyle = nodeObj.getNodePresentation()
 
                             self.setNodePresentation(nodeid, nodeStyle)
 
@@ -1810,7 +1881,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     
                     retObj = self.refreshExecutor.executeAsync(0,
                             c.getNodePresentation)
-                    while retObj.state == 0:  # Dangerous!
+                    while retObj.state == 0:
                         yield None
                     nodeStyle = retObj.getReturn()
                     self.setNodePresentation(newnodeid, nodeStyle)
@@ -2182,7 +2253,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         nodeobj.setRoot(True)
         root = self.AddRoot(u"")
         self.joinItemIdToNode(root, nodeobj)
-        self.setNodePresentation(root, nodeobj.getNodePresentation())
+        
+        nodeStyle = nodeobj.getNodePresentationFast()
+        if nodeStyle is None:
+            nodeStyle = nodeobj.getNodePresentation()
+        else:
+            self._startBackgroundRefresh()
+
+        self.setNodePresentation(root, nodeStyle)
         if self.expandedNodePathes is not None:
             self.expandedNodePathes = StringPathSet()
 
@@ -2336,14 +2414,26 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if self.expandedNodePathes is not None:
             self.expandedNodePathes.add(tuple(itemobj.getNodePath()))
 
-        childnodes = itemobj.listChildren()
+        refreshNeeded = False
+
+        childnodes = itemobj.listChildrenFast()
+        if childnodes is None:
+            childnodes = itemobj.listChildren()
+        else:
+            refreshNeeded = True
 
         self.Freeze()
         try:
             for ch in childnodes:
                 newit = self.AppendItem(item, u"")
                 self.joinItemIdToNode(newit, ch)
-                nodeStyle = ch.getNodePresentation()
+                
+                nodeStyle = ch.getNodePresentationFast()
+                if nodeStyle is None:
+                    nodeStyle = ch.getNodePresentation()
+                else:
+                    refreshNeeded = True
+
                 self.setNodePresentation(newit, nodeStyle)
                 
                 if self.expandedNodePathes is not None:
@@ -2355,6 +2445,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #                                 tuple(ch.getNodePath()))
         finally:
             self.Thaw()
+        
+        if refreshNeeded:
+            self._startBackgroundRefresh()
 
         ## _prof.stop()
 
