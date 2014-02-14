@@ -865,7 +865,6 @@ class WikiData:
 
 
 
-    # TODO Optimize!
     def getParentlessWikiWords(self):
         """
         get the words that have no parents.
@@ -875,26 +874,22 @@ class WikiData:
         no entries in the wikiwords table.)))
         """
         try:
-#             return self.connWrap.execSqlQuerySingleColumn(
-#                     "select word from wikiwords where not word glob '[[]*' "
-#                     "except select "
-#                     "ifnull(wikiwordattrs.word, wikirelations.relation) as unaliased "
-#                     "from wikirelations left join wikiwordattrs "
-#                     "on wikirelations.relation = wikiwordattrs.value and "
-#                     "wikiwordattrs.key = 'alias' where unaliased != wikirelations.word")
-
+            # Also working but slower:
 #             return self.connWrap.execSqlQuerySingleColumn(
 #                     "select word from wikiwords except "
-#                     "select word as mtword from wikiwordmatchterms "
-#                     "where matchterm in (select relation from wikirelations "
-#                     "where wikirelations.word != mtword)")
+#                     "select wikiwordmatchterms.word "
+#                     "from wikiwordmatchterms inner join wikirelations "
+#                     "on matchterm == relation where "
+#                     "wikirelations.word != wikiwordmatchterms.word and "
+#                     "(type & 2) != 0")
+
 
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords except "
-                    "select wikiwordmatchterms.word "
-                    "from wikiwordmatchterms inner join wikirelations "
-                    "on matchterm == relation where "
-                    "wikirelations.word != wikiwordmatchterms.word and "
+                    "select wikiwordmatchterms.word from wikiwordmatchterms "
+                    "where exists (select 1 from wikirelations where "
+                    "wikiwordmatchterms.matchterm == wikirelations.relation and "
+                    "wikirelations.word != wikiwordmatchterms.word) and "
                     "(type & 2) != 0")
 
         except (IOError, OSError, sqlite.Error), e:
@@ -1196,19 +1191,91 @@ class WikiData:
         """
         Function works for read-only wiki.
         """
+        class CachedWikiPageLinkTermDict(object):
+            def __init__(self, outer):
+                self.outer = outer
+                self.cache = {}
+                self.cacheNonExistent = set()
+                self.cacheComplete = False
+                
+            def get(self, key, default=None):
+                if self.cacheComplete:
+                    return self.cache.get(key, default)
+                
+                if self.cache.has_key(key):
+                    return self.cache.get(key, default)
+                    
+                if key in self.cacheNonExistent:
+                    return default
+                
+                try:
+                    value = self.lookup(key)
+                    self.cache[key] = value
+                    return value
+                except KeyError:
+                    self.cacheNonExistent.add(key)
+                    return default
+            
+            def lookup(self, key):
+                if self.outer.isDefinedWikiPageName(key):
+                    return key
+                
+                try:
+                    value = self.outer.connWrap.execSqlQuerySingleItem(
+                            "select word from wikiwordmatchterms "
+                            "where matchterm = ? and (type & 2) != 0 ", (key,))
+                    # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                except (IOError, OSError, sqlite.Error), e:
+                    traceback.print_exc()
+                    raise DbReadAccessError(e)
+                
+                if value is None:
+                    raise KeyError(key)
+                
+                return value
+
+
+            def keys(self):
+                if not self.cacheComplete:
+                    self.cache = dict(self.outer.connWrap.execSqlQuery(
+                            "select word, word from wikiwords union "
+                            "select matchterm, word from wikiwordmatchterms "
+                            "where (type & 2) != 0 and not matchterm in "
+                            "(select word from wikiwords)"))
+                    # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                    self.cacheComplete = True
+                    self.cacheNonExistent = set()
+
+                return self.cache.keys()
+
+
         try:
             if self.cachedWikiPageLinkTermDict is None:
-                self.cachedWikiPageLinkTermDict = dict(self.connWrap.execSqlQuery(
-                        "select word, word from wikiwords union "
-                        "select matchterm, word from wikiwordmatchterms "
-                        "where (type & 2) != 0 and not matchterm in "
-                        "(select word from wikiwords)"))
-                # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                self.cachedWikiPageLinkTermDict = CachedWikiPageLinkTermDict(self)
 
             return self.cachedWikiPageLinkTermDict
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+
+#     def _getCachedWikiPageLinkTermDict(self):
+#         """
+#         Function works for read-only wiki.
+#         """
+#         try:
+#             if self.cachedWikiPageLinkTermDict is None:
+#                 self.cachedWikiPageLinkTermDict = dict(self.connWrap.execSqlQuery(
+#                         "select word, word from wikiwords union "
+#                         "select matchterm, word from wikiwordmatchterms "
+#                         "where (type & 2) != 0 and not matchterm in "
+#                         "(select word from wikiwords)"))
+#                 # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+# 
+#             return self.cachedWikiPageLinkTermDict
+#         except (IOError, OSError, sqlite.Error), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
 
 
     def _getAllWikiFileNamesFromDisk(self):   # Used for rebuilding wiki

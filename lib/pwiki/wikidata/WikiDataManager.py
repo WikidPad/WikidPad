@@ -1,5 +1,8 @@
 from __future__ import with_statement
 
+# import profilehooks
+# profile = profilehooks.profile(filename="profile.prf", immediate=False)
+
 
 from weakref import WeakValueDictionary
 import os, os.path, time, shutil, traceback, ConfigParser
