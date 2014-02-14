@@ -357,7 +357,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
     This version is a panel and contains the children itself.
     """
     def __init__(self, parent, mainControl, id=-1):
-        wx.Panel.__init__(self, parent, id)
+        wx.Panel.__init__(self, parent, id, style=wx.WANTS_CHARS)
         BasicDocPagePresenter.__init__(self, mainControl)
         self.SetSizer(LayerSizer())
 
