@@ -1455,6 +1455,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
 
                 # Check if their are any surrounding viewports that we can use
+                # TODO: we should be able to use (create) unused viewports
                 viewports = self.presenter.getMainControl().\
                         getMainAreaPanel().getPossibleTabCtrlDirections(
                                 self.presenter)
@@ -4293,6 +4294,10 @@ class ViHandler(ViHelper):
 
     # Note:
     # The repeats provided by ; and , are managed within the FindChar function
+
+    ######## TODO: some of these are duplicated in WikiHtmlView*, they should
+    #               be moved to ViHelper.
+
         k = self.KEY_BINDINGS
         self.keys = {
             0 : {
@@ -4486,6 +4491,9 @@ class ViHandler(ViHelper):
     # these navigation commands have been prefixed by "g".
     # TODO: different repeat command for these?
     (k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0, 0), # gf
+    (k["g"], k["c"])  : (0, (self.PseudoActivateLink, 0), 0, 0), # gc
+    (k["g"], k["C"])  : (0, (self.PseudoActivateLink, 2), 0, 0), # gC
+
     (("Ctrl", k["w"]), k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0, 0), # <c-w>gf
     (k["g"], k["F"])   : (0, (self.ctrl.activateLink, { "tabMode" : 2 }), 0, 0), # gF
     (k["g"], k["b"])   : (0, (self.ctrl.activateLink, { "tabMode" : 3 }), 0, 0), # gb
@@ -5074,6 +5082,32 @@ class ViHandler(ViHelper):
 #--------------------------------------------------------------------
 # Misc stuff
 #--------------------------------------------------------------------
+    def PseudoActivateLink(self, tab_mode):
+        """
+        A custom way to follow links.
+
+        Useful for a number of reasons
+            # It works on the text (so does not need a parsed page)
+            # It capitalises the first letter of the link
+        """
+        self.SelectInSquareBracket()
+
+        self.SelectSelection(1)
+        wikiword = self.ctrl.GetSelectedText()
+
+        # Arbitrary limits are fun
+        if len(wikiword) < 2:
+            return
+
+        if wikiword.startswith("//"):
+            wikiword = wikiword[2:]
+
+        wikiword = wikiword[:1].upper() + wikiword[1:]
+
+        self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
+            u"wikipage/" + wikiword, tabMode=tab_mode)
+
+
     def Autocomplete(self, forwards):
         # TODO: fix for single length words.
         if not self.ctrl.AutoCompActive():
