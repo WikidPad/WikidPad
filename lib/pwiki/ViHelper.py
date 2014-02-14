@@ -267,7 +267,16 @@ class ViHelper():
                 if presenter in presenter_type:
                     def returnKey(key):
                         if len(key) > 1 and key[0] == u"key":
-                            return k[key[1]]
+                            if type(key[1]) == tuple:
+                                l = list(key[1])
+                                key_char = l.pop()
+
+                                l.extend([k[key_char]])
+
+                                return tuple(l)
+
+                            else:
+                                return k[key[1]]
                         elif key == "motion" or "m":
                             return "m"
                         elif key == "*":
@@ -440,12 +449,13 @@ class ViHelper():
         else:
 	    # Keys present in the key_map should be consitent across
 	    # all platforms and can be handled directly.
-            if evt.ControlDown():
-                key = ("Ctrl", key)
-            elif evt.AltDown():
-                key = ("Alt", key)
-	    self.HandleKey(key, m, evt)
-	    return
+            key = self.AddModifierToKeychain(key, evt)
+	    #self.HandleKey(key, m, evt)
+            if not self.HandleKey(key, m, evt):
+                # For wxPython 2.9.5 we need this otherwise menu accels don't 
+                # seem to be triggered (though they worked in previous versions?)
+                evt.Skip()
+            return
 
 	
     	# What about os-x?
@@ -455,12 +465,33 @@ class ViHelper():
 	    evt.Skip()
 	    return
 
-        if evt.ControlDown():
-            key = ("Ctrl", key)
-        elif evt.AltDown():
-            key = ("Alt", key)
+        key = self.AddModifierToKeychain(key, evt)
 
-	self.HandleKey(key, m, evt)
+	if not self.HandleKey(key, m, evt):
+            # For wxPython 2.9.5 we need this otherwise menu accels don't 
+            # seem to be triggered (though they worked in previous versions?)
+            evt.Skip()
+
+    def AddModifierToKeychain(self, key, evt):
+        """
+        Checks a key event for modifiers (ctrl / alt) and adds them to
+        the key if they are present
+
+        """
+        mods = []
+        if evt.ControlDown():
+            mods.append("Ctrl")
+
+        if evt.AltDown():
+            mods.append("Alt")
+
+        if mods:
+            mods.extend([key])
+            print mods
+            key = tuple(mods)
+
+        return key
+
 
     def EndInsertMode(self):
         pass
@@ -518,10 +549,6 @@ class ViHelper():
                 evt.Skip()
                 return False
             return True
-
-
-
-
 
         if self._acceptable_keys is None or \
                                 "*" not in self._acceptable_keys:
@@ -595,7 +622,12 @@ class ViHelper():
 
         self.FlushBuffers()
 
-	return True
+        # If a chain command has been started prevent evt.Skip() from being
+        # called
+        if len(key_chain) > 1:
+            return True
+
+	return False
 
     def NextKeyCommandCanBeMotion(self):
         """
@@ -638,14 +670,15 @@ class ViHelper():
         """
         # TODO: Rewrite
         if keycode is not None:
-            # If we have a tuple the keycode includes a modifier, e.g. ctrl
+            # Check for modifiers
             if type(keycode) == tuple:
-                try:
-                    return "{0}-{1}".format(keycode[0], unichr(keycode[1]))
-                except TypeError:
-                    return keycode
+                l = list(keycode)
+                k = l.pop()
+                mods = ACCEL_SEP.join(l)
+                return "{0}{1}{2}".format(mods, ACCEL_SEP, unichr(k))
             try:
                 return unichr(keycode)
+            # This may occur when special keys (e.g. WXK_SPACE) are used
             except TypeError, ValueError: # >wx2.9 ?valueerror?
                 return keycode
         else:
@@ -717,8 +750,12 @@ class ViHelper():
             for accels in keys[j]:
                 for accel in accels:
                     if type(accel) == tuple and len(accel) > 1:
-                        key_accels.add("{0}{1}{2}".format(accel[0], \
-                                ACCEL_SEP, unichr(accel[1]).upper()))
+                        l = list(accel)
+                        k = l.pop()
+                        mods = ACCEL_SEP.join(l)
+                        # wx accels chars are always uppercase
+                        to_add = "{0}{1}{2}".format(mods, ACCEL_SEP, unichr(k).upper())
+                        key_accels.add(to_add)
                 
         self.viKeyAccels.update(key_accels)
 
@@ -2174,6 +2211,9 @@ class CmdParser():
         if arg_type == 1:
             if arg.strip() == u"":
                 return False
+
+            # Do we want to allow whitespaced wikiwords?
+            arg = arg.strip()
 
             # We create the required link format here
             return ((arg, 0, arg, -1, -1),)
