@@ -1757,21 +1757,39 @@ class WikiData:
         exclusionSet -- set of wiki words for which their pages shouldn't be
         searched here and which must not be part of the result set
         """
-        try:
-            result = self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent where "
-                    "testMatch(word, content, ?)",
-                    (sqlite.addTransObject(sarOp),))
-        except (IOError, OSError, sqlite.Error), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-        finally:
-            sqlite.delTransObject(sarOp)
 
-        result = set(result)
-        result -= exclusionSet
-
-        return result
+        if sarOp.isTextNeededForTest():
+            try:
+                result = self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikiwordcontent where "
+                        "testMatch(word, content, ?)",
+                        (sqlite.addTransObject(sarOp),))
+            except (IOError, OSError, sqlite.Error), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+            finally:
+                sqlite.delTransObject(sarOp)
+    
+            result = set(result)
+            result -= exclusionSet
+    
+            return result
+        else:
+            try:
+                result = self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikiwordcontent where "
+                        "testMatch(word, '', ?)",
+                        (sqlite.addTransObject(sarOp),))
+            except (IOError, OSError, sqlite.Error), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+            finally:
+                sqlite.delTransObject(sarOp)
+    
+            result = set(result)
+            result -= exclusionSet
+    
+            return result
 
 
 # explain select distinct type from wikiwordmatchterms where type & 2

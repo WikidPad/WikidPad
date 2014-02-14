@@ -2282,20 +2282,29 @@ class WikiData:
         searched here and which must not be part of the result set
         """
         result = set()
-        for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-            if word in exclusionSet:
-                continue
-            try:
-                fileContents = self.getContent(word)
-            except WikiFileNotFoundException:
-                # some error in cache (should not happen)
-                continue
 
-            if sarOp.testWikiPage(word, fileContents) == True:
-                result.add(word)
+        if sarOp.isTextNeededForTest():
+            for word in self.getAllDefinedWikiPageNames():
+                if word in exclusionSet:
+                    continue
+                try:
+                    fileContents = self.getContent(word)
+                except WikiFileNotFoundException:
+                    # some error in cache (should not happen)
+                    continue
+    
+                if sarOp.testWikiPage(word, fileContents) == True:
+                    result.add(word)
+        else:
+            for word in self.getAllDefinedWikiPageNames():
+                if word in exclusionSet:
+                    continue
+
+                if sarOp.testWikiPage(word, None) == True:
+                    result.add(word)
 
         return result
-
+        
 
     # ---------- Miscellaneous ----------
 

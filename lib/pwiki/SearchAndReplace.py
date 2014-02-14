@@ -54,6 +54,13 @@ class AbstractSearchNode:
 #         return self.testText(text)
         raise NotImplementedError
         
+    def isTextNeededForTest(self):
+        """
+        Returns False iff the  text  parameter in testWikiPage() can be None.
+        Should return True in case of doubt.
+        """
+        return True
+        
 
 #     def testText(self, text):
 #         """
@@ -156,6 +163,8 @@ class NotSearchNode(AbstractSearchNode):
             
         return not subret
 
+    def isTextNeededForTest(self):
+        return self.sub.isTextNeededForTest()
 
     # orderNatural() from the subnode is not delegated
 
@@ -222,6 +231,9 @@ class AllWikiPagesNode(AbstractSearchNode):
 
     def testWikiPage(self, word, text):
         return True
+        
+    def isTextNeededForTest(self):
+        return False
 
     def searchText(self, text, searchCharStartPos=0, cycleToStart=False):
         return (0, 0)
@@ -274,6 +286,9 @@ class RegexWikiPageNode(AbstractSearchNode):
     
     def testWikiPage(self, word, text):
         return bool(self.compPat.match(word))
+
+    def isTextNeededForTest(self):
+        return False
 
     def serializeBin(self, stream):
         """
@@ -374,6 +389,9 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
 
     def testWikiPage(self, word, text):
         return self.wordSet.has_key(word)
+
+    def isTextNeededForTest(self):
+        return False
 
 
     def orderNatural(self, wordSet, coll):
@@ -598,6 +616,8 @@ class AbstractAndOrSearchNode(AbstractContentSearchNode):
     def testWikiPage(self, word, text):
         raise NotImplementedError  # abstract
 
+    def isTextNeededForTest(self):
+        return self.left.isTextNeededForTest() or self.right.isTextNeededForTest()
 
     def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
             cycleToStart=False):
@@ -805,7 +825,6 @@ class RegexTextNode(AbstractContentSearchNode):
     def testWikiPage(self, word, text):
         return bool(self.rePattern.search(text))
 
-
 #     def testText(self, text):
 #         return bool(self.rePattern.search(text))
 
@@ -959,6 +978,8 @@ class AttributeNode(AbstractContentSearchNode):
     def testWikiPage(self, word, text):
         return word in self.wordSet
 
+    def isTextNeededForTest(self):
+        return False
 
     def serializeBin(self, stream):
         """
@@ -1087,6 +1108,8 @@ class TodoNode(AbstractContentSearchNode):
     def testWikiPage(self, word, text):
         return word in self.wordSet
 
+    def isTextNeededForTest(self):
+        return False
 
     def serializeBin(self, stream):
         """
@@ -1257,6 +1280,16 @@ class ListWikiPagesOperation:
             return False
 
         return self.searchOpTree.testWikiPage(word, text)
+
+    def isTextNeededForTest(self):
+        """
+        Returns False iff the  text  parameter in testWikiPage() can be None.
+        Should return True in case of doubt.
+        """
+        if self.searchOpTree is None:
+            return True
+
+        return self.searchOpTree.isTextNeededForTest()
 
 
     def testWikiPageByDocPage(self, docPage):
@@ -1842,6 +1875,18 @@ class SearchReplaceOperation:
             
         return self.listWikiPagesOp.testWikiPage(word, text) and \
                 self.searchOpTree.testWikiPage(word, text)
+
+
+    def isTextNeededForTest(self):
+        """
+        Returns False iff the  text  parameter in testWikiPage() can be None.
+        Should return True in case of doubt.
+        """
+        if self.searchOpTree is None:
+            self.rebuildSearchOpTree()
+
+        return self.listWikiPagesOp.isTextNeededForTest() or \
+                self.searchOpTree.isTextNeededForTest()
 
 
     def testWikiPageByDocPage(self, docPage):

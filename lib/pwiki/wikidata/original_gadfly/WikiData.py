@@ -2198,74 +2198,28 @@ class WikiData:
         searched here and which must not be part of the result set
         """
         result = set()
-        for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-            if word in exclusionSet:
-                continue
-            try:
-                fileContents = self.getContent(word)
-            except WikiFileNotFoundException:
-                # some error in cache (should not happen)
-                continue
 
-            if sarOp.testWikiPage(word, fileContents) == True:
-                result.add(word)
+        if sarOp.isTextNeededForTest():
+            for word in self.getAllDefinedWikiPageNames():
+                if word in exclusionSet:
+                    continue
+                try:
+                    fileContents = self.getContent(word)
+                except WikiFileNotFoundException:
+                    # some error in cache (should not happen)
+                    continue
+    
+                if sarOp.testWikiPage(word, fileContents) == True:
+                    result.add(word)
+        else:
+            for word in self.getAllDefinedWikiPageNames():
+                if word in exclusionSet:
+                    continue
+
+                if sarOp.testWikiPage(word, None) == True:
+                    result.add(word)
 
         return result
-
-
-#     def saveSearch(self, title, datablock):
-#         try:
-#             test = self.connWrap.execSqlQuerySingleItem(
-#                     "select title from search_views where title = ?",
-#                     (title,))
-#         except (IOError, OSError, ValueError), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-# 
-#         try:
-#             if test is not None:
-#                 self.connWrap.execSql(
-#                         "update search_views set datablock = ? where "+\
-#                         "title = ?", (datablock, title))
-#             else:
-#                 self.connWrap.execSqlInsert("search_views", ("title", "datablock"),
-#                         (title, datablock))
-#             
-#             self.commitNeeded = True
-# 
-#         except (IOError, OSError, ValueError), e:
-#             traceback.print_exc()
-#             raise DbWriteAccessError(e)
-
-
-#     def getSavedSearchTitles(self):
-#         """
-#         Return the titles of all stored searches in alphabetical order
-#         """
-#         try:
-#             return self.connWrap.execSqlQuerySingleColumn(
-#                     "select title from search_views order by title")
-#         except (IOError, OSError, ValueError), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-
-#     def getSearchDatablock(self, title):
-#         try:
-#             return self.connWrap.execSqlQuerySingleItem(
-#                     "select datablock from search_views where title = ?", (title,),
-#                     strConv=False)
-#         except (IOError, OSError, ValueError), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-
-#     def deleteSavedSearch(self, title):
-#         try:
-#             self.connWrap.execSql(
-#                     "delete from search_views where title = ?", (title,))
-#             self.commitNeeded = True
-#         except (IOError, OSError, ValueError), e:
-#             traceback.print_exc()
-#             raise DbWriteAccessError(e)
 
 
 
