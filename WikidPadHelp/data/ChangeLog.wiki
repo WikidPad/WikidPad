@@ -1,5 +1,11 @@
 ﻿++ Change Log
 
+Feb. 15, 2014 (2.2)
+    
+    * Version number changed (that's all)
+
+
+
 Oct. 27, 2013 (2.2rc11)
 
     * Bug fixed: Last line of page could vanish in plain text print
