@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
 
+Feb. 15, 2014 (2.3beta12)
+
+    * Speedup processing of "Views" node in tree (faster opening
+      of a wiki)
+    * Speedup of search for parentless words
+    * Faster search operation (page testing) if page content isn't
+      needed for search
+    * Some optimizations in WikiPyparsing
+
+    * Vi (thanks to Ross):
+        * New cmd to start frame inspection (":inspect")
+        * Add "min_wikipage_search_len" option (default: 2)
+        * Add new PseudoActivateLink keybinding (gc and gC)
+        * Better solution for menu accels in >= wx 2.9.5
+        * Add support for multi modifier key bindings (e.g. Ctrl-Alt-p)
+        * Add support for using modifiers in plugins
+
+    * Bug fixed: Shortcut Ctrl-Enter didn't work anymore
+
+
+
 Oct. 27, 2013 (2.3beta11)
 
     * Added attribute "bgcolor" to set tree item background color.
