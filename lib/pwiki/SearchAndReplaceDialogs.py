@@ -1101,6 +1101,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.mainControl.getWikiDocument() is not None and \
                 self.mainControl.getWikiDocument().isSearchIndexEnabled())
 
+        self.pageListRadioButtons = (self.ctrls.rbPagesAll,
+                self.ctrls.rbPagesMatchRe, self.ctrls.rbPagesInList)
+
+        self.panelPageListLastFocused = None  
+
+
         self._refreshSavedSearchesList()
         self._refreshSearchHistoryCombo()
 
@@ -1120,7 +1126,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
             self.OnRadioBox(None)  # Refresh settings
             self._updateTabTitle()
-
+            
+            
         # Fixes focus bug under Linux
         self.SetFocus()
         self.ctrls.cbSearch.SetFocus()
@@ -1159,9 +1166,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         wx.EVT_TEXT(self, GUI_ID.tfSubtreeLevels, self.OnTextSubtreeLevels)
         wx.EVT_TEXT(self, GUI_ID.tfMatchRe, self.OnTextPageNameMatchRe)
 
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesAll, self.OnListRefreshNeeded)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesMatchRe, self.OnListRefreshNeeded)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesInList, self.OnListRefreshNeeded)
+        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesAll, self.OnPageListRadioButtons)
+        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesMatchRe, self.OnPageListRadioButtons)
+        wx.EVT_RADIOBUTTON(self, GUI_ID.rbPagesInList, self.OnPageListRadioButtons)
 
         wx.EVT_TEXT_ENTER(self, GUI_ID.tfPageListToAdd, self.OnPageListAdd)
         wx.EVT_BUTTON(self, GUI_ID.btnPageListUp, self.OnPageListUp) 
@@ -1194,6 +1201,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
         wx.EVT_CLOSE(self, self.OnClose)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        
+        
+        wx.EVT_CHILD_FOCUS(self.ctrls.panelPageList, self.OnPageListChildFocus)
+        
         
 #         _prof.stop()
         
@@ -1272,6 +1283,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         return lpOp
 
 
+    def OnPageListChildFocus(self, evt):
+        self.panelPageListLastFocused = evt.GetEventObject()
+        evt.Skip()
+
 
     def _buildSearchReplaceOperation(self):
         searchType = self.ctrls.rboxSearchType.GetSelection()
@@ -1302,12 +1317,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             item = self.listPagesOperation.searchOpTree
             
             if item.CLASS_PERSID == "AllPages":
-                self.ctrls.rbPagesAll.SetValue(True)
+                self._setPageListRadioButton(self.ctrls.rbPagesAll)
             elif item.CLASS_PERSID == "RegexPage":
-                self.ctrls.rbPagesMatchRe.SetValue(True)
+                self._setPageListRadioButton(self.ctrls.rbPagesMatchRe)
                 self.ctrls.tfMatchRe.SetValue(item.getPattern())
             elif item.CLASS_PERSID == "ListItemWithSubtreePages":
-                self.ctrls.rbPagesInList.SetValue(True)
+                self._setPageListRadioButton(self.ctrls.rbPagesInList)
                 self.pageListData = item.rootWords[:]
                 self.ctrls.lbPageList.AppendItems(self.pageListData)
                 if item.level == -1:
@@ -1902,12 +1917,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnTextSubtreeLevels(self, evt):
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
         self.listNeedsRefresh = True
 
     def OnTextPageNameMatchRe(self, evt):
-        self.ctrls.rbPagesMatchRe.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesMatchRe)
         self._updateTabTitle()
         self.listNeedsRefresh = True
 
@@ -1933,6 +1948,31 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.ctrls.nbSearchWiki.SetPageText(1, _(u"Set page list"))
         else:
             self.ctrls.nbSearchWiki.SetPageText(1, _(u"*Set page list*"))            
+
+
+    def _setPageListRadioButton(self, selectedBtn):
+        refocus = False
+        focused = self.panelPageListLastFocused
+        
+        for btn in self.pageListRadioButtons:
+            if btn is selectedBtn:
+                btn.SetValue(True)
+            else:
+                if btn is focused:
+                    refocus = True
+
+                btn.SetValue(False)
+                
+        if refocus:
+            self.ctrls.panelPageList.ProcessEvent(wx.ChildFocusEvent(selectedBtn))
+
+
+
+    def OnPageListRadioButtons(self, evt):
+        self._setPageListRadioButton(evt.GetEventObject())
+        
+        self.OnListRefreshNeeded(evt)
+
 
     def OnPageListUp(self, evt):
         sel = self.ctrls.lbPageList.GetSelection()
@@ -1971,7 +2011,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnPageListSort(self, evt):
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
         self.listNeedsRefresh = True
 
@@ -1982,7 +2022,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnPageListAdd(self, evt):
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
 
         word = guiToUni(self.ctrls.tfPageListToAdd.GetValue())
@@ -2013,7 +2053,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnPageListDelete(self, evt):
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
 
         sel = self.ctrls.lbPageList.GetSelection()
@@ -2035,7 +2075,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnPageListClearList(self, evt):
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
 
         self.ctrls.lbPageList.Clear()
@@ -2047,7 +2087,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         """
         Take wiki words from clipboard and enter them into the list
         """
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
 
         text = getTextFromClipboard()
@@ -2080,7 +2120,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         """
         Take wiki words from clipboard and intersect with the list
         """
-        self.ctrls.rbPagesInList.SetValue(True)
+        self._setPageListRadioButton(self.ctrls.rbPagesInList)
         self._updateTabTitle()
 
         text = getTextFromClipboard()
