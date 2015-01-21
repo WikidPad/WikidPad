@@ -506,3 +506,53 @@ class ImagePasteDialog(wx.Dialog):
             self.bitmapControl.SetPosition((0,0))
             self.bitmapControl.SetBitmap(bmp)
 
+
+class RenameFileDialog(wx.Dialog):
+    def __init__(self, parent, caption, title, filename):
+        style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
+        super(RenameFileDialog, self).__init__(parent, -1, title, style=style)
+        
+        self.selectionSet = False
+
+        text = wx.StaticText(self, -1, caption)
+
+        text_ctrl = wx.TextCtrl(self, -1)
+        text_ctrl.ChangeValue(filename)
+
+        buttons = self.CreateButtonSizer(wx.OK|wx.CANCEL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(text, 0, wx.ALL, 5)
+        sizer.Add(text_ctrl, 1, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(buttons, 0, wx.EXPAND|wx.ALL, 5)
+        self.SetSizerAndFit(sizer)
+        self.text_ctrl = text_ctrl
+
+        wx.EVT_SET_FOCUS(self.text_ctrl, self.OnFocus)
+        self.text_ctrl.SetFocus()
+        
+
+    def OnFocus(self, evt):
+        
+        if self.selectionSet:
+            return
+
+        wx.CallAfter(self.RemoveExtensionFromSelection)
+        
+        self.selectionSet = True
+        
+
+    def RemoveExtensionFromSelection(self):
+        # Remove selection from extension (if one exists)
+        try:
+            name, extension = self.text_ctrl.GetValue().rsplit(u".", 1)
+            self.text_ctrl.SetInsertionPoint(0)
+            self.text_ctrl.SetSelection(0, len(name))
+        except ValueError:
+            pass
+
+
+    def SetValue(self, value):
+        self.text_ctrl.SetValue(value)
+
+    def GetValue(self):
+        return self.text_ctrl.GetValue()

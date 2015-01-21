@@ -2506,7 +2506,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         newName = filename
         while True:
             dlg = WikiTxtDialogs.RenameFileDialog(self,
-                    _(u"Enter new name for file: {0}".format(filename)),
+                    _(u"Enter new name for file: {0}").format(filename),
                     _(u"Rename File"), newName)
 
             if dlg.ShowModal() != wx.ID_OK:
