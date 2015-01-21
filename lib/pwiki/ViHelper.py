@@ -1288,7 +1288,7 @@ class ViHelper():
         presenter.SetFocus()
 
     def GoogleSelection(self):
-        self.StartCmdInput("google", run_cmd=True)
+        self.StartCmdInput("google ", run_cmd=True)
 
 
 #--------------------------------------------------------------------
@@ -1343,7 +1343,7 @@ class ViHelper():
             if initial_input is None:
                 initial_input = u"'<,'>"
             else:
-                initial_input = "{0} {1}".format(initial_input, self.ctrl.GetSelectedText())
+                initial_input = "{0}{1}".format(initial_input, self.ctrl.GetSelectedText())
             selection_range = self.ctrl.vi._GetSelectionRange()
 
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
@@ -2176,10 +2176,10 @@ class CmdParser():
         else:
             arg = None
 
-        split_cmd = text_input.split(" ")
+        split_cmd = [i for i in text_input.split(" ") if len(i) > 0]
 
         action = split_cmd[0]
-        if arg is None and len(split_cmd) > 1 and len(split_cmd[1]) > 0:
+        if arg is None and len(split_cmd) > 1: #and len(split_cmd[1]) > 0:
             arg = (1, u" ".join(split_cmd[1:]))
 
         # If a full cmd name has been entered use it

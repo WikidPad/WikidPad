@@ -3573,6 +3573,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     bytePos = bytePos - self.GetColumn(bytePos) 
                     
                 
+                # TODO: FIX
                 callInMainThread(self.CallTipShow, bytePos, callTip)
 
         except NotCurrentThreadException:
