@@ -395,6 +395,9 @@ class ViHelper():
                 # Handle autocompletion
                 self.ctrl.autoComplete()
 
+            if self.ctrl.AutoCompActive():
+                self.OnAutocompleteKeyDown(evt)
+
             # The following code is mostly duplicated from OnKeyDown (should be
             # rewritten to avoid duplication)
             # TODO Check all modifiers

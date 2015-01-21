@@ -11,8 +11,8 @@ import threading
 import subprocess
 import textwrap
 
-from os.path import exists, dirname, isfile, join, basename
-from os import rename, unlink
+from os.path import exists, dirname, isfile, isdir, join, basename
+from os import rename, unlink, listdir
 
 from time import time, sleep
 
@@ -4280,6 +4280,9 @@ class ViHandler(ViHelper):
 
         self.ctrl.SendMsg(2472, 1)
 
+        # Autoenlarge autcomplete box
+        self.ctrl.AutoCompSetMaxWidth(200)
+
     def LoadKeybindings(self):
         """
         Function called to load keybindings.
@@ -4970,7 +4973,6 @@ class ViHandler(ViHelper):
             return
 
         if evt.GetKeyCode() in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_RETURN):
-            evt.Skip()
             return
 
         # Messy
@@ -4987,27 +4989,9 @@ class ViHandler(ViHelper):
                 wx.PostEvent(self.ctrl, evt)
                 return
 
+        evt.Skip()
         
-        return_evt = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
-        return_evt.m_keyCode = wx.WXK_RETURN
-        wx.PostEvent(self.ctrl, return_evt)
 
-        #if evt.GetKeyCode() == wx.WXK_ESCAPE or evt.ControlDown() and evt.GetKeyCode() == 91:
-        #    evt = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
-        #    evt.m_keyCode = wx.WXK_ESCAPE
-        #    wx.PostEvent(self.ctrl, evt)
-        #    return
-            
-
-        #if evt.GetKeyCode() in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_LEFT, 
-        #        wx.WXK_RIGHT, wx.WXK_RETURN, wx.WXK_ESCAPE):
-        #    evt.Skip()
-        #    return
-
-        #evt.Skip()
-        wx.CallAfter(self.ctrl.Bind, wx.EVT_KEY_DOWN, None)
-
-        #wx.PostEvent(self.ctrl, evt)
 
             
     def TurnOff(self):
@@ -5132,62 +5116,106 @@ class ViHandler(ViHelper):
 
 
     def Autocomplete(self, forwards):
+        """
+        Basic autocomplete
+
+        Will search in current page for completions to basic words
+
+        Also supports completing relative links (may not work on windows)
+        """
         # TODO: fix for single length words.
         if not self.ctrl.AutoCompActive():
-            # NOTE: list order is not correct
             pos = self.ctrl.GetCurrentPos()
-            if pos - 1 > 0 and self.GetUnichrAt(pos-1) in \
-                                self.WORD_BREAK_INCLUDING_WHITESPACE:
-                word = u"[a-zA-Z0-9_]"
-                word_length = 0
-            # Select in word fails if it is a single char, may be better
-            # to fix it there
-            elif pos - 2 > 0 and self.GetUnichrAt(pos-2) in \
-                                self.WORD_BREAK_INCLUDING_WHITESPACE:
-                self.ctrl.CharLeftExtend()
-                word = self.ctrl.GetSelectedText()
-                word_length = 1
+            # First check if we are working with a link
+
+            link = self.GetLinkAtCaret(link_type="rel://")
+
+            if link is not None:
+                word = None
             else:
-                self.ctrl.CharLeft()
-                # Vim only selects backwards
-                # this will select the entire word
-                self.SelectInWord()
-                self.ctrl.CharRightExtend()
-                #self.ExtendSelectionIfRequired()
-                word = self.ctrl.GetSelectedText()
-                word_length = len(word)
+                self.ctrl.GotoPos(pos)
 
-
-            # Search for possible autocompletions
-            # Bad ordering at the moment
-            text = self.ctrl.GetTextRange(
-                        self.ctrl.GetCurrentPos(), self.ctrl.GetLength())
-            word_list = re.findall(ur"\b{0}.*?\b".format(re.escape(word)), 
-                    text, re.U)
-            text = self.ctrl.GetTextRange(0, self.ctrl.GetCurrentPos())
-            word_list.extend(re.findall(ur"\b{0}.*?\b".format(word), 
-                    text, re.U))
-
+                # NOTE: list order is not correct
+                if pos - 1 > 0 and self.GetUnichrAt(pos-1) in \
+                                    self.WORD_BREAK_INCLUDING_WHITESPACE:
+                    word = u"[a-zA-Z0-9_]"
+                    comcompletion_length = 0
+                # Select in word fails if it is a single char, may be better
+                # to fix it there
+                elif pos - 2 > 0 and self.GetUnichrAt(pos-2) in \
+                                    self.WORD_BREAK_INCLUDING_WHITESPACE:
+                    self.ctrl.CharLeftExtend()
+                    word = self.ctrl.GetSelectedText()
+                    completion_length = 1
+                else:
+                    self.ctrl.CharLeft()
+                    # Vim only selects backwards
+                    # this will select the entire word
+                    self.SelectInWord()
+                    self.ctrl.CharRightExtend()
+                    #self.ExtendSelectionIfRequired()
+                    word = self.ctrl.GetSelectedText()
+                    completion_length = len(word)
 
             # Remove duplicates
-            words = set()
-            words.add(word)
+            completions = set()
 
-            unique_word_list = [i for i in word_list if i not in words \
-                    and not words.add(i)]
+            if word is None:
+                abs_link = self.ctrl.presenter.getWikiDocument()\
+                            .makeRelUrlAbsolute(link)
+
+                # Check if link is a dir
+                link_is_dir = False
+                if isdir(abs_link[5:]):
+                    link_is_dir = True
+
+                link_dirname = dirname(abs_link)
+                link_basename = basename(abs_link)
+
+                # Search for matching files within the current directory
+                files = listdir("{0}".format(link_dirname[5:]))
+                completion_list = [self.ctrl.presenter.getWikiDocument()\
+                            .makeAbsUrlRelative(join(link_dirname, i)) \
+                            for i in files if link_basename == "" \
+                            or i.startswith(link_basename)]
+
+                # If the link is a directory we need to add all files from
+                # that directory
+                if link_is_dir:
+                    completion_list.extend(
+                            [self.ctrl.presenter.getWikiDocument()\
+                                .makeAbsUrlRelative(join(abs_link, i)) \
+                                for i in listdir(abs_link[5:])])
+
+                completion_length = len(link)
+            else:
+                # Search for possible autocompletions
+                # Bad ordering at the moment
+                text = self.ctrl.GetTextRange(
+                            self.ctrl.GetCurrentPos(), self.ctrl.GetLength())
+                completion_list = re.findall(ur"\b{0}.*?\b".format(re.escape(word)), 
+                        text, re.U)
+                text = self.ctrl.GetTextRange(0, self.ctrl.GetCurrentPos())
+                completion_list.extend(re.findall(ur"\b{0}.*?\b".format(word), 
+                        text, re.U))
+                completions.add(word)
+
+
+            unique_completion_list = [i for i in completion_list if i not in completions \
+                    and not completions.add(i)]
+
             # No completions found
-            if len(unique_word_list) < 1:
+            if len(unique_completion_list) < 1:
                 if self.HasSelection():
                     self.ctrl.CharRight()
                 self.visualBell("RED")
                 return
 
-            word_list_prepped = "\x01".join(unique_word_list)
+            completion_list_prepped = "\x01".join(unique_completion_list)
 
             if self.HasSelection():
                 self.ctrl.CharRight()
-            self.ctrl.AutoCompShow(word_length, word_list_prepped)
-            self.ctrl.Bind(wx.EVT_KEY_DOWN, self.OnAutocompleteKeyDown)
+            self.ctrl.AutoCompShow(completion_length, completion_list_prepped)
 
     def GetFirstVisibleLine(self):
         return self.ctrl.GetFirstVisibleLine()
@@ -5346,8 +5374,12 @@ class ViHandler(ViHelper):
                 in self.SINGLE_LINE_WHITESPACE:
             pos = sel_start-1
             while self.ctrl.GetCharAt(pos-1) \
-                    in  self.SINGLE_LINE_WHITESPACE:
+                    in self.SINGLE_LINE_WHITESPACE:
                 pos -= 1
+
+                if pos == 0:
+                    break
+
             self.ctrl.GotoPos(pos)
             self.StartSelection()
             self.ctrl.GotoPos(true_end)
@@ -5856,13 +5888,13 @@ class ViHandler(ViHelper):
         self.DeleteSelection()
         self.Insert()
 
-    def RemoveSelection(self):
+    def RemoveSelection(self, pos=None):
         """
         Removes the selection.
 
         """
-        #TODO: don't goto selection start pos
-        pos = self.ctrl.GetAnchor()
+        if pos is None:
+            pos = self.ctrl.GetAnchor()
         self.ctrl.SetSelection(pos,pos)
 
     # TODO: Clean up selection names
@@ -7083,10 +7115,14 @@ class ViHandler(ViHelper):
             while forward_char in self.SENTENCE_ENDINGS_SUFFIXS:
                 pos += 1
                 forward_char = self.GetUnichrAt(pos)
+                if pos == page_length:
+                    break
         if forward_char in string.whitespace:
             while forward_char in string.whitespace:
                 pos += 1
                 forward_char = self.GetUnichrAt(pos)
+                if pos == page_length:
+                    break
         else:
             self._MoveCaretSentenceStart(pos-1, start_pos)
             return
@@ -7156,11 +7192,15 @@ class ViHandler(ViHelper):
             while forward_char in self.SENTENCE_ENDINGS_SUFFIXS:
                 pos += 1
                 forward_char = self.GetUnichrAt(pos)
+                if pos == page_length:
+                    break
             sentence_end_pos = pos-1
         if forward_char in string.whitespace:
             while forward_char in string.whitespace:
                 pos += 1
                 forward_char = self.GetUnichrAt(pos)
+                if pos == page_length:
+                    break
         else:
             self._MoveCaretNextSentence(include_whitespace, pos+1, start_pos)
             return
@@ -7466,7 +7506,8 @@ class ViHandler(ViHelper):
                 while char is not None and \
                         (((only_whitespace or char not in self.WORD_BREAK) and \
                         char not in string.whitespace) \
-                        or char in ("_")):
+                        or char in ("_")) \
+                        and pos <= text_length:
                     pos = pos + offset
                     char = self.GetUnichrAt(pos + offset)
 
@@ -7486,7 +7527,8 @@ class ViHandler(ViHelper):
 
     def MoveCaretToWhitespaceStart(self):
         start = self.ctrl.GetCurrentPos()
-        while self.ctrl.GetCharAt(start-1) in self.SINGLE_LINE_WHITESPACE:
+        while start > 0 and \
+                self.ctrl.GetCharAt(start-1) in self.SINGLE_LINE_WHITESPACE:
             start -= 1
         self.ctrl.GotoPos(start)
 
@@ -7509,9 +7551,10 @@ class ViHandler(ViHelper):
     def MoveCaretNextWORD(self, count=None):
         """Wordbreaks are spaces"""
         def func():
+            text_length = self.ctrl.GetLength()
             self.ctrl.WordRight()
             while self.GetChar(-1) and not self.GetChar(-1).isspace():
-                if self.ctrl.GetCurrentPos() == self.ctrl.GetLength():
+                if self.ctrl.GetCurrentPos() == text_length:
                     return
                 self.ctrl.WordRight()
         self.Repeat(func, count)
@@ -7731,3 +7774,21 @@ class ViHandler(ViHelper):
         self.TruncateLine(check_line_end=False)
         self.Insert()
 
+
+    def GetLinkAtCaret(self, link_type=("rel://", "abs://"), extensions=""):
+        """
+        Helper for checking if the caret is currently within a link
+        """
+        pos = self.ctrl.GetCurrentPos()
+        # First check if we are working with a link
+
+        self.SelectInWORD()
+        self.ctrl.CharRightExtend()
+        link = self.ctrl.GetSelectedText()
+
+        self.RemoveSelection(pos)
+
+        if link.startswith(link_type) and link.endswith(extensions):
+            return link
+
+        return None
