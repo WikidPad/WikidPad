@@ -5139,7 +5139,7 @@ class ViHandler(ViHelper):
                 if pos - 1 > 0 and self.GetUnichrAt(pos-1) in \
                                     self.WORD_BREAK_INCLUDING_WHITESPACE:
                     word = u"[a-zA-Z0-9_]"
-                    comcompletion_length = 0
+                    completion_length = 0
                 # Select in word fails if it is a single char, may be better
                 # to fix it there
                 elif pos - 2 > 0 and self.GetUnichrAt(pos-2) in \
