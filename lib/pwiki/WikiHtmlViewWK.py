@@ -862,10 +862,16 @@ class WikiHtmlViewWK(wx.Panel):
 
         # If ctrl is pressed
         if evt.state & gtk.gdk.CONTROL_MASK:
+            if self.presenter.getConfig().getboolean(
+                    "main", "mouse_reverseWheelZoom", False):
+                scrollUpZoom = -1
+            else:
+                scrollUpZoom = 1
+            
             if evt.direction == gtk.gdk.SCROLL_UP:
-                self.addZoom(-1)
+                self.addZoom(scrollUpZoom)
             elif evt.direction == gtk.gdk.SCROLL_DOWN:
-                self.addZoom(1)
+                self.addZoom(-scrollUpZoom)
 
             return True # Return true so we don't scroll
 

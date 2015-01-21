@@ -521,6 +521,7 @@ class OptionsDialog(wx.Dialog):
                     "btnSelectEditorCaretColor"),
 
 
+            ("mouse_reverseWheelZoom", "cbMouseReverseWheelZoom", "b"),
             ("mouse_middleButton_withoutCtrl", "chMouseMiddleButtonWithoutCtrl", "seli"),
             ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
             ("userEvent_mouse/leftdoubleclick/preview/body", "chMouseDblClickPreviewBody", "selt",

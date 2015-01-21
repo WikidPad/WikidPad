@@ -746,7 +746,9 @@ GLOBALDEFAULTS = {
 
     ("main", "mouse_scrollUnderPointer"): "False", # Windows only, experimental, incomplete: Scroll window under pointer instead
             # of focused window
-
+            
+    ("main", "mouse_reverseWheelZoom"): "False", # Normally (since 2.3beta13) upward is zoom in, downward is zoom out.
+            # If this settings is true this is reversed for editor and internal HTML-preview (other previews not supported)
 
     ("main", "userEvent_mouse/leftdoubleclick/preview/body"): u"action/none", # How to react when user double-clicks somewhere into body of preview?
             # "action/none": Do nothing; "action/presenter/this/subcontrol/textedit": Switch current subcontrol to textedit mode;

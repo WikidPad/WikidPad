@@ -640,11 +640,15 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def OnMouseWheel(self, evt):
         if evt.ControlDown():
-            self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
+            if self.presenter.getConfig().getboolean(
+                    "main", "mouse_reverseWheelZoom", False):
+                self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
+            else:
+                self.addZoom( evt.GetWheelRotation() // evt.GetWheelDelta() )
         else:
             evt.Skip()
-            
-            
+
+
     def OnMouseMotion(self, evt):
         evt.Skip()
 

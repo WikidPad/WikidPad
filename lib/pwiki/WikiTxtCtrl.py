@@ -1129,6 +1129,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
             self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
             self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
+            self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
             if not isLinux():
                 self.Bind(wx.EVT_CHAR, None)
 
@@ -3274,6 +3275,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
             unichar = StringOps.mbcsDec(chr(key))[0]
 
         self.ReplaceSelection(unichar)
+
+
+    def OnMouseWheel(self, evt):
+        # Scintilla's wheel zoom behavior is unusual (upward=zoom out)
+        # So the sign of rotation value must be changed if wheel zoom is NOT
+        # reversed by option
+        
+        if evt.ControlDown() and not self.presenter.getConfig().getboolean(
+                "main", "mouse_reverseWheelZoom", False):
+            evt.m_wheelRotation = -evt.m_wheelRotation
+
+        evt.Skip()
 
 
     def OnLogicalLineMove(self, evt):
