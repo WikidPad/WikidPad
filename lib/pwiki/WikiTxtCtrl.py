@@ -4226,9 +4226,10 @@ class ViHandler(ViHelper):
         self.GenerateKeyBindings()
 
         self.SINGLE_LINE_WHITESPACE = [9, 11, 12, 32]
-        self.WORD_BREAK =   '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
+
+        self.WORD_BREAK =   u'!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
         self.WORD_BREAK_INCLUDING_WHITESPACE = \
-                            '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
+                            u'!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
         self.SENTENCE_ENDINGS = (".", "!", "?", "\n\n")
         self.SENTENCE_ENDINGS_SUFFIXS = '\'")]'
 
@@ -5115,8 +5116,13 @@ class ViHandler(ViHelper):
         if len(wikiword) < 2:
             return
 
+        if "|" in wikiword:
+            wikiword = wikiword.split("|")[0]
+
         if wikiword.startswith("//"):
             wikiword = wikiword[2:]
+        elif wikiword.startswith("/"):
+            wikiword = self.ctrl.presenter.getWikiWord()+wikiword
 
         wikiword = wikiword[:1].upper() + wikiword[1:]
 
@@ -5278,8 +5284,11 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def GetUnichrAt(self, pos):
-        if -1 < pos < self.ctrl.GetLength():
-            return self.ctrl.GetTextRaw()[pos]
+        """
+        Returns the character under the caret. 
+        Works with unicode characters.
+        """
+        return self.ctrl.GetTextRange(pos, self.ctrl.PositionAfter(pos))
 
     def SelectInTextObject(self, ob):
         self.SelectTextObject(ob, False)
@@ -6195,6 +6204,7 @@ class ViHandler(ViHelper):
         self.EndUndo()
 
     def Indent(self, forward=True, repeat=1, visual=False):
+        # TODO: fix - call SelectSelection?
         if visual == True:
             repeat = self.count
 
@@ -7379,7 +7389,7 @@ class ViHandler(ViHelper):
                                     "only_whitespace" : False })
 
     def MoveCaretNextWord(self, count=None):
-        # TODO: should probably es _MoveCaretWord
+        # TODO: should probably use _MoveCaretWord
         self.Repeat(self.ctrl.WordRight, count)
         self.SetLineColumnPos()
 
@@ -7458,6 +7468,10 @@ class ViHandler(ViHelper):
                         or char in ("_")):
                     pos = pos + offset
                     char = self.GetUnichrAt(pos + offset)
+
+        # We need to correct the position if using a unicode character
+        if len(bytes(char)) > 2:
+            pos = self.ctrl.PositionAfter(pos)
  
         if pos != start_pos or recursion:
             self.GotoPosAndSave(pos)
