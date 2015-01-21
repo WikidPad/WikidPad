@@ -1,4 +1,5 @@
 import wx, wx.xrc
+import wx.lib.dialogs
 import SystemInfo
 from wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
 from collections import defaultdict
@@ -627,7 +628,13 @@ class ViHelper():
         if len(key_chain) > 1:
             return True
 
-	return False
+        try:
+            if "Ctrl" in key or "Alt" in key:   
+                return False
+        except TypeError:
+            pass
+
+        return True
 
     def NextKeyCommandCanBeMotion(self):
         """
@@ -1830,6 +1837,10 @@ class CmdParser():
 
             "inspect" : (self.Pass, self.StartInspection,
                         "Launch the wxPython inspection tool"),
+
+            "list-keybindings" : (self.Pass, self.ShowKeybindings,
+                        "Displays a list of the currently \
+                            loaded keybindings"),
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
@@ -1865,6 +1876,36 @@ class CmdParser():
     def StartInspection(self, args=None):
         import wx.lib.inspection
         wx.lib.inspection.InspectionTool().Show()
+
+    def ShowKeybindings(self, args=None):
+        # A quick and dirty way to view all currently registered vi
+	# keybindings and the functions they call
+
+        keys = self.ctrl.vi.keys
+
+        text = []
+
+        for mode in keys:
+            text.append("")
+            text.append("MODE: {0}".format(mode))
+
+            for binding in keys[mode]:
+                chain = " ".join([self.ctrl.vi.GetCharFromCode(i) 
+					for i in binding])
+
+                text.append("{0} : {1}".format(chain, 
+			keys[mode][binding][1][0].__name__))
+
+        text = "\n".join(text)
+
+        dlg = wx.lib.dialogs.ScrolledMessageDialog(
+		self.ctrl.presenter.getMainControl(), text, "Keybindings")
+
+        if dlg.ShowModal():
+            pass
+
+        dlg.Destroy()
+
     
     def SearchAndReplace(self, pattern, ignore_flags=False):
         """
