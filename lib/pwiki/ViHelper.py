@@ -1133,6 +1133,8 @@ class ViHelper():
             text = text.split("\n", 1)[0]
             text = text[:30]
 
+        self.ctrl.presenter.setTabTitleColour("BLUE")
+
         self.input_window.StartSearch(self.ctrl, self.input_search_history, text, forward)
 
 
@@ -1349,6 +1351,8 @@ class ViHelper():
                 initial_input = "{0}{1}".format(initial_input, self.ctrl.GetSelectedText())
             selection_range = self.ctrl.vi._GetSelectionRange()
 
+        self.ctrl.presenter.setTabTitleColour("RED")
+
         self.input_window.StartCmd(self.ctrl, self.input_cmd_history, 
                     initial_input, selection_range=selection_range, 
                             run_cmd=run_cmd)
@@ -1362,6 +1366,7 @@ class ViHelper():
         """
         Called when input dialog is closed
         """
+        self.ctrl.presenter.setTabTitleColour("BLACK")
         self.ctrl.presenter.getMainControl().windowLayouter.collapseWindow("vi input")
 
     def GotoSelectionStart(self):

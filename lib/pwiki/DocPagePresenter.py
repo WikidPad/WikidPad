@@ -589,4 +589,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         return wnd
 
 
+    def setTabTitleColour(self, colour):
+        self.getAUITabPage().text_colour = colour
+        self.getAUITabCtrl().Refresh()
+
 
