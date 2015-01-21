@@ -832,7 +832,7 @@ class AbstractWikiPage(DataCarryingPage):
         attributes inside of todo entries.
         """
         # Complicated version for compatibility with old language plugins
-        # TODO remove "property"-compatibility
+        # TODO 2.4 remove "property"-compatibility
         return Utilities.iterMergesort((
                 pageAst.iterUnselectedDeepByName("attribute",
                 frozenset(("todoEntry",))),

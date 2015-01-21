@@ -195,6 +195,8 @@ class FilePasteParams:
         self.bracketedUrl = True
 
         self.unifActionName = None  # Unified name of the action to do 
+        self.defaultUnifActionName = None  # If action is ask, this is the default
+                # to show in dialog
 #         self.actionParamDict = None  # Parameter dict of action
 
 
@@ -211,10 +213,24 @@ class FilePasteParams:
                 "editor_filePaste_suffix", u""))
         self.bracketedUrl = config.getboolean("main",
                 "editor_filePaste_bracketedUrl", True)
+        self.defaultUnifActionName = \
+                "action/editor/this/paste/files/insert/url/absolute"
+#                 config.get("main",
+#                 "editor_filePaste_dialog_default",
+#                 "action/editor/this/paste/files/insert/url/absolute")
 
 
 
 class FilePasteDialog(wx.Dialog, ModalDialogMixin):
+    
+    _ACTIONSEL_TO_UNIFNAME = (
+            u"action/editor/this/paste/files/insert/url/absolute",
+            u"action/editor/this/paste/files/insert/url/relative",
+            u"action/editor/this/paste/files/insert/url/tostorage",
+            u"action/editor/this/paste/files/insert/url/movetostorage"
+        )
+
+    
     def __init__(self, pWiki, ID, filepastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
@@ -233,6 +249,12 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.tfEditorFilePasteMiddle.SetValue(filepastesaver.rawMiddle)
         self.ctrls.tfEditorFilePasteSuffix.SetValue(filepastesaver.rawSuffix)
         self.ctrls.cbEditorFilePasteBracketedUrl.SetValue(filepastesaver.bracketedUrl)
+        
+        try:
+            self.ctrls.chEditorFilePasteOperation.SetSelection(
+                    self._ACTIONSEL_TO_UNIFNAME.index(filepastesaver.defaultUnifActionName))
+        except ValueError:
+            pass
 
         self.filepastesaver = None
 
@@ -248,13 +270,6 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
     def GetValue(self):
         return self.filepastesaver
 
-
-    _ACTIONSEL_TO_UNIFNAME = {
-            0: u"action/editor/this/paste/files/insert/url/absolute",
-            1: u"action/editor/this/paste/files/insert/url/relative",
-            2: u"action/editor/this/paste/files/insert/url/tostorage",
-            3: u"action/editor/this/paste/files/insert/url/movetostorage"
-        }
 
     def OnOk(self, evt):
         try:

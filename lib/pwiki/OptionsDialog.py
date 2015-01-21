@@ -502,6 +502,15 @@ class OptionsDialog(wx.Dialog):
             ("editor_filePaste_middle", "tfEditorFilePasteMiddle", "tes"),
             ("editor_filePaste_suffix", "tfEditorFilePasteSuffix", "tes"),
             ("editor_filePaste_bracketedUrl", "cbEditorFilePasteBracketedUrl", "b"),
+            ("userEvent_event/paste/editor/files", "chEditorFilePaste", "selt",
+                    [
+                    u"action/none",
+                    u"action/editor/this/paste/files/insert/url/absolute",
+                    u"action/editor/this/paste/files/insert/url/relative",
+                    u"action/editor/this/paste/files/insert/url/tostorage",
+                    u"action/editor/this/paste/files/insert/url/movetostorage",
+                    u"action/editor/this/paste/files/insert/url/ask"
+                    ]),
 
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0",
                     "btnSelectEditorPlaintextColor"),

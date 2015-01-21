@@ -443,12 +443,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
             copyTextToClipboard(text)
 
     def Paste(self):
-        # Text pasted?
-        text = getTextFromClipboard()
-        if text:
-            self.ReplaceSelection(text)
-            return True
-
         # File(name)s pasted?
         filenames = wxHelper.getFilesFromClipboard()
         if filenames is not None:
@@ -458,8 +452,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     "x": -1, "y": -1, "main control": mc,
                     "processDirectly": True}
 
-            mc.getUserActionCoord().runAction(
-                    u"action/editor/this/paste/files/insert/url/ask", paramDict)
+#             mc.getUserActionCoord().runAction(
+#                     u"action/editor/this/paste/files/insert/url/ask", paramDict)
+
+            mc.getUserActionCoord().reactOnUserEvent(
+                    u"event/paste/editor/files", paramDict)
 
             return True
 
@@ -498,19 +495,25 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.ReplaceSelection(url)
             return True
 
-        if not WindowsHacks:
-            return False
+        if WindowsHacks:
 
-        # Windows Meta File pasted?
-        destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
-        if destPath is not None:
-            url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
+            # Windows Meta File pasted?
+            destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
+            if destPath is not None:
+                url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
+    
+                if url is None:
+                    url = u"file:" + StringOps.urlFromPathname(destPath)
+    
+                self.ReplaceSelection(url)
+                return True
 
-            if url is None:
-                url = u"file:" + StringOps.urlFromPathname(destPath)
-
-            self.ReplaceSelection(url)
+        # Text pasted?
+        text = getTextFromClipboard()
+        if text:
+            self.ReplaceSelection(text)
             return True
+
 
         return False
 

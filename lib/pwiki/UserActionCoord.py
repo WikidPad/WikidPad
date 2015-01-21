@@ -182,7 +182,8 @@ class UserActionCoord(object):
             "mouse/middleclick/pagetab",
             "mouse/leftdrop/editor/files",
             "mouse/leftdrop/editor/files/modkeys/shift",
-            "mouse/leftdrop/editor/files/modkeys/ctrl"
+            "mouse/leftdrop/editor/files/modkeys/ctrl",
+            "event/paste/editor/files"
             )
 
     def applyConfiguration(self):
