@@ -797,7 +797,12 @@ if ((typeof jQuery !== 'undefined')) {
             #    self.addZoom(-1)
             #elif evt.direction == gtk.gdk.SCROLL_DOWN:
             #    self.addZoom(1)
-            self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
+            scrollUpZoom = evt.GetWheelRotation() // evt.GetWheelDelta()
+            if self.presenter.getConfig().getboolean(
+                    "main", "mouse_reverseWheelZoom", False):
+                scrollUpZoom = -scrollUpZoom
+            
+            self.addZoom(scrollUpZoom)
 
 
 

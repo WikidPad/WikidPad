@@ -21,6 +21,8 @@ from .WindowLayout import LayeredControlPresenter, LayerSizer, StorablePerspecti
 
 from .PageHistory import PageHistory
 
+from . import pygauge as PG
+
 
 
 class BasicDocPagePresenter(LayeredControlPresenter):
@@ -368,6 +370,9 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         # which element was selected if same page appears multiple
         # times in tree. DocPagePresenter class itself does not modify it.
 
+        self.tabProgressBar = None
+        self.tabProgressCount = {}
+
         wx.GetApp().getMiscEvent().addListener(self)
 
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
@@ -544,6 +549,92 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         self.switchSubControl("textedit")
     
 
+    def getAUITabCtrl(self):
+        return self.getMainControl().mainAreaPanel.getTabCtrlByPresenter(self)
+
+
+    def getAUITabPage(self):
+        pIndex = self.getMainControl().mainAreaPanel.getIndexForPresenter(self)
+
+        return self.getMainControl().mainAreaPanel.GetPageInfo(pIndex)
+        #tabCtrl = self.getAUITabCtrl()
+        #return tabCtrl.GetPage(tabCtrl.GetActivePageIdx())
+
+    def setTabTitleColour(self, colour):
+        self.getAUITabPage().text_colour = colour
+        self.getAUITabCtrl().Refresh()
+
+
+    def setTabProgressThreadSafe(self, percent, thread, colour=wx.GREEN):
+        try:
+            thread.testValidThread()
+            wx.CallAfter(self.setTabProgress, percent, thread, colour)
+        except NotCurrentThreadException:
+            return
+
+
+    def onProgressBarClicked(self, evt):
+        # Activate tab that is clicked on
+        self.getMainControl().mainAreaPanel.showPresenter(self)
+
+
+    def onProgressBarContext(self, evt):
+        self.getMainControl().mainAreaPanel.OnTabContextMenu(evt, self)
+
+
+    def setTabProgress(self, percent, thread="page", colour=None):
+        try:
+            if thread in self.tabProgressCount:
+                colour = self.tabProgressCount[thread][0]
+
+            if percent == 0:
+                self.tabProgressCount[thread] = (colour, percent)
+            else:
+                if thread not in self.tabProgressCount:
+                    return
+
+            if percent == 100:
+                del self.tabProgressCount[thread]
+
+            if self.getAUITabCtrl() is None:
+                return
+
+            if self.tabProgressBar is None:
+                self.tabProgressBar = PG.PyGauge(self.getAUITabCtrl(), -1, size=(40, 15), style=wx.GA_HORIZONTAL) 
+                # Use EVT_CHILD_FOCUS to detect when the progress bar is 
+                # clicked on as no click event seems to be emitted
+                self.tabProgressBar.Bind(wx.EVT_CHILD_FOCUS, 
+                                                self.onProgressBarClicked)
+                self.tabProgressBar.Bind(wx.EVT_CONTEXT_MENU, 
+                                                self.onProgressBarContext)
+
+            if percent == 100:
+                if len(self.tabProgressCount) < 1:
+                    self.tabProgressBar.Hide()
+                    self.getAUITabPage().control = None
+                    self.getAUITabCtrl().Refresh()
+                    return
+                else:
+                    for thread in self.tabProgressCount:
+                        colour, percent = self.tabProgressCount[thread]
+                        break
+
+            if self.getAUITabPage().control is None:
+                self.getAUITabPage().control = self.tabProgressBar
+            self.tabProgressBar.SetValue(percent)
+
+            self.tabProgressBar.SetBarColour(colour)
+            self.tabProgressBar.SetBorderColour(wx.BLACK)
+
+            self.getAUITabCtrl().Refresh()
+        except wx.PyDeadObjectError:
+            pass
+
+
+
+
+
+
 # ----- Implementation of StorablePerspective methods -----
 
 
@@ -589,8 +680,5 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         return wnd
 
 
-    def setTabTitleColour(self, colour):
-        self.getAUITabPage().text_colour = colour
-        self.getAUITabCtrl().Refresh()
 
 
