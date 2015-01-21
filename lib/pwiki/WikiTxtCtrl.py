@@ -398,7 +398,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         wx.EVT_MENU(self, GUI_ID.CMD_SELECT_TEMPLATE, self.OnSelectTemplate)
 
-
+    # 2.8 does not support SetEditable - Define a dummy function for now
+    if wx.version().startswith("2.8"):
+        def SetEditable(self, state):
+            pass
 
 #     def __getattr__(self, attr):
 #         return getattr(self.cnt, attr)
