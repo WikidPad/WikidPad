@@ -3982,7 +3982,7 @@ class AuiNotebook(wx.PyPanel):
         self._tabs.MakeTabVisible(indx, self)
 
 
-    def SetSelection(self, new_page, force=False):
+    def SetSelection(self, new_page, force=False, changeFocus=True):
         """
         Sets the page selection. Calling this method will generate a page change event.
 
@@ -4004,9 +4004,10 @@ class AuiNotebook(wx.PyPanel):
         # however, clicking again on a tab should give it the focus.
         if new_page == self._curpage and not force:
             
-            ctrl, ctrl_idx = self.FindTab(wnd)
-            if wx.Window.FindFocus() != ctrl:
-                ctrl.SetFocus()
+            if changeFocus:
+                ctrl, ctrl_idx = self.FindTab(wnd)
+                if wx.Window.FindFocus() != ctrl:
+                    ctrl.SetFocus()
 
             return self._curpage
 
@@ -4051,7 +4052,8 @@ class AuiNotebook(wx.PyPanel):
 
                 # Set the focus to the page if we're not currently focused on the tab.
                 # This is Firefox-like behaviour.
-                if wnd.IsShownOnScreen() and wx.Window.FindFocus() != ctrl:
+                if changeFocus and wnd.IsShownOnScreen() and \
+                        wx.Window.FindFocus() != ctrl:
                     wnd.SetFocus()
                     
                 # Inform that page changed

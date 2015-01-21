@@ -400,7 +400,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         """
         i = self.getIndexForPresenter(currentPresenter)
         if i != wx.NOT_FOUND:
-            self.SetSelection(i)
+            self.SetSelection(i, changeFocus=False)
 
 
     def getCurrentPresenterProxyEvent(self):
