@@ -27,14 +27,28 @@ from .TempFileSet import TempFileSet
 
 from . import PluginManager
 
-
-# Try and load webkit renderer
+# Try and load the html2 webview renderer
 try:
-    import WikiHtmlViewWK
-except:
-    import ExceptionLogger
-    ExceptionLogger.logOptionalComponentException("Initialize webkit HTML renderer")
     WikiHtmlViewWK = None
+    if wx.version().startswith(("2.9", "3")):
+        import WikiHtmlView2
+    else:
+        WikiHtmlView2 = None
+
+        try:
+            import WikiHtmlViewWK
+        except:
+            WikiHtmlViewWK = None
+            import ExceptionLogger
+            ExceptionLogger.logOptionalComponentException("Initialize webkit HTML renderer")
+            
+
+except:
+#         traceback.print_exc()
+    WikiHtmlView2 = None
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException("Initialize webkit HTML2 renderer")
+
 
 
 # Try and load Windows IE renderer
@@ -78,8 +92,11 @@ def createWikiHtmlView(presenter, parent, ID):
         config.saveGlobalConfig()
         return hvIe
         
-    if WikiHtmlViewWK and pvRenderer == 3:
+    elif WikiHtmlViewWK and pvRenderer == 3:
         return WikiHtmlViewWK.WikiHtmlViewWK(presenter, parent, ID)
+
+    elif WikiHtmlView2 and pvRenderer == 4:
+        return WikiHtmlView2.WikiHtmlView2(presenter, parent, ID)
 
     # Internal preview if nothing else wanted or possible
     return WikiHtmlView(presenter, parent, ID)

@@ -887,6 +887,10 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webkit"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(3)
 
+        if WikiHtmlView.WikiHtmlView2 is not None:
+            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webview"))
+            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(4)
+
         self.ctrls.chHtmlPreviewRenderer.Enable(
                 len(self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData) > 1)
 
