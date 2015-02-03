@@ -204,6 +204,9 @@ If checked, each time you paste an image, a dialog box asks for the above settin
 
 ++++ File dropping
 
+*Action on paste*
+What to do when pasting files into WikidPad. You can select if you want to insert the absolute or relative URL or if the file should be copied or moved to the FileStorage (a relative URL is always shown in this case). You can also choose to be asked on every insert.
+
 *Prepend before links*
 *Between links*
 *Append after links*
@@ -272,6 +275,9 @@ Enter here the path to a script or program which takes the path or URL of a file
 
 
 +++ Mouse
+
+*Reverse wheel zoom*
+When holding CTRL and using mouse wheel in editor or preview the font size is changed. With this switch you can choose which wheel direction zooms in or out.
 
 *Middle button without CTRL*
 Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background, in the same (active) tab or in a new window.

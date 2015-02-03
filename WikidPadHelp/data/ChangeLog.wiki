@@ -1,6 +1,42 @@
 ﻿++ Change Log
 
 
+Feb. 03, 2015 (2.3beta13)
+
+    * Added option what to do on file paste into editor.
+      See [OptionsDialog#*Action on paste*]
+    * Default direction of mouse wheel zoom reversed, option added
+      to switch back to previous behavior.
+      See [OptionsDialog#*Reverse wheel zoom*]
+
+    * Updated whoosh library (index search) to version 2.5.6
+      (background update may need a while before index works
+      correctly)
+
+    * Vi (thanks to Ross):
+
+        * add list-keybindings cmd - a quick way to view the currently
+          registered keybindings
+        * rewrite a bit of autocomplete code (also fix a number of
+          bounds in motion commands)
+        * highlight active tab when searching or entering a : cmd
+
+        * fix keychain modifier bug
+        * fix small bug when multiple spaces are used in : cmds
+        * Proper fix for starting : cmds when in visual mode
+        * Fix a number of bugs with vi autocomplete. Also add support
+          for autocompleting relative paths
+
+    * Selecting wiki page in tree no longer automatically switches
+      focus from tree to editor/preview
+
+    * Bug fixed: For some wxPython versions radio button grouping on
+      tab "Set page list" of wiki-wide search failed
+    * Bug fixed: Renaming of linked files didn't work
+    * Bug fixed: Editor didn't work after creating new wiki
+
+
+
 Feb. 15, 2014 (2.3beta12)
 
     * Speedup processing of "Views" node in tree (faster opening
