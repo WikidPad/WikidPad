@@ -1,4 +1,4 @@
-#encoding: utf8
+#encoding: utf-8
 
 """
 This module contains quasi-phonetic encoders for words in different languages.
@@ -6,10 +6,13 @@ This module contains quasi-phonetic encoders for words in different languages.
 
 import re
 
+from whoosh.compat import iteritems
+
 # This soundex implementation is adapted from the recipe here:
 # http://code.activestate.com/recipes/52213/
 
 english_codes = '01230120022455012623010202'
+
 
 def soundex_en(word):
     # digits holds the soundex values for the alphabet
@@ -20,14 +23,15 @@ def soundex_en(word):
         prevcode = None
         for char in word.lower():
             c = ord(char)
-            if c >= 97 and c <= 122: # a-z
-                if not fc: fc = char
+            if c >= 97 and c <= 122:  # a-z
+                if not fc:
+                    fc = char
                 code = english_codes[c - 97]
                 # Don't append the code if it's the same as the previous
                 if code != prevcode:
                     r += code
                 prevcode = code
-        
+
         # Replace first digit with first alpha character
         r = fc + r[1:]
 
@@ -48,12 +52,13 @@ _esp_codes = (("\\Aw?[uh]?([aeiou])", ""),
               ("v", "b"),
               ("d$", "t"), # Change a trailing d to a t
               )
-_esp_codes = tuple((re.compile(pat), repl) for pat, repl in _esp_codes)    
+_esp_codes = tuple((re.compile(pat), repl) for pat, repl in _esp_codes)
+
 
 def soundex_esp(word):
     word = word.lower()
     r = ""
-    
+
     prevcode = None
     i = 0
     while i < len(word):
@@ -64,17 +69,17 @@ def soundex_esp(word):
                 i = match.end()
                 code = ecode
                 break
-                
+
         if code is None:
             code = word[i]
             i += 1
-        
+
         if code != prevcode:
             r += code
         prevcode = code
-    
+
     return r
- 
+
 
 # This version of soundex for Arabic is translated to Python from Tammam
 # Koujan's C# version here:
@@ -82,21 +87,22 @@ def soundex_esp(word):
 
 # Create a dictionary mapping arabic characters to digits
 _arabic_codes = {}
-for chars, code in {'\u0627\u0623\u0625\u0622\u062d\u062e\u0647\u0639\u063a\u0634\u0648\u064a': "0",
+for chars, code in iteritems({'\u0627\u0623\u0625\u0622\u062d\u062e\u0647\u0639\u063a\u0634\u0648\u064a': "0",
                     '\u0641\u0628': "1",
                     '\u062c\u0632\u0633\u0635\u0638\u0642\u0643': "2",
                     '\u062a\u062b\u062f\u0630\u0636\u0637': "3",
                     '\u0644': "4",
                     '\u0645\u0646': "5",
                     '\u0631': "6",
-                    }.iteritems():
+                    }):
     for char in chars:
         _arabic_codes[char] = code
+
 
 def soundex_ar(word):
     if word[0] in "\u0627\u0623\u0625\u0622":
         word = word[1:]
-    
+
     r = "0"
     prevcode = "0"
     if len(word) > 1:
@@ -111,7 +117,3 @@ def soundex_ar(word):
                     r += code
             prevcode = code
     return r
-
-if __name__ == "__main__":
-    print soundex_esp("solidad")
-    
