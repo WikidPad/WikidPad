@@ -3033,7 +3033,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiConfig.save()
 
                     self.closeWiki()
-                    
+
                     # open the new wiki
                     self.openWiki(configFileLoc)
                     p = self.wikiDataManager.createWikiPage(wikiName)
@@ -3057,7 +3057,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     
                     # trigger hook
                     self.hooks.createdWiki(self, wikiName, wikiDir)
-    
+
                     # open the homepage
                     self.openWikiPage(self.wikiName, False, False)
 
@@ -3413,9 +3413,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         targetPresenter = self.getMainAreaPanel().getPresenters()[0]
                         if targetPresenter.hasSubControl(wwo[0][1]):
                             targetPresenter.switchSubControl(wwo[0][1])
-    #                 else:
-    #                     self.openWikiPage(self.wikiName)
-        
+                    else:
+                        self.openWikiPage(self.wikiName)
+
                     # If present, open further words in tabs on the right
                     for word, subCtrl in wwo[1:]:
                         targetPresenter = self.activatePageByUnifiedName(
@@ -4662,9 +4662,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 validWikiWord = langHelper.resolveWikiWordLink(
                         validWikiLinkCore, self.getCurrentDocPage())
 
-#                 print "--showReplaceTextByWikiwordDialog23", repr((validWikiLinkCore, langHelper.resolveWikiWordLink(validWikiLinkCore,
-#                             self.getCurrentDocPage())))
-
                 knownWikiWord = self.getWikiDocument()\
                         .getWikiPageNameForLinkTerm(validWikiWord)
 
@@ -4698,9 +4695,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 page = self.wikiDataManager.getWikiPage(validWikiWord)
                 page.appendLiveText(u"\n\n" + text)
 
-
-#             print "--showReplaceTextByWikiwordDialog34", repr((validWikiWord, langHelper.createLinkFromWikiWord(validWikiWord,
-#                     self.getCurrentDocPage())))
             self.getActiveEditor().ReplaceSelection(
                     langHelper.createLinkFromWikiWord(validWikiWord,
                     self.getCurrentDocPage(), forceAbsolute=absoluteLink))
@@ -5348,7 +5342,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def _updateStatusBarByStack(self):
-#         print "--_updateStatusBarByStack1", repr((wx.Thread_IsMain(), wx.GetApp().IsMainLoopRunning()))
         try:
             if not wx.GetApp().IsMainLoopRunning():
                 return

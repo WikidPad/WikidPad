@@ -871,6 +871,9 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
 
         self.visible = vis
         
+    def getLayerVisible(self):
+        return self.visible
+        
     def close(self):
         for c in frozenset(self.subControls.values()): # Same control may appear
                             # multiple times

@@ -494,29 +494,45 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         self.updateConfig()
 
 
-    def _closeAllButCurrentTab(self):
+#     def _closeAllButCurrentTab(self):
+#         """
+#         Close all tabs except the current one.
+#         """
+#         current = self.currentPresenter
+#         if current is None:
+#             return
+# 
+#         if not isinstance(current, BasicDocPagePresenter):
+#             # Current presenter is not a doc page one, so take first doc page
+#             # presenter instead
+#             current = self.getDocPagePresenters()[0]
+# 
+#         # Loop over copy of the presenter list
+#         for presenter in self.getPresenters():
+# #             if isinstance(presenter, BasicDocPagePresenter) and \
+# #                     len(self.getDocPagePresenters()) < 2:
+# #                 # At least one DPP tab must stay
+# #                 return
+#             if presenter is current:
+#                 continue
+# 
+#             self.closePresenterTab(presenter)
+
+    def _closeAllTabs(self):
         """
-        Close all tabs except the current one.
+        Close all tabs.
         """
-        current = self.currentPresenter
-        if current is None:
-            return
-
-        if not isinstance(current, BasicDocPagePresenter):
-            # Current presenter is not a doc page one, so take first doc page
-            # presenter instead
-            current = self.getDocPagePresenters()[0]
-
-        # Loop over copy of the presenter list
-        for presenter in self.getPresenters():
-#             if isinstance(presenter, BasicDocPagePresenter) and \
-#                     len(self.getDocPagePresenters()) < 2:
-#                 # At least one DPP tab must stay
-#                 return
-            if presenter is current:
-                continue
-
-            self.closePresenterTab(presenter)
+        
+        for idx in range(self.GetPageCount() - 1, -1, -1):
+            presenter = self.GetPage(idx)
+            presenter.close()
+            self.DeletePage(idx)
+            
+        self._mruTabWindowClear()
+        
+        self.currentPresenter = None
+        proxyEvent = self.getCurrentPresenterProxyEvent()
+        proxyEvent.setWatchedEvent(None)
 
 
     def switchDocPagePresenterTabEditorPreview(self, presenter):
@@ -651,6 +667,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         except ValueError:
             return self._mruTabSequence[-1]
 
+    def _mruTabWindowClear(self):
+        self._mruTabSequence.clear()
+        
+
 
     def OnGoTab(self, evt):
         pageCount = self.GetPageCount()
@@ -762,7 +782,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         elif miscevt.getSource() is self.mainControl:
             if miscevt.has_key("closed current wiki"):
-                self._closeAllButCurrentTab()
+                # self._closeAllButCurrentTab()
+                self._closeAllTabs()
 
 
 # ----- Implementation of StorablePerspective methods -----

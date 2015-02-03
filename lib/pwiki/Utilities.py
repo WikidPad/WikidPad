@@ -789,6 +789,9 @@ class IdentityList(list):
             return
 
         del self[idx]
+        
+    def clear(self):
+        del self[0:len(self)]
 
 
 def sgn(value):
