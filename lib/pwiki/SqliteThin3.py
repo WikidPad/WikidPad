@@ -141,32 +141,44 @@ def stdErrHandler(err):
     if not err in (SQLITE_OK, SQLITE_ROW, SQLITE_DONE):
         raise SqliteError3(err)
 
-
+def vpId(o):
+    """
+    Should be used instead of id(o) to avoid conversion problems
+    """
+    return c_void_p(id(o)).value
 
 # This dictionary holds python objects which can't be handled
 # as sqlite functions or function parameters directly
-_sqliteTransObjects = {}  # Dictionary of type {<id of object>: <object>}
+_sqliteTransObjects = {}  # Dictionary of type {<vpId of object>: <object>}
 
 
 def addTransObject(o):
     """
     Enters an arbitrary python object into the transfer
-    table and returns its id
+    table and returns its vpId (integer or long value unique for object during
+    its lifetime.
     """
-    if type(o) is int:
-        return None  # TODO Other reaction?
+#     if type(o) is int:
+#         return None  # TODO Other reaction?
 
-    _sqliteTransObjects[id(o)] = o
-    return id(o)
+    result = vpId(o)
+    _sqliteTransObjects[result] = o
+    return result
 
 
 def getTransObject(i):
     return _sqliteTransObjects.get(i, None)
 
 
-def delTransObject(io):
-    if not type(io) is int:
-        io = id(io)
+def delTransObject(o):
+    """
+    Delete object o from transfer table. If it wasn't in the table nothing
+    happens.
+    
+    Neither refcounting nor other thread safety measures are used!
+    """
+#     if not type(io) is int:
+    io = vpId(o)
     
     try:
         del _sqliteTransObjects[io]
@@ -625,17 +637,17 @@ class SqliteDb3:
     
     def errmsg(self):
         """
-        Return English error message for last recent API call (in UTF8)
+        Return English error message for most recent API call (in UTF8)
         """
         return _dll.sqlite3_errmsg(self._dbpointer)
    
    
     # TODO Support deletion
     def create_function(self, funcname, nArg, func, textRep=SQLITE_UTF8):
-        _sqliteTransObjects[id(func)] = func
+        _sqliteTransObjects[vpId(func)] = func
         # TODO returns int
         self.errhandler(_dll.sqlite3_create_function(self._dbpointer, 
-                funcname, c_int(nArg), c_int(textRep), c_uint(id(func)),
+                funcname, c_int(nArg), c_int(textRep), c_void_p(id(func)),
                 _FUNC_CALLBACK, None, None))
 
 
@@ -785,7 +797,9 @@ del %s
 # void (*xFunc)(sqlite3_context*,int,sqlite3_value**)
 FUNC_CALLBACK_TYPE = CFUNCTYPE(None, c_void_p, c_int, POINTER(c_void_p))
 
-_dll.sqlite3_user_data.restype = c_uint
+_dll.sqlite3_user_data.restype = c_void_p
+
+
 
 def _pyFuncCallback(contextptr, nValues, valueptrptr):
     realfunc = _sqliteTransObjects[_dll.sqlite3_user_data(c_void_p(contextptr))]
