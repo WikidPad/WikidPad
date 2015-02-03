@@ -100,7 +100,7 @@ SEARCHTYPE_INDEX = 3
 
 # Version number of the current searchindex. If number doesn't match with
 # number in configuration file, index must be rebuild
-SEARCHINDEX_FORMAT_NO = 3
+SEARCHINDEX_FORMAT_NO = 4
 
 
 

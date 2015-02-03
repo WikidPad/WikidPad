@@ -305,7 +305,8 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
                                     continue
     
                                 html, firstPos = sarOp.highlightWhooshIndexFound(
-                                        text, docPage, before, after)
+                                        text, docPage, context * 2 + 30,
+                                        context // 2)
                                 
                                 info = _SearchResultItemInfo(w, occPos=(firstPos, firstPos))
                                 info.setHtmlDirectly(html)

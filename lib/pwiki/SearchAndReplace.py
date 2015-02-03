@@ -1161,6 +1161,53 @@ class TodoNode(AbstractContentSearchNode):
 
 
 
+
+# ----------------------------------------------------------------------
+
+
+# Special whoosh formatter class
+class SimpleHtmlFormatter(object):
+    """Returns a string in which the matched terms are enclosed in <b></b>.
+    """
+    
+    def __init__(self, between=u"... "):
+        """
+        :param between: the text to add between fragments.
+        """
+        self.between = between
+        self.firstPos = -1
+        
+    def _format_fragment(self, text, fragment):
+        from pwiki.StringOps import escapeHtml as htmlescape
+
+        output = []
+        index = fragment.startchar
+        
+        for t in fragment.matches:
+            if t.startchar > index:
+                output.append(htmlescape(text[index:t.startchar]))
+
+            ttxt = htmlescape(text[t.startchar:t.endchar])
+            if t.matched:
+                ttxt = "<b>%s</b>" % ttxt
+                if self.firstPos == -1:
+                    self.firstPos = t.startchar
+                else:
+                    self.firstPos = min(self.firstPos, t.startchar)
+
+            output.append(ttxt)
+            index = t.endchar
+        
+        output.append(htmlescape(text[index:fragment.endchar]))
+        return u"".join(output)
+
+    def __call__(self, text, fragments):
+        return self.between.join([self._format_fragment(text, fragment)
+                                  for fragment in fragments]), self.firstPos
+
+
+
+
 # ----------------------------------------------------------------------
 
 
@@ -1756,7 +1803,7 @@ class SearchReplaceOperation:
         return self.indexSearch == "default"
 
 
-    def highlightWhooshIndexFound(self, content, docPage, before, after,
+    def highlightWhooshIndexFound(self, content, docPage, maxchars, surround,
             formatter=None):
         """
         Retrieve formatted output with highlighted search hits for a page.
@@ -1777,11 +1824,10 @@ class SearchReplaceOperation:
         analyzer = docPage.getWikiDocument().getWhooshIndexContentAnalyzer()
         
         # TODO: Length of before and after from config
-        fragmenter = highlight.ContextFragmenter(terms, (before + after) * 2,
-                before, after)
+        fragmenter = highlight.ContextFragmenter(maxchars, surround)
 
         if formatter is None:
-            formatter = highlight.SimpleHtmlFormatter()
+            formatter = SimpleHtmlFormatter()
         
         return highlight.highlight(content, terms, analyzer,
                      fragmenter, formatter, top=1)
