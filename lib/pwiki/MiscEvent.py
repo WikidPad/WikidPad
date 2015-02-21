@@ -360,6 +360,7 @@ class MiscEvent(object):
                     # deleted already, so remove object from listener list.
                     self.listenerList.invalidateObjectAt(i)
                 except:
+                    traceback.print_stack()
                     traceback.print_exc()
 
                 i += 1

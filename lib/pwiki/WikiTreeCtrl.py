@@ -1413,6 +1413,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.__sinkMc = wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
                 ("closing current wiki", self.onClosingCurrentWiki),
+                ("dropping current wiki", self.onClosingCurrentWiki),
                 ("closed current wiki", self.onClosedCurrentWiki),
                 ("changed current presenter",
                     self.onChangedPresenter)
@@ -1518,17 +1519,21 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         else:
         currentNode = self.GetSelection()
         currentWikiWord = self.pWiki.getCurrentWikiWord()
+        if currentWikiWord is None:
+            self.Unselect()
+            return
+
         currentDpp = self.pWiki.getCurrentDocPagePresenter()
         if currentNode is not None and currentNode.IsOk():
             node = self.GetPyData(currentNode)
             if node.representsWikiWord():                    
                 if self.pWiki.getWikiDocument()\
                         .getWikiPageNameForLinkTermOrAsIs(node.getWikiWord()) ==\
-                        currentWikiWord and currentWikiWord is not None:
+                        currentWikiWord:  #  and currentWikiWord is not None:
                     return  # Is already on word -> nothing to do
-                if currentWikiWord is None:
-                    self.Unselect()
-                    return
+#                 if currentWikiWord is None:
+#                     self.Unselect()
+#                     return
             if node.representsFamilyWikiWord():
                 # If we know the motionType, tree selection can be moved smart
                 motionType = miscevt.get("motionType", "random")
@@ -1658,6 +1663,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def _startBackgroundRefresh(self):
         if self.refreshStartLock:
             return
+            
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
         self.Bind(wx.EVT_IDLE, self.OnIdle)
