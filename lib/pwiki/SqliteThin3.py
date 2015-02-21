@@ -143,25 +143,35 @@ def stdErrHandler(err):
 
 def vpId(o):
     """
-    Should be used instead of id(o) to avoid conversion problems
+    Should be used only internally here
     """
     return c_void_p(id(o)).value
+    
+    
+def llId(o):
+    """
+    Should be used instead of id(o) to avoid conversion problems.
+    Returns a long value guaranteed to fit into signed long long 64bit data type.
+    (At least until 128bit CPUs are used :-) )
+    """
+    return c_longlong(id(o)).value
+    
 
 # This dictionary holds python objects which can't be handled
 # as sqlite functions or function parameters directly
-_sqliteTransObjects = {}  # Dictionary of type {<vpId of object>: <object>}
+_sqliteTransObjects = {}  # Dictionary of type {<llId or vpId of object>: <object>}
 
 
 def addTransObject(o):
     """
     Enters an arbitrary python object into the transfer
-    table and returns its vpId (integer or long value unique for object during
-    its lifetime.
+    table and returns its llId (long value unique for object during
+    its lifetime).
     """
 #     if type(o) is int:
 #         return None  # TODO Other reaction?
 
-    result = vpId(o)
+    result = llId(o)
     _sqliteTransObjects[result] = o
     return result
 
@@ -178,7 +188,7 @@ def delTransObject(o):
     Neither refcounting nor other thread safety measures are used!
     """
 #     if not type(io) is int:
-    io = vpId(o)
+    io = llId(o)
     
     try:
         del _sqliteTransObjects[io]
@@ -644,7 +654,7 @@ class SqliteDb3:
    
     # TODO Support deletion
     def create_function(self, funcname, nArg, func, textRep=SQLITE_UTF8):
-        _sqliteTransObjects[vpId(func)] = func
+        _sqliteTransObjects[c_void_p(id(func)).value] = func
         # TODO returns int
         self.errhandler(_dll.sqlite3_create_function(self._dbpointer, 
                 funcname, c_int(nArg), c_int(textRep), c_void_p(id(func)),
@@ -773,25 +783,27 @@ class _Value:
 # The remaining value functions are created by this template
 
 for restype, fctname in (
-        (c_int, "value_bytes"),
-        (c_int, "value_bytes16"),
-        (c_double, "value_double"),
-        (c_int, "value_int"),
-        (c_longlong, "value_int64"),
-        (c_int, "value_type") ):
+        ("c_int", "value_bytes"),
+        ("c_int", "value_bytes16"),
+        ("c_double", "value_double"),
+        ("c_int", "value_int"),
+        ("c_longlong", "value_int64"),
+        ("c_int", "value_type") ):
 
 
     exec """
 
-def %s(self):
+def {1}(self):
     "Retrieve a value from a user-defined function"
-    return _dll.sqlite3_%s(self._valuepointer)  # .value ?
+    return _dll.sqlite3_{1}(self._valuepointer)  # .value ?
 
-_Value.%s = %s
+_Value.{1} = {1}
 
-del %s
+del {1}
 
-""" % (fctname, fctname, fctname, fctname, fctname)
+_dll.sqlite3_{1}.restype = {0}
+
+""".format(restype, fctname)
 
 
 # void (*xFunc)(sqlite3_context*,int,sqlite3_value**)
