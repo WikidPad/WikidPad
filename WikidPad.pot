@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2015-02-03 21:12\n"
+"POT-Creation-Date: 2015-02-21 23:55\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4815,11 +4815,11 @@ msgstr ""
 msgid "Add color attribute"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1997
+#: lib\pwiki\WikiTreeCtrl.py:2003
 msgid "Append Wiki Word"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:2012
+#: lib\pwiki\WikiTreeCtrl.py:2018
 msgid "Prepend Wiki Word"
 msgstr ""
 
