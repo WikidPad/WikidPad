@@ -731,7 +731,7 @@ GLOBALDEFAULTS = {
     ("main", "editor_margin_bg_color"): "",  # Background color of margins in the editor except fold margin
     ("main", "editor_caret_color"): "",  # Color of caret in the editor
 
-    # Clipboard catcher (Windows only)
+    # Clipboard catcher (some OS')
     ("main", "clipboardCatcher_prefix"): ur"",  # Prefix to prepend before each caught clipboard snippet
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
     ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)

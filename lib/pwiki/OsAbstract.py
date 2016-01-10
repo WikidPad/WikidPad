@@ -9,8 +9,7 @@ from . import SystemInfo
 from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, pathEnc
 
 
-# import WindowsHacks
-
+# WindowsHacks for some OS specials
 
 if SystemInfo.isWindows():
     try:
@@ -22,15 +21,14 @@ if SystemInfo.isWindows():
 else:
     WindowsHacks = None
 
-if SystemInfo.isWindows():
-    try:
-        import GtkHacks
-    except:
-        import ExceptionLogger
-        ExceptionLogger.logOptionalComponentException(
-                "Initialize GTK hacks in OsAbstract.py")
-        GtkHacks = None
-else:
+# GtkHacks for the Clipboard Catcher
+
+try:
+    import GtkHacks
+except:
+    import ExceptionLogger
+    ExceptionLogger.logOptionalComponentException(
+            "Initialize GTK hacks in OsAbstract.py")
     GtkHacks = None
 
 
