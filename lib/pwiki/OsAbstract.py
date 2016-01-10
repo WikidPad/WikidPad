@@ -11,19 +11,26 @@ from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, pathEnc
 
 # import WindowsHacks
 
-try:
-    import WindowsHacks
-except:
-    if SystemInfo.isWindows():
-        traceback.print_exc()
+
+if SystemInfo.isWindows():
+    try:
+        import WindowsHacks
+    except:
+        if SystemInfo.isWindows():
+            traceback.print_exc()
+        WindowsHacks = None
+else:
     WindowsHacks = None
 
-try:
-    import GtkHacks
-except:
-    import ExceptionLogger
-    ExceptionLogger.logOptionalComponentException(
-            "Initialize GTK hacks in OsAbstract.py")
+if SystemInfo.isWindows():
+    try:
+        import GtkHacks
+    except:
+        import ExceptionLogger
+        ExceptionLogger.logOptionalComponentException(
+                "Initialize GTK hacks in OsAbstract.py")
+        GtkHacks = None
+else:
     GtkHacks = None
 
 

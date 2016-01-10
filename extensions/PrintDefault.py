@@ -17,10 +17,14 @@ from pwiki import PluginManager
 
 from pwiki.StringOps import unescapeWithRe, urlFromPathname
 
+from pwiki import WikiHtmlView
 
-try:
-    from pwiki.WikiHtmlViewWK import WKHtmlWindow
-except:
+if WikiHtmlView.WikiHtmlViewWK is not None:
+    try:
+        from pwiki.WikiHtmlViewWK import WKHtmlWindow
+    except:
+        WKHtmlWindow = None
+else:
     WKHtmlWindow = None
 
 
