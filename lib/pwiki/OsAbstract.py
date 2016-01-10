@@ -37,7 +37,7 @@ if SystemInfo.isWindows():
 else:
     def startFile(mainControl, link):
         # We need mainControl only for this version of startFile()
-        
+
         startPath = mainControl.getConfig().get("main", "fileLauncher_path", u"")
         if startPath == u"":
             wx.LaunchDefaultBrowser(link)
@@ -55,7 +55,7 @@ if SystemInfo.isWinNT() and WindowsHacks:
     moveFile = WindowsHacks.moveFile
     deleteFile = WindowsHacks.deleteFile
 else:
-    # TODO Mac version    
+    # TODO Mac version
     def copyFile(srcPath, dstPath):
         """
         Copy file from srcPath to dstPath. dstPath may be overwritten if
@@ -65,10 +65,10 @@ else:
         This currently just calls shutil.copy2() TODO!
         """
         dstDir = os.path.dirname(dstPath)
-            
+
         if not os.path.exists(pathEnc(dstDir)):
             os.makedirs(dstDir)
-    
+
         shutil.copy2(srcPath, dstPath)
 
     def moveFile(srcPath, dstPath):
@@ -77,11 +77,11 @@ else:
         existing already. dstPath must point to a file, not a directory.
         If some directories in dstPath do not exist, they are created.
         """
-        dstDir = os.path.dirname(dstPath)        
-    
+        dstDir = os.path.dirname(dstPath)
+
         if not os.path.exists(pathEnc(dstDir)):
             os.makedirs(dstDir)
-    
+
         shutil.move(srcPath, dstPath)
 
 
@@ -105,7 +105,7 @@ if SystemInfo.isWindows():
             if WindowsHacks.getLongPath(path1).lower() == \
                     WindowsHacks.getLongPath(path2).lower():
                 return True
-            
+
             return WindowsHacks.getLongPath(os.path.abspath(path1)).lower() == \
                     WindowsHacks.getLongPath(os.path.abspath(path2)).lower()
     else:
@@ -164,7 +164,7 @@ else:
             return GtkHacks.FakeInterceptCollection(interceptors)
         def createClipboardInterceptor(callingWindow):
             return GtkHacks.ClipboardCatchFakeIceptor(callingWindow)
-        
+
 
 if WindowsHacks:
     translateAcceleratorByKbLayout = WindowsHacks.translateAcceleratorByKbLayout
