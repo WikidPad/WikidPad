@@ -24,7 +24,7 @@ gobject.threads_init()
 class BaseFakeInterceptor:
     def __init__(self):
         pass
-        
+
     def addInterceptCollection(self, interceptCollection):
         """
         Called automatically if interceptor is added to an
@@ -63,7 +63,7 @@ class BaseFakeInterceptor:
         uninterception doesn't happen (this may be dangerous).
         """
         return True
-        
+
     def stopAfterUnintercept(self, interceptCollection):
         """
         Called for each interceptor of a collection after the actual
@@ -76,7 +76,7 @@ class BaseFakeInterceptor:
 #         """
 #         Called for each Windows message to the intercepted window. This is
 #         the ANSI-style method, wide-char is not supported.
-#         
+#
 #         params -- WinProcParams object containing parameters the function can
 #                 modify and a returnValue which can be set to prevent
 #                 from calling interceptWinProc functions
@@ -92,9 +92,9 @@ class FakeInterceptCollection:
     """
     def __init__(self, interceptors=None):
         self.interceptors = []
-        
+
         self.hWnd = None  # Stored, but unused
-        
+
         if interceptors is not None:
             for icept in interceptors:
                 self.addInterceptor(icept)
@@ -114,10 +114,10 @@ class FakeInterceptCollection:
 
         for icept in self.interceptors:
             icept.removeInterceptCollection(self)
-        
+
         self.interceptors = []
-    
-    
+
+
     def close(self):
         self.clear()
 
@@ -125,35 +125,35 @@ class FakeInterceptCollection:
     def start(self, callingWindow):
         if self.isIntercepting():
             return False
-            
+
         for icept in self.interceptors:
             if not icept.startBeforeIntercept(self):
                 return False
-        
+
         self.intercept(callingWindow)
-        
+
         for icept in self.interceptors:
             try:
                 icept.startAfterIntercept(self)
             except:
                 traceback.print_exc()
-                
+
         return True
 
 
     def stop(self):
         if not self.isIntercepting():
             return False
-            
+
         for icept in self.interceptors:
             try:
                 if not icept.stopBeforeUnintercept(self):
                     return False
             except:
                 traceback.print_exc()
-        
+
         self.unintercept()
-        
+
         for icept in self.interceptors:
             try:
                 icept.stopAfterUnintercept(self)
@@ -178,10 +178,10 @@ class FakeInterceptCollection:
     def unintercept(self):
         if not self.isIntercepting():
             return
-            
+
 #         SetWindowLong(c_int(self.hWnd), c_int(GWL_WNDPROC),
 #                 c_int(self.oldWndProc))
-# 
+#
 #         self.oldWinProc = None
 #         self.ctWinProcStub = None
         self.hWnd = None
@@ -189,17 +189,17 @@ class FakeInterceptCollection:
 
     def isIntercepting(self):
         return self.hWnd is not None
-        
+
 
 #     def _lastWinProc(self, params):
 #         """
 #         This default function reacts only on a WM_DESTROY message and
 #         stops interception. All messages are sent to the original WinProc
 #         """
-#         
+#
 #         if params.uMsg == WM_DESTROY and params.hWnd == self.hWnd:
 #             self.stop()
-# 
+#
 #         params.returnValue = CallWindowProc(c_int(self.oldWndProc),
 #                 c_int(params.hWnd), c_uint(params.uMsg),
 #                 c_uint(params.wParam), c_ulong(params.lParam))
@@ -208,20 +208,20 @@ class FakeInterceptCollection:
 #     def winProc(self, hWnd, uMsg, wParam, lParam):
 #         params = self.winParams
 #         params.set(hWnd, uMsg, wParam, lParam)
-# 
+#
 #         for icept in self.interceptors:
 #             try:
 #                 icept.interceptWinProc(self, params)
 #             except:
 #                 traceback.print_exc()
-#             
+#
 #             if params.returnValue is not None:
 #                 return params.returnValue
-#         
+#
 #         self._lastWinProc(params)
 #         return params.returnValue
 
-        
+
 
 
 
@@ -235,7 +235,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
 
     def __init__(self, mainControl):
         BaseFakeInterceptor.__init__(self)
-        
+
 #         self.hWnd = None
         self.gtkDefClipboard = None
         self.gtkConnHandle = None
@@ -257,7 +257,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
         """
         if self.gtkDefClipboard is not None:
             return
-        
+
         self.gtkDefClipboard = gtk.clipboard_get()
         self.gtkConnHandle = self.gtkDefClipboard.connect("owner-change",
                 lambda clp, evt: self.handleClipboardChange())
@@ -273,7 +273,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
         """
         if self.gtkDefClipboard is None:
             return
-        
+
         self.gtkDefClipboard.disconnect(self.gtkConnHandle)
         self.gtkConnHandle = None
         self.gtkDefClipboard = None
@@ -351,7 +351,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
 #         """
 #         Called for each Windows message to the intercepted window. This is
 #         the ANSI-style method, wide-char is not supported.
-#         
+#
 #         params -- WinProcParams object containing parameters the function can
 #                 modify and a returnValue which can be set to prevent
 #                 from calling interceptWinProc functions
@@ -360,18 +360,18 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
 #             if self.nextWnd == params.wParam:
 #                 # repair the chain
 #                 self.nextWnd = params.lParam
-#     
+#
 #             if self.nextWnd:  # Neither None nor 0
 #                 # pass the message to the next window in chain
 #                 SendMessage(c_int(self.nextWnd), c_int(params.uMsg),
 #                         c_uint(params.wParam), c_ulong(params.lParam))
-# 
+#
 #         elif params.uMsg == WM_DRAWCLIPBOARD:
 #             if self.ignoreNextCCMessage:
 #                 self.ignoreNextCCMessage = False
 #             else:
 #                 self.handleClipboardChange()
-# 
+#
 #             if self.nextWnd:  # Neither None nor 0
 #                 # pass the message to the next window in chain
 #                 SendMessage(c_int(self.nextWnd), c_int(params.uMsg),
@@ -423,7 +423,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
 
         if self.mode == ClipboardCatchFakeIceptor.MODE_OFF:
             return
-            
+
         if self.mainControl.getConfig().getboolean("main",
                 "clipboardCatcher_filterDouble", True) and self.lastText == text:
             # Same text shall be inserted again
@@ -434,11 +434,11 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
                 return
             self.wikiPage.appendLiveText(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
-            
+
         elif self.mode == ClipboardCatchFakeIceptor.MODE_AT_CURSOR:
             self.mainControl.getActiveEditor().ReplaceSelection(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
-            
+
         self.lastText = text
 
 
