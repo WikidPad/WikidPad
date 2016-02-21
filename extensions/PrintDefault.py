@@ -17,10 +17,14 @@ from pwiki import PluginManager
 
 from pwiki.StringOps import unescapeWithRe, urlFromPathname
 
+from pwiki import WikiHtmlView
 
-try:
-    from pwiki.WikiHtmlViewWK import WKHtmlWindow
-except:
+if WikiHtmlView.WikiHtmlViewWK is not None:
+    try:
+        from pwiki.WikiHtmlViewWK import WKHtmlWindow
+    except:
+        WKHtmlWindow = None
+else:
     WKHtmlWindow = None
 
 
@@ -85,7 +89,7 @@ class PlainTextPrint:
             if panel.fontDesc:
                 font = wx.FontFromNativeInfoString(panel.fontDesc)
                 fontdata.SetInitialFont(font)
-                
+
             dlg = wx.FontDialog(panel, fontdata)
             try:
                 if dlg.ShowModal() == wx.ID_OK:
@@ -97,7 +101,7 @@ class PlainTextPrint:
 
         ctrls.tfWikiPageSeparator.SetValue(config.get("main",
                 "print_plaintext_wpseparator"))
-                
+
         panel.fontDesc = config.get("main", "print_plaintext_font")
 
         wx.EVT_BUTTON(panel, GUI_ID.btnChoosePlainTextFont,
@@ -114,7 +118,7 @@ class PlainTextPrint:
         Returns the version of the additional options information returned
         by getAddOpt(). If the return value is -1, the version info can't
         be stored between application sessions.
-        
+
         Otherwise, the addopt information can be stored between sessions
         and can later handled back to the doPreview() or doPrint() method of
         the object without previously showing the print dialog (currently
@@ -159,7 +163,7 @@ class PlainTextPrint:
                 addOpt[:2]
 
         ctrls = XrcControls(addoptpanel)
-        
+
         addoptpanel.fontDesc = fontDesc
         ctrls.tfWikiPageSeparator.SetValue(wpseparator)
 
@@ -181,10 +185,10 @@ class PlainTextPrint:
 #                     "main", "print_plaintext_wpseparator"))
 #         except:
 #             separator = u"\n\n\n\n"   # TODO Error message
-#         
+#
 #         return separator.join(contents)
-            
-            
+
+
     def setContext(self, printer, wikiDocument, wordList, printType, addopt):
         self.wikiDocument = wikiDocument
         self.wordList = wordList
@@ -199,7 +203,7 @@ class PlainTextPrint:
         """
         Part of "Prints" plugin API. A Printing.Printer object calls this
         to print a list of wiki words.
-        
+
         printer -- Printer object
         wikiDocument -- WikiDataManager aka WikiDocument object
         wordList -- list of wiki words to print
@@ -212,9 +216,9 @@ class PlainTextPrint:
 
         printout = PlainTextPrintout(text, self.printer, addopt)
         printer = wx.Printer(wx.PrintDialogData(self.printer.getPrintData()))
-        
+
         config = self.mainControl.getConfig()
-        
+
         config.set("main", "print_plaintext_font", addopt[0])
         config.set("main", "print_plaintext_wpseparator", addopt[1])
 
@@ -225,7 +229,7 @@ class PlainTextPrint:
         """
         Part of "Prints" plugin API. A Printing.Printer object calls this
         to show a print preview for a list of wiki words.
-        
+
         printer -- Printer object
         wikiDocument -- WikiDataManager aka WikiDocument object
         wordList -- list of wiki words to print
@@ -235,7 +239,7 @@ class PlainTextPrint:
         """
         self.setContext(printer, wikiDocument, wordList, printType, addopt)
         text = self._buildText()
-        
+
         pddata = wx.PrintDialogData(self.printer.getPrintData())
         printout = PlainTextPrintout(text, self.printer, addopt)
         printout2 = PlainTextPrintout(text, self.printer, addopt)
@@ -268,7 +272,7 @@ class PlainTextPrintout(wx.Printout):
         self.fontDesc = addOpt[0]
         self.wpseparator = addOpt[1]
 
-        
+
     def HasPage(self, pageNum):
         return len(self.pageCharStartIndex) > pageNum
 
@@ -284,7 +288,7 @@ class PlainTextPrintout(wx.Printout):
         (self.mm2logUnitsFactor).
 
         Must be called before using the conversion functions.
-        
+
         Code taken from a wxWidgets sample
         """
         # You might use THIS code to set the printer DC to ROUGHLY reflect
@@ -341,7 +345,7 @@ class PlainTextPrintout(wx.Printout):
         if len(self.pageCharStartIndex) <= pageNum:
             # Request for a non-existing page
             return True
-            
+
         return self._printAndIndex(pageNum)
 
 
@@ -389,7 +393,7 @@ class PlainTextPrintout(wx.Printout):
 
         textpos = self.pageCharStartIndex[pagepos]
         text = self.text
-        
+
         if pageNum == -1:
             # Build a list of cuttedText. Each item is either a newline,
             # a new page command '\f', one or more spaces or one or more
@@ -400,24 +404,24 @@ class PlainTextPrintout(wx.Printout):
                 lastCharPos = len(text)
             else:
                 lastCharPos = self.pageCharStartIndex[pageNum + 1]
-                
+
             cuttedText = _CUT_RE.findall(
                     text[self.pageCharStartIndex[pageNum]:lastCharPos])
 
         currLine = u""
         currLineWidth = 0
         w, stepY, d, e = dc.GetFullTextExtent("aaaaaaaa")
-        
+
         posxLu, posyLu = printRectLu[0:2]
         prAreaWidth = printRectLu[2] - printRectLu[0]
-        
+
         i = 0
         while i < len(cuttedText):    # _CUT_RE.finditer(text[textpos:]):
             part = cuttedText[i]
-            
+
             flushLine = False
             flushPage = False
-            
+
             if part[0] == u" ":
                 # One or more spaces -> Append to current line if possible,
                 # throw away and start new print line if not
@@ -483,12 +487,12 @@ class PlainTextPrintout(wx.Printout):
                 if posyLu + stepY > printRectLu[3]:
                     # End of page reached
                     flushPage = True
-                    
+
             if flushPage:
                 if pageNum != -1 or textpos == len(text):
                     break
                 pagepos += 1
-                
+
 #                 print "PagePos", pagepos
 #                 if pagepos > 100: break
                 posyLu = printRectLu[1]
@@ -496,7 +500,7 @@ class PlainTextPrintout(wx.Printout):
 
 
         dc.SetFont(wx.NullFont)
-        
+
         return True
 
 
@@ -519,19 +523,19 @@ class HtmlPrint:
 #         if not u"html_multi" in exportTypes and \
 #                 not u"html_single" in exportTypes:
 #             return ()
-# 
+#
 #         res = wx.xrc.XmlResource.Get()
 #         htmlPanel = res.LoadPanel(guiparent, "ExportSubHtml")
 #         ctrls = XrcControls(htmlPanel)
 #         config = self.mainControl.getConfig()
-# 
+#
 #         ctrls.cbPicsAsLinks.SetValue(config.getboolean("main",
 #                 "html_export_pics_as_links"))
 #         ctrls.chTableOfContents.SetSelection(config.getint("main",
 #                 "export_table_of_contents"))
 #         ctrls.tfHtmlTocTitle.SetValue(config.get("main",
 #                 "html_toc_title"))
-# 
+#
 #         return (
 #             (u"html_multi", htmlPanel),
 #             (u"html_single", htmlPanel)
@@ -546,7 +550,7 @@ class HtmlPrint:
 #         if addoptpanel is None:
 #             # Return default set in options
 #             config = self.mainControl.getConfig()
-# 
+#
 #             return ( boolToInt(config.getboolean("main",
 #                     "html_export_pics_as_links")),
 #                     config.getint("main", "export_table_of_contents"),
@@ -555,11 +559,11 @@ class HtmlPrint:
 #                      )
 #         else:
 #             ctrls = XrcControls(addoptpanel)
-# 
+#
 #             picsAsLinks = boolToInt(ctrls.cbPicsAsLinks.GetValue())
 #             tableOfContents = ctrls.chTableOfContents.GetSelection()
 #             tocTitle = ctrls.tfHtmlTocTitle.GetValue()
-# 
+#
 #             return (picsAsLinks, tableOfContents, tocTitle, u"volatile")
 
 
@@ -567,11 +571,11 @@ class HtmlPrint:
         pass
 #         picsAsLinks, tableOfContents, tocTitle, volatileDir = \
 #                 addOpt[:4]
-# 
+#
 #         # volatileDir is currently ignored
-# 
+#
 #         ctrls = XrcControls(addoptpanel)
-# 
+#
 #         ctrls.cbPicsAsLinks.SetValue(picsAsLinks != 0)
 #         ctrls.chTableOfContents.SetSelection(tableOfContents)
 #         ctrls.tfHtmlTocTitle.SetValue(tocTitle)
@@ -593,7 +597,7 @@ class HtmlPrint:
         self.tempFileSet = TempFileSet()
         exporterInstance.tempFileSet = self.tempFileSet
         exporterInstance.styleSheet = u""
-        
+
         realfp = StringIO.StringIO()
         exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
 
@@ -603,7 +607,7 @@ class HtmlPrint:
         self.tempFileSet.clear()
         self.tempFileSet = None
 
-            
+
     def setContext(self, printer, wikiDocument, wordList, printType, addopt):
         self.wikiDocument = wikiDocument
         self.wordList = wordList
@@ -613,10 +617,10 @@ class HtmlPrint:
     def doPrint(self, printer, wikiDocument, wordList, printType, addopt):
         self.setContext(printer, wikiDocument, wordList, printType, addopt)
         text = self._buildHtml()
-        
+
         try:
             printout = HtmlPrintout(text, self.printer)
-            
+
             pData = wx.PrintDialogData(self.printer.getPrintData())
             printer = wx.Printer(pData)
 
@@ -628,17 +632,17 @@ class HtmlPrint:
     def doPreview(self, printer, wikiDocument, wordList, printType, addopt):
         self.setContext(printer, wikiDocument, wordList, printType, addopt)
         text = self._buildHtml()
-        
-        try:        
+
+        try:
             pddata = wx.PrintDialogData(self.printer.getPrintData())
             printout = HtmlPrintout(text, self.printer)
             printout2 = HtmlPrintout(text, self.printer)
-    
+
             preview = wx.PrintPreview(printout, printout2, pddata)
-    
+
             frame = wx.PreviewFrame(preview, self.mainControl, _(u"Print Preview"),
                     style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
-    
+
             frame.Initialize()
             frame.SetPosition(self.mainControl.GetPosition())
             frame.SetSize(self.mainControl.GetSize())
@@ -651,7 +655,7 @@ class HtmlPrint:
 class HtmlPrintout(wx.html.HtmlPrintout):
     def __init__(self, text, printer):
         wx.html.HtmlPrintout.__init__(self)
-        
+
         self.printer = printer
         self.SetHtmlText(text)
         psddata = self.printer.getPageSetupDialogData()
@@ -659,19 +663,19 @@ class HtmlPrintout(wx.html.HtmlPrintout):
         br = psddata.GetMarginBottomRight()
 
         self.SetMargins(tl.y, br.y, tl.x, br.x, spaces=0)
-        
+
 
 
 #     def _updateTempFilePrefPath(self):
 #         wikiDocument = self.presenter.getWikiDocument()
-# 
+#
 #         if wikiDocument is not None:
 #             self.exporterInstance.tempFileSet.setPreferredPath(
 #                     wikiDocument.getWikiTempDir())
 #         else:
 #             self.exporterInstance.tempFileSet.setPreferredPath(None)
 
-        
+
 #         self.SetHtmlText(u"ab<br />\n" * 5000)
 
 
@@ -702,7 +706,7 @@ class HtmlWKPrint(HtmlPrint):
         self.tempFileSet = TempFileSet()
         exporterInstance.tempFileSet = self.tempFileSet
         exporterInstance.styleSheet = u""
-        
+
         htpath = self.tempFileSet.createTempFile(
                     u"", ".html", relativeTo="").decode("latin-1")
 
@@ -785,18 +789,18 @@ if WKHtmlWindow:
             self.html_preview.PizzaMagic()
             url = "file:" + urlFromPathname(htpath)
             self.html_preview.LoadUrl(url)
-            
-        
+
+
 #         def Print(self):
 #             self.html_preview.Print()
 
-            
+
     class WKPrintFrame(wx.Frame):
         """Frame to contain webkit ctrl panel"""
         def __init__(self, htpath):
             wx.Frame.__init__(self, None)
             self.html_panel = WKPrintPanel(self, htpath)
-        
+
         def print_full(self, print_op, opCode):
             return self.html_panel.html_preview.getWebkitWebView()\
                     .get_main_frame().print_full(print_op, opCode)
