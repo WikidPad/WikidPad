@@ -42,9 +42,9 @@ class ResourceOptionsPanel(DefaultOptionsPanel):
         self.PostCreate(p)
 #         self.optionsDlg = optionsDlg
         res = wx.xrc.XmlResource.Get()
-        
+
         res.LoadOnPanel(self, parent, resName)
-        
+
     def setVisible(self, vis):
         return True
 
@@ -64,11 +64,11 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         self.optionToControl = []
         self.mainControl = optionsDlg.getMainControl()
 
-    
+
     def addOptionEntry(self, opt, ctl, typ, *params):
         self.optionToControl.append((opt, ctl, typ) + params)
-    
-    
+
+
     def transferOptionsToDialog(self, config=None):
         # List of tuples (<configuration file entry>, <gui control name>, <type>)
         # Supported types:
@@ -85,14 +85,14 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         #     spin: Numeric SpinCtrl
         #
         #     guilang: special choice for GUI language
-    
+
         # ttdf and color0 entries have a 4th item with the name
         #     of the "..." button to call a dialog to set.
         # selt entries have a list with the internal config names (unicode) of the
         #     possible choices as 4th item.
 
         # Transfer options to dialog
-        
+
         if config is None:
             config = self.mainControl.getConfig()
 
@@ -122,7 +122,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
 #                         config.getboolean("main", o))
         elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
             ctl.SetValue( uniToGui(config.get("main", o)) )
-        elif t == "tes":  # Text escaped 
+        elif t == "tes":  # Text escaped
             ctl.SetValue( unescapeForIni(uniToGui(config.get("main", o))) )
         elif t == "seli":   # Selection -> transfer index
             ctl.SetSelection(config.getint("main", o))
@@ -139,8 +139,8 @@ class PluginOptionsPanel(DefaultOptionsPanel):
             ctl.Append(_(u"Default"))
             for ls, lt in Localization.getLangList():
                 ctl.Append(lt)
-            
-            # Then select previous setting                
+
+            # Then select previous setting
             optValue = config.get("main", o)
             ctl.SetSelection(Localization.findLangListIndex(optValue) + 1)
 
@@ -162,7 +162,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -173,7 +173,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         for oct in self.optionToControl:
             if not self.checkSingleOptionOk(oct):
                 fieldsValid = False
-        
+
         return fieldsValid
 
 
@@ -214,7 +214,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
             # HTML Color field or empty field
             val = guiToUni(ctl.GetValue())
             rgb = colorDescToRgbTuple(val)
-            
+
             if val != "" and rgb is None:
                 ctl.SetBackgroundColour(wx.RED)
                 fieldsValid = False
@@ -275,7 +275,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 config.set("main", o,
                         oct[3][ctl.GetSelection()])
             except IndexError:
-                config.set("main", o, 
+                config.set("main", o,
                         guiToUni(ctl.GetStringSelection()))
         elif t == "spin":   # Numeric SpinCtrl -> transfer number
             config.set(
@@ -297,7 +297,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         oct = self.idToOptionEntryMap[evt.GetId()]
         o, ctl, t = oct[:3]
         params = oct[3:]
-        
+
         if t == "color0":
             self.selectColor(ctl)
         elif t == "ttdf":   # Date/time format
@@ -325,7 +325,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
             dlg.Destroy()
 
     def selectDateTimeFormat(self, tfield):
-        dlg = DateformatDialog(self, -1, self.mainControl, 
+        dlg = DateformatDialog(self, -1, self.mainControl,
                 deffmt=tfield.GetValue())
         try:
             if dlg.ShowModal() == wx.ID_OK:
@@ -366,7 +366,7 @@ class OptionsDialog(wx.Dialog):
     #     of the "..." button to call for a dialog to set.
     # selt entries have a list with the internal config names (unicode) of the
     #     possible choices as 4th item.
-    
+
     _lastShownPanelName = None
 
 
@@ -498,6 +498,8 @@ class OptionsDialog(wx.Dialog):
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
             ("editor_imagePaste_quality", "tfEditorImagePasteQuality", "i0+"),
             ("editor_imagePaste_askOnEachPaste", "cbEditorImagePasteAskOnEachPaste", "b"),
+            ("editor_imagePaste_alwaysGetTextOnly", "cbEditorImagePasteAlwaysGetTextOnly", "b"),
+            ("editor_imagePaste_getTextOnlyFromWmf", "cbEditorImagePasteGetTextOnlyFromWmf", "b"),
             ("editor_filePaste_prefix", "tfEditorFilePastePrefix", "tes"),
             ("editor_filePaste_middle", "tfEditorFilePasteMiddle", "tes"),
             ("editor_filePaste_suffix", "tfEditorFilePasteSuffix", "tes"),
@@ -539,7 +541,7 @@ class OptionsDialog(wx.Dialog):
                     u"action/presenter/this/subcontrol/textedit",
                     u"action/presenter/new/foreground/end/page/this/subcontrol/textedit"
                     ]),
-                
+
             ("userEvent_mouse/middleclick/pagetab", "chMouseMdlClickPageTab", "selt",
                     [
                     u"action/none",
@@ -656,7 +658,7 @@ class OptionsDialog(wx.Dialog):
             ("wikiPageFiles_maxNameLength", "tfWikiPageFilesMaxNameLength", "i0+"),
             ("wikiPageFiles_gracefulOutsideAddAndRemove",
                     "cbWikiPageFilesGracefulOutsideAddAndRemove", "b"),
-            
+
 
             ("wiki_icon", "tfWikiIcon", "t"),
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
@@ -707,14 +709,14 @@ class OptionsDialog(wx.Dialog):
             ("clipboardCatcher_soundFile", "tfClipCatchSoundFile", "t")
     )
 
-    # Non-Windows specific options    
+    # Non-Windows specific options
     OPTION_TO_CONTROL_NON_WINDOWS_ONLY = (
             ("fileLauncher_path", "tfFileLauncherPath", "t"),
     )
 
 
     DEFAULT_PANEL_LIST = (
-            ("OptionsPageApplication", N_(u"Application")),    
+            ("OptionsPageApplication", N_(u"Application")),
             ("OptionsPageUserInterface", 2 * u" " + N_(u"User interface")),
             ("OptionsPageSecurity", 2 * u" " + N_(u"Security")),
             ("OptionsPageTree", 2 * u" " + N_(u"Tree")),
@@ -726,9 +728,9 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageFileLauncher", 2 * u" " + N_(u"File Launcher")),
             ("OptionsPageMouse", 2 * u" " + N_(u"Mouse")),
             ("OptionsPageChronView", 2 * u" " + N_(u"Chron. view")),
-            ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
-            ("OptionsPageNewWikiDefaults", 2 * u" " + N_(u"New wiki defaults")),  
-            ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
+            ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),
+            ("OptionsPageNewWikiDefaults", 2 * u" " + N_(u"New wiki defaults")),
+            ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),
             ("OptionsPageAdvTiming", 4 * u" " + N_(u"Timing")),
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("??switch mark/current wiki/begin", u""),
@@ -755,7 +757,7 @@ class OptionsDialog(wx.Dialog):
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
         self.combinedOptionToControl = self.OPTION_TO_CONTROL_GLOBAL
-        
+
         if self.pWiki.isWikiLoaded():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_WIKI
 
@@ -776,7 +778,7 @@ class OptionsDialog(wx.Dialog):
             # Remove wiki-bound setting pages
             try:
                 del self.combinedPanelList[self.combinedPanelList.index(
-                        ("??switch mark/current wiki/begin", u"")) : 
+                        ("??switch mark/current wiki/begin", u"")) :
                         self.combinedPanelList.index(
                         ("??switch mark/current wiki/end", u""))]
             except ValueError:
@@ -785,7 +787,7 @@ class OptionsDialog(wx.Dialog):
 
         # Rewrite panel list depending on OS and environment
         newPL = []
-        
+
         for e in self.combinedPanelList:
             if isinstance(e[0], basestring):
                 if e[0] == "OptionsPageFileLauncher" and SystemInfo.isWindows():
@@ -807,7 +809,7 @@ class OptionsDialog(wx.Dialog):
 
 #         if SystemInfo.isWindows():
 #             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
-# 
+#
 #             newPL = []
 #             for e in self.combinedPanelList:
 #                 if isinstance(e[0], basestring):
@@ -816,13 +818,13 @@ class OptionsDialog(wx.Dialog):
 #                     if e[0].startswith("??"):
 #                         # Entry is only a mark for insert operations so skip it
 #                         continue
-# 
+#
 #                 newPL.append(e)
-# 
+#
 #             self.combinedPanelList = newPL
 #         else:
 #             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
-# 
+#
 #             newPL = []
 #             for i, e in enumerate(self.combinedPanelList):
 #                 if isinstance(e[0], basestring):
@@ -831,9 +833,9 @@ class OptionsDialog(wx.Dialog):
 #                     if e[0].startswith("??"):
 #                         # Entry is only a mark for insert operations so skip it
 #                         continue
-# 
+#
 #                 newPL.append(e)
-# 
+#
 #             self.combinedPanelList = newPL
 
         self.ctrls = XrcControls(self)
@@ -845,7 +847,7 @@ class OptionsDialog(wx.Dialog):
 
 
         mainsizer = LayerSizer()  # wx.BoxSizer(wx.VERTICAL)
-        
+
         for pn, pt in self.combinedPanelList:
             indPt, textPt = splitIndent(pt)
             pt = indPt + _(textPt)
@@ -854,7 +856,7 @@ class OptionsDialog(wx.Dialog):
                     panel = ResourceOptionsPanel(self.ctrls.panelPages, pn)
                 else:
                     if self.emptyPanel is None:
-                        # Necessary to avoid a crash        
+                        # Necessary to avoid a crash
                         self.emptyPanel = DefaultOptionsPanel(self.ctrls.panelPages)
                     panel = self.emptyPanel
             else:
@@ -864,8 +866,8 @@ class OptionsDialog(wx.Dialog):
             self.panelList.append(panel)
             self.ctrls.lbPages.Append(pt)
             mainsizer.Add(panel)
-        
-        
+
+
         self.ctrls.panelPages.SetSizer(mainsizer)
         self.ctrls.panelPages.SetMinSize(mainsizer.GetMinSize())
 
@@ -882,7 +884,7 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(1)
             self.ctrls.chHtmlPreviewRenderer.Append(_(u"Mozilla"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(2)
-        
+
         if WikiHtmlView.WikiHtmlViewWK is not None:
             self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webkit"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(3)
@@ -919,7 +921,7 @@ class OptionsDialog(wx.Dialog):
                     "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
-            elif t == "tes":  # Text escaped 
+            elif t == "tes":  # Text escaped
                 self.ctrls[c].SetValue(
                         unescapeForIni(uniToGui(self.pWiki.getConfig().get(
                         "main", o))) )
@@ -947,8 +949,8 @@ class OptionsDialog(wx.Dialog):
                 self.ctrls[c].Append(_(u"Default"))
                 for ls, lt in Localization.getLangList():
                     self.ctrls[c].Append(lt)
-                
-                # Then select previous setting                
+
+                # Then select previous setting
                 optValue = self.pWiki.getConfig().get("main", o)
                 self.ctrls[c].SetSelection(
                         Localization.findLangListIndex(optValue) + 1)
@@ -961,9 +963,9 @@ class OptionsDialog(wx.Dialog):
                     self.ctrls[c].Append(ld[1])
                     if ld[0] == optValue:
                         sel = i
-                
+
                 if sel > -1:
-                    # Then select previous setting                
+                    # Then select previous setting
                     self.ctrls[c].SetSelection(sel)
 
             # Register events for "..." buttons
@@ -983,12 +985,12 @@ class OptionsDialog(wx.Dialog):
                 "new_window_on_follow_wiki_url") != 0)
 
         wikiDocument = self.pWiki.getWikiDocument()
-        if wikiDocument is not None:        
+        if wikiDocument is not None:
             self.ctrls.cbWikiReadOnly.SetValue(
                     wikiDocument.getWriteAccessDeniedByConfig())
 
             fppCap = wikiDocument.getWikiData().checkCapability("filePerPage")
-            
+
             self.ctrls.cbWikiPageFilesAsciiOnly.Enable(fppCap is not None)
             self.ctrls.tfWikiPageFilesMaxNameLength.Enable(fppCap is not None)
             self.ctrls.cbWikiPageFilesGracefulOutsideAddAndRemove.Enable(
@@ -1008,7 +1010,7 @@ class OptionsDialog(wx.Dialog):
         for panel in self.panelList:
             panel.Show(False)
             panel.Enable(False)
-        
+
         if startPanelName is None:
             startPanelName = OptionsDialog._lastShownPanelName
 
@@ -1048,10 +1050,10 @@ class OptionsDialog(wx.Dialog):
                 self.OnUpdateUiAfterChange)
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnUpdateUiAfterChange)
-                
+
         wx.EVT_CHOICE(self, GUI_ID.chHtmlPreviewRenderer,
                 self.OnUpdateUiAfterChange)
-        
+
         wx.EVT_CHECKBOX(self, GUI_ID.cbWwSearchCountOccurrences,
                 self.OnUpdateUiAfterChange)
 
@@ -1140,7 +1142,7 @@ class OptionsDialog(wx.Dialog):
                 # HTML Color field or empty field
                 val = guiToUni(self.ctrls[c].GetValue())
                 rgb = colorDescToRgbTuple(val)
-                
+
                 if val != "" and rgb is None:
                     self.ctrls[c].SetBackgroundColour(wx.RED)
                     fieldsValid = False
@@ -1162,7 +1164,7 @@ class OptionsDialog(wx.Dialog):
         if not fieldsValid:
             self.Refresh()
             return
-            
+
         # Check each panel
         for i, panel in enumerate(self.panelList):
             if not panel.checkOk():
@@ -1171,7 +1173,7 @@ class OptionsDialog(wx.Dialog):
                 self._refreshForPage()
                 return
 
-        
+
         # Options with special treatment (before standard handling)
         wikiDocument = self.pWiki.getWikiDocument()
 
@@ -1211,7 +1213,7 @@ class OptionsDialog(wx.Dialog):
                 try:
                     config.set("main", o, oct[3][self.ctrls[c].GetSelection()])
                 except IndexError:
-                    config.set("main", o, 
+                    config.set("main", o,
                             guiToUni(self.ctrls[c].GetStringSelection()))
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
                 config.set( "main", o, unicode(self.ctrls[c].GetValue()) )
@@ -1242,7 +1244,7 @@ class OptionsDialog(wx.Dialog):
             panel.handleOk()
 
         config.informChanged(self.oldSettings)
-        
+
         if self.activePageIndex > -1:
             OptionsDialog._lastShownPanelName = self.combinedPanelList[
                     self.activePageIndex][0]
@@ -1260,9 +1262,9 @@ class OptionsDialog(wx.Dialog):
         if dlg.ShowModal() == wx.ID_OK:
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()
-        
+
 #     def OnSelectPageStatusTimeFormat(self, evt):
-#         dlg = DateformatDialog(self, -1, self.pWiki, 
+#         dlg = DateformatDialog(self, -1, self.pWiki,
 #                 deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
 #         if dlg.ShowModal() == wx.ID_OK:
 #             self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
@@ -1279,7 +1281,7 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.tfTempHandlingTempDir.Enable(enabled)
         self.ctrls.btnSelectTempHandlingTempDir.Enable(enabled)
 
-        # Dimensions of image preview tooltips can only be set if tooltips are 
+        # Dimensions of image preview tooltips can only be set if tooltips are
         # enabled
         enabled = self.ctrls.cbEditorImageTooltipsLocalUrls.GetValue()
         self.ctrls.scEditorImageTooltipsMaxWidth.Enable(enabled)
@@ -1316,7 +1318,7 @@ class OptionsDialog(wx.Dialog):
         oct = self.idToOptionEntryMap[evt.GetId()]
         o, c, t = oct[:3]
         params = oct[3:]
-        
+
         if t == "color0":
             self.selectColor(self.ctrls[c])
         elif t == "ttdf":   # Date/time format
@@ -1348,25 +1350,25 @@ class OptionsDialog(wx.Dialog):
             dlg.Destroy()
 
 
-    def selectDirectory(self, tfield):        
+    def selectDirectory(self, tfield):
         seldir = wx.DirSelector(_(u"Select Directory"),
                 tfield.GetValue(),
                 style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
-            
+
         if seldir:
             tfield.SetValue(seldir)
 
-    def selectFile(self, tfield, wildcard=u""):        
+    def selectFile(self, tfield, wildcard=u""):
         selfile = wx.FileSelector(_(u"Select File"),
                 tfield.GetValue(), wildcard = wildcard + u"|" + \
                         _(u"All files (*.*)|*"),
                 flags=wx.OPEN, parent=self)
-            
+
         if selfile:
             tfield.SetValue(selfile)
-            
+
     def selectDateTimeFormat(self, tfield):
-        dlg = DateformatDialog(self, -1, self.pWiki, 
+        dlg = DateformatDialog(self, -1, self.pWiki,
                 deffmt=tfield.GetValue())
         try:
             if dlg.ShowModal() == wx.ID_OK:
@@ -1380,11 +1382,11 @@ class OptionsDialog(wx.Dialog):
 
         # if fontDesc != u"":
         font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
-            
-        # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT, 
-        
+
+        # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT,
+
         font.SetNativeFontInfoUserDesc(fontDesc)
-        
+
         newFont = wx.GetFontFromUser(self, font)  # , const wxString& caption = wxEmptyString)
         if newFont is not None and newFont.IsOk():
             tfield.SetValue(newFont.GetNativeFontInfoUserDesc())

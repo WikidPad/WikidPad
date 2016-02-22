@@ -38,17 +38,17 @@ def _setValue(section, option, value, config):
 
     if type(option) is unicode:
         option = utf8Enc(option)[0]
-        
+
     if type(value) is str:
         value = utf8Enc(mbcsDec(value)[0])[0]
     elif type(value) is unicode:
         value = utf8Enc(value)[0]
     else:
         value = utf8Enc(unicode(value))[0]
-        
+
     if not config.has_section(section):
-        config.add_section(section) 
-        
+        config.add_section(section)
+
     config.set(section, option, value)
 
 
@@ -79,7 +79,7 @@ class _AbstractConfiguration:
         result = self.get(section, option)
         if result is None:
             return default
-        
+
         try:
             return float(result)
         except ValueError:
@@ -91,7 +91,7 @@ class _AbstractConfiguration:
         result = self.get(section, option)
         if result is None:
             return default
-        
+
         return strToBool(result, False)
 
     @staticmethod
@@ -115,12 +115,12 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
                 (only stored here, but processed by CombinedConfiguration)
         """
         MiscEventSourceMixin.__init__(self)
-        
+
         self.configParserObject = None
         self.configPath = None
-        
+
         self.configDefaults = configdef
-        
+
         if fallthroughDict is None:
             self.fallthroughDict = {}
         else:
@@ -138,7 +138,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         result = None
 
         if self.isOptionAllowed(section, option):
@@ -174,21 +174,21 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         if self.isOptionAllowed(section, option):
             return self.configDefaults[(section, option)]
         else:
             raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
-        
-        
-        
-        
+
+
+
+
     def setWriteAccessDenied(self, flag):
         self.writeAccessDenied = flag
-        
+
     def getWriteAccessDenied(self):
         return self.writeAccessDenied
-        
+
     def isReadOnlyEffect(self):
         return self.writeAccessDenied
 
@@ -215,7 +215,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         if self.isOptionAllowed(section, option):
             _setValue(section, option, value, self.configParserObject)
         else:
@@ -252,7 +252,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
     def createEmptyConfig(self, fn):
         config = ConfigParser.ConfigParser()
         self.setConfigParserObject(config, fn)
-        
+
     def getFallthroughDict(self):
         return self.fallthroughDict
 
@@ -291,7 +291,7 @@ class CombinedConfiguration(_AbstractConfiguration):
     Manages global and wiki specific configuration options.
     Mainly wraps two SingleConfiguration instances
     """
-    
+
     def __init__(self, globalconfig, wikiconfig):
         """
         globalconfig -- SingleConfiguration object for global settings
@@ -310,12 +310,12 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         result = None
-        
+
         checkWiki = True
         checkGlobal = True
-        
+
         if option.startswith("option/wiki/"):
             option = option[12:]
             checkGlobal = False
@@ -331,7 +331,7 @@ class CombinedConfiguration(_AbstractConfiguration):
                 if not ftDict.has_key((section, option)) or \
                         ftDict[(section, option)] != result:
                     checkGlobal = False
-                
+
             # TODO more elegantly
             elif WIKIDEFAULTS.has_key((section, option)):
                 result = default
@@ -350,7 +350,7 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         return result
 
-        
+
     def getDefault(self, section, option):
         """
         Return the default configuration value as string/unicode
@@ -360,12 +360,12 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         result = None
-        
+
         checkWiki = True
         checkGlobal = True
-        
+
         if option.startswith("option/wiki/"):
             option = option[12:]
             checkGlobal = False
@@ -404,10 +404,10 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         checkWiki = True
         checkGlobal = True
-        
+
         if option.startswith("option/wiki/"):
             option = option[12:]
             checkGlobal = False
@@ -430,7 +430,7 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-            
+
         if option.startswith("option/wiki/"):
             option = option[12:]
             self.wikiConfig.set(section, option, value)
@@ -570,10 +570,10 @@ GLOBALDEFAULTS = {
             # 0:Left, 1:Right, 2:Above, 3:Below
     ("main", "viewsTree_position"): u"0",  # Mode how to show the "Views" tree relative to main tree,
             # 0: Not at all, 1:Above, 2:Below, 3:Left, 4:Right
-            
+
         # Actual layout data processed by PersonalWikiFrame.changeLayoutByCf()
         # which in turn calls WindowLayout.WindowSashLayouter.realizeNewLayoutByCf()
-        
+
         # The value is not set directly but generated by
         # WindowLayout.calculateMainWindowLayoutCfString() each time configuration
         # changes by using some of the other layout settings in configuration.
@@ -604,7 +604,7 @@ GLOBALDEFAULTS = {
             # wiki
     ("main", "hotKey_showHide_byApp_isActive"): u"True", # Separate switch to deactivate hotkey
             # without deleting the hotkey setting itself
-            
+
     ("main", "wikiOpenNew_defaultDir"): u"",   # Default directory to show when opening
             # or creating a wiki. If entry is empty, a built-in default is used.
 
@@ -615,7 +615,7 @@ GLOBALDEFAULTS = {
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "5",  # Seconds to wait after last key pressed and ...
     ("main", "auto_save_delay_dirty"): "60",  # secs. to wait after page became dirty before auto save
-     
+
     ("main", "hideundefined"): "False", # hide undefined wikiwords in tree
     ("main", "tree_auto_follow"): "True", # The tree selection follows when opening a wiki word
     ("main", "tree_update_after_save"): "True", # The tree is updated after a save
@@ -706,10 +706,12 @@ GLOBALDEFAULTS = {
     ("main", "editor_imagePaste_quality"): "75",  # Which quality should the (JPEG-)image have?
             # 0 zero means very bad, 100 means very good
     ("main", "editor_imagePaste_askOnEachPaste"): "True",  # When pasting image, ask each time for settings?
+    ("main", "editor_imagePaste_alwaysGetTextOnly"): "False",  # When about to paste an image, paste text instead
+    ("main", "editor_imagePaste_getTextOnlyFromWmf"): "False",  # When about to paste WMF image, paste text instead (if included in data)
     ("main", "editor_filePaste_prefix"): "",  # When dropping files into editor, how to prefix, join(middle) and suffix them?
     ("main", "editor_filePaste_middle"): "\\x20",  # These three values are escaped with StringOps.escapeForIni to preserve spaces
-    ("main", "editor_filePaste_suffix"): "",  
-    ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with 
+    ("main", "editor_filePaste_suffix"): "",
+    ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with
             # spaces in it preserved unquoted)?
 
     ("main", "userEvent_event/paste/editor/files"): u"action/editor/this/paste/files/insert/url/ask",  # How to react on pasting files into editor?
@@ -752,7 +754,7 @@ GLOBALDEFAULTS = {
 
     ("main", "mouse_scrollUnderPointer"): "False", # Windows only, experimental, incomplete: Scroll window under pointer instead
             # of focused window
-            
+
     ("main", "mouse_reverseWheelZoom"): "False", # Normally (since 2.3beta13) upward is zoom in, downward is zoom out.
             # If this settings is true this is reversed for editor and internal HTML-preview (other previews not supported)
 
@@ -777,11 +779,11 @@ GLOBALDEFAULTS = {
     ("main", "timeView_position"): "0",  # Mode where to place the time view window,
             # 0: Hidden, 1:Left, 2:Right, 3:Above, 4:Below
     ("main", "timeView_dateFormat"): u"%Y %m %d",  # Time format to show and enter dates in the time view,
-            # especially in the timeline    
+            # especially in the timeline
     ("main", "timeView_autohide"): "False", # Automatically hide time view after something was selected in it.
     ("main", "timeView_showWordListOnHovering"): u"True", # If True the wordlist of a date is shown when hovering
             # over the entry
-    ("main", "timeView_showWordListOnSelect"): u"False", # If True the wordlist of a date is shown when 
+    ("main", "timeView_showWordListOnSelect"): u"False", # If True the wordlist of a date is shown when
             # entry is selected
     ("main", "timeView_lastSelectedTab"): u"modified", # Which tab was selected last when closing WikidPad?
             # "modified": Modified time, "version": Versioning tab
@@ -835,7 +837,7 @@ GLOBALDEFAULTS = {
     ("main", "windowmode"): "0",
     ("main", "frame_stayOnTop"): "False",  # Should frame stay on top of all other windows?
     ("main", "showontray"): "0",
-    ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed  
+    ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed
     ("main", "mainTabs_switchMruOrder"): "True", # Switch between tabs in most-recently used order
     ("main", "startup_splashScreen_show"): "True", # Show splash screen on startup
     ("main", "openWordDialog_askForCreateWhenNonexistingWord"): "True", # Ask if to create
@@ -861,7 +863,7 @@ GLOBALDEFAULTS = {
             # are stored relative to application dir.
     ("main", "openWikiWordDialog_sortOrder"): "0", # Sort order in "Open Wiki Word" dialog
             # 0:Alphabetically; 1:By last visit, newest first; 2:By last visit, oldest first; 3:Alphabetically reverse
-    
+
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
     ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inorder (AaBbCc)
 
@@ -928,7 +930,7 @@ WIKIDEFAULTS = {
     ("main", "db_pagefile_suffix"): u".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
     ("main", "export_default_dir"): u"",  # Default directory for exports, u"" means fill in last active directory
-    
+
     ("main", "wiki_readOnly"): u"False",   # Should wiki be read only?
 
     ("main", "log_window_autoshow"): u"Gray", # Automatically show log window if messages added? "Gray" means to look at
@@ -954,7 +956,7 @@ WIKIDEFAULTS = {
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): u"False",  # Modification date must match for file to be identical
-    ("main", "fileStorage_identity_filenameMustMatch"): u"False",  # Filename must match for file 
+    ("main", "fileStorage_identity_filenameMustMatch"): u"False",  # Filename must match for file
     ("main", "fileStorage_identity_modDateIsEnough"): u"False",
             # Same modification date is enough to claim files identical (no content compare)
 
@@ -994,7 +996,7 @@ WIKIFALLTHROUGH ={
 
 
 
-# Maps configuration setting "mouse_middleButton_withoutCtrl" number to a 
+# Maps configuration setting "mouse_middleButton_withoutCtrl" number to a
 # tabMode number for WikiTxtCtrl._activateLink or WikiHtmlView._activateLink
 MIDDLE_MOUSE_CONFIG_TO_TABMODE = {
                                     0: 2, # New tab in foreground
@@ -1008,12 +1010,12 @@ MIDDLE_MOUSE_CONFIG_TO_TABMODE = {
 # def createCombinedConfiguration():
 #     return CombinedConfiguration(createGlobalConfiguration(),
 #             createWikiConfiguration())
-#             
-# 
+#
+#
 # def createWikiConfiguration():
 #     return SingleConfiguration(WIKIDEFAULTS)
-# 
-# 
+#
+#
 # def createGlobalConfiguration():
 #     return SingleConfiguration(GLOBALDEFAULTS)
 
