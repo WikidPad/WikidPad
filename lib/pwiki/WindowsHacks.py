@@ -54,16 +54,16 @@ FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000
 
 SetClipboardViewer = _user32dll.SetClipboardViewer
 # HWND SetClipboardViewer(
-# 
-#     HWND hWndNewViewer 	// handle of clipboard viewer window  
+#
+#     HWND hWndNewViewer 	// handle of clipboard viewer window
 #    );
 
 
 ChangeClipboardChain = _user32dll.ChangeClipboardChain
 # BOOL ChangeClipboardChain(
-# 
-#     HWND hWndRemove,	// handle to window to remove  
-#     HWND hWndNewNext 	// handle to next window 
+#
+#     HWND hWndRemove,	// handle to window to remove
+#     HWND hWndNewNext 	// handle to next window
 #    );
 
 
@@ -77,7 +77,7 @@ OpenClipboard = _user32dll.OpenClipboard
 
 CloseClipboard = _user32dll.CloseClipboard
 # BOOL CloseClipboard(
-#     VOID 
+#     VOID
 #    );
 
 
@@ -134,7 +134,7 @@ DeleteMetaFile = _gdi32dll.DeleteMetaFile
 
 SendMessage = _user32dll.SendMessageA
 # SendMessage(
-# 
+#
 #     HWND hWnd,	// handle of destination window
 #     UINT Msg,	// message to send
 #     WPARAM wParam,	// first message parameter
@@ -146,7 +146,7 @@ SendMessage = _user32dll.SendMessageA
 
 SetWindowLong = _user32dll.SetWindowLongA
 # LONG SetWindowLong(
-# 
+#
 #     HWND hWnd,	// handle of window
 #     int nIndex,	// offset of value to set
 #     LONG dwNewLong 	// new value
@@ -172,7 +172,7 @@ GetLastError = _kernel32dll.GetLastError
 
 CallWindowProc = _user32dll.CallWindowProcA
 # LRESULT CallWindowProc(
-# 
+#
 #     WNDPROC lpPrevWndFunc,	// pointer to previous procedure
 #     HWND hWnd,	// handle to window
 #     UINT Msg,	// message
@@ -183,13 +183,13 @@ CallWindowProc = _user32dll.CallWindowProcA
 
 MultiByteToWideChar = _kernel32dll.MultiByteToWideChar
 # int MultiByteToWideChar(
-# 
-#     UINT CodePage,	// code page 
-#     DWORD dwFlags,	// character-type options 
-#     LPCSTR lpMultiByteStr,	// address of string to map 
-#     int cchMultiByte,	// number of characters in string 
-#     LPWSTR lpWideCharStr,	// address of wide-character buffer 
-#     int cchWideChar 	// size of buffer 
+#
+#     UINT CodePage,	// code page
+#     DWORD dwFlags,	// character-type options
+#     LPCSTR lpMultiByteStr,	// address of string to map
+#     int cchMultiByte,	// number of characters in string
+#     LPWSTR lpWideCharStr,	// address of wide-character buffer
+#     int cchWideChar 	// size of buffer
 #    );
 
 
@@ -210,7 +210,7 @@ VkKeyScan.argtypes = [ctypes.c_wchar]
 WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
         ctypes.c_uint, ctypes.c_ulong)
 # LRESULT CALLBACK WindowProc(
-# 
+#
 #     HWND hwnd,	// handle of window
 #     UINT uMsg,	// message identifier
 #     WPARAM wParam,	// first message parameter
@@ -227,15 +227,15 @@ except AttributeError:
     ShellExecuteW = None
 
 # HINSTANCE ShellExecute(
-# 
+#
 #     HWND hwnd,	// handle to parent window
 #     LPCTSTR lpOperation,	// pointer to string that specifies operation to perform
 #     LPCTSTR lpFile,	// pointer to filename or folder name string
-#     LPCTSTR lpParameters,	// pointer to string that specifies executable-file parameters 
+#     LPCTSTR lpParameters,	// pointer to string that specifies executable-file parameters
 #     LPCTSTR lpDirectory,	// pointer to string that specifies default directory
 #     INT nShowCmd 	// whether file is shown when opened
 #    );
-#    
+#
 
 
 
@@ -288,15 +288,15 @@ except AttributeError:
 if SHFileOperationW is not None:
     def _shellFileOp(opcode, srcPath, dstPath):
         fileOp = SHFILEOPSTRUCTW()
-        
+
         srcPathWc = ctypes.c_wchar_p(srcPath + u"\0")
-    
+
         fileOp.hwnd = 0
         fileOp.wFunc = opcode
         fileOp.pFrom = srcPathWc
         if dstPath is not None:
             dstDir = os.path.dirname(dstPath)
-                
+
             if not os.path.exists(pathEnc(dstDir)):
                 os.makedirs(dstDir)
 
@@ -335,17 +335,17 @@ if SHFileOperationW is not None:
         Copy file from srcPath to dstPath. dstPath may be overwritten if
         existing already. dstPath must point to a file, not a directory.
         If some directories in dstPath do not exist, they are created.
-        
+
         This function only works on Win NT!
         """
         _shellFileOp(FO_COPY, srcPath, dstPath)
-    
+
     def moveFile(srcPath, dstPath):
         """
         Move file from srcPath to dstPath. dstPath may be overwritten if
         existing already. dstPath must point to a file, not a directory.
         If some directories in dstPath do not exist, they are created.
-        
+
         This function only works on Win NT!
         """
         _shellFileOp(FO_MOVE, srcPath, dstPath)
@@ -353,7 +353,7 @@ if SHFileOperationW is not None:
     def deleteFile(path):
         """
         Delete file or directory  path.
-        
+
         This function only works on Win NT!
         """
         if os.path.isfile(path) or os.path.islink(path):
@@ -371,38 +371,62 @@ def _getMemoryContentFromHandle(hdl):
         return None
     try:
         size = GlobalSize(hdl)
-        
+
         return string_at(pt, size)
     finally:
         GlobalUnlock(hdl)
+
+
+def isWmfInClipboard():
+    """
+    Check whether there is raw Windows meta data file in current clipboard.
+    Return True/False.
+    """
+    OpenClipboard(0)
+    try:
+        if IsClipboardFormatAvailable(CF_METAFILEPICT) == 0:
+            return False
+
+        hdl = GetClipboardData(CF_METAFILEPICT)
+        if hdl == 0:
+            return False
+
+        data = _getMemoryContentFromHandle(hdl)
+        if data is None:
+            return False
+
+    finally:
+        CloseClipboard()
+
+    return True
 
 
 def saveWmfFromClipboardToFileStorage(fs, prefix):
     """
     Retrieve raw Windows meta data file from clipboard. Return None,
     if not present.
-    
+
     fs -- FileStorage to save to
-    
+
     Returns path to new file or None.
     """
     OpenClipboard(0)
     try:
         if IsClipboardFormatAvailable(CF_METAFILEPICT) == 0:
             return None
-        
+
         hdl = GetClipboardData(CF_METAFILEPICT)
         if hdl == 0:
             return None
-        
+
         data = _getMemoryContentFromHandle(hdl)
         if data is None:
             return None
-        
+
         hdl = struct.unpack("lllI", data)[3]
-        
+
         destPath = fs.findDestPathNoSource(u".wmf", prefix)
-        
+
         if destPath is None:
             # Couldn't find unused filename
             return None
@@ -432,7 +456,7 @@ GetLongPathName = _kernel32dll.GetLongPathNameW
 def getLongPath(path):
     if isinstance(path, str):
         path = mbcsDec(path)[0]
-    
+
     if not isinstance(path, unicode):
         return path
 
@@ -447,7 +471,7 @@ def getLongPath(path):
     if rv > 1024:
         result = create_unicode_buffer(rv)
         rv = GetLongPathName(u"\\\\?\\" + path, result, rv)
-        
+
         if rv == 0:
             return path
 
@@ -459,7 +483,7 @@ def getErrorMessageFromCode(errCode):
 
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
             0, errCode, 0, result, 1024, 0)
-    
+
     return result.value
 
 
@@ -484,7 +508,7 @@ def ansiInputToUnicodeChar(ansiCode):
 
     # get current locale
     lcid = _user32dll.GetKeyboardLayout(0) & 0xffff
-    
+
     # get codepage for locale
     currAcpStr = (c_char * 50)()
 
@@ -495,13 +519,13 @@ def ansiInputToUnicodeChar(ansiCode):
         codepage = int(currAcpStr.value)
     except:
         return unichr(ansiCode)
-        
+
     ansiByte = c_byte(ansiCode)
     uniChar = (c_ushort * 2)()
-    
+
     length = MultiByteToWideChar(codepage, MB_PRECOMPOSED, byref(ansiByte), 1,
             byref(uniChar), 2)
-            
+
     if length == 0:
         # function failed, fallback
         return unichr(ansiCode)
@@ -521,7 +545,7 @@ if ShellExecuteW:
         # TODO Test result?
         res = _shell32dll.ShellExecuteW(0, 0, ctypes.c_wchar_p(link), 0, 0,
                 SW_SHOW)
-                
+
         return res
 
 
@@ -550,7 +574,7 @@ def translateAcceleratorByKbLayout(accStr):
         # Build mapping
 
         result = {}
-        
+
         # Dictionary for alternative detection method
         resultBack = {}
 
@@ -584,7 +608,7 @@ def translateAcceleratorByKbLayout(accStr):
                 continue
 
             result[targetChar] = unichr(char)
-            
+
         # If result and resultBack have a key, result wins
         resultBack.update(result)
         _ACCEL_KEY_MAPPING = resultBack
@@ -607,12 +631,12 @@ class WinProcParams:
         self.wParam = wParam
         self.lParam = lParam
         self.returnValue = None
-        
+
 
 class BaseWinInterceptor:
     def __init__(self):
         pass
-        
+
     def addInterceptCollection(self, interceptCollection):
         """
         Called automatically if interceptor is added to an
@@ -651,7 +675,7 @@ class BaseWinInterceptor:
         uninterception doesn't happen (this may be dangerous).
         """
         return True
-        
+
     def stopAfterUnintercept(self, interceptCollection):
         """
         Called for each interceptor of a collection after the actual
@@ -664,7 +688,7 @@ class BaseWinInterceptor:
         """
         Called for each Windows message to the intercepted window. This is
         the ANSI-style method, wide-char is not supported.
-        
+
         params -- WinProcParams object containing parameters the function can
                 modify and a returnValue which can be set to prevent
                 from calling interceptWinProc functions
@@ -686,9 +710,9 @@ class WinProcInterceptCollection:
         self.ctWinProcStub = None
         self.hWnd = None
         self.interceptors = []
-        
+
         self.winParams = WinProcParams()
-        
+
         if interceptors is not None:
             for icept in interceptors:
                 self.addInterceptor(icept)
@@ -708,10 +732,10 @@ class WinProcInterceptCollection:
 
         for icept in self.interceptors:
             icept.removeInterceptCollection(self)
-        
+
         self.interceptors = []
-    
-    
+
+
     def close(self):
         self.clear()
 
@@ -723,11 +747,11 @@ class WinProcInterceptCollection:
     def start(self, callingWindow):
         if self.isIntercepting():
             return False
-            
+
         for icept in self.interceptors:
             if not icept.startBeforeIntercept(self):
                 return False
-        
+
         self.intercept(callingWindow)
 
         for icept in self.interceptors:
@@ -735,23 +759,23 @@ class WinProcInterceptCollection:
                 icept.startAfterIntercept(self)
             except:
                 traceback.print_exc()
-                
+
         return True
 
 
     def stop(self):
         if not self.isIntercepting():
             return False
-            
+
         for icept in self.interceptors:
             try:
                 if not icept.stopBeforeUnintercept(self):
                     return False
             except:
                 traceback.print_exc()
-        
+
         self.unintercept()
-        
+
         for icept in self.interceptors:
             try:
                 icept.stopAfterUnintercept(self)
@@ -776,7 +800,7 @@ class WinProcInterceptCollection:
     def unintercept(self):
         if not self.isIntercepting():
             return
-            
+
         SetWindowLong(c_int(self.hWnd), c_int(GWL_WNDPROC),
                 c_int(self.oldWndProc))
 
@@ -787,14 +811,14 @@ class WinProcInterceptCollection:
 
     def isIntercepting(self):
         return self.hWnd is not None
-        
+
 
     def _lastWinProc(self, params):
         """
         This default function reacts only on a WM_DESTROY message and
         stops interception. All messages are sent to the original WinProc
         """
-        
+
         if params.uMsg == WM_DESTROY and params.hWnd == self.hWnd:
             self.stop()
 
@@ -812,14 +836,14 @@ class WinProcInterceptCollection:
                 icept.interceptWinProc(self, params)
             except:
                 traceback.print_exc()
-            
+
             if params.returnValue is not None:
                 return params.returnValue
-        
+
         self._lastWinProc(params)
         return params.returnValue
 
-        
+
 
 
 
@@ -829,7 +853,7 @@ class WinProcInterceptCollection:
 #     """
 #     def winProc(self, hWnd, uMsg, wParam, lParam):
 #         print "Intercept1", repr((uMsg, wParam, lParam))
-#         
+#
 #         return BaseWinProcIntercept.winProc(self, hWnd, uMsg, wParam, lParam)
 
 
@@ -840,10 +864,10 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
     MODE_OFF = 0
     MODE_AT_PAGE = 1
     MODE_AT_CURSOR = 2
-    
+
     def __init__(self, mainControl):
         BaseWinInterceptor.__init__(self)
-        
+
         self.hWnd = None
         self.nextWnd = None
 
@@ -857,7 +881,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
 
     def getMode(self):
         return self.mode
-        
+
     def _cbViewerChainIn(self):
         """
         Hook into clipboard viewer chain.
@@ -891,7 +915,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
             self.mainControl.displayErrorMessage(
                     _(u"Only a real wiki page can be a clipboard catcher"))
             return
-            
+
         self.lastText = None
         self.wikiPage = wikiPage
         self.mode = ClipboardCatchIceptor.MODE_AT_PAGE
@@ -921,7 +945,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         if self.mode == ClipboardCatchIceptor.MODE_AT_CURSOR:
             self.ignoreNextCCMessage = True
             self.lastText = None
-    
+
     def informCopyInWikidPadStop(self):
         pass
 
@@ -947,7 +971,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         """
         Called for each Windows message to the intercepted window. This is
         the ANSI-style method, wide-char is not supported.
-        
+
         params -- WinProcParams object containing parameters the function can
                 modify and a returnValue which can be set to prevent
                 from calling interceptWinProc functions
@@ -956,7 +980,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
             if self.nextWnd == params.wParam:
                 # repair the chain
                 self.nextWnd = params.lParam
-    
+
             if self.nextWnd:  # Neither None nor 0
                 # pass the message to the next window in chain
                 SendMessage(c_int(self.nextWnd), c_int(params.uMsg),
@@ -1015,7 +1039,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
 
         if self.mode == ClipboardCatchIceptor.MODE_OFF:
             return
-            
+
         if self.mainControl.getConfig().getboolean("main",
                 "clipboardCatcher_filterDouble", True) and self.lastText == text:
             # Same text shall be inserted again
@@ -1026,11 +1050,11 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
                 return
             self.wikiPage.appendLiveText(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
-            
+
         elif self.mode == ClipboardCatchIceptor.MODE_AT_CURSOR:
             self.mainControl.getActiveEditor().ReplaceSelection(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
-            
+
         self.lastText = text
 
 
@@ -1052,7 +1076,7 @@ class BrowserMoveIceptor(BaseWinInterceptor):
     """
     def __init__(self, mainControl):
         BaseWinInterceptor.__init__(self)
-        
+
         self.mainControl = mainControl
 
 
@@ -1062,8 +1086,8 @@ class BrowserMoveIceptor(BaseWinInterceptor):
 #         intercept happened.
 #         """
 #         self.hWnd = interceptCollection.getHWnd()
-# 
-# 
+#
+#
 #     def stopAfterUnintercept(self, interceptCollection):
 #         """
 #         Called for each interceptor of a collection after the actual
@@ -1077,7 +1101,7 @@ class BrowserMoveIceptor(BaseWinInterceptor):
         """
         Called for each Windows message to the intercepted window. This is
         the ANSI-style method, wide-char is not supported.
-        
+
         params -- WinProcParams object containing parameters the function can
                 modify and a returnValue which can be set to prevent
                 from calling interceptWinProc functions

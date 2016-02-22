@@ -1368,7 +1368,23 @@
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbEditorImagePasteAskOnEachPaste">
-          <label>Ask settings on each paste</label>
+          <label>Ask settings on each image paste</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbEditorImagePasteAlwaysGetTextOnly">
+          <label>Always paste text instead of image</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbEditorImagePasteGetTextOnlyFromWmf">
+          <label>WMF data: Paste text instead of image</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>

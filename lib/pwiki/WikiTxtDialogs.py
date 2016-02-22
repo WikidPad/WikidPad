@@ -31,10 +31,10 @@ except:
 
 
 class IncrementalSearchDialog(wx.Frame):
-    
+
     COLOR_YELLOW = wx.Colour(255, 255, 0);
     COLOR_GREEN = wx.Colour(0, 255, 0);
-    
+
     def __init__(self, parent, id, txtCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
@@ -194,7 +194,7 @@ class FilePasteParams:
         self.rawSuffix = u""  # Suffix after links
         self.bracketedUrl = True
 
-        self.unifActionName = None  # Unified name of the action to do 
+        self.unifActionName = None  # Unified name of the action to do
         self.defaultUnifActionName = None  # If action is ask, this is the default
                 # to show in dialog
 #         self.actionParamDict = None  # Parameter dict of action
@@ -222,7 +222,7 @@ class FilePasteParams:
 
 
 class FilePasteDialog(wx.Dialog, ModalDialogMixin):
-    
+
     _ACTIONSEL_TO_UNIFNAME = (
             u"action/editor/this/paste/files/insert/url/absolute",
             u"action/editor/this/paste/files/insert/url/relative",
@@ -230,7 +230,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
             u"action/editor/this/paste/files/insert/url/movetostorage"
         )
 
-    
+
     def __init__(self, pWiki, ID, filepastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
@@ -249,7 +249,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.tfEditorFilePasteMiddle.SetValue(filepastesaver.rawMiddle)
         self.ctrls.tfEditorFilePasteSuffix.SetValue(filepastesaver.rawSuffix)
         self.ctrls.cbEditorFilePasteBracketedUrl.SetValue(filepastesaver.bracketedUrl)
-        
+
         try:
             self.ctrls.chEditorFilePasteOperation.SetSelection(
                     self._ACTIONSEL_TO_UNIFNAME.index(filepastesaver.defaultUnifActionName))
@@ -260,7 +260,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
-        
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
@@ -297,7 +297,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
 
 class ImagePasteSaver:
     """
-    Helper class to store image settings (format, quality) and to 
+    Helper class to store image settings (format, quality) and to
     perform saving on request.
     """
     def __init__(self):
@@ -327,7 +327,7 @@ class ImagePasteSaver:
             quality = int(s)
             quality = min(100, quality)
             quality = max(0, quality)
-    
+
             self.quality = quality
         except ValueError:
             return
@@ -354,7 +354,7 @@ class ImagePasteSaver:
 
         img.SetOptionInt(u"quality", self.quality)
 
-        tempFileSet = TempFileSet() 
+        tempFileSet = TempFileSet()
 
         if self.formatNo == 1:   # PNG
             file_suffix = u".png"
@@ -392,10 +392,17 @@ class ImagePasteSaver:
         return destPath
 
 
+    def isWmfInClipboard(self):
+        if WindowsHacks is None:
+            return None
+
+        return WindowsHacks.isWmfInClipboard()
+
+
     def saveWmfFromClipboardToFileStorage(self, fs):
         if WindowsHacks is None:
             return None
-        
+
         return WindowsHacks.saveWmfFromClipboardToFileStorage(fs, self.prefix)
 
 
@@ -407,7 +414,7 @@ class ImagePasteSaver:
         Returns absolute path of saved image or None if not saved
         """
         destPath = fs.findDestPathNoSource(u".wmf", self.prefix)
-        
+
         if destPath is None:
             # Couldn't find unused filename
             return None
@@ -417,7 +424,7 @@ class ImagePasteSaver:
         metaDC.Close()
 
 #         writeEntireFile(destPath, rawData)
-        
+
         return destPath
 
 
@@ -442,10 +449,10 @@ class ImagePasteDialog(wx.Dialog):
         self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
         self.ctrls.tfEditorImagePasteQuality.SetValue(unicode(
                 imgpastesaver.quality))
-        
+
         self.origImage = img
         self.origImgWidth, self.origImgHeight = img.GetSize()
-        
+
         self.bitmapControl = wx.StaticBitmap(self.ctrls.pnImagePreviewContainer,
                 -1, wx.NullBitmap)
 
@@ -453,10 +460,10 @@ class ImagePasteDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
-        
+
         self.OnFileTypeChoice(None)
         self.OnSizePreviewBitmapContainer(None)
-        
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
@@ -470,7 +477,7 @@ class ImagePasteDialog(wx.Dialog):
 
     def getImagePasteSaver(self):
         return self.imgpastesaver
-        
+
     def OnFileTypeChoice(self, evt):
         # Make quality field gray if not JPG format
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
@@ -497,7 +504,7 @@ class ImagePasteDialog(wx.Dialog):
 
         newWidth, newHeight = Utilities.calcResizeArIntoBoundingBox(
                 self.origImgWidth, self.origImgHeight, bbWidth, bbHeight)
-                
+
         img_resize = self.origImage.Scale(newWidth, newHeight,
                 quality = wx.IMAGE_QUALITY_HIGH)
 
@@ -511,7 +518,7 @@ class RenameFileDialog(wx.Dialog):
     def __init__(self, parent, caption, title, filename):
         style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         super(RenameFileDialog, self).__init__(parent, -1, title, style=style)
-        
+
         self.selectionSet = False
 
         text = wx.StaticText(self, -1, caption)
@@ -529,17 +536,17 @@ class RenameFileDialog(wx.Dialog):
 
         wx.EVT_SET_FOCUS(self.text_ctrl, self.OnFocus)
         self.text_ctrl.SetFocus()
-        
+
 
     def OnFocus(self, evt):
-        
+
         if self.selectionSet:
             return
 
         wx.CallAfter(self.RemoveExtensionFromSelection)
-        
+
         self.selectionSet = True
-        
+
 
     def RemoveExtensionFromSelection(self):
         # Remove selection from extension (if one exists)
