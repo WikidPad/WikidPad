@@ -189,6 +189,8 @@ class SizeValue(object):
             self.unit = SizeValue.UNIT_INVALID
             return False
 
+    def __repr__(self):
+        return "<SizeValue value={0} type={1}>".format(self.value, self.unit)
 
 
 HOR_ALIGN_CSS_ATTR = {
@@ -2438,6 +2440,10 @@ class HtmlExporter(AbstractExporter):
                                         appendixDict.has_key("upright") and
                                         strToBool(appendixDict.get("upright"),
                                         True))
+                        
+                        # Round dimensions to integers (and ensure they are non-negative)
+                        imgWidth = max(0, int(round(imgWidth)))
+                        imgHeight = max(0, int(round(imgHeight)))
 
                         attribs.append(u'width="{0}" height="{1}"'.format(
                                 imgWidth, imgHeight))
