@@ -4,9 +4,11 @@ import string, locale, codecs, os, sys, os.path, traceback
 
 import Consts
 
-from rtlibRepl import minidom
+from .rtlibRepl import minidom
 
-from StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
+from .StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
+
+import wx
 
 
 CASEMODE_UPPER_INSIDE = 0   # Sort upper case inside like aAbBcC
@@ -175,6 +177,10 @@ class _PythonCollator(AbstractCollator):
         self.locStr = locStr
         self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
 
+        langInfo = wx.Locale.FindLanguageInfo(locStr)
+        if langInfo is not None:
+            wx.Locale(langInfo.Language)
+
     def strcoll(self, left, right):
         return locale.strcoll(left, right)
         
@@ -191,10 +197,13 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
     """
     def __init__(self, locStr):
         """
-        caseMode -- ignored here
         """
         self.locStr = locStr
         self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
+
+        langInfo = wx.Locale.FindLanguageInfo(locStr)
+        if langInfo is not None:
+            wx.Locale(langInfo.Language)
 
     def strcoll(self, left, right):
         ml = min(len(left), len(right))

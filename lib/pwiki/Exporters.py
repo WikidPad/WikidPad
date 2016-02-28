@@ -10,30 +10,30 @@ from cStringIO import StringIO
 import shutil
 ## from xml.sax.saxutils import escape
 
-import urllib_red as urllib
+from . import urllib_red as urllib
 
 import wx
-from rtlibRepl import minidom
+from .rtlibRepl import minidom
 
-from wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
+from .wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
 
 import Consts
-from WikiExceptions import WikiWordNotFoundException, ExportException
-from ParseUtilities import getFootnoteAnchorDict
-from StringOps import *
+from .WikiExceptions import WikiWordNotFoundException, ExportException
+from .ParseUtilities import getFootnoteAnchorDict
+from .StringOps import *
 from . import StringOps
-import Serialization
-from WikiPyparsing import StackedCopyDict, SyntaxNode
-from TempFileSet import TempFileSet
+from . import Serialization
+from .WikiPyparsing import StackedCopyDict, SyntaxNode
+from .TempFileSet import TempFileSet
 
-from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
+from .SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
 
-import SystemInfo, PluginManager
+from . import SystemInfo, PluginManager
 
-import OsAbstract
+from . import OsAbstract
 
-import DocPages
+from . import DocPages
 
 
 
@@ -821,6 +821,8 @@ class MultiPageTextExporter(AbstractExporter):
                             self._writeHintedDatablock(un, False)
 
                     locale.setlocale(locale.LC_ALL, '')
+                    
+                    wx.Locale(wx.LANGUAGE_DEFAULT)
     
                     # Write actual wiki words
                     for word in self.wordList:
