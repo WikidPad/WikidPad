@@ -498,8 +498,6 @@ class OptionsDialog(wx.Dialog):
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
             ("editor_imagePaste_quality", "tfEditorImagePasteQuality", "i0+"),
             ("editor_imagePaste_askOnEachPaste", "cbEditorImagePasteAskOnEachPaste", "b"),
-            ("editor_imagePaste_alwaysGetTextOnly", "cbEditorImagePasteAlwaysGetTextOnly", "b"),
-            ("editor_imagePaste_getTextOnlyFromWmf", "cbEditorImagePasteGetTextOnlyFromWmf", "b"),
             ("editor_filePaste_prefix", "tfEditorFilePastePrefix", "tes"),
             ("editor_filePaste_middle", "tfEditorFilePasteMiddle", "tes"),
             ("editor_filePaste_suffix", "tfEditorFilePasteSuffix", "tes"),

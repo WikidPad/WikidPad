@@ -706,8 +706,6 @@ GLOBALDEFAULTS = {
     ("main", "editor_imagePaste_quality"): "75",  # Which quality should the (JPEG-)image have?
             # 0 zero means very bad, 100 means very good
     ("main", "editor_imagePaste_askOnEachPaste"): "True",  # When pasting image, ask each time for settings?
-    ("main", "editor_imagePaste_alwaysGetTextOnly"): "False",  # When about to paste an image, paste text instead
-    ("main", "editor_imagePaste_getTextOnlyFromWmf"): "False",  # When about to paste WMF image, paste text instead (if included in data)
     ("main", "editor_filePaste_prefix"): "",  # When dropping files into editor, how to prefix, join(middle) and suffix them?
     ("main", "editor_filePaste_middle"): "\\x20",  # These three values are escaped with StringOps.escapeForIni to preserve spaces
     ("main", "editor_filePaste_suffix"): "",

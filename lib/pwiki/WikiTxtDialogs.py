@@ -392,13 +392,6 @@ class ImagePasteSaver:
         return destPath
 
 
-    def isWmfInClipboard(self):
-        if WindowsHacks is None:
-            return None
-
-        return WindowsHacks.isWmfInClipboard()
-
-
     def saveWmfFromClipboardToFileStorage(self, fs):
         if WindowsHacks is None:
             return None
