@@ -5,12 +5,14 @@ import wx, wx.xrc
 from wxHelper import *
 
 from . import SystemInfo
+from . import Utilities
 
 from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
         rgbToHtmlColor, strToBool, splitIndent, escapeForIni, unescapeForIni
 
 from .AdditionalDialogs import DateformatDialog, FontFaceDialog
 
+from .WikiTxtCtrl import WikiTxtCtrl
 
 from . import Localization
 from . import OsAbstract
@@ -721,6 +723,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageHtml", 2 * u" " + N_(u"HTML preview/export")),
             ("OptionsPageHtmlHeader", 4 * u" " + N_(u"HTML header")),
             ("OptionsPageEditor", 2 * u" " + N_(u"Editor")),
+            ("OptionsPageEditorPasteDrop", 4 * u" " + N_(u"Editor Paste/Drag'n'Drop")),
             ("OptionsPageEditorColors", 4 * u" " + N_(u"Editor Colors")),
             ("OptionsPageClipboardCatcher", 4 * u" " + N_(u"Clipboard Catcher")),
             ("OptionsPageFileLauncher", 2 * u" " + N_(u"File Launcher")),
@@ -803,39 +806,6 @@ class OptionsDialog(wx.Dialog):
 
         self.combinedPanelList = newPL
 
-
-
-#         if SystemInfo.isWindows():
-#             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
-#
-#             newPL = []
-#             for e in self.combinedPanelList:
-#                 if isinstance(e[0], basestring):
-#                     if e[0] == "OptionsPageFileLauncher":
-#                         continue
-#                     if e[0].startswith("??"):
-#                         # Entry is only a mark for insert operations so skip it
-#                         continue
-#
-#                 newPL.append(e)
-#
-#             self.combinedPanelList = newPL
-#         else:
-#             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
-#
-#             newPL = []
-#             for i, e in enumerate(self.combinedPanelList):
-#                 if isinstance(e[0], basestring):
-#                     if e[0] == "OptionsPageClipboardCatcher":
-#                         continue
-#                     if e[0].startswith("??"):
-#                         # Entry is only a mark for insert operations so skip it
-#                         continue
-#
-#                 newPL.append(e)
-#
-#             self.combinedPanelList = newPL
-
         self.ctrls = XrcControls(self)
 
         self.emptyPanel = None
@@ -876,6 +846,8 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
         # Special options to be prepared before transferring to dialog
+        
+        # HTML renderer (OS specific)
         self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData = [0]
         if WikiHtmlView.WikiHtmlViewIE is not None:
             self.ctrls.chHtmlPreviewRenderer.Append(_(u"IE"))
@@ -894,6 +866,24 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.chHtmlPreviewRenderer.Enable(
                 len(self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData) > 1)
 
+        # Reorderable paste type list
+        
+        # Retrieve default and configured paste order
+        defPasteOrder = self.pWiki.getConfig().getDefault("main",
+                "editor_paste_typeOrder").split(";")
+        pasteOrder = self.pWiki.getConfig().get("main",
+                "editor_paste_typeOrder", "").split(";")
+
+        # Use default paste order to constrain which items are allowed and
+        # necessary in configured paste order
+        pasteOrder = Utilities.seqEnforceContained(pasteOrder, defPasteOrder)
+        
+        pasteLabels = [WikiTxtCtrl.getHrNameForPasteType(pasteType)
+                for pasteType in pasteOrder]
+        
+        self.ctrls.rlPasteTypeOrder.SetLabelsAndClientDatas(pasteLabels,
+                pasteOrder)
+                
         # Transfer options to dialog
         for oct in self.combinedOptionToControl:
             o, c, t = oct[:3]
@@ -1039,6 +1029,12 @@ class OptionsDialog(wx.Dialog):
         wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,
                 lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
                 _(u"All files (*.*)|*")))
+
+        wx.EVT_BUTTON(self, GUI_ID.btnPasteTypeOrderUp,
+                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp())
+
+        wx.EVT_BUTTON(self, GUI_ID.btnPasteTypeOrderDown,
+                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown())
 
 
         wx.EVT_CHOICE(self, GUI_ID.chTempHandlingTempMode,
@@ -1236,6 +1232,10 @@ class OptionsDialog(wx.Dialog):
 
         if wikiDocument is not None and self.ctrls.cbWikiReadOnly.GetValue():
             wikiDocument.setWriteAccessDeniedByConfig(True)
+            
+        # Store paste type order
+        config.set("main", "editor_paste_typeOrder",
+                ";".join(self.ctrls.rlPasteTypeOrder.GetClientDatas()))
 
         # Ok for each panel
         for panel in self.panelList:

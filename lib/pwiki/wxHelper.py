@@ -1171,6 +1171,88 @@ class ProgressHandler(object):
         self.progDlg = None
 
 
+class ReorderableListBox(wx.ListBox):
+    """
+    Additional functionality: Move selected item one step upward/downward
+    """
+    def __init__(self, *args, **kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            f = wx.PreListBox()
+            self.PostCreate(f)
+            self.Bind(wx.EVT_WINDOW_CREATE, self.OnCreate)
+        else:
+            wx.ListBox.__init__(self, *args, **kwargs)
+            wx.CallAfter(self.__PostInit)
+
+    def OnCreate(self,evt):
+        self.Unbind(wx.EVT_WINDOW_CREATE)
+        wx.CallAfter(self.__PostInit)
+        evt.Skip()
+        return True
+
+    def __PostInit(self):
+        pass
+
+    def MoveSelectedUp(self):
+        """
+        Move currently selected item one up in the list (including associated
+        data if any). Fails silently if not possible.
+        """
+        sel = self.GetSelection()
+        if sel == wx.NOT_FOUND or sel == 0:
+            return
+            
+        data = self.GetClientData(sel)
+        label = self.GetString(sel)
+        self.Delete(sel)
+        
+        self.Insert(label, sel - 1)
+        
+        if data is not None:
+            self.SetClientData(sel - 1, data)
+        
+        self.SetSelection(sel - 1)
+
+
+    def MoveSelectedDown(self):
+        """
+        Move currently selected item one down in the list (including associated
+        data if any). Fails silently if not possible.
+        """
+
+        sel = self.GetSelection()
+        if sel == wx.NOT_FOUND or sel == self.GetCount() - 1:
+            return
+
+        data = self.GetClientData(sel)
+        label = self.GetString(sel)
+        self.Delete(sel)
+
+        self.Insert(label, sel + 1)
+        
+        if data is not None:
+            self.SetClientData(sel + 1, data)
+        
+        self.SetSelection(sel + 1)
+
+
+    def GetClientDatas(self):
+        """
+        Get list of all item data.
+        """
+        return [self.GetClientData(i) for i in xrange(self.GetCount())]
+
+
+    def SetLabelsAndClientDatas(self, labels, datas):
+        with WindowUpdateLocker(self):
+            self.Clear()
+            self.AppendItems(labels)
+            
+            for i, d in enumerate(datas):
+                self.SetClientData(i, d)
+
+
+
 
 class EnhancedListControl(wx.ListCtrl):
     def __init__(self, *args, **kwargs):

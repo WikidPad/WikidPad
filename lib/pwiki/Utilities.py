@@ -621,6 +621,34 @@ def seqStartsWith(seq, startSeq):
 
 
 
+def seqEnforceContained(seq, allowedSeq):
+    """
+    Returns a list with those items of seq which are in allowedSeq
+    plus (appended) items which are in allowedSeq but missing in seq.
+    
+    >>> seqEnforceContained([1,2,5],[1,2,3,4,5])
+    [1, 2, 5, 3, 4]
+    >>> seqEnforceContained([1,2,4,3,7,5],[1,2,3,4,5])
+    [1, 2, 4, 3, 5]
+    >>> seqEnforceContained([1,2,7,5],[1,2,3,4,5])
+    [1, 2, 5, 3, 4]
+    """
+    
+    aSeq = list(allowedSeq)
+    result = []
+    for item in seq:
+        try:
+            pos = aSeq.index(item)
+            result.append(item)
+            del aSeq[pos]
+        except ValueError:
+            pass
+    
+    result.extend(aSeq)
+    
+    return result
+
+
 
 # class FlagHolder(object):
 #     __slots__ = ("__weakref__", "flag")

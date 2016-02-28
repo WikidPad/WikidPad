@@ -712,6 +712,10 @@ GLOBALDEFAULTS = {
     ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with
             # spaces in it preserved unquoted)?
 
+    ("main", "editor_paste_typeOrder"): "files;bitmap;wmf;plainText;rawHtml", # In which order should Paste() look for
+            # types on clipboard (first found is used). Types are separated by ';', mapping to localized human readable
+            # name is provided by WikiTxtCtrl.getHrNameForPasteType(pasteType)
+
     ("main", "userEvent_event/paste/editor/files"): u"action/editor/this/paste/files/insert/url/ask",  # How to react on pasting files into editor?
             # "action/none": Do nothing; "action/editor/this/paste/files/insert/url/absolute" insert absolute urls,
             # ".../relative": relative URLs, ".../tostorage": copy to files storage and create relative URL

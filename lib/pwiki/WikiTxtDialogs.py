@@ -391,6 +391,16 @@ class ImagePasteSaver:
 
         return destPath
 
+    @staticmethod
+    def isWmfAvailableOnClipboard():
+        """
+        Return True iff Windows meta file format is available on clipboard
+        """
+        if WindowsHacks is None:
+            return False
+        
+        return WindowsHacks.isWmfAvailableOnClipboard()
+
 
     def saveWmfFromClipboardToFileStorage(self, fs):
         if WindowsHacks is None:

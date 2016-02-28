@@ -21,7 +21,7 @@ import wx, wx.stc
 from Consts import FormatTypes
 
 from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, \
-        calcResizeArIntoBoundingBox, DictFromFields
+        calcResizeArIntoBoundingBox, DictFromFields, seqEnforceContained
 
 from .wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
@@ -445,88 +445,290 @@ class WikiTxtCtrl(SearchableScintillaControl):
         else:
             copyTextToClipboard(text)
 
-    def Paste(self):
-        # File(name)s pasted?
+
+    _PASTETYPE_TO_HR_NAME_MAP = {
+            u"files": N_(u"File(s)"),
+            u"bitmap": N_(u"Bitmap image"),
+            u"wmf": N_(u"Windows meta file"),
+            u"plainText": N_(u"Plain text"),
+            u"rawHtml": N_(u"HTML"),
+            }
+
+
+    @classmethod
+    def getHrNameForPasteType(cls, pasteType):
+        """
+        Return the human readable name of a paste type.
+        """
+        return _(cls._PASTETYPE_TO_HR_NAME_MAP.get(pasteType, pasteType))
+
+
+    def pasteFiles(self, testOnly=False):
+        """
+        Try to get file(name)s from clipboard and paste it at current
+        cursor position as links.
+        
+        testOnly -- Don't paste, only check if clipboard provides appropriate data
+        
+        Returns True iff successful.
+        """
+        
         filenames = wxHelper.getFilesFromClipboard()
-        if filenames is not None:
-            mc = self.presenter.getMainControl()
-
-            paramDict = {"editor": self, "filenames": filenames,
-                    "x": -1, "y": -1, "main control": mc,
-                    "processDirectly": True}
-
-#             mc.getUserActionCoord().runAction(
-#                     u"action/editor/this/paste/files/insert/url/ask", paramDict)
-
-            mc.getUserActionCoord().reactOnUserEvent(
-                    u"event/paste/editor/files", paramDict)
-
+        if filenames is None:
+            return False
+            
+        if testOnly:
             return True
 
-        fs = self.presenter.getWikiDocument().getFileStorage()
+        mc = self.presenter.getMainControl()
+
+        paramDict = {"editor": self, "filenames": filenames,
+                "x": -1, "y": -1, "main control": mc,
+                "processDirectly": True}
+
+        mc.getUserActionCoord().reactOnUserEvent(
+                u"event/paste/editor/files", paramDict)
+
+        return True
+
+
+    def pasteBitmap(self, testOnly=False):
+        """
+        Try to get image from clipboard and paste it at current
+        cursor position as link.
+        
+        testOnly -- Don't paste, only check if clipboard provides appropriate data
+        
+        Returns True iff successful.
+        """
+
         imgsav = WikiTxtDialogs.ImagePasteSaver()
         imgsav.readOptionsFromConfig(self.presenter.getConfig())
 
         # Bitmap pasted?
         bmp = wxHelper.getBitmapFromClipboard()
-        if bmp is not None:
-            img = bmp.ConvertToImage()
-            del bmp
+        if bmp is None:
+            return False
+        
+        if testOnly:
+            return True
+            
+        img = bmp.ConvertToImage()
+        del bmp
 
-            if self.presenter.getConfig().getboolean("main",
-                    "editor_imagePaste_askOnEachPaste", True):
-                # Options say to present dialog on an image paste operation
-                # Send image so it can be used for preview
-                dlg = WikiTxtDialogs.ImagePasteDialog(
-                        self.presenter.getMainControl(), -1, imgsav, img)
-                try:
-                    dlg.ShowModal()
-                    imgsav = dlg.getImagePasteSaver()
-                finally:
-                    dlg.Destroy()
+        if self.presenter.getConfig().getboolean("main",
+                "editor_imagePaste_askOnEachPaste", True):
+            # Options say to present dialog on an image paste operation
+            # Send image so it can be used for preview
+            dlg = WikiTxtDialogs.ImagePasteDialog(
+                    self.presenter.getMainControl(), -1, imgsav, img)
+            try:
+                dlg.ShowModal()
+                imgsav = dlg.getImagePasteSaver()
+            finally:
+                dlg.Destroy()
 
-            destPath = imgsav.saveFile(fs, img)
-            if destPath is None:
-                # Couldn't find unused filename or saving denied
-                return True
-
-            url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
-
-            if url is None:
-                url = u"file:" + StringOps.urlFromPathname(destPath)
-
-            self.ReplaceSelection(url)
+        fs = self.presenter.getWikiDocument().getFileStorage()
+        destPath = imgsav.saveFile(fs, img)
+        if destPath is None:
+            # Couldn't find unused filename or saving denied
+            # TODO: Error message!
             return True
 
-        if WindowsHacks:
+        url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
-            # Windows Meta File pasted?
-            destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
-            if destPath is not None:
-                url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
-    
-                if url is None:
-                    url = u"file:" + StringOps.urlFromPathname(destPath)
-    
-                self.ReplaceSelection(url)
-                return True
+        if url is None:
+            url = u"file:" + StringOps.urlFromPathname(destPath)
 
-        # Text pasted?
+        self.ReplaceSelection(url)
+        return True
+        
+    
+
+
+    def pasteWmf(self, testOnly=False):
+        """
+        Try to get Windows meta file from clipboard and paste it at current
+        cursor position as link.
+        On non-Windows OSs it always returns False.
+        
+        testOnly -- Don't paste, only check if clipboard provides appropriate data
+        
+        Returns True iff successful.
+        """
+
+        if not WindowsHacks:
+            return False
+            
+        if testOnly:
+            return WikiTxtDialogs.ImagePasteSaver.isWmfAvailableOnClipboard()
+
+        imgsav = WikiTxtDialogs.ImagePasteSaver()
+        imgsav.readOptionsFromConfig(self.presenter.getConfig())
+
+        fs = self.presenter.getWikiDocument().getFileStorage()
+
+        # Windows Meta File pasted?
+        destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
+        if destPath is None:
+            return False
+            
+        url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
+
+        if url is None:
+            url = u"file:" + StringOps.urlFromPathname(destPath)
+
+        self.ReplaceSelection(url)
+        return True
+
+
+    def pastePlainText(self, testOnly=False):
+        """
+        Try to get text from clipboard and paste it at current
+        cursor position.
+        
+        testOnly -- Don't paste, only check if clipboard provides appropriate data
+        
+        Returns True iff successful.
+        """
+    
         text = getTextFromClipboard()
-        if text:
-            self.ReplaceSelection(text)
+        if not text:
+            return False
+        
+        if testOnly:
             return True
+            
+        self.ReplaceSelection(text)
+        return True
 
 
-        return False
 
+    def pasteRawHtml(self, testOnly=False):
+        """
+        Try to retrieve HTML text from clipboard and paste it at current
+        cursor position.
 
-    def pasteRawHtml(self):
+        testOnly -- Don't paste, only check if clipboard provides appropriate data
+        
+        Returns True iff successful.
+        """
         rawHtml, url = wxHelper.getHtmlFromClipboard()
-        if rawHtml:
-            return self.wikiLanguageHelper.handlePasteRawHtml(self, rawHtml, {})
+
+        if not rawHtml:
+            return False
+            
+        if testOnly:
+            return True
+            
+        return self.wikiLanguageHelper.handlePasteRawHtml(self, rawHtml, {})
+
+
+
+    def Paste(self):
+        PASTETYPE_TO_FUNCTION = {
+            u"files": self.pasteFiles,
+            u"bitmap": self.pasteBitmap,
+            u"wmf": self.pasteWmf,
+            u"plainText": self.pastePlainText,
+            u"rawHtml": self.pasteRawHtml,
+            }
+
+        config = self.presenter.getConfig()
+
+        # Retrieve default and configured paste order
+        defPasteOrder = config.getDefault("main", "editor_paste_typeOrder").split(";")
+        pasteOrder = config.get("main", "editor_paste_typeOrder", "").split(";")
+
+        # Use default paste order to constrain which items are allowed and
+        # necessary in configured paste order
+        pasteOrder = seqEnforceContained(pasteOrder, defPasteOrder)
+
+        pasteFctOrder = [PASTETYPE_TO_FUNCTION[pasteType] for pasteType in pasteOrder]
+
+        for fct in pasteFctOrder:
+            if fct():
+                return True
 
         return False
+
+
+#     def Paste(self):
+#         # File(name)s pasted?
+#         filenames = wxHelper.getFilesFromClipboard()
+#         if filenames is not None:
+#             mc = self.presenter.getMainControl()
+# 
+#             paramDict = {"editor": self, "filenames": filenames,
+#                     "x": -1, "y": -1, "main control": mc,
+#                     "processDirectly": True}
+# 
+# #             mc.getUserActionCoord().runAction(
+# #                     u"action/editor/this/paste/files/insert/url/ask", paramDict)
+# 
+#             mc.getUserActionCoord().reactOnUserEvent(
+#                     u"event/paste/editor/files", paramDict)
+# 
+#             return True
+# 
+#         fs = self.presenter.getWikiDocument().getFileStorage()
+#         imgsav = WikiTxtDialogs.ImagePasteSaver()
+#         imgsav.readOptionsFromConfig(self.presenter.getConfig())
+# 
+#         # Bitmap pasted?
+#         bmp = wxHelper.getBitmapFromClipboard()
+#         if bmp is not None:
+#             img = bmp.ConvertToImage()
+#             del bmp
+# 
+#             if self.presenter.getConfig().getboolean("main",
+#                     "editor_imagePaste_askOnEachPaste", True):
+#                 # Options say to present dialog on an image paste operation
+#                 # Send image so it can be used for preview
+#                 dlg = WikiTxtDialogs.ImagePasteDialog(
+#                         self.presenter.getMainControl(), -1, imgsav, img)
+#                 try:
+#                     dlg.ShowModal()
+#                     imgsav = dlg.getImagePasteSaver()
+#                 finally:
+#                     dlg.Destroy()
+# 
+#             destPath = imgsav.saveFile(fs, img)
+#             if destPath is None:
+#                 # Couldn't find unused filename or saving denied
+#                 return True
+# 
+#             url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
+# 
+#             if url is None:
+#                 url = u"file:" + StringOps.urlFromPathname(destPath)
+# 
+#             self.ReplaceSelection(url)
+#             return True
+# 
+#         if WindowsHacks:
+# 
+#             # Windows Meta File pasted?
+#             destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
+#             if destPath is not None:
+#                 url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
+#     
+#                 if url is None:
+#                     url = u"file:" + StringOps.urlFromPathname(destPath)
+#     
+#                 self.ReplaceSelection(url)
+#                 return True
+# 
+#         # Text pasted?
+#         text = getTextFromClipboard()
+#         if text:
+#             self.ReplaceSelection(text)
+#             return True
+# 
+# 
+#         return False
+
+
 
 
     def onCmdCopy(self, miscevt):

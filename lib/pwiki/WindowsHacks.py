@@ -377,6 +377,18 @@ def _getMemoryContentFromHandle(hdl):
         GlobalUnlock(hdl)
 
 
+def isWmfAvailableOnClipboard():
+    """
+    Return True iff Windows meta file format is available on clipboard
+    """
+    OpenClipboard(0)
+    try:
+        return IsClipboardFormatAvailable(CF_METAFILEPICT) != 0
+    finally:
+        CloseClipboard()
+    
+    
+
 def saveWmfFromClipboardToFileStorage(fs, prefix):
     """
     Retrieve raw Windows meta data file from clipboard. Return None,

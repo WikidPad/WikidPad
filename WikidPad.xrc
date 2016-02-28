@@ -1274,12 +1274,11 @@
         </object>
         <flag>wxEXPAND</flag>
       </object>
-      <object class="sizeritem">
-        <object class="wxStaticLine"/>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="OptionsPageEditorPasteDrop">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
       <object class="sizeritem">
         <object class="wxStaticText">
           <label>Image pasting</label>
@@ -1459,6 +1458,79 @@
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>Paste type order</label>
+          <font>
+            <size>8</size>
+            <weight>bold</weight>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <object class="sizeritem">
+            <object class="wxListBox" name="rlPasteTypeOrder" subclass="pwiki.wxHelper.ReorderableListBox">
+              <content/>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <minsize>-1,200</minsize>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxButton" name="btnPasteTypeOrderUp">
+                  <label>Up</label>
+                  <style>wxBU_EXACTFIT</style>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+                <cellpos>0,0</cellpos>
+              </object>
+              <object class="sizeritem">
+                <object class="wxButton" name="btnPasteTypeOrderDown">
+                  <label>Down</label>
+                  <style>wxBU_EXACTFIT</style>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxButton" name="btnPageListSort">
+                  <label>Sort</label>
+                  <style>wxBU_EXACTFIT</style>
+                  <hidden>1</hidden>
+                </object>
+                <option>0</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+              </object>
+              <orient>wxVERTICAL</orient>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND</flag>
+            <minsize>40,-1</minsize>
+          </object>
+          <cols>2</cols>
+          <growablecols>0</growablecols>
+          <growablerows>0</growablerows>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
