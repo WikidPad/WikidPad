@@ -78,12 +78,93 @@ import wx
 #------------
 
 
-if wx.version() < "2.9":
+# Set required GTK version as retrieved from wxGTK
+
+def initToolkitInfo():
+    global WX_GTK_MAJOR, WX_GTK_MINOR, WX_GTK_VER_STRING
+    pi = wx.PlatformInformation()
+    
+    WX_GTK_MAJOR = pi.GetToolkitMajorVersion()
+    WX_GTK_MINOR = pi.GetToolkitMinorVersion()
+    
+    WX_GTK_VER_STRING = "{0}.{1}".format(WX_GTK_MAJOR, WX_GTK_MINOR)
+
+
+initToolkitInfo()
+
+
+
+# Version major of directly loaded GTK toolkit (0:none loaded yet)
+loadedGtkMajor = 0
+
+
+def tryGtk3Import():
+    """Try GObject inspection to retrieve GTK
+    (probably only works with GTK 3 and above)
+    """
+    global gi, Gtk, Gdk, loadedGtkMajor
+    
+    import sys
+    
+    # First step: Try to load gi module
+    try:
+        import gi
+    except:
+        import ExceptionLogger
+        ExceptionLogger.logOptionalComponentException(
+                "Import GI in GtkHacks.py"
+                .format(WX_GTK_VER_STRING))
+        
+        return
+    
+    # Second step: Load required GTK version
+    try:
+        gi.require_version('Gtk', WX_GTK_VER_STRING)
+        from gi.repository import Gtk, Gdk
+    
+        loadedGtkMajor = WX_GTK_MAJOR # Success
+    except:
+        # Failed:
+        import ExceptionLogger
+        ExceptionLogger.logOptionalComponentException(
+                "Import GTK (version {0}) by GI in GtkHacks.py"
+                .format(WX_GTK_VER_STRING))
+
+        # Problem now: gi polluted sys.modules so that subsequent
+        # gtk imports would fail.
+        
+        # Cleaning hack:
+        
+        for m in ('glib', 'gobject', 'gio', 'gtk', 'gtk.gdk'):
+            try:
+                if sys.modules.has_key(m) and \
+                        isinstance(sys.modules[m], gi._DummyStaticModule):
+                    del sys.modules[m]
+            except:
+                ExceptionLogger.logOptionalComponentException(
+                        "Cleaning after GI, module name {0} in GtkHacks.py"
+                        .format(m))
+                        
+        # TODO: Remove gi module from sys.modules?
+
+
+tryGtk3Import()
+
+
+
+
+# First try failed so load using old version (prior 3)
+if loadedGtkMajor == 0 and WX_GTK_MAJOR < 3:
     import gtk
-else:
-    import gi
-    gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk, Gdk
+    loadedGtkMajor = WX_GTK_MAJOR # Success
+
+
+# Nothing worked
+if loadedGtkMajor == 0:
+    raise ImportError("No suitable direct GTK (version {0}) import"
+            .format(WX_GTK_VER_STRING))
+
+
 
 from wxHelper import getTextFromClipboard
 
@@ -91,10 +172,10 @@ from StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
 import DocPages
 
 
-if wx.version() < "2.9":
-    pass
-    #import gobject
-    #gobject.threads_init()    # TODO: is it really needed? Doesn't seem so.
+if loadedGtkMajor < 3:
+    # Needed to avoid crash under some circumstances
+    import gobject
+    gobject.threads_init()
 
 # gnome.program_init('glipper', '1.0', properties= { gnome.PARAM_APP_DATADIR : glipper.DATA_DIR })
 
@@ -337,7 +418,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
             return
 
 
-        if wx.version() < "2.9":
+        if loadedGtkMajor < 3:
             self.gtkDefClipboard = gtk.clipboard_get()
         else:
             self.gtkDefClipboard = Gtk.Clipboard.get(Gdk.atom_intern('CLIPBOARD', True))
