@@ -1,6 +1,23 @@
 ﻿++ Change Log
 
 
+Mar. 14, 2016 (2.3beta14)
+    
+    * Option to modify paste type order.
+      See [OptionsDialog#+++++ Paste type order]
+    
+    * Bug fixed: Avoid XRC-errors in option menu for some
+      wxPython versions (thanks to Christian Ziemski)
+    * Bug fixed: Image dimensions calculated by 'r' URL-appendix were
+      set as float in HTML attributes but must be integer.
+
+    * Bug fixed: Locale mismatch error between C++ and the OS on
+      wxPython 3.0
+    * Linux: Better GTK support for wxGTK 2.9 or later with GTK 3
+      (thanks to Christian Ziemski)
+
+
+
 Feb. 03, 2015 (2.3beta13)
 
     * Added option what to do on file paste into editor.

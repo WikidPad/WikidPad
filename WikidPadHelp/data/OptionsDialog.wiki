@@ -182,8 +182,14 @@ Set if editor should wrap (if "Auto-Wrap" is active) by word or by character. Th
 *Tab width*
 How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
 
+*Image preview tooltips for local URLs*
+When hovering over a local URL pointing to an image in some common formats it can be shown as a small preview tooltip. Here you can set if the preview should be shown and which size it should have. The size defines a bounding box in which the preview is fitted while preserving the aspect ratio.
 
-++++ Image pasting
+
+
+++++ Editor Paste/Drag'n'drop
+
++++++ Image pasting
 
 When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:
 
@@ -202,7 +208,7 @@ Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
 If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.
 
 
-++++ File dropping
+++++ File pasting/dropping
 
 *Action on paste*
 What to do when pasting files into WikidPad. You can select if you want to insert the absolute or relative URL or if the file should be copied or moved to the FileStorage (a relative URL is always shown in this case). You can also choose to be asked on every insert.
@@ -217,6 +223,16 @@ When dropping files into editor (which are shown as file URLS then) you can set 
 
 *Links in brackets*
 Set if you want to have file links in brackets. If so, spaces are kept as they are instead of escaping them as %20 to increase readability.
+
+
++++++ Paste type order
+
+The same data can be stored in different formats at once on the clipboard. Here you can set in which order WikidPad tries to process the types. It goes through the list top-down and uses the first data type it can find on clipboard.
+
+To change the order select an item in the list and use the "Up"/"Down"-buttons on the right.
+
+The item "Windows meta file" is only processed on Windows.
+
 
 
 +++ Editor colors

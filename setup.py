@@ -15,7 +15,7 @@ wikidpad = Target(
     # used for the versioninfo resource
     version = '2.3',
     name = 'WikidPad',
-    copyright = '(C) 2005-2014 Jason Horman, Michael Butscher, Gerhard Reitmayr',
+    copyright = '(C) 2005-2016 Jason Horman, Michael Butscher, Gerhard Reitmayr',
     description = 'Single user wiki notepad',
     comments='',
 
