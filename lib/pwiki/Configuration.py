@@ -712,7 +712,7 @@ GLOBALDEFAULTS = {
     ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with
             # spaces in it preserved unquoted)?
 
-    ("main", "editor_paste_typeOrder"): "files;bitmap;wmf;plainText;rawHtml", # In which order should Paste() look for
+    ("main", "editor_paste_typeOrder"): "files;plainText;bitmap;wmf;rawHtml", # In which order should Paste() look for
             # types on clipboard (first found is used). Types are separated by ';', mapping to localized human readable
             # name is provided by WikiTxtCtrl.getHrNameForPasteType(pasteType)
 
