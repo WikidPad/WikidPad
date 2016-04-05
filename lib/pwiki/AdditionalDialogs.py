@@ -21,8 +21,7 @@ except:
 from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc, \
-        writeEntireFile
+        escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
 from wikidata import DbBackendUtils
 
 from WikiExceptions import *

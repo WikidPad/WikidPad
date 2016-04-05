@@ -60,10 +60,10 @@ from . import AttributeHandling, SpellChecker
 from . import AdditionalDialogs
 
 
-import StringOps
-from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
+from . import StringOps
+from .StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
         unescapeForIni, urlFromPathname, \
-        strftimeUB, pathEnc, loadEntireFile, writeEntireFile, \
+        strftimeUB, pathEnc, loadEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
 
 
@@ -177,7 +177,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
         # if the file doesn't exist yet.
         tbLoc = os.path.join(self.globalConfigSubDir, "[TextBlocks].wiki")
         if not os.path.exists(pathEnc(tbLoc)):
-            writeEntireFile(tbLoc, 
+            StringOps.writeEntireFile(tbLoc, 
 """importance: high;a=[importance: high]\\n
 importance: low;a=[importance: low]\\n
 tree_position: 0;a=[tree_position: 0]\\n

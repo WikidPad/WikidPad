@@ -949,7 +949,7 @@ WIKIDEFAULTS = {
     ("main", "versioning_storageLocation"): "0",  # Where to store versioning data? 0: Intern in database;
             # 1: extern in files (not supported for Compact Sqlite DB)
 
-    ("main", "versioning_completeSteps"): u"10",  # How many versions before next version is saved complete
+    ("main", "versioning_completeSteps"): u"10",  # How many versions before next version is saved completely
             # instead of reverse differential? 0: Always revdiff, 1: Always complete, 2: Every second v. is complete ...
 
     ("main", "tabHistory_maxEntries"): u"25",  # Maximum number of entries in the history for each tab

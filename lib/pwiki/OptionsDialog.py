@@ -699,7 +699,7 @@ class OptionsDialog(wx.Dialog):
     )
 
 
-    # Windows specific options
+    # Clipboard catcher specific options
     OPTION_TO_CONTROL_CLIPBOARD_CATCHER = (
             ("clipboardCatcher_prefix", "tfClipboardCatcherPrefix", "t"),
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),

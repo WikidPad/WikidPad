@@ -17,6 +17,8 @@ class Dummy(object):
     pass
 
 
+# ---------- Thread handling and task execution ----------
+
 class BasicThreadStop(object):
     """
     An object of this or a derived class is handed over to long running
@@ -606,6 +608,9 @@ class _TimeoutRLock(threading._Verbose):
         return self.__owner is threading.currentThread()
 
 
+
+# ---------- Data structures ----------
+
 def seqStartsWith(seq, startSeq):
     """
     Returns True iff sequence startSeq is the beginning of sequence seq or
@@ -820,6 +825,10 @@ class IdentityList(list):
         
     def clear(self):
         del self[0:len(self)]
+
+
+# ---------- Misc ----------
+
 
 
 def sgn(value):

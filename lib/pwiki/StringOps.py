@@ -23,10 +23,9 @@ from WikiExceptions import *
 
 from Utilities import between
 
-
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
-from SystemInfo import isUnicode, isOSX, isLinux, isWindows, isWin9x
+from .SystemInfo import isUnicode, isOSX, isLinux, isWindows, isWin9x
 
 
 # To generate dependencies for py2exe/py2app
@@ -95,6 +94,11 @@ else:
 
     def lineendToOs(text):
         return convertLineEndings(text, "\r\n")
+
+
+# mbcsEnc is idempotent for the first item of returned tuple
+# pathEnc and longPathEnc are also idempotent
+# (f is idempotent iff f(x) == f(f(x)) for all x)
 
 
 def mbcsEnc(input, errors="strict"):
@@ -191,7 +195,10 @@ def unicodeToCompFilename(us):
     Encode a unicode filename to a filename compatible to (hopefully)
     any filesystem encoding by converting unicode to '=xx' for
     characters up to 255 and '$xxxx' above. Each 'x represents a hex
-    character
+    character.
+    
+    Be aware that the returned filename may be too long to be allowed in
+    the used filesystem.
     """
     result = []
     for c in us:
