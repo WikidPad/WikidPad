@@ -3624,6 +3624,27 @@
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Page file write mode:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chWikiPageFilesWriteFileMode">
+              <content>
+                <item>Safe</item>
+                <item>Overwrite</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="spacer">
+            <size>0,0</size>
+          </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>

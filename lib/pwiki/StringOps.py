@@ -355,8 +355,18 @@ def loadEntireFile(filename, textMode=False):
         rf.close()
 
 
+# Constants for writeFileMode of writeEntireFile
 
-def writeEntireFile(filename, content, textMode=False):
+# safe: Create temporary file, delete previous target file, rename temporary to target
+WRITE_FILE_MODE_SAFE = 0
+
+# overwrite: Just overwrite file if it exists (useful if hard links are used)
+WRITE_FILE_MODE_OVERWRITE = 1
+
+
+
+def writeEntireFile(filename, content, textMode=False,
+        writeFileMode=WRITE_FILE_MODE_SAFE):
     """
     Write entire file.
     content  can either be a bytestring or a tuple or list of bytestrings
@@ -367,21 +377,66 @@ def writeEntireFile(filename, content, textMode=False):
     for utf-8. In textMode, lineEndings are properly converted to the
     appropriate for the OS.
     """
-    import TempFileSet
+    if writeFileMode == WRITE_FILE_MODE_OVERWRITE:
+        if textMode:
+            f = open(filename, "w")
+        else:
+            f = open(filename, "wb")
 
-    basePath = os.path.split(filename)[0]
-    suffix = os.path.splitext(filename)[1]
-
-    if basePath == "":
-        basePath = u"."
-
-    tempPath = TempFileSet.createTempFile(content, suffix=suffix, path=basePath,
-            textMode=textMode)
-
-    if os.path.exists(filename):
-        os.unlink(filename)
-
-    os.rename(tempPath, filename)
+        try:
+            if isinstance(content, unicode):
+                # assert textMode
+                content = content.encode("utf-8")
+                f.write(BOM_UTF8)
+                f.write(content)
+            elif isinstance(content, str):
+                f.write(content)
+            else:    # content is a sequence
+                try:
+                    iCont = iter(content)
+        
+                    firstContent = iCont.next()
+                    
+                    unic = False
+                    if isinstance(firstContent, unicode):
+                        firstContent = firstContent.encode("utf-8")
+                        f.write(BOM_UTF8)
+                        unic = True
+    
+                    assert isinstance(firstContent, str)
+                    f.write(firstContent)
+    
+                    while True:
+                        content = iCont.next()
+    
+                        if unic:
+                            assert isinstance(content, unicode)
+                            content = content.encode("utf-8")
+    
+                        assert isinstance(content, str)
+                        f.write(content)
+                except StopIteration:
+                    pass
+        finally:
+            f.close()
+        
+    else:
+        from . import TempFileSet
+        
+        basePath = os.path.split(filename)[0]
+        suffix = os.path.splitext(filename)[1]
+    
+        if basePath == "":
+            basePath = u"."
+    
+        tempPath = TempFileSet.createTempFile(content, suffix=suffix, path=basePath,
+                textMode=textMode)
+    
+        # TODO: What if unlink or rename fails?
+        if os.path.exists(filename):
+            os.unlink(filename)
+    
+        os.rename(tempPath, filename)
 
 
 

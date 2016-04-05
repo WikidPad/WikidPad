@@ -943,6 +943,10 @@ WIKIDEFAULTS = {
     ("main", "wikiPageFiles_gracefulOutsideAddAndRemove"): u"True",   # Handle missing wiki page files gracefully and try
             # to find existing files even if they are not in database.
 
+    ("main", "wikiPageFiles_writeFileMode"): u"0", # How wiki page files are modified on saving?
+            # 0: Safe: create temp file, delete target file, rename temp to target
+            # 1: Just overwrite in place (useful if files are hardlinked).
+
     ("main", "headingsAsAliases_depth"): "0",  # Maximum heading depth for which aliases should be generated for
             # each heading up to and including this depth.
 
