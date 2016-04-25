@@ -16,7 +16,7 @@ tabs_maxcharacters = 0
 trashcan_askondelete = True
 wiki_icon = 
 headingsasaliases_depth = 0
-wiki_mainarea_auiperspective = v1/56e5c4a40000000c00000002=*DocPagePresenter=WikidPadHelp=0=textedit\x7cwikipage/WikidPadHelp@layout2|name=dummy;caption=;state=67372030;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=523;besth=165;minw=523;minh=165;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|name=56e5c4a40000000c00000002;caption=;state=67372028;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|dock_size(5,0,0)=202|
+wiki_mainarea_auiperspective = v1/571e9d6f0000001300000002=*DocPagePresenter=WikidPadHelp=0=textedit\x7cwikipage/WikidPadHelp@layout2|name=dummy;caption=;state=67372030;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=523;besth=165;minw=523;minh=165;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|name=571e9d6f0000001300000002;caption=;state=67372028;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|dock_size(5,0,0)=202|
 wiki_name = WikidPadHelp
 wikipagetitle_creationmode = 1
 wikipagetitleprefix = ++

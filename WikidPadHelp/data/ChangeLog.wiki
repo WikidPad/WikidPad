@@ -1,6 +1,17 @@
 ﻿++ Change Log
 
 
+Apr. 26, 2016 (2.3beta15)
+
+    * New wiki-bound option to let wiki page files simply be
+      overwritten instead of safe new file creation (useful
+      for hard-linking). See [OptionsDialog#*Page file write mode*]
+    
+    * Chinese translation updated and Traditional Chinese added
+      (thanks to yuxiaoxu)
+
+
+
 Mar. 14, 2016 (2.3beta14)
     
     * Option to modify paste type order.

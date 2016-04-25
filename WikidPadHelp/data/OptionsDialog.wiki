@@ -671,3 +671,14 @@ If set, all filenames of newly created pages only contain ASCII-characters (no u
 This option is especially recommended on Mac OS or for wikis which will be interchanged with Mac users.
 This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
 
+*Max length of page file name*
+Numbers of characters the file name of a wiki page file can have. Default is 120 characters. The value must be between 35 and 250, if it is out of this range the nearest value in the range is taken instead.
+
+This option does not apply to Compact Sqlite DB backend.
+
+*Page file write mode*
+In the default "safe" mode everytime a page file is saved to disk a new temporary file is created then the current file is deleted and the temporary file is renamed to take the place of the deleted file. So even if WikidPad crashes at the wrong time there should be at least a temporary file (with a strange name) with the full contents of the wiki page written.
+
+In the "overwrite" mode the file is just overwritten in place. You should only use this mode if you created hard links to page files (which would be useless in "safe"-mode).
+
+This option does not apply to Compact Sqlite DB backend.

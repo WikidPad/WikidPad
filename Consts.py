@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 3, 114, 0)
-VERSION_STRING = "wikidPad 2.3beta14"
+VERSION_TUPLE = ("wikidPad", 2, 3, 115, 0)
+VERSION_STRING = "wikidPad 2.3beta15"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
