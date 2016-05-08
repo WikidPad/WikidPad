@@ -362,6 +362,10 @@ def preActNewLineWhitespace(s, l, st, pe):
     if not wikiFormatDetails.paragraphMode:
         raise ParseException(s, l, "Newline is only whitespace in paragraph mode")
 
+def preActEscapedNewLine(s, l, st, pe):
+    if "preHtmlTag" in st.nameStack:
+        raise ParseException(s, l, "Escaped Newline isn't line break inside <pre> tag")
+
 
 
 
@@ -412,6 +416,10 @@ newLineLineBreak = newLineLineBreak.setResultsName("lineBreak")\
 newLineWhitespace = newLine
 newLineWhitespace = newLineWhitespace.setResultsName("whitespace")\
         .setParseStartAction(preActNewLineWhitespace)
+
+
+escapedNewLine = buildRegex(EscapePlainCharPAT + u"\n", "lineBreak")\
+        .setParseStartAction(preActEscapedNewLine)
 
 
 moreIndentation = buildRegex(ur"^[ \t]*(?!\n)").setValidateAction(validateMoreIndent)
@@ -1253,7 +1261,7 @@ endTokenInCharacterAttribution = endToken | heading
 
 findMarkupInCell = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
-        urlRef, insertion, escapedChar, footnote, wikiWord,
+        urlRef, insertion, escapedNewLine, escapedChar, footnote, wikiWord,
         bodyHtmlTag, htmlTag, htmlEntity], endTokenInTable)
 findMarkupInCell = findMarkupInCell.setPseudoParseAction(pseudoActionFindMarkup)
 
@@ -1305,8 +1313,9 @@ oneLineContent << temp
 
 findMarkupInCharacterAttribution = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
-        attribute, insertion, escapedChar, footnote, wikiWord,
+        attribute, insertion, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace,
+        escapedNewLine, escapedChar,
         todoEntryWithTermination, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
@@ -1324,8 +1333,9 @@ characterAttributionContent << temp
 
 findMarkup = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
-        attribute, insertion, escapedChar, footnote, wikiWord,
-        newLinesParagraph, newLineLineBreak, newLineWhitespace, heading,
+        attribute, insertion, footnote, wikiWord,
+        newLinesParagraph, newLineLineBreak, newLineWhitespace,
+        escapedNewLine, escapedChar, heading,
         todoEntryWithTermination, anchorDef, preHtmlTag, bodyHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
         indentedText, table, preBlock, noExportMultipleLines,
