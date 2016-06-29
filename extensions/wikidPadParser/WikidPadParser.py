@@ -57,10 +57,10 @@ def buildRegex(regex, name=None, hideOnEmpty=False):
         element = Regex(regex, RE_FLAGS)
     else:
         element = Regex(regex, RE_FLAGS).setResultsName(name).setName(name)
-    
+
     if hideOnEmpty:
         element.setParseAction(actionHideOnEmpty)
-        
+
     return element
 
 stringEnd = buildRegex(ur"(?!.)", "stringEnd")
@@ -70,11 +70,11 @@ stringEnd = buildRegex(ur"(?!.)", "stringEnd")
 def getFirstTerminalNode(t):
     if t.getChildrenCount() == 0:
         return None
-    
+
     lt = t[-1]
     if not isinstance(lt, TerminalNode):
         return None
-        
+
     return lt
 
 
@@ -94,14 +94,14 @@ def actionCutRightWhitespace(s, l, st, t):
             if i < len(txt) - 1:
                 lt.text = txt[:i+1]
                 lt.recalcStrLength()
-                
+
                 t2 = buildSyntaxNode(txt[i+1:], lt.pos + i + 1)
                 t.append(t2)
             return t
 
     return None
 
-  
+
 _CHECK_LEFT_RE = re.compile(ur"[ \t]*$", RE_FLAGS)
 
 
@@ -174,7 +174,7 @@ def actionModeAppendix(s, l, st, t):
 
         data = entry.findFlatByName("data").getText()
         entries.append((key, data))
-        
+
     t.entries = entries
     return t
 
@@ -268,7 +268,7 @@ todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent
 
 todoEntry = todoEntry.setResultsNameNoCopy("todoEntry")\
         .setParseAction(actionTodoEntry)
-        
+
 todoEntryWithTermination = todoEntry + Optional(buildRegex(ur"\|"))
 
 # Only for LanguageHelper.parseTodoEntry()
@@ -326,12 +326,12 @@ def actionMoreIndent(s, l, st, t):
     Called for more indentation before a general indented text.
     """
     newIdInfo = IndentInfo("normal")
-    
+
     result = actionIndent(s, l, st, t)
 
     newIdInfo.level = st.dictStack.getSubTopDict().get("lastIdentation", 0)
     st.dictStack.getSubTopDict()["indentInfo"] = newIdInfo
-    
+
     return result
 
 
@@ -339,7 +339,7 @@ def actionMoreIndent(s, l, st, t):
 def preActNewLinesParagraph(s, l, st, pe):
     if "preHtmlTag" in st.nameStack:
         raise ParseException(s, l, "Newlines aren't paragraph inside <pre> tag")
-    
+
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
     if not wikiFormatDetails.paragraphMode:
         raise ParseException(s, l, "Newlines are only paragraph in paragraph mode")
@@ -348,7 +348,7 @@ def preActNewLinesParagraph(s, l, st, pe):
 def preActNewLineLineBreak(s, l, st, pe):
     if "preHtmlTag" in st.nameStack:
         raise ParseException(s, l, "Newline isn't line break inside <pre> tag")
-    
+
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
     if wikiFormatDetails.paragraphMode:
         raise ParseException(s, l, "Newline isn't line break in paragraph mode")
@@ -357,7 +357,7 @@ def preActNewLineLineBreak(s, l, st, pe):
 def preActNewLineWhitespace(s, l, st, pe):
     if "preHtmlTag" in st.nameStack:
         raise ParseException(s, l, "Newline isn't whitespace inside <pre> tag")
-    
+
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
     if not wikiFormatDetails.paragraphMode:
         raise ParseException(s, l, "Newline is only whitespace in paragraph mode")
@@ -456,7 +456,7 @@ bullet = buildRegex(ur"\*[ \t]", "bullet")
 
 bulletEntry = equalIndentation.copy()\
         .addParseStartAction(inmostIndentChecker("ul")) + bullet  # + \
-        
+
 
 
 unorderedList = listStartIndentation + bullet + \
@@ -540,7 +540,7 @@ def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
         # E. g. "s=foo" uses class "foo". The '=' can be omitted for the
         # short form "s", therefore "sfoo" does the same. The same is also:
         # "class=foo", "s:foo" and "class:foo".
-        
+
         # The longer form is recommended, the short "s" e.g. does not work
         # in appendices for image URLs due to a name clash
         if key == u"s" or key == u"class":
@@ -582,10 +582,10 @@ tableCellContinuationLeft = tableCellContinuationLeft.setResultsNameNoCopy(
 
 
 tableCell = tableCellWhitespace + MatchFirst([
-        tableCellContinuationUp, 
-        tableCellContinuationLeft,  
+        tableCellContinuationUp,
+        tableCellContinuationLeft,
         Optional(tableCellAppendix) + tableContentInCell])
-        
+
 tableCell = tableCell.setResultsNameNoCopy("tableCell")
 
 tableRow = tableCellWhitespace + tableCell + ZeroOrMore(newCell + tableCellWhitespace + tableCell)
@@ -594,9 +594,9 @@ tableRow = tableRow.setResultsNameNoCopy("tableRow").setParseAction(actionHideOn
 
 def actionTableModeAppendix(s, l, st, t):
     st.dictStack.getNamedDict("table")["table.tabSeparated"] = False
-    
+
     s, l, st, t = parseGlobalAppendixEntries(s, l, st, t)
-    
+
     t.border = None
 
     for key, data in t.entries:
@@ -684,7 +684,7 @@ def actionBodyHtmlTag(s, l, st, t):
 
 
 bodyHtmlStart = buildRegex(ur"<body(?: [^\n>]*)?>", "htmlTag")
- 
+
 bodyHtmlEnd = buildRegex(ur"</body>", "htmlTag")
 
 bodyHtmlText = buildRegex(ur".*?(?=" + bodyHtmlEnd.getPattern() + ")",
@@ -803,7 +803,7 @@ def actionSearchFragmentExtern(s, l, st, t):
     lt2 = getFirstTerminalNode(t)
     if lt2 is None:
         return None
-    
+
     lt2.unescaped = UnescapeExternalFragmentRE.sub(ur"\1", lt2.text)
 
 
@@ -826,7 +826,7 @@ def resolveWikiWordLink(link, basePage):
     It returns the absolute link (page name).
     """
     return _TheHelper.resolvePrefixSilenceAndWikiWordLink(link, basePage)[2]
-   
+
 
 
 
@@ -851,7 +851,7 @@ def actionWikiWordNcc(s, l, st, t):
         t.searchFragment = t.fragmentNode.unescaped
     else:
         t.searchFragment = None
-    
+
     t.anchorLink = t.findFlatByName("anchorLink")
     if t.anchorLink is not None:
         t.anchorLink = t.anchorLink.getString()
@@ -861,7 +861,7 @@ def actionWikiWordNcc(s, l, st, t):
 def preActCheckWikiWordCcAllowed(s, l, st, pe):
     try:
         wikiFormatDetails = st.dictStack["wikiFormatDetails"]
-        
+
         if not wikiFormatDetails.withCamelCase:
             raise ParseException(s, l, "CamelCase words not allowed here")
     except KeyError:
@@ -881,7 +881,7 @@ def actionWikiWordCc(s, l, st, t):
 
         try:
 #             wikiFormatDetails = st.dictStack["wikiFormatDetails"]
-            
+
             if t.wikiWord in wikiFormatDetails.wikiDocument.getCcWordBlacklist():
                 raise ParseException(s, l, "CamelCase word is in blacklist")
         except KeyError:
@@ -915,8 +915,8 @@ def actionUrlLink(s, l, st, t):
         t.bracketed = False
     else:
         t.bracketed = True
-    
-    t.name = "urlLink"        
+
+    t.name = "urlLink"
     t.appendixNode = t.findFlatByName("urlModeAppendix")
     t.coreNode = t.findFlatByName("url")
 
@@ -932,9 +932,9 @@ def actionAnchorDef(s, l, st, t):
 
 def actionUrlModeAppendix(s, l, st, t):
     s, l, st, t = parseGlobalAppendixEntries(s, l, st, t, ignore=(u"s",))
-    
+
 #     t.border = None
-# 
+#
 #     for key, data in t.entries:
 #         if key == u"b":
 #             if data.endswith(u"px"):
@@ -1048,7 +1048,7 @@ footnotePAT = ur"[0-9]+"
 
 def preActCheckFootnotesAllowed(s, l, st, pe):
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
-    
+
     if wikiFormatDetails.wikiLanguageDetails.footnotesAsWws:
         raise ParseException(s, l, "CamelCase words not allowed here")
 
@@ -1185,9 +1185,9 @@ RevTodoValueRE = re.compile(ur"^[^\n:]{0,30}:" + RevTodoKeyRE.pattern[1:],
 RevWikiWordAnchorRE = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
         WikiWordAnchorStartPAT + ur"(?P<wikiWord>" + RevWikiWordRE.pattern[1:] + ur")",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
-        
-RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" + 
-        WikiWordAnchorStartPAT + BracketEndRevPAT + ur"(?P<wikiWord>" + 
+
+RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
+        WikiWordAnchorStartPAT + BracketEndRevPAT + ur"(?P<wikiWord>" +
         WikiWordNccRevPAT + ur")" + BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
@@ -1381,7 +1381,7 @@ def _buildBaseDict(wikiDocument=None, formatDetails=None):
 
 
 # -------------------- API for plugin WikiParser --------------------
-# During beta state of the WikidPad version, this API isn't stable yet, 
+# During beta state of the WikidPad version, this API isn't stable yet,
 # so changes may occur!
 
 
@@ -1421,11 +1421,11 @@ class _TheParser(object):
                     if isinstance(node, NonTerminalNode):
                         newAstNodes.append(recursAutoLink(node))
                         continue
-    
+
                     if node.name == "plainText":
                         text = node.text
                         start = node.pos
-                        
+
                         threadstop.testValidThread()
                         while text != u"":
                             # The foundWordText is the text as typed in the page
@@ -1434,7 +1434,7 @@ class _TheParser(object):
                             foundPos = len(text)
                             foundWord = None
                             foundWordText = None
-                            
+
                             # Search all regexes for the earliest match
                             for regex, word in relaxList:
                                 match = regex.search(text)
@@ -1454,15 +1454,15 @@ class _TheParser(object):
                             if preText != u"":
                                 newAstNodes.append(buildSyntaxNode(preText,
                                         start, "plainText"))
-                
+
                                 start += len(preText)
                                 text = text[len(preText):]
-                            
+
                             if foundWord is not None:
                                 wwNode = buildSyntaxNode(
                                         [buildSyntaxNode(foundWordText, start, "word")],
                                         start, "wikiWord")
-                                        
+
                                 wwNode.searchFragment = None
                                 wwNode.anchorLink = None
                                 wwNode.wikiWord = foundWord
@@ -1480,11 +1480,11 @@ class _TheParser(object):
 
 
                 ast.sub = newAstNodes
-    
+
                 return ast
 
             pageAst = recursAutoLink(pageAst)
-        
+
         return pageAst
 
     @staticmethod
@@ -1574,7 +1574,7 @@ class _WikiLinkPath(object):
             self.upwardCount = upwardCount
             self.components = components
             return
-        
+
         if link == u".":
             # Link to self
             self.upwardCount = 0
@@ -1585,7 +1585,7 @@ class _WikiLinkPath(object):
             self.upwardCount = -1
             self.components = link[2:].split(u"/")
             return
-        
+
         if link.startswith(u"/"):
             self.upwardCount = 0
             self.components = link[1:].split(u"/")
@@ -1598,15 +1598,15 @@ class _WikiLinkPath(object):
                 self.upwardCount = i + 1
                 self.components = comps[i:]
                 return
-        
+
         self.upwardCount = len(comps)
         self.components = []
-        
+
     def clone(self):
         result = _WikiLinkPath()
         result.upwardCount = self.upwardCount
         result.components = self.components[:]
-        
+
         return result
 
     def __repr__(self):
@@ -1615,7 +1615,7 @@ class _WikiLinkPath(object):
 
     def isAbsolute(self):
         return self.upwardCount == -1
-        
+
     def join(self, otherPath):
         if otherPath.upwardCount == -1:
             self.upwardCount = -1
@@ -1674,14 +1674,14 @@ class _WikiLinkPath(object):
         Autocompletion now searches for all wiki words starting with pageName. For
         all found items it removes the first  silence  characters, prepends the  prefix
         instead and uses the result as suggestion for autocompletion.
-        
+
         If prefix is None autocompletion is not possible.
         """
         if self.isAbsolute():
             return u"//", 0, self.resolveWikiWord(None)
 
         assert basePath.isAbsolute()
-        
+
         if len(self.components) == 0:
             # link path only consists of ".." -> autocompletion not possible
             if self.upwardCount == 0:
@@ -1735,15 +1735,15 @@ class _WikiLinkPath(object):
 
         wordPath = targetAbsPath.components[:]
         baseWordPath = baseAbsPath.components[:]
-        
+
         result = _WikiLinkPath()
-        
+
         if downwardOnly:
             if len(baseWordPath) >= len(wordPath):
                 return None
             if baseWordPath != wordPath[:len(baseWordPath)]:
                 return None
-            
+
             result.upwardCount = 0
             result.components = wordPath[len(baseWordPath):]
             return result
@@ -1754,7 +1754,7 @@ class _WikiLinkPath(object):
                     wordPath[0] == baseWordPath[0]:
                 del wordPath[0]
                 del baseWordPath[0]
-            
+
             if len(baseWordPath) == 0:
                 if len(wordPath) == 0:
                     return None  # word == baseWord, TODO return u"." or something
@@ -1766,7 +1766,7 @@ class _WikiLinkPath(object):
             result.upwardCount = len(baseWordPath)
             result.components = wordPath
             return result
-        
+
 
 
 
@@ -1878,7 +1878,7 @@ class _TheHelper(object):
         Autocompletion now searches for all wiki words starting with pageName. For
         all found items it removes the first  silence  characters, prepends the  prefix
         instead and uses the result as suggestion for autocompletion.
-        
+
         If prefix is None autocompletion is not possible.
         """
         linkPath = _WikiLinkPath(link=link)
@@ -1887,11 +1887,11 @@ class _TheHelper(object):
 
         if basePage is None:
             return u"", 0, link  # TODO:  Better reaction?
-        
+
         basePageName = basePage.getWikiWord()
         if basePageName is None:
             return u"", 0, link  # TODO:  Better reaction?
-        
+
         return linkPath.resolvePrefixSilenceAndWikiWordLink(_WikiLinkPath(
                 pageName=basePageName))
 
@@ -1964,7 +1964,7 @@ class _TheHelper(object):
 
         # Sort longest words first
         words.sort(key=lambda w: len(w), reverse=True)
-        
+
         return [(_TheHelper._createAutoLinkRelaxWordEntryRE(w), w)
                 for w in words if w != u""]
 
@@ -1985,7 +1985,7 @@ class _TheHelper(object):
         Create a link from word which should be put on wikiPage.
         """
         wikiDocument = wikiPage.getWikiDocument()
-        
+
         targetPath = _WikiLinkPath(pageName=word)
 
         if forceAbsolute:
@@ -1993,15 +1993,15 @@ class _TheHelper(object):
 
         linkCore = _TheHelper.createRelativeLinkFromWikiWord(
                 word, wikiPage.getWikiWord(), downwardOnly=False)
-                
+
         if _TheHelper.isCcWikiWord(word) and _TheHelper.isCcWikiWord(linkCore):
             wikiFormatDetails = wikiPage.getFormatDetails()
             if wikiFormatDetails.withCamelCase:
-                
+
                 ccBlacklist = wikiDocument.getCcWordBlacklist()
                 if not word in ccBlacklist:
                     return linkCore
-        
+
         return BracketStart + linkCore + BracketEnd
 
 
@@ -2013,7 +2013,7 @@ class _TheHelper(object):
         """
         return u"\n".join([u"%s//%s%s" % (BracketStart, w, BracketEnd)
                 for w in words])
-                
+
 #     # For compatibility. TODO: Remove
 #     createStableLinksFromWikiWords = createAbsoluteLinksFromWikiWords
 
@@ -2023,7 +2023,7 @@ class _TheHelper(object):
         text = text.replace(BracketStart, u"").replace(BracketEnd, u"")
         while text.startswith(u"+"):
             text = text[1:]
-        
+
         text = text.strip()
 
         if len(text) == 0:
@@ -2046,14 +2046,14 @@ class _TheHelper(object):
         If downwardOnly is True, the function may return None if a relative
         link can't be constructed.
         """
-        
+
         relPath = _WikiLinkPath.getRelativePathByAbsPaths(_WikiLinkPath(
                 pageName=word), _WikiLinkPath(pageName=baseWord),
                 downwardOnly=downwardOnly)
-        
+
         if relPath is None:
             return None
-        
+
         return relPath.getLinkCore()
 
     @staticmethod
@@ -2078,11 +2078,25 @@ class _TheHelper(object):
             if protocol == "wiki":
                 url = u"wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
             else:
-                url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
-
+                print("*3 createUrlLinkFromPath() path ***........", path, type(path), addSafe)
+                temp_url = StringOps.urlFromPathname(path, addSafe=addSafe)
+                print("*3a as test: after urlFromPathname() ***...", temp_url, type(temp_url))
+                try:
+                    ##url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
+                    ##print("*3b final url (original) ***...............", url, type(url))
+                    # why does this work here (at least in Linux Mint 17.2 with Python 2.7.6) ?!?!?!?
+                    # Doing it manually in Python shell fails!
+                    ##url = u"file:" + '/home/chris/\xc3\xa4.out'
+                    ##print("*3c as test: url hardcoded ***.............", url, type(url))
+                    url = u"file:" + temp_url
+                    print("*3d as test: url via temporary variable ***", url, type(url))
+                except UnicodeDecodeError as e:
+                    print("**** EXCEPTION", e)
+                    # UnicodeDecodeError('ascii', '/home/chris/Downloads/\xc3\xa4.out', 22, 23, 'ordinal not in range(128)'))
+                    url = "ERROR OCCURED"
         if bracketed:
             url = BracketStart + url + BracketEnd
-        
+
         return url
 
 
@@ -2093,7 +2107,7 @@ class _TheHelper(object):
         TODO: Check for necessary escaping
         """
         return u"%s%s: %s%s\n" % (BracketStart, key, value, BracketEnd)
-        
+
 
     @staticmethod
     def isCcWikiWord(word):
@@ -2104,11 +2118,11 @@ class _TheHelper(object):
     def findNextWordForSpellcheck(text, startPos, wikiPage):
         """
         Find in text next word to spellcheck, beginning at position startPos
-        
+
         Returns tuple (start, end, spWord) which is either (None, None, None)
         if no more word can be found or returns start and after-end of the
         spWord to spellcheck.
-        
+
         TODO: Move away because this is specific to human language,
             not wiki language.
         """
@@ -2135,7 +2149,7 @@ class _TheHelper(object):
         Called when user wants autocompletion.
         text -- Whole text of page
         charPos -- Cursor position in characters
-        lineStartCharPos -- For convenience and speed, position of the 
+        lineStartCharPos -- For convenience and speed, position of the
                 start of text line in which cursor is.
         wikiDocument -- wiki document object
         docPage -- DocPage object on which autocompletion is done
@@ -2168,7 +2182,7 @@ class _TheHelper(object):
             backstep = len(tofind)
             prefix, silence, tofind = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
                     tofind, docPage)
-            
+
             # We don't want prefixes here
             if prefix == u"":
                 ccBlacklist = wikiDocument.getCcWordBlacklist()
@@ -2189,12 +2203,12 @@ class _TheHelper(object):
                 wordBracketEnd = BracketEnd
             else:
                 wordBracketEnd = u""
-            
+
             backstep = len(tofind)
 
             prefix, silence, link = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
                     tofind[len(BracketStart):], docPage)
-            
+
             if prefix is not None:
                 for word in wikiData.getWikiPageLinkTermsStartingWith(
                         link, True):
@@ -2279,7 +2293,7 @@ class _TheHelper(object):
                 page = wikiDocument.getWikiPage(wikiWord) # May throw exception
                 anchors = [a for a in page.getAnchors()
                         if a.startswith(anchorBegin)]
-                        
+
                 for a in anchors:
                     backStepMap[wikiWord + wikiLinkCore +
                             a] = len(tofind)
@@ -2289,7 +2303,7 @@ class _TheHelper(object):
 
 
         acresult = backStepMap.keys()
-        
+
         if len(acresult) > 0:
             # formatting.BracketEnd
             acresultTuples = []
@@ -2314,7 +2328,7 @@ class _TheHelper(object):
             editor yet.
         """
         # autoIndent, autoBullet, autoUnbullet
-        
+
         line = text[lineStartCharPos:charPos]
 
         if settings.get("autoUnbullet", False):
@@ -2340,7 +2354,7 @@ class _TheHelper(object):
                 editor.SetSelectionByCharPos(lineStartCharPos, charPos)
                 editor.ReplaceSelection(replacement)
                 return False
-        
+
         return True
 
 
@@ -2348,7 +2362,7 @@ class _TheHelper(object):
     def handleNewLineAfterEditor(editor, text, charPos, lineStartCharPos,
             wikiDocument, settings):
         """
-        Processes pressing of a newline after editor processed it (if 
+        Processes pressing of a newline after editor processed it (if
         handleNewLineBeforeEditor returned True).
         """
         # autoIndent, autoBullet, autoUnbullet
@@ -2358,7 +2372,7 @@ class _TheHelper(object):
         if currentLine > 0:
             previousLine = editor.GetLine(currentLine - 1)
             indent = _RE_LINE_INDENT.match(previousLine).group(0)
-    
+
             # check if the prev level was a bullet level
             if settings.get("autoBullets", False):
                 match = BulletRE.match(previousLine)
@@ -2428,7 +2442,7 @@ class _TheHelper(object):
             curLineNum = curLineNum + 1
             curLine = editor.GetLine(curLineNum)
         endLine = curLineNum
-        
+
         if (startLine <= endLine):
             # get the start and end of the lines
             startPos = editor.PositionFromLine(startLine)
@@ -2469,11 +2483,11 @@ class _TheHelper(object):
                 lines = []
                 for s in xrange(0, len(text), wrapPosition):
                     lines.append(text[s:s+wrapPosition])
-                    
+
                 filledText = u"\n".join(lines)
             else:
                 filledText = fill(text, width=wrapPosition,
-                        initial_indent=indent, 
+                        initial_indent=indent,
                         subsequent_indent=subIndent)
 
             # replace the text based on targetting
@@ -2484,7 +2498,7 @@ class _TheHelper(object):
             editor.scrollXY(0, editor.GetScrollPos(wx.VERTICAL))
 
 
-    @staticmethod 
+    @staticmethod
     def handlePasteRawHtml(editor, rawHtml, settings):
         # Remove possible body end tags
         rawHtml = rawHtml.replace(u"</body>", u"")
@@ -2495,7 +2509,7 @@ class _TheHelper(object):
         return False
 
 
-    @staticmethod 
+    @staticmethod
     def formatSelectedText(text, start, afterEnd, formatType, settings):
         """
         Called when selected text (between start and afterEnd)
@@ -2506,10 +2520,10 @@ class _TheHelper(object):
 
         formatType -- string to describe type of format
         settings -- dict with additional information, currently ignored
-        
-        Returns None if operation wasn't supported or possible or 
+
+        Returns None if operation wasn't supported or possible or
             tuple (replacement, repStart, repAfterEnd, selStart, selAfterEnd) where
-    
+
             replacement -- replacement text
             repStart -- Start of characters to delete in original text
             repAfterEnd -- After end of characters to delete
@@ -2557,13 +2571,13 @@ These are your default global settings.
         Returns a new WikiLanguageDetails object based on current configuration
         """
         return WikiLanguageDetails(wikiDocument, docPage)
-        
-        
-    
+
+
+
     _RECURSIVE_STYLING_NODE_NAMES = frozenset(("table", "tableRow", "tableCell",
                         "orderedList", "unorderedList", "indentedText",
                         "noExport"))
-                        
+
     @staticmethod
     def getRecursiveStylingNodeNames():
         """
@@ -2571,8 +2585,8 @@ These are your default global settings.
         WikiTxtCtrl.processTokens() should process children recursively.
         """
         return _TheHelper._RECURSIVE_STYLING_NODE_NAMES
-        
-        
+
+
     _FOLDING_NODE_DICT = {
             "table": (True, False),
             "attribute": (True, False),
@@ -2590,13 +2604,13 @@ These are your default global settings.
         each value is a tuple (fold, recursive) where
         fold -- True iff node should be folded
         recursive -- True iff node should be processed recursively
-        
+
         The value tuples may contain more than these two items, processFolding()
         must be able to handle that.
         """
         return _TheHelper._FOLDING_NODE_DICT
 
-            
+
 
 
 THE_LANGUAGE_HELPER = _TheHelper()

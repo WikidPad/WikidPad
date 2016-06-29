@@ -1275,8 +1275,10 @@ elif os.name == 'mac':
     urlFromPathname = macUrlFromPathname
 else:
     def urlFromPathname(fn, addSafe=''):
+        print("*1a urlFromPathname() before encoding ***..", fn, type(fn))
         if isinstance(fn, unicode):
             fn = utf8Enc(fn, "replace")[0]
+        print("*1b urlFromPathname() after encoding ***...", fn, type(fn))
             
         # riscos not supported
         url = urlQuote(fn, safe='/$' + addSafe)

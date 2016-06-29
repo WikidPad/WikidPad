@@ -4043,11 +4043,15 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
         if isLinux():
             # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
             # string
+            for fn in filenames:
+                print("*0a onDropFiles() - before recoding ***....", fn, type(fn))
             try:
                 filenames = [StringOps.utf8Dec(fn.encode("latin-1"))[0]
                         for fn in filenames]
             except (UnicodeEncodeError, UnicodeDecodeError):
                 pass
+            for fn in filenames:
+                print("*0b onDropFiles() - after recoding ***.....", fn, type(fn))
 
 
         mc = self.editor.presenter.getMainControl()
