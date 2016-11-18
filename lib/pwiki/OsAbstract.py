@@ -34,7 +34,7 @@ except:
 
 # Define startFile
 if SystemInfo.isWindows():
-    if SystemInfo.isWinNT() and SystemInfo.isUnicode() and WindowsHacks:
+    if WindowsHacks:
         startFile = WindowsHacks.startFile
     else:
         def startFile(mainControl, link):

@@ -7,7 +7,7 @@ from .wxHelper import *
 from . import SystemInfo
 from . import Utilities
 
-from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
+from .StringOps import colorDescToRgbTuple,\
         rgbToHtmlColor, strToBool, splitIndent, escapeForIni, unescapeForIni
 
 from .AdditionalDialogs import DateformatDialog, FontFaceDialog
@@ -123,9 +123,9 @@ class PluginOptionsPanel(DefaultOptionsPanel):
 #                 ctl.SetValue(
 #                         config.getboolean("main", o))
         elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
-            ctl.SetValue( uniToGui(config.get("main", o)) )
+            ctl.SetValue( config.get("main", o) )
         elif t == "tes":  # Text escaped
-            ctl.SetValue( unescapeForIni(uniToGui(config.get("main", o))) )
+            ctl.SetValue( unescapeForIni(config.get("main", o)) )
         elif t == "seli":   # Selection -> transfer index
             ctl.SetSelection(config.getint("main", o))
         elif t == "selt":   # Selection -> transfer content string
@@ -133,7 +133,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 idx = oct[3].index(config.get("main", o))
                 ctl.SetSelection(idx)
             except (IndexError, ValueError):
-                ctl.SetStringSelection(uniToGui(config.get("main", o)) )
+                ctl.SetStringSelection(config.get("main", o) )
         elif t == "spin":   # Numeric SpinCtrl -> transfer number
             ctl.SetValue(config.getint("main", o))
         elif t == "guilang":   # GUI language choice
@@ -186,7 +186,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         if t == "tre":
             # Regular expression field, test if re is valid
             try:
-                rexp = guiToUni(ctl.GetValue())
+                rexp = ctl.GetValue()
                 re.compile(rexp, re.DOTALL | re.UNICODE | re.MULTILINE)
                 ctl.SetBackgroundColour(wx.WHITE)
             except:   # TODO Specific exception
@@ -195,7 +195,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         elif t == "i0+":
             # Nonnegative integer field
             try:
-                val = int(guiToUni(ctl.GetValue()))
+                val = int(ctl.GetValue())
                 if val < 0:
                     raise ValueError
                 ctl.SetBackgroundColour(wx.WHITE)
@@ -205,7 +205,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         elif t == "f0+":
             # Nonnegative float field
             try:
-                val = float(guiToUni(ctl.GetValue()))
+                val = float(ctl.GetValue())
                 if val < 0:
                     raise ValueError
                 ctl.SetBackgroundColour(wx.WHITE)
@@ -214,7 +214,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 ctl.SetBackgroundColour(wx.RED)
         elif t == "color0":
             # HTML Color field or empty field
-            val = guiToUni(ctl.GetValue())
+            val = ctl.GetValue()
             rgb = colorDescToRgbTuple(val)
 
             if val != "" and rgb is None:
@@ -265,10 +265,10 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 config.set("main", o, "False")
 
         elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
-            config.set("main", o, guiToUni(ctl.GetValue()) )
+            config.set("main", o, ctl.GetValue() )
         elif t == "tes":
-            config.set( "main", o, guiToUni(escapeForIni(ctl.GetValue(),
-                    toEscape=" ")) )
+            config.set( "main", o, escapeForIni(ctl.GetValue(),
+                    toEscape=" ") )
         elif t == "seli":   # Selection -> transfer index
             config.set(
                     "main", o, str(ctl.GetSelection()) )
@@ -278,7 +278,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                         oct[3][ctl.GetSelection()])
             except IndexError:
                 config.set("main", o,
-                        guiToUni(ctl.GetStringSelection()))
+                        ctl.GetStringSelection())
         elif t == "spin":   # Numeric SpinCtrl -> transfer number
             config.set(
                     "main", o, str(ctl.GetValue()) )
@@ -923,11 +923,11 @@ class OptionsDialog(wx.Dialog):
             elif t in ("t", "tre", "ttdf", "tfont0", "tdir", "i0+", "f0+",
                     "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
-                        uniToGui(self.pWiki.getConfig().get("main", o)) )
+                        self.pWiki.getConfig().get("main", o) )
             elif t == "tes":  # Text escaped
                 self.ctrls[c].SetValue(
-                        unescapeForIni(uniToGui(self.pWiki.getConfig().get(
-                        "main", o))) )
+                        unescapeForIni(self.pWiki.getConfig().get(
+                        "main", o)) )
             elif t == "seli":   # Selection -> transfer index
                 sel = self.pWiki.getConfig().getint("main", o)
                 if hasattr(self.ctrls[c], "optionsDialog_clientData"):
@@ -943,7 +943,7 @@ class OptionsDialog(wx.Dialog):
                     self.ctrls[c].SetSelection(idx)
                 except (IndexError, ValueError):
                     self.ctrls[c].SetStringSelection(
-                        uniToGui(self.pWiki.getConfig().get("main", o)) )
+                        self.pWiki.getConfig().get("main", o) )
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
                 self.ctrls[c].SetValue(
                         self.pWiki.getConfig().getint("main", o))
@@ -1124,7 +1124,7 @@ class OptionsDialog(wx.Dialog):
             if t == "tre":
                 # Regular expression field, test if re is valid
                 try:
-                    rexp = guiToUni(self.ctrls[c].GetValue())
+                    rexp = self.ctrls[c].GetValue()
                     re.compile(rexp, re.DOTALL | re.UNICODE | re.MULTILINE)
                     self.ctrls[c].SetBackgroundColour(wx.WHITE)
                 except:   # TODO Specific exception
@@ -1133,7 +1133,7 @@ class OptionsDialog(wx.Dialog):
             elif t == "i0+":
                 # Nonnegative integer field
                 try:
-                    val = int(guiToUni(self.ctrls[c].GetValue()))
+                    val = int(self.ctrls[c].GetValue())
                     if val < 0:
                         raise ValueError
                     self.ctrls[c].SetBackgroundColour(wx.WHITE)
@@ -1143,7 +1143,7 @@ class OptionsDialog(wx.Dialog):
             elif t == "f0+":
                 # Nonnegative float field
                 try:
-                    val = float(guiToUni(self.ctrls[c].GetValue()))
+                    val = float(self.ctrls[c].GetValue())
                     if val < 0:
                         raise ValueError
                     self.ctrls[c].SetBackgroundColour(wx.WHITE)
@@ -1152,7 +1152,7 @@ class OptionsDialog(wx.Dialog):
                     self.ctrls[c].SetBackgroundColour(wx.RED)
             elif t == "color0":
                 # HTML Color field or empty field
-                val = guiToUni(self.ctrls[c].GetValue())
+                val = self.ctrls[c].GetValue()
                 rgb = colorDescToRgbTuple(val)
 
                 if val != "" and rgb is None:
@@ -1211,10 +1211,10 @@ class OptionsDialog(wx.Dialog):
                     config.set("main", o, "False")
 
             elif t in ("t", "tre", "ttdf", "tfont0", "tdir", "i0+", "f0+", "color0"):
-                config.set( "main", o, guiToUni(self.ctrls[c].GetValue()) )
+                config.set( "main", o, self.ctrls[c].GetValue() )
             elif t == "tes":
-                config.set( "main", o, guiToUni(
-                        escapeForIni(self.ctrls[c].GetValue(), toEscape=" ")) )
+                config.set( "main", o, 
+                        escapeForIni(self.ctrls[c].GetValue(), toEscape=" ") )
             elif t == "seli":   # Selection -> transfer index
                 sel = self.ctrls[c].GetSelection()
                 if hasattr(self.ctrls[c], "optionsDialog_clientData"):
@@ -1226,7 +1226,7 @@ class OptionsDialog(wx.Dialog):
                     config.set("main", o, oct[3][self.ctrls[c].GetSelection()])
                 except IndexError:
                     config.set("main", o,
-                            guiToUni(self.ctrls[c].GetStringSelection()))
+                            self.ctrls[c].GetStringSelection())
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
                 config.set( "main", o, str(self.ctrls[c].GetValue()) )
             elif t == "guilang":    # GUI language choice

@@ -25,7 +25,7 @@ from .Utilities import between
 
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
-from .SystemInfo import isUnicode, isOSX, isLinux, isWindows, isWin9x
+from .SystemInfo import isOSX, isLinux, isWindows
 
 
 # To generate dependencies for py2exe/py2app
@@ -163,30 +163,18 @@ else:
     longPathDec = pathDec
 
 
-if isUnicode():
-    def uniToGui(text):
-        """
-        Convert unicode text to a format usable for wx GUI
-        """
-        return text   # Nothing to do
+def uniToGui(text):
+    """
+    Convert unicode text to a format usable for wx GUI. Legacy function, TODO 2.5: Remove
+    """
+    return text   # Nothing to do
 
-    def guiToUni(text):
-        """
-        Convert wx GUI string format to unicode
-        """
-        return text   # Nothing to do
-else:
-    def uniToGui(text):
-        """
-        Convert unicode text to a format usable for wx GUI
-        """
-        return mbcsEnc(text, "replace")[0]
+def guiToUni(text):
+    """
+    Convert wx GUI string format to unicode. Legacy function, TODO 2.5: Remove
+    """
+    return text   # Nothing to do
 
-    def guiToUni(text):
-        """
-        Convert wx GUI string format to unicode
-        """
-        return mbcsDec(text, "replace")[0]
 
 
 # TODO!

@@ -10,7 +10,7 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from .MiscEvent import KeyFunctionSink
 
-from .StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
@@ -847,7 +847,7 @@ if ((typeof jQuery !== 'undefined')) {
             # Status None is sent on mouse off
             if status is None:
                 self.presenter.getMainControl().statusBar.SetStatusText(
-                        uniToGui(""), 0)
+                        "", 0)
                 return
 
             internaljumpPrefix = "http://internaljump/"
@@ -892,7 +892,7 @@ if ((typeof jQuery !== 'undefined')) {
                 status = _("Link to page: {0}{1}".format(wikiWord, anchor))
 
             self.presenter.getMainControl().statusBar.SetStatusText(
-                    uniToGui(status), 0)
+                    status, 0)
 
     def GetScriptReturn(self, script, return_value):
         """

@@ -13,7 +13,7 @@ from pwiki.wxHelper import copyTextToClipboard, GUI_ID
 
 
 from pwiki.TempFileSet import createTempFile, TempFileSet
-from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs, uniToGui, \
+from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs, \
         joinRegexes, rgbToHtmlColor, escapeHtmlNoBreaks
 from pwiki.AdditionalDialogs import FontFaceDialog
 from pwiki.OptionsDialog import PluginOptionsPanel
@@ -537,8 +537,8 @@ class GraphView(wx.html.HtmlWindow):
                     self.outOfSync = False
                     return
 
-                self.SetPage(uniToGui('<img src="%s" border="0" align="top" alt="relation" />'
-                        % url))
+                self.SetPage('<img src="%s" border="0" align="top" alt="relation" />'
+                        % url)
 
             else:  # self.mode.endswith("/dot/source"):
                 if self.graphDotHandler.extAppExe == "":
@@ -548,8 +548,8 @@ class GraphView(wx.html.HtmlWindow):
                 else:
                     warning = ""
 
-                self.SetPage(uniToGui('<pre>%s%s</pre>' %
-                        (escapeHtmlNoBreaks(warning), escapeHtmlNoBreaks(source))))
+                self.SetPage('<pre>%s%s</pre>' %
+                        (escapeHtmlNoBreaks(warning), escapeHtmlNoBreaks(source)))
 
         self.outOfSync = False
 

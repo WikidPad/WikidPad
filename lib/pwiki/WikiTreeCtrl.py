@@ -25,7 +25,7 @@ from . import AttributeHandling
 from . import DocPages
 from .SearchAndReplace import SearchReplaceOperation
 
-from .StringOps import mbcsEnc, guiToUni, uniToGui, strToBool, \
+from .StringOps import mbcsEnc, strToBool, \
         pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni, \
         colorDescToRgbTuple
 
@@ -2353,7 +2353,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def setNodePresentation(self, node, style):
-        self.SetItemText(node, uniToGui(style.label), recalcSize=False)
+        self.SetItemText(node, style.label, recalcSize=False)
         self.setNodeImage(node, style.icon)
         self.SetItemBold(node, strToBool(style.bold, False))
         self.setNodeColor(node, style.color)

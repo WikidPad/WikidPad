@@ -11,23 +11,15 @@ from .wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
 
 from . import StringOps
 
-from .SystemInfo import isUnicode, isOSX
+from .SystemInfo import isOSX
 
 
-def bytelenSct_utf8(us):
+def bytelenSct(us):
     """
     us -- unicode string
     returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
     """
     return len(StringOps.utf8Enc(us)[0])
-
-
-def bytelenSct_mbcs(us):
-    """
-    us -- unicode string
-    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
-    """
-    return len(StringOps.mbcsEnc(us)[0])
 
 
 
@@ -78,18 +70,6 @@ class StyleCollector(StringOps.SnippetCollector):
 class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
     def __init__(self, parent, ID):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID, style=wx.WANTS_CHARS | wx.TE_PROCESS_ENTER)
-        # Self-modify to ansi/unicode version
-        if isUnicode():
-            self.bytelenSct = bytelenSct_utf8
-        else:
-            self.bytelenSct = bytelenSct_mbcs
-            
-            self.GetText = self.GetText_unicode
-            self.GetTextRange = self.GetTextRange_unicode
-            self.GetSelectedText = self.GetSelectedText_unicode
-            self.GetLine = self.GetLine_unicode
-            self.ReplaceSelection = self.ReplaceSelection_unicode
-            self.AddText = self.AddText_unicode
 
         self._resetKeyBindings()
 
@@ -163,57 +143,14 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
                 self.CmdKeyClear(key, mod)
 
 
-    def GetText_unicode(self):
-        """
-        Overrides the wxStyledTextCtrl.GetText method in ansi mode
-        to return unicode.
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetText(self),
-                "replace")[0]
-
-    
-    def GetTextRange_unicode(self, startPos, endPos):
-        """
-        Overrides the wxStyledTextCtrl.GetTextRange method in ansi mode
-        to return unicode.
-        startPos and endPos are byte(!) positions into the editor buffer
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self,
-                startPos, endPos), "replace")[0]
-
-
-    def GetSelectedText_unicode(self):
-        """
-        Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
-        to return unicode.
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self),
-                "replace")[0]
-
-
-    def GetLine_unicode(self, line):
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line),
-                "replace")[0]
-
-
-    def ReplaceSelection_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.ReplaceSelection(self,
-                StringOps.mbcsEnc(txt, "replace")[0])
-
-
-    def AddText_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.AddText(self,
-                StringOps.mbcsEnc(txt, "replace")[0])
-
-
     def SetSelectionByCharPos(self, start, end):
         """
         Same as SetSelection(), but start and end are character positions
         not byte positions
         """
         text = self.GetText()
-        bs = self.bytelenSct(text[:start])
-        be = bs + self.bytelenSct(text[start:end])
+        bs = bytelenSct(text[:start])
+        be = bs + bytelenSct(text[start:end])
         self.SetSelection(bs, be)
 
 
@@ -222,8 +159,8 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
         Same as SetSelectionByCharPos(), but scrolls to position correctly 
         """
         text = self.GetText()
-        bs = self.bytelenSct(text[:start])
-        be = bs + self.bytelenSct(text[start:end])
+        bs = bytelenSct(text[:start])
+        be = bs + bytelenSct(text[start:end])
 
         with WindowUpdateLocker(self):
             self.SetSelection(-1, -1)
@@ -247,7 +184,7 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
         the character position
         """
         text = self.GetText()
-        return self.bytelenSct(text[:charPos])
+        return bytelenSct(text[:charPos])
                 
 
     def GetSelectionCharPos(self):
@@ -264,7 +201,7 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
     def gotoCharPos(self, pos, scroll=True):
         # Go to the end and back again, so the anchor is
         # near the top
-        sctPos = self.bytelenSct(self.GetText()[:pos])
+        sctPos = bytelenSct(self.GetText()[:pos])
         if scroll:
             self.SetSelection(-1, -1)
             self.GotoPos(self.GetLength())

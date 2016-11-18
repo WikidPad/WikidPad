@@ -61,7 +61,7 @@ from . import AdditionalDialogs
 
 
 from . import StringOps
-from .StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
+from .StringOps import mbcsDec, mbcsEnc, \
         unescapeForIni, urlFromPathname, \
         strftimeUB, pathEnc, loadEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
@@ -1046,7 +1046,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # For a new id, an event must be set
                 wx.EVT_MENU(self, menuID, self.OnRecentWikiUsed)
 
-            menu.Append(menuID, uniToGui(wiki))
+            menu.Append(menuID, wiki)
 
 
     def OnRecentWikiUsed(self, evt):
@@ -2457,7 +2457,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 acc == (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER):
             from .SearchAndReplaceDialogs import FastSearchPopup
 
-            text = guiToUni(self.fastSearchField.GetValue())
+            text = self.fastSearchField.GetValue()
             tfHeight = self.fastSearchField.GetSize()[1]
             pos = self.fastSearchField.ClientToScreen((0, tfHeight))
 
@@ -2494,10 +2494,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbAccessError) as e:
                     sys.stderr.write(_("Error while trying to reconnect:\n"))
                     traceback.print_exc()
-                    answer = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(_(
                             'There was an error while reconnecting the database\n\n'
                             'Would you like to try it again?\n%s') %
-                            e), _('Error reconnecting!'),
+                            e, _('Error reconnecting!'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                     if answer != wx.YES:
                         return
@@ -2515,10 +2515,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbWriteAccessError) as e:
                     sys.stderr.write(_("Error while trying to write:\n"))
                     traceback.print_exc()
-                    answer = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(_(
                             'There was an error while writing to the database\n\n'
                             'Would you like to try it again?\n%s') %
-                            e), _('Error writing!'),
+                            e, _('Error writing!'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                     if answer != wx.YES:
                         break
@@ -2946,9 +2946,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         createIt = True;
         if (os.path.exists(pathEnc(wikiDir))):
             dlg=wx.MessageDialog(self,
-                    uniToGui(_("A wiki already exists in '%s', overwrite? "
+                    _("A wiki already exists in '%s', overwrite? "
                     "(This deletes everything in and below this directory!)") %
-                    wikiDir), _('Warning'), wx.YES_NO)
+                    wikiDir, _('Warning'), wx.YES_NO)
             answer = dlg.ShowModal()
             dlg.Destroy()
             if answer == wx.ID_YES:
@@ -4018,7 +4018,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     link)
             if not os.path.exists(filePath):
                 self.showStatusMessage(
-                        uniToGui(_("Couldn't open wiki: %s") % link), -2)
+                        _("Couldn't open wiki: %s") % link, -2)
                 return False
 
             if self.configuration.getint(
@@ -4058,7 +4058,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if docPage is None or not isinstance(docPage,
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
-            self.statusBar.SetStatusText(uniToGui(""), 1)
+            self.statusBar.SetStatusText("", 1)
             return
 
         pageStatus = ""   # wikiWord
@@ -4072,11 +4072,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             pageStatus += _("Mod.: %s") % strftimeUB(fmt, modTime)
             pageStatus += _("; Crea.: %s") % strftimeUB(fmt, creaTime)
 
-        self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
+        self.statusBar.SetStatusText(pageStatus, 1)
 
-        self.SetTitle(uniToGui("%s: %s - %s - WikidPad" %
+        self.SetTitle("%s: %s - %s - WikidPad" %
                 (self.getWikiDocument().getWikiName(), docPage.getWikiWord(),
-                self.getWikiConfigPath(), )))
+                self.getWikiConfigPath(), ))
 
 
     def viewWordSelection(self, title, words, motionType, default=None):
@@ -4330,14 +4330,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 img.Rescale(20, 20)
                 bmp = wx.BitmapFromImage(img)
                 icon = wx.IconFromBitmap(bmp)
-                self.tbIcon.SetIcon(icon, uniToGui(tooltip))
+                self.tbIcon.SetIcon(icon, tooltip)
             else:
                 if bmp is not None:                
-                    self.tbIcon.SetIcon(wx.IconFromBitmap(bmp),
-                            uniToGui(tooltip))
+                    self.tbIcon.SetIcon(wx.IconFromBitmap(bmp), tooltip)
                 else:
-                    self.tbIcon.SetIcon(wx.GetApp().standardIcon,
-                            uniToGui(tooltip))
+                    self.tbIcon.SetIcon(wx.GetApp().standardIcon, tooltip)
 
         else:
             if self.tbIcon is not None:
@@ -4644,9 +4642,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     bracketed=False)
 
             while True:
-                wikiWord = guiToUni(wx.GetTextFromUser(
+                wikiWord = wx.GetTextFromUser(
                         _("Replace text by WikiWord:"),
-                        _("Replace by Wiki Word"), wikiWord, self))
+                        _("Replace by Wiki Word"), wikiWord, self)
                         
                 if not wikiWord:
                     return False
@@ -4667,10 +4665,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         .getWikiPageNameForLinkTerm(validWikiWord)
 
                 if knownWikiWord is not None:
-                    answer = wx.MessageBox(uniToGui(_(
+                    answer = wx.MessageBox(_(
                             'Wiki word %s exists already\n'
                             'Would you like to append to the word?') %
-                            knownWikiWord), _('Word exists'),
+                            knownWikiWord, _('Word exists'),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                     
                     if answer != wx.YES:
@@ -5242,14 +5240,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if dlgtype == "text":
             if additional is None:
                 additional = ""
-            return guiToUni(wx.GetTextFromUser(uniToGui(message),
-                    uniToGui(title), uniToGui(additional), self))
+            return wx.GetTextFromUser(message, title, additional, self)
         elif dlgtype == "listmcstr":
             if additional is None:
                 raise RuntimeError(
                         _('No list of strings passed to "listmcstr" dialog'))
-            multidlg = wx.MultiChoiceDialog(self, uniToGui(message),
-                    uniToGui(title), list(additional))
+            multidlg = wx.MultiChoiceDialog(self, message, title, list(additional))
             try:
                 if (multidlg.ShowModal() == wx.ID_OK):
                     selections = multidlg.GetSelections()
@@ -5272,7 +5268,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if style is None:
                 raise RuntimeError(_("Unknown dialog type"))
 
-            answer = wx.MessageBox(uniToGui(message), uniToGui(title), style, self)
+            answer = wx.MessageBox(message, title, style, self)
             
             if answer == wx.OK:
                 return "ok"
@@ -5383,7 +5379,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """pops up a dialog box,
         used by scripts only
         """
-        dlg_m = wx.MessageDialog(self, uniToGui("%s" % str), title, wx.OK)
+        dlg_m = wx.MessageDialog(self, "%s" % str, title, wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
 
@@ -5398,7 +5394,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if str(e) != "":
             msg += " %s." % e 
         
-        dlg_m = wx.MessageDialog(self, uniToGui(msg),  # u"%s. %s." % (errorStr, e)
+        dlg_m = wx.MessageDialog(self, msg,  # u"%s. %s." % (errorStr, e)
                 _('Error!'), wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
@@ -5595,7 +5591,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _("Create New Wiki"), "MyWiki", wx.OK | wx.CANCEL)
 
         if dlg.ShowModal() == wx.ID_OK:
-            wikiName = guiToUni(dlg.GetValue())
+            wikiName = dlg.GetValue()
             userLangHelper = wx.GetApp().createWikiLanguageHelper(
                     wx.GetApp().getUserDefaultWikiLanguage())
 

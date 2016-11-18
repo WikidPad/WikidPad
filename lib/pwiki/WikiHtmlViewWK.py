@@ -10,7 +10,7 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from .MiscEvent import KeyFunctionSink
 
-from .StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
@@ -1002,7 +1002,7 @@ class WikiHtmlViewWK(wx.Panel):
             # Status None is sent on mouse off
             if status is None:
                 self.presenter.getMainControl().statusBar.SetStatusText(
-                        uniToGui(""), 0)
+                        "", 0)
                 return
 
             internaljumpPrefix = "http://internaljump/"
@@ -1032,7 +1032,7 @@ class WikiHtmlViewWK(wx.Panel):
                     status = _("Link to page: %s") % wikiWord
 
             self.presenter.getMainControl().statusBar.SetStatusText(
-                    uniToGui(status), 0)
+                    status, 0)
 
 
     # GTK wx mapping

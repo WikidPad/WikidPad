@@ -20,9 +20,9 @@ except AttributeError:
 # Placed here to avoid circular dependency with StringOps
 def isUnicode():
     """
-    Return if GUI is in unicode mode
+    Return if GUI is in unicode mode. Legacy function, TODO 2.5: Remove
     """
-    return wx.PlatformInfo[2] == "unicode"
+    return True
 
 def isOSX():
     """
@@ -45,17 +45,17 @@ _ISWINNT = wx.GetOsVersion()[0] == wxWINDOWS_NT
 
 def isWin9x():
     """
-    Returns True if OS is Windows 95/98/ME
+    Returns True if OS is Windows 95/98/ME. Legacy function, TODO 2.5: Remove
     """
-    return _ISWIN9x
+    return False
 
 def isWinNT():
     """
-    Returns True if OS is Windows NT/2000/XP...
+    Returns True if OS is Windows NT/2000/XP... Legacy function, TODO 2.5: Remove
     """
     return _ISWINNT
 
 def isWindows():
-    return _ISWIN9x or _ISWINNT
+    return _ISWINNT
 
 

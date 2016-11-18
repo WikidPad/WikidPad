@@ -20,7 +20,7 @@ except:
 
 from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
 
-from .StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
+from .StringOps import mbcsEnc, mbcsDec, \
         escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
 from .wikidata import DbBackendUtils
 
@@ -92,7 +92,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
             term = self.listContent[sel]
             self.wikiWord = term[2]
         else:
-            self.wikiWord = guiToUni(self.ctrls.text.GetValue())
+            self.wikiWord = self.ctrls.text.GetValue()
     
             if not self.pWiki.getWikiDocument().isDefinedWikiLinkTerm(
                     self.wikiWord):
@@ -124,7 +124,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
             self.ignoreTextChange -= 1
             return
 
-        text = guiToUni(evt.GetString())
+        text = evt.GetString()
 
         self.ctrls.lb.Freeze()
         try:
@@ -141,8 +141,8 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
         sel = self.ctrls.lb.GetSelection()
         if sel != wx.NOT_FOUND:
             if self.listContent[sel][0] != self.listContent[sel][2]:
-                self.ctrls.stLinkTo.SetLabel(uniToGui(_("Links to:") + " " +
-                        self.listContent[sel][2]))
+                self.ctrls.stLinkTo.SetLabel(_("Links to:") + " " +
+                        self.listContent[sel][2])
             else:
                 self.ctrls.stLinkTo.SetLabel("")
             self.ignoreTextChange += 1
@@ -260,7 +260,7 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         if len(sel) > 0:
             self.value = tuple(self.listContent[s] for s in sel)
         else:
-            entered = guiToUni(self.ctrls.text.GetValue())
+            entered = self.ctrls.text.GetValue()
 
             if len(entered) == 0:
                 # Nothing entered probably means the user doesn't want to
@@ -296,8 +296,8 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
                                 True):
                             # wikiWord is valid but nonexisting, so maybe create it?
                             answer = wx.MessageBox(
-                                    uniToGui(_("'%s' is not an existing wikiword. Create?") %
-                                    wikiWord), uniToGui(_("Create")),
+                                    _("'%s' is not an existing wikiword. Create?") %
+                                    wikiWord, _("Create"),
                                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
                             if answer != wx.YES:
@@ -330,7 +330,7 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
             self.ignoreTextChange -= 1
             return
 
-        text = guiToUni(self.ctrls.text.GetValue())  # evt.GetString())
+        text = self.ctrls.text.GetValue()  # evt.GetString())
         
         listBox = self.ctrls.lb
 
@@ -359,8 +359,8 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         if len(sel) > 0:
             sel = sel[0]
             if self.listContent[sel][0] != self.listContent[sel][2]:
-                self.ctrls.stLinkTo.SetLabel(uniToGui(_("Links to:") + " " +
-                        self.listContent[sel][2]))
+                self.ctrls.stLinkTo.SetLabel(_("Links to:") + " " +
+                        self.listContent[sel][2])
             else:
                 self.ctrls.stLinkTo.SetLabel("")
             self.ignoreTextChange += 1
@@ -405,7 +405,7 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.pWiki.getWikiDefaultWikiLanguage(),
                 self.pWiki.getWikiDocument())
-        entered = guiToUni(self.ctrls.text.GetValue())
+        entered = self.ctrls.text.GetValue()
         wikiWord = langHelper.extractWikiWordFromLink(entered)
 
         if wikiWord is None:
@@ -622,10 +622,8 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.words = self.unsortedWords[:]
         if self.ctrls.cbSortAlphabetically.GetValue():
             self.pWiki.getCollator().sort(self.words)
-            
-        wordsgui = list(map(uniToGui, self.words))
         
-        self.ctrls.lb.Set(wordsgui)
+        self.ctrls.lb.Set(self.words)
 
 
 
@@ -953,7 +951,7 @@ class DateformatDialog(wx.Dialog):
 
     def OnText(self, evt):
         preview = _("<invalid>")
-        text = guiToUni(self.ctrls.fieldFormat.GetValue())
+        text = self.ctrls.fieldFormat.GetValue()
         try:
             preview = strftimeUB(text)
             self.value = text
@@ -1262,7 +1260,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         try:
             if self.continuousExport:
                 ob.startContinuousExport(self.mainControl.getWikiDocument(),
-                        sarOp, etype, guiToUni(self.ctrls.tfDestination.GetValue()),
+                        sarOp, etype, self.ctrls.tfDestination.GetValue(),
                         self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
                         pgh)
     
@@ -1273,7 +1271,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         
                 try:
                     ob.export(self.mainControl.getWikiDocument(), wordList, etype, 
-                            guiToUni(self.ctrls.tfDestination.GetValue()), 
+                            self.ctrls.tfDestination.GetValue(), 
                             self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
                             pgh)
                 except ExportException as e:
@@ -1379,7 +1377,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
 
         self.ctrls.lbSavedExports.Clear()
         for exportName, xmlNode in self.savedExports:
-            self.ctrls.lbSavedExports.Append(uniToGui(exportName))
+            self.ctrls.lbSavedExports.Append(exportName)
 
 
     def OnSaveExport(self, evt):
@@ -1391,8 +1389,8 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
             defValue = self.savedExports[sels[0]][0]
 
         while True:
-            title = guiToUni(wx.GetTextFromUser(_("Title:"),
-                    _("Choose export title"), defValue, self))
+            title = wx.GetTextFromUser(_("Title:"),
+                    _("Choose export title"), defValue, self)
             if title == "":
                 return  # Cancel
                 
@@ -1485,7 +1483,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         Serialization.serToXmlUnicode(xmlHead, xmlDoc, "exportTypeName", etype)
 
         Serialization.serToXmlUnicode(xmlHead, xmlDoc, "destinationPath",
-                guiToUni(self.ctrls.tfDestination.GetValue()))
+                self.ctrls.tfDestination.GetValue())
 
         pageSetXml = xmlDoc.createElement("pageSet")
         xmlHead.appendChild(pageSetXml)
@@ -1556,8 +1554,8 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
             self.ctrls.chExportTo.SetSelection(sel)
             ob.setAddOpt(addOpt, panel)
     
-            self.ctrls.tfDestination.SetValue(uniToGui(
-                    Serialization.serFromXmlUnicode(xmlNode, "destinationPath")))
+            self.ctrls.tfDestination.SetValue(
+                    Serialization.serFromXmlUnicode(xmlNode, "destinationPath"))
                     
             self._refreshForEtype()
             
@@ -1685,7 +1683,7 @@ class ImportDialog(wx.Dialog):
         ob, itype, desc, panel = \
                 self.importerList[self.ctrls.chImportFormat.GetSelection()][:4]
                 
-        if not exists(guiToUni(self.ctrls.tfSource.GetValue())):
+        if not exists(self.ctrls.tfSource.GetValue()):
             self.mainControl.displayErrorMessage(
                     _("Source does not exist"))
             return
@@ -1695,12 +1693,12 @@ class ImportDialog(wx.Dialog):
         if impSrcWildcards is None:
             # Import from a directory
             
-            if not isdir(guiToUni(self.ctrls.tfSource.GetValue())):
+            if not isdir(self.ctrls.tfSource.GetValue()):
                 self.mainControl.displayErrorMessage(
                         _("Source must be a directory"))
                 return
         else:
-            if not isfile(guiToUni(self.ctrls.tfSource.GetValue())):
+            if not isfile(self.ctrls.tfSource.GetValue()):
                 self.mainControl.displayErrorMessage(
                         _("Source must be a file"))
                 return
@@ -1710,7 +1708,7 @@ class ImportDialog(wx.Dialog):
 
         try:
             ob.doImport(self.mainControl.getWikiDocument(), itype, 
-                    guiToUni(self.ctrls.tfSource.GetValue()), 
+                    self.ctrls.tfSource.GetValue(), 
                     False, ob.getAddOpt(panel))
         except ImportException as e:
             self.mainControl.displayErrorMessage(_("Error while importing"),

@@ -16,7 +16,6 @@ from .wxHelper import *
 from .WikiExceptions import *
 
 from .Utilities import callInMainThreadAsync
-from .SystemInfo import isUnicode
 
 from . import StringOps
 
@@ -239,10 +238,6 @@ def buildColorsSubmenu():
     colorsMenu2 = wx.Menu()
     colorsMenu.AppendMenu(wx.NewId(), 'M-Z', colorsMenu2)
     
-    # Set showColored to False if we are on Win 95/98/ME and use an unicode build
-    #   of wxPython because it would crash then
-    showColored = not (wx.GetOsVersion()[0] == wxWIN95 and isUnicode())
-
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
         translatedColorName = _(cn)
@@ -257,15 +252,14 @@ def buildColorsSubmenu():
         menuItem = wx.MenuItem(colorsSubMenu, menuID, translatedColorName,
                 translatedColorName)
         
-        if showColored:
-            cl = wx.NamedColour(cn)
-    
-            menuItem.SetBackgroundColour(cl)
-    
-            # if color is dark, text should be white
-            #   (checking green component seems to be enough)
-            if cl.Green() < 128:
-                menuItem.SetTextColour(wx.WHITE)
+        cl = wx.NamedColour(cn)
+
+        menuItem.SetBackgroundColour(cl)
+
+        # if color is dark, text should be white
+        #   (checking green component seems to be enough)
+        if cl.Green() < 128:
+            menuItem.SetTextColour(wx.WHITE)
 
         colorsSubMenu.AppendItem(menuItem)
 

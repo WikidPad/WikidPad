@@ -16,7 +16,7 @@ from .wxHelper import getAccelPairFromKeyDown, GUI_ID, wxKeyFunctionSink, \
 from .MiscEvent import KeyFunctionSink
 
 from . import StringOps
-from .StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
@@ -290,7 +290,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     for s in self._DEFAULT_FONT_SIZES])
                     
 #             print "-- refresh8", html.encode("mbcs", "ignore")
-            self.SetPage(uniToGui(html))
+            self.SetPage(html)
             self.scrollDeferred(lx, ly)
 
 #         traceback.print_stack()
@@ -713,8 +713,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 else:
                     status = href
 
-        self.presenter.getMainControl().statusBar.SetStatusText(
-                        uniToGui(status), 0)
+        self.presenter.getMainControl().statusBar.SetStatusText(status, 0)
 
         self.SetToolTipString(callTip)
 

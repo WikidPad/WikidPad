@@ -10,10 +10,8 @@ import wx
 from .MiscEvent import MiscEventSourceMixin
 from .WikiExceptions import *
 
-from .SystemInfo import isUnicode
-
 # For compatibility TODO: remove in 2.2
-from .SystemInfo import isOSX, isLinux, isWin9x, isWinNT, isWindows
+from .SystemInfo import isOSX, isLinux, isWindows
 
 # from WikiExceptions import *
 
@@ -97,9 +95,9 @@ class _AbstractConfiguration:
     @staticmethod
     def isUnicode():
         """
-        Return if GUI is in unicode mode
+        Return if GUI is in unicode mode. Legacy function, TODO 2.5: Remove
         """
-        return isUnicode()
+        return True
 
 
 

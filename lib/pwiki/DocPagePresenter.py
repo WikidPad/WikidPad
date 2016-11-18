@@ -15,7 +15,7 @@ from .WikiHtmlView import createWikiHtmlView
 from . import DocPages
 
 from . import SystemInfo
-from .StringOps import uniToGui, escapeForIni, unescapeForIni
+from .StringOps import escapeForIni, unescapeForIni
 
 from .WindowLayout import LayeredControlPresenter, LayerSizer, StorablePerspective
 
@@ -72,7 +72,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         return self.getSubControl("textedit")
 
     def SetStatusText(self, text, field):
-        self.getStatusBar().SetStatusText(uniToGui(text), field)
+        self.getStatusBar().SetStatusText(text, field)
 
     def showStatusMessage(self, msg, duration=0, key=None):
         self.getMainControl().showStatusMessage(msg, duration, key)
@@ -269,8 +269,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 # trigger hooks
                 self.getMainControl().hooks.newWikiWord(self, wikiWord)
                 self.showStatusMessage(
-                        uniToGui(_("Wiki page not found, a new "
-                        "page will be created")))
+                        _("Wiki page not found, a new "
+                        "page will be created"))
 #                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
 
             self.loadWikiPage(page, **evtprops)

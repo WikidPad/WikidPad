@@ -42,7 +42,7 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from .MiscEvent import KeyFunctionSink
 
-from .StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 
 from . import DocPages
@@ -536,7 +536,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     status = _("Link to page: %s") % wikiWord
 
             self.presenter.getMainControl().statusBar.SetStatusText(
-                    uniToGui(status), 0)
+                    status, 0)
 
 
 #     def OnKeyUp(self, evt):

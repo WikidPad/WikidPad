@@ -31,7 +31,7 @@ from . import OsAbstract
 
 from .WikiExceptions import *
 
-from .SystemInfo import isUnicode, isOSX, isLinux, isWindows
+from .SystemInfo import isOSX, isLinux, isWindows
 
 from .ParseUtilities import getFootnoteAnchorDict
 
@@ -57,11 +57,7 @@ from .SearchAndReplace import SearchReplaceOperation
 from . import StringOps
 from . import SpellChecker
 
-# from StringOps import *  # TODO Remove this
-# mbcsDec, uniToGui, guiToUni, \
-#        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
-
-# NOTE: TEMPORY
+# NOTE: TEMPORARY
 import inspect
 
 
@@ -860,11 +856,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.SetSelection(-1, -1)
         self.ignoreOnChange = True
-        if isUnicode():
-            wx.stc.StyledTextCtrl.SetText(self, text)
-        else:
-            wx.stc.StyledTextCtrl.SetText(self,
-                    StringOps.mbcsEnc(text, "replace")[0])
+        wx.stc.StyledTextCtrl.SetText(self, text)
         self.ignoreOnChange = False
 
         if emptyUndo:
@@ -873,11 +865,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     def replaceText(self, text):
-        if isUnicode():
-            wx.stc.StyledTextCtrl.SetText(self, text)
-        else:
-            wx.stc.StyledTextCtrl.SetText(self,
-                    StringOps.mbcsEnc(text, "replace")[0])
+        wx.stc.StyledTextCtrl.SetText(self, text)
 
 
     def replaceTextAreaByCharPos(self, newText, start, end):
@@ -887,10 +875,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.SetTargetStart(bs)
         self.SetTargetEnd(be)
 
-        if isUnicode():
-            self.ReplaceTarget(newText)
-        else:
-            self.ReplaceTarget(StringOps.mbcsEnc(newText, "replace")[0])
+        self.ReplaceTarget(newText)
 
 #         text = self.GetText()
 #         text = text[:pos] + newText + text[(pos + len):]
@@ -915,8 +900,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         Apply the basic Scintilla settings which are resetted to wrong
         default values by some operations
         """
-        if isUnicode():
-            self.SetCodePage(wx.stc.STC_CP_UTF8)
+        self.SetCodePage(wx.stc.STC_CP_UTF8)
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
         self.SetUseTabs(not self.tabsToSpaces)
@@ -1520,7 +1504,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 # For a new id, an event must be set
                 wx.EVT_MENU(self, menuID, self.OnTemplateUsed)
 
-            menu.Append(menuID, StringOps.uniToGui(tn))
+            menu.Append(menuID, tn)
 
 
     def OnTemplateUsed(self, evt):
@@ -3473,16 +3457,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
             evt.Skip()
             return
 
-        if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+        if key >= wx.WXK_START and evt.GetUnicodeKey() != key:
             evt.Skip()
             return
 
-        if isUnicode():
-            unichar = chr(evt.GetUnicodeKey())
-        else:
-            unichar = StringOps.mbcsDec(chr(key))[0]
-
-        self.ReplaceSelection(unichar)
+        self.ReplaceSelection(chr(evt.GetUnicodeKey()))
 
 
     def OnMouseWheel(self, evt):

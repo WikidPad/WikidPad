@@ -32,8 +32,6 @@ except (AttributeError, ImportError, WindowsError):
 
 from .DocPages import AliasWikiPage, WikiPage
 
-from .StringOps import uniToGui, guiToUni
-
 
 
 class SpellCheckerDialog(wx.Dialog):
@@ -101,7 +99,7 @@ class SpellCheckerDialog(wx.Dialog):
         self.ctrls.tfToCheck.SetValue("")
         # Show message in blue
         self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLUE))
-        self.ctrls.tfToCheck.AppendText(uniToGui(msg))
+        self.ctrls.tfToCheck.AppendText(msg)
         self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         # To scroll text to beginning
         self.ctrls.tfToCheck.SetInsertionPoint(0)
@@ -240,9 +238,9 @@ class SpellCheckerDialog(wx.Dialog):
         autosizeColumn(self.ctrls.lbReplaceSuggestions, 0)
 
         if len(sugglist) > 0:
-            self.ctrls.tfReplaceWith.SetValue(uniToGui(sugglist[0]))
+            self.ctrls.tfReplaceWith.SetValue(sugglist[0])
         else:
-            self.ctrls.tfReplaceWith.SetValue(uniToGui(spWord))
+            self.ctrls.tfReplaceWith.SetValue(spWord)
 
         self.ctrls.tfReplaceWith.SetFocus()
 
@@ -268,7 +266,7 @@ class SpellCheckerDialog(wx.Dialog):
     def OnReplace(self, evt):
         activeEditor = self.mainControl.getActiveEditor()
 
-        repl = guiToUni(self.ctrls.tfReplaceWith.GetValue())
+        repl = self.ctrls.tfReplaceWith.GetValue()
         if repl != self.currentCheckedWord:
             activeEditor.ReplaceSelection(repl)
 
@@ -278,7 +276,7 @@ class SpellCheckerDialog(wx.Dialog):
 
     def OnReplaceAll(self, evt):
         self.session.addAutoReplace(self.currentCheckedWord, 
-                guiToUni(self.ctrls.tfReplaceWith.GetValue()))
+                self.ctrls.tfReplaceWith.GetValue())
         self.OnReplace(None)
 
 

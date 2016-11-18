@@ -18,12 +18,10 @@ from .WikiPyparsing import TerminalNode, NonTerminalNode
 from .EnhancedScintillaControl import StyleCollector
 from .SearchableScintillaControl import SearchableScintillaControl
 
-from .SystemInfo import isUnicode
 
 
 
-
-def bytelenSct_utf8(us):
+def bytelenSct(us):
     """
     us -- unicode string
     returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
@@ -31,12 +29,6 @@ def bytelenSct_utf8(us):
     return len(StringOps.utf8Enc(us)[0])
 
 
-def bytelenSct_mbcs(us):
-    """
-    us -- unicode string
-    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
-    """
-    return len(StringOps.mbcsEnc(us)[0])
 
 
 _WORD_DIVIDER = re.compile(r"(\b[\w']+)",
@@ -62,12 +54,6 @@ class InlineDiffControl(SearchableScintillaControl):
 
         res = wx.xrc.XmlResource.Get()
         self.tabContextMenu = res.LoadMenu("MenuDiffTabPopup")
-
-        # Self-modify to ansi/unicode version
-        if isUnicode():
-            self.bytelenSct = bytelenSct_utf8
-        else:
-            self.bytelenSct = bytelenSct_mbcs
 
         config = self.mainControl.getConfig()
         self.defaultFont = config.get("main", "font",
@@ -313,7 +299,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
     def _calcViewStylebytes(self, text):
         stylebytes = StyleCollector(wx.stc.STC_STYLE_DEFAULT, text,
-                self.bytelenSct)
+                bytelenSct)
                 
         _NODENAME_TO_STYLEBYTE = self._NODENAME_TO_STYLEBYTE
         

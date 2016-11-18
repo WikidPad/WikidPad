@@ -1060,8 +1060,7 @@ class HtmlExporter(AbstractExporter):
 
         formattedContent = self.formatContent(wikiPage)
 
-        if SystemInfo.isUnicode():
-            result.append(self.getFileHeader(wikiPage))
+        result.append(self.getFileHeader(wikiPage))
 
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
