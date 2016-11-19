@@ -1,1 +1,1 @@
-from original_gadfly.WikiData import *
+from .original_gadfly.WikiData import *

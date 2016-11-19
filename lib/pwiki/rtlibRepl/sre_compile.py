@@ -11,15 +11,16 @@
 """Internal support module for sre"""
 
 import _sre, sys
-from sre_constants import *
-import sre_parse
+from .sre_constants import *
+from . import sre_parse
+import collections
 
 assert _sre.MAGIC == MAGIC, "SRE module mismatch"
 
 if _sre.CODESIZE == 2:
     MAXCODE = 65535
 else:
-    MAXCODE = 0xFFFFFFFFL
+    MAXCODE = 0xFFFFFFFF
 
 def _identityfunction(x):
     return x
@@ -69,7 +70,7 @@ def _compile(code, pattern, flags):
                 emit(OPCODES[ANY])
         elif op in REPEATING_CODES:
             if flags & SRE_FLAG_TEMPLATE:
-                raise error, "internal: unsupported template operator"
+                raise error("internal: unsupported template operator")
                 emit(OPCODES[REPEAT])
                 skip = _len(code); emit(0)
                 emit(av[0])
@@ -118,7 +119,7 @@ def _compile(code, pattern, flags):
             else:
                 lo, hi = av[1].getwidth()
                 if lo != hi:
-                    raise error, "look-behind requires fixed-width pattern"
+                    raise error("look-behind requires fixed-width pattern")
                 emit(lo) # look behind
             _compile(code, av[1], flags)
             emit(OPCODES[SUCCESS])
@@ -179,7 +180,7 @@ def _compile(code, pattern, flags):
             else:
                 code[skipyes] = _len(code) - skipyes + 1
         else:
-            raise ValueError, ("unsupported operand type", op)
+            raise ValueError("unsupported operand type", op)
 
 def _compile_charset(charset, flags, code, fixup=None):
     # compile charset subprogram
@@ -207,7 +208,7 @@ def _compile_charset(charset, flags, code, fixup=None):
             else:
                 emit(CHCODES[av])
         else:
-            raise error, "internal: unsupported set operator"
+            raise error("internal: unsupported set operator")
     emit(OPCODES[FAILURE])
 
 def _optimize_charset(charset, fixup):
@@ -267,7 +268,7 @@ def _mk_bitmap(bits):
     if _sre.CODESIZE == 2:
         start = (1, 0)
     else:
-        start = (1L, 0L)
+        start = (1, 0)
     m, v = start
     for c in bits:
         if c:
@@ -318,7 +319,7 @@ def _optimize_unicode(charset, fixup):
             elif op is LITERAL:
                 charmap[fixup(av)] = 1
             elif op is RANGE:
-                for i in xrange(fixup(av[0]), fixup(av[1])+1):
+                for i in range(fixup(av[0]), fixup(av[1])+1):
                     charmap[i] = 1
             elif op is CATEGORY:
                 # XXX: could expand category
@@ -330,13 +331,13 @@ def _optimize_unicode(charset, fixup):
         if sys.maxunicode != 65535:
             # XXX: negation does not work with big charsets
             return charset
-        for i in xrange(65536):
+        for i in range(65536):
             charmap[i] = not charmap[i]
     comps = {}
     mapping = [0]*256
     block = 0
     data = []
-    for i in xrange(256):
+    for i in range(256):
         chunk = tuple(charmap[i*256:(i+1)*256])
         new = comps.setdefault(chunk, block)
         mapping[i] = new
@@ -361,7 +362,7 @@ def _simple(av):
     # check if av is a "simple" operator
     lo, hi = av[2].getwidth()
     if lo == 0 and hi == MAXREPEAT:
-        raise error, "nothing to repeat"
+        raise error("nothing to repeat")
     return lo == hi == 1 and av[2][0][0] != SUBPATTERN
 
 def _compile_info(code, pattern, flags):
@@ -461,7 +462,7 @@ def _compile_info(code, pattern, flags):
         code.extend(prefix)
         # generate overlap table
         table = [-1] + ([0]*len(prefix))
-        for i in xrange(len(prefix)):
+        for i in range(len(prefix)):
             table[i+1] = table[i]+1
             while table[i+1] > 0 and prefix[i] != prefix[table[i+1]-1]:
                 table[i+1] = table[table[i+1]-1]+1
@@ -471,11 +472,11 @@ def _compile_info(code, pattern, flags):
     code[skip] = len(code) - skip
 
 try:
-    unicode
+    str
 except NameError:
     STRING_TYPES = (type(""),)
 else:
-    STRING_TYPES = (type(""), type(unicode("")))
+    STRING_TYPES = (type(""), type(str("")))
 
 def isstring(obj):
     for tp in STRING_TYPES:
@@ -522,7 +523,7 @@ class WrappedPattern(object):
 #         return self.realPattern.search(*args, **kwargs)
     
     def sub(self, repl, string, count=0) :
-        if not callable(repl):
+        if not isinstance(repl, collections.Callable):
             # _subx is injected from module "re.py"
             repl = _subx(self, repl)
         
@@ -553,7 +554,7 @@ def compile(p, flags=0):
     # map in either direction
     groupindex = p.pattern.groupdict
     indexgroup = [None] * p.pattern.groups
-    for k, i in groupindex.items():
+    for k, i in list(groupindex.items()):
         indexgroup[i] = k
 
     # Workaround for bug, see class WrappedPattern_sre

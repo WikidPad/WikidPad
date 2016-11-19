@@ -17,11 +17,11 @@ class WikiWideHistoryPanel(EnhancedListControl):
 
         self.mainControl = mainControl
 
-        self.InsertColumn(0, _(u"Page Name"), width=100)
-        self.InsertColumn(1, _(u"Visited"), width=100)
+        self.InsertColumn(0, _("Page Name"), width=100)
+        self.InsertColumn(1, _("Visited"), width=100)
         
         colConfig = self.mainControl.getConfig().get("main",
-                "wikiWideHistory_columnWidths", u"100,100")
+                "wikiWideHistory_columnWidths", "100,100")
 
         self.setColWidthsByConfigString(colConfig)
 
@@ -197,9 +197,9 @@ class WikiWideHistoryPanel(EnhancedListControl):
         Handle misc events
         """
         if self.isVisibleEffect() and miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("opened wiki"):
+            if "opened wiki" in miscevt:
                 self.onWikiStateChanged(miscevt)
-            elif miscevt.has_key("closed current wiki"):
+            elif "closed current wiki" in miscevt:
                 self.onWikiStateChanged(miscevt)
 
 
@@ -231,7 +231,7 @@ class WikiWideHistoryPanel(EnhancedListControl):
         
         # TODO: Own date/time format
         formatStr = self.mainControl.getConfig().get("main",
-                "wikiWideHistory_dateFormat", u"%x %I:%M %p")
+                "wikiWideHistory_dateFormat", "%x %I:%M %p")
 
         with WindowUpdateLocker(self):
             self.DeleteAllItems()
@@ -368,7 +368,7 @@ class WikiWideHistoryPanel(EnhancedListControl):
 
 # Context menu on history tab
 _CONTEXT_MENU_HISTORY_TAB = \
-u"""
+"""
 Clear history;CMD_WIKI_WIDE_HISTORY_DELETE_ALL;Clear history
 """
 
@@ -377,7 +377,7 @@ Clear history;CMD_WIKI_WIDE_HISTORY_DELETE_ALL;Clear history
 
 # Entries to support i18n of context menus
 if False:
-    N_(u"Clear history")
+    N_("Clear history")
 
 
 

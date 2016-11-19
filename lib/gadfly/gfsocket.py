@@ -40,7 +40,7 @@ def send_packet(socket, data):
 
 def send_len(data, socket):
     """send length of data as cr terminated int rep"""
-    info = `len(data)`+"\n"
+    info = repr(len(data))+"\n"
     socket.send(info)
 
 def send_certified_action(actor_name, action, arguments, password, socket):
@@ -63,12 +63,12 @@ def recv_data(socket, timeout=10):
     while not done:
         timeout = endtime - time.time()
         if timeout<0:
-            raise IOError, "socket time out (1)"
+            raise IOError("socket time out (1)")
         (readable, dummy, error) = select.select([socket], [], [socket], timeout)
         if error:
-            raise IOError, "socket in error state"
+            raise IOError("socket in error state")
         if not readable:
-            raise IOError, "socket time out (2)"
+            raise IOError("socket time out (2)")
         reader.poll()
         done = (reader.mode==READY)
     return reader.data
@@ -80,9 +80,9 @@ def interpret_response(data):
         return data
     elif indicator==EXCEPTION:
         # ???
-        raise EXCEPTION, data
+        raise EXCEPTION(data)
     else:
-        raise ValueError, "unknown indicator: "+`indicator`
+        raise ValueError("unknown indicator: "+repr(indicator))
 
 # packet reader modes
 LEN = "LEN"
@@ -115,26 +115,26 @@ class Packet_Reader:
 
     def __len__(self):
         if self.mode is LEN:
-            raise ValueError, "still reading length"
+            raise ValueError("still reading length")
         return self.length
 
     def get_data(self):
         if self.mode is not READY:
-            raise ValueError, "still reading"
+            raise ValueError("still reading")
         return self.data
 
     def poll(self):
         mode = self.mode
         if mode is READY:
-            raise ValueError, "data is ready"
+            raise ValueError("data is ready")
         if mode is ERROR:
-            raise ValueError, "socket error previously detected"
+            raise ValueError("socket error previously detected")
         socket = self.socket
         (readable, dummy, error) = select.select([socket], [], [socket], 0)
         if error:
             self.socket.close()
             self.mode = ERROR
-            raise ValueError, "socket is in error state"
+            raise ValueError("socket is in error state")
         if readable:
             if mode is LEN:
                 self.read_len()
@@ -161,18 +161,18 @@ class Packet_Reader:
                 except:
                     self.mode = ERROR
                     socket.close()
-                    raise ValueError, "bad len string? "+`len_list`
+                    raise ValueError("bad len string? "+repr(len_list))
                 self.received = received
                 self.length_remaining = length
                 self.mode = DATA
                 limit_len = self.limit_len
                 if limit_len and length>limit_len:
-                    raise ValueError, "Length too big: "+`(length, limit_len)`
+                    raise ValueError("Length too big: "+repr((length, limit_len)))
                 return
             if len(len_list)>10:
                 self.mode = ERROR
                 socket.close()
-                raise ValueError, "len_list too long: "+`len_list`
+                raise ValueError("len_list too long: "+repr(len_list))
             len_list.append(input)
             if not received:
                 (readable, dummy, error) = select.select(\
@@ -180,7 +180,7 @@ class Packet_Reader:
                 if error:
                     self.mode = ERROR
                     socket.close()
-                    raise ValueError, "socket in error state"
+                    raise ValueError("socket in error state")
                 if readable:
                     received = socket.recv(10)
         # remember extra data received.
@@ -209,7 +209,7 @@ class Packet_Reader:
 def certificate(String, password):
     """generate a certificate for a string, using a password"""
     if not String:
-        raise ValueError, "cannot generate certificate for empty string"
+        raise ValueError("cannot generate certificate for empty string")
     taggedstring = password + String
     return hashlib.md5(taggedstring).digest()
 

@@ -1,20 +1,21 @@
 import wx, wx.xrc
 import wx.lib.dialogs
-import SystemInfo
-from wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
+from . import SystemInfo
+from .wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
 from collections import defaultdict
-from StringOps import pathEnc, urlQuote
+from .StringOps import pathEnc, urlQuote
 import os
-import ConfigParser
+import configparser
 import re
 import copy
 import string
-import PluginManager
+from . import PluginManager
 import subprocess
 
-from wxHelper import * # Needed for  XrcControls
+from .wxHelper import * # Needed for  XrcControls
 
-from WindowLayout import setWindowSize
+from .WindowLayout import setWindowSize
+from functools import reduce
 
 #TODO:  Multiple registers
 #       Page marks
@@ -44,111 +45,111 @@ class ViHelper():
     """
     # Modes
     # Current these are only (partly) implemented for the editor
-    NORMAL, INSERT, VISUAL, REPLACE = range(4)
+    NORMAL, INSERT, VISUAL, REPLACE = list(range(4))
 
     MODE_TEXT = { 
-                    0 : u"", 
-                    1 : u"--INSERT--", 
-                    2 : u"--VISUAL--", 
-                    3 : u"--REPLACE--" 
+                    0 : "", 
+                    1 : "--INSERT--", 
+                    2 : "--VISUAL--", 
+                    3 : "--REPLACE--" 
                 }
 
     # Default key bindings - can be overridden by wikidrc
     KEY_BINDINGS = {
-                        u"!" : 33,
-                        u"\"" : 34,
-                        u"#" : 35,
-                        u"$" : 36,
-                        u"%" : 37,
-                        u"&" : 38,
-                        u"'" : 39,
-                        u"(" : 40,
-                        u")" : 41,
-                        u"*" : 42,
-                        u"+" : 43,
-                        u"," : 44,
-                        u"-" : 45,
-                        u"." : 46,
-                        u"/" : 47,
-                        u"0" : 48,
-                        u"1" : 49,
-                        u"2" : 50,
-                        u"3" : 51,
-                        u"4" : 52,
-                        u"5" : 53,
-                        u"6" : 54,
-                        u"7" : 55,
-                        u"8" : 56,
-                        u"9" : 57,
-                        u":" : 58,
-                        u";" : 59,
-                        u"<" : 60,
-                        u"=" : 61,
-                        u">" : 62,
-                        u"?" : 63,
-                        u"@" : 64,
-                        u"A" : 65,
-                        u"B" : 66,
-                        u"C" : 67,
-                        u"D" : 68,
-                        u"E" : 69,
-                        u"F" : 70,
-                        u"G" : 71,
-                        u"H" : 72,
-                        u"I" : 73,
-                        u"J" : 74,
-                        u"K" : 75,
-                        u"L" : 76,
-                        u"M" : 77,
-                        u"N" : 78,
-                        u"O" : 79,
-                        u"P" : 80,
-                        u"Q" : 81,
-                        u"R" : 82,
-                        u"S" : 83,
-                        u"T" : 84,
-                        u"U" : 85,
-                        u"V" : 86,
-                        u"W" : 87,
-                        u"X" : 88,
-                        u"Y" : 89,
-                        u"Z" : 90,
-                        u"[" : 91,
-                        u"\\" : 92,
-                        u"]" : 93,
-                        u"^" : 94,
-                        u"_" : 95,
-                        u"`" : 96,
-                        u"a" : 97,
-                        u"b" : 98,
-                        u"c" : 99,
-                        u"d" : 100,
-                        u"e" : 101,
-                        u"f" : 102,
-                        u"g" : 103,
-                        u"h" : 104,
-                        u"i" : 105,
-                        u"j" : 106,
-                        u"k" : 107,
-                        u"l" : 108,
-                        u"m" : 109,
-                        u"n" : 110,
-                        u"o" : 111,
-                        u"p" : 112,
-                        u"q" : 113,
-                        u"r" : 114,
-                        u"s" : 115,
-                        u"t" : 116,
-                        u"u" : 117,
-                        u"v" : 118,
-                        u"w" : 119,
-                        u"x" : 120,
-                        u"y" : 121,
-                        u"z" : 122,
-                        u"{" : 123,
-                        u"|" : 124,
-                        u"}" : 125,
-                        u"~" : 126,
+                        "!" : 33,
+                        "\"" : 34,
+                        "#" : 35,
+                        "$" : 36,
+                        "%" : 37,
+                        "&" : 38,
+                        "'" : 39,
+                        "(" : 40,
+                        ")" : 41,
+                        "*" : 42,
+                        "+" : 43,
+                        "," : 44,
+                        "-" : 45,
+                        "." : 46,
+                        "/" : 47,
+                        "0" : 48,
+                        "1" : 49,
+                        "2" : 50,
+                        "3" : 51,
+                        "4" : 52,
+                        "5" : 53,
+                        "6" : 54,
+                        "7" : 55,
+                        "8" : 56,
+                        "9" : 57,
+                        ":" : 58,
+                        ";" : 59,
+                        "<" : 60,
+                        "=" : 61,
+                        ">" : 62,
+                        "?" : 63,
+                        "@" : 64,
+                        "A" : 65,
+                        "B" : 66,
+                        "C" : 67,
+                        "D" : 68,
+                        "E" : 69,
+                        "F" : 70,
+                        "G" : 71,
+                        "H" : 72,
+                        "I" : 73,
+                        "J" : 74,
+                        "K" : 75,
+                        "L" : 76,
+                        "M" : 77,
+                        "N" : 78,
+                        "O" : 79,
+                        "P" : 80,
+                        "Q" : 81,
+                        "R" : 82,
+                        "S" : 83,
+                        "T" : 84,
+                        "U" : 85,
+                        "V" : 86,
+                        "W" : 87,
+                        "X" : 88,
+                        "Y" : 89,
+                        "Z" : 90,
+                        "[" : 91,
+                        "\\" : 92,
+                        "]" : 93,
+                        "^" : 94,
+                        "_" : 95,
+                        "`" : 96,
+                        "a" : 97,
+                        "b" : 98,
+                        "c" : 99,
+                        "d" : 100,
+                        "e" : 101,
+                        "f" : 102,
+                        "g" : 103,
+                        "h" : 104,
+                        "i" : 105,
+                        "j" : 106,
+                        "k" : 107,
+                        "l" : 108,
+                        "m" : 109,
+                        "n" : 110,
+                        "o" : 111,
+                        "p" : 112,
+                        "q" : 113,
+                        "r" : 114,
+                        "s" : 115,
+                        "t" : 116,
+                        "u" : 117,
+                        "v" : 118,
+                        "w" : 119,
+                        "x" : 120,
+                        "y" : 121,
+                        "z" : 122,
+                        "{" : 123,
+                        "|" : 124,
+                        "}" : 125,
+                        "~" : 126,
                     }
                             
 
@@ -199,7 +200,7 @@ class ViHelper():
         self.last_cmd = None
         self.insert_action = []
 
-        self.selection_mode = u"NORMAL"
+        self.selection_mode = "NORMAL"
 
         self.tag_input = False
                     
@@ -224,8 +225,8 @@ class ViHelper():
                 # No. spaces to put between +++ and heading text
                 "pad_headings" : 0,
 
-                "gvim_path" : u"gvim", 
-                "vim_path" : u"vim", 
+                "gvim_path" : "gvim", 
+                "vim_path" : "vim", 
 
                 "caret_colour_normal" : "#FF0000",
                 "caret_colour_visual" : "#FFD700",
@@ -267,7 +268,7 @@ class ViHelper():
             try:
                 if presenter in presenter_type:
                     def returnKey(key):
-                        if len(key) > 1 and key[0] == u"key":
+                        if len(key) > 1 and key[0] == "key":
                             if type(key[1]) == tuple:
                                 l = list(key[1])
                                 key_char = l.pop()
@@ -283,7 +284,7 @@ class ViHelper():
                         elif key == "*":
                             return "*"
                         else:
-                            raise PluginKeyError(u"ERROR LOADING PLUGIN")
+                            raise PluginKeyError("ERROR LOADING PLUGIN")
                             
                     key_chain = tuple([returnKey(i) for i in keys])
                     for mode in vi_mode:
@@ -323,7 +324,7 @@ class ViHelper():
                 break
 
         if rc_file is not None:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(rc_file)
 
             # Load custom key bindings
@@ -332,8 +333,8 @@ class ViHelper():
                     try:
                         self.KEY_BINDINGS[key] = config.getint("keys", key)
                     except ValueError:
-                        print "Keycode must be a integer: {0}".format(key)
-            except ConfigParser.NoSectionError:
+                        print("Keycode must be a integer: {0}".format(key))
+            except configparser.NoSectionError:
                 pass
                 
 
@@ -344,9 +345,9 @@ class ViHelper():
                             self.settings[setting] = config.getboolean(
                                     "settings", setting)
                         except ValueError:
-                            print "Setting '{1}' must be boolean".format(setting)
+                            print("Setting '{1}' must be boolean".format(setting))
 
-            except ConfigParser.NoSectionError:
+            except configparser.NoSectionError:
                 pass
 
         self.ApplySettings()
@@ -403,10 +404,10 @@ class ViHelper():
             # TODO Check all modifiers
             if not evt.ControlDown() and not evt.ShiftDown():  
                 if key == wx.WXK_TAB:
-                    if self.ctrl.pageType == u"form":
+                    if self.ctrl.pageType == "form":
                         if not self.ctrl._goToNextFormField():
                             self.ctrl.presenter.getMainControl().showStatusMessage(
-                                    _(u"No more fields in this 'form' page"), -1)
+                                    _("No more fields in this 'form' page"), -1)
                         return
                     evt.Skip()
                 elif key == wx.WXK_RETURN and not self.ctrl.AutoCompActive():
@@ -491,7 +492,7 @@ class ViHelper():
 
         if mods:
             mods.extend([key])
-            print mods
+            print(mods)
             key = tuple(mods)
 
         return key
@@ -685,14 +686,14 @@ class ViHelper():
                 l = list(keycode)
                 k = l.pop()
                 mods = ACCEL_SEP.join(l)
-                return "{0}{1}{2}".format(mods, ACCEL_SEP, unichr(k))
+                return "{0}{1}{2}".format(mods, ACCEL_SEP, chr(k))
             try:
-                return unichr(keycode)
+                return chr(keycode)
             # This may occur when special keys (e.g. WXK_SPACE) are used
-            except TypeError, ValueError: # >wx2.9 ?valueerror?
+            except TypeError as ValueError: # >wx2.9 ?valueerror?
                 return keycode
         else:
-            return u""
+            return ""
 
     def Mark(self, code):
         """
@@ -764,7 +765,7 @@ class ViHelper():
                         k = l.pop()
                         mods = ACCEL_SEP.join(l)
                         # wx accels chars are always uppercase
-                        to_add = "{0}{1}{2}".format(mods, ACCEL_SEP, unichr(k).upper())
+                        to_add = "{0}{1}{2}".format(mods, ACCEL_SEP, chr(k).upper())
                         key_accels.add(to_add)
                 
         self.viKeyAccels.update(key_accels)
@@ -1002,12 +1003,12 @@ class ViHelper():
     def updateViStatus(self, force=False):
         # can this be right aligned?
         mode = self.mode
-        text = u""
+        text = ""
         if mode in self.keys:
-            cmd = u"".join([self.GetCharFromCode(i) for i in self.key_inputs])
-            text = u"{0}{1}{2}".format(
+            cmd = "".join([self.GetCharFromCode(i) for i in self.key_inputs])
+            text = "{0}{1}{2}".format(
                             ViHelper.MODE_TEXT[self.mode],
-                            u"".join(map(str, self.key_number_modifier)),
+                            "".join(map(str, self.key_number_modifier)),
                             cmd
                             )
 
@@ -1061,7 +1062,7 @@ class ViHelper():
 		    except:
 			# Key errors appear in windows! (probably due to
 			# unicode support??).
-			if unichr(accel.GetKeyCode()) in self.viKeyAccels:
+			if chr(accel.GetKeyCode()) in self.viKeyAccels:
 			    label = menu_item.GetItemLabel()
 			    self.menuShortCuts[i] = (label)
 			    menu_item.SetText(label.split("\t")[0]+"\tNone")
@@ -1165,7 +1166,7 @@ class ViHelper():
                 args['forward'] = not args['forward']
 
     def _SearchText(self):
-        raise NotImplementedError, "To be overridden by derived class"
+        raise NotImplementedError("To be overridden by derived class")
 
     def GoForwardInHistory(self):
         pageHistDeepness = self.ctrl.presenter.getPageHistory().getDeepness()[1]
@@ -1346,7 +1347,7 @@ class ViHelper():
         selection_range = None
         if self.mode == ViHelper.VISUAL:
             if initial_input is None:
-                initial_input = u"'<,'>"
+                initial_input = "'<,'>"
             else:
                 initial_input = "{0}{1}".format(initial_input, self.ctrl.GetSelectedText())
             selection_range = self.ctrl.vi._GetSelectionRange()
@@ -1470,7 +1471,7 @@ class ViHintDialog(wx.Frame):
                     mainControl, tabMode=0, primary_link=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
-        wx.Frame.__init__(self, parent, id, u"WikidPad Hints",
+        wx.Frame.__init__(self, parent, id, "WikidPad Hints",
                 rect.GetPosition(), rect.GetSize(),
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
@@ -1483,7 +1484,7 @@ class ViHintDialog(wx.Frame):
         self.viCtrl = viCtrl
         self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Follow Hint:"), style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
+                _("Follow Hint:"), style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
 
@@ -1666,7 +1667,7 @@ class ViRegister():
         for i in range(0, 10):
             self.registers[str(i)] = None
 
-        self.registers['"'] = u""
+        self.registers['"'] = ""
 
     def SelectRegister(self, key_code):
         if key_code is None:
@@ -1674,7 +1675,7 @@ class ViRegister():
             return
 
         if type(key_code) == int:
-            reg = unichr(key_code)
+            reg = chr(key_code)
         else:
             reg = key_code
 
@@ -1852,7 +1853,7 @@ class CmdParser():
             }
 
         if self.ctrl.presenter.getWikiDocument().getDbtype() == \
-                u"original_sqlite":
+                "original_sqlite":
             self.cmds["vim"] = (self.GetWikiPages, self.EditWithVim,
                         "Edit page with vim")
             self.cmds["gvim"] = (self.GetWikiPages, self.EditWithGvim,
@@ -1868,15 +1869,15 @@ class CmdParser():
             
 
         # marks? search patterns?
-        self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, u".", u"$", u"%", u",")
+        self.cmd_range_starters = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ".", "$", "%", ",")
         self.range_cmds = {
-                            u"s" : self.SearchAndReplace,
-                            u"sort" : self.Sort
+                            "s" : self.SearchAndReplace,
+                            "sort" : self.Sort
                           }
         # TODO: :s repeats last command
 
-        self.range_regex = u"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
-                                            "|".join(self.range_cmds.keys()))
+        self.range_regex = "(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
+                                            "|".join(list(self.range_cmds.keys())))
 
     def StartPDBDebug(self, args=None):
         import pdb; pdb.set_trace()
@@ -1929,7 +1930,7 @@ class CmdParser():
         # characters
         delims = "/;$|^%,"
         if pattern[0] in delims:
-            delim = u"\{0}".format(pattern[0])
+            delim = "\{0}".format(pattern[0])
         else:
             self.ctrl.vi.viError(
                     _("Error: {0} is not a valid delimiter".format(
@@ -1963,7 +1964,7 @@ class CmdParser():
         #           p : print the line containing the last substitute
         #           # : like [p] and prepend line number
         #           l : like [p] but print the text like [:list]
-        if u"g" in flags:
+        if "g" in flags:
             count = 0
 
         re_flags = re.M
@@ -2036,7 +2037,7 @@ class CmdParser():
         if re.match(self.range_regex, text_input):
             return True
         elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
-                                "|".join(self.range_cmds.keys())), text_input):
+                                "|".join(list(self.range_cmds.keys()))), text_input):
             return True
         elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)", text_input):
             return True
@@ -2067,21 +2068,21 @@ class CmdParser():
 
             
         # Ranges are by default lines
-        if start_range == u"%" or end_range == u"%":
+        if start_range == "%" or end_range == "%":
             start_range = 0
             end_range = self.ctrl.GetLineCount()
-        elif start_range in (None, u""):
+        elif start_range in (None, ""):
             start_range = end_range
             
 
         # Convert line ranges to char positions
         if type(start_range) == int:
             start_range = self.ctrl.vi.GetLineStartPos(start_range)
-        elif start_range == u".":
+        elif start_range == ".":
             start_range = self.ctrl.vi.GetLineStartPos(
                     self.ctrl.GetCurrentLine())
-        elif len(start_range) == 2 and start_range.startswith(u"'"):
-            if start_range[1] == u"<":
+        elif len(start_range) == 2 and start_range.startswith("'"):
+            if start_range[1] == "<":
                 start_range = self.selection_range[0]
             else:
                 page = self.ctrl.presenter.getWikiWord()
@@ -2095,14 +2096,14 @@ class CmdParser():
 
         if type(end_range) == int:
             end_range = self.ctrl.GetLineEndPosition(end_range) + 1
-        elif end_range == u"$":
+        elif end_range == "$":
             end_range = self.ctrl.GetLineEndPosition(
                                 self.ctrl.GetLineCount()) + 1
-        elif end_range == u".":
+        elif end_range == ".":
             end_range = self.ctrl.GetLineEndPosition(
                                 self.ctrl.GetCurrentLine()) + 1
-        elif len(end_range) == 2 and end_range.startswith(u"'"):
-            if end_range[1] == u">":
+        elif len(end_range) == 2 and end_range.startswith("'"):
+            if end_range[1] == ">":
                 end_range = self.selection_range[1]
             else:
                 page = self.ctrl.presenter.getWikiWord()
@@ -2136,7 +2137,7 @@ class CmdParser():
 
         args = False
         if len(split_cmd) > 1:
-            if split_cmd[1] != u"":
+            if split_cmd[1] != "":
                 args = True
             else:
                 args = False
@@ -2152,19 +2153,19 @@ class CmdParser():
         if self.CheckForRangeCmd(text_input):
             return []
 
-        split_cmd = text_input.split(u" ")
+        split_cmd = text_input.split(" ")
 
         arg = None
         action = split_cmd[0]
         if len(split_cmd) > 1:
-            arg = u" ".join(split_cmd[1:])
+            arg = " ".join(split_cmd[1:])
 
         cmd_list = []
         list_box = []
         
         for cmd in self.cmds:
             if cmd.startswith(action):
-                if arg is not None or text_input.endswith(u" "):
+                if arg is not None or text_input.endswith(" "):
                     return self.cmds[cmd][0](arg)
                 else:
                     cmd_list.append(cmd)
@@ -2188,7 +2189,7 @@ class CmdParser():
 
         action = split_cmd[0]
         if arg is None and len(split_cmd) > 1: #and len(split_cmd[1]) > 0:
-            arg = (1, u" ".join(split_cmd[1:]))
+            arg = (1, " ".join(split_cmd[1:]))
 
         # If a full cmd name has been entered use it
         if action in self.cmds:
@@ -2230,7 +2231,7 @@ class CmdParser():
         if arg_type == 0:
             return arg
         elif arg_type == 1:
-            if arg.strip() == u"":
+            if arg.strip() == "":
                 return self.ctrl.presenter
             tabs = self.GetTabs(arg)
 
@@ -2258,7 +2259,7 @@ class CmdParser():
 
         # If args is a string just use it as a wikiword directly
         if arg_type == 1:
-            if arg.strip() == u"":
+            if arg.strip() == "":
                 return False
 
             # Do we want to allow whitespaced wikiwords?
@@ -2294,7 +2295,7 @@ class CmdParser():
             wikiword = wikiword.strip()
 
         return self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
-                u"wikipage/" + wikiword, tabMode=tab_mode, 
+                "wikipage/" + wikiword, tabMode=tab_mode, 
                 firstcharpos=value[0][3], charlength=value[0][4])
 
 
@@ -2474,7 +2475,7 @@ class CmdParser():
         wx.CallAfter(mainAreaPanel.Split, page, wx.RIGHT)
 
     def CloneCurrentTab(self):
-        return self.ctrl.presenter.getMainControl().activatePageByUnifiedName(u"wikipage/" + self.ctrl.presenter.getWikiWord(), tabMode=2)
+        return self.ctrl.presenter.getMainControl().activatePageByUnifiedName("wikipage/" + self.ctrl.presenter.getWikiWord(), tabMode=2)
             
     def CloseWiki(self, arg=None):
         """
@@ -2510,14 +2511,14 @@ class CmdParser():
         return tabs, tab_names, tab_names
 
     def GetDefinedWikiPages(self, search_text):
-        if search_text is None or search.text.strip() == u"":
-            return None, (_(u"Enter wikiword..."),), None
+        if search_text is None or search.text.strip() == "":
+            return None, (_("Enter wikiword..."),), None
 
         results = self.ctrl.presenter.getMainControl().getWikiData().\
                                                 getAllDefinedWikiPageNames()
         self.cmd_list = results
 
-        if search_text.strip() == u"":
+        if search_text.strip() == "":
             return results
 
         results = [i for i in self.cmd_list if i.find(search_text) > -1]
@@ -2528,15 +2529,15 @@ class CmdParser():
         return results
 
     def GetWikiPagesOrSearch(self, search_text):
-        if search_text is None or search_text.strip() == u"":
-            return None, (_(u"Enter wikiword (or text) to search for..."),), \
+        if search_text is None or search_text.strip() == "":
+            return None, (_("Enter wikiword (or text) to search for..."),), \
                     None
         return self.GetWikiPages(search_text)
 
     def GetWikiPages(self, search_text):
         if search_text is None or \
                 len(search_text.strip()) < self.ctrl.vi.settings['min_wikipage_search_len']:
-            return None, (_(u"Enter wikiword..."),), None
+            return None, (_("Enter wikiword..."),), None
 
         results = self.ctrl.presenter.getMainControl().getWikiData().\
                     getWikiWordMatchTermsWith(
@@ -2595,7 +2596,7 @@ class CmdParser():
         # If no parents give a notification and exit
         if len(parents) == 0:
             self.ctrl.vi.visualBell()
-            return None, (_(u"Page has no parents"),), None
+            return None, (_("Page has no parents"),), None
 
         return parents, parents, parents
 
@@ -2615,7 +2616,7 @@ class ViInputHistory():
         if self.cmd_position < 0:
             return False
         if self.cmd_position + 1 >= len(self.cmd_history):
-            return u""
+            return ""
         self.cmd_position = min(len(self.cmd_history)-1, self.cmd_position + 1)
 
         return self.cmd_history[self.cmd_position]
@@ -2846,12 +2847,12 @@ class ViInputDialog(wx.Panel):
         if len(text) < 1:
             return
 
-        self.search_args[u"text"] = text
+        self.search_args["text"] = text
 
         # would .copy() be better?
         temp_search_args = dict(self.search_args)
 
-        temp_search_args[u"select_text"] = True
+        temp_search_args["select_text"] = True
 
         self.block_kill_focus = True
         # TODO: set flags from config?
@@ -2871,7 +2872,7 @@ class ViInputDialog(wx.Panel):
             return False
         self.cmd_history.AddCmd(text_input)
         if self.search:
-            self.search_args[u"text"] = text_input
+            self.search_args["text"] = text_input
             self.ctrl.vi.last_search_args = copy.copy(self.search_args)
 
             self.ctrl.vi.GotoSelectionStart()
@@ -3047,7 +3048,7 @@ class ViInputDialog(wx.Panel):
 
     def MoveListBoxSelection(self, offset):
         if not self.ctrls.viInputListBox.HasData():
-            self.ctrl.vi.visualBell(u"RED")
+            self.ctrl.vi.visualBell("RED")
             return
 
         if offset < 0:
@@ -3126,7 +3127,7 @@ class ViCmdList(wx.HtmlListBox):
             if formatted_data:
                 self.formatted_data = formatted_data
             else:
-                self.formatted_data = [u"No items / data found."]
+                self.formatted_data = ["No items / data found."]
             self.data = None
 
         else:

@@ -1,2 +1,2 @@
-from wikidata.WikiDataManager import WikiDataManager as WikiDocument
+from .wikidata.WikiDataManager import WikiDataManager as WikiDocument
 

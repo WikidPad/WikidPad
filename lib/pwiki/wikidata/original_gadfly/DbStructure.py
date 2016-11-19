@@ -22,7 +22,7 @@ import gadfly
 
 
 def _uniToUtf8(ob):
-    if type(ob) is unicode:
+    if type(ob) is str:
         return utf8Enc(ob)[0]
     else:
         return ob
@@ -91,7 +91,7 @@ class ConnectWrap:
         changeTableSchema(self, "defaultvalues",
                 TABLE_DEFINITIONS["defaultvalues"])
 
-        for tn in DEFAULT_VALS.keys():
+        for tn in list(DEFAULT_VALS.keys()):
             for fn in DEFAULT_VALS[tn]:
                 self.execSqlInsert("defaultvalues", ("tablename", "field", 
                         "value"), (tn, fn, DEFAULT_VALS[tn][fn]))
@@ -210,7 +210,7 @@ class ConnectWrap:
 
         tableDefs = self._defaultValues.get(tableDefault)
         if tableDefs is not None:
-            for k in tableDefs.keys():
+            for k in list(tableDefs.keys()):
                 if k not in fields:
                     fields += (k,)
                     values += (tableDefs[k],)
@@ -375,7 +375,7 @@ TABLE_DEFINITIONS = {
 t.r = 0.0
 t.i = 0
 t.imo = -1
-t.t = u""
+t.t = ""
 t.b = ""
 
 
@@ -551,8 +551,8 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
 
     # Build the sql command to create the table with new schema (needed later)
 
-    newtabletyped = ", ".join(map(lambda sc: "%s %s" % sc[:2], schema))
-    newtableselect = ", ".join(map(lambda sc: sc[0], schema))
+    newtabletyped = ", ".join(["%s %s" % sc[:2] for sc in schema])
+    newtableselect = ", ".join([sc[0] for sc in schema])
 
     newtablecreate = "create table %s (" % tablename
     newtablecreate += newtabletyped
@@ -577,7 +577,7 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
             "select COLUMN_NAME from __columns__ where TABLE_NAME = '%s'" %
             tablename.upper())
     
-    oldcolumns = map(string.upper, oldcolumns)
+    oldcolumns = list(map(string.upper, oldcolumns))
     
     # Which columns have old and new schema in common?    
     intersect = []
@@ -668,7 +668,7 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
             "select COLUMN_NAME from __columns__ where TABLE_NAME = '%s'" %
             tablename.upper())
     
-    oldcolumns = map(string.upper, oldcolumns)
+    oldcolumns = list(map(string.upper, oldcolumns))
     
     return True
 
@@ -694,7 +694,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
 #                 dbName = u"wikidb"
 #         else:
 
-        dbName = u"wikidb"
+        dbName = "wikidb"
 
         # create the database
         connection = gadfly.gadfly()
@@ -731,7 +731,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
 
     else:
         raise WikiDBExistsException(
-                _(u"database already exists at location: %s") % dataDir)
+                _("database already exists at location: %s") % dataDir)
 
 
 
@@ -768,7 +768,7 @@ def oldWikiWordToLabel(word):
     """
     Strip '[' and ']' if non camelcase word and return it
     """
-    if word.startswith(u"[") and word.endswith(u"]"):
+    if word.startswith("[") and word.endswith("]"):
         return word[1:-1]
     return word
 
@@ -783,14 +783,14 @@ def checkDatabaseFormat(connwrap):
     indices = connwrap.execSqlQuerySingleColumn("select INDEX_NAME from __indices__")
     tables = connwrap.execSqlQuerySingleColumn("select TABLE_NAME from __table_names__")
 
-    indices = map(string.upper, indices)
-    tables = map(string.upper, tables)
+    indices = list(map(string.upper, indices))
+    tables = list(map(string.upper, tables))
 
     if not "SETTINGS" in tables:
-        return 1, _(u"Update needed")
+        return 1, _("Update needed")
         
     if getSettingsValue(connwrap, "branchtag") != "WikidPad":
-        return 2, _(u"Database has unknown format branchtag='%s'") \
+        return 2, _("Database has unknown format branchtag='%s'") \
                 % getSettingsValue(connwrap, "branchtag")
 
     formatver = getSettingsInt(connwrap, "formatver")
@@ -799,14 +799,14 @@ def checkDatabaseFormat(connwrap):
     if writecompatver > VERSION_WRITECOMPAT:
         # TODO: Check compatibility
         
-        return 2, _(u"Database has unknown format version='%i'") \
+        return 2, _("Database has unknown format version='%i'") \
                 % formatver
                 
     if formatver < VERSION_DB:
-        return 1, _(u"Update needed, current format version='%i'") \
+        return 1, _("Update needed, current format version='%i'") \
                 % formatver
         
-    return 0, _(u"Database format is up to date")
+    return 0, _("Database format is up to date")
 
 
 
@@ -820,8 +820,8 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
     indices = connwrap.execSqlQuerySingleColumn("select INDEX_NAME from __indices__")
     tables = connwrap.execSqlQuerySingleColumn("select TABLE_NAME from __table_names__")
 
-    indices = map(string.upper, indices)
-    tables = map(string.upper, tables)
+    indices = list(map(string.upper, indices))
+    tables = list(map(string.upper, tables))
     
     # updatedTables = []
     
@@ -928,7 +928,7 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         uniqueCtl = {}
         for w, c, m in dataIn:
             w = oldWikiWordToLabel(w)
-            if not uniqueCtl.has_key(w):
+            if w not in uniqueCtl:
                 connwrap.execSqlInsert("wikiwords", ("word", "created", 
                         "modified", "presentationdatablock"),
                         (w, c, m, ""))
@@ -948,7 +948,7 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         uniqueCtl = {}
         for w, r, c in dataIn:
             w, r = oldWikiWordToLabel(w), oldWikiWordToLabel(r)
-            if not uniqueCtl.has_key((w, r)):
+            if (w, r) not in uniqueCtl:
                 connwrap.execSqlInsert("wikirelations", ("word", "relation", 
                         "created"), (w, r, c))
 #                 connwrap.execSql("insert into wikirelations(word, relation, created) "
@@ -1022,7 +1022,7 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         for title, data in searches:
             connwrap.execSql(
                 "insert into datablocks(unifiedname, data) "+\
-                "values (?, ?)", (u"savedsearch/" + title, data))
+                "values (?, ?)", ("savedsearch/" + title, data))
 
         connwrap.execSql("drop table search_views")
 
@@ -1056,16 +1056,16 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
 
         # Move functional pages to new table "datablocksexternal" and rename them
         for funcWord in funcWords:
-            if funcWord not in (u"[TextBlocks]", u"[PWL]", u"[CCBlacklist]"):
+            if funcWord not in ("[TextBlocks]", "[PWL]", "[CCBlacklist]"):
                 continue # Error ?!
             
-            unifName = u"wiki/" + funcWord[1:-1]
+            unifName = "wiki/" + funcWord[1:-1]
             fullPath = join(dataDir, funcWord + pagefileSuffix)
             
-            icf = iterCompatibleFilename(unifName, u".data")
+            icf = iterCompatibleFilename(unifName, ".data")
             
             for i in range(10):  # Actual "while True", but that's too dangerous
-                newFilename = icf.next()
+                newFilename = next(icf)
                 newPath = join(dataDir, newFilename)
 
                 if exists(pathEnc(newPath)):

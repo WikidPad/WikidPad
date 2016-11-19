@@ -1,11 +1,11 @@
-from __future__ import with_statement
+
 
 import os, os.path, traceback, sys, re
 
 from wx.xrc import XRCCTRL, XRCID, XmlResource
 import wx
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 from .MiscEvent import KeyFunctionSink
 from . import SystemInfo, StringOps
@@ -22,7 +22,7 @@ def _unescapeWithRe(text):
     """
     Unescape things like \n or \f. Throws exception if unescaping fails
     """
-    return re.sub(u"", text, u"", 1)
+    return re.sub("", text, "", 1)
 
 
 class wxIdPool:
@@ -63,14 +63,14 @@ class XrcControls:
     def __getattr__(self, name):
         result = XRCCTRL(self.__basepanel, name)
         if result is None:
-            raise InternalError(u"XML-ID '%s' not found in %s" %
+            raise InternalError("XML-ID '%s' not found in %s" %
                     (name, repr(self.__basepanel)))
         return result
 
     def __getitem__(self, name):
         result = XRCCTRL(self.__basepanel, name)
         if result is None:
-            raise InternalError(u"XML-ID '%s' not found in %s" %
+            raise InternalError("XML-ID '%s' not found in %s" %
                     (name, repr(self.__basepanel)))
         return result
 
@@ -170,13 +170,13 @@ class IdRecycler:
         return self.assoc[id]
 
     def iteritems(self):
-        return self.assoc.iteritems()
+        return iter(self.assoc.items())
 
     def clearAssoc(self):
         """
         Clear the associations, but store all ids for later reuse.
         """
-        self.unusedSet.update(self.assoc.iterkeys())
+        self.unusedSet.update(iter(self.assoc.keys()))
         self.assoc.clear()
 
 
@@ -185,7 +185,7 @@ def getTextFromClipboard():
     """
     Retrieve text or unicode text from clipboard
     """
-    from StringOps import lineendToInternal, mbcsDec
+    from .StringOps import lineendToInternal, mbcsDec
 
     cb = wx.TheClipboard
     cb.Open()
@@ -195,7 +195,7 @@ def getTextFromClipboard():
             if dataob.GetTextLength() > 0:
                 return lineendToInternal(dataob.GetText())
             else:
-                return u""
+                return ""
         return None
     finally:
         cb.Close()
@@ -223,7 +223,7 @@ if SystemInfo.isWindows():
         where source is the HTML sourcecode and URL is the URL where it came
         from. Both or one of the items may be None.
         """
-        from StringOps import lineendToInternal, mbcsDec
+        from .StringOps import lineendToInternal, mbcsDec
     
         cb = wx.TheClipboard
         cb.Open()
@@ -327,7 +327,7 @@ else:
         from. Both or one of the items may be None. For GTK second item is always
         None.
         """
-        from StringOps import lineendToInternal, mbcsDec
+        from .StringOps import lineendToInternal, mbcsDec
     
         cb = wx.TheClipboard
         cb.Open()
@@ -364,10 +364,10 @@ def textToDataObject(text=None):
     """
     Create data object for an unicode string
     """
-    from StringOps import lineendToOs, mbcsEnc, utf8Enc
+    from .StringOps import lineendToOs, mbcsEnc, utf8Enc
     
     if text is None:
-        text = u""
+        text = ""
     
     text = lineendToOs(text)
 
@@ -398,7 +398,7 @@ def getFilesFromClipboard():
     """
     Retrieve bitmap from clipboard if available
     """
-    from StringOps import utf8Dec
+    from .StringOps import utf8Dec
     cb = wx.TheClipboard
     cb.Open()
     try:
@@ -540,7 +540,7 @@ def getAccelPairFromString(s):
 
 def setHotKeyByString(win, hotKeyId, keyString):
     # Search for Windows key
-    winMatch = re.search(u"(?<![^\+\-])win[\+\-]", keyString, re.IGNORECASE)
+    winMatch = re.search("(?<![^\+\-])win[\+\-]", keyString, re.IGNORECASE)
     winKey = False
     if winMatch:
         winKey = True
@@ -650,15 +650,15 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     in the KeyBindings, e.g. "*ShowFolding". If keyBindings
     parameter is None, all shortcuts (with or without *) are ignored.
     """
-    for line in desc.split(u"\n"):
-        if line.strip() == u"":
+    for line in desc.split("\n"):
+        if line.strip() == "":
             continue
 
-        parts = [p.strip() for p in line.split(u";")]
+        parts = [p.strip() for p in line.split(";")]
         if len(parts) < 4:
-            parts += [u""] * (4 - len(parts))
+            parts += [""] * (4 - len(parts))
 
-        if parts[0] == u"-":
+        if parts[0] == "-":
             ic = menu.GetMenuItemCount()
             if ic > 0 and not menu.FindItemByPosition(ic - 1).IsSeparator():
                 # Separator
@@ -667,22 +667,22 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
             # First check for radio or checkbox items
             kind = wx.ITEM_NORMAL
             title = _unescapeWithRe(parts[0])
-            if title[0] == u"*":
+            if title[0] == "*":
                 # Radio item
                 title = title[1:]
                 kind = wx.ITEM_RADIO
-            elif title[0] == u"+":
+            elif title[0] == "+":
                 # Checkbox item
                 title = title[1:]
                 kind = wx.ITEM_CHECK
 
             # Check for shortcut
-            if parts[3] != u"" and keyBindings is not None:
-                if parts[3][0] == u"*":
-                    parts[3] = getattr(keyBindings, parts[3][1:], u"")
+            if parts[3] != "" and keyBindings is not None:
+                if parts[3][0] == "*":
+                    parts[3] = getattr(keyBindings, parts[3][1:], "")
                 
-                if parts[3] != u"":
-                    title += u"\t" + parts[3]
+                if parts[3] != "":
+                    title += "\t" + parts[3]
                 
             menuID = getattr(GUI_ID, parts[1], -1)
             if menuID == -1:
@@ -900,7 +900,7 @@ class IconCache:
                     id = self.iconLookupCache[iconname][0]
 
                 self.iconLookupCache[iconname] = (id, iconFile, bitmap)
-            except Exception, e:
+            except Exception as e:
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
@@ -977,7 +977,7 @@ class IconCache:
             return default            
         elif isinstance(desc, wx.Bitmap):
             return desc
-        elif isinstance(desc, basestring):
+        elif isinstance(desc, str):
             result = self.lookupIcon(desc)
             if result is not None:
                 return result
@@ -1240,7 +1240,7 @@ class ReorderableListBox(wx.ListBox):
         """
         Get list of all item data.
         """
-        return [self.GetClientData(i) for i in xrange(self.GetCount())]
+        return [self.GetClientData(i) for i in range(self.GetCount())]
 
 
     def SetLabelsAndClientDatas(self, labels, datas):
@@ -1303,16 +1303,16 @@ class EnhancedListControl(wx.ListCtrl):
         
     def getConfigStringForColWidths(self):
         result = []
-        for i in xrange(self.GetColumnCount()):
-            result.append(unicode(self.GetColumnWidth(i)))
+        for i in range(self.GetColumnCount()):
+            result.append(str(self.GetColumnWidth(i)))
         
-        return u",".join(result)
+        return ",".join(result)
     
     def setColWidthsByConfigString(self, cfgString):
         if cfgString is None:
             return
 
-        cfgParts = cfgString.split(u",")
+        cfgParts = cfgString.split(",")
         if len(cfgParts) != self.GetColumnCount():
             return
             
@@ -1322,7 +1322,7 @@ class EnhancedListControl(wx.ListCtrl):
             return
 
         with WindowUpdateLocker(self):
-            for i in xrange(self.GetColumnCount()):
+            for i in range(self.GetColumnCount()):
                 self.SetColumnWidth(i, cfgParts[i])
 
 
@@ -1357,7 +1357,7 @@ class EnhancedPlgSuppMenu(wx.Menu):
     A plugin supported context menu provides functionality for plugins to add
     additional menu items and react on them
     """
-    def __init__(self, owningWindow, title=u"", style=0):
+    def __init__(self, owningWindow, title="", style=0):
         wx.Menu.__init__(self, title, style)
 
         self.contextName = None
@@ -1390,7 +1390,7 @@ class EnhancedPlgSuppMenu(wx.Menu):
         
     @staticmethod
     def convertId(id):
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = registerPluginGuiId(id)
         elif id == -1:
             id = wx.NewId()

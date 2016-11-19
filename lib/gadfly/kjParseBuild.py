@@ -15,12 +15,12 @@
 # compiled representation if available.
 
 import string
-import kjSet
-import kjParser
+from . import kjSet
+from . import kjParser
 import re
 
 # import some constants
-from kjParser import TERMFLAG, NOMATCHFLAG, MOVETOFLAG, REDUCEFLAG, \
+from .kjParser import TERMFLAG, NOMATCHFLAG, MOVETOFLAG, REDUCEFLAG, \
     TRANSFLAG, KEYFLAG, NONTERMFLAG, TERMFLAG, EOFFLAG, ENDOFFILETOKEN
 
 PMODULE = kjParser.THISMODULE
@@ -58,10 +58,10 @@ class CFSMachine(kjParser.FSMachine):
             kjSet.AddArc( EGraph, State, State )
             # add possible transition on epsilon (ONLY ONE SUPPORTED!)
             key = (State, Epsilon)
-            if self.StateTokenMap.has_key(key):
+            if key in self.StateTokenMap:
                 keymap = self.StateTokenMap[key]
                 if keymap[0][0] != MOVETOFLAG:
-                    raise TypeError, "unexpected map type in StateTokenMap"
+                    raise TypeError("unexpected map type in StateTokenMap")
                 for (Flag,ToState) in keymap:
                     kjSet.AddArc( EGraph, State, ToState )
         #endfor
@@ -87,7 +87,7 @@ class CFSMachine(kjParser.FSMachine):
 
         # compute set of all known tokens EXCEPT EPSILON
         Tokens = kjSet.NewSet( [] )
-        for (State, Token) in self.StateTokenMap.keys():
+        for (State, Token) in list(self.StateTokenMap.keys()):
             if Token != Epsilon:
                 kjSet.addMember(Token, Tokens)
         # tranform it into a list
@@ -109,10 +109,10 @@ class CFSMachine(kjParser.FSMachine):
                     # if MState has a transition on Token, include
                     # EMap for the destination state
                     key = (MState, Token)
-                    if self.StateTokenMap.has_key(key):
+                    if key in self.StateTokenMap:
                         DStateTup = self.StateTokenMap[key]
                         if DStateTup[0][0] != MOVETOFLAG:
-                            raise TypeError, "unknown map type"
+                            raise TypeError("unknown map type")
                         for (DFlag, DState) in DStateTup:
                             for EDState in EMap[DState]:
                                 kjSet.addMember(EDState, UTrans)
@@ -215,7 +215,7 @@ class Ruleset:
                                 # if so, process next token in rule
                                 Processindex = 1
                         else:
-                            raise TokenError, "unknown token type in rule body"
+                            raise TokenError("unknown token type in rule body")
                     #endif
                     Bodyindex = Bodyindex + 1
                 #endwhile Processindex
@@ -260,7 +260,7 @@ class Ruleset:
             (Ttype,Tname) = Token
 
             if Ttype not in (KEYFLAG, TERMFLAG, NONTERMFLAG):
-                raise TokenError, "unknown token type in rule body"
+                raise TokenError("unknown token type in rule body")
 
             if Ttype in (KEYFLAG,TERMFLAG):
                 # keywords etc cancel epsilon tail, otherwise ignore
@@ -308,7 +308,7 @@ class Ruleset:
                                 kjSet.AddArc(Follow, Token, FToken)
                                 done = 0
                 else:
-                    raise TokenError, "unknown token type in rule body"
+                    raise TokenError("unknown token type in rule body")
 
             # finally, check whether next iteration has epsilon tail
             if not kjSet.HasArc(self.First, Token, NULLTOKEN):
@@ -319,20 +319,20 @@ class Ruleset:
     def DumpFirstFollow(self):
         First = self.First
         Follow = self.Follow
-        print "First:"
-        for key in First.keys():
+        print("First:")
+        for key in list(First.keys()):
             name = key[1]
-            print name," :: ",
-            for (flag2,name2) in First[key].keys():
-                print name2,", ",
-            print
-        print "Follow:"
-        for key in Follow.keys():
+            print(name," :: ", end=' ')
+            for (flag2,name2) in list(First[key].keys()):
+                print(name2,", ", end=' ')
+            print()
+        print("Follow:")
+        for key in list(Follow.keys()):
             name = key[1]
-            print name," :: ",
-            for (flag2,name2) in Follow[key].keys():
-                print name2,", ",
-            print
+            print(name," :: ", end=' ')
+            for (flag2,name2) in list(Follow[key].keys()):
+                print(name2,", ", end=' ')
+            print()
 
     def FirstOfTail(self, Rule, TailIndex, Token=None):
         ''' computing the "first" of the tail of a rule followed by an optional
@@ -362,7 +362,7 @@ class Ruleset:
                 kjSet.addMember(RToken, Result)
                 Nullprefix = 0
             else:
-                raise TokenError, "unknown token type in rule body"
+                raise TokenError("unknown token type in rule body")
             ThisIndex = ThisIndex + 1
         #endwhile
         # add the optional token if given and Nullprefix still set
@@ -437,7 +437,7 @@ class Ruleset:
                 NFA.SetMap( ThisState, NULLTOKEN, NextState )
         # fix the NFA.States entry
         if GoodStartingPlace == None:
-            raise NotSLRError, "No derivation for root nonterminal."
+            raise NotSLRError("No derivation for root nonterminal.")
         NFA.States[ NFA.initial_state ] = \
              [ 'transient', GoodStartingPlace ]
 
@@ -449,15 +449,15 @@ class Ruleset:
         '''
         (ruleindex, position) = item
         Rule = self.Rules[ruleindex]
-        print Rule.Nonterm[1],' >> ',
+        print(Rule.Nonterm[1],' >> ', end=' ')
         for bindex in range(0, len(Rule.Body)):
             if position == bindex:
-                print " (*) ",
-            print Rule.Body[bindex][1],
+                print(" (*) ", end=' ')
+            print(Rule.Body[bindex][1], end=' ')
         if position == len(Rule.Body):
-            print " (*) "
+            print(" (*) ")
         else:
-            print
+            print()
 
     def SLRItemIsFinal(self, item):
         ''' utility function -- returns true if an item is a final item
@@ -473,16 +473,16 @@ class Ruleset:
         ''' dump the NFA
         '''
         NFA = self.SLRNFA
-        print "root: ", NFA.root_nonTerminal
-        for key in NFA.StateTokenMap.keys():
+        print("root: ", NFA.root_nonTerminal)
+        for key in list(NFA.StateTokenMap.keys()):
             map = NFA.StateTokenMap[key]
             (fromstate, token) = key
             fromitem = NFA.States[ fromstate ][1]
             self.ItemDump(fromitem)
-            print " on ", token[1], " maps "
+            print(" on ", token[1], " maps ")
             for Tostate in map:
                 Toitem = NFA.States[Tostate][1]
-                print "    ",
+                print("    ", end=' ')
                 self.ItemDump(Toitem)
 
     def compDFA(self):
@@ -492,19 +492,19 @@ class Ruleset:
 
     def DumpDFAsets(self):
         DFA = self.DFA
-        print "root: ", DFA.root_nonTerminal
+        print("root: ", DFA.root_nonTerminal)
         for State in range(1, len(DFA.States) ):
             self.DumpItemSet(State)
 
     def DumpItemSet(self,State):
         DFA = self.DFA
         NFA = self.SLRNFA
-        print
-        print "STATE ", State, " *******"
+        print()
+        print("STATE ", State, " *******")
         fromNFAindices = kjSet.get_elts(DFA.States[State][1])
         for NFAindex in fromNFAindices:
             item = NFA.States[NFAindex][1]
-            print "  ", NFAindex, ": ",
+            print("  ", NFAindex, ": ", end=' ')
             self.ItemDump(item)
 
     def SLRFixDFA(self):
@@ -541,13 +541,13 @@ class Ruleset:
                     Following = kjSet.Neighbors( self.Follow, Head )
                     for Token in Following:
                         key = (State, Token)
-                        if not ToDo.has_key(key):
+                        if key not in ToDo:
                             ToDo[ key ] = item
                         else:
                             # it might be okay if the items are identical?
                             item2 = ToDo[key]
                             if item != item2:
-                                print "reduce/reduce conflict on ",key
+                                print("reduce/reduce conflict on ",key)
                                 self.ItemDump(item)
                                 self.ItemDump(item2)
                             Error = " apparent reduce/reduce conflict"
@@ -559,7 +559,7 @@ class Ruleset:
 
         # for each (State,Token) pair which indicates a reduction
         # record the reduction UNLESS the map is already set for the pair
-        for key in ToDo.keys():
+        for key in list(ToDo.keys()):
             (State,Token) = key
             item = ToDo[key]
             (rulenum, dotpos) = item
@@ -567,14 +567,14 @@ class Ruleset:
             if ExistingMap[0] == NOMATCHFLAG:
                 DFA.SetReduction( State, Token, rulenum )
             else:
-                print "apparent shift/reduce conflict"
-                print "reduction: ", key, ": "
+                print("apparent shift/reduce conflict")
+                print("reduction: ", key, ": ")
                 self.ItemDump(item)
-                print "existing map ", ExistingMap
+                print("existing map ", ExistingMap)
                 Error = " apparent shift/reduce conflict"
         #endfor
         if Error and ABORTONERROR:
-            raise NotSLRError, Error
+            raise NotSLRError(Error)
     #enddef SLRfixDFA()
 
     def DoSLRGeneration(self):
@@ -609,14 +609,14 @@ def RootReduction(list, ObjectGram):
        [ nontermtoken, keyword COLKEY, RuleList ]
     '''
     if len(list) != 3 or list[1] != COLKEY:
-        raise FlowError, "unexpected metagrammar root reduction"
+        raise FlowError("unexpected metagrammar root reduction")
     return (list[0], list[2])
 
 def NullRuleList(list, ObjectGram):
     ''' NullRuleList should receive list of form []
     '''
     if list != []:
-        raise FlowError, "unexpected null RuleList form"
+        raise FlowError("unexpected null RuleList form")
     return []
 
 def FullRuleList(list, ObjectGram):
@@ -624,7 +624,7 @@ def FullRuleList(list, ObjectGram):
           [ Rule, RuleList ]
     '''
     if type(list) != type([]) or len(list)!=2:
-        raise FlowError, "unexpected full RuleList form"
+        raise FlowError("unexpected full RuleList form")
     NewRule = list[0]
     OldRules = list[1]
     return [NewRule] + OldRules
@@ -640,7 +640,7 @@ def InterpRule(list, ObjectGram):
     '''
     # check keywords:
     if len(list)!=6 or list[0]!=RSKEY or list[2]!=COLKEY or list[4]!=LTKEY:
-        raise FlowError, "unexpected meta rule reduction form"
+        raise FlowError("unexpected meta rule reduction form")
     ruleName = list[1]
     ruleNonterm = list[3]
     ruleBody = list[5]
@@ -651,7 +651,7 @@ def InterpRule(list, ObjectGram):
             if flag == KEYFLAG:
                 ruleBody[i] = (KEYFLAG, string.upper(name))
             elif not flag in (TERMFLAG, NONTERMFLAG):
-                raise FlowError, "unexpected rule body member"
+                raise FlowError("unexpected rule body member")
     rule = kjParser.ParseRule( ruleNonterm, ruleBody )
     rule.Name = ruleName
     return rule
@@ -668,18 +668,18 @@ def InterpNonTerm(list, ObjectGram):
           [ string ]
     '''
     if type(list)!=type([]) or len(list)!=1:
-        raise FlowError, "unexpected rulename form"
+        raise FlowError("unexpected rulename form")
     Name = list[0]
     # determine whether this is a valid nonterminal
-    if not ObjectGram.NonTermDict.has_key(Name):
-        raise TokenError, "LHS of Rule must be nonterminal: "+Name
+    if Name not in ObjectGram.NonTermDict:
+        raise TokenError("LHS of Rule must be nonterminal: "+Name)
     return ObjectGram.NonTermDict[Name]
 
 def NullBody(list, ObjectGram):
     ''' NullBody should receive []
     '''
     if list != []:
-        raise FlowError, "unexpected null Body form"
+        raise FlowError("unexpected null Body form")
     return []
 
 def FullBody(list,ObjectGram):
@@ -692,18 +692,18 @@ def FullBody(list,ObjectGram):
                (NONTERMFLAG, string) respectively
     '''
     if type(list)!=type([]) or len(list)!=2:
-        raise FlowError, "unexpected body form"
+        raise FlowError("unexpected body form")
     Name = list[0]
     # Does the Name rep a nonterm, keyword or term
     # of the object grammar (in that order).
-    if ObjectGram.NonTermDict.has_key(Name):
+    if Name in ObjectGram.NonTermDict:
         kind = NONTERMFLAG
-    elif ObjectGram.LexD.keywordmap.has_key(Name):
+    elif Name in ObjectGram.LexD.keywordmap:
         kind = KEYFLAG
-    elif ObjectGram.TermDict.has_key(Name):
+    elif Name in ObjectGram.TermDict:
         kind = TERMFLAG
     else:
-        raise TokenError, "Rule body contains unregistered string: "+Name
+        raise TokenError("Rule body contains unregistered string: "+Name)
     restOfBody = list[1]
     return [(kind, Name)] + restOfBody
 
@@ -905,7 +905,7 @@ class Reconstruct:
     def MakeTokenArchives(self):
         # make a list of all tokens and
         # initialize token > int dictionary
-        keys = self.Gram.DFA.StateTokenMap.keys()
+        keys = list(self.Gram.DFA.StateTokenMap.keys())
         tokenToInt = {}
         tokenSet = kjSet.NewSet([])
         for k in keys:
@@ -969,10 +969,10 @@ class codeReconstruct(Reconstruct):
         Tofile.write("\n\n"+IND+"# declaration of lexical dictionary.\n")
         Tofile.write(IND+"# EXCEPT FOR TERMINALS\n")
         Tofile.write(IND+VarName+".LexD.punctuationlist = ")
-        Tofile.write(`LexD.punctuationlist`+"\n")
+        Tofile.write(repr(LexD.punctuationlist)+"\n")
         Tofile.write(IND+"# now comment patterns\n")
         for comment in LexD.commentstrings:
-            Tofile.write(IND+VarName+".LexD.comment("+`comment`+")\n")
+            Tofile.write(IND+VarName+".LexD.comment("+repr(comment)+")\n")
         Tofile.write(IND+"# now define tokens\n")
         for i in range(0,len(tokens)):
             tok = tokens[i]
@@ -980,16 +980,16 @@ class codeReconstruct(Reconstruct):
             if kind == TERMFLAG:
                 # put warning at end!
                 #  nonterminal not installed in lexical dictionary here!
-                Tofile.write(IND+VarName+".IndexToToken["+`i`+"] = ")
-                Tofile.write(PMODULE+".termrep("+`name`+")\n")
+                Tofile.write(IND+VarName+".IndexToToken["+repr(i)+"] = ")
+                Tofile.write(PMODULE+".termrep("+repr(name)+")\n")
             elif kind == KEYFLAG:
-                Tofile.write(IND+VarName+".IndexToToken["+`i`+"] = ")
-                Tofile.write(VarName+".LexD.keyword("+`name`+")\n")
+                Tofile.write(IND+VarName+".IndexToToken["+repr(i)+"] = ")
+                Tofile.write(VarName+".LexD.keyword("+repr(name)+")\n")
             elif kind == NONTERMFLAG:
-                Tofile.write(IND+VarName+".IndexToToken["+`i`+"] = ")
-                Tofile.write(PMODULE+".nonterminal("+`name`+")\n")
+                Tofile.write(IND+VarName+".IndexToToken["+repr(i)+"] = ")
+                Tofile.write(PMODULE+".nonterminal("+repr(name)+")\n")
             else:
-                raise FlowError, "unknown token type"
+                raise FlowError("unknown token type")
     #enddef PutLex
 
     def PutRules(self):
@@ -1001,21 +1001,21 @@ class codeReconstruct(Reconstruct):
         Tofile.write("\n\n"+IND+"# declaration of rule list with names.\n")
         Tofile.write(IND+"# EXCEPT FOR INTERP FUNCTIONS\n")
         nrules = len(Rules)
-        Tofile.write(IND+VarName+".RuleL = [None] * "+`nrules`+"\n")
+        Tofile.write(IND+VarName+".RuleL = [None] * "+repr(nrules)+"\n")
         for i in range(0,nrules):
             # put warning at end:
             #  rule reduction function not initialized here!
             rule = Rules[i]
             name = rule.Name
-            Tofile.write(IND+"rule = "+`rule`+"\n")
-            Tofile.write(IND+"name = "+`name`+"\n")
+            Tofile.write(IND+"rule = "+repr(rule)+"\n")
+            Tofile.write(IND+"name = "+repr(name)+"\n")
             Tofile.write(IND+"rule.Name = name\n")
-            Tofile.write(IND+VarName+".RuleL["+`i`+"] = rule\n")
-            Tofile.write(IND+VarName+".RuleNameToIndex[name] = "+`i`+"\n")
+            Tofile.write(IND+VarName+".RuleL["+repr(i)+"] = rule\n")
+            Tofile.write(IND+VarName+".RuleNameToIndex[name] = "+repr(i)+"\n")
 
         Tofile.write("\n\n"+IND+"# DFA root nonterminal.\n")
         Tofile.write(IND+VarName+".DFA.root_nonTerminal =")
-        Tofile.write(`Root`+"\n")
+        Tofile.write(repr(Root)+"\n")
     #enddef PutRules
 
     def PutTransitions(self):
@@ -1029,28 +1029,28 @@ class codeReconstruct(Reconstruct):
 
         Tofile.write("\n\n"+IND+"# DFA state declarations.\n")
         for state in range(1, maxState+1):
-            Tofile.write(IND+VarName+".DFA.States["+`state`+"] = ")
-            Tofile.write('['+`TRANSFLAG`+']\n')
-        Tofile.write(IND+VarName+".DFA.maxState = "+`maxState`+"\n")
+            Tofile.write(IND+VarName+".DFA.States["+repr(state)+"] = ")
+            Tofile.write('['+repr(TRANSFLAG)+']\n')
+        Tofile.write(IND+VarName+".DFA.maxState = "+repr(maxState)+"\n")
 
         Tofile.write("\n\n"+IND+"# DFA transition declarations.\n")
         for key in keys:
             (fromState, TokenRep) = key
             TokenIndex = tokenToInt[TokenRep]
-            TokenArg = VarName+".IndexToToken["+`TokenIndex`+"]"
+            TokenArg = VarName+".IndexToToken["+repr(TokenIndex)+"]"
             TMap = StateTokenMap[key]
             TMaptype = TMap[0][0]
             if TMaptype == REDUCEFLAG:
                 # reduction
                 rulenum = TMap[0][1]
-                Args = "("+`fromState`+","+TokenArg+","+`rulenum`+")"
+                Args = "("+repr(fromState)+","+TokenArg+","+repr(rulenum)+")"
                 Tofile.write(IND+VarName+".DFA.SetReduction"+Args+"\n")
             elif TMaptype == MOVETOFLAG:
                 # MoveTo
-                Args = "("+`fromState`+","+TokenArg+","+`TMap[0][1]`+")"
+                Args = "("+repr(fromState)+","+TokenArg+","+repr(TMap[0][1])+")"
                 Tofile.write(IND+VarName+".DFA.SetMap"+Args+"\n")
             else:
-                raise FlowError, "unexpected else (2)"
+                raise FlowError("unexpected else (2)")
     #enddef
 
     def Cleanup(self):
@@ -1073,7 +1073,7 @@ class codeReconstruct(Reconstruct):
         Tofile.write(IND+"# You must bind the following rule names \n")
         Tofile.write(IND+"# to reduction interpretation functions \n")
         for R in RuleL:
-            Tofile.write(IND+"# "+VarName+".Bind("+`R.Name`+", ??function??)\n")
+            Tofile.write(IND+"# "+VarName+".Bind("+repr(R.Name)+", ??function??)\n")
         Tofile.write(IND+"#(last rule)\n")
 
         Tofile.write("\n\n"+IND+"# WARNINGS ****************************** \n")
@@ -1084,7 +1084,7 @@ class codeReconstruct(Reconstruct):
             (kind, name) = tok
             if kind == TERMFLAG and tok != ENDOFFILETOKEN:
                 Tofile.write(IND+"# "+VarName+\
-                  ".Addterm("+`name`+", ??regularExp??, ??function??)\n")
+                  ".Addterm("+repr(name)+", ??regularExp??, ??function??)\n")
                 warningPrinted = 1
         if not warningPrinted:
             Tofile.write(IND+"#  ***NONE** \n")
@@ -1159,7 +1159,7 @@ class marshalReconstruct(Reconstruct):
                 moveToDict[nmoveTos] = (fromState, TokenIndex, ToState)
                 nmoveTos = nmoveTos + 1
             else:
-                raise FlowError, "unexpected else"
+                raise FlowError("unexpected else")
         #endfor
         # translate dicts to lists
         reducts = [None] * nreducts
@@ -1178,15 +1178,15 @@ class marshalReconstruct(Reconstruct):
         ''' this is the function that does the marshalling
         '''
         # dump the info
-        self.File.write('tokens = %s\n'%`self.tokens`)
-        self.File.write('punct = %s\n'%`self.punct`)
-        self.File.write('comments = %s\n'%`self.comments`)
-        self.File.write('RuleTups = %s\n'%`self.RuleTups`)
-        self.File.write('MaxStates = %s\n'%`self.MaxStates`)
-        self.File.write('reducts = %s\n'%`self.reducts`)
-        self.File.write('moveTos = %s\n'%`self.moveTos`)
-        self.File.write('Root = %s\n'%`self.Root`)
-        self.File.write('CaseSensitivity = %s\n'%`self.CaseSensitivity`)
+        self.File.write('tokens = %s\n'%repr(self.tokens))
+        self.File.write('punct = %s\n'%repr(self.punct))
+        self.File.write('comments = %s\n'%repr(self.comments))
+        self.File.write('RuleTups = %s\n'%repr(self.RuleTups))
+        self.File.write('MaxStates = %s\n'%repr(self.MaxStates))
+        self.File.write('reducts = %s\n'%repr(self.reducts))
+        self.File.write('moveTos = %s\n'%repr(self.moveTos))
+        self.File.write('Root = %s\n'%repr(self.Root))
+        self.File.write('CaseSensitivity = %s\n'%repr(self.CaseSensitivity))
 
 #
 # $Log: kjParseBuild.py,v $

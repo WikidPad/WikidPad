@@ -161,7 +161,7 @@ Version 1.0
 
 import wx
 import zlib
-import cStringIO
+import io
 import types
 import traceback
 
@@ -372,7 +372,7 @@ def GetFlaggedBitmap():
     return wx.BitmapFromImage(GetFlaggedImage())
 
 def GetFlaggedImage():
-    stream = cStringIO.StringIO(GetFlaggedData())
+    stream = io.StringIO(GetFlaggedData())
     return wx.ImageFromStream(stream)
 
 #----------------------------------------------------------------------
@@ -400,7 +400,7 @@ def GetNotFlaggedBitmap():
     return wx.BitmapFromImage(GetNotFlaggedImage())
 
 def GetNotFlaggedImage():
-    stream = cStringIO.StringIO(GetNotFlaggedData())
+    stream = io.StringIO(GetNotFlaggedData())
     return wx.ImageFromStream(stream)
 
 #----------------------------------------------------------------------
@@ -421,7 +421,7 @@ def GetCheckedBitmap():
     return wx.BitmapFromImage(GetCheckedImage())
 
 def GetCheckedImage():
-    stream = cStringIO.StringIO(GetCheckedData())
+    stream = io.StringIO(GetCheckedData())
     return wx.ImageFromStream(stream)
 
 #----------------------------------------------------------------------
@@ -440,7 +440,7 @@ def GetNotCheckedBitmap():
     return wx.BitmapFromImage(GetNotCheckedImage())
 
 def GetNotCheckedImage():
-    stream = cStringIO.StringIO(GetNotCheckedData())
+    stream = io.StringIO(GetNotCheckedData())
     return wx.ImageFromStream(stream)
 
 
@@ -457,7 +457,7 @@ def GrayOut(anImage):
     else:
         maskColor = None
         
-    data = map(ord, list(anImage.GetData()))
+    data = list(map(ord, list(anImage.GetData())))
 
     for i in range(0, len(data), 3):
         
@@ -472,14 +472,14 @@ def GrayOut(anImage):
     return anImage
 
 
-def MakeGray((r,g,b), factor, maskColor):
+def MakeGray(xxx_todo_changeme, factor, maskColor):
     """
     Make a pixel grayed-out. If the pixel matches the maskcolor, it won't be
     changed.
     """
-    
+    (r,g,b) = xxx_todo_changeme
     if (r,g,b) != maskColor:
-        return map(lambda x: int((230 - x) * factor) + x, (r,g,b))
+        return [int((230 - x) * factor) + x for x in (r,g,b)]
     else:
         return (r,g,b)
 
@@ -1150,7 +1150,7 @@ class GenericTreeItem:
         # since there can be very many of these, we save size by chosing
         # the smallest representation for the elements and by ordering
         # the members to avoid padding.
-        assert isinstance(text, types.StringTypes)
+        assert isinstance(text, str)
         self._text = text       # label to be rendered for item
         self._data = data       # user-provided data
 
@@ -1594,7 +1594,7 @@ class GenericTreeItem:
     def SetText(self, text):
         """Sets the item text."""
 
-        assert isinstance(text, types.StringTypes)
+        assert isinstance(text, str)
         self._text = text
 
 
@@ -1608,7 +1608,7 @@ class GenericTreeItem:
 
         total = count
 
-        for n in xrange(count):
+        for n in range(count):
             total += self._children[n].GetChildrenCount()
         
         return total
@@ -3721,7 +3721,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         
         count = len(children)
         
-        for n in xrange(index+1, count):
+        for n in range(index+1, count):
             if self.TagAllChildrenUntilLast(children[n], last_item, select):
                 return True
 
@@ -4087,7 +4087,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             # necessary (which might look ugly).
             n = self._imageListNormal.GetImageCount()
 
-            for i in xrange(n):
+            for i in range(n):
             
                 width, height = self._imageListNormal.GetSize(i)
 
@@ -4101,7 +4101,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             # necessary (which might look ugly).
             n = self._imageListButtons.GetImageCount()
 
-            for i in xrange(n):
+            for i in range(n):
             
                 width, height = self._imageListButtons.GetSize(i)
 
@@ -4115,7 +4115,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             # necessary (which might look ugly).
             n = self._imageListCheck.GetImageCount()
 
-            for i in xrange(n):
+            for i in range(n):
             
                 width, height = self._imageListCheck.GetSize(i)
 
@@ -4147,7 +4147,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             sz = imageList.GetSize(0)
             self._grayedImageList = wx.ImageList(sz[0], sz[1], True, 0)
 
-            for ii in xrange(imageList.GetImageCount()):
+            for ii in range(imageList.GetImageCount()):
                 bmp = imageList.GetBitmap(ii)
                 image = wx.ImageFromBitmap(bmp)
                 image = GrayOut(image)
@@ -4213,7 +4213,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # We gray out the image list to use the grayed icons with disabled items
         self._grayedCheckList = wx.ImageList(sizex, sizey, True, 0)
         
-        for ii in xrange(self._imageListCheck.GetImageCount()):
+        for ii in range(self._imageListCheck.GetImageCount()):
             
             bmp = self._imageListCheck.GetBitmap(ii)
             image = wx.ImageFromBitmap(bmp)
@@ -4304,7 +4304,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         rf, gf, bf = 0, 0, 0
         
-        for y in xrange(rect.y, rect.y + rect.height):
+        for y in range(rect.y, rect.y + rect.height):
             currCol = (r1 + rf, g1 + gf, b1 + bf)                
             dc.SetBrush(wx.Brush(currCol, wx.SOLID))
             dc.DrawRectangle(rect.x, y, rect.width, 1)
@@ -4345,7 +4345,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         rf, gf, bf = 0, 0, 0
 
-        for x in xrange(rect.x, rect.x + rect.width):
+        for x in range(rect.x, rect.x + rect.width):
             currCol = (int(r1 + rf), int(g1 + gf), int(b1 + bf))
             dc.SetBrush(wx.Brush(currCol, wx.SOLID))
             dc.DrawRectangle(x, rect.y, 1, rect.height)
@@ -4397,7 +4397,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         rf, gf, bf = 0, 0, 0
         dc.SetPen(wx.TRANSPARENT_PEN)
         
-        for y in xrange(filRect.y, filRect.y + filRect.height):
+        for y in range(filRect.y, filRect.y + filRect.height):
             currCol = (r1 + rf, g1 + gf, b1 + bf)
             dc.SetBrush(wx.Brush(currCol, wx.SOLID))
             dc.DrawRectangle(filRect.x, y, filRect.width, 1)
@@ -5414,7 +5414,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         if underMouseChanged and not self._isDragging and (not self._renameTimer or not self._renameTimer.IsRunning()):
             
             if hoverItem is not None:
-                tooltipString = u""
+                tooltipString = ""
                 # Ask the tree control what tooltip (if any) should be shown
                 hevent = TreeEvent(wxEVT_TREE_ITEM_GETTOOLTIP, self.GetId())
                 hevent._item = hoverItem
@@ -5880,7 +5880,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             children = item.GetChildren()
             count = len(children)
             level = level + 1
-            for n in xrange(count):
+            for n in range(count):
                 y = self.CalculateLevel(children[n], dc, level, y)  # recurse
                 
             return y
@@ -5899,7 +5899,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         children = item.GetChildren()
         count = len(children)
         level = level + 1
-        for n in xrange(count):
+        for n in range(count):
             y = self.CalculateLevel(children[n], dc, level, y)  # recurse
         
         return y

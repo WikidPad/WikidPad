@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -9,12 +9,12 @@ from time import sleep
 
 import wx
 
-import Utilities
-from Utilities import DUMBTHREADSTOP
+from . import Utilities
+from .Utilities import DUMBTHREADSTOP
 # from MiscEvent import KeyFunctionSinkAR
-from WikiExceptions import NotCurrentThreadException
+from .WikiExceptions import NotCurrentThreadException
 
-from wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
+from .wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
 
 
 class DocStructureCtrl(EnhancedListControl):
@@ -24,7 +24,7 @@ class DocStructureCtrl(EnhancedListControl):
 
         self.mainControl = mainControl
 
-        self.InsertColumn(0, u"", width=3000)
+        self.InsertColumn(0, "", width=3000)
 
         self.updatingThreadHolder = Utilities.ThreadHolder()
         self.tocList = [] # List of tuples (char. start in text, headLevel, heading text)
@@ -181,7 +181,7 @@ class DocStructureCtrl(EnhancedListControl):
         Handle misc events
         """
         if self.sizeVisible and miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("changed current presenter"):
+            if "changed current presenter" in miscevt:
                 presenter = self.mainControl.getCurrentDocPagePresenter()
                 if presenter is not None:
                     self.docPagePresenterSink.setEventSource(presenter.getMiscEvent())
@@ -252,8 +252,8 @@ class DocStructureCtrl(EnhancedListControl):
                 if node.level > depth:
                     continue
 
-                title = u"  " * (node.level - 1) + node.contentNode.getString()
-                while title.endswith(u"\n"):
+                title = "  " * (node.level - 1) + node.contentNode.getString()
+                while title.endswith("\n"):
                     title = title[:-1]
                 result.append((node.pos, node.level, title))
 
@@ -316,7 +316,7 @@ class DocStructureCtrl(EnhancedListControl):
             subCtrl.gotoCharPos(start)
         elif scName == "preview": 
             # HTML preview
-            subCtrl.gotoAnchor(u".h%i" % start)
+            subCtrl.gotoAnchor(".h%i" % start)
 
 #         if focusToSubctrl:
 #             subCtrl.SetFocus()

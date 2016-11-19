@@ -2,6 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import sys, os, traceback, os.path, socket
+from functools import reduce
 
 # To generate dependency for py2exe
 if False:
@@ -16,16 +17,16 @@ import wx, wx.xrc
 
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 
-from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
+from .MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
-from WikiExceptions import *
-import Configuration
-from StringOps import mbcsDec, createRandomString, pathEnc, \
+from .WikiExceptions import *
+from . import Configuration
+from .StringOps import mbcsDec, createRandomString, pathEnc, \
         writeEntireFile, loadEntireFile
 
-import SystemInfo
-import WindowLayout
-from CmdLineAction import CmdLineAction
+from . import SystemInfo
+from . import WindowLayout
+from .CmdLineAction import CmdLineAction
 
 
 
@@ -134,8 +135,8 @@ class App(wx.App, MiscEventSourceMixin):
         wikiAppDir, globalConfigDir = findDirs()
 
         if not globalConfigDir or not os.path.exists(globalConfigDir):
-            raise Exception(_(u"Error initializing environment, couldn't locate "
-                    u"global config directory"))
+            raise Exception(_("Error initializing environment, couldn't locate "
+                    "global config directory"))
                     
         self.wikiAppDir = wikiAppDir
         self.globalConfigDir = globalConfigDir
@@ -185,7 +186,7 @@ class App(wx.App, MiscEventSourceMixin):
         if os.path.exists(pathEnc(globalConfigLoc)):
             try:
                 self.globalConfig.loadConfig(globalConfigLoc)
-            except Configuration.Error, MissingConfigurationFileException:
+            except Configuration.Error as MissingConfigurationFileException:
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             globalConfigLoc = os.path.join(self.globalConfigDir,
@@ -193,7 +194,7 @@ class App(wx.App, MiscEventSourceMixin):
             if os.path.exists(pathEnc(globalConfigLoc)):
                 try:
                     self.globalConfig.loadConfig(globalConfigLoc)
-                except Configuration.Error, MissingConfigurationFileException:
+                except Configuration.Error as MissingConfigurationFileException:
                     self.createDefaultGlobalConfig(globalConfigLoc)
             else:
                 self.createDefaultGlobalConfig(defaultGlobalConfigLoc)
@@ -219,11 +220,11 @@ class App(wx.App, MiscEventSourceMixin):
 
     def initStep2(self, cmdLine):
         # Block of modules to import while splash screen is shown
-        from wxHelper import IconCache
-        from Serialization import SerializeStream
-        import OsAbstract
-        import Ipc
-        import OptionsDialog, Localization
+        from .wxHelper import IconCache
+        from .Serialization import SerializeStream
+        from . import OsAbstract
+        from . import Ipc
+        from . import OptionsDialog, Localization
 
         self.optionsDlgPanelList = list(
                 OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
@@ -235,7 +236,7 @@ class App(wx.App, MiscEventSourceMixin):
         Localization.loadLangList(self.wikiAppDir)
         
         Localization.loadI18nDict(self.wikiAppDir, self.globalConfig.get(
-                "main", "gui_language", u""))
+                "main", "gui_language", ""))
 
         if self.globalConfig.getboolean("main", "single_process"):
             # Single process mode means to create a server, detect an already
@@ -269,9 +270,9 @@ class App(wx.App, MiscEventSourceMixin):
                     
                     lines = appLockContent.split("\n")
                     if len(lines) != 3:
-                        sys.stderr.write(_(u"Invalid AppLock.lock file.\n"
-                                u"Ensure that WikidPad is not running,\n"
-                                u"then delete file \"%s\" if present yet.\n") %
+                        sys.stderr.write(_("Invalid AppLock.lock file.\n"
+                                "Ensure that WikidPad is not running,\n"
+                                "then delete file \"%s\" if present yet.\n") %
                                     (os.path.join(self.globalConfigSubDir,
                                     "AppLock.lock")))
                         return True # TODO Error handling!!!
@@ -301,9 +302,9 @@ class App(wx.App, MiscEventSourceMixin):
         
                                 # Reaching this point means something went wrong
                                 singleInstance = True  # TODO More fine grained reaction
-                            except socket.timeout, e:
+                            except socket.timeout as e:
                                 singleInstance = True
-                            except socket.error, e:
+                            except socket.error as e:
                                 if (e.args[0] == 10061 or e.args[0] == 111):
                                     # Connection refused (port not bound to a server)
                                     singleInstance = True
@@ -324,12 +325,12 @@ class App(wx.App, MiscEventSourceMixin):
                 if self.globalConfig.getboolean("main", "zombieCheck", True):
                     otherProcIds = OsAbstract.checkForOtherInstances()
                     if len(otherProcIds) > 0:
-                        procIdString = u", ".join([unicode(procId)
+                        procIdString = ", ".join([str(procId)
                                 for procId in otherProcIds])
                         answer = wx.MessageBox(
-                                _(u"Other WikidPad process(es) seem(s) to run already\n"
+                                _("Other WikidPad process(es) seem(s) to run already\n"
                                 "Process identifier(s): %s\nContinue?") % procIdString,
-                                _(u"Continue?"),
+                                _("Continue?"),
                                 wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
     
                         if answer != wx.YES:
@@ -350,19 +351,19 @@ class App(wx.App, MiscEventSourceMixin):
                     Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
                 else:
                     answer = wx.MessageBox(
-                            _(u"WikidPad couldn't detect if other processes are "
+                            _("WikidPad couldn't detect if other processes are "
                             "already running.\nContinue anyway?"),
-                            _(u"Continue?"),
+                            _("Continue?"),
                             wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
                     if answer != wx.YES:
                         return False
                     
-            except socket.error, e:
+            except socket.error as e:
                 answer = wx.MessageBox(
-                        _(u"WikidPad couldn't detect if other processes are "
+                        _("WikidPad couldn't detect if other processes are "
                         "already running.\nSocket error: %s\nContinue anyway?") %
-                        unicode(e), _(u"Continue?"),
+                        str(e), _("Continue?"),
                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
 
                 if answer != wx.YES:
@@ -410,12 +411,12 @@ class App(wx.App, MiscEventSourceMixin):
         automatically at startup. Later calls only recommended during plugin
         development as they can have unwanted side effects!
         """
-        from PluginManager import PluginManager, InsertionPluginManager, \
+        from .PluginManager import PluginManager, InsertionPluginManager, \
                 KeyInParamLearningDispatcher
 
-        dirs = ( os.path.join(self.wikiAppDir, u'extensions'),
-                os.path.join(self.wikiAppDir, u'user_extensions'),
-                os.path.join(self.globalConfigSubDir, u'user_extensions') )
+        dirs = ( os.path.join(self.wikiAppDir, 'extensions'),
+                os.path.join(self.wikiAppDir, 'user_extensions'),
+                os.path.join(self.globalConfigSubDir, 'user_extensions') )
 
         self.pluginManager = PluginManager(dirs, systemDirIdx=0)
 
@@ -445,8 +446,8 @@ class App(wx.App, MiscEventSourceMixin):
 #         dirs = ( os.path.join(self.wikiAppDir, u'user_extensions'),
 #                 os.path.join(self.wikiAppDir, u'extensions') )
 
-        self.pluginManager.loadPlugins([ u'KeyBindings.py',
-                u'EvalLibrary.py'] )
+        self.pluginManager.loadPlugins([ 'KeyBindings.py',
+                'EvalLibrary.py'] )
 
         # Register options
         registerOptionsApi.registerOptions(1, self)
@@ -507,12 +508,12 @@ class App(wx.App, MiscEventSourceMixin):
         """
         Return list of internal names of all available wiki languages
         """
-        if self.wikiLanguageDescDict.has_key("wikidpad_default_2_0"):
+        if "wikidpad_default_2_0" in self.wikiLanguageDescDict:
             return [self.getWikiLanguageDescription("wikidpad_default_2_0")] + \
-                    [l for l in self.wikiLanguageDescDict.values()
+                    [l for l in list(self.wikiLanguageDescDict.values())
                     if l[0] != "wikidpad_default_2_0"]
         else:
-            return self.wikiLanguageDescDict.values()
+            return list(self.wikiLanguageDescDict.values())
 
 
     def getModifyMenuDispatcher(self):
@@ -613,7 +614,7 @@ class App(wx.App, MiscEventSourceMixin):
         """
         Make settings from global config which are changeable during session
         """
-        import Localization
+        from . import Localization
         
         collationOrder = self.globalConfig.get("main", "collation_order")
         collationUppercaseFirst = self.globalConfig.getboolean("main",
@@ -629,10 +630,10 @@ class App(wx.App, MiscEventSourceMixin):
                     collationCaseMode)
         except:
             try:
-                self.collator = Localization.getCollatorByString(u"Default",
+                self.collator = Localization.getCollatorByString("Default",
                         collationCaseMode)
             except:
-                self.collator = Localization.getCollatorByString(u"C",
+                self.collator = Localization.getCollatorByString("C",
                         collationCaseMode)
         try:
             self.SetCallFilterEvent(self.globalConfig.getboolean("main",
@@ -648,7 +649,7 @@ class App(wx.App, MiscEventSourceMixin):
 
 
     def OnExit(self):
-        import Ipc
+        from . import Ipc
 
         self.getInsertionPluginManager().taskEnd()
 
@@ -665,7 +666,7 @@ class App(wx.App, MiscEventSourceMixin):
             traceback.print_exc()
 
         if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
-            wx.MessageBox(_(u"An error occurred during this session\nSee file %s") %
+            wx.MessageBox(_("An error occurred during this session\nSee file %s") %
                     os.path.join(ExceptionLogger.getLogDestDir()),
                     "Error", style = wx.OK)
 
@@ -674,7 +675,7 @@ class App(wx.App, MiscEventSourceMixin):
         return self.mainFrameSet
 
     def startPersonalWikiFrame(self, clAction):
-        from PersonalWikiFrame import PersonalWikiFrame
+        from .PersonalWikiFrame import PersonalWikiFrame
 
         wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
                 self.globalConfigDir, self.globalConfigSubDir, clAction)
@@ -852,13 +853,13 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pl = self.getOptionsDlgPanelList()
         try:
-            insPos = pl.index(("??insert mark/plugins global", u""))
+            insPos = pl.index(("??insert mark/plugins global", ""))
         except ValueError:
-            pl.append(("", _(u"Plugin options")))
+            pl.append(("", _("Plugin options")))
             insPos = len(pl)
-            pl.append(("??insert mark/plugins global", u""))
+            pl.append(("??insert mark/plugins global", ""))
 
-        pl.insert(insPos, (factory, 2 * u" " + title))
+        pl.insert(insPos, (factory, 2 * " " + title))
 
 
     def addOptionsDlgPanel(self, factory, title):
@@ -880,7 +881,7 @@ class App(wx.App, MiscEventSourceMixin):
         title -- unistring with title to show in the left list in options
             dialog
         """
-        if title[:2] == u"  ":
+        if title[:2] == "  ":
             title = title[2:]
 
         self.addGlobalPluginOptionsDlgPanel(optionsPanelFactoryWrapper, title)
@@ -899,14 +900,14 @@ class App(wx.App, MiscEventSourceMixin):
         pl = self.getOptionsDlgPanelList()
 
         try:
-            insPos = pl.index(("??insert mark/current wiki/wiki lang", u""))
+            insPos = pl.index(("??insert mark/current wiki/wiki lang", ""))
         except ValueError:
-            insPos = pl.index(("??insert mark/current wiki", u""))
-            pl.insert(insPos, ("??insert mark/current wiki/wiki lang", u""))
-            pl.insert(insPos, ("", 2 * u" " + _(u"Wiki language")))
+            insPos = pl.index(("??insert mark/current wiki", ""))
+            pl.insert(insPos, ("??insert mark/current wiki/wiki lang", ""))
+            pl.insert(insPos, ("", 2 * " " + _("Wiki language")))
             insPos += 1
 
-        pl.insert(insPos, (factory, 4 * u" " + title))
+        pl.insert(insPos, (factory, 4 * " " + title))
 
 
     def addWikiPluginOptionsDlgPanel(self, factory, title):
@@ -922,11 +923,11 @@ class App(wx.App, MiscEventSourceMixin):
         pl = self.getOptionsDlgPanelList()
 
         try:
-            insPos = pl.index(("??insert mark/current wiki/plugins", u""))
+            insPos = pl.index(("??insert mark/current wiki/plugins", ""))
         except ValueError:
-            insPos = pl.index(("??insert mark/current wiki", u""))
-            pl.insert(insPos, ("??insert mark/current wiki/plugins", u""))
-            pl.insert(insPos, ("", 2 * u" " + _(u"Plugins")))
+            insPos = pl.index(("??insert mark/current wiki", ""))
+            pl.insert(insPos, ("??insert mark/current wiki/plugins", ""))
+            pl.insert(insPos, ("", 2 * " " + _("Plugins")))
             insPos += 1
 
-        pl.insert(insPos, (factory, 4 * u" " + title))
+        pl.insert(insPos, (factory, 4 * " " + title))

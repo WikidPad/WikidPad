@@ -8,7 +8,7 @@
 
 # $Id: introspection.py,v 1.1 2006/01/07 15:01:24 Michael Butscher Exp $
 
-import store
+from . import store
 
 class RemoteView(store.View):
 
@@ -53,21 +53,21 @@ class RemoteView(store.View):
 
     def attributes(self):
         from string import upper
-        return map(upper, self.column_names)
+        return list(map(upper, self.column_names))
 
     def rows(self, andseqs=0):
         cached_rows = self.cached_rows
         if cached_rows is None:
             tups = list(self.listing())
-            from semantics import kjbuckets
+            from .semantics import kjbuckets
             undump = kjbuckets.kjUndump
             attributes = tuple(self.attributes())
-            for i in xrange(len(tups)):
+            for i in range(len(tups)):
                 tups[i] = undump(attributes, tups[i])
             cached_rows = self.cached_rows = tups
         tups = cached_rows[:]
         if andseqs:
-            return (tups, range(len(tups)))
+            return (tups, list(range(len(tups))))
         else:
             return tups
 
@@ -97,11 +97,11 @@ class DictKeyValueView(RemoteView):
         self.dict = dict
 
     def listing(self):
-        items = self.dict.items()
+        items = list(self.dict.items())
         if self.mapstring:
             def mapper(item):
                 return tuple(map(str, item))
-            return map(mapper, items)
+            return list(map(mapper, items))
         else:
             return items
 
@@ -114,7 +114,7 @@ class RelationsView(DictKeyValueView):
     def relbind(self, db, atts):
         rels = db.rels
         dict = {}
-        for relname in rels.keys():
+        for relname in list(rels.keys()):
             dict[relname] = rels[relname].is_view
         self.dict = dict
         return self
@@ -129,7 +129,7 @@ class IndicesView(DictKeyValueView):
     def relbind(self, db, atts):
         rels = db.rels
         dict = {}
-        for relname in rels.keys():
+        for relname in list(rels.keys()):
             rel = rels[relname]
             if not rel.is_view:
                 index_list = rels[relname].index_list
@@ -141,7 +141,7 @@ class IndicesView(DictKeyValueView):
     def listing(self):
         L = []
         dict = self.dict
-        keys = dict.keys()
+        keys = list(dict.keys())
         for k in keys:
             L.append( (k,) + dict[k] )
         return L
@@ -165,7 +165,7 @@ class ColumnsView(RemoteView):
     def relbind(self, db, atts):
         rels = db.rels
         pairs = []
-        for relname in rels.keys():
+        for relname in list(rels.keys()):
             for att in rels[relname].attributes():
                 pairs.append( (relname, att) )
         self.pairs = pairs
@@ -182,7 +182,7 @@ class IndexAttsView(ColumnsView):
     def relbind(self, db, atts):
         indices = db.indices
         pairs = []
-        for iname in indices.keys():
+        for iname in list(indices.keys()):
             for att in indices[iname].attributes():
                 pairs.append( (iname, att) )
         self.pairs = pairs

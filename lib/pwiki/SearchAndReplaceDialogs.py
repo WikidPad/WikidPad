@@ -5,18 +5,18 @@ import sys, traceback, re, time
 
 import wx, wx.html, wx.xrc
 
-from rtlibRepl import minidom
+from .rtlibRepl import minidom
 
 import Consts
 from .MiscEvent import MiscEventSourceMixin, KeyFunctionSink
-from WikiExceptions import *
+from .WikiExceptions import *
 from .Utilities import DUMBTHREADSTOP, callInMainThread, callInMainThreadAsync, \
         ThreadHolder, FunctionThreadStop
 
 from .SystemInfo import isLinux
 
 from . import wxHelper
-from wxHelper import *
+from .wxHelper import *
 
 from .StringOps import uniToGui, guiToUni, escapeHtml
 
@@ -45,7 +45,7 @@ class _SearchResultItemInfo(object):
         else:
             self.occNumber = -1  # -1: No specific occurrence
 
-        self.occHtml = u""  # HTML presentation of the occurrence
+        self.occHtml = ""  # HTML presentation of the occurrence
         self.occPos = occPos  # Tuple (start, end) with position of occurrence in characters
         self.occCount = occCount # -1: Undefined; -2: More than maxCountOccurrences
         self.maxCountOccurrences = maxOccCount
@@ -61,12 +61,12 @@ class _SearchResultItemInfo(object):
 
         if basum == 0:
             # No context
-            self.occHtml = u""
+            self.occHtml = ""
             return self
         
         if pos[0] is None:
             # All occurences where deleted meanwhile dialog was open
-            self.occHtml = u""
+            self.occHtml = ""
             self.occNumber = 0
             self.occCount = 0
             return self
@@ -78,7 +78,7 @@ class _SearchResultItemInfo(object):
         
         s = max(0, pos[0] - before)
         e = min(len(text), pos[1] + after)
-        self.occHtml = u"".join([escapeHtml(text[s:pos[0]]), 
+        self.occHtml = "".join([escapeHtml(text[s:pos[0]]), 
             "<b>", escapeHtml(text[pos[0]:pos[1]]), "</b>",
             escapeHtml(text[pos[1]:e])])
             
@@ -95,34 +95,34 @@ class _SearchResultItemInfo(object):
 
     def getHtml(self):
         if self.html is None:
-            result = [u'<table><tr><td bgcolor="#0000ff" width="6"></td>'
-                    u'<td><font color="BLUE"><b>%s</b></font>' % \
+            result = ['<table><tr><td bgcolor="#0000ff" width="6"></td>'
+                    '<td><font color="BLUE"><b>%s</b></font>' % \
                     escapeHtml(self.wikiWord)]
             
             if self.occNumber != -1:
-                stroc = [unicode(self.occNumber), u"/"]
+                stroc = [str(self.occNumber), "/"]
             else:
                 stroc = []
                 
             if self.occCount > -1:
-                stroc.append(unicode(self.occCount))
+                stroc.append(str(self.occCount))
             elif len(stroc) > 0:
                 if self.occCount == -1:
-                    stroc.append(u"?")
+                    stroc.append("?")
                 elif self.occCount == -2:
-                    stroc.append(u">%s" % self.maxCountOccurrences)
+                    stroc.append(">%s" % self.maxCountOccurrences)
 
-            stroc = u"".join(stroc)
+            stroc = "".join(stroc)
             
-            if stroc != u"":
-                result.append(u' <b>(%s)</b>' % stroc)
+            if stroc != "":
+                result.append(' <b>(%s)</b>' % stroc)
                 
-            if self.occHtml != u"":
-                result.append(u'<br>\n')
+            if self.occHtml != "":
+                result.append('<br>\n')
                 result.append(self.occHtml)
                 
             result.append('</td></tr></table>')
-            self.html = u"".join(result)
+            self.html = "".join(result)
             
         return self.html
 
@@ -158,14 +158,14 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
 
     def OnGetItem(self, i):
         if self.isShowingSearching:
-            return u"<b>" + _(u"Searching... (click into field to abort)") + u"</b>"
+            return "<b>" + _("Searching... (click into field to abort)") + "</b>"
         elif self.GetCount() == 0:
-            return u"<b>" + _(u"Not found") + u"</b>"
+            return "<b>" + _("Not found") + "</b>"
 
         try:
             return self.foundinfo[i].getHtml()
         except IndexError:
-            return u""
+            return ""
 
     def showSearching(self):
         """
@@ -498,7 +498,7 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
         tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
 
         presenter = self.pWiki.activatePageByUnifiedName(
-                u"wikipage/" + info.wikiWord, tabMode)
+                "wikipage/" + info.wikiWord, tabMode)
         
         if presenter is None:
             return
@@ -565,7 +565,7 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
 
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 0)
             presenter = self.pWiki.activatePageByUnifiedName(
-                    u"wikipage/" + info.wikiWord, 0)
+                    "wikipage/" + info.wikiWord, 0)
 
             if presenter is None:
                 return
@@ -588,7 +588,7 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
 
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 2)
             presenter = self.pWiki.activatePageByUnifiedName(
-                    u"wikipage/" + info.wikiWord, 2)
+                    "wikipage/" + info.wikiWord, 2)
 
             if presenter is None:
                 return
@@ -611,7 +611,7 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
 
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 3)
             presenter = self.pWiki.activatePageByUnifiedName(
-                    u"wikipage/" + info.wikiWord, 3)
+                    "wikipage/" + info.wikiWord, 3)
             
             if presenter is None:
                 return
@@ -684,14 +684,14 @@ class SearchPageDialog(wx.Dialog):
         if not self.showExtended:
             self.ctrls.panelSavedSearchButtons.Show(False)
             self.mainSizer.Detach(self.ctrls.panelSavedSearchButtons)
-            self.ctrls.btnToggleExtended.SetLabel(_(u"More >>"))
+            self.ctrls.btnToggleExtended.SetLabel(_("More >>"))
         else:
             self.ctrls.panelSavedSearchButtons.Show(True)
             self.mainSizer.Add(self.ctrls.panelSavedSearchButtons, (1,0), (1,2),
                     flag=wx.ALL | wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL,
                     border=5)
 #             self.mainSizer.AddGrowableRow(1)
-            self.ctrls.btnToggleExtended.SetLabel(_(u"<< Less"))
+            self.ctrls.btnToggleExtended.SetLabel(_("<< Less"))
 
 #         print "--OnToggleExtended13", repr(self.mainSizer.CalcMin())
         self.Layout()
@@ -794,7 +794,7 @@ class SearchPageDialog(wx.Dialog):
 
     def _refreshSavedSearchesList(self):
         wikiData = self.mainControl.getWikiData()
-        unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedpagesearch/")
+        unifNames = wikiData.getDataBlockUnifNamesStartingWith("savedpagesearch/")
 
         result = []
 #         suppExTypes = PluginManager.getSupportedExportTypes(mainControl,
@@ -835,8 +835,8 @@ class SearchPageDialog(wx.Dialog):
             return
             
         answer = wx.MessageBox(
-                _(u"Do you want to delete %i search(es)?") % len(sels),
-                _(u"Delete search"),
+                _("Do you want to delete %i search(es)?") % len(sels),
+                _("Delete search"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
         if answer != wx.YES:
             return
@@ -844,7 +844,7 @@ class SearchPageDialog(wx.Dialog):
         for s in sels:
 #             self.mainControl.getWikiData().deleteSavedSearch(self.savedSearches[s])
             self.mainControl.getWikiData().deleteDataBlock(
-                    u"savedpagesearch/" + self.savedSearches[s][0])
+                    "savedpagesearch/" + self.savedSearches[s][0])
         self._refreshSavedSearchesList()
 
 
@@ -888,31 +888,31 @@ class SearchPageDialog(wx.Dialog):
         sarOp = self._buildSearchReplaceOperation()
         try:
             sarOp.rebuildSearchOpTree()
-        except re.error, e:
-            self.mainControl.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.mainControl.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
             return
-        except ParseException, e:
-            self.mainControl.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
+        except ParseException as e:
+            self.mainControl.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
             return
 
         if len(sarOp.searchStr) > 0:
             title = sarOp.getTitle()
             while True:
-                title = guiToUni(wx.GetTextFromUser(_(u"Title:"),
-                        _(u"Choose search title"), title, self))
-                if title == u"":
+                title = guiToUni(wx.GetTextFromUser(_("Title:"),
+                        _("Choose search title"), title, self))
+                if title == "":
                     return  # Cancel
                     
 #                 if title in self.mainControl.getWikiData().getSavedSearchTitles():
-                if (u"savedpagesearch/" + title) in self.mainControl.getWikiData()\
+                if ("savedpagesearch/" + title) in self.mainControl.getWikiData()\
                         .getDataBlockUnifNamesStartingWith(
-                        u"savedpagesearch/" + title):
+                        "savedpagesearch/" + title):
 
                     answer = wx.MessageBox(
-                            _(u"Do you want to overwrite existing search '%s'?") %
-                            title, _(u"Overwrite search"),
+                            _("Do you want to overwrite existing search '%s'?") %
+                            title, _("Overwrite search"),
                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
                     if answer != wx.YES:
                         continue
@@ -922,28 +922,28 @@ class SearchPageDialog(wx.Dialog):
 
                 xmlDoc = minidom.getDOMImplementation().createDocument(None,
                         None, None)
-                xmlNode = xmlDoc.createElement(u"savedpagesearch")
+                xmlNode = xmlDoc.createElement("savedpagesearch")
                 sarOp.serializeToXml(xmlNode, xmlDoc)
                 
                 xmlDoc.appendChild(xmlNode)
                 content = xmlDoc.toxml("utf-8")
                 xmlDoc.unlink()
                 self.mainControl.getWikiData().storeDataBlock(
-                        u"savedpagesearch/" + title, content,
+                        "savedpagesearch/" + title, content,
                         storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
 
                 self._refreshSavedSearchesList()
                 break
         else:
             self.mainControl.displayErrorMessage(
-                    _(u"Invalid search string, can't save as view"))
+                    _("Invalid search string, can't save as view"))
 
 
-    def displayErrorMessage(self, errorStr, e=u""):
+    def displayErrorMessage(self, errorStr, e=""):
         """
         Pops up an error dialog box
         """
-        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), _(u"Error!"),
+        wx.MessageBox(uniToGui("%s. %s." % (errorStr, e)), _("Error!"),
             wx.OK, self)
 
 
@@ -964,9 +964,9 @@ class SearchPageDialog(wx.Dialog):
             # No matches found
             if contPos != 0:
                 # We started not at beginning, so ask if to wrap around
-                result = wx.MessageBox(_(u"End of document reached. "
-                        u"Continue at beginning?"),
-                        _(u"Continue at beginning?"),
+                result = wx.MessageBox(_("End of document reached. "
+                        "Continue at beginning?"),
+                        _("Continue at beginning?"),
                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                 if result != wx.YES:
                     return
@@ -977,12 +977,12 @@ class SearchPageDialog(wx.Dialog):
                     return
 
             # no more matches possible -> show dialog
-            wx.MessageBox(_(u"No matches found"),
-                    _(u"No matches found"), wx.OK, self)
+            wx.MessageBox(_("No matches found"),
+                    _("No matches found"), wx.OK, self)
 
 
     def OnFindNext(self, evt):
-        if guiToUni(self.ctrls.cbSearch.GetValue()) == u"":
+        if guiToUni(self.ctrls.cbSearch.GetValue()) == "":
             return
 
         sarOp = self._buildSearchReplaceOperation()
@@ -991,9 +991,9 @@ class SearchPageDialog(wx.Dialog):
         try:
             self._nextSearch(sarOp)
             self.firstFind = False
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
 
 
     def OnReplace(self, evt):
@@ -1004,9 +1004,9 @@ class SearchPageDialog(wx.Dialog):
         try:
             self.mainControl.getActiveEditor().executeReplace(sarOp)
             self._nextSearch(sarOp)
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
 
 
     def OnReplaceAll(self, evt):
@@ -1033,8 +1033,8 @@ class SearchPageDialog(wx.Dialog):
         finally:
             editor.EndUndoAction()
             
-        wx.MessageBox(_(u"%i replacements done") % replaceCount,
-                _(u"Replace All"), wx.OK, self)
+        wx.MessageBox(_("%i replacements done") % replaceCount,
+                _("Replace All"), wx.OK, self)
 
 
     def OnSearchComboSelected(self, evt):
@@ -1074,7 +1074,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.ctrls.btnOk.SetId(wx.ID_OK)
             self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         else:
-            self.ctrls.btnOk.SetLabel(_(u"Close"))
+            self.ctrls.btnOk.SetLabel(_("Close"))
             self.ctrls.btnOk.SetId(wx.ID_CANCEL)
             self.ctrls.btnCancel.Show(False)
 
@@ -1234,11 +1234,11 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         return self.value
 
 
-    def displayErrorMessage(self, errorStr, e=u""):
+    def displayErrorMessage(self, errorStr, e=""):
         """
         Pops up an error dialog box
         """
-        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), _(u"Error!"),
+        wx.MessageBox(uniToGui("%s. %s." % (errorStr, e)), _("Error!"),
             wx.OK, self)
 
 
@@ -1247,7 +1247,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         Construct a ListWikiPagesOperation according to current content of the
         second tab of the dialog
         """
-        import SearchAndReplace as Sar
+        from . import SearchAndReplace as Sar
         
         lpOp = Sar.ListWikiPagesOperation()
         
@@ -1257,9 +1257,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             pattern = self.ctrls.tfMatchRe.GetValue()
             try:
                 re.compile(pattern, re.DOTALL | re.UNICODE | re.MULTILINE)
-            except re.error, e:
-                wx.MessageBox(_(u"Bad regular expression '%s':\n%s") %
-                        (pattern, _(unicode(e))), _(u"Error in regular expression"),
+            except re.error as e:
+                wx.MessageBox(_("Bad regular expression '%s':\n%s") %
+                        (pattern, _(str(e))), _("Error in regular expression"),
                         wx.OK, self)
                 return None
                 
@@ -1327,9 +1327,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.pageListData = item.rootWords[:]
                 self.ctrls.lbPageList.AppendItems(self.pageListData)
                 if item.level == -1:
-                    self.ctrls.tfSubtreeLevels.SetValue(u"")
+                    self.ctrls.tfSubtreeLevels.SetValue("")
                 else:
-                    self.ctrls.tfSubtreeLevels.SetValue(u"%i" % item.level)
+                    self.ctrls.tfSubtreeLevels.SetValue("%i" % item.level)
                     
             self.ctrls.chOrdering.SetSelection(
                     self._ORDERNAME_TO_CHOICE[self.listPagesOperation.ordering])
@@ -1483,15 +1483,15 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.ctrls.htmllbPages.SetSelection(0)
         except UserAbortException:
             return
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
-        except ParseException, e:
-            self.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
-        except DbReadAccessError, e:
-            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
+        except ParseException as e:
+            self.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
+        except DbReadAccessError as e:
+            self.displayErrorMessage(_('Error. Maybe wiki rebuild is needed'),
+                    _(str(e)))
             return
 
 
@@ -1509,17 +1509,17 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self._refreshPageList()
             except UserAbortException:
                 return
-            except re.error, e:
-                self.displayErrorMessage(_(u'Error in regular expression'),
-                        _(unicode(e)))
+            except re.error as e:
+                self.displayErrorMessage(_('Error in regular expression'),
+                        _(str(e)))
                 return
-            except ParseException, e:
-                self.displayErrorMessage(_(u'Error in boolean expression'),
-                        _(unicode(e)))
+            except ParseException as e:
+                self.displayErrorMessage(_('Error in boolean expression'),
+                        _(str(e)))
                 return
-            except DbReadAccessError, e:
-                self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
-                        _(unicode(e)))
+            except DbReadAccessError as e:
+                self.displayErrorMessage(_('Error. Maybe wiki rebuild is needed'),
+                        _(str(e)))
                 return
 
 
@@ -1566,12 +1566,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 # Otherwise: Go to next page in list            
                 self.ctrls.htmllbPages.SetSelection(
                         self.ctrls.htmllbPages.GetSelection() + 1)
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
-        except ParseException, e:
-            self.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
+        except ParseException as e:
+            self.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
 
 
 
@@ -1580,13 +1580,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         sarOp.replaceOp = True
         try:
             self.mainControl.getActiveEditor().executeReplace(sarOp)
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
             return
-        except ParseException, e:  # Probably this can't happen
-            self.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
+        except ParseException as e:  # Probably this can't happen
+            self.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
             return
 
 
@@ -1594,7 +1594,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnReplaceAll(self, evt):
-        answer = wx.MessageBox(_(u"Replace all occurrences?"), _(u"Replace All"),
+        answer = wx.MessageBox(_("Replace all occurrences?"), _("Replace All"),
                 wx.YES_NO | wx.NO_DEFAULT, self)
 
         if answer != wx.YES:
@@ -1617,7 +1617,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             
             replaceCount = 0
     
-            for i in xrange(self.ctrls.htmllbPages.GetCount()):
+            for i in range(self.ctrls.htmllbPages.GetCount()):
                 self.ctrls.htmllbPages.SetSelection(i)
                 wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
                 wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
@@ -1654,20 +1654,20 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                     
             self._refreshPageList()
             
-            wx.MessageBox(_(u"%i replacements done") % replaceCount,
-                    _(u"Replace All"),
+            wx.MessageBox(_("%i replacements done") % replaceCount,
+                    _("Replace All"),
                 wx.OK, self)        
         except UserAbortException:
             return
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
-        except ParseException, e:
-            self.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
-        except DbReadAccessError, e:
-            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
+        except ParseException as e:
+            self.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
+        except DbReadAccessError as e:
+            self.displayErrorMessage(_('Error. Maybe wiki rebuild is needed'),
+                    _(str(e)))
 
 
     def addCurrentToHistory(self):
@@ -1677,7 +1677,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         except re.error:
             # Ignore silently
             return
-        except ParseException, e:
+        except ParseException as e:
             # This too
             return
 
@@ -1708,31 +1708,31 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         sarOp = self._buildSearchReplaceOperation()
         try:
             sarOp.rebuildSearchOpTree()
-        except re.error, e:
-            self.mainControl.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.mainControl.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
             return
-        except ParseException, e:
-            self.mainControl.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
+        except ParseException as e:
+            self.mainControl.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
             return
 
         if len(sarOp.searchStr) > 0:
             title = sarOp.getTitle()
             while True:
-                title = guiToUni(wx.GetTextFromUser(_(u"Title:"),
-                        _(u"Choose search title"), title, self))
-                if title == u"":
+                title = guiToUni(wx.GetTextFromUser(_("Title:"),
+                        _("Choose search title"), title, self))
+                if title == "":
                     return  # Cancel
                     
 #                 if title in self.pWiki.getWikiData().getSavedSearchTitles():
-                if (u"savedsearch/" + title) in self.mainControl.getWikiData()\
+                if ("savedsearch/" + title) in self.mainControl.getWikiData()\
                         .getDataBlockUnifNamesStartingWith(
-                        u"savedsearch/" + title):
+                        "savedsearch/" + title):
 
                     answer = wx.MessageBox(
-                            _(u"Do you want to overwrite existing search '%s'?") %
-                            title, _(u"Overwrite search"),
+                            _("Do you want to overwrite existing search '%s'?") %
+                            title, _("Overwrite search"),
                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
                     if answer != wx.YES:
                         continue
@@ -1740,14 +1740,14 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 #                 self.pWiki.getWikiData().saveSearch(title,
 #                         sarOp.getPackedSettings())
                 self.mainControl.getWikiData().storeDataBlock(
-                        u"savedsearch/" + title, sarOp.getPackedSettings(),
+                        "savedsearch/" + title, sarOp.getPackedSettings(),
                         storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
 
                 self._refreshSavedSearchesList()
                 break
         else:
             self.mainControl.displayErrorMessage(
-                    _(u"Invalid search string, can't save as view"))
+                    _("Invalid search string, can't save as view"))
 
 
     def OnRadioBox(self, evt):
@@ -1824,7 +1824,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
     def _refreshSavedSearchesList(self):
         unifNames = self.mainControl.getWikiData()\
-                .getDataBlockUnifNamesStartingWith(u"savedsearch/")
+                .getDataBlockUnifNamesStartingWith("savedsearch/")
 
         self.savedSearches = [name[12:] for name in unifNames]
         self.mainControl.getCollator().sort(self.savedSearches)
@@ -1847,8 +1847,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             return
             
         answer = wx.MessageBox(
-                _(u"Do you want to delete %i search(es)?") % len(sels),
-                _(u"Delete search"),
+                _("Do you want to delete %i search(es)?") % len(sels),
+                _("Delete search"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
         if answer != wx.YES:
             return
@@ -1856,7 +1856,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         for s in sels:
 #             self.pWiki.getWikiData().deleteSavedSearch(self.savedSearches[s])
             self.mainControl.getWikiData().deleteDataBlock(
-                    u"savedsearch/" + self.savedSearches[s])
+                    "savedsearch/" + self.savedSearches[s])
         self._refreshSavedSearchesList()
 
 
@@ -1869,15 +1869,15 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self._refreshPageList()
             except UserAbortException:
                 return
-            except re.error, e:
-                self.displayErrorMessage(_(u'Error in regular expression'),
-                        _(unicode(e)))
-            except ParseException, e:
-                self.displayErrorMessage(_(u'Error in boolean expression'),
-                        _(unicode(e)))
-            except DbReadAccessError, e:
-                self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
-                        _(unicode(e)))
+            except re.error as e:
+                self.displayErrorMessage(_('Error in regular expression'),
+                        _(str(e)))
+            except ParseException as e:
+                self.displayErrorMessage(_('Error in boolean expression'),
+                        _(str(e)))
+            except DbReadAccessError as e:
+                self.displayErrorMessage(_('Error. Maybe wiki rebuild is needed'),
+                        _(str(e)))
 
 
     def _loadSearch(self):
@@ -1887,7 +1887,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             return False
         
         datablock = self.mainControl.getWikiData().retrieveDataBlock(
-                u"savedsearch/" + self.savedSearches[sels[0]])
+                "savedsearch/" + self.savedSearches[sels[0]])
 
         sarOp = SearchReplaceOperation()
         sarOp.setPackedSettings(datablock)
@@ -1910,7 +1910,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.mainControl.getWikiDefaultWikiLanguage())
 
-        wordsText = u"".join([
+        wordsText = "".join([
                 langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.foundPages])
 
@@ -1946,9 +1946,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     
     def _updateTabTitle(self):
         if self.ctrls.rbPagesAll.GetValue():
-            self.ctrls.nbSearchWiki.SetPageText(1, _(u"Set page list"))
+            self.ctrls.nbSearchWiki.SetPageText(1, _("Set page list"))
         else:
-            self.ctrls.nbSearchWiki.SetPageText(1, _(u"*Set page list*"))            
+            self.ctrls.nbSearchWiki.SetPageText(1, _("*Set page list*"))            
 
 
     def _setPageListRadioButton(self, selectedBtn):
@@ -2050,7 +2050,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.pageListData.insert(sel + 1, word)
             self.ctrls.lbPageList.SetSelection(sel + 1)
             
-        self.ctrls.tfPageListToAdd.SetValue(u"")
+        self.ctrls.tfPageListToAdd.SetValue("")
 
 
     def OnPageListDelete(self, evt):
@@ -2103,7 +2103,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
             for node in wwNodes:
                 w = node.wikiWord
-                if not found.has_key(w):
+                if w not in found:
                     self.ctrls.lbPageList.Append(uniToGui(w))
                     self.pageListData.append(w)
                     found[w] = None
@@ -2142,7 +2142,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
             # Now fill all with already existing entries
             for w in pageList:
-                if found.has_key(w):
+                if w in found:
                     self.ctrls.lbPageList.Append(uniToGui(w))
                     self.pageListData.append(w)
                     del found[w]
@@ -2152,7 +2152,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.mainControl.getWikiDefaultWikiLanguage())
 
-        wordsText = u"".join([
+        wordsText = "".join([
                 langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.pageListData])
 
@@ -2163,7 +2163,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.mainControl.getWikiDefaultWikiLanguage())
 
-        wordsText = u"".join([
+        wordsText = "".join([
                 langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.resultListData])
 
@@ -2222,12 +2222,12 @@ class SearchResultPresenterControl(wx.Panel):
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.btnAsResultlist = wx.Button(self,
-                GUI_ID.CMD_SEARCH_AS_RESULTLIST, label=_(u"As Resultlist"))
+                GUI_ID.CMD_SEARCH_AS_RESULTLIST, label=_("As Resultlist"))
                 # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsResultlist, 0, wx.EXPAND)
 
         self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH,
-                label=_(u"As Full Search"))    # TODO Allow hotkey for button
+                label=_("As Full Search"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsWwSearch, 0, wx.EXPAND)
 
 #         buttonSizer.AddStretchSpacer()
@@ -2260,7 +2260,7 @@ class SearchResultPresenterControl(wx.Panel):
         """
         """
         self.sarOp = sarOp
-        self.presenter.setTitle(_(u"<Search: %s>") % self.sarOp.searchStr)
+        self.presenter.setTitle(_("<Search: %s>") % self.sarOp.searchStr)
 
 
     def getTabContextMenu(self):
@@ -2310,7 +2310,7 @@ class FastSearchPopup(wx.Frame):
     """
     def __init__(self, parent, mainControl, ID, srListBox=None,
             pos=wx.DefaultPosition):
-        wx.Frame.__init__(self, parent, ID, _(u"Fast Search"), pos=pos,
+        wx.Frame.__init__(self, parent, ID, _("Fast Search"), pos=pos,
                 style=wx.RESIZE_BORDER | wx.FRAME_FLOAT_ON_PARENT | wx.SYSTEM_MENU |
                 wx.FRAME_TOOL_WINDOW | wx.CAPTION | wx.CLOSE_BOX ) # wx.FRAME_NO_TASKBAR)
                 
@@ -2332,11 +2332,11 @@ class FastSearchPopup(wx.Frame):
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH,
-                label=_(u"As Full Search"))    # TODO Allow hotkey for button
+                label=_("As Full Search"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsWwSearch, 0, wx.EXPAND)
 
         self.btnAsTab = wx.Button(self, GUI_ID.CMD_SEARCH_AS_TAB,
-                label=_(u"As Tab"))    # TODO Allow hotkey for button
+                label=_("As Tab"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsTab, 0, wx.EXPAND)
 #         buttonSizer.AddStretchSpacer()
         buttonSizer.Add((0, 0), 1)
@@ -2381,7 +2381,7 @@ class FastSearchPopup(wx.Frame):
         self.resultBox.Unbind(wx.EVT_KILL_FOCUS)
         self.btnAsWwSearch.Unbind(wx.EVT_KILL_FOCUS)
         self.Unbind(wx.EVT_MOVE)
-        self.SetTitle(_(u"Search: %s") % self.sarOp.searchStr)
+        self.SetTitle(_("Search: %s") % self.sarOp.searchStr)
         self.fixed = True
         
 
@@ -2440,18 +2440,17 @@ class FastSearchPopup(wx.Frame):
         
     
     def miscEventHappened(self, miscevt):
-        if miscevt.getSource() is self.resultBox and miscevt.has_key(
-                "opened in foreground"):
+        if miscevt.getSource() is self.resultBox and "opened in foreground" in miscevt:
 
             if not self.fixed:
                 self.Close()
 
         
-    def displayErrorMessage(self, errorStr, e=u""):
+    def displayErrorMessage(self, errorStr, e=""):
         """
         Pops up an error dialog box
         """
-        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), u"Error!",
+        wx.MessageBox(uniToGui("%s. %s." % (errorStr, e)), "Error!",
             wx.OK, self)
 
 
@@ -2525,15 +2524,15 @@ class FastSearchPopup(wx.Frame):
             self._refreshPageList()
         except UserAbortException:
             return
-        except re.error, e:
-            self.displayErrorMessage(_(u'Error in regular expression'),
-                    _(unicode(e)))
-        except ParseException, e:
-            self.displayErrorMessage(_(u'Error in boolean expression'),
-                    _(unicode(e)))
-        except DbReadAccessError, e:
-            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
-                    _(unicode(e)))
+        except re.error as e:
+            self.displayErrorMessage(_('Error in regular expression'),
+                    _(str(e)))
+        except ParseException as e:
+            self.displayErrorMessage(_('Error in boolean expression'),
+                    _(str(e)))
+        except DbReadAccessError as e:
+            self.displayErrorMessage(_('Error. Maybe wiki rebuild is needed'),
+                    _(str(e)))
 
 
     def setSearchOp(self, sarOp):
@@ -2625,7 +2624,7 @@ class FastSearchPopup(wx.Frame):
 
 
 _CONTEXT_MENU_ACTIVATE = \
-u"""
+"""
 Activate;CMD_ACTIVATE_THIS
 Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
@@ -2633,6 +2632,6 @@ Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 
 # Entries to support i18n of context menus
 if False:
-    N_(u"Activate")
-    N_(u"Activate New Tab")
-    N_(u"Activate New Tab Backgrd.")
+    N_("Activate")
+    N_("Activate New Tab")
+    N_("Activate New Tab Backgrd.")

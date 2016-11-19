@@ -1,6 +1,6 @@
-import WikiData_compact_sqlite
-import WikiData_original_gadfly
-import WikiData_original_sqlite
+from . import WikiData_compact_sqlite
+from . import WikiData_original_gadfly
+from . import WikiData_original_sqlite
 
 _handlers = None
 

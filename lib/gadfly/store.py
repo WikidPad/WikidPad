@@ -9,9 +9,9 @@
 verbosity = 0
 
 import sys, os, hashlib, types, marshal
-from consts import MARSHAL_VERSION
-from kjbuckets_select import kjbuckets
-import serialize
+from .consts import MARSHAL_VERSION
+from .kjbuckets_select import kjbuckets
+from . import serialize
 
 class StorageError(Exception):
     ''' error on checking of data integrity '''
@@ -22,7 +22,7 @@ def checksum(string):
 
 def recursive_dump(data, prefix="["):
     """for debugging"""
-    if isinstance(data, types.StringType):
+    if isinstance(data, bytes):
         #print prefix, data
         return
     p2 = prefix+"["
@@ -30,7 +30,7 @@ def recursive_dump(data, prefix="["):
         for x in data:
             recursive_dump(x, p2)
     except:
-        print prefix, data
+        print(prefix, data)
 
 def checksum_dump(data, file):
     """checksum and dump marshallable data to file"""
@@ -43,7 +43,7 @@ def checksum_undump(file):
     checkpair = marshal.load(file)
     (check, storage) = checkpair
     if checksum(storage)!=check:
-        raise StorageError, "data load checksum fails"
+        raise StorageError("data load checksum fails")
     data = marshal.loads(storage)
     return data
 
@@ -93,9 +93,9 @@ class Database0:
         if log:
             self.is_scratch = log.is_scratch
         if shadowing and not log:
-            raise ValueError, "shadowing db requires log"
+            raise ValueError("shadowing db requires log")
         if verbose:
-            print "Database0 init"
+            print("Database0 init")
             if log:
                 log.verbose = 1
         if shadowing:
@@ -111,7 +111,7 @@ class Database0:
                 self.set_introspection()
 
     def set_introspection(self):
-        import introspection
+        from . import introspection
         self["dual"] = introspection.DualView()
         self["__table_names__"] = introspection.RelationsView()
         self["__datadefs__"] = introspection.DataDefsView()
@@ -144,46 +144,46 @@ class Database0:
             #if log and not log.is_scratch:
                #if verbose: print "committing log"
                #self.log.commit(verbose)
-            if verbose: print "committing rels"
+            if verbose: print("committing rels")
             self.rels.commit(verbose)
-            if verbose: print "committing datadefs"
+            if verbose: print("committing datadefs")
             self.datadefs.commit(verbose)
-            if verbose: print "committing indices"
+            if verbose: print("committing indices")
             self.indices.commit(verbose)
             st = self.shadowing.touched
             if not st:
-                if verbose: print "setting touched", self.touched
+                if verbose: print("setting touched", self.touched)
                 self.shadowing.touched = self.touched
             elif verbose:
-                print "shadowed database is touched"
+                print("shadowed database is touched")
         elif verbose:
-            print "db0: commit on nonshadow instance"
+            print("db0: commit on nonshadow instance")
 
     def __setitem__(self, name, relation):
         """bind a name (uppercased) to tuples as a relation."""
-        if self.indices.has_key(name):
-            raise NameError, "cannot set index"
+        if name in self.indices:
+            raise NameError("cannot set index")
         self.rels[ name.upper() ] = relation
-        if self.verbose: print "db0 sets rel", name
+        if self.verbose: print("db0 sets rel", name)
 
     def add_index(self, name, index):
-        if self.rels.has_key(name):
-            raise NameError, `name`+": is relation"
+        if name in self.rels:
+            raise NameError(repr(name)+": is relation")
         self.indices[name] = index
-        if self.verbose: print "db0 sets index", name
+        if self.verbose: print("db0 sets index", name)
 
     def drop_index(self, name):
-        if self.verbose: print "db0 drops index", name
+        if self.verbose: print("db0 drops index", name)
         del self.indices[name]
 
     def __getitem__(self, name):
-        if self.verbose: print "db0 gets rel", name
+        if self.verbose: print("db0 gets rel", name)
         return self.rels[name.upper()]
 
     def get_for_update(self, name):
         """note: does not imply updates, just possibility of them"""
         verbose = self.verbose
-        if verbose: print "db0 gets rel for update", name
+        if verbose: print("db0 gets rel for update", name)
         shadowing = self.shadowing
         gotit = 0
         name = name.upper()
@@ -205,11 +205,11 @@ class Database0:
             test = rels[name]
             gotit = 1
         if self.readonly:
-            raise ValueError, "cannot update, db is read only"
+            raise ValueError("cannot update, db is read only")
         elif test.is_view:
-            raise ValueError, "VIEW %s cannot be updated" % name
+            raise ValueError("VIEW %s cannot be updated" % name)
         elif shadowing and not gotit:
-            if verbose: print "db0: making shadow for", name
+            if verbose: print("db0: making shadow for", name)
             if test.is_shadow: return test
             shadow = Relation0(())
             shadow = shadow.shadow(test, self.log, name, self)
@@ -219,17 +219,17 @@ class Database0:
             return test
 
     def __delitem__(self, name):
-        if self.verbose: print "db0 drops rel", name
+        if self.verbose: print("db0 drops rel", name)
         del self.rels[name.upper()]
 
     def relations(self):
-        return self.rels.keys()
+        return list(self.rels.keys())
 
     def has_relation(self, name):
-        return self.rels.has_key(name)
+        return name in self.rels
 
     def getdatadefs(self):
-        result = self.datadefs.values()
+        result = list(self.datadefs.values())
         # sort to make create tables first, eg
         result.sort()
         return result
@@ -237,29 +237,29 @@ class Database0:
     def add_datadef(self, name, defn, logit=1):
         """only log the datadef if logit is set, else ignore redefinitions"""
         dd = self.datadefs
-        if logit and dd.has_key(name):
-            raise KeyError, `name`+": already defined"
+        if logit and name in dd:
+            raise KeyError(repr(name)+": already defined")
         if logit:
             self.touched = 1
         dd[name] = defn
 
     def has_datadef(self, name):
-        return self.datadefs.has_key(name)
+        return name in self.datadefs
 
     def drop_datadef(self, name):
-        if self.verbose: print "db0 drops datadef",name
+        if self.verbose: print("db0 drops datadef",name)
         dd = self.datadefs
         #print dd.keys()
-        if not dd.has_key(name):
-            raise KeyError, `name`+": no such element"
+        if name not in dd:
+            raise KeyError(repr(name)+": no such element")
         del dd[name]
 
     def __repr__(self):
         l = []
-        l.append("INDICES: "+`self.indices.keys()`)
-        for (name, ddef) in self.datadefs.items():
+        l.append("INDICES: "+repr(list(self.indices.keys())))
+        for (name, ddef) in list(self.datadefs.items()):
             l.append("data definition %s::\n%s" % (name, ddef))
-        for (name, rel) in self.rels.items():
+        for (name, rel) in list(self.rels.items()):
             l.append(name + ":")
             l.append(rel.irepr())
         return '\n\n'.join(l)
@@ -280,17 +280,17 @@ class Database0:
         for (name,alias) in fromlist:
             name = name.upper()
             alias = alias.upper()
-            if relseen.has_key(alias):
-                raise NameError, `alias` + ": bound twice in from list"
+            if alias in relseen:
+                raise NameError(repr(alias) + ": bound twice in from list")
             relseen[alias]=alias
             try:
                 therel = rels[name]
             except KeyError:
-                raise NameError, `name` + " no such relation in DB"
+                raise NameError(repr(name) + " no such relation in DB")
             relbindings[alias] = therel
             for attname in therel.attributes():
-                if not ambiguous_atts.has_key(attname):
-                    if attbindings.has_key(attname):
+                if attname not in ambiguous_atts:
+                    if attname in attbindings:
                         oldrel = attbindings[attname]
                         oldbind = (oldrel, attname)
                         ambiguous["%s.%s"%oldbind] = oldbind
@@ -318,7 +318,7 @@ class File_Storage0:
 
     def __init__(self, dbname, directory):
         """directory must exist."""
-        if self.verbose: print "fs0 init:", dbname, directory
+        if self.verbose: print("fs0 init:", dbname, directory)
         self.dbname = dbname
         self.directory = directory
         self.relation_implementation = Relation0
@@ -330,29 +330,29 @@ class File_Storage0:
         logfile = self.logfilename()
         blogfile = self.backup_logfilename()
         verbose = self.verbose
-        if verbose: print "fs0 load, checking", logfile
+        if verbose: print("fs0 load, checking", logfile)
         try:
             testlog = open(logfile, "rb")
-            if verbose: print "fs0: opened", testlog
+            if verbose: print("fs0: opened", testlog)
             testlog.close()
             testlog = open(blogfile, "rb")
             testlog.close()
             testlog = None
         except:
             recovery_mode = self.recovery_mode = 0
-            if verbose: print "recovery not needed"
+            if verbose: print("recovery not needed")
         else:
             recovery_mode = self.recovery_mode = 1
-            if verbose: print "FS0 RECOVERY MODE LOAD!"
+            if verbose: print("FS0 RECOVERY MODE LOAD!")
         resultdb = Database0()
         resultdb.is_scratch = forscratch
         commands = self.get_initstatements()
         for command in commands:
-            if verbose: print "fs0 evals", command
+            if verbose: print("fs0 evals", command)
             command.relbind(resultdb)
             command.eval()
         for name in resultdb.relations():
-            if verbose: print "fs0 loads rel", name
+            if verbose: print("fs0 loads rel", name)
             rel = resultdb[name]
             if rel.is_view:
                 # don't need to load views
@@ -360,13 +360,13 @@ class File_Storage0:
             rel.set_empty()
             try:
                 data = self.get_relation(name)
-            except StorageError, detail:
-                raise StorageError, "load failure %s: %s" % (name, detail)
+            except StorageError as detail:
+                raise StorageError("load failure %s: %s" % (name, detail))
             attsin = tuple(data.attributes())
             attsout = tuple(rel.attributes())
             if attsin!=attsout:
-                raise StorageError, "rel %s: atts %s don't match %s" % (
-                   name, attsin, attsout)
+                raise StorageError("rel %s: atts %s don't match %s" % (
+                   name, attsin, attsout))
             rel.add_tuples( data.rows() )
             # in sync!
             rel.touched = 0
@@ -374,7 +374,7 @@ class File_Storage0:
         resultdb.touched = 0
         # do recovery, if needed
         if recovery_mode:
-            if verbose: print "fs0 recovering from logfile", logfile
+            if verbose: print("fs0 recovering from logfile", logfile)
             # restart the log file only if db is not scratch
             restart = not forscratch
             Log = DB_Logger(logfile, blogfile)
@@ -386,7 +386,7 @@ class File_Storage0:
                 Log.shutdown()
                 Log = None
                 del_file(logfile)
-                if verbose: print "FS0: dumping database"
+                if verbose: print("FS0: dumping database")
                 self.dump(resultdb)
                 Log = resultdb.log = DB_Logger(logfile, blogfile)
                 Log.startup()
@@ -428,8 +428,7 @@ class File_Storage0:
                 f = open(self.relfilename(name), "rb")
                 rel.load(f)
             else:
-                raise StorageError, \
-   "fs: could not unpack backup rel file or rel file in recovery mode: "+name
+                raise StorageError("fs: could not unpack backup rel file or rel file in recovery mode: "+name)
         return rel
 
     def dbfilename(self):
@@ -458,7 +457,7 @@ class File_Storage0:
     def get_initstatements(self):
         f = self.get_initstat_file("rb")
         if self.verbose:
-            print "init statement from file", f
+            print("init statement from file", f)
         try:
             data = checksum_undump(f)
         except StorageError:
@@ -466,10 +465,9 @@ class File_Storage0:
                 f = open(self.dbfilename, "rb")
                 data = checksum_undump(f)
             else:
-                raise StorageError, \
-   "could not unpack ddf backup or ddf file in recovery mode: "+self.dbname
+                raise StorageError("could not unpack ddf backup or ddf file in recovery mode: "+self.dbname)
         f.close()
-        stats = map(serialize.deserialize, data)
+        stats = list(map(serialize.deserialize, data))
         return stats
 
     def dump(self, db):
@@ -478,20 +476,20 @@ class File_Storage0:
         # first thing: back up the log
         backup_file(self.logfilename(), self.backup_logfilename())
         verbose = self.verbose
-        if verbose: print "fs0: checkpointing db"
+        if verbose: print("fs0: checkpointing db")
         if db.is_scratch or db.readonly:
             # don't need to do anything.
-            if verbose: print "fs0: scratch or readonly, returning"
+            if verbose: print("fs0: scratch or readonly, returning")
             return
         log = db.log
         if log:
             log.commit()
             if verbose:
-                print "DEBUG LOG TRACE"
+                print("DEBUG LOG TRACE")
                 log.dump()
             log.shutdown()
         if db.touched:
-            if verbose: print "fs0: db touched, backing up ddf file"
+            if verbose: print("fs0: db touched, backing up ddf file")
             backup_file(self.dbfilename(),
                         self.backup_dbfilename())
         relations = db.relations()
@@ -499,34 +497,34 @@ class File_Storage0:
             rel = db[r]
             #print r
             if rel.touched:
-                if verbose: print "fs0: backing up touched rel", r
+                if verbose: print("fs0: backing up touched rel", r)
                 backup_file(self.relfilename(r),
                             self.backup_relfilename(r))
         for r in relations:
-            if verbose: print "fs0: dumping relations now"
+            if verbose: print("fs0: dumping relations now")
             self.dumprelation(r, db[r])
-        if verbose: print "fs0: dumping datadefs now"
+        if verbose: print("fs0: dumping datadefs now")
         self.dumpdatadefs(db)
         # del of logfile signals successful commit.
-        if verbose: print "fs0: successful dump, deleting log file"
+        if verbose: print("fs0: successful dump, deleting log file")
         logfilename = self.logfilename()
         blogfilename = self.backup_logfilename()
         del_file(logfilename)
         del_file(blogfilename)
         if db.touched:
-            if verbose: print "fs0: deleting backup ddf file"
+            if verbose: print("fs0: deleting backup ddf file")
             del_file(self.backup_dbfilename())
             db.touched = 0
         for r in relations:
             rel = db[r]
             if rel.touched:
-                if verbose: print "fs0: deleting rel backup", r
+                if verbose: print("fs0: deleting rel backup", r)
                 del_file(self.backup_relfilename(r))
             rel.touched = 0
-        if verbose: print "fs0: restarting db log"
+        if verbose: print("fs0: restarting db log")
         log = db.log = DB_Logger(logfilename, blogfilename)
         log.startup()
-        if verbose: print "fs0: dump complete"
+        if verbose: print("fs0: dump complete")
         self.recovery_mode = 0
 
     def dumprelation(self, name, rel, force=0):
@@ -535,7 +533,7 @@ class File_Storage0:
         if (force or rel.touched) and not rel.is_view:
             fn = self.relfilename(name)
             if self.verbose:
-                print "dumping touched rel", name, "to", fn
+                print("dumping touched rel", name, "to", fn)
             f = open(fn, "wb")
             rel.dump(f)
 
@@ -546,7 +544,7 @@ class File_Storage0:
         fn = self.dbfilename()
         f = open(fn, "wb")
         datadefs = db.getdatadefs()
-        datadefsd = map(serialize.serialize, datadefs)
+        datadefsd = list(map(serialize.serialize, datadefs))
         #for (defn, ser) in map(None, datadefs, datadefsd):
             #print defn
             #print ser
@@ -616,9 +614,9 @@ class Relation0:
         rows = self.rows()
         newrows = rows[:]
         count = 0
-        for i in xrange(len(rows)):
+        for i in range(len(rows)):
             this = rows[i]
-            if this is not None and not isinstance(this, types.IntType):
+            if this is not None and not isinstance(this, int):
                 newrows[count] = rows[i].dump(attributes)
                 count = count + 1
         newrows = newrows[:count]
@@ -632,7 +630,7 @@ class Relation0:
         self.attribute_names = attributes
         rows = rows[:-1]
         undump = kjbuckets.kjUndump
-        for i in xrange(len(rows)):
+        for i in range(len(rows)):
             rows[i] = undump(attributes, rows[i])
         self.set_empty()
         self.add_tuples(rows)
@@ -658,8 +656,8 @@ class Relation0:
         # does not "touch" the relation
         name = index.name
         if verbosity:
-            print "rel.drop_index", index
-            print "...", self.indices, self.index_list
+            print("rel.drop_index", index)
+            print("...", self.indices, self.index_list)
         indices = self.indices
         for a in index.attributes():
             # contorted since one index be clone of the other.
@@ -676,7 +674,7 @@ class Relation0:
         kjSet = kjbuckets.kjSet
         atts = kjSet(attributes)
         #print "choosing index", atts
-        indices = (atts * self.indices).values()
+        indices = list((atts * self.indices).values())
         choice = None
         for index in indices:
             indexatts = index.attributes()
@@ -710,15 +708,15 @@ class Relation0:
             list_rep.append(rlist)
         # compute maxen for formatting
         maxen = [0] * len(atts)
-        for i in xrange(len(atts)):
+        for i in range(len(atts)):
             for l in list_rep:
                 maxen[i] = max(maxen[i], len(l[i]))
-        for i in xrange(len(atts)):
+        for i in range(len(atts)):
             mm = maxen[i]
             for l in list_rep:
                 old = l[i]
                 l[i] = old + (" " * (mm-len(old)))
-        for i in xrange(len(list_rep)):
+        for i in range(len(list_rep)):
             list_rep[i] = ' | '.join(list_rep[i])
         first = list_rep[0]
         list_rep.insert(1, "=" * len(first))
@@ -726,7 +724,7 @@ class Relation0:
 
     def irepr(self):
         List = [self] + list(self.index_list)
-        List = map(str, List)
+        List = list(map(str, List))
         return '\n'.join(List)
 
     def set_empty(self):
@@ -751,13 +749,13 @@ class Relation0:
 
     def add_tuples(self, tuples):
         if not tuples: return
-        tuples = filter(self.filter, tuples)
+        tuples = list(filter(self.filter, tuples))
         oldtuples = self.tuples
         first = len(oldtuples)
         oldtuples[first:] = list(tuples)
         last = len(oldtuples)
         for index in self.index_list:
-            index.add_tuples(tuples, xrange(first,last))
+            index.add_tuples(tuples, range(first,last))
         self.touched = 1
 
     def attributes(self):
@@ -768,15 +766,15 @@ class Relation0:
         # short cut
         if 0 not in tups:
             if andseqnums:
-                return (tups, xrange(len(tups)))
+                return (tups, range(len(tups)))
             else:
                 return tups
         result = list(self.tuples)
         if andseqnums: seqnums = result[:]
         count = 0
-        for i in xrange(len(result)):
+        for i in range(len(result)):
             t = result[i]
-            if not isinstance(t, types.IntType):
+            if not isinstance(t, int):
                 result[count] = t
                 if andseqnums: seqnums[count] = i
                 count = count+1
@@ -805,7 +803,7 @@ class Relation0:
         mytups = self.tuples
         for index in self.index_list:
             index.erase_tuples(seqnums, mytups)
-        for i in xrange(len(seqnums)):
+        for i in range(len(seqnums)):
             seqnum = seqnums[i]
             mytups[seqnum] = tups[i]
         for index in self.index_list:
@@ -841,7 +839,7 @@ class View(Relation0):
         self.cached_rows = None
 
     def UNDEFINED_OP_FOR_VIEW(*args, **kw):
-        raise ValueError, "operation explicitly undefined for view object"
+        raise ValueError("operation explicitly undefined for view object")
 
     shadow = dump = load = add_index = drop_index = set_empty = \
     add_tuples = erase_tuples = reset_tuples = UNDEFINED_OP_FOR_VIEW
@@ -886,7 +884,7 @@ class View(Relation0):
                 for i in range(len(cached_rows)):
                     cached_rows[i] = cached_rows[i].remap(translate)
         if andseqs:
-            return (cached_rows[:], range(len(cached_rows)))
+            return (cached_rows[:], list(range(len(cached_rows))))
         else:
             return cached_rows[:]
 
@@ -915,9 +913,9 @@ class Index:
         rdseqnums = result.dseqnums
         myindex = self.index
         mydseqnums = self.dseqnums
-        for k in myindex.keys():
+        for k in list(myindex.keys()):
             rindex[k] = myindex[k][:]
-        for k in mydseqnums.keys():
+        for k in list(mydseqnums.keys()):
             rdseqnums[k] = mydseqnums[k][:]
         return result
 
@@ -932,7 +930,7 @@ class Index:
         atts = self.atts
         dump = tuple.dump(atts)
         index = self.index
-        if index.has_key(dump):
+        if dump in index:
             return (index[dump], self.dseqnums[dump])
         else:
             return ((), ())
@@ -947,7 +945,7 @@ class Index:
         index = self.index
         dseqnums = self.dseqnums
         test = index.has_key
-        for i in xrange(len(tuples)):
+        for i in range(len(tuples)):
             tup = tuples[i]
             seqnum = seqnums[i]
             dump = tup.dump(atts)
@@ -958,8 +956,8 @@ class Index:
                 #print "unique", unique
                 #print "bucket", bucket
                 if unique and bucket:
-                    raise StorageError, "uniqueness violation: %s %s" %(
-                      dump, self)
+                    raise StorageError("uniqueness violation: %s %s" %(
+                      dump, self))
                 bucket.append(tup)
                 dseqnums[dump].append(seqnum)
             else:
@@ -984,7 +982,7 @@ class shadow_dict:
         self.shadowed = shadowing
         shadow = self.shadow = {}
         self.touched = {}
-        for key in shadowing.keys():
+        for key in list(shadowing.keys()):
             shadow[key] = shadowing[key]
         self.value_transform = value_transform
         # defeats inheritance! careful!
@@ -994,7 +992,7 @@ class shadow_dict:
         self.has_key = shadow.has_key
 
     def is_shadowed(self, name):
-        return self.touched.has_key(name)
+        return name in self.touched
 
     def __len__(self):
         return len(self.shadow)
@@ -1006,15 +1004,15 @@ class shadow_dict:
             shadowed = self.shadowed
             shadow = self.shadow
             value_transform = self.value_transform
-            keys = shadowed.keys()
+            keys = list(shadowed.keys())
             if verbose:
-                print "shadowdict oldkeys", keys
+                print("shadowdict oldkeys", keys)
             for k in keys:
                 del shadowed[k]
-            keys = shadow.keys()
+            keys = list(shadow.keys())
             if verbose:
-                print "shadowdict newkeys", keys
-            for k in shadow.keys():
+                print("shadowdict newkeys", keys)
+            for k in list(shadow.keys()):
                 value = shadow[k]
                 if value_transform is not None:
                     value = value_transform(value)
@@ -1025,7 +1023,7 @@ class shadow_dict:
         return self.shadow[key]
 
     def __setitem__(self, key, item):
-        if not isinstance(key, types.StringType):
+        if not isinstance(key, bytes):
             raise "nonstring", key
         if item is None:
             raise "none set", (key, item)
@@ -1049,12 +1047,12 @@ class Add_Tuples:
         attributes = tuple(rel.attributes())
         ltuples = len(tuples)
         data = list(tuples)
-        for i in xrange(ltuples):
+        for i in range(ltuples):
             tdata = tuples[i].dump(attributes)
             data[i] = tdata
         self.data = tuple(data)
     def __repr__(self):
-        datarep = map(repr, self.data)
+        datarep = list(map(repr, self.data))
         datarep = '\n  '.join(datarep)
         return "add tuples to %s\n  %s\n\n" % (self.to_rel, datarep)
     def marshaldata(self):
@@ -1072,7 +1070,7 @@ class Add_Tuples:
         attributes = tuple(rel.attributes())
         tuples = list(data)
         undump = kjbuckets.kjUndump
-        for i in xrange(len(tuples)):
+        for i in range(len(tuples)):
             tuples[i] = undump(attributes, tuples[i])
         rel.add_tuples(tuples)
 
@@ -1095,13 +1093,13 @@ class Reset_Tuples(Add_Tuples):
     def set_data(self, tups, seqnums, rel):
         attributes = tuple(rel.attributes())
         dtups = list(tups)
-        for i in xrange(len(dtups)):
+        for i in range(len(dtups)):
             dtups[i] = dtups[i].dump(attributes)
         self.data = (tuple(dtups), tuple(seqnums))
     def __repr__(self):
         (dtups, seqnums) = self.data
         pairs = map(None, seqnums, dtups)
-        datarep = map(repr, pairs)
+        datarep = list(map(repr, pairs))
         datarep = '  \n'.join(datarep)
         return "Reset tuples in %s\n  %s\n\n" % (self.to_rel, datarep)
     def eval(self, dyn=None):
@@ -1111,7 +1109,7 @@ class Reset_Tuples(Add_Tuples):
         rel = db[self.to_rel]
         attributes = tuple(rel.attributes())
         undump = kjbuckets.kjUndump
-        for i in xrange(len(dtups)):
+        for i in range(len(dtups)):
             tups[i] = undump(attributes, dtups[i])
         rel.reset_tuples(tups, seqnums)
 
@@ -1146,7 +1144,7 @@ class Transaction_Logger:
         if not self.is_scratch:
             self.deferred.append(operation)
             if verbose:
-                print "tid logs", tid, operation
+                print("tid logs", tid, operation)
 
     def flush(self):
         verbose = self.verbose
@@ -1159,25 +1157,25 @@ class Transaction_Logger:
                     self.db_log.log(operation, tid)
             self.dirty = 1
         elif verbose:
-            print "scratch log ignored", tid, operation
+            print("scratch log ignored", tid, operation)
 
     def commit(self, verbose=0):
         verbose = self.verbose or verbose
         tid = self.transactionid
         if verbose:
-            print "committing trans log", tid
+            print("committing trans log", tid)
         if self.is_scratch:
             if verbose:
-                print "scratch commit ignored", tid
+                print("scratch commit ignored", tid)
             return
         if not self.dirty:
             if verbose:
-                print "nondirty commit", tid
+                print("nondirty commit", tid)
             return
         self.flush()
         self.db_log.commit(verbose, tid)
         if verbose:
-            print "transaction is considered recoverable", tid
+            print("transaction is considered recoverable", tid)
 
 #    def __setattr__(self, attr, value):
 #        if attr == 'dirty':
@@ -1202,14 +1200,14 @@ class DB_Logger:
         self.file = None
         self.dirty = 0
         if self.verbose:
-            print id(self), "created DB_Logger on", self.filename
+            print(id(self), "created DB_Logger on", self.filename)
 
     def __repr__(self):
         return "DB_Logger(%s)" % self.filename
 
     def startup(self):
         if self.verbose:
-            print id(self), "preparing", self.filename
+            print(id(self), "preparing", self.filename)
         # open happens automagically
         #self.file = open(self.filename, "wb")
         self.clear()
@@ -1217,7 +1215,7 @@ class DB_Logger:
 
     def shutdown(self):
         if self.verbose:
-            print id(self), "shutting down log", self.filename
+            print(id(self), "shutting down log", self.filename)
         file = self.file
         if file:
             file.close()
@@ -1225,13 +1223,13 @@ class DB_Logger:
 
     def clear(self):
         if self.verbose:
-            print id(self), "clearing"
+            print(id(self), "clearing")
         self.shutdown()
         del_file(self.filename)
 
     def restart(self):
         if self.verbose:
-            print id(self), "restarting log file", self.filename
+            print(id(self), "restarting log file", self.filename)
         if self.file is not None:
             self.file.close()
         self.file = open(self.filename, "ab")
@@ -1241,7 +1239,7 @@ class DB_Logger:
 
     def clear_log_file(self):
         if self.verbose:
-            print id(self), "clearing logfile", self.filename
+            print(id(self), "clearing logfile", self.filename)
         if self.file is not None:
             self.file.close()
             self.file = None
@@ -1259,8 +1257,8 @@ class DB_Logger:
         serial = serialize.serialize(operation)
         data = (transactionid, serial)
         if verbose:
-            print id(self), "logging:", transactionid
-            print operation
+            print(id(self), "logging:", transactionid)
+            print(operation)
         checksum_dump(data, file)
         self.dirty = 1
 
@@ -1268,14 +1266,14 @@ class DB_Logger:
         """add commit, if appropriate, flush."""
         verbose = self.verbose or verbose
         if not self.dirty and transactionid is None:
-            if verbose: print "commit not needed", transactionid
+            if verbose: print("commit not needed", transactionid)
             return
         elif verbose:
-            print "attempting commit", transactionid
+            print("attempting commit", transactionid)
         if transactionid is not None:
             self.log( COMMIT, transactionid )
-            if verbose: print "committed", transactionid
-        if verbose: print "flushing", self.filename
+            if verbose: print("committed", transactionid)
+        if verbose: print("flushing", self.filename)
         self.file.flush()
         self.dirty = 0
 
@@ -1283,45 +1281,45 @@ class DB_Logger:
         verbose = self.verbose
         filename = self.filename
         if verbose:
-            print "attempting recovery from", self.filename
+            print("attempting recovery from", self.filename)
         file = self.file
         if file is not None:
-            if verbose: print "closing file"
+            if verbose: print("closing file")
             self.file.close()
             self.file = None
         if verbose:
-            print "opens should generate an error if no recovery needed"
+            print("opens should generate an error if no recovery needed")
         try:
             file = open(filename, "rb")
             file2 = open(self.backupname, "rb")
         except:
             if verbose:
-                print "no recovery needed:", filename
-                print sys.exc_type, sys.exc_value
-            sys.exc_traceback = None
+                print("no recovery needed:", filename)
+                print(sys.exc_info()[0], sys.exc_info()[1])
+            sys.exc_info()[2] = None
             return
         file2.close()
-        if verbose: print "log found, recovering from", filename
+        if verbose: print("log found, recovering from", filename)
         records = self.read_records(file)
-        if verbose: print "scan for commit records"
+        if verbose: print("scan for commit records")
         commits = {}
         for (i, (tid, op)) in records:
             if op==COMMIT:
-                if verbose: print "transaction", tid, "commit at", i
+                if verbose: print("transaction", tid, "commit at", i)
                 commits[tid] = i
             elif verbose:
-                print i, tid, "operation\n", op
-        if verbose: print commits, "commits total"
-        if verbose: print "applying commited operations, in order"
+                print(i, tid, "operation\n", op)
+        if verbose: print(commits, "commits total")
+        if verbose: print("applying commited operations, in order")
         committed = commits.has_key
         for (i, (tid, op)) in records:
             if tid is None or (committed(tid) and commits[tid]>i):
-                if isinstance(op, types.StringType):
+                if isinstance(op, bytes):
                     if verbose:
-                        print "skipping marker", tid, op
+                        print("skipping marker", tid, op)
                 if verbose:
-                    print "executing for", tid, i
-                    print op
+                    print("executing for", tid, i)
+                    print(op)
                 #### Note: silently eat errors unless verbose
                 ### (eg in case of table recreation...)
                 ### There should be a better way to do this!!!
@@ -1330,24 +1328,24 @@ class DB_Logger:
                     op.eval()
                 except:
                     if verbose:
-                        print "error", sys.exc_type, sys.exc_value
-                        print "binding or evaluating logged operation:"
-                        print op
+                        print("error", sys.exc_info()[0], sys.exc_info()[1])
+                        print("binding or evaluating logged operation:")
+                        print(op)
             elif verbose:
-                print "uncommitted operation", tid, i
+                print("uncommitted operation", tid, i)
                 op
         if verbose:
-            print "recovery successful: clearing log file"
+            print("recovery successful: clearing log file")
         self.clear()
         if restart:
             if verbose:
-                print "recreating empty log file"
+                print("recreating empty log file")
             self.startup()
 
     def read_records(self, file):
         """return log record as (index, (tid, op)) list"""
         verbose = self.verbose
-        if verbose: print "reading log records to error"
+        if verbose: print("reading log records to error")
         records = {}
         count = 0
         while 1:
@@ -1355,30 +1353,30 @@ class DB_Logger:
                 data = checksum_undump(file)
             except:
                 if verbose:
-                    print "record read terminated with error", len(records)
-                    print sys.exc_type, sys.exc_value
+                    print("record read terminated with error", len(records))
+                    print(sys.exc_info()[0], sys.exc_info()[1])
                 break
             (transactionid, serial) = data
             operation = serialize.deserialize(serial)
             records[count] = (transactionid, operation)
             if verbose:
-                print count, ": read for", transactionid
-                print operation
+                print(count, ": read for", transactionid)
+                print(operation)
             count = count+1
-        if verbose: print len(records), "records total"
-        records = records.items()
+        if verbose: print(len(records), "records total")
+        records = list(records.items())
         records.sort()
         return records
 
     def dump(self):
         verbose = self.verbose
         self.shutdown()
-        print "dumping log"
+        print("dumping log")
         self.verbose = 1
         try:
             file = open(self.filename, "rb")
         except:
-            print "DUMP FAILED, cannot open", self.filename
+            print("DUMP FAILED, cannot open", self.filename)
         else:
             self.read_records(file)
         self.verbose = verbose

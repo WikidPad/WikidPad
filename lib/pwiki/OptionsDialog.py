@@ -2,7 +2,7 @@ import re
 
 import wx, wx.xrc
 
-from wxHelper import *
+from .wxHelper import *
 
 from . import SystemInfo
 from . import Utilities
@@ -138,7 +138,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
             ctl.SetValue(config.getint("main", o))
         elif t == "guilang":   # GUI language choice
             # First fill choice with options
-            ctl.Append(_(u"Default"))
+            ctl.Append(_("Default"))
             for ls, lt in Localization.getLangList():
                 ctl.Append(lt)
 
@@ -268,10 +268,10 @@ class PluginOptionsPanel(DefaultOptionsPanel):
             config.set("main", o, guiToUni(ctl.GetValue()) )
         elif t == "tes":
             config.set( "main", o, guiToUni(escapeForIni(ctl.GetValue(),
-                    toEscape=u" ")) )
+                    toEscape=" ")) )
         elif t == "seli":   # Selection -> transfer index
             config.set(
-                    "main", o, unicode(ctl.GetSelection()) )
+                    "main", o, str(ctl.GetSelection()) )
         elif t == "selt":   # Selection -> transfer content string
             try:
                 config.set("main", o,
@@ -281,11 +281,11 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                         guiToUni(ctl.GetStringSelection()))
         elif t == "spin":   # Numeric SpinCtrl -> transfer number
             config.set(
-                    "main", o, unicode(ctl.GetValue()) )
+                    "main", o, str(ctl.GetValue()) )
         elif t == "guilang":    # GUI language choice
             idx = ctl.GetSelection()
             if idx < 1:
-                config.set("main", o, u"")
+                config.set("main", o, "")
             else:
                 config.set("main", o,
                         Localization.getLangList()[idx - 1][0])
@@ -380,7 +380,7 @@ class OptionsDialog(wx.Dialog):
             ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
                 "t"),
             ("collation_order", "chCollationOrder", "selt",
-                [u"Default", u"C"]),
+                ["Default", "C"]),
             ("collation_uppercaseFirst", "cbCollationUppercaseFirst", "b"),
             ("wikiWord_renameDefault_modifyWikiLinks",
                 "cbRenameDefaultModifyLinks", "b"),
@@ -392,7 +392,7 @@ class OptionsDialog(wx.Dialog):
 
             ("tempHandling_preferMemory", "cbTempHandlingPreferMemory", "b"),
             ("tempHandling_tempMode", "chTempHandlingTempMode", "selt",
-                [u"system", u"config", u"given"]),
+                ["system", "config", "given"]),
             ("tempHandling_tempDir", "tfTempHandlingTempDir", "tdir",
                 "btnSelectTempHandlingTempDir"),
 
@@ -484,8 +484,8 @@ class OptionsDialog(wx.Dialog):
             ("attributeDefault_global.wrap_type",
                     "chAttributeDefaultGlobalWrapType", "selt",
                     [
-                    u"word",
-                    u"char"
+                    "word",
+                    "char"
                     ]),
             ("editor_tabWidth", "scEditorTabWidth", "spin"),
 
@@ -506,12 +506,12 @@ class OptionsDialog(wx.Dialog):
             ("editor_filePaste_bracketedUrl", "cbEditorFilePasteBracketedUrl", "b"),
             ("userEvent_event/paste/editor/files", "chEditorFilePaste", "selt",
                     [
-                    u"action/none",
-                    u"action/editor/this/paste/files/insert/url/absolute",
-                    u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage",
-                    u"action/editor/this/paste/files/insert/url/movetostorage",
-                    u"action/editor/this/paste/files/insert/url/ask"
+                    "action/none",
+                    "action/editor/this/paste/files/insert/url/absolute",
+                    "action/editor/this/paste/files/insert/url/relative",
+                    "action/editor/this/paste/files/insert/url/tostorage",
+                    "action/editor/this/paste/files/insert/url/movetostorage",
+                    "action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0",
@@ -537,46 +537,46 @@ class OptionsDialog(wx.Dialog):
             ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
             ("userEvent_mouse/leftdoubleclick/preview/body", "chMouseDblClickPreviewBody", "selt",
                     [
-                    u"action/none",
-                    u"action/presenter/this/subcontrol/textedit",
-                    u"action/presenter/new/foreground/end/page/this/subcontrol/textedit"
+                    "action/none",
+                    "action/presenter/this/subcontrol/textedit",
+                    "action/presenter/new/foreground/end/page/this/subcontrol/textedit"
                     ]),
 
             ("userEvent_mouse/middleclick/pagetab", "chMouseMdlClickPageTab", "selt",
                     [
-                    u"action/none",
-                    u"action/presenter/this/close",
-                    u"action/presenter/this/clone"
+                    "action/none",
+                    "action/presenter/this/close",
+                    "action/presenter/this/clone"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files", "chMouseLeftDropEditor", "selt",
                     [
-                    u"action/none",
-                    u"action/editor/this/paste/files/insert/url/absolute",
-                    u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage",
-                    u"action/editor/this/paste/files/insert/url/movetostorage",
-                    u"action/editor/this/paste/files/insert/url/ask"
+                    "action/none",
+                    "action/editor/this/paste/files/insert/url/absolute",
+                    "action/editor/this/paste/files/insert/url/relative",
+                    "action/editor/this/paste/files/insert/url/tostorage",
+                    "action/editor/this/paste/files/insert/url/movetostorage",
+                    "action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files/modkeys/shift", "chMouseLeftDropEditorShift", "selt",
                     [
-                    u"action/none",
-                    u"action/editor/this/paste/files/insert/url/absolute",
-                    u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage",
-                    u"action/editor/this/paste/files/insert/url/movetostorage",
-                    u"action/editor/this/paste/files/insert/url/ask"
+                    "action/none",
+                    "action/editor/this/paste/files/insert/url/absolute",
+                    "action/editor/this/paste/files/insert/url/relative",
+                    "action/editor/this/paste/files/insert/url/tostorage",
+                    "action/editor/this/paste/files/insert/url/movetostorage",
+                    "action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files/modkeys/ctrl", "chMouseLeftDropEditorCtrl", "selt",
                     [
-                    u"action/none",
-                    u"action/editor/this/paste/files/insert/url/absolute",
-                    u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage",
-                    u"action/editor/this/paste/files/insert/url/movetostorage",
-                    u"action/editor/this/paste/files/insert/url/ask"
+                    "action/none",
+                    "action/editor/this/paste/files/insert/url/absolute",
+                    "action/editor/this/paste/files/insert/url/relative",
+                    "action/editor/this/paste/files/insert/url/tostorage",
+                    "action/editor/this/paste/files/insert/url/movetostorage",
+                    "action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("timeView_position", "chTimeViewPosition", "seli"),
@@ -673,9 +673,9 @@ class OptionsDialog(wx.Dialog):
             ("wiki_onOpen_rebuild", "chWikiOnOpenRebuild", "seli"),
             ("wiki_onOpen_tabsSubCtrl", "chWikiOnOpenTabsSubCtrl", "selt",
                     [
-                    u"",
-                    u"preview",
-                    u"textedit"
+                    "",
+                    "preview",
+                    "textedit"
                     ]),
 
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
@@ -731,34 +731,34 @@ class OptionsDialog(wx.Dialog):
 
 
     DEFAULT_PANEL_LIST = (
-            ("OptionsPageApplication", N_(u"Application")),
-            ("OptionsPageUserInterface", 2 * u" " + N_(u"User interface")),
-            ("OptionsPageSecurity", 2 * u" " + N_(u"Security")),
-            ("OptionsPageTree", 2 * u" " + N_(u"Tree")),
-            ("OptionsPageHtml", 2 * u" " + N_(u"HTML preview/export")),
-            ("OptionsPageHtmlHeader", 4 * u" " + N_(u"HTML header")),
-            ("OptionsPageEditor", 2 * u" " + N_(u"Editor")),
-            ("OptionsPageEditorPasteDrop", 4 * u" " + N_(u"Editor Paste/Drag'n'Drop")),
-            ("OptionsPageEditorColors", 4 * u" " + N_(u"Editor Colors")),
-            ("OptionsPageClipboardCatcher", 4 * u" " + N_(u"Clipboard Catcher")),
-            ("OptionsPageFileLauncher", 2 * u" " + N_(u"File Launcher")),
-            ("OptionsPageMouse", 2 * u" " + N_(u"Mouse")),
-            ("OptionsPageChronView", 2 * u" " + N_(u"Chron. view")),
-            ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),
-            ("OptionsPageNewWikiDefaults", 2 * u" " + N_(u"New wiki defaults")),
-            ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),
-            ("OptionsPageAdvTiming", 4 * u" " + N_(u"Timing")),
-            ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
-            ("??switch mark/current wiki/begin", u""),
-            ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
-            ("OptionsPageCwOnOpen", 2 * u" " + N_(u"On Open")),
-            ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
-            ("OptionsPageCwChronological", 2 * u" " + N_(u"Chronological")),
-            ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),
-            ("??insert mark/current wiki/wiki lang", u""),
-            ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),
-            ("??insert mark/current wiki", u""),
-            ("??switch mark/current wiki/end", u"")
+            ("OptionsPageApplication", N_("Application")),
+            ("OptionsPageUserInterface", 2 * " " + N_("User interface")),
+            ("OptionsPageSecurity", 2 * " " + N_("Security")),
+            ("OptionsPageTree", 2 * " " + N_("Tree")),
+            ("OptionsPageHtml", 2 * " " + N_("HTML preview/export")),
+            ("OptionsPageHtmlHeader", 4 * " " + N_("HTML header")),
+            ("OptionsPageEditor", 2 * " " + N_("Editor")),
+            ("OptionsPageEditorPasteDrop", 4 * " " + N_("Editor Paste/Drag'n'Drop")),
+            ("OptionsPageEditorColors", 4 * " " + N_("Editor Colors")),
+            ("OptionsPageClipboardCatcher", 4 * " " + N_("Clipboard Catcher")),
+            ("OptionsPageFileLauncher", 2 * " " + N_("File Launcher")),
+            ("OptionsPageMouse", 2 * " " + N_("Mouse")),
+            ("OptionsPageChronView", 2 * " " + N_("Chron. view")),
+            ("OptionsPageSearching", 2 * " " + N_("Searching")),
+            ("OptionsPageNewWikiDefaults", 2 * " " + N_("New wiki defaults")),
+            ("OptionsPageAdvanced", 2 * " " + N_("Advanced")),
+            ("OptionsPageAdvTiming", 4 * " " + N_("Timing")),
+            ("OptionsPageAutosave", 4 * " " + N_("Autosave")),
+            ("??switch mark/current wiki/begin", ""),
+            ("OptionsPageCurrentWiki", N_("Current Wiki")),
+            ("OptionsPageCwOnOpen", 2 * " " + N_("On Open")),
+            ("OptionsPageCwHeadings", 2 * " " + N_("Headings")),
+            ("OptionsPageCwChronological", 2 * " " + N_("Chronological")),
+            ("OptionsPageCwWikiLanguage", 2 * " " + N_("Wiki language")),
+            ("??insert mark/current wiki/wiki lang", ""),
+            ("OptionsPageCwAdvanced", 2 * " " + N_("Advanced")),
+            ("??insert mark/current wiki", ""),
+            ("??switch mark/current wiki/end", "")
     )
 
     def __init__(self, pWiki, ID, startPanelName=None, title="Options",
@@ -794,9 +794,9 @@ class OptionsDialog(wx.Dialog):
             # Remove wiki-bound setting pages
             try:
                 del self.combinedPanelList[self.combinedPanelList.index(
-                        ("??switch mark/current wiki/begin", u"")) :
+                        ("??switch mark/current wiki/begin", "")) :
                         self.combinedPanelList.index(
-                        ("??switch mark/current wiki/end", u""))]
+                        ("??switch mark/current wiki/end", ""))]
             except ValueError:
                 pass
 
@@ -805,7 +805,7 @@ class OptionsDialog(wx.Dialog):
         newPL = []
 
         for e in self.combinedPanelList:
-            if isinstance(e[0], basestring):
+            if isinstance(e[0], str):
                 if e[0] == "OptionsPageFileLauncher" and SystemInfo.isWindows():
                     # For Windows the OS-function is used, for other systems
                     # we need the path to an external script
@@ -834,7 +834,7 @@ class OptionsDialog(wx.Dialog):
         for pn, pt in self.combinedPanelList:
             indPt, textPt = splitIndent(pt)
             pt = indPt + _(textPt)
-            if isinstance(pn, basestring):
+            if isinstance(pn, str):
                 if pn != "":
                     panel = ResourceOptionsPanel(self.ctrls.panelPages, pn)
                 else:
@@ -865,17 +865,17 @@ class OptionsDialog(wx.Dialog):
         # HTML renderer (OS specific)
         self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData = [0]
         if WikiHtmlView.WikiHtmlViewIE is not None:
-            self.ctrls.chHtmlPreviewRenderer.Append(_(u"IE"))
+            self.ctrls.chHtmlPreviewRenderer.Append(_("IE"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(1)
-            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Mozilla"))
+            self.ctrls.chHtmlPreviewRenderer.Append(_("Mozilla"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(2)
 
         if WikiHtmlView.WikiHtmlViewWK is not None:
-            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webkit"))
+            self.ctrls.chHtmlPreviewRenderer.Append(_("Webkit"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(3)
 
         if WikiHtmlView.WikiHtmlView2 is not None:
-            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webview"))
+            self.ctrls.chHtmlPreviewRenderer.Append(_("Webview"))
             self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(4)
 
         self.ctrls.chHtmlPreviewRenderer.Enable(
@@ -949,7 +949,7 @@ class OptionsDialog(wx.Dialog):
                         self.pWiki.getConfig().getint("main", o))
             elif t == "guilang":   # GUI language choice
                 # First fill choice with options
-                self.ctrls[c].Append(_(u"Default"))
+                self.ctrls[c].Append(_("Default"))
                 for ls, lt in Localization.getLangList():
                     self.ctrls[c].Append(lt)
 
@@ -1035,7 +1035,7 @@ class OptionsDialog(wx.Dialog):
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,
                 lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,
-                _(u"Wave files (*.wav)|*.wav")))
+                _("Wave files (*.wav)|*.wav")))
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectExportDefaultDir,
                 lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir))
@@ -1046,7 +1046,7 @@ class OptionsDialog(wx.Dialog):
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,
                 lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
-                _(u"All files (*.*)|*")))
+                _("All files (*.*)|*")))
 
         wx.EVT_BUTTON(self, GUI_ID.btnPasteTypeOrderUp,
                 lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp())
@@ -1214,13 +1214,13 @@ class OptionsDialog(wx.Dialog):
                 config.set( "main", o, guiToUni(self.ctrls[c].GetValue()) )
             elif t == "tes":
                 config.set( "main", o, guiToUni(
-                        escapeForIni(self.ctrls[c].GetValue(), toEscape=u" ")) )
+                        escapeForIni(self.ctrls[c].GetValue(), toEscape=" ")) )
             elif t == "seli":   # Selection -> transfer index
                 sel = self.ctrls[c].GetSelection()
                 if hasattr(self.ctrls[c], "optionsDialog_clientData"):
                     # There is client data to take instead of real selection
                     sel = self.ctrls[c].optionsDialog_clientData[sel]
-                config.set("main", o, unicode(sel))
+                config.set("main", o, str(sel))
             elif t == "selt":   # Selection -> transfer content string
                 try:
                     config.set("main", o, oct[3][self.ctrls[c].GetSelection()])
@@ -1228,11 +1228,11 @@ class OptionsDialog(wx.Dialog):
                     config.set("main", o,
                             guiToUni(self.ctrls[c].GetStringSelection()))
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
-                config.set( "main", o, unicode(self.ctrls[c].GetValue()) )
+                config.set( "main", o, str(self.ctrls[c].GetValue()) )
             elif t == "guilang":    # GUI language choice
                 idx = self.ctrls[c].GetSelection()
                 if idx < 1:
-                    config.set("main", o, u"")
+                    config.set("main", o, "")
                 else:
                     config.set("main", o,
                             Localization.getLangList()[idx - 1][0])
@@ -1367,17 +1367,17 @@ class OptionsDialog(wx.Dialog):
 
 
     def selectDirectory(self, tfield):
-        seldir = wx.DirSelector(_(u"Select Directory"),
+        seldir = wx.DirSelector(_("Select Directory"),
                 tfield.GetValue(),
                 style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
 
         if seldir:
             tfield.SetValue(seldir)
 
-    def selectFile(self, tfield, wildcard=u""):
-        selfile = wx.FileSelector(_(u"Select File"),
-                tfield.GetValue(), wildcard = wildcard + u"|" + \
-                        _(u"All files (*.*)|*"),
+    def selectFile(self, tfield, wildcard=""):
+        selfile = wx.FileSelector(_("Select File"),
+                tfield.GetValue(), wildcard = wildcard + "|" + \
+                        _("All files (*.*)|*"),
                 flags=wx.OPEN, parent=self)
 
         if selfile:

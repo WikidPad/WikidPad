@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 ## import profilehooks
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
@@ -9,22 +9,22 @@ from .rtlibRepl import minidom
 
 import wx
 
-from MiscEvent import MiscEventSourceMixin, KeyFunctionSinkAR
+from .MiscEvent import MiscEventSourceMixin, KeyFunctionSinkAR
 
 import Consts
-from WikiExceptions import *
+from .WikiExceptions import *
 
-from StringOps import strToBool, fileContentToUnicode, lineendToInternal, \
+from .StringOps import strToBool, fileContentToUnicode, lineendToInternal, \
         loadEntireTxtFile, writeEntireFile
 
-import Utilities
-from Utilities import DUMBTHREADSTOP, FunctionThreadStop, TimeoutRLock, \
+from . import Utilities
+from .Utilities import DUMBTHREADSTOP, FunctionThreadStop, TimeoutRLock, \
         callInMainThread, callInMainThreadAsync
 
-from WikiPyparsing import buildSyntaxNode
-import ParseUtilities
+from .WikiPyparsing import buildSyntaxNode
+from . import ParseUtilities
 
-import Serialization
+from . import Serialization
 
 
 
@@ -341,7 +341,7 @@ class AliasWikiPage(DocPage):
         "wikipage/" + the wiki word for wiki pages or the functional tag
         for functional pages.
         """
-        return u"wikipage/" + self.aliasWikiWord
+        return "wikipage/" + self.aliasWikiWord
 
     def getNonAliasPage(self):
         """
@@ -552,7 +552,7 @@ class AbstractWikiPage(DataCarryingPage):
         "wikipage/" + the wiki word for wiki pages or the functional tag
         for functional pages.
         """
-        return u"wikipage/" + self.wikiPageName
+        return "wikipage/" + self.wikiPageName
 
     def getWikiDocument(self):
         return self.wikiDocument
@@ -715,7 +715,7 @@ class AbstractWikiPage(DataCarryingPage):
     def getAttribute(self, attrkey, default=None):
         with self.textOperationLock:
             attrs = self.getAttributes()
-            if attrs.has_key(attrkey):
+            if attrkey in attrs:
                 return attrs[attrkey][-1]
             else:
                 return default
@@ -729,12 +729,12 @@ class AbstractWikiPage(DataCarryingPage):
         """
         with self.textOperationLock:
             attrs = self.getAttributes()
-            if attrs.has_key(attrkey):
+            if attrkey in attrs:
                 return attrs[attrkey][-1]
 
             globalAttrs = self.getWikiData().getGlobalAttributes() 
-            attrkey = u"global." + attrkey
-            if globalAttrs.has_key(attrkey):
+            attrkey = "global." + attrkey
+            if attrkey in globalAttrs:
                 return globalAttrs[attrkey]
 
             option = "attributeDefault_" + attrkey
@@ -796,15 +796,15 @@ class AbstractWikiPage(DataCarryingPage):
         """
         with self.textOperationLock:
             withCamelCase = strToBool(self.getAttributeOrGlobal(
-                    u"camelCaseWordsEnabled"), True)
+                    "camelCaseWordsEnabled"), True)
     
 #             footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
 #                     "main", "footnotes_as_wikiwords", False)
     
-            autoLinkMode = self.getAttributeOrGlobal(u"auto_link", u"off").lower()
+            autoLinkMode = self.getAttributeOrGlobal("auto_link", "off").lower()
 
             paragraphMode = strToBool(self.getAttributeOrGlobal(
-                    u"paragraph_mode"), False)
+                    "paragraph_mode"), False)
                     
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     self.wikiDocument.getWikiDefaultWikiLanguage())
@@ -1294,7 +1294,7 @@ class WikiPage(AbstractWikiPage):
         if wikiWordHead is None:
             return content
 
-        wikiWordHead = wikiDoc.formatPageTitle(wikiWordHead) + u"\n"
+        wikiWordHead = wikiDoc.formatPageTitle(wikiWordHead) + "\n"
                 
         # Based on parts of WikiDocument.renameWikiWord()
         # Maybe refactor
@@ -1302,7 +1302,7 @@ class WikiPage(AbstractWikiPage):
         templateWordTitle = wikiDoc.getWikiPageTitle(templatePage.getWikiWord())
         
         if templateWordTitle is not None:
-            prevTitle = wikiDoc.formatPageTitle(templateWordTitle) + u"\n"
+            prevTitle = wikiDoc.formatPageTitle(templateWordTitle) + "\n"
         else:
             prevTitle = None
 
@@ -1322,8 +1322,8 @@ class WikiPage(AbstractWikiPage):
         
         # Check if template title should be changed
         tplHeading = parentPage.getAttributeOrGlobal(
-                u"template_head", u"auto")
-        if tplHeading in (u"auto", u"automatic"):
+                "template_head", "auto")
+        if tplHeading in ("auto", "automatic"):
             content = self._changeHeadingForTemplate(templatePage)
 
         return content
@@ -1343,7 +1343,7 @@ class WikiPage(AbstractWikiPage):
         content = None
         try:
             content = self.getWikiData().getContent(self.wikiPageName)
-        except WikiFileNotFoundException, e:
+        except WikiFileNotFoundException as e:
             # Create initial content of new page
 
             # Check for "template" attribute
@@ -1381,7 +1381,7 @@ class WikiPage(AbstractWikiPage):
                     # No individual template attributes, try to find global one
                     globalAttrs = self.getWikiData().getGlobalAttributes()     
                     
-                    templateWord = globalAttrs.get(u"global.template")
+                    templateWord = globalAttrs.get("global.template")
                     if templateWord is not None and \
                             self.wikiDocument.isDefinedWikiLinkTerm(templateWord):
                         templateSource = templateWord
@@ -1425,9 +1425,9 @@ class WikiPage(AbstractWikiPage):
                     title = self.suggNewPageTitle
 
                 if title is not None:
-                    content = self.wikiDocument.formatPageTitle(title) + u"\n\n"
+                    content = self.wikiDocument.formatPageTitle(title) + "\n\n"
                 else:
-                    content = u""
+                    content = ""
 
         return content
 
@@ -1495,7 +1495,7 @@ class WikiPage(AbstractWikiPage):
             if vo is None:
                 return
             
-            vo.renameTo(u"wikipage/" + newWord)
+            vo.renameTo("wikipage/" + newWord)
             self.versionOverview = UNDEFINED
 
 
@@ -1519,7 +1519,7 @@ class WikiPage(AbstractWikiPage):
     def _cloneDeepAttributes(self):
         with self.textOperationLock:
             result = {}
-            for key, value in self.getAttributes().iteritems():
+            for key, value in self.getAttributes().items():
                 result[key] = value[:]
                 
             return result
@@ -1731,7 +1731,7 @@ class WikiPage(AbstractWikiPage):
                 self.getWikiLanguageName())
 
         for w, k, v in self.getWikiDocument().getAttributeTriples(
-                self.wikiPageName, u"alias", None):
+                self.wikiPageName, "alias", None):
             threadstop.testValidThread()
             if not langHelper.checkForInvalidWikiLink(v,
                     self.getWikiDocument()):
@@ -1751,7 +1751,7 @@ class WikiPage(AbstractWikiPage):
                     continue
 
                 title = node.getString()
-                if title.endswith(u"\n"):
+                if title.endswith("\n"):
                     title = title[:-1]
                 
                 matchTerms.append((title, HEADALIAS_TYPE, self.wikiPageName,
@@ -2055,11 +2055,11 @@ class WikiPage(AbstractWikiPage):
         wikiDocument = self.wikiDocument
         
         # get the sort order for the children
-        childSortOrder = self.getAttributeOrGlobal(u'child_sort_order',
-                u"ascending")
+        childSortOrder = self.getAttributeOrGlobal('child_sort_order',
+                "ascending")
             
         # Apply sort order
-        if childSortOrder == u"natural":
+        if childSortOrder == "natural":
             # TODO: Do it right 
             # Retrieve relations as list of tuples (child, firstcharpos)
             relations = self.getChildRelationships(existingonly,
@@ -2069,7 +2069,7 @@ class WikiPage(AbstractWikiPage):
             relations.sort(_cmpNumbersItem1)
             # Remove firstcharpos
             relations = [r[0] for r in relations]
-        elif childSortOrder == u"mod_oldest":
+        elif childSortOrder == "mod_oldest":
             # Retrieve relations as list of tuples (child, modifTime)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
@@ -2077,7 +2077,7 @@ class WikiPage(AbstractWikiPage):
             relations.sort(_cmpNumbersItem1)
             # Remove firstcharpos
             relations = [r[0] for r in relations]
-        elif childSortOrder == u"mod_newest":
+        elif childSortOrder == "mod_newest":
             # Retrieve relations as list of tuples (child, modifTime)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
@@ -2090,7 +2090,7 @@ class WikiPage(AbstractWikiPage):
             relations = self.getChildRelationships(existingonly, 
                     selfreference=False, withFields=(),
                     excludeSet=excludeSet, includeSet=includeSet)
-            if childSortOrder.startswith(u"desc"):
+            if childSortOrder.startswith("desc"):
                 coll = wikiDocument.getCollator()
 
                 def cmpLowerDesc(a, b):
@@ -2099,7 +2099,7 @@ class WikiPage(AbstractWikiPage):
                             
                 # TODO Python 3.0 supports only key argument, no cmp. function
                 relations.sort(cmpLowerDesc) # sort alphabetically
-            elif childSortOrder.startswith(u"asc"):
+            elif childSortOrder.startswith("asc"):
                 coll = wikiDocument.getCollator()
 
                 def cmpLowerAsc(a, b):
@@ -2119,10 +2119,10 @@ class WikiPage(AbstractWikiPage):
             relationPage = wikiDocument.getWikiPageNoError(relation)
             attrs = relationPage.getAttributes()
             try:
-                if (attrs.has_key(u'tree_position')):
-                    positioned.append((int(attrs[u'tree_position'][-1]) - 1, relation))
-                elif (attrs.has_key(u'priority')):
-                    priorized.append((int(attrs[u'priority'][-1]), relation))
+                if ('tree_position' in attrs):
+                    positioned.append((int(attrs['tree_position'][-1]) - 1, relation))
+                elif ('priority' in attrs):
+                    priorized.append((int(attrs['priority'][-1]), relation))
                 else:
                     other.append(relation)
             except:
@@ -2138,7 +2138,7 @@ class WikiPage(AbstractWikiPage):
         ipo = 0
         iot = 0
 
-        for i in xrange(len(relations)):
+        for i in range(len(relations)):
             if ipo < len(positioned) and positioned[ipo][0] <= i:
                 result.append(positioned[ipo][1])
                 ipo += 1
@@ -2331,7 +2331,7 @@ class FunctionalPage(DataCarryingPage):
         
         if not isFuncTag(funcTag):
             raise BadFuncPageTagException(
-                    _(u"Func. tag %s does not exist") % funcTag)
+                    _("Func. tag %s does not exist") % funcTag)
 
         self.funcTag = funcTag
 
@@ -2347,7 +2347,7 @@ class FunctionalPage(DataCarryingPage):
         """
         Return human readable title of the page.
         """
-        return u"<" + getHrNameForFuncTag(self.funcTag) + u">"
+        return "<" + getHrNameForFuncTag(self.funcTag) + ">"
 
 
     def getFuncTag(self):
@@ -2373,13 +2373,13 @@ class FunctionalPage(DataCarryingPage):
             tbContent = loadEntireTxtFile(tbLoc)
             return fileContentToUnicode(lineendToInternal(tbContent))
         except:
-            return u""
+            return ""
 
 
     def _loadDbSpecificPage(self, funcTag):
         content = self.wikiDocument.getWikiData().retrieveDataBlockAsText(funcTag)
         if content is None:
-            return u""
+            return ""
         
         return content
 
@@ -2416,12 +2416,12 @@ class FunctionalPage(DataCarryingPage):
 
 
     def getContent(self):
-        if self.funcTag in (u"global/TextBlocks", u"global/PWL",
-                u"global/CCBlacklist", u"global/NCCBlacklist",
-                u"global/FavoriteWikis"):
+        if self.funcTag in ("global/TextBlocks", "global/PWL",
+                "global/CCBlacklist", "global/NCCBlacklist",
+                "global/FavoriteWikis"):
             return self._loadGlobalPage(self.funcTag[7:])
-        elif self.funcTag in (u"wiki/TextBlocks", u"wiki/PWL",
-                u"wiki/CCBlacklist", u"wiki/NCCBlacklist"):
+        elif self.funcTag in ("wiki/TextBlocks", "wiki/PWL",
+                "wiki/CCBlacklist", "wiki/NCCBlacklist"):
             return self._loadDbSpecificPage(self.funcTag)
 
 
@@ -2480,7 +2480,7 @@ class FunctionalPage(DataCarryingPage):
 
         wikiData = self.wikiDocument.getWikiData()
         
-        if text == u"":
+        if text == "":
             wikiData.deleteDataBlock(funcTag)
         else:
             wikiData.storeDataBlock(funcTag, text,
@@ -2505,12 +2505,12 @@ class FunctionalPage(DataCarryingPage):
         with self.textOperationLock:
             # text = self.getLiveText()
     
-            if self.funcTag in (u"global/TextBlocks", u"global/PWL",
-                    u"global/CCBlacklist", u"global/NCCBlacklist",
-                    u"global/FavoriteWikis"):
+            if self.funcTag in ("global/TextBlocks", "global/PWL",
+                    "global/CCBlacklist", "global/NCCBlacklist",
+                    "global/FavoriteWikis"):
                 self._saveGlobalPage(text, self.funcTag[7:])
-            elif self.funcTag in (u"wiki/TextBlocks", u"wiki/PWL",
-                    u"wiki/CCBlacklist", u"wiki/NCCBlacklist"):
+            elif self.funcTag in ("wiki/TextBlocks", "wiki/PWL",
+                    "wiki/CCBlacklist", "wiki/NCCBlacklist"):
                 self._saveDbSpecificPage(text, self.funcTag)
 
             self.saveDirtySince = None
@@ -2532,31 +2532,31 @@ class FunctionalPage(DataCarryingPage):
             self.updateDirtySince = None
     
             if fireEvent:
-                if self.funcTag.startswith(u"wiki/"):
+                if self.funcTag.startswith("wiki/"):
                     evtSource = self
                 else:
                     evtSource = wx.GetApp()
     
-                if self.funcTag in (u"global/TextBlocks", u"wiki/TextBlocks"):
+                if self.funcTag in ("global/TextBlocks", "wiki/TextBlocks"):
                     # The text blocks for the text blocks submenu was updated
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
                             "reread text blocks needed"))
-                elif self.funcTag in (u"global/PWL", u"wiki/PWL"):
+                elif self.funcTag in ("global/PWL", "wiki/PWL"):
                     # The personal word list (words to ignore by spell checker)
                     # was updated
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
                             "reread personal word list needed"))
-                elif self.funcTag in (u"global/CCBlacklist", u"wiki/CCBlacklist"):
+                elif self.funcTag in ("global/CCBlacklist", "wiki/CCBlacklist"):
                     # The blacklist of camelcase words not to mark as wiki links
                     # was updated
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
                             "reread cc blacklist needed"))
-                elif self.funcTag in (u"global/NCCBlacklist", u"wiki/NCCBlacklist"):
+                elif self.funcTag in ("global/NCCBlacklist", "wiki/NCCBlacklist"):
                     # The blacklist of non-camelcase words not to mark as wiki links
                     # was updated
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
                             "reread ncc blacklist needed"))
-                elif self.funcTag == u"global/FavoriteWikis":
+                elif self.funcTag == "global/FavoriteWikis":
                     # The list of favorite wikis was updated (there is no
                     # wiki-bound version of favorite wikis
                     evtSource.fireMiscEventKeys(("updated func page", "updated page",
@@ -2568,7 +2568,7 @@ class FunctionalPage(DataCarryingPage):
         "for any reason", regardless if error or intention.
         Global func. pages do not depend on the wiki state so they are writable.
         """
-        if self.funcTag.startswith(u"global/"):
+        if self.funcTag.startswith("global/"):
             # Global pages are not stored in the wiki and are always writable
             return False
         else:
@@ -2589,14 +2589,14 @@ class FunctionalPage(DataCarryingPage):
         it is only searched for a global attribute with this name.
         If this can't be found, default (normally None) is returned.
         """
-        attrkey = u"global." + attrkey
+        attrkey = "global." + attrkey
 
         if self.wikiDocument is not None:
             wikiData = self.wikiDocument.getWikiData()
             if wikiData is not None:
                 with self.textOperationLock:
                     globalAttrs = wikiData.getGlobalAttributes()
-                    if globalAttrs.has_key(attrkey):
+                    if attrkey in globalAttrs:
                         return globalAttrs[attrkey]
 
         option = "attributeDefault_" + attrkey
@@ -2641,15 +2641,15 @@ def _cmpNumbersItem1Rev(a, b):
 
 
 _FUNCTAG_TO_HR_NAME_MAP = {
-            u"global/TextBlocks": N_(u"Global text blocks"),
-            u"wiki/TextBlocks": N_(u"Wiki text blocks"),
-            u"global/PWL": N_(u"Global spell list"),
-            u"wiki/PWL": N_(u"Wiki spell list"),
-            u"global/CCBlacklist": N_(u"Global cc. blacklist"),
-            u"wiki/CCBlacklist": N_(u"Wiki cc. blacklist"),
-            u"global/NCCBlacklist": N_(u"Global ncc. blacklist"),
-            u"wiki/NCCBlacklist": N_(u"Wiki ncc. blacklist"),
-            u"global/FavoriteWikis": N_(u"Favorite wikis"),
+            "global/TextBlocks": N_("Global text blocks"),
+            "wiki/TextBlocks": N_("Wiki text blocks"),
+            "global/PWL": N_("Global spell list"),
+            "wiki/PWL": N_("Wiki spell list"),
+            "global/CCBlacklist": N_("Global cc. blacklist"),
+            "wiki/CCBlacklist": N_("Wiki cc. blacklist"),
+            "global/NCCBlacklist": N_("Global ncc. blacklist"),
+            "wiki/NCCBlacklist": N_("Wiki ncc. blacklist"),
+            "global/FavoriteWikis": N_("Favorite wikis"),
         }
 
 
@@ -2664,9 +2664,9 @@ def getFuncTags():
     """
     Return all available func tags
     """
-    return _FUNCTAG_TO_HR_NAME_MAP.keys()
+    return list(_FUNCTAG_TO_HR_NAME_MAP.keys())
 
 
 def isFuncTag(funcTag):
-    return _FUNCTAG_TO_HR_NAME_MAP.has_key(funcTag)
+    return funcTag in _FUNCTAG_TO_HR_NAME_MAP
 

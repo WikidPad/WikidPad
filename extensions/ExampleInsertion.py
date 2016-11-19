@@ -1,4 +1,4 @@
-import os, urllib
+import os, urllib.request, urllib.parse, urllib.error
 
 import wx
 
@@ -24,7 +24,7 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return ((u"testexample", ("wikidpad_language",), ExampleHandler),)
+    return (("testexample", ("wikidpad_language",), ExampleHandler),)
 
 
 class ExampleHandler:
@@ -76,7 +76,7 @@ class ExampleHandler:
         For HtmlExporter a unistring is returned with the HTML code
         to insert instead of the insertion.        
         """
-        result = u"Value: " + insToken.value
+        result = "Value: " + insToken.value
         for i, apx in enumerate(insToken.appendices):
             result += " %i. appendix: %s" % (i, apx)
 

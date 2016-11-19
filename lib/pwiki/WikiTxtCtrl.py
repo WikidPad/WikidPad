@@ -1,9 +1,9 @@
-from __future__ import with_statement
+
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import traceback, codecs
-from cStringIO import StringIO
+from io import StringIO
 import string, itertools, contextlib
 import re # import pwiki.srePersistent as re
 import threading
@@ -65,11 +65,12 @@ from . import SpellChecker
 import inspect
 
 
-from ViHelper import ViHintDialog, ViHelper
+from .ViHelper import ViHintDialog, ViHelper
 from collections import defaultdict
+from functools import reduce
 
 try:
-    import WindowsHacks
+    from . import WindowsHacks
 except:
     if isWindows():
         traceback.print_exc()
@@ -182,7 +183,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 #         self.setFoldingActive(self.foldingActive)
 
-        for i in xrange(32):
+        for i in range(32):
             self.StyleSetEOLFilled(i, True)
 
         # i plan on lexing myself
@@ -353,32 +354,32 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_LEFT,
-                lambda evt: self.OnActivateThis(evt, u"left"))
+                lambda evt: self.OnActivateThis(evt, "left"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT,
-                lambda evt: self.OnActivateNewTabThis(evt, u"left"))
+                lambda evt: self.OnActivateNewTabThis(evt, "left"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"left"))
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "left"))
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_RIGHT,
-                lambda evt: self.OnActivateThis(evt, u"right"))
+                lambda evt: self.OnActivateThis(evt, "right"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT,
-                lambda evt: self.OnActivateNewTabThis(evt, u"right"))
+                lambda evt: self.OnActivateNewTabThis(evt, "right"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"right"))
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "right"))
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_ABOVE,
-                lambda evt: self.OnActivateThis(evt, u"above"))
+                lambda evt: self.OnActivateThis(evt, "above"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE,
-                lambda evt: self.OnActivateNewTabThis(evt, u"above"))
+                lambda evt: self.OnActivateNewTabThis(evt, "above"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"above"))
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "above"))
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_BELOW,
-                lambda evt: self.OnActivateThis(evt, u"below"))
+                lambda evt: self.OnActivateThis(evt, "below"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW,
-                lambda evt: self.OnActivateNewTabThis(evt, u"below"))
+                lambda evt: self.OnActivateNewTabThis(evt, "below"))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"below"))
+                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "below"))
 
 
         wx.EVT_MENU(self, GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS,
@@ -447,11 +448,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     _PASTETYPE_TO_HR_NAME_MAP = {
-            u"files": N_(u"File(s)"),
-            u"bitmap": N_(u"Bitmap image"),
-            u"wmf": N_(u"Windows meta file"),
-            u"plainText": N_(u"Plain text"),
-            u"rawHtml": N_(u"HTML"),
+            "files": N_("File(s)"),
+            "bitmap": N_("Bitmap image"),
+            "wmf": N_("Windows meta file"),
+            "plainText": N_("Plain text"),
+            "rawHtml": N_("HTML"),
             }
 
 
@@ -487,7 +488,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 "processDirectly": True}
 
         mc.getUserActionCoord().reactOnUserEvent(
-                u"event/paste/editor/files", paramDict)
+                "event/paste/editor/files", paramDict)
 
         return True
 
@@ -538,7 +539,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
         if url is None:
-            url = u"file:" + StringOps.urlFromPathname(destPath)
+            url = "file:" + StringOps.urlFromPathname(destPath)
 
         self.ReplaceSelection(url)
         return True
@@ -576,7 +577,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
         if url is None:
-            url = u"file:" + StringOps.urlFromPathname(destPath)
+            url = "file:" + StringOps.urlFromPathname(destPath)
 
         self.ReplaceSelection(url)
         return True
@@ -627,11 +628,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     def Paste(self):
         PASTETYPE_TO_FUNCTION = {
-            u"files": self.pasteFiles,
-            u"bitmap": self.pasteBitmap,
-            u"wmf": self.pasteWmf,
-            u"plainText": self.pastePlainText,
-            u"rawHtml": self.pasteRawHtml,
+            "files": self.pasteFiles,
+            "bitmap": self.pasteBitmap,
+            "wmf": self.pasteWmf,
+            "plainText": self.pastePlainText,
+            "rawHtml": self.pasteRawHtml,
             }
 
         config = self.presenter.getConfig()
@@ -750,8 +751,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def isCharWrap(self):
         docPage = self.getLoadedDocPage()
         if docPage is not None:
-            return docPage.getAttributeOrGlobal(u"wrap_type", u"word").lower()\
-                    .startswith(u"char")
+            return docPage.getAttributeOrGlobal("wrap_type", "word").lower()\
+                    .startswith("char")
         else:
             return False
 
@@ -927,7 +928,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.SetIndent(tabWidth)
         self.SetTabWidth(tabWidth)
 
-        self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
+        self.AutoCompSetFillUps(":=")  # TODO Add '.'?
 #         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)
 #         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)
         self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4)
@@ -1029,7 +1030,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # Load content
             try:
                 content = self.getLoadedDocPage().getLiveText()
-            except WikiFileNotFoundException, e:
+            except WikiFileNotFoundException as e:
                 assert 0   # TODO
 
             # now fill the text into the editor
@@ -1075,7 +1076,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # Load content
             try:
                 content = docPage.getLiveText()
-            except WikiFileNotFoundException, e:
+            except WikiFileNotFoundException as e:
                 assert 0   # TODO
 
             # now fill the text into the editor
@@ -1111,10 +1112,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # this updates depending on attribute "wrap_type" (word or character)
         self.setWrapMode(self.getWrapMode())
 
-        self.pageType = docPage.getAttributes().get(u"pagetype",
-                [u"normal"])[-1]
+        self.pageType = docPage.getAttributes().get("pagetype",
+                ["normal"])[-1]
 
-        if self.pageType == u"normal":
+        if self.pageType == "normal":
             if not docPage.isDefined():
                 # This is a new, not yet defined page, so go to the end of page
                 self.GotoPos(self.GetLength())
@@ -1159,7 +1160,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def handleSpecialPageType(self):
 #         self.allowRectExtend(self.pageType != u"texttree")
 
-        if self.pageType == u"form":
+        if self.pageType == "form":
             self.GotoPos(0)
             self._goToNextFormField()
             return True
@@ -1177,7 +1178,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         anchor = miscevt.get("anchor")
         if not anchor:
-            if self.pageType == u"normal":
+            if self.pageType == "normal":
                 # Is there a position given in the eventprops?
                 firstcharpos = miscevt.get("firstcharpos", -1)
                 if firstcharpos != -1:
@@ -1203,7 +1204,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             wx.GetApp().freeWikiLanguageHelper(self.wikiLanguageHelper)
             self.wikiLanguageHelper = docPage.createWikiLanguageHelper()
 
-        if self.pageType == u"normal":
+        if self.pageType == "normal":
             # Scroll page according to the anchor
             try:
                 anchorNodes = self.getPageAst().iterDeepByName("anchorDef")
@@ -1265,7 +1266,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         color = self._getColorFromOption("editor_bg_color", (255, 255, 255))
 
-        for i in xrange(32):
+        for i in range(32):
             self.StyleSetBackground(i, color)
         self.StyleSetBackground(wx.stc.STC_STYLE_DEFAULT, color)
 
@@ -1390,8 +1391,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # this updates depending on attribute "wrap_type" (word or character)
         self.setWrapMode(self.getWrapMode())
 
-        self.pageType = self.getLoadedDocPage().getAttributes().get(u"pagetype",
-                [u"normal"])[-1]
+        self.pageType = self.getLoadedDocPage().getAttributes().get("pagetype",
+                ["normal"])[-1]
 
 
     def handleInvalidFileSignature(self, docPage):
@@ -1498,13 +1499,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         config = self.presenter.getConfig()
 
-        templateRePat = config.get(u"main", u"template_pageNamesRE",
-                u"^template/")
+        templateRePat = config.get("main", "template_pageNamesRE",
+                "^template/")
 
         try:
             templateRe = re.compile(templateRePat, re.DOTALL | re.UNICODE)
         except re.error:
-            templateRe = re.compile(u"^template/", re.DOTALL | re.UNICODE)
+            templateRe = re.compile("^template/", re.DOTALL | re.UNICODE)
 
         wikiDocument = self.presenter.getWikiDocument()
         templateNames = [n for n in wikiDocument.getAllDefinedWikiPageNames()
@@ -1539,8 +1540,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         docPage.setMetaDataFromTemplate(templatePage)
 
         self.SetText(content, emptyUndo=False)
-        self.pageType = docPage.getAttributes().get(u"pagetype",
-                [u"normal"])[-1]
+        self.pageType = docPage.getAttributes().get("pagetype",
+                ["normal"])[-1]
         self.handleSpecialPageType()
         # TODO Handle form mode
         self.presenter.informEditorTextChanged(self)
@@ -1555,9 +1556,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             return
 
         if not docPage.isDefined() and not docPage.getDirty()[0]:
-            title = _(u"Select Template")
+            title = _("Select Template")
         else:
-            title = _(u"Select Template (deletes current content!)")
+            title = _("Select Template (deletes current content!)")
 
         templateName = AdditionalDialogs.SelectWikiWordDialog.runModal(
                 self.presenter.getMainControl(), self, -1,
@@ -1573,8 +1574,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         docPage.setMetaDataFromTemplate(templatePage)
 
         self.SetText(content, emptyUndo=False)
-        self.pageType = docPage.getAttributes().get(u"pagetype",
-                [u"normal"])[-1]
+        self.pageType = docPage.getAttributes().get("pagetype",
+                ["normal"])[-1]
         self.handleSpecialPageType()
         self.presenter.informEditorTextChanged(self)
 
@@ -1616,15 +1617,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     contextInfo.inWikiWord = True
                 elif node.name == "urlLink":
                     addActivateItem = True
-                    if node.url.startswith(u"file:") or \
-                            node.url.startswith(u"rel://"):
+                    if node.url.startswith("file:") or \
+                            node.url.startswith("rel://"):
                         addFileUrlItem = True
                         contextInfo.inFileUrl = True
-                    elif node.url.startswith(u"wiki:") or \
-                            node.url.startswith(u"wikirel://"):
+                    elif node.url.startswith("wiki:") or \
+                            node.url.startswith("wikirel://"):
                         addWikiUrlItem = True
                         contextInfo.inWikiUrl = True
-                elif node.name == "insertion" and node.key == u"page":
+                elif node.name == "insertion" and node.key == "page":
                     addActivateItem = True
                     contextInfo.inPageInsertion = True
                 elif node.name == "anchorDef":
@@ -1693,7 +1694,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU)
 
                     menu.AppendSeparator()
-                    menu.AppendMenu(wx.NewId(), _(u'Use Template'),
+                    menu.AppendMenu(wx.NewId(), _('Use Template'),
                             templateSubmenu)
                 else:
                     appendToMenuByMenuDesc(menu,
@@ -1854,7 +1855,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     # TODO: Faster? How?
                     stylebytes = "".join([chr(ord(a) | ord(b))
-                            for a, b in itertools.izip(stylebytes, spellStyleBytes)])
+                            for a, b in zip(stylebytes, spellStyleBytes)])
 
                     self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
                 else:
@@ -2062,7 +2063,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     if fndMode == (True, False):  # Fold, non recursive
                         # No point in folding single line items
-                        if node.getString().count(u"\n") > 1:
+                        if node.getString().count("\n") > 1:
                             levelStack.append(("node", 0))
                             foldHeader = True
 
@@ -2086,7 +2087,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                         recursive = True
 
                 if not recursive:
-                    lfc = node.getString().count(u"\n")
+                    lfc = node.getString().count("\n")
 
                     if len(levelStack) > prevLevel:
                         foldHeader = True
@@ -2124,7 +2125,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def applyFolding(self, foldingseq):
         if foldingseq and self.getFoldingActive() and \
                 len(foldingseq) == self.GetLineCount():
-            for ln in xrange(len(foldingseq)):
+            for ln in range(len(foldingseq)):
                 self.SetFoldLevel(ln, foldingseq[ln])
             self.repairFoldingVisibility()
 
@@ -2133,7 +2134,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         Unfold all folded lines
         """
-        for i in xrange(self.GetLineCount()):
+        for i in range(self.GetLineCount()):
             self.SetFoldExpanded(i, True)
 
         self.ShowLines(0, self.GetLineCount()-1)
@@ -2146,7 +2147,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if not self.getFoldingActive():
             self.setFoldingActive(True, forceSync=True)
 
-        for ln in xrange(self.GetLineCount()):
+        for ln in range(self.GetLineCount()):
             if self.GetFoldLevel(ln) & wx.stc.STC_FOLDLEVELHEADERFLAG and \
                     self.GetFoldExpanded(ln):
                 self.ToggleFold(ln)
@@ -2169,7 +2170,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             return None
 
         result = [0] * self.GetLineCount()
-        for ln in xrange(self.GetLineCount()):
+        for ln in range(self.GetLineCount()):
             levComb = self.GetFoldLevel(ln)
             levOut = levComb & 4095
             if levComb & wx.stc.STC_FOLDLEVELHEADERFLAG:
@@ -2227,7 +2228,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 #         print "0", prevLevel, bool(prevIsHeader), bool(prevIsExpanded), bool(prevVisible)
 
-        for ln in xrange(1, lc):
+        for ln in range(1, lc):
             combLevel = self.GetFoldLevel(ln)
             level = combLevel & 4095
             isHeader = combLevel & wx.stc.STC_FOLDLEVELHEADERFLAG
@@ -2330,7 +2331,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def getPageAst(self):
         docPage = self.getLoadedDocPage()
         if docPage is None:
-            raise NoPageAstException(u"Internal error: No docPage => no page AST")
+            raise NoPageAstException("Internal error: No docPage => no page AST")
 
         return docPage.getLivePageAst()
 
@@ -2417,7 +2418,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 return True
 
             elif node.name == "insertion":
-                if node.key == u"page":
+                if node.key == "page":
 
                     # open the wiki page
                     if tabMode & 2:
@@ -2623,17 +2624,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if node.name == "urlLink":
                     link = node.url
 
-                    if link.startswith(u"rel://") or link.startswith(u"wikirel://"):
+                    if link.startswith("rel://") or link.startswith("wikirel://"):
                         link = self.presenter.getWikiDocument()\
                                 .makeRelUrlAbsolute(link)
 
-                    if link.startswith(u"file:") or link.startswith(u"wiki:"):
+                    if link.startswith("file:") or link.startswith("wiki:"):
                         # TODO: fix
                         try:
                             path = dirname(StringOps.pathnameFromUrl(link))
                             if not exists(StringOps.longPathEnc(path)):
                                 self.presenter.displayErrorMessage(
-                                        _(u"Folder does not exist"))
+                                        _("Folder does not exist"))
                                 return
 
                             OsAbstract.startFile(self.presenter.getMainControl(),
@@ -2663,7 +2664,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     if not isfile(link):
                         self.presenter.displayErrorMessage(
-                                _(u"File does not exist"))
+                                _("File does not exist"))
                         return
 
                     filename = basename(link)
@@ -2675,7 +2676,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                     if choice == wx.YES:
                         OsAbstract.deleteFile(link)
-                        self.replaceTextAreaByCharPos(u"", node.pos,
+                        self.replaceTextAreaByCharPos("", node.pos,
                                 node.pos + node.strLength)
                     return
 
@@ -2702,7 +2703,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     break
 
         if not isfile(link):
-            self.presenter.displayErrorMessage(_(u"File does not exist"))
+            self.presenter.displayErrorMessage(_("File does not exist"))
             return
 
         path = dirname(link)
@@ -2711,8 +2712,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         newName = filename
         while True:
             dlg = WikiTxtDialogs.RenameFileDialog(self,
-                    _(u"Enter new name for file: {0}").format(filename),
-                    _(u"Rename File"), newName)
+                    _("Enter new name for file: {0}").format(filename),
+                    _("Rename File"), newName)
 
             if dlg.ShowModal() != wx.ID_OK:
                 # User cancelled
@@ -2727,7 +2728,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if exists(newfile):
                 if not isfile(newfile):
                     self.presenter.displayErrorMessage(
-                            _(u"Target is not a file"))
+                            _("Target is not a file"))
                     continue
 
                 choice = wx.MessageBox(
@@ -2744,13 +2745,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             OsAbstract.moveFile(link, newfile)
 
-            if node.url.startswith(u"rel://"):
+            if node.url.startswith("rel://"):
                 # Relative URL/path
                 newUrl = self.presenter.getWikiDocument().makeAbsPathRelUrl(
                         newfile)
             else:
                 # Absolute URL/path
-                newUrl = u"file:" + StringOps.urlFromPathname(newfile)
+                newUrl = "file:" + StringOps.urlFromPathname(newfile)
 
             self.replaceTextAreaByCharPos(newUrl, node.coreNode.pos,
                     node.coreNode.pos + node.coreNode.strLength)
@@ -2769,7 +2770,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 else:
                     addSafe = ''
 
-                if link.startswith(u"rel://") or link.startswith(u"wikirel://"):
+                if link.startswith("rel://") or link.startswith("wikirel://"):
                     link = self.presenter.getWikiDocument()\
                             .makeRelUrlAbsolute(link, addSafe=addSafe)
 
@@ -2799,8 +2800,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wikiWord = self.presenter.getWikiWord()
         if wikiWord is None:
             wx.MessageBox(
-                    _(u"This can only be done for the page of a wiki word"),
-                    _(u'Not a wiki page'), wx.OK, self)
+                    _("This can only be done for the page of a wiki word"),
+                    _('Not a wiki page'), wx.OK, self)
             return
 
         path = self.presenter.getWikiDocument().getWikiConfigPath()
@@ -2821,10 +2822,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if securityLevel == 0:
             # No scripts allowed
             # Print warning message
-            wx.MessageBox(_(u"Set in menu \"Wiki\", item \"Options...\", "
+            wx.MessageBox(_("Set in menu \"Wiki\", item \"Options...\", "
                     "options page \"Security\", \n"
                     "item \"Script security\" an appropriate value "
-                    "to execute a script."), _(u"Script execution disabled"),
+                    "to execute a script."), _("Script execution disabled"),
                     wx.OK, self.presenter.getMainControl())
             return
 
@@ -2846,10 +2847,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             # process script imports
             if securityLevel > 1: # Local import_scripts attributes allowed
-                if self.getLoadedDocPage().getAttributes().has_key(
-                        u"import_scripts"):
+                if "import_scripts" in self.getLoadedDocPage().getAttributes():
                     scriptNames = self.getLoadedDocPage().getAttributes()[
-                            u"import_scripts"]
+                            "import_scripts"]
                     for sn in scriptNames:
                         try:
                             importPage = self.presenter.getWikiDocument().\
@@ -2862,7 +2862,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             if securityLevel > 2: # global.import_scripts attribute also allowed
                 globScriptName = self.presenter.getWikiDocument().getWikiData().\
-                        getGlobalAttributes().get(u"global.import_scripts")
+                        getGlobalAttributes().get("global.import_scripts")
 
                 if globScriptName is not None:
                     try:
@@ -2882,36 +2882,36 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             for node in scriptNodes:
                 script = node.findFlatByName("code").getString()
-                script = re.sub(u"^[\r\n\s]+", u"", script)
-                script = re.sub(u"[\r\n\s]+$", u"", script)
+                script = re.sub("^[\r\n\s]+", "", script)
+                script = re.sub("[\r\n\s]+$", "", script)
                 try:
                     if index == -1:
-                        script = re.sub(u"^\d:?\s?", u"", script)
-                        exec(script) in self.evalScope
+                        script = re.sub("^\d:?\s?", "", script)
+                        exec((script), self.evalScope)
                     elif index > -1 and script.startswith(str(index)):
-                        script = re.sub(u"^\d:?\s?", u"", script)
-                        exec(script) in self.evalScope
+                        script = re.sub("^\d:?\s?", "", script)
+                        exec((script), self.evalScope)
                         break # Execute only the first found script
 
-                except Exception, e:
+                except Exception as e:
                     s = StringIO()
                     traceback.print_exc(file=s)
-                    self.AddText(_(u"\nException: %s") % s.getvalue())
+                    self.AddText(_("\nException: %s") % s.getvalue())
         else:
             # Evaluate selected text
             text = self.GetSelectedText()
             try:
-                compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
+                compThunk = compile(re.sub("[\n\r]", "", text), "<string>",
                         "eval", CO_FUTURE_DIVISION)
                 result = eval(compThunk, self.evalScope)
-            except Exception, e:
+            except Exception as e:
                 s = StringIO()
                 traceback.print_exc(file=s)
                 result = s.getvalue()
 
             pos = self.GetCurrentPos()
             self.GotoPos(endPos)
-            self.AddText(u" = %s" % unicode(result))
+            self.AddText(" = %s" % str(result))
             self.GotoPos(pos)
 
 
@@ -2933,14 +2933,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     def _agaReplace(self, match):
         try:
-            result = unicode(eval(match.group(2), self.evalScope))
-        except Exception, e:
+            result = str(eval(match.group(2), self.evalScope))
+        except Exception as e:
             s = StringIO()
             traceback.print_exc(file=s)
-            result = unicode(s.getvalue())
+            result = str(s.getvalue())
 
-        if len(result) == 0 or result[-1] != u"\n":
-            result += u"\n"
+        if len(result) == 0 or result[-1] != "\n":
+            result += "\n"
 
         return match.group(1) + match.group(2) + result + match.group(4)
 
@@ -2984,7 +2984,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     # TODO  Reflect possible changes in WikidPadParser.py
-    AGACONTENTTABLERE = re.compile(ur"^(\+{1,4})([^\n\+][^\n]*)", re.DOTALL | re.LOCALE | re.MULTILINE)
+    AGACONTENTTABLERE = re.compile(r"^(\+{1,4})([^\n\+][^\n]*)", re.DOTALL | re.LOCALE | re.MULTILINE)
 
     def agaContentTable(self, omitfirst = False):
         """
@@ -2992,11 +2992,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
         The text is assumed to be in self.agatext variable(see updateAutoGenAreas()).
         If omitfirst is true, the first entry (normally the title) is not shown.
         """
-        allmatches = map(lambda m: m.group(0), self.AGACONTENTTABLERE.finditer(self.agatext))
+        allmatches = [m.group(0) for m in self.AGACONTENTTABLERE.finditer(self.agatext)]
         if omitfirst and len(allmatches) > 0:
             allmatches = allmatches[1:]
 
-        return u"\n".join(allmatches)
+        return "\n".join(allmatches)
 
 
         # TODO Multi column support
@@ -3004,7 +3004,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         Format a list l of strings in a nice way for an aga content
         """
-        return u"\n".join(l)
+        return "\n".join(l)
 
 
     def agaParentsTable(self):
@@ -3029,7 +3029,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if endLine < startLine:
             startLine, endLine = endLine, startLine
 
-        for checkLine in xrange(endLine, startLine - 1, -1):
+        for checkLine in range(endLine, startLine - 1, -1):
             if not self.GetLineVisible(checkLine):
                 line = checkLine
 
@@ -3089,7 +3089,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # Store current show/hide state of lines to show
         shownList = []
-        for i in xrange(startLine, endLine + 1):
+        for i in range(startLine, endLine + 1):
             shownList.append(self.GetLineVisible(i))
 
         self.incSearchPreviousHiddenLines = shownList
@@ -3157,7 +3157,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     (art[1], self.bytelenSct(text[charPos - art[2]:charPos]))
                     for art in acResultTuples) )
 
-            self.UserListShow(1, u"\x01".join(
+            self.UserListShow(1, "\x01".join(
                     [art[1] for art in acResultTuples]))
 
 
@@ -3273,10 +3273,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if firstLine > 0:
                 content = self.GetSelectedText()
                 if len(content) > 0:
-                    if content[-1] == u"\n":
+                    if content[-1] == "\n":
                         selByteEnd -= 1
                     else:
-                        content += u"\n"
+                        content += "\n"
                     # Now content ends with \n and selection end points
                     # before this newline
                     self.ReplaceSelection("")
@@ -3313,15 +3313,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     target = self.PositionFromLine(lastLine + 1)
                     target -= selByteEnd - selByteStart
 
-                    if content[-1] == u"\n":  # Necessary for downward move?
+                    if content[-1] == "\n":  # Necessary for downward move?
                         selByteEnd -= 1
                     else:
-                        content += u"\n"
+                        content += "\n"
 
                     self.ReplaceSelection("")
                     if self.GetTextRange(target - 1,
-                            target) != u"\n":
-                        self.InsertText(target, u"\n")
+                            target) != "\n":
+                        self.InsertText(target, "\n")
                         target += 1
 
                     self.InsertText(target, content)
@@ -3420,10 +3420,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
-                if self.pageType == u"form":
+                if self.pageType == "form":
                     if not self._goToNextFormField():
                         self.presenter.getMainControl().showStatusMessage(
-                                _(u"No more fields in this 'form' page"), -1)
+                                _("No more fields in this 'form' page"), -1)
                     return
                 evt.Skip()
             elif key == wx.WXK_RETURN and not self.AutoCompActive():
@@ -3478,7 +3478,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             return
 
         if isUnicode():
-            unichar = unichr(evt.GetUnicodeKey())
+            unichar = chr(evt.GetUnicodeKey())
         else:
             unichar = StringOps.mbcsDec(chr(key))[0]
 
@@ -3536,7 +3536,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             try:
                 wikiPage.checkFileSignatureAndMarkDirty()
-            except (IOError, OSError, DbAccessError), e:
+            except (IOError, OSError, DbAccessError) as e:
                 self.presenter.getMainControl().lostAccess(e)
 
             evt.Skip()
@@ -3555,7 +3555,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             try:
                 wikiPage.checkFileSignatureAndMarkDirty()
-            except (IOError, OSError, DbAccessError), e:
+            except (IOError, OSError, DbAccessError) as e:
                 self.presenter.getMainControl().lostAccess(e)
 
 
@@ -3634,7 +3634,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 currentLine = self.GetCurrentLine()+1
                 currentPos = self.GetCurrentPos()
                 currentCol = self.GetColumn(currentPos)
-                self.presenter.SetStatusText(_(u"Line: %d Col: %d Pos: %d") %
+                self.presenter.SetStatusText(_("Line: %d Col: %d Pos: %d") %
                         (currentLine, currentCol, currentPos), 2)
 
 
@@ -3684,11 +3684,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     # Set status to wikipage
                     callInMainThread(
                             self.presenter.getMainControl().showStatusMessage,
-                            _(u"Link to page: %s") % wikiWord, 0, "linkToPage")
+                            _("Link to page: %s") % wikiWord, 0, "linkToPage")
 
                     if wikiWord is not None:
                         propList = wikiDocument.getAttributeTriples(
-                                wikiWord, u"short_hint", None)
+                                wikiWord, "short_hint", None)
                         if len(propList) > 0:
                             callTip = propList[-1][2]
                             break
@@ -3705,9 +3705,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                         appendixDict = dict(astNode.appendixNode.entries)
 
                     # Decide if this is an image link
-                    if appendixDict.has_key("l"):
+                    if "l" in appendixDict:
                         urlAsImage = False
-                    elif appendixDict.has_key("i"):
+                    elif "i" in appendixDict:
                         urlAsImage = True
 #                     elif self.asHtmlPreview and \
 #                             self.mainControl.getConfig().getboolean(
@@ -3740,10 +3740,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                 threadstop.testValidThread()
                                 callInMainThread(SetImageTooltip, path)
                             else:
-                                callTip = _(u"Not a valid image")
+                                callTip = _("Not a valid image")
                             break
                         else:
-                            callTip = _(u"Image does not exist")
+                            callTip = _("Image does not exist")
 
             if callTip:
                 threadstop.testValidThread()
@@ -3847,7 +3847,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         dlgParams.readOptionsFromConfig(
                 editor.presenter.getMainControl().getConfig())
 
-        if unifActionName == u"action/editor/this/paste/files/insert/url/ask":
+        if unifActionName == "action/editor/this/paste/files/insert/url/ask":
             # Ask user
             if not paramDict.get("processDirectly", False):
                 # If files are drag&dropped, at least on Windows the dragging
@@ -3869,16 +3869,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         moveToStorage = False
 
-        if unifActionName == u"action/editor/this/paste/files/insert/url/absolute":
+        if unifActionName == "action/editor/this/paste/files/insert/url/absolute":
             modeToStorage = False
             modeRelativeUrl = False
-        elif unifActionName == u"action/editor/this/paste/files/insert/url/relative":
+        elif unifActionName == "action/editor/this/paste/files/insert/url/relative":
             modeToStorage = False
             modeRelativeUrl = True
-        elif unifActionName == u"action/editor/this/paste/files/insert/url/tostorage":
+        elif unifActionName == "action/editor/this/paste/files/insert/url/tostorage":
             modeToStorage = True
             modeRelativeUrl = False
-        elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
+        elif unifActionName == "action/editor/this/paste/files/insert/url/movetostorage":
             modeToStorage = True
             modeRelativeUrl = False
             moveToStorage = True
@@ -3889,26 +3889,26 @@ class WikiTxtCtrl(SearchableScintillaControl):
             prefix = StringOps.strftimeUB(dlgParams.rawPrefix)
         except:
             traceback.print_exc()
-            prefix = u""   # TODO Error message?
+            prefix = ""   # TODO Error message?
 
         try:
             middle = StringOps.strftimeUB(dlgParams.rawMiddle)
         except:
             traceback.print_exc()
-            middle = u" "   # TODO Error message?
+            middle = " "   # TODO Error message?
 
         try:
             suffix = StringOps.strftimeUB(dlgParams.rawSuffix)
         except:
             traceback.print_exc()
-            suffix = u""   # TODO Error message?
+            suffix = ""   # TODO Error message?
 
 
         urls = []
 
         for fn in filenames:
             protocol = None
-            if fn.endswith(u".wiki"):
+            if fn.endswith(".wiki"):
                 protocol = "wiki"
 
             toStorage = False
@@ -3918,10 +3918,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 try:
                     fn = fs.createDestPath(fn, move=moveToStorage)
                     toStorage = True
-                except Exception, e:
+                except Exception as e:
                     traceback.print_exc()
                     editor.presenter.getMainControl().displayErrorMessage(
-                            _(u"Couldn't copy file"), e)
+                            _("Couldn't copy file"), e)
                     return
 
             urls.append(editor.wikiLanguageHelper.createUrlLinkFromPath(
@@ -3938,11 +3938,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         m_id = self.GetEOLMode()
         if m_id == wx.stc.STC_EOL_CR:
-            return u'\r'
+            return '\r'
         elif m_id == wx.stc.STC_EOL_CRLF:
-            return u'\r\n'
+            return '\r\n'
         else:
-            return u'\n'
+            return '\n'
 
     def GetScrollAndCaretPosition(self):
         return self.GetCurrentPos(), self.GetScrollPos(wx.HORIZONTAL), self.GetScrollPos(wx.VERTICAL)
@@ -4056,14 +4056,14 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
                 "x": x, "y": y, "main control": mc}
 
         if controlPressed:
-            suffix = u"/modkeys/ctrl"
+            suffix = "/modkeys/ctrl"
         elif shiftPressed:
-            suffix = u"/modkeys/shift"
+            suffix = "/modkeys/shift"
         else:
-            suffix = u""
+            suffix = ""
 
         mc.getUserActionCoord().reactOnUserEvent(
-                u"mouse/leftdrop/editor/files" + suffix, paramDict)
+                "mouse/leftdrop/editor/files" + suffix, paramDict)
 
 
 
@@ -4095,11 +4095,11 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 # Register paste actions
 _ACTIONS = tuple( UserActionCoord.SimpleAction("", unifName,
         WikiTxtCtrl.userActionPasteFiles) for unifName in (
-            u"action/editor/this/paste/files/insert/url/absolute",
-            u"action/editor/this/paste/files/insert/url/relative",
-            u"action/editor/this/paste/files/insert/url/tostorage",
-            u"action/editor/this/paste/files/insert/url/movetostorage",
-            u"action/editor/this/paste/files/insert/url/ask") )
+            "action/editor/this/paste/files/insert/url/absolute",
+            "action/editor/this/paste/files/insert/url/relative",
+            "action/editor/this/paste/files/insert/url/tostorage",
+            "action/editor/this/paste/files/insert/url/movetostorage",
+            "action/editor/this/paste/files/insert/url/ask") )
 
 
 UserActionCoord.registerActions(_ACTIONS)
@@ -4107,7 +4107,7 @@ UserActionCoord.registerActions(_ACTIONS)
 
 
 _CONTEXT_MENU_INTEXT_SPELLING = \
-u"""
+"""
 -
 Ignore;CMD_ADD_THIS_SPELLING_SESSION
 Add Globally;CMD_ADD_THIS_SPELLING_GLOBAL
@@ -4116,7 +4116,7 @@ Add Locally;CMD_ADD_THIS_SPELLING_LOCAL
 
 
 _CONTEXT_MENU_INTEXT_BASE = \
-u"""
+"""
 -
 Undo;CMD_UNDO
 Redo;CMD_REDO
@@ -4131,7 +4131,7 @@ Select All;CMD_SELECT_ALL
 
 
 _CONTEXT_MENU_INTEXT_ACTIVATE = \
-u"""
+"""
 -
 Follow Link;CMD_ACTIVATE_THIS
 Follow Link New Tab;CMD_ACTIVATE_NEW_TAB_THIS
@@ -4140,25 +4140,25 @@ Follow Link New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 """
 
 _CONTEXT_MENU_INTEXT_ACTIVATE_DIRECTION = {
-    u"left" : u"""
+    "left" : """
 -
 Follow Link in pane|Left;CMD_ACTIVATE_THIS_LEFT
 Follow Link in pane|Left New Tab;CMD_ACTIVATE_NEW_TAB_THIS_LEFT
 Follow Link in pane|Left New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT
 """,
-    u"right" : u"""
+    "right" : """
 -
 Follow Link in pane|Right;CMD_ACTIVATE_THIS_RIGHT
 Follow Link in pane|Right New Tab;CMD_ACTIVATE_NEW_TAB_THIS_RIGHT
 Follow Link in pane|Right New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT
 """,
-    u"above" : u"""
+    "above" : """
 -
 Follow Link in pane|Above;CMD_ACTIVATE_THIS_ABOVE
 Follow Link in pane|Above New Tab;CMD_ACTIVATE_NEW_TAB_THIS_ABOVE
 Follow Link in pane|Above New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE
 """,
-    u"below" : u"""
+    "below" : """
 -
 Follow Link in pane|Below;CMD_ACTIVATE_THIS_BELOW
 Follow Link in pane|Below New Tab;CMD_ACTIVATE_NEW_TAB_THIS_BELOW
@@ -4167,14 +4167,14 @@ Follow Link in pane|Below New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_
     }
 
 _CONTEXT_MENU_INTEXT_WIKI_URL = \
-u"""
+"""
 -
 Convert Absolute/Relative File URL;CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS
 Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER_THIS
 """
 
 _CONTEXT_MENU_INTEXT_FILE_URL = \
-u"""
+"""
 -
 Convert Absolute/Relative File URL;CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS
 Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER_THIS
@@ -4184,26 +4184,26 @@ Delete file;CMD_DELETE_FILE
 
 
 _CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD = \
-u"""
+"""
 -
 Copy Anchor URL to Clipboard;CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR
 """
 
 _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU = \
-u"""
+"""
 -
 Other...;CMD_SELECT_TEMPLATE
 """
 
 _CONTEXT_MENU_SELECT_TEMPLATE = \
-u"""
+"""
 -
 Use Template...;CMD_SELECT_TEMPLATE
 """
 
 
 _CONTEXT_MENU_INTEXT_BOTTOM = \
-u"""
+"""
 -
 Close Tab;CMD_CLOSE_CURRENT_TAB
 """
@@ -4211,7 +4211,7 @@ Close Tab;CMD_CLOSE_CURRENT_TAB
 
 
 FOLD_MENU = \
-u"""
+"""
 +Show folding;CMD_CHECKBOX_SHOW_FOLDING;Show folding marks and allow folding;*ShowFolding
 &Toggle current folding;CMD_TOGGLE_CURRENT_FOLDING;Toggle folding of the current line;*ToggleCurrentFolding
 &Unfold All;CMD_UNFOLD_ALL_IN_CURRENT;Unfold everything in current editor;*UnfoldAll
@@ -4221,43 +4221,43 @@ u"""
 
 # Entries to support i18n of context menus
 if False:
-    N_(u"Ignore")
-    N_(u"Add Globally")
-    N_(u"Add Locally")
+    N_("Ignore")
+    N_("Add Globally")
+    N_("Add Locally")
 
-    N_(u"Undo")
-    N_(u"Redo")
-    N_(u"Cut")
-    N_(u"Copy")
-    N_(u"Paste")
-    N_(u"Delete")
-    N_(u"Select All")
+    N_("Undo")
+    N_("Redo")
+    N_("Cut")
+    N_("Copy")
+    N_("Paste")
+    N_("Delete")
+    N_("Select All")
 
-    N_(u"Follow Link")
-    N_(u"Follow Link New Tab")
-    N_(u"Follow Link New Tab Backgrd.")
-    N_(u"Follow Link New Window")
+    N_("Follow Link")
+    N_("Follow Link New Tab")
+    N_("Follow Link New Tab Backgrd.")
+    N_("Follow Link New Window")
 
-    N_(u"Convert Absolute/Relative File URL")
-    N_(u"Open Containing Folder")
-    N_(u"Rename file")
-    N_(u"Delete file")
+    N_("Convert Absolute/Relative File URL")
+    N_("Open Containing Folder")
+    N_("Rename file")
+    N_("Delete file")
 
-    N_(u"Copy anchor URL to clipboard")
+    N_("Copy anchor URL to clipboard")
 
-    N_(u"Other...")
-    N_(u"Use Template...")
+    N_("Other...")
+    N_("Use Template...")
 
-    N_(u"Close Tab")
+    N_("Close Tab")
 
-    N_(u"Show folding")
-    N_(u"Show folding marks and allow folding")
-    N_(u"&Toggle current folding")
-    N_(u"Toggle folding of the current line")
-    N_(u"&Unfold All")
-    N_(u"Unfold everything in current editor")
-    N_(u"&Fold All")
-    N_(u"Fold everything in current editor")
+    N_("Show folding")
+    N_("Show folding marks and allow folding")
+    N_("&Toggle current folding")
+    N_("Toggle folding of the current line")
+    N_("&Unfold All")
+    N_("Unfold everything in current editor")
+    N_("&Fold All")
+    N_("Fold everything in current editor")
 
 
 # I will move this to wxHelper later (MB)
@@ -4405,48 +4405,48 @@ class ViHandler(ViHelper):
 
                     # The commands below are not present in vim but may
                     # be useful for quickly editing parser syntax
-                    u"\xc2" : (True, self.SelectInPoundSigns),
-                    u"$" : (True, self.SelectInDollarSigns),
-                    u"^" : (True, self.SelectInHats),
-                    u"%" : (True, self.SelectInPercentSigns),
-                    u"&" : (True, self.SelectInAmpersands),
-                    u"*" : (True, self.SelectInStars),
-                    u"-" : (True, self.SelectInHyphens),
-                    u"_" : (True, self.SelectInUnderscores),
-                    u"=" : (True, self.SelectInEqualSigns),
-                    u"+" : (True, self.SelectInPlusSigns),
-                    u"!" : (True, self.SelectInExclamationMarks),
-                    u"?" : (True, self.SelectInQuestionMarks),
-                    u"@" : (True, self.SelectInAtSigns),
-                    u"#" : (True, self.SelectInHashs),
-                    u"~" : (True, self.SelectInApproxSigns),
-                    u"|" : (True, self.SelectInVerticalBars),
-                    u";" : (True, self.SelectInSemicolons),
-                    u":" : (True, self.SelectInColons),
-                    u"\\" : (True, self.SelectInBackslashes),
-                    u"/" : (True, self.SelectInForwardslashes),
+                    "\xc2" : (True, self.SelectInPoundSigns),
+                    "$" : (True, self.SelectInDollarSigns),
+                    "^" : (True, self.SelectInHats),
+                    "%" : (True, self.SelectInPercentSigns),
+                    "&" : (True, self.SelectInAmpersands),
+                    "*" : (True, self.SelectInStars),
+                    "-" : (True, self.SelectInHyphens),
+                    "_" : (True, self.SelectInUnderscores),
+                    "=" : (True, self.SelectInEqualSigns),
+                    "+" : (True, self.SelectInPlusSigns),
+                    "!" : (True, self.SelectInExclamationMarks),
+                    "?" : (True, self.SelectInQuestionMarks),
+                    "@" : (True, self.SelectInAtSigns),
+                    "#" : (True, self.SelectInHashs),
+                    "~" : (True, self.SelectInApproxSigns),
+                    "|" : (True, self.SelectInVerticalBars),
+                    ";" : (True, self.SelectInSemicolons),
+                    ":" : (True, self.SelectInColons),
+                    "\\" : (True, self.SelectInBackslashes),
+                    "/" : (True, self.SelectInForwardslashes),
                 }
 
         self.LoadKeybindings()
-        self.LoadPlugins(u"editor")
+        self.LoadPlugins("editor")
         self.GenerateKeyBindings()
 
         self.SINGLE_LINE_WHITESPACE = [9, 11, 12, 32]
 
-        self.WORD_BREAK =   u'!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
+        self.WORD_BREAK =   '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
         self.WORD_BREAK_INCLUDING_WHITESPACE = \
-                            u'!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
+                            '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~ \n\r'
         self.SENTENCE_ENDINGS = (".", "!", "?", "\n\n")
         self.SENTENCE_ENDINGS_SUFFIXS = '\'")]'
 
         self.BRACES = {
-                        u"(" : u")",
-                        u"[" : u"]",
-                        u"{" : u"}",
-                        u"<" : u">",
-                        u"<<" : u">>",
+                        "(" : ")",
+                        "[" : "]",
+                        "{" : "}",
+                        "<" : ">",
+                        "<<" : ">>",
                       }
-        self.REVERSE_BRACES = dict((v,k) for k, v in self.BRACES.iteritems())
+        self.REVERSE_BRACES = dict((v,k) for k, v in self.BRACES.items())
 
 
         self.SURROUND_REPLACEMENTS = {
@@ -4563,7 +4563,7 @@ class ViHandler(ViHelper):
     (k["T"], "*")  : (2, (self.FindUpToNextCharBackwards, None), 5, 0), # T*
     (k["r"], "*") : (0, (self.ReplaceChar, None), 0, 0), # r*
 
-    (k["d"], k["c"], u"m", u"*") : (0, (self.DeleteCharMotion,
+    (k["d"], k["c"], "m", "*") : (0, (self.DeleteCharMotion,
                                             False), 1, 0), # dcmotion*
 
     (k["i"],) : (0, (self.Insert, None), 2, 0), # i
@@ -4843,7 +4843,7 @@ class ViHandler(ViHelper):
     (k["g"], k["s"]) : (0, (self.SelectionToSubscript, None), 1, 0), # gs
     (k["g"], k["S"]) : (0, (self.SelectionToSuperscript, None), 1, 0), # gS
 
-    (k["\\"], k["d"], k["c"], u"*") : (0, (self.DeleteCharFromSelection,
+    (k["\\"], k["d"], k["c"], "*") : (0, (self.DeleteCharFromSelection,
                                                     None), 1), # \dc*
 
     # Use Ctrl-r in visual mode to start a replace
@@ -4893,7 +4893,7 @@ class ViHandler(ViHelper):
 
             # If current line only contains whitespace remove it
             current_line = self.ctrl.GetCurLine()[0]
-            if len(current_line) > 1 and current_line.strip() == u"":
+            if len(current_line) > 1 and current_line.strip() == "":
                 self.ctrl.LineDelete()
                 self.ctrl.AddText(self.ctrl.GetEOLChar())
                 self.ctrl.CharLeft()
@@ -4978,7 +4978,7 @@ class ViHandler(ViHelper):
 
         if self._undo_state == 0:
             self.ctrl.BeginUndoAction()
-            print "START UNDO"
+            print("START UNDO")
             self._undo_positions = \
                         self._undo_positions[:self._undo_pos + 1]
 
@@ -4989,7 +4989,7 @@ class ViHandler(ViHelper):
                     self._undo_start_position = self.ctrl.GetCurrentPos()
 
         self._undo_state += 1
-        print "BEGIN", self._undo_state, inspect.getframeinfo(inspect.currentframe().f_back)[2]
+        print("BEGIN", self._undo_state, inspect.getframeinfo(inspect.currentframe().f_back)[2])
 
     def EndUndo(self, force=False):
         if self._undo_state == 1:
@@ -5003,10 +5003,10 @@ class ViHandler(ViHelper):
             else:
                 self._undo_positions.append(self.ctrl.GetCurrentPos())
             self._undo_pos += 1
-            print "END UNDO"
+            print("END UNDO")
         self._undo_state -= 1
 
-        print self._undo_state, inspect.getframeinfo(inspect.currentframe().f_back)[2]
+        print(self._undo_state, inspect.getframeinfo(inspect.currentframe().f_back)[2])
 
     def EndBeginUndo(self):
         # TODO: shares code with EndUndo and BeginUndo
@@ -5239,7 +5239,7 @@ class ViHandler(ViHelper):
                     self.ctrl.InsertText(self.ctrl.GetCurrentPos(), "\t")
                     self.ctrl.CharRight()
                 else:
-                    self.ctrl.InsertText(self.ctrl.GetCurrentPos(), unichr(i))
+                    self.ctrl.InsertText(self.ctrl.GetCurrentPos(), chr(i))
                     self.ctrl.CharRight()
 
     def _RepeatCmdHelper(self):
@@ -5317,7 +5317,7 @@ class ViHandler(ViHelper):
         wikiword = wikiword[:1].upper() + wikiword[1:]
 
         self.ctrl.presenter.getMainControl().activatePageByUnifiedName(
-            u"wikipage/" + wikiword, tabMode=tab_mode)
+            "wikipage/" + wikiword, tabMode=tab_mode)
 
 
     def Autocomplete(self, forwards):
@@ -5343,7 +5343,7 @@ class ViHandler(ViHelper):
                 # NOTE: list order is not correct
                 if pos - 1 > 0 and self.GetUnichrAt(pos-1) in \
                                     self.WORD_BREAK_INCLUDING_WHITESPACE:
-                    word = u"[a-zA-Z0-9_]"
+                    word = "[a-zA-Z0-9_]"
                     completion_length = 0
                 # Select in word fails if it is a single char, may be better
                 # to fix it there
@@ -5398,10 +5398,10 @@ class ViHandler(ViHelper):
                 # Bad ordering at the moment
                 text = self.ctrl.GetTextRange(
                             self.ctrl.GetCurrentPos(), self.ctrl.GetLength())
-                completion_list = re.findall(ur"\b{0}.*?\b".format(re.escape(word)),
+                completion_list = re.findall(r"\b{0}.*?\b".format(re.escape(word)),
                         text, re.U)
                 text = self.ctrl.GetTextRange(0, self.ctrl.GetCurrentPos())
-                completion_list.extend(re.findall(ur"\b{0}.*?\b".format(word),
+                completion_list.extend(re.findall(r"\b{0}.*?\b".format(word),
                         text, re.U))
                 completions.add(word)
 
@@ -5728,9 +5728,9 @@ class ViHandler(ViHelper):
                     if not extra:
                         sel_start = self.StartSelection(sel_start+len(bracket))
                         if ignore_forewardslashes:
-                            if self.GetUnichrAt(sel_start) == u"/":
+                            if self.GetUnichrAt(sel_start) == "/":
                                 sel_start = self.StartSelection(sel_start+1)
-                            if self.GetUnichrAt(sel_start) == u"/":
+                            if self.GetUnichrAt(sel_start) == "/":
                                 sel_start = self.StartSelection(sel_start+1)
 
                         self.ctrl.GotoPos(sel_end - len(bracket))
@@ -5923,7 +5923,7 @@ class ViHandler(ViHelper):
         if new_line:
             text = "\n{0}\n".format(text)
 
-        uni_chr = unichr(keycode)
+        uni_chr = chr(keycode)
         if uni_chr in replacements:
             # Use .join([]) ?
 
@@ -5932,16 +5932,16 @@ class ViHandler(ViHelper):
             new_text = text
 
             # TODO: add option to rewrite links containing <sup> and <sub> tags
-            tags = [u"<sup>", u"</sup>", u"<sub>", u"</sub>"]
-            if uni_chr == u"r" and REWRITE_SUB_SUP_LINKS and \
+            tags = ["<sup>", "</sup>", "<sub>", "</sub>"]
+            if uni_chr == "r" and REWRITE_SUB_SUP_LINKS and \
                     True in [tag in text for tag in tags]:
                 stripped_text = text
                 for tag in tags:
-                    stripped_text = stripped_text.replace(tag, u"")
+                    stripped_text = stripped_text.replace(tag, "")
                 new_text = "{0}|{1}".format(stripped_text, text)
 
             # If r is used on a subpage we will add // for ease of use
-            if uni_chr == u"r" and u"/" in self.ctrl.presenter.getWikiWord():
+            if uni_chr == "r" and "/" in self.ctrl.presenter.getWikiWord():
                 new_text = "{0}//{1}{2}".format(replacements[uni_chr][0], new_text, replacements[uni_chr][1])
             else:
                 new_text = "{0}{1}{2}".format(replacements[uni_chr][0], new_text, replacements[uni_chr][1])
@@ -6035,7 +6035,7 @@ class ViHandler(ViHelper):
         new_text = []
         for i in range(len(lines)):
             line = lines[i]
-            if line.strip() == u"": # Leave out empty lines
+            if line.strip() == "": # Leave out empty lines
                 continue
             # Strip one space from line end (if it exists)
             elif line.endswith(" "):
@@ -6073,7 +6073,7 @@ class ViHandler(ViHelper):
         self.BeginUndo(use_start_pos=True)
         char = self.GetCharFromCode(key_code)
         text = self.ctrl.GetSelectedText()
-        new_text = text.replace(char, u"")
+        new_text = text.replace(char, "")
         self.ctrl.ReplaceSelection(new_text)
         self.SetLineColumnPos()
         self.EndUndo()
@@ -6136,7 +6136,7 @@ class ViHandler(ViHelper):
 
         """
         # Test if selection is lines
-        if selection_type == 1 or self.GetSelMode() == u"LINE" or \
+        if selection_type == 1 or self.GetSelMode() == "LINE" or \
         (self.GetLineStartPos(self.ctrl.LineFromPosition(
         self.ctrl.GetSelectionStart())) == self.ctrl.GetSelectionStart() and \
         self.ctrl.GetLineEndPosition(self.ctrl.LineFromPosition(
@@ -6194,7 +6194,7 @@ class ViHandler(ViHelper):
 
     def SelectSelection(self, com_type=0):
         if com_type < 1:
-            print "Select selection called incorrectly", inspect.getframeinfo(inspect.currentframe().f_back)[2]
+            print("Select selection called incorrectly", inspect.getframeinfo(inspect.currentframe().f_back)[2])
 
             return
 
@@ -6207,7 +6207,7 @@ class ViHandler(ViHelper):
             self.ctrl.SetAnchor(self._anchor)
 
         #self.SetSelMode(u"LINE")
-        if self.GetSelMode() == u"LINE":
+        if self.GetSelMode() == "LINE":
             self.SelectFullLines()
         # Inclusive motion commands select the last character as well
         elif com_type != 2:
@@ -6368,7 +6368,7 @@ class ViHandler(ViHelper):
         self.SelectCurrentLine()
 
         # Check if heading needs line padding above
-        extra = u""
+        extra = ""
         if self.settings["blank_line_above_headings"]:
             start = self.ctrl.GetSelectionStart()
             if self.GetUnichrAt(start-2) != self.ctrl.GetEOLChar():
@@ -6387,7 +6387,7 @@ class ViHandler(ViHelper):
                 line = line[1:-2] + line[-1]
 
 
-        new_line = "".join([extra, level * u"+", self.ctrl.vi.settings["pad_headings"] * u" ", line.lstrip("+")])
+        new_line = "".join([extra, level * "+", self.ctrl.vi.settings["pad_headings"] * " ", line.lstrip("+")])
         self.ctrl.ReplaceSelection(new_line)
 
 
@@ -6930,7 +6930,7 @@ class ViHandler(ViHelper):
         """
         # TODO: visual indication
         try:
-            char = unichr(keycode)
+            char = chr(keycode)
         except:
             return
 
@@ -7498,11 +7498,11 @@ class ViHandler(ViHelper):
             if line_pos + end_offset == len(bytes(line)):
                 return
             bytes_to_move = len(bytes(
-                        unicode(bytes(line)[line_pos:-end_offset])[:offset]))
+                        str(bytes(line)[line_pos:-end_offset])[:offset]))
         elif offset < 0:
             if line_pos == 0:
                 return
-            bytes_to_move = -len(bytes(unicode(bytes(line)[:line_pos])[offset:]))
+            bytes_to_move = -len(bytes(str(bytes(line)[:line_pos])[offset:]))
         else:
             # Offset is 0, do nothing
             return
@@ -7937,8 +7937,8 @@ class ViHandler(ViHelper):
         # This code is independent of the wikidpad syntax used
         line_prefix = False
         line_text = self.ctrl.GetCurLine()[0].strip()
-        if line_text.startswith(u"* "):
-            line_prefix = u"* "
+        if line_text.startswith("* "):
+            line_prefix = "* "
 
         if above:
             if self.ctrl.GetCurrentLine() == 0:

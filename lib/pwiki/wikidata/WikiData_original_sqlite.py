@@ -1,1 +1,1 @@
-from original_sqlite.WikiData import *
+from .original_sqlite.WikiData import *

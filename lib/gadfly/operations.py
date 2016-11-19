@@ -6,8 +6,8 @@
 :Id: $Id: operations.py,v 1.1 2006/01/07 15:01:24 Michael Butscher Exp $:
 """
 
-import semantics
-import serialize
+from . import semantics
+from . import serialize
 
 # ordering of ddef storage is important so, eg, index defs
 # follow table defs.
@@ -62,21 +62,21 @@ class CreateTable(Ordered_DDF):
         return (self.name, [])
 
     def marshaldata(self):
-        return map(serialize.serialize, self.colelts)
+        return list(map(serialize.serialize, self.colelts))
 
     def demarshal(self, args):
-        self.colelts = map(serialize.deserialize, args)
+        self.colelts = list(map(serialize.deserialize, args))
 
     def __repr__(self):
         from string import join
         elts = list(self.colelts)
-        elts = map(repr, elts)
+        elts = list(map(repr, elts))
         return CTFMT % (self.name, join(elts, ",\n  "))
 
     def relbind(self, db):
         """check that table doesn't already exist"""
         if db.has_relation(self.name):
-            raise NameError, "cannot create %s, exists" % (self.name,)
+            raise NameError("cannot create %s, exists" % (self.name,))
         self.indb = db
         return self
 
@@ -85,16 +85,16 @@ class CreateTable(Ordered_DDF):
         # datatypes currently happily ignored :)
         db = self.indb
         if db is None:
-            raise ValueError, "unbound or executed"
+            raise ValueError("unbound or executed")
         self.indb = None
         name = self.name
         if db.has_relation(self.name):
-            raise NameError, "relation %s exists, cannot create" % (self.name,)
+            raise NameError("relation %s exists, cannot create" % (self.name,))
         db.touched = 1
         attnames = []
         for x in self.colelts:
             attnames.append(x.colid)
-        from store import Relation0
+        from .store import Relation0
         r = Relation0(attnames)
         # must store if new (unset for reloads)
         r.touched = 1
@@ -128,7 +128,7 @@ class CreateView(semantics.SimpleRecursive, Ordered_DDF):
         self.indb = db
         name = self.name
         if db.has_datadef(name):
-            raise NameError, "(view) datadef %s exists" % name
+            raise NameError("(view) datadef %s exists" % name)
         # don't bind the selection yet
         return self
 
@@ -137,12 +137,12 @@ class CreateView(semantics.SimpleRecursive, Ordered_DDF):
         db = self.indb
         name = self.name
         if db is None:
-            raise ValueError, "create view %s unbound or executed" % name
+            raise ValueError("create view %s unbound or executed" % name)
         self.indb = None
         if db.has_relation(name):
-            raise ValueError, "create view %s, name exists" % name
+            raise ValueError("create view %s, name exists" % name)
         db.touched = 1
-        from store import View
+        from .store import View
         v = View(self.name, self.namelist, self.selection, db)
         db[name] = v
         db.add_datadef(name, self)
@@ -192,22 +192,22 @@ class CreateIndex(semantics.SimpleRecursive, Ordered_DDF):
         name = self.name
         self.indb = db
         if db.has_datadef(name):
-            raise NameError, `name`+": data def exists"
+            raise NameError(repr(name)+": data def exists")
         try:
             self.target = db.get_for_update(self.tablename) #db[self.tablename]
         except:
-            raise NameError, `self.tablename`+": no such relation"
+            raise NameError(repr(self.tablename)+": no such relation")
         return self
 
     def eval(self, dyn=None):
-        from store import Index
+        from .store import Index
         db = self.indb
         if db is None:
-            raise ValueError, "create index unbound or executed"
+            raise ValueError("create index unbound or executed")
         self.indb = None
         rel = self.target
         if rel is None:
-            raise ValueError, "create index not bound to relation"
+            raise ValueError("create index not bound to relation")
         db.touched = 1
         self.the_index = the_index = Index(self.name, self.atts, unique=self.unique)
         rel.add_index(the_index)
@@ -232,14 +232,14 @@ class DropIndex(semantics.SimpleRecursive):
     def relbind(self, db):
         self.indb = db
         if not db.has_datadef(self.name):
-            raise NameError, `self.name`+": no such index"
+            raise NameError(repr(self.name)+": no such index")
         return self
 
     def eval(self, dyn=None):
         db = self.indb
         self.indb=None
         if db is None:
-            raise ValueError, "drop index executed or unbound"
+            raise ValueError("drop index executed or unbound")
         db.touched = 1
         indexname = self.name
         createindex = db.datadefs[indexname]
@@ -265,16 +265,16 @@ class DropTable(semantics.SimpleRecursive):
         self.indb = db
         name = self.name
         if not db.has_relation(name):
-            raise NameError, `self.name` + ": cannot delete, no such table/view"
+            raise NameError(repr(self.name) + ": cannot delete, no such table/view")
         self.check_kind(name, db)
         return self
     def check_kind(self, name, db):
         if db[name].is_view:
-            raise ValueError, "%s is VIEW, can't DROP TABLE" % name
+            raise ValueError("%s is VIEW, can't DROP TABLE" % name)
     def eval(self, dyn):
         db = self.indb
         if db is None:
-            raise ValueError, "unbound or executed"
+            raise ValueError("unbound or executed")
         db.touched = 1
         self.indb = None
         self.relbind(db)
@@ -293,7 +293,7 @@ class DropView(DropTable):
         return "DROP VIEW %s" % self.name
     def check_kind(self, name, db):
         if not db[name].is_view:
-            raise ValueError, "%s is TABLE, can't DROP VIEW" % name
+            raise ValueError("%s is TABLE, can't DROP VIEW" % name)
 
 COLDEFFMT = "%s %s %s %s"
 
@@ -321,10 +321,10 @@ def evalcond(cond, eqs, target, dyn, rassns, translate, invtrans):
     """factored out shared op between Update and Delete."""
     if dyn:
             #print "dyn", dyn
-        from semantics import dynamic_binding
+        from .semantics import dynamic_binding
         dynbind = dynamic_binding(len(dyn), dyn)
         if len(dynbind)>1:
-            raise ValueError, "only one dynamic binding allowed for UPDATE"
+            raise ValueError("only one dynamic binding allowed for UPDATE")
         dynbind1 = dynbind = dynbind[0]
         if eqs is not None:
             dynbind1 = dynbind.remap(eqs)
@@ -346,7 +346,7 @@ def evalcond(cond, eqs, target, dyn, rassns, translate, invtrans):
     # get tuple set, try to use an index
     index = None
     if rassns is not None:
-        known = rassns.keys()
+        known = list(rassns.keys())
         index = target.choose_index(known)
     if index is None:
         (tuples, seqnums) = target.rows(1)
@@ -355,7 +355,7 @@ def evalcond(cond, eqs, target, dyn, rassns, translate, invtrans):
         (tuples, seqnums) = index.matches(rassns)
     ltuples = len(tuples)
     buffer = [0] * ltuples
-    rtups = range(ltuples)
+    rtups = list(range(ltuples))
     for i in rtups:
         tup = tuples[i]
         #print tup
@@ -408,7 +408,7 @@ class UpdateOp(semantics.SimpleRecursive):
         # check that atts of assns are atts of target
         #print dir(assns)
         resultatts = assns.attorder
-        from semantics import kjbuckets
+        from .semantics import kjbuckets
         kjSet = kjbuckets.kjSet
         kjGraph = kjbuckets.kjGraph
         resultatts = kjSet(resultatts)
@@ -416,10 +416,10 @@ class UpdateOp(semantics.SimpleRecursive):
         self.preserved = allatts - resultatts
         huh = resultatts - allatts
         if huh:
-            raise NameError, "%s lacks %s attributes" % (name, huh.items())
+            raise NameError("%s lacks %s attributes" % (name, list(huh.items())))
         # compute projection
-        assnsatts = kjGraph(assns.domain().items()).neighbors(name)
-        condatts = kjGraph(cond.domain().items()).neighbors(name)
+        assnsatts = kjGraph(list(assns.domain().items())).neighbors(name)
+        condatts = kjGraph(list(cond.domain().items())).neighbors(name)
         condatts = condatts+assnsatts
         #print "condatts", condatts
         translate = kjbuckets.kjDict()
@@ -487,7 +487,7 @@ class UpdateOp(semantics.SimpleRecursive):
             target.reset_tuples(newtups, newseqs)
             log = indb.log
             if log is not None and not log.is_scratch:
-                from semantics import Reset_Tuples
+                from .semantics import Reset_Tuples
                 op = Reset_Tuples(self.name)
                 op.set_data(newtups, newseqs, target)
                 log.log(op)
@@ -521,8 +521,8 @@ class DeleteOp(semantics.SimpleRecursive):
         else:
             self.eqs = cassns = None
         # compute projection/rename
-        from semantics import kjbuckets
-        condatts = kjbuckets.kjGraph(cond.domain().items()).neighbors(name)
+        from .semantics import kjbuckets
+        condatts = kjbuckets.kjGraph(list(cond.domain().items())).neighbors(name)
         translate = kjbuckets.kjDict()
         for att in condatts:
             translate[(name, att)] = att
@@ -569,7 +569,7 @@ class DeleteOp(semantics.SimpleRecursive):
             target.erase_tuples(newseqs)
             log = indb.log
             if log is not None and not log.is_scratch:
-                from semantics import Erase_Tuples
+                from .semantics import Erase_Tuples
                 op = Erase_Tuples(self.name)
                 op.set_data(newseqs, target)
                 log.log(op)
@@ -600,7 +600,7 @@ class InsertOp(semantics.SimpleRecursive):
         # determine target relation
         target = self.target = db.get_for_update(name)
         targetatts = target.attributes()
-        from semantics import kjbuckets
+        from .semantics import kjbuckets
         kjSet = kjbuckets.kjSet
         targetset = kjSet(targetatts)
         # check or set colid bindings
@@ -611,21 +611,21 @@ class InsertOp(semantics.SimpleRecursive):
         ### for now all attributes must be in colset
         cdiff = colset-targetset
         if cdiff:
-            raise NameError, "%s: no such attributes in %s" % (cdiff.items(), name)
+            raise NameError("%s: no such attributes in %s" % (list(cdiff.items()), name))
         cdiff = targetset-colset
         ### temporary!!!
         if cdiff:
-            raise NameError, "%s: not set in insert on %s" % (cdiff.items(), name)
+            raise NameError("%s: not set in insert on %s" % (list(cdiff.items()), name))
         # bind the insertspec
         insertspec = self.insertspec
         self.insertspec = insertspec = insertspec.relbind(db)
         # create a collector for result
-        from semantics import TupleCollector
+        from .semantics import TupleCollector
         collector = self.collector = TupleCollector()
         # get ordered list of expressions to eval on bound attributes of insertspec
         resultexps = insertspec.resultexps()
         if len(resultexps)!=len(colset):
-            raise ValueError, "result and colset of differing length %s:%s" % (colset,resultexps)
+            raise ValueError("result and colset of differing length %s:%s" % (colset,resultexps))
         pairs = map(None, colids, resultexps)
         for (col,exp) in pairs:
             collector.addbinding(col, exp)
@@ -646,7 +646,7 @@ class InsertOp(semantics.SimpleRecursive):
             #target.regenerate_indices()
             log = indb.log
             if log is not None and not log.is_scratch:
-                from semantics import Add_Tuples
+                from .semantics import Add_Tuples
                 op = Add_Tuples(self.name)
                 op.set_data(resulttups, target)
                 log.log(op)
@@ -663,7 +663,7 @@ class InsertValues(semantics.SimpleRecursive):
         return (self.list,)
 
     def __repr__(self):
-        return "VALUES " +` tuple(self.list) `
+        return "VALUES " +repr( tuple(self.list))
 
     def resultexps(self):
         return self.list
@@ -671,7 +671,7 @@ class InsertValues(semantics.SimpleRecursive):
     def relbind(self, db):
         l = self.list
         bindings = {}
-        for i in xrange(len(self.list)):
+        for i in range(len(self.list)):
             li = l[i]
             l[i] = li.relbind(bindings, db)
             # do nothing with domain, for now
@@ -680,11 +680,11 @@ class InsertValues(semantics.SimpleRecursive):
 
     def eval(self, dyn=None):
         if dyn:
-            from semantics import dynamic_binding
+            from .semantics import dynamic_binding
             dynbt = dynamic_binding(len(dyn), dyn)
         else:
             # dummy value to prevent triviality
-            from semantics import kjbuckets
+            from .semantics import kjbuckets
             dynbt = [kjbuckets.kjDict(Insert_dummy_arg)]
         #print "bindings", dynbt.assns
         return dynbt # ??
@@ -706,7 +706,7 @@ class InsertSubSelect(semantics.SimpleRecursive):
         atts = self.subsel.attributes()
         # bind each as "result.name"
         exps = []
-        from semantics import BoundAttribute
+        from .semantics import BoundAttribute
         for a in atts:
             exps.append( BoundAttribute("result", a) )
         return exps # temp
@@ -723,13 +723,13 @@ class InsertSubSelect(semantics.SimpleRecursive):
         subsel.uncache()
         rel = subsel.eval(dyn)
         tups = rel.rows()
-        from semantics import BoundTuple ### temp
-        from semantics import kjbuckets
+        from .semantics import BoundTuple ### temp
+        from .semantics import kjbuckets
         kjDict = kjbuckets.kjDict
-        for i in xrange(len(tups)):
+        for i in range(len(tups)):
             tupsi = tups[i]
             new = kjDict()
-            for k in tupsi.keys():
+            for k in list(tupsi.keys()):
                 new[ ("result", k) ] = tupsi[k]
             tups[i] = new
         return tups

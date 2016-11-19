@@ -1,17 +1,17 @@
-from __future__ import with_statement
+
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import cStringIO as StringIO
-import urllib, os, os.path, traceback
+import io as StringIO
+import urllib.request, urllib.parse, urllib.error, os, os.path, traceback
 
 import wx, wx.html
 
 if wx.Platform == '__WXMSW__':
 #     import wx.activex
     import wx.lib.iewin as iewin
-    from WindowsHacks import getLongPath
+    from .WindowsHacks import getLongPath
 else:
     iewin = None
 
@@ -36,17 +36,17 @@ if False:
 
 
 
-from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+from .WikiExceptions import *
+from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
         wxKeyFunctionSink
 
-from MiscEvent import KeyFunctionSink
+from .MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 
-import DocPages
-from TempFileSet import TempFileSet
+from . import DocPages
+from .TempFileSet import TempFileSet
 
 from . import PluginManager
 
@@ -61,7 +61,7 @@ class LinkConverterForPreviewIe:
 
     def getLinkForWikiWord(self, word, default = None):
         if self.wikiDocument.isDefinedWikiLinkTerm(word):
-            return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
+            return urlQuote("http://internaljump/wikipage/%s" % word, "/#:;@")
         else:
             return default
 
@@ -74,7 +74,7 @@ class LinkConverterForPreviewMoz:
 
     def getLinkForWikiWord(self, word, default = None):
         if self.wikiDocument.isDefinedWikiLinkTerm(word):
-            return urlQuote(u"file://internaljump/wikipage/%s" % word, u"/#:;@")
+            return urlQuote("file://internaljump/wikipage/%s" % word, "/#:;@")
         else:
             return default
 
@@ -138,14 +138,14 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         # TODO Should be changed to presenter as controller
         self.exporterInstance = PluginManager.getExporterTypeDict(
-                self.presenter.getMainControl(), False)[u"html_single"][0]\
+                self.presenter.getMainControl(), False)["html_single"][0]\
                 (self.presenter.getMainControl())
 
         # TODO More elegantly
         if self.drivingMoz:
-            self.exporterInstance.exportType = u"html_previewMOZ"
+            self.exporterInstance.exportType = "html_previewMOZ"
         else:
-            self.exporterInstance.exportType = u"html_previewIE"
+            self.exporterInstance.exportType = "html_previewIE"
 
         self.exporterInstance.tempFileSet = TempFileSet()
         self._updateTempFilePrefPath()
@@ -158,9 +158,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         # Create two temporary html files (IE 7 needs two to work)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="").decode("latin-1")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="").decode("latin-1")
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
@@ -215,7 +215,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
                 prevPage.setPresentation(self.GetViewStart(), 3)
-            except WikiWordNotFoundException, e:
+            except WikiWordNotFoundException as e:
                 pass
             except AttributeError:
                 pass
@@ -297,7 +297,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         else:  # Not outOfSync
             if self.anchor is not None:
                 self.passNavigate += 1
-                self.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
+                self.LoadUrl(self.currentLoadedUrl + "#" + self.anchor)
                 self.lastAnchor = self.anchor
 
         self.anchor = None
@@ -435,18 +435,18 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
         if self.drivingMoz:
-            internaljumpPrefix = u"file://internaljump/"
+            internaljumpPrefix = "file://internaljump/"
         else:
-            internaljumpPrefix = u"http://internaljump/"
+            internaljumpPrefix = "http://internaljump/"
             
-        if href.startswith(internaljumpPrefix + u"wikipage/"):
+        if href.startswith(internaljumpPrefix + "wikipage/"):
 
             if self.drivingMoz:
                 # Unlike stated, the Mozilla ActiveX control has some
                 # differences to the IE control. For instance, it returns
                 # here an UTF-8 URL-quoted string, while IE returns the
                 # unicode as it is.
-                href = utf8Dec(urllib.unquote(href.encode("ascii", "replace")))[0]
+                href = utf8Dec(urllib.parse.unquote(href.encode("ascii", "replace")))[0]
 
             Cancel[0] = True
             # Jump to another wiki page
@@ -461,9 +461,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 anchor = None
             
             # unescape word
-            word = urllib.unquote(word) # utf8Dec(urllib.unquote(word))[0]
+            word = urllib.parse.unquote(word) # utf8Dec(urllib.unquote(word))[0]
             if anchor:
-                anchor = urllib.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
+                anchor = urllib.parse.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
 
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(
@@ -474,12 +474,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             self.gotoAnchor(anchorFragment)
 #             evt.Cancel = True
 
-        elif href == (internaljumpPrefix + u"action/history/back"):
+        elif href == (internaljumpPrefix + "action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()
             Cancel[0] = True
 
-        elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
+        elif href == (internaljumpPrefix + "mouse/leftdoubleclick/preview/body"):
             pres = self.presenter
             mc = pres.getMainControl()
 
@@ -487,10 +487,10 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     "main control": mc}
 
             mc.getUserActionCoord().reactOnUserEvent(
-                    u"mouse/leftdoubleclick/preview/body", paramDict)
+                    "mouse/leftdoubleclick/preview/body", paramDict)
             Cancel[0] = True
 
-        elif href.startswith(u"file:"):
+        elif href.startswith("file:"):
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
             normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
@@ -508,9 +508,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def StatusTextChange(self, status):
         if self.visible:
             if self.drivingMoz:
-                internaljumpPrefix = u"file://internaljump/wikipage/"
+                internaljumpPrefix = "file://internaljump/wikipage/"
             else:
-                internaljumpPrefix = u"http://internaljump/wikipage/"
+                internaljumpPrefix = "http://internaljump/wikipage/"
 
             if status.startswith(internaljumpPrefix):
                 # First check for an anchor. In URLs, anchors are always
@@ -518,7 +518,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 # in the wiki syntax (normally '!')
                 try:
                     wikiWord, anchor = status[len(internaljumpPrefix):].split(
-                            u"#", 1)
+                            "#", 1)
                     anchor = flexibleUrlUnquote(anchor)
                 except ValueError:
                     wikiWord = status[len(internaljumpPrefix):]
@@ -533,7 +533,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 wikiWord = wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
                 if wikiWord is not None:
-                    status = _(u"Link to page: %s") % wikiWord
+                    status = _("Link to page: %s") % wikiWord
 
             self.presenter.getMainControl().statusBar.SetStatusText(
                     uniToGui(status), 0)

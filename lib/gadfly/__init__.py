@@ -9,7 +9,7 @@ compatibility.
 # $Id: __init__.py,v 1.1 2006/01/07 15:01:23 Michael Butscher Exp $
 
 # make old code still work
-from database import gadfly
+from .database import gadfly
 
 #
 # $Log: __init__.py,v $

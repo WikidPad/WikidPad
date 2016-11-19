@@ -41,7 +41,7 @@ class HistoryEntry(object):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"historyEntry")
+            xmlNode = xmlDoc.createElement("historyEntry")
 
         self.serializeToXml(xmlNode, xmlDoc)
         
@@ -53,10 +53,10 @@ class HistoryEntry(object):
         Create XML node to contain all information
         about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"unifiedName", self.unifiedPageName,
+        serToXmlUnicode(xmlNode, xmlDoc, "unifiedName", self.unifiedPageName,
                     replace=True)
 
-        serToXmlUnicode(xmlNode, xmlDoc, u"visitedTime", unicode(time.strftime(
+        serToXmlUnicode(xmlNode, xmlDoc, "visitedTime", str(time.strftime(
                 "%Y-%m-%d/%H:%M:%S", time.gmtime(self.visitedTimeStamp))),
                 replace=True)
 
@@ -68,9 +68,9 @@ class HistoryEntry(object):
         """
         self.xmlNode = xmlNode
 
-        self.unifiedPageName = serFromXmlUnicode(xmlNode, u"unifiedName")
+        self.unifiedPageName = serFromXmlUnicode(xmlNode, "unifiedName")
 
-        timeStr = serFromXmlUnicode(xmlNode, u"visitedTime")
+        timeStr = serFromXmlUnicode(xmlNode, "visitedTime")
         self.visitedTimeStamp = timegm(time.strptime(timeStr,
                 "%Y-%m-%d/%H:%M:%S"))
 
@@ -83,8 +83,8 @@ class HistoryEntry(object):
         if self.unifiedPageName.startswith("wikipage/"):
             return self.unifiedPageName[9:]
         else:
-            return u"<" + DocPages.getHrNameForFuncTag(self.unifiedPageName)\
-                    + u">"
+            return "<" + DocPages.getHrNameForFuncTag(self.unifiedPageName)\
+                    + ">"
 
 
 
@@ -167,7 +167,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
 
         upname = docPage.getUnifiedPageName()
         
-        if not upname.startswith(u"wikipage/") and \
+        if not upname.startswith("wikipage/") and \
                 not DocPages.isFuncTag(upname):
             # Page is neither a wiki page nor a standard functional page
             return
@@ -187,7 +187,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         """
         Remove deleted word from history
         """
-        upname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord() # self.mainControl.getCurrentWikiWord()
+        upname = "wikipage/" + miscevt.get("wikiPage").getWikiWord() # self.mainControl.getCurrentWikiWord()
         
         # print "onDeletedWikiPage1",  self.pos, repr(self.historyEntries)
 
@@ -201,10 +201,10 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         """
         Rename word in history
         """
-        oldUpname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord()
-        newUpname = u"wikipage/" + miscevt.get("newWord")
+        oldUpname = "wikipage/" + miscevt.get("wikiPage").getWikiWord()
+        newUpname = "wikipage/" + miscevt.get("newWord")
         
-        for i in xrange(len(self.historyEntries)):
+        for i in range(len(self.historyEntries)):
             if self.historyEntries[i].unifiedPageName == oldUpname:
                 self.historyEntries[i].unifiedPageName = newUpname
                 
@@ -236,7 +236,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         Read and decode overview from database. Most functions can be called
         only after this was called (exception: isNotInDatabase())
         """
-        unifName = u"wikiwidehistory"
+        unifName = "wikiwidehistory"
 
         content = self.wikiDocument.retrieveDataBlock(unifName, default=DAMAGED)
         if content is DAMAGED:
@@ -251,7 +251,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
 
 
     def writeOverview(self):
-        unifName = u"wikiwidehistory"
+        unifName = "wikiwidehistory"
 
         if len(self.historyEntries) == 0:
             self.wikiDocument.deleteDataBlock(unifName)
@@ -273,7 +273,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"wikiWideHistory")
+            xmlNode = xmlDoc.createElement("wikiWideHistory")
 
         self.serializeToXml(xmlNode, xmlDoc)
 
@@ -284,11 +284,11 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         """
         Modify XML node to contain all information about this object.
         """
-        xmlNode.setAttribute(u"formatVersion", u"0")
-        xmlNode.setAttribute(u"readCompatVersion", u"0")
-        xmlNode.setAttribute(u"writeCompatVersion", u"0")
+        xmlNode.setAttribute("formatVersion", "0")
+        xmlNode.setAttribute("readCompatVersion", "0")
+        xmlNode.setAttribute("writeCompatVersion", "0")
 
-        for xmlEntry in iterXmlElementFlat(xmlNode, u"historyEntry"):
+        for xmlEntry in iterXmlElementFlat(xmlNode, "historyEntry"):
             xmlNode.removeChild(xmlEntry)
 
         for entry in self.historyEntries:
@@ -300,7 +300,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
         """
         Set object state from data in xmlNode.
         """
-        formatVer = int(xmlNode.getAttribute(u"writeCompatVersion"))
+        formatVer = int(xmlNode.getAttribute("writeCompatVersion"))
         
         self.xmlNode = xmlNode
 
@@ -313,7 +313,7 @@ class WikiWideHistory(object, MiscEventSourceMixin):
 
         historyEntries = []
 
-        for xmlEntry in iterXmlElementFlat(xmlNode, u"historyEntry"):
+        for xmlEntry in iterXmlElementFlat(xmlNode, "historyEntry"):
             entry = HistoryEntry()
             entry.serializeFromXml(xmlEntry)
             

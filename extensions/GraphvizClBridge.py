@@ -23,11 +23,11 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"dot", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler),
-            (u"neato", ("html_single", "html_previewWX", "html_preview", "html_multi"), NeatoHandler),
-            (u"twopi", ("html_single", "html_previewWX", "html_preview", "html_multi"), TwopiHandler),
-            (u"circo", ("html_single", "html_previewWX", "html_preview", "html_multi"), CircoHandler),
-            (u"fdp", ("html_single", "html_previewWX", "html_preview", "html_multi"), FdpHandler)
+            ("dot", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler),
+            ("neato", ("html_single", "html_previewWX", "html_preview", "html_multi"), NeatoHandler),
+            ("twopi", ("html_single", "html_previewWX", "html_preview", "html_multi"), TwopiHandler),
+            ("circo", ("html_single", "html_previewWX", "html_preview", "html_multi"), CircoHandler),
+            ("fdp", ("html_single", "html_previewWX", "html_preview", "html_multi"), FdpHandler)
             )
 
 
@@ -99,11 +99,11 @@ class GraphVizBaseHandler:
 
         if not bstr:
             # Nothing in, nothing out
-            return u""
+            return ""
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return u'<pre>' + _(u'[Please set path to GraphViz executables]') + \
+            return '<pre>' + _('[Please set path to GraphViz executables]') + \
                     '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
@@ -132,7 +132,7 @@ class GraphVizBaseHandler:
             popenObject.stdin.close()
             popenObject.stdout.close()
 
-            if u"noerror" in [a.strip() for a in insToken.appendices]:
+            if "noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
                 errResponse = ""
             else:
@@ -145,17 +145,17 @@ class GraphVizBaseHandler:
         if errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u'<pre>' + _(u'[%s Error: %s]') % (appname, errResponse) +\
-                     u'</pre>'
+            return '<pre>' + _('[%s Error: %s]') % (appname, errResponse) +\
+                     '</pre>'
 
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
-                    u'&nbsp;') % url
+            return ('<img src="%s" border="0" align="bottom" alt="formula" />'
+                    '&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
+            return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 
@@ -197,16 +197,16 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register options
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_dirExe")] = u""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_dirExe")] = ""
 
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeDot")] = u"dot.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeNeato")] = u"neato.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeTwopi")] = u"twopi.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeCirco")] = u"circo.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = u"fdp.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeDot")] = "dot.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeNeato")] = "neato.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeTwopi")] = "twopi.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeCirco")] = "circo.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = "fdp.exe"
 
     # Register panel in options dialog
-    app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, u"GraphViz")
+    app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, "GraphViz")
 
 
 class GraphVizOptionsPanel(wx.Panel):
@@ -220,53 +220,53 @@ class GraphVizOptionsPanel(wx.Panel):
         self.app = wx.GetApp()
         
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_dirExe",
-                u"")
+                "")
         self.tfDir = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeDot",
-                u"dot.exe")
+                "dot.exe")
         self.tfDot = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeNeato",
-                u"neato.exe")
+                "neato.exe")
         self.tfNeato = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeTwopi",
-                u"twopi.exe")
+                "twopi.exe")
         self.tfTwopi = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeCirco",
-                u"circo.exe")
+                "circo.exe")
         self.tfCirco = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeFdp",
-                u"fdp.exe")
+                "fdp.exe")
         self.tfFdp = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
         mainsizer.AddGrowableCol(1, 1)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Directory of executables:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Directory of executables:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfDir, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of dot executable:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Name of dot executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfDot, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of neato executable:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Name of neato executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfNeato, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of twopi executable:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Name of twopi executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfTwopi, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of circo executable:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Name of circo executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfCirco, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of fdp executable:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Name of fdp executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfFdp, 1, wx.ALL | wx.EXPAND, 5)
 

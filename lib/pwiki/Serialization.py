@@ -1,10 +1,10 @@
 from struct import pack, unpack
-import cStringIO as StringIO
+import io as StringIO
 
-from StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
+from .StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
         base64BlockDecode
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 
 
@@ -157,7 +157,7 @@ class SerializeStream:
         if self.isReadMode() and l != len(abs):
             abs = [""] * l
 
-        for i in xrange(l):
+        for i in range(l):
             abs[i] = self.serString(abs[i])
             
         return abs
@@ -171,7 +171,7 @@ class SerializeStream:
         if self.isReadMode() and l != len(an):
             an = [0] * l
 
-        for i in xrange(l):
+        for i in range(l):
             an[i] = self.serUint32(an[i])
             
         return an
@@ -247,7 +247,7 @@ def serToXmlUnicode(xmlNode, xmlDoc, tag, data, replace=False):
     xmlNode.appendChild(subNode)
 
 
-def serFromXmlUnicode(xmlNode, tag, default=u""):
+def serFromXmlUnicode(xmlNode, tag, default=""):
     subNode = findXmlElementFlat(xmlNode, tag, False)
     if subNode is None:
         return default
@@ -259,7 +259,7 @@ def serFromXmlUnicode(xmlNode, tag, default=u""):
 
 
 def serToXmlBoolean(xmlNode, xmlDoc, tag, data, replace=False):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(bool(data))),
+    serToXmlUnicode(xmlNode, xmlDoc, tag, str(repr(bool(data))),
             replace=replace)
 
 
@@ -272,7 +272,7 @@ def serFromXmlBoolean(xmlNode, tag, default=None):
 
 
 def serToXmlInt(xmlNode, xmlDoc, tag, data, replace=False):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)),
+    serToXmlUnicode(xmlNode, xmlDoc, tag, str(repr(data)),
             replace=replace)
 
 def serFromXmlInt(xmlNode, tag, default=None):
@@ -287,23 +287,23 @@ def serFromXmlInt(xmlNode, tag, default=None):
 
 
 _TYPE_TO_TYPENAME = (
-        (bool, u"bool"),
-        (int, u"int"),
-        (long, u"long"),
-        (float, u"float"),
-        (unicode, u"unicode"),
-        (str, u"str")
+        (bool, "bool"),
+        (int, "int"),
+        (int, "long"),
+        (float, "float"),
+        (str, "unicode"),
+        (str, "str")
     )
 
 
 
 _TYPENAME_TO_FACTORY = {
-        u"int": int,
-        u"long": long,
-        u"float": float,
-        u"unicode": unicode,
-        u"str": base64BlockDecode,
-        u"bool": strToBool
+        "int": int,
+        "long": int,
+        "float": float,
+        "unicode": str,
+        "str": base64BlockDecode,
+        "bool": strToBool
     }
 
 
@@ -321,14 +321,14 @@ def convertTupleToXml(xmlNode, xmlDoc, addOpt):
             raise SerializationException(
                     "XML conversion: Unknown item type in tuple: " + repr(opt))
 
-        if dtype == u"str":
+        if dtype == "str":
             # Maybe binary data, so do base64 encoding
             opt = base64BlockEncode(opt)
 
-        subEl = xmlDoc.createElement(u"item")
-        subEl.setAttribute(u"type", dtype)
+        subEl = xmlDoc.createElement("item")
+        subEl.setAttribute("type", dtype)
 
-        subEl.appendChild(xmlDoc.createTextNode(unicode(opt)))
+        subEl.appendChild(xmlDoc.createTextNode(str(opt)))
 
         xmlNode.appendChild(subEl)
 
@@ -347,8 +347,8 @@ def convertTupleFromXml(xmlNode):
 #                 repr(mainEl.getAttribute("type")) +" instead")
 
     result = []
-    for subEl in iterXmlElementFlat(xmlNode, u"item"):
-        dtype = subEl.getAttribute(u"type")
+    for subEl in iterXmlElementFlat(xmlNode, "item"):
+        dtype = subEl.getAttribute("type")
         fact = _TYPENAME_TO_FACTORY.get(dtype)
         if fact is None:
             raise SerializationException(

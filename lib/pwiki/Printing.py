@@ -4,13 +4,13 @@
 
 import wx, wx.xrc
 
-from wxHelper import *
+from .wxHelper import *
 
 from . import PluginManager
 
 
-from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
-from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
+from .SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
+from .SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
 
 
 
@@ -65,8 +65,8 @@ class PrintMainDialog(wx.Dialog):
 
         addOptSizer = LayerSizer()
 
-        for obtp in PluginManager.getSupportedPrintTypes(self.mainControl,
-                self.ctrls.additOptions).values():
+        for obtp in list(PluginManager.getSupportedPrintTypes(self.mainControl,
+                self.ctrls.additOptions).values()):
             panel = obtp[3]
             if panel is None:
                 if self.emptyPanel is None:
@@ -240,7 +240,7 @@ class Printer:
             try:
                 margintext = self.pWiki.configuration.get(
                         "main", "print_margins")
-                margins = map(int, margintext.split(u","))
+                margins = list(map(int, margintext.split(",")))
             except:
                 margins = [0, 0, 0, 0]  # TODO Perhaps error message
                 
@@ -262,7 +262,7 @@ class Printer:
 
 
     def buildWordList(self):
-        import SearchAndReplace as Sar
+        from . import SearchAndReplace as Sar
 
         # Create wordList (what to export)
         selset = self.selectionSet
@@ -270,7 +270,7 @@ class Printer:
         
         if root is None and selset in (0, 1):
             self.pWiki.displayErrorMessage(
-                    _(u"No real wiki word selected as root"))
+                    _("No real wiki word selected as root"))
             return
 
         lpOp = Sar.ListWikiPagesOperation()
@@ -328,7 +328,7 @@ class Printer:
         br = self.psddata.GetMarginBottomRight()
 
         margins = [tl.x, tl.y, br.x, br.y]
-        margtext = u",".join(map(unicode, margins))
+        margtext = ",".join(map(str, margins))
         self.pWiki.configuration.set("main", "print_margins", margtext)
 
 

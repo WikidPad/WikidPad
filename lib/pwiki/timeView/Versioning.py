@@ -33,7 +33,7 @@ class VersionEntry(object):
             "xmlNode")
 
     def __init__(self, unifiedBasePageName, description=None,
-            contentDifferencing=u"revdiff", contentEncoding = None):
+            contentDifferencing="revdiff", contentEncoding = None):
 
         self.unifiedBasePageName = unifiedBasePageName
         self.creationTimeStamp = time.time()
@@ -59,7 +59,7 @@ class VersionEntry(object):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"versionOverviewEntry")
+            xmlNode = xmlDoc.createElement("versionOverviewEntry")
 
         self.serializeOverviewToXml(xmlNode, xmlDoc)
         
@@ -71,22 +71,22 @@ class VersionEntry(object):
         Create XML node to contain all overview information (not content)
         about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"creationTime", unicode(time.strftime(
+        serToXmlUnicode(xmlNode, xmlDoc, "creationTime", str(time.strftime(
                 "%Y-%m-%d/%H:%M:%S", time.gmtime(self.creationTimeStamp))),
                 replace=True)
 
         if self.description is not None:
-            serToXmlUnicode(xmlNode, xmlDoc, u"description", self.description,
+            serToXmlUnicode(xmlNode, xmlDoc, "description", self.description,
                     replace=True)
 
-        serToXmlInt(xmlNode, xmlDoc, u"versionNumber", self.versionNumber,
+        serToXmlInt(xmlNode, xmlDoc, "versionNumber", self.versionNumber,
                 replace=True)
         
-        serToXmlUnicode(xmlNode, xmlDoc, u"contentDifferencing",
+        serToXmlUnicode(xmlNode, xmlDoc, "contentDifferencing",
                 self.contentDifferencing, replace=True)
         
         if self.contentEncoding is not None:
-            serToXmlUnicode(xmlNode, xmlDoc, u"contentEncoding",
+            serToXmlUnicode(xmlNode, xmlDoc, "contentEncoding",
                     self.contentEncoding, replace=True)
 
 
@@ -97,23 +97,23 @@ class VersionEntry(object):
         """
         self.xmlNode = xmlNode
 
-        timeStr = serFromXmlUnicode(xmlNode, u"creationTime")
+        timeStr = serFromXmlUnicode(xmlNode, "creationTime")
 
         self.creationTimeStamp = timegm(time.strptime(timeStr,
                 "%Y-%m-%d/%H:%M:%S"))
 
-        self.description = serFromXmlUnicode(xmlNode, u"description", None)
+        self.description = serFromXmlUnicode(xmlNode, "description", None)
 
-        self.versionNumber = serFromXmlInt(xmlNode, u"versionNumber")
+        self.versionNumber = serFromXmlInt(xmlNode, "versionNumber")
 
         self.contentDifferencing = serFromXmlUnicode(xmlNode,
-                u"contentDifferencing", u"complete")
+                "contentDifferencing", "complete")
 
-        self.contentEncoding = serFromXmlUnicode(xmlNode, u"contentEncoding", None)
+        self.contentEncoding = serFromXmlUnicode(xmlNode, "contentEncoding", None)
 
 
     def getUnifiedPageName(self):
-        return u"versioning/packet/versionNo/%s/%s" % (self.versionNumber,
+        return "versioning/packet/versionNo/%s/%s" % (self.versionNumber,
                 unifiedPageName)
 
 
@@ -135,7 +135,7 @@ class VersionOverview(MiscEventSourceMixin):
 
 
     def getUnifiedName(self):
-        return u"versioning/overview/" + self.unifiedBasePageName
+        return "versioning/overview/" + self.unifiedBasePageName
 
 
     def isNotInDatabase(self):
@@ -169,11 +169,11 @@ class VersionOverview(MiscEventSourceMixin):
         Read and decode overview from database. Most functions can be called
         only after this was called (exception: isNotInDatabase())
         """
-        unifName = u"versioning/overview/" + self.unifiedBasePageName
+        unifName = "versioning/overview/" + self.unifiedBasePageName
 
         content = self.wikiDocument.retrieveDataBlock(unifName, default=DAMAGED)
         if content is DAMAGED:
-            raise VersioningException(_(u"Versioning data damaged"))
+            raise VersioningException(_("Versioning data damaged"))
 
         self.readOverviewFromBytes(content)
 
@@ -200,10 +200,10 @@ class VersionOverview(MiscEventSourceMixin):
         if omitSelf:
             result = []
         else:
-            result = [u"versioning/overview/" + unifiedPageName]
+            result = ["versioning/overview/" + unifiedPageName]
 
         for entry in self.versionEntries:
-            result.append(u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            result.append("versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                 unifiedPageName))
 
         return result
@@ -218,9 +218,9 @@ class VersionOverview(MiscEventSourceMixin):
 
         # First copy to new 
         for entry in self.versionEntries:
-            oldUnifName = u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            oldUnifName = "versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                 oldUnifiedPageName)
-            newUnifName = u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            newUnifName = "versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                 newUnifiedPageName)
 
             content = self.wikiDocument.retrieveDataBlock(oldUnifName,
@@ -236,12 +236,12 @@ class VersionOverview(MiscEventSourceMixin):
 
         # Then delete old data
         for entry in self.versionEntries:
-            oldUnifName = u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            oldUnifName = "versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                 oldUnifiedPageName)
 
             self.wikiDocument.deleteDataBlock(oldUnifName)
 
-        oldUnifName = u"versioning/overview/" + oldUnifiedPageName
+        oldUnifName = "versioning/overview/" + oldUnifiedPageName
         self.wikiDocument.deleteDataBlock(oldUnifName)
         
         self.invalidate()
@@ -255,12 +255,12 @@ class VersionOverview(MiscEventSourceMixin):
         doing so.
         """
         for entry in self.versionEntries:
-            unifName = u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            unifName = "versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                 self.unifiedBasePageName)
 
             self.wikiDocument.deleteDataBlock(unifName)
 
-        unifName = u"versioning/overview/" + self.unifiedBasePageName
+        unifName = "versioning/overview/" + self.unifiedBasePageName
         self.wikiDocument.deleteDataBlock(unifName)
 
         self.invalidate()
@@ -278,14 +278,14 @@ class VersionOverview(MiscEventSourceMixin):
         unifPageName = docPage.getUnifiedPageName()
         wikiDocument = docPage.getWikiDocument()
 
-        matOb = re.compile(u"^versioning/packet/versionNo/[0-9]+/%s$" %
+        matOb = re.compile("^versioning/packet/versionNo/[0-9]+/%s$" %
                 re.escape(unifPageName))
         
         dataBlocks = wikiDocument.getDataBlockUnifNamesStartingWith(
-                u"versioning/packet/versionNo/")
+                "versioning/packet/versionNo/")
         
         dataBlocks = [db for db in dataBlocks if matOb.match(db)]
-        dataBlocks.append(u"versioning/overview/" + unifPageName)
+        dataBlocks.append("versioning/overview/" + unifPageName)
 
         for db in dataBlocks:
             wikiDocument.deleteDataBlock(db)
@@ -293,9 +293,9 @@ class VersionOverview(MiscEventSourceMixin):
 
     def writeOverview(self, unifPageName=None):
         if unifPageName is None:
-            unifName = u"versioning/overview/" + self.unifiedBasePageName
+            unifName = "versioning/overview/" + self.unifiedBasePageName
         else:
-            unifName = u"versioning/overview/" + unifPageName
+            unifName = "versioning/overview/" + unifPageName
 
         if len(self.versionEntries) == 0:
             self.wikiDocument.deleteDataBlock(unifName)
@@ -359,7 +359,7 @@ class VersionOverview(MiscEventSourceMixin):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"versionOverview")
+            xmlNode = xmlDoc.createElement("versionOverview")
 
         self.serializeToXml(xmlNode, xmlDoc)
         
@@ -370,11 +370,11 @@ class VersionOverview(MiscEventSourceMixin):
         """
         Modify XML node to contain all information about this object.
         """
-        xmlNode.setAttribute(u"formatVersion", u"0")
-        xmlNode.setAttribute(u"readCompatVersion", u"0")
-        xmlNode.setAttribute(u"writeCompatVersion", u"0")
+        xmlNode.setAttribute("formatVersion", "0")
+        xmlNode.setAttribute("readCompatVersion", "0")
+        xmlNode.setAttribute("writeCompatVersion", "0")
 
-        for xmlEntry in iterXmlElementFlat(xmlNode, u"versionOverviewEntry"):
+        for xmlEntry in iterXmlElementFlat(xmlNode, "versionOverviewEntry"):
             xmlNode.removeChild(xmlEntry)
 
         for entry in self.versionEntries:
@@ -386,7 +386,7 @@ class VersionOverview(MiscEventSourceMixin):
         """
         Set object state from data in xmlNode.
         """
-        formatVer = int(xmlNode.getAttribute(u"writeCompatVersion"))
+        formatVer = int(xmlNode.getAttribute("writeCompatVersion"))
         if formatVer > 0:
             SerializationException("Wrong version no. %s for version overview" %
                     formatVer)
@@ -396,7 +396,7 @@ class VersionOverview(MiscEventSourceMixin):
         versionEntries = []
         maxVersionNumber = 0
 
-        for xmlEntry in iterXmlElementFlat(xmlNode, u"versionOverviewEntry"):
+        for xmlEntry in iterXmlElementFlat(xmlNode, "versionOverviewEntry"):
             entry = VersionEntry(self.unifiedBasePageName)
             entry.serializeOverviewFromXml(xmlEntry)
             
@@ -409,17 +409,17 @@ class VersionOverview(MiscEventSourceMixin):
 
     def getVersionContentRaw(self, versionNumber):
         if len(self.versionEntries) == 0:
-            raise InternalError(u"Tried to retrieve non-existing "
-                    u"version number %s from empty list." % versionNumber)
+            raise InternalError("Tried to retrieve non-existing "
+                    "version number %s from empty list." % versionNumber)
 
         if versionNumber == -1:
             versionNumber = self.versionEntries[-1].versionNumber
 
         base = None
         workList = []
-        for i in xrange(len(self.versionEntries) - 1, -1, -1):
+        for i in range(len(self.versionEntries) - 1, -1, -1):
             entry = self.versionEntries[i]
-            if entry.contentDifferencing == u"complete":
+            if entry.contentDifferencing == "complete":
                 workList = []
                 base = entry
             else:
@@ -428,34 +428,34 @@ class VersionOverview(MiscEventSourceMixin):
             if entry.versionNumber == versionNumber:
                 break
         else:
-            raise InternalError(u"Tried to retrieve non-existing "
-                    u"version number %s." % versionNumber)
+            raise InternalError("Tried to retrieve non-existing "
+                    "version number %s." % versionNumber)
 
         if base is None:
-            raise InternalError(u"No base version found for getVersionContent(%s)" %
+            raise InternalError("No base version found for getVersionContent(%s)" %
                     versionNumber)
 
-        unifName = u"versioning/packet/versionNo/%s/%s" % (base.versionNumber,
+        unifName = "versioning/packet/versionNo/%s/%s" % (base.versionNumber,
                 self.unifiedBasePageName)
 
         content = self.wikiDocument.retrieveDataBlock(unifName, default=DAMAGED)
         if content is DAMAGED:
-            raise VersioningException(_(u"Versioning data damaged"))
+            raise VersioningException(_("Versioning data damaged"))
         elif content is None:
-            raise InternalError(u"Tried to retrieve non-existing "
-                    u"packet for version number %s" % versionNumber)
+            raise InternalError("Tried to retrieve non-existing "
+                    "packet for version number %s" % versionNumber)
 
         content = self.decodeContent(content, entry.contentEncoding)
 
         for entry in workList:
-            unifName = u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+            unifName = "versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
                     self.unifiedBasePageName)
             packet = self.wikiDocument.retrieveDataBlock(unifName, default=None)
             if content is DAMAGED:
-                raise VersioningException(_(u"Versioning data damaged"))
+                raise VersioningException(_("Versioning data damaged"))
             elif content is None:
-                raise InternalError(u"Tried to retrieve non-existing "
-                        u"packet for version number %s" % versionNumber)
+                raise InternalError("Tried to retrieve non-existing "
+                        "packet for version number %s" % versionNumber)
 
 
             content = applyBinCompact(content, packet)
@@ -471,7 +471,7 @@ class VersionOverview(MiscEventSourceMixin):
         """
         entry.versionNumber is assumed invalid and will be filled by this function.
         """
-        if isinstance(content, unicode):
+        if isinstance(content, str):
             content = BOM_UTF8 + content.encode("utf-8")
         assert isinstance(content, str)
 
@@ -493,7 +493,7 @@ class VersionOverview(MiscEventSourceMixin):
         self.maxVersionNumber += 1
         newHeadVerNo = self.maxVersionNumber
 
-        newHeadUnifName = u"versioning/packet/versionNo/%s/%s" % \
+        newHeadUnifName = "versioning/packet/versionNo/%s/%s" % \
                 (newHeadVerNo, self.unifiedBasePageName)
 
         self.wikiDocument.storeDataBlock(newHeadUnifName, content,
@@ -510,7 +510,7 @@ class VersionOverview(MiscEventSourceMixin):
                 prevHeadEntry = self.versionEntries[-2]
                 prevHeadContent = self.getVersionContentRaw(prevHeadEntry.versionNumber)
 
-                unifName = u"versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
+                unifName = "versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
                         self.unifiedBasePageName)
                 diffPacket = getBinCompactForDiff(content, prevHeadContent)
 
@@ -533,7 +533,7 @@ class VersionOverview(MiscEventSourceMixin):
 
         if versionNumber == self.versionEntries[0].versionNumber:
             # Delete oldest
-            unifName = u"versioning/packet/versionNo/%s/%s" % (versionNumber,
+            unifName = "versioning/packet/versionNo/%s/%s" % (versionNumber,
                     self.unifiedBasePageName)
 
             self.wikiDocument.deleteDataBlock(unifName)
@@ -551,13 +551,13 @@ class VersionOverview(MiscEventSourceMixin):
             prevHeadEntry = self.versionEntries[-2]
             newContent = self.getVersionContentRaw(prevHeadEntry.versionNumber)
             
-            unifName = u"versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
+            unifName = "versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
                     self.unifiedBasePageName)
             prevHeadEntry.contentDifferencing = "complete"
             self.wikiDocument.storeDataBlock(unifName, newContent,
                     storeHint=self.getStorageHint())
                 
-            unifName = u"versioning/packet/versionNo/%s/%s" % (versionNumber,
+            unifName = "versioning/packet/versionNo/%s/%s" % (versionNumber,
                     self.unifiedBasePageName)
             self.wikiDocument.deleteDataBlock(unifName)
             del self.versionEntries[-1]
@@ -608,7 +608,7 @@ class WikiPageSnapshot(AbstractWikiPage):
         if self.versionNumber == 0:
             return None
         
-        return u"versioning/version/versionNo/%s/%s" % (self.versionNumber,
+        return "versioning/version/versionNo/%s/%s" % (self.versionNumber,
                 self.baseWikiPage.getWikiWord())
 
 

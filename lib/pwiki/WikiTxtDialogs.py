@@ -1,7 +1,7 @@
-from __future__ import with_statement
+
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
-from __future__ import division
+
 
 import traceback
 
@@ -9,20 +9,20 @@ import wx, wx.xrc
 
 # from Utilities import *  # TODO Remove this
 
-from wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
+from .wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
         ModalDialogMixin, WindowUpdateLocker
 
 
-from StringOps import unescapeForIni
+from .StringOps import unescapeForIni
 
-import SystemInfo
+from . import SystemInfo
 
-import Utilities
+from . import Utilities
 
-from TempFileSet import TempFileSet
+from .TempFileSet import TempFileSet
 
 try:
-    import WindowsHacks
+    from . import WindowsHacks
 except:
     if SystemInfo.isWindows():
         traceback.print_exc()
@@ -38,14 +38,14 @@ class IncrementalSearchDialog(wx.Frame):
     def __init__(self, parent, id, txtCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
-        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+        wx.Frame.__init__(self, parent, id, "WikidPad i-search",
                 rect.GetPosition(), rect.GetSize(),
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.txtCtrl = txtCtrl
         self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Incremental search (ENTER/ESC to finish)"),
+                _("Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -188,10 +188,10 @@ class FilePasteParams:
     Helper class to store file paste settings
     """
     def __init__(self):
-        self.rawPrefix = u""  # Prefix before file links
+        self.rawPrefix = ""  # Prefix before file links
                 # (before calling StringOps.strftimeUB on it)
-        self.rawMiddle = u" "  # Middle text between links
-        self.rawSuffix = u""  # Suffix after links
+        self.rawMiddle = " "  # Middle text between links
+        self.rawSuffix = ""  # Suffix after links
         self.bracketedUrl = True
 
         self.unifActionName = None  # Unified name of the action to do
@@ -206,11 +206,11 @@ class FilePasteParams:
                 settings from into the object
         """
         self.rawPrefix = unescapeForIni(config.get("main",
-                "editor_filePaste_prefix", u""))
+                "editor_filePaste_prefix", ""))
         self.rawMiddle = unescapeForIni(config.get("main",
-                "editor_filePaste_middle", u" "))
+                "editor_filePaste_middle", " "))
         self.rawSuffix = unescapeForIni(config.get("main",
-                "editor_filePaste_suffix", u""))
+                "editor_filePaste_suffix", ""))
         self.bracketedUrl = config.getboolean("main",
                 "editor_filePaste_bracketedUrl", True)
         self.defaultUnifActionName = \
@@ -224,10 +224,10 @@ class FilePasteParams:
 class FilePasteDialog(wx.Dialog, ModalDialogMixin):
 
     _ACTIONSEL_TO_UNIFNAME = (
-            u"action/editor/this/paste/files/insert/url/absolute",
-            u"action/editor/this/paste/files/insert/url/relative",
-            u"action/editor/this/paste/files/insert/url/tostorage",
-            u"action/editor/this/paste/files/insert/url/movetostorage"
+            "action/editor/this/paste/files/insert/url/absolute",
+            "action/editor/this/paste/files/insert/url/relative",
+            "action/editor/this/paste/files/insert/url/tostorage",
+            "action/editor/this/paste/files/insert/url/movetostorage"
         )
 
 
@@ -301,7 +301,7 @@ class ImagePasteSaver:
     perform saving on request.
     """
     def __init__(self):
-        self.prefix = u""  # Prefix before random numbers in filename
+        self.prefix = ""  # Prefix before random numbers in filename
         self.formatNo = 0  # Currently either 0:None, 1:PNG or 2:JPG
         self.quality = 75   # Quality for JPG image
 
@@ -311,9 +311,9 @@ class ImagePasteSaver:
         config -- SingleConfiguration or CombinedConfiguration to read default
                 settings from into the object
         """
-        self.prefix = config.get("main", "editor_imagePaste_filenamePrefix", u"")
+        self.prefix = config.get("main", "editor_imagePaste_filenamePrefix", "")
 
-        self.formatNo = config.getint("main", "editor_imagePaste_fileType", u"")
+        self.formatNo = config.getint("main", "editor_imagePaste_fileType", "")
 
         quality = config.getint("main", "editor_imagePaste_quality", 75)
         quality = min(100, quality)
@@ -352,19 +352,19 @@ class ImagePasteSaver:
         if self.formatNo < 1 or self.formatNo > 2:
             return None
 
-        img.SetOptionInt(u"quality", self.quality)
+        img.SetOptionInt("quality", self.quality)
 
         tempFileSet = TempFileSet()
 
         if self.formatNo == 1:   # PNG
-            file_suffix = u".png"
+            file_suffix = ".png"
             wx_image_type = wx.BITMAP_TYPE_PNG
         elif self.formatNo == 2:   # JPG
-            file_suffix = u".jpg"
+            file_suffix = ".jpg"
             wx_image_type = wx.BITMAP_TYPE_JPEG
 
         tempFilePath = tempFileSet.createTempFile(
-                u"", file_suffix, relativeTo="")
+                "", file_suffix, relativeTo="")
 
         img.SaveFile(tempFilePath, wx_image_type)
 
@@ -416,7 +416,7 @@ class ImagePasteSaver:
 
         Returns absolute path of saved image or None if not saved
         """
-        destPath = fs.findDestPathNoSource(u".wmf", self.prefix)
+        destPath = fs.findDestPathNoSource(".wmf", self.prefix)
 
         if destPath is None:
             # Couldn't find unused filename
@@ -450,7 +450,7 @@ class ImagePasteDialog(wx.Dialog):
 
         self.ctrls.tfEditorImagePasteFilenamePrefix.SetValue(imgpastesaver.prefix)
         self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
-        self.ctrls.tfEditorImagePasteQuality.SetValue(unicode(
+        self.ctrls.tfEditorImagePasteQuality.SetValue(str(
                 imgpastesaver.quality))
 
         self.origImage = img
@@ -554,7 +554,7 @@ class RenameFileDialog(wx.Dialog):
     def RemoveExtensionFromSelection(self):
         # Remove selection from extension (if one exists)
         try:
-            name, extension = self.text_ctrl.GetValue().rsplit(u".", 1)
+            name, extension = self.text_ctrl.GetValue().rsplit(".", 1)
             self.text_ctrl.SetInsertionPoint(0)
             self.text_ctrl.SetSelection(0, len(name))
         except ValueError:

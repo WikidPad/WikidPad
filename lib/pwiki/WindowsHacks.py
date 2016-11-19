@@ -289,7 +289,7 @@ if SHFileOperationW is not None:
     def _shellFileOp(opcode, srcPath, dstPath):
         fileOp = SHFILEOPSTRUCTW()
 
-        srcPathWc = ctypes.c_wchar_p(srcPath + u"\0")
+        srcPathWc = ctypes.c_wchar_p(srcPath + "\0")
 
         fileOp.hwnd = 0
         fileOp.wFunc = opcode
@@ -300,7 +300,7 @@ if SHFileOperationW is not None:
             if not os.path.exists(pathEnc(dstDir)):
                 os.makedirs(dstDir)
 
-            dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
+            dstPathWc = ctypes.c_wchar_p(dstPath + "\0")
             fileOp.pTo = dstPathWc
         else:
             fileOp.pTo = 0
@@ -315,18 +315,18 @@ if SHFileOperationW is not None:
         if res != 0:
             if opcode == FO_COPY:
                 raise IOError(
-                        _(u"Copying from %s to %s failed. SHFileOperation result no. %s") %
+                        _("Copying from %s to %s failed. SHFileOperation result no. %s") %
                         (srcPath, dstPath, res))
             elif opcode == FO_MOVE:
                 raise IOError(
-                        _(u"Moving from %s to %s failed. SHFileOperation result no. %s") %
+                        _("Moving from %s to %s failed. SHFileOperation result no. %s") %
                         (srcPath, dstPath, res))
             elif opcode == FO_DELETE:
                 raise IOError(
-                        _(u"Deleting %s failed. SHFileOperation result no. %s") %
+                        _("Deleting %s failed. SHFileOperation result no. %s") %
                         (srcPath, res))
             else:
-                raise InternalError(u"SHFileOperation failed. Opcode=%s from=%s to=%s errcode=%s" %
+                raise InternalError("SHFileOperation failed. Opcode=%s from=%s to=%s errcode=%s" %
                         (opcode, srcPath, dstPath, res))
 
 
@@ -413,7 +413,7 @@ def saveWmfFromClipboardToFileStorage(fs, prefix):
 
         hdl = struct.unpack("lllI", data)[3]
 
-        destPath = fs.findDestPathNoSource(u".wmf", prefix)
+        destPath = fs.findDestPathNoSource(".wmf", prefix)
 
         if destPath is None:
             # Couldn't find unused filename
@@ -445,7 +445,7 @@ def getLongPath(path):
     if isinstance(path, str):
         path = mbcsDec(path)[0]
 
-    if not isinstance(path, unicode):
+    if not isinstance(path, str):
         return path
 
     if len(path) > 32760:
@@ -453,12 +453,12 @@ def getLongPath(path):
         return path
 
     result = create_unicode_buffer(1024)
-    rv = GetLongPathName(u"\\\\?\\" + path, result, 1024)
+    rv = GetLongPathName("\\\\?\\" + path, result, 1024)
     if rv == 0:
         return path
     if rv > 1024:
         result = create_unicode_buffer(rv)
-        rv = GetLongPathName(u"\\\\?\\" + path, result, rv)
+        rv = GetLongPathName("\\\\?\\" + path, result, rv)
 
         if rv == 0:
             return path
@@ -486,12 +486,12 @@ def ansiInputToUnicodeChar(ansiCode):
     ansiCode -- Numerical ANSI keycode from EVT_CHAR
     """
     if ansiCode < 128:
-        return unichr(ansiCode)
+        return chr(ansiCode)
 
     if ansiCode > 255:
         # This may be wrong for Asian languages on Win 9x,
         # but I just hope this case doesn't happen
-        return unichr(ansiCode)
+        return chr(ansiCode)
 
 
     # get current locale
@@ -506,7 +506,7 @@ def ansiInputToUnicodeChar(ansiCode):
     try:
         codepage = int(currAcpStr.value)
     except:
-        return unichr(ansiCode)
+        return chr(ansiCode)
 
     ansiByte = c_byte(ansiCode)
     uniChar = (c_ushort * 2)()
@@ -516,11 +516,11 @@ def ansiInputToUnicodeChar(ansiCode):
 
     if length == 0:
         # function failed, fallback
-        return unichr(ansiCode)
+        return chr(ansiCode)
     elif length == 1:
-        return unichr(uniChar[0])
+        return chr(uniChar[0])
     elif length == 2:
-        return unichr(uniChar[0]) + unichr(uniChar[1])
+        return chr(uniChar[0]) + chr(uniChar[1])
 
     assert 0
 
@@ -528,8 +528,8 @@ def ansiInputToUnicodeChar(ansiCode):
 
 if ShellExecuteW:
     def startFile(mainControl, link):
-        if not isinstance(link, unicode):
-            link = unicode(link)
+        if not isinstance(link, str):
+            link = str(link)
         # TODO Test result?
         res = _shell32dll.ShellExecuteW(0, 0, ctypes.c_wchar_p(link), 0, 0,
                 SW_SHOW)
@@ -542,7 +542,7 @@ def checkForOtherInstances():
     return []
 
 try:
-    from WindowsHacksZombieCheck import checkForOtherInstances
+    from .WindowsHacksZombieCheck import checkForOtherInstances
 except:
     if SystemInfo.isWindows():
         traceback.print_exc()
@@ -554,7 +554,7 @@ _ACCEL_KEY_MAPPING = None
 def translateAcceleratorByKbLayout(accStr):
     global _ACCEL_KEY_MAPPING
 
-    cm = re.match(ur"(.+?[\+\-])(.) *$", accStr)
+    cm = re.match(r"(.+?[\+\-])(.) *$", accStr)
     if not cm:
         return accStr
 
@@ -571,18 +571,18 @@ def translateAcceleratorByKbLayout(accStr):
         # 2. Digits
         # 3. Remaining codes
 
-        for char in range(0x41, 0x5b) + range(0x30, 0x3a) + \
-                range(0x20, 0x30) + range(0x3a, 0x41) + range(0x5b, 0xffff):
-            ks = VkKeyScan(unichr(char))
+        for char in list(range(0x41, 0x5b)) + list(range(0x30, 0x3a)) + \
+                list(range(0x20, 0x30)) + list(range(0x3a, 0x41)) + list(range(0x5b, 0xffff)):
+            ks = VkKeyScan(chr(char))
             vkCode = ks & 0xff
 
             if vkCode == 0:
                 continue
 
             # Alternative method
-            targetChar = unichr(vkCode).upper()
+            targetChar = chr(vkCode).upper()
             if not targetChar in resultBack:
-                resultBack[targetChar] = unichr(char)
+                resultBack[targetChar] = chr(char)
 
 
             targetChar = MapVirtualKey(vkCode, 2) & 0xffff
@@ -590,12 +590,12 @@ def translateAcceleratorByKbLayout(accStr):
             if targetChar == 0:
                 continue
 
-            targetChar = unichr(targetChar).upper()
+            targetChar = chr(targetChar).upper()
 
             if targetChar in result:
                 continue
 
-            result[targetChar] = unichr(char)
+            result[targetChar] = chr(char)
 
         # If result and resultBack have a key, result wins
         resultBack.update(result)
@@ -901,7 +901,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         if not isinstance(wikiPage,
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
             self.mainControl.displayErrorMessage(
-                    _(u"Only a real wiki page can be a clipboard catcher"))
+                    _("Only a real wiki page can be a clipboard catcher"))
             return
 
         self.lastText = None
@@ -991,8 +991,8 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         config = self.mainControl.getConfig()
         notifMode = config.getint("main", "clipboardCatcher_userNotification", 0)
         if notifMode == 1:
-            soundPath = config.get("main", "clipboardCatcher_soundFile", u"")
-            if soundPath == u"":
+            soundPath = config.get("main", "clipboardCatcher_soundFile", "")
+            if soundPath == "":
                 wx.Bell()
             else:
                 try:
@@ -1003,7 +1003,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
                                 # (This shouldn't be needed, but there seems to be a bug...)
                     else:
                         wx.Bell()
-                except NotImplementedError, v:
+                except NotImplementedError as v:
                     wx.Bell()
 
 
@@ -1016,14 +1016,14 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
                     "main", "clipboardCatcher_prefix", r""))
         except:
             traceback.print_exc()
-            prefix = u""   # TODO Error message?
+            prefix = ""   # TODO Error message?
 
         try:
             suffix = strftimeUB(self.mainControl.getConfig().get(
                     "main", "clipboardCatcher_suffix", r"\n"))
         except:
             traceback.print_exc()
-            suffix = u"\n"   # TODO Error message?
+            suffix = "\n"   # TODO Error message?
 
         if self.mode == ClipboardCatchIceptor.MODE_OFF:
             return

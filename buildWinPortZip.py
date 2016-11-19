@@ -8,8 +8,8 @@ import Consts
 
 # Build dirlist
 
-print "Build Windows portable Zip File"
-print "Collecting files..."
+print("Build Windows portable Zip File")
+print("Collecting files...")
 
 DIRS_TO_WALK = r"""dist\WikidPadHelp"""
 
@@ -94,7 +94,7 @@ VERSTRING = Consts.VERSION_STRING.split(" ")[1]
 zfilefull = zipfile.ZipFile("Output\\WikidPad-" + VERSTRING + "-winport.zip", "w",
         zipfile.ZIP_DEFLATED)
 
-print "Compressing files..."
+print("Compressing files...")
 for src, ziptarget in filesToZip:
     zfilefull.write(src, ziptarget)
 #     if src.endswith(".py"):

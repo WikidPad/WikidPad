@@ -5,11 +5,11 @@ to it and closes the additional instance then.
 """
 
 import os, sys, string, re, traceback
-import threading, socket, SocketServer
+import threading, socket, socketserver
 
 import wx
 
-from Serialization import SerializeStream
+from .Serialization import SerializeStream
 
 # TODO How to handle /x (exit) command on commandline?
 
@@ -32,9 +32,9 @@ class RemoteCommandEvent(wx.PyCommandEvent):
 
 
 
-class CommandServer(SocketServer.TCPServer):
+class CommandServer(socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
-        SocketServer.TCPServer.__init__(self, server_address,
+        socketserver.TCPServer.__init__(self, server_address,
                 RequestHandlerClass)
         
         self.cookie = None
@@ -67,13 +67,13 @@ class CommandServer(SocketServer.TCPServer):
 
 
 
-class RemoteCmdHandler(SocketServer.StreamRequestHandler):
+class RemoteCmdHandler(socketserver.StreamRequestHandler):
     def setup(self):
         self.request.settimeout(10.0)
-        SocketServer.StreamRequestHandler.setup(self)
+        socketserver.StreamRequestHandler.setup(self)
 
     def finish(self):
-        SocketServer.StreamRequestHandler.finish(self)
+        socketserver.StreamRequestHandler.finish(self)
         self.request.close()
 
     def _readLine(self):
@@ -122,13 +122,13 @@ def createCommandServer(appCookie):
     global theServer
 
     # Search for an unused port
-    for port in xrange(2000,3000):   # TODO range option
+    for port in range(2000,3000):   # TODO range option
         try:
             server = CommandServer(("127.0.0.1", port), RemoteCmdHandler)
             server.setAppCookie(appCookie)
             theServer = server
             return port  # Free port found
-        except socket.error, e:
+        except socket.error as e:
             if not (e.args[0] == 10048 or e.args[0] == 98):
                 # Not "Address already in use" error, so reraise
                 raise

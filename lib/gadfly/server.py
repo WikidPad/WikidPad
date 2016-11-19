@@ -1,7 +1,7 @@
 
 import sys, socket, select, gadfly
 
-from gfsocket import reply_exception, reply_success, Packet_Reader, certify
+from .gfsocket import reply_exception, reply_success, Packet_Reader, certify
 
 # general error
 ServerError = "ServerError"
@@ -79,7 +79,7 @@ class Server:
 
     def start(self):
         """after init, listen for commands."""
-        from gfsocket import READY, ERROR, unpack_certified_data
+        from .gfsocket import READY, ERROR, unpack_certified_data
         verbose = self.verbose
         socket = self.socket
         connection = self.connection
@@ -91,21 +91,20 @@ class Server:
                 # main loop
                 if self.check_loop < 0:
                     self.check_loop=5
-                for i in xrange(self.check_loop):
+                for i in range(self.check_loop):
                     if verbose:
-                        print "main loop on", socket, connection
+                        print("main loop on", socket, connection)
                     # checkpoint loop
                     sockets = [socket]
                     if pending_connects:
-                        sockets = sockets + pending_connects.keys()
+                        sockets = sockets + list(pending_connects.keys())
                     # wait for availability
                     if verbose:
-                        print "server: waiting for connection(s)"
+                        print("server: waiting for connection(s)")
                     (readables, dummy, errors) = select.select(\
                        sockets, [], sockets[:], self.select_timeout)
                     if socket in errors:
-                        raise ServerError, \
-                          "listening socket in error state: aborting"
+                        raise ServerError("listening socket in error state: aborting")
                     # clean up error connection sockets
                     for s in errors:
                         del pending_connects[s]
@@ -115,7 +114,7 @@ class Server:
                         readables.remove(socket)
                         (conn, addr) = socket.accept()
                         if 1 or verbose:
-                            print "connect %s" % (addr,)
+                            print("connect %s" % (addr,))
                         reader = Packet_Reader(conn)
                         pending_connects[conn] = reader
                     # poll readable pending connections, if possible
@@ -137,7 +136,7 @@ class Server:
                                     pass # AFTER DEBUG CHANGE THIS!
                     # in blocking mode, service ready request,
                     # commit on no error
-                    for conn in pending_connects.keys():
+                    for conn in list(pending_connects.keys()):
                         reader = pending_connects[conn]
                         mode = reader.mode
                         if mode == ERROR:
@@ -152,58 +151,55 @@ class Server:
                                 (actor_name, cert, md) = \
                                   unpack_certified_data(data)
                                 # find the policy for this actor
-                                if not policies.has_key(actor_name):
+                                if actor_name not in policies:
                                     if verbose:
-                                        print "no such policy: "+actor_name
+                                        print("no such policy: "+actor_name)
                                     reply_exception(NameError,
                                      "no such policy: "+actor_name, conn)
                                     policy = None
                                 else:
                                     if verbose:
-                                        print "executing for", actor_name
+                                        print("executing for", actor_name)
                                     policy = policies[actor_name]
                                     policy.action(cert, md, conn)
                             except SHUTDOWN:
                                 if policy is admin_policy:
-                                    print \
-  "shutdown on admin policy: terminating"
+                                    print("shutdown on admin policy: terminating")
                                     connection.close()
                                     socket.close()
                                     # NORMAL TERMINATION:
                                     return
                             except RESTART:
                                 if policy is admin_policy:
-                                    print \
-  "restart from admin policy: restarting connection"
+                                    print("restart from admin policy: restarting connection")
                                     connection.restart()
                             except CHECKPOINT:
                                 if policy is admin_policy:
-                                    print \
-  "checkpoint from admin policy: checkpointing now."
+                                    print("checkpoint from admin policy: checkpointing now.")
                                     connection.checkpoint()
                             except:
-                                tb = sys.exc_traceback
-                                info = "%s %s" % (sys.exc_type,
-                                             str(sys.exc_value))
+                                tb = sys.exc_info()[2]
+                                info = "%s %s" % (sys.exc_info()[0],
+                                             str(sys.exc_info()[1]))
                                 if verbose:
                                     from traceback import print_tb
                                     print_tb(tb)
-                                print "error in executing action: "+info
+                                print("error in executing action: "+info)
                                 reply_exception(
   ServerError, "exception: "+info, conn)
                         #break # stop after first request serviced!
             except:
                 # except of main while 1 try statement
-                tb = sys.exc_traceback
-                ty = sys.exc_type
-                va = sys.exc_value
-                print "UNEXPECTED EXCEPTION ON MAINLOOP"
+                tb = sys.exc_info()[2]
+                ty = sys.exc_info()[0]
+                va = sys.exc_info()[1]
+                print("UNEXPECTED EXCEPTION ON MAINLOOP")
                 from traceback import print_tb
                 print_tb(tb)
-                print "exception:", ty, va
+                print("exception:", ty, va)
             if not pending_connects:
                 pending_connects = {}
-            print "server: checkpointing"
+            print("server: checkpointing")
             connection.checkpoint()
 
     def init(self):
@@ -221,18 +217,18 @@ class Server:
         verbose = self.verbose
         import socket, sys
         if verbose:
-            print "initializing listener socket"
+            print("initializing listener socket")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             if verbose:
-                print "trying to set REUSEADDR",\
+                print("trying to set REUSEADDR",\
                        sock.getsockopt(socket.SOL_SOCKET,
-                          socket.SO_REUSEADDR)
+                          socket.SO_REUSEADDR))
             sock.setsockopt(socket.SOL_SOCKET,
                    socket.SO_REUSEADDR, 1)
         except:
             if verbose:
-                print "set of REUSEADDR failed", sys.exc_type, sys.exc_value
+                print("set of REUSEADDR failed", sys.exc_info()[0], sys.exc_info()[1])
             pass
         sock.bind((self.HOST, self.port))
         sock.listen(self.BACKLOG)
@@ -287,7 +283,7 @@ class Policy:
            set queries to allow general accesses (unrestricted)
         """
         if self.verbose:
-            print "policy.__init__", name
+            print("policy.__init__", name)
         self.general_queries = queries
         self.name = name
         self.password = password
@@ -298,23 +294,23 @@ class Policy:
 
     def __setitem__(self, name, value):
         if self.verbose:
-            print "policy", self.name, ":", (name, value)
+            print("policy", self.name, ":", (name, value))
         from types import StringType
         if type(name) is not StringType or type(value) is not StringType:
-            raise ValueError, "cursor names and contents must be strings"
+            raise ValueError("cursor names and contents must be strings")
         self.named_accesses[name] = value
 
     def execute_named(self, name, params=None):
         """execute a named (prepared) sql statement"""
         if self.verbose:
-            print "policy", self.name, "executes", name, params
+            print("policy", self.name, "executes", name, params)
         na = self.named_accesses
         pc = self.prepared_cursors
         con = self.connection
-        if not na.has_key(name):
-            raise PreparedNameError, "unknown access name: %s" % name
+        if name not in na:
+            raise PreparedNameError("unknown access name: %s" % name)
         stat = na[name]
-        if pc.has_key(name):
+        if name in pc:
             # get prepared query
             cursor = pc[name]
         else:
@@ -325,7 +321,7 @@ class Policy:
     def execute(self, cursor, statement, params=None):
         """execute a statement in a cursor"""
         if self.verbose:
-            print "policy", self.name, "executes", statement, params
+            print("policy", self.name, "executes", statement, params)
         cursor.execute(statement, params)
         # immediate commit!
         self.connection.commit()
@@ -340,7 +336,7 @@ class Policy:
     def execute_any_statement(self, statement, params=None):
         """execute any statement."""
         if self.verbose:
-            print "policy", self.name, "executes", statement, params
+            print("policy", self.name, "executes", statement, params)
         con = self.connection
         cursor = con.cursor()
         return self.execute(cursor, statement, params)
@@ -349,10 +345,10 @@ class Policy:
         """perform a database/server action after checking certificate"""
         verbose = self.verbose
         if verbose:
-            print "policy", self.name, "action..."
+            print("policy", self.name, "action...")
         # make sure the certificate checks out
         if not self.certify(datastring, certificate, self.password):
-            raise ServerError, "password certification failure"
+            raise ServerError("password certification failure")
         # unpack the datastring
         from marshal import loads
         test = loads(datastring)
@@ -364,27 +360,27 @@ class Policy:
             action = "policy_"+action
             myaction = getattr(self, action)
             try:
-                data = apply(myaction, moredata+(socket,))
+                data = myaction(*moredata+(socket,))
                 #self.reply_success(data)
             # pass up server level requests as exceptions
-            except SHUTDOWN, detail:
-                raise SHUTDOWN, detail
-            except RESTART, detail:
-                raise RESTART, detail
-            except CHECKPOINT, detail:
-                raise CHECKPOINT, detail
+            except SHUTDOWN as detail:
+                raise SHUTDOWN(detail)
+            except RESTART as detail:
+                raise RESTART(detail)
+            except CHECKPOINT as detail:
+                raise CHECKPOINT(detail)
             except:
-                tb = sys.exc_traceback
-                exceptiondata = "%s\n%s" %(sys.exc_type,
-                    str(sys.exc_value))
+                tb = sys.exc_info()[2]
+                exceptiondata = "%s\n%s" %(sys.exc_info()[0],
+                    str(sys.exc_info()[1]))
                 if verbose:
                     from traceback import print_tb
                     print_tb(tb)
                 self.reply_exception(ServerError,
                   "unexpected exception: "+exceptiondata, socket)
-                raise ServerError, exceptiondata
+                raise ServerError(exceptiondata)
         else:
-            raise ServerError, "unknown action: "+`action`
+            raise ServerError("unknown action: "+repr(action))
 
     def certify(self, datastring, certificate, password):
         # hook for subclassing
@@ -392,21 +388,21 @@ class Policy:
 
     def policy_SHUTDOWN(self, socket):
         self.reply_success("attempting server shutdown", socket)
-        raise SHUTDOWN, "please shut down the server"
+        raise SHUTDOWN("please shut down the server")
 
     def policy_RESTART(self, socket):
         self.reply_success("attempting server restart", socket)
-        raise RESTART, "please restart the server"
+        raise RESTART("please restart the server")
 
     def policy_CHECKPOINT(self, socket):
         self.reply_success("attempting server checkpoint", socket)
-        raise CHECKPOINT, "please checkpoint the server"
+        raise CHECKPOINT("please checkpoint the server")
 
     def policy_EXECUTE_PREPARED(self, name, dyn, socket):
         try:
             result = self.execute_named(name, dyn)
             self.reply_success(result, socket)
-        except PreparedNameError, detail:
+        except PreparedNameError as detail:
             self.reply_exception(PreparedNameError,
              "no such prepared statement: "+name,
              socket)
@@ -416,7 +412,7 @@ class Policy:
             self.reply_exception(ServerError,
                "general statements disallowed on this policy",
                socket)
-            raise ServerError, "illegal statement attempt for: "+self.name
+            raise ServerError("illegal statement attempt for: "+self.name)
         result = self.execute_any_statement(stat, dyn)
         self.reply_success(result, socket)
 

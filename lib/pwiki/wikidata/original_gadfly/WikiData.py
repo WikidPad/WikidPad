@@ -32,8 +32,8 @@ except ImportError:
 #     pass
 
 if gadfly is not None:
-    import DbStructure
-    from DbStructure import createWikiDB
+    from . import DbStructure
+    from .DbStructure import createWikiDB
 
 
 import Consts
@@ -64,11 +64,11 @@ class WikiData:
 #                 u"").strip()
 #                 
 #         if (dbName == u""):
-        dbName = u"wikidb"
+        dbName = "wikidb"
 
         try:
             conn = gadfly.gadfly(dbName, self.dataDir)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -80,8 +80,8 @@ class WikiData:
         self.connWrap = DbStructure.ConnectWrap(conn)
         try:
             self.pagefileSuffix = self.wikiDocument.getWikiConfig().get("main",
-                    "db_pagefile_suffix", u".wiki")
-        except (IOError, OSError, ValueError), e:
+                    "db_pagefile_suffix", ".wiki")
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -95,7 +95,7 @@ class WikiData:
 
         if formatcheck == 2:
             # Unknown format
-            raise WikiDataException, formatmsg
+            raise WikiDataException(formatmsg)
 
         # Update database from previous versions if necessary
         if formatcheck == 1:
@@ -110,7 +110,7 @@ class WikiData:
         try:
             # Further possible updates   
             DbStructure.updateDatabase2(self.connWrap)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             # Remember but continue
             lastException = DbWriteAccessError(e)
 
@@ -118,7 +118,7 @@ class WikiData:
             # Set marker for database type
             self.wikiDocument.getWikiConfig().set("main", "wiki_database_type",
                     "original_gadfly")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             # Remember but continue
             lastException = DbWriteAccessError(e)
 
@@ -137,11 +137,11 @@ class WikiData:
 #     
             self.cachedGlobalAttrs = None
             self.getGlobalAttributes()
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             try:
                 self.connWrap.rollback()
-            except (IOError, OSError, ValueError), e2:
+            except (IOError, OSError, ValueError) as e2:
                 traceback.print_exc()
                 raise DbReadAccessError(e2)
             raise DbReadAccessError(e)
@@ -168,7 +168,7 @@ class WikiData:
             content = loadEntireTxtFile(filePath)
 
             return fileContentToUnicode(content)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -187,7 +187,7 @@ class WikiData:
         try:
             data = self.connWrap.execSqlQuery("select word from wikiwords "
                     "where word = ?", (word,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -219,7 +219,7 @@ class WikiData:
 
             self.cachedWikiPageLinkTermDict = None
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -245,7 +245,7 @@ class WikiData:
             self.connWrap.execSql("update wikiwords set filesignature = ?, "
                     "metadataprocessed = ? where word = ?", (fileSig, 0, word))
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -280,7 +280,7 @@ class WikiData:
 
 ###            del self._getCachedWikiPageLinkTermDict()[oldWord]
 ###            self._getCachedWikiPageLinkTermDict()[newWord] = 1
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -303,7 +303,7 @@ class WikiData:
             self.cachedWikiPageLinkTermDict = None
             if fileName is not None and os.path.exists(fileName):
                 os.unlink(fileName)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -324,7 +324,7 @@ class WikiData:
                 return (float(dates[0][0]), float(dates[0][1]), float(dates[0][2]))
             else:
                 return (None, None, None)  # ?
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -339,7 +339,7 @@ class WikiData:
         try:
             data = self.connWrap.execSqlQuery("select word from wikiwords "
                     "where word = ?", (word,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -351,7 +351,7 @@ class WikiData:
                         "created = ?, visited = ? where word = ?",
                         (moddate, creadate, visitdate, word))
                 self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -367,7 +367,7 @@ class WikiData:
         try:
             data = self.connWrap.execSqlQuery("select word from wikiwords "
                     "where word = ?", (word,))
-        except (IOError, OSError, sqlite.Error), e:
+        except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -377,7 +377,7 @@ class WikiData:
             else:
                 self.connWrap.execSql("update wikiwords set readonly = ? "
                         "where word = ?", (flag, word))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
         
@@ -395,7 +395,7 @@ class WikiData:
                 return None
             else:
                 return int(data)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -439,7 +439,7 @@ class WikiData:
             elif field == "firstcharpos":
                 # Fake character position. TODO More elegantly
                 addFields += ", 0"
-                converters.append(lambda s: 2000000000L)
+                converters.append(lambda s: 2000000000)
 
 
         sql = "select word%s from wikiwords where word = ?" % addFields
@@ -455,7 +455,7 @@ class WikiData:
                 raise WikiWordNotFoundException(wikiWord)
             
             return dbresult[0]
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -480,7 +480,7 @@ class WikiData:
             except:
                 self.connWrap.rollback()
                 raise
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -511,7 +511,7 @@ class WikiData:
                 except:
                     self.connWrap.rollback()
                     raise
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
                 
@@ -520,11 +520,11 @@ class WikiData:
                 self.connWrap.close()
                 conn = gadfly.gadfly("wikidb", self.dataDir)
                 self.connWrap = DbStructure.ConnectWrap(conn)
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
         else:
-            raise WikiDataException(_(u"You cannot delete the root wiki node"),
+            raise WikiDataException(_("You cannot delete the root wiki node"),
                     "delete rootPage")
 
 
@@ -538,7 +538,7 @@ class WikiData:
             self.connWrap.execSql("update wikiwords set metadataprocessed = ? "
                     "where word = ?", (state, word))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -550,7 +550,7 @@ class WikiData:
         try:
             return self.connWrap.execSqlQuerySingleItem("select metadataprocessed "
                     "from wikiwords where word = ?", (word,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -574,14 +574,14 @@ class WikiData:
         """
         sqlCompare = self._METADATASTATE_NUMCOPARE_TO_SQL.get(compare)
         if sqlCompare is None:
-            raise InternalError(u"getWikiPageNamesForMetaDataState: Bad compare '%s'" %
+            raise InternalError("getWikiPageNamesForMetaDataState: Bad compare '%s'" %
                     compare)
 
         try:
             return self.connWrap.execSqlQuerySingleColumn("select word "
                     "from wikiwords where metadataprocessed " + sqlCompare +
                     " ?", (state,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -617,7 +617,7 @@ class WikiData:
                     (word,), strConv=False)
             
             return dbFileSig == fileSig
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -629,14 +629,14 @@ class WikiData:
         try:
             filePath = self.getWikiWordFileName(word)
             fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
         try:
             self.connWrap.execSql("update wikiwords set filesignature = ? "
                     "where word = ?", (fileSig, word))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -657,7 +657,7 @@ class WikiData:
         try:
             data = self.connWrap.execSqlQuery("select word, relation "
                     "from wikirelations")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -710,7 +710,7 @@ class WikiData:
             try:
                 children = self.connWrap.execSqlQuerySingleColumn(sql,
                         (wikiWord,))
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -725,7 +725,7 @@ class WikiData:
         else:
             try:
                 children = self.connWrap.execSqlQuery(sql, (wikiWord,))
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -798,7 +798,7 @@ class WikiData:
 #                 parents.update(self.connWrap.execSqlQuerySingleColumn(
 #                     "select word from wikirelations where relation = ?", (al,)))
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -852,7 +852,7 @@ class WikiData:
             data = self.connWrap.execSqlQuery("select relation "
                     "from wikirelations where word = ? and relation = ?",
                     (word, rel[0]))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -862,7 +862,7 @@ class WikiData:
                 self.connWrap.execSqlInsert("wikirelations", ("word", "relation",
                         "created"), (word, rel[0], time()))
                 self.commitNeeded = True
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
 
@@ -880,7 +880,7 @@ class WikiData:
             self.connWrap.execSql("delete from wikirelations where word = ?",
                     (fromWord,))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -902,7 +902,7 @@ class WikiData:
 
         while len(checkList) > 0:
             toCheck, chLevel = checkList.pop()
-            if resultSet.has_key(toCheck):
+            if toCheck in resultSet:
                 continue
 
             result.append(toCheck)
@@ -972,7 +972,7 @@ class WikiData:
         try:
             return self.connWrap.execSqlQuerySingleColumn("select word "
                     "from wikiwords")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
             
@@ -986,7 +986,7 @@ class WikiData:
             words = self.getAllDefinedWikiPageNames()
             return [w for w in words if w.startswith(thisStr)]
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -995,7 +995,7 @@ class WikiData:
         try:
             return bool(self.connWrap.execSqlQuerySingleItem(
                     "select word from wikiwords where word = ?", (word,)))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1010,17 +1010,17 @@ class WikiData:
                     
                     if self.connWrap.execSqlQuerySingleItem(
                             "select word from wikiwords where word = ?",
-                            (wikiWord + u"~" + rand,)):
+                            (wikiWord + "~" + rand,)):
                         continue
                     
-                    return wikiWord + u"~" + rand
+                    return wikiWord + "~" + rand
 
                 return None
 
             else:
                 return wikiWord
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1062,7 +1062,7 @@ class WikiData:
                         for word in words:
                             try:
                                 self.deleteWord(word, delContent=False)
-                            except WikiDataException, e:
+                            except WikiDataException as e:
                                 if e.getTag() != "delete rootPage":
                                     raise
 
@@ -1093,7 +1093,7 @@ class WikiData:
                     page.refreshSyncUpdateMatchTerms()
 
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1116,7 +1116,7 @@ class WikiData:
                 self.cachedWikiPageLinkTermDict = result
 
             return self.cachedWikiPageLinkTermDict
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1124,11 +1124,11 @@ class WikiData:
     # TODO More general Wikiword to filename mapping
     def _getAllWikiFileNamesFromDisk(self):   # Used for rebuilding wiki
         try:
-            files = glob.glob(join(self.dataDir, u'*' + self.pagefileSuffix))
+            files = glob.glob(join(self.dataDir, '*' + self.pagefileSuffix))
 
             return [pathDec(basename(fn)) for fn in files]
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1138,7 +1138,7 @@ class WikiData:
             return self.connWrap.execSqlQuerySingleColumn("select filepath "
                     "from wikiwords")
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1150,13 +1150,13 @@ class WikiData:
         try:
             path = self.connWrap.execSqlQuerySingleItem("select filepath "
                     "from wikiwords where word = ?", (wikiWord,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
         if path is None:
             raise WikiFileNotFoundException(
-                    _(u"Wiki page not found (no path information) for word: %s") %
+                    _("Wiki page not found (no path information) for word: %s") %
                     wikiWord)
 
         return path
@@ -1174,7 +1174,7 @@ class WikiData:
             if mustExist and \
                     (not os.path.exists(path) or not os.path.isfile(path)):
                  raise WikiFileNotFoundException(
-                        _(u"Wiki page not found (bad path information) for word: %s") %
+                        _("Wiki page not found (bad path information) for word: %s") %
                         wikiWord)
         except WikiFileNotFoundException:
             if self.wikiDocument.getWikiConfig().getboolean("main",
@@ -1188,7 +1188,7 @@ class WikiData:
                 if mustExist and \
                         (not os.path.exists(path) or not os.path.isfile(path)):
                      raise WikiFileNotFoundException(
-                            _(u"Wiki page not found (bad path information) for word: %s") %
+                            _("Wiki page not found (bad path information) for word: %s") %
                             wikiWord)
             else:
                 raise
@@ -1211,7 +1211,7 @@ class WikiData:
                 asciiOnly=asciiOnly, maxLength=maxFnLength)
         try:
             for i in range(30):   # "while True" would be too dangerous
-                fileName = icf.next()
+                fileName = next(icf)
                 existing = self.connWrap.execSqlQuerySingleColumn(
                         "select filenamelowercase from wikiwords "
                         "where filenamelowercase = ?", (fileName.lower(),))
@@ -1223,7 +1223,7 @@ class WikiData:
                 return fileName
     
             return None
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1247,7 +1247,7 @@ class WikiData:
                     asciiOnly=asciiOnly, maxLength=maxFnLength)
     
             for i in range(2):
-                fileName = icf.next()
+                fileName = next(icf)
 
                 existing = self.connWrap.execSqlQuerySingleColumn(
                         "select filenamelowercase from wikiwords "
@@ -1264,7 +1264,7 @@ class WikiData:
                     asciiOnly=not asciiOnly, maxLength=maxFnLength)
     
             for i in range(2):
-                fileName = icf.next()
+                fileName = next(icf)
 
                 existing = self.connWrap.execSqlQuerySingleColumn(
                         "select filenamelowercase from wikiwords "
@@ -1277,7 +1277,7 @@ class WikiData:
                 return fileName
             
             return None
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1298,7 +1298,7 @@ class WikiData:
         Return all links stored by production (in contrast to resolution)
         Function must work for read-only wiki.
         """
-        return self._getCachedWikiPageLinkTermDict().keys()
+        return list(self._getCachedWikiPageLinkTermDict().keys())
 
 #         try:
 #             otherTerms = self.connWrap.execSqlQuery("select matchterm, type "
@@ -1326,7 +1326,7 @@ class WikiData:
                         "select matchterm, type "
                         "from wikiwordmatchterms")
 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -1355,7 +1355,7 @@ class WikiData:
                 return list(words)
 
                 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -1415,7 +1415,7 @@ class WikiData:
         try:
             rows = self.connWrap.execSqlQuery("select word, modified "
                     "from wikiwords")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
             
@@ -1446,7 +1446,7 @@ class WikiData:
         try:
             rows = self.connWrap.execSqlQuery("select word, %s from wikiwords" %
                     field)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1454,7 +1454,7 @@ class WikiData:
         maxT = None
         
         # Find initial record for setting min/max
-        for i in xrange(len(rows)):
+        for i in range(len(rows)):
             row = rows[i]
             if row[0].startswith('[') or row[1] == 0.0:
                 continue
@@ -1463,7 +1463,7 @@ class WikiData:
             maxT = row[1]
             break
         
-        for i in xrange(i + 1, len(rows)):
+        for i in range(i + 1, len(rows)):
             row = rows[i]
             if row[0].startswith('[') or row[1] == 0.0:
                 continue
@@ -1490,7 +1490,7 @@ class WikiData:
         try:
             rows = self.connWrap.execSqlQuery("select word, %s from wikiwords" %
                     field)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1521,7 +1521,7 @@ class WikiData:
         try:
             rows = self.connWrap.execSqlQuery("select word, %s from wikiwords" %
                     field)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1585,7 +1585,7 @@ class WikiData:
         try:
             names = self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(key) from wikiwordattrs")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1595,7 +1595,7 @@ class WikiData:
         try:
             names = self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(key) from wikiwordattrs")   #  order by key")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1606,7 +1606,7 @@ class WikiData:
             try:
                 data = self.connWrap.execSqlQuery(
                         "select key, value from wikiwordattrs")  # order by key
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
             globalMap = {}
@@ -1622,7 +1622,7 @@ class WikiData:
         try:
             return self.connWrap.execSqlQuerySingleColumn("select distinct(value) "
                     "from wikiwordattrs where key = ?", (key,))  #  order by value
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1665,7 +1665,7 @@ class WikiData:
 
         try:
             return self.connWrap.execSqlQuery(query, tuple(parameters))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1675,7 +1675,7 @@ class WikiData:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(word) from wikiwordattrs where key = ? ",
                     (key,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1688,7 +1688,7 @@ class WikiData:
         try:
             return self.connWrap.execSqlQuery("select key, value "+
                         "from wikiwordattrs where word = ?", (word,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1699,7 +1699,7 @@ class WikiData:
             data = self.connWrap.execSqlQuery("select word from wikiwordattrs "
                     "where word = ? and key = ? and value = ?",
                     (word, key, value))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
         # if it doesn't insert it
@@ -1709,7 +1709,7 @@ class WikiData:
                 self.connWrap.execSqlInsert("wikiwordattrs", ("word", "key",
                         "value"), (word, key, value))
                 self.commitNeeded = True
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
             returnValue = True
@@ -1718,7 +1718,7 @@ class WikiData:
     def updateAttributes(self, word, attrs):
         self.deleteAttributes(word)
         self.getExistingWikiWordInfo(word)
-        for k in attrs.keys():
+        for k in list(attrs.keys()):
             values = attrs[k]
             for v in values:
                 self._setAttribute(word, k, v)
@@ -1733,7 +1733,7 @@ class WikiData:
             self.connWrap.execSql("delete from wikiwordattrs where word = ?",
                     (word,))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1794,7 +1794,7 @@ class WikiData:
         try:
 #             return self.connWrap.execSqlQuery("select word, todo from todos")
             return self.connWrap.execSqlQuery("select word, key, value from todos")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
 
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1825,7 +1825,7 @@ class WikiData:
             self.commitNeeded = True
 
 #             self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1833,7 +1833,7 @@ class WikiData:
         try:
             self.connWrap.execSql("delete from todos where word = ?", (word,))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1853,7 +1853,7 @@ class WikiData:
                         "from wikiwordmatchterms, wikiwords "
                         "where wikiwordmatchterms.word = wikiwords.word")
 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -1864,7 +1864,7 @@ class WikiData:
                         "select matchterm, type, word, firstcharpos, charlength "
                         "from wikiwordmatchterms")
                 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -1906,7 +1906,7 @@ class WikiData:
                     "type", "word", "firstcharpos", "charlength"),
                     (matchterm, typ, word, firstcharpos, charlength))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1934,7 +1934,7 @@ class WikiData:
                                 "firstcharpos = ?", term)
 
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -1956,7 +1956,7 @@ class WikiData:
                     
             names2 = self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(unifiedname) from datablocksexternal")
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1982,7 +1982,7 @@ class WikiData:
             if filePath is None:
                 return None  # TODO exception?
             
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1990,7 +1990,7 @@ class WikiData:
             datablock = loadEntireFile(join(self.dataDir, filePath))
             return datablock
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             if self.wikiDocument.getWikiConfig().getboolean("main",
                     "wikiPageFiles_gracefulOutsideAddAndRemove", True):
                 return default
@@ -2033,7 +2033,7 @@ class WikiData:
                 datablock = self.connWrap.execSqlQuerySingleItem(
                         "select data from datablocks where unifiedname = ?",
                         (unifName,), strConv=False)
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -2051,7 +2051,7 @@ class WikiData:
                         "data"), (unifName, newdata))
                 self.commitNeeded = True
 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
 
@@ -2060,7 +2060,7 @@ class WikiData:
                 filePath = self.connWrap.execSqlQuerySingleItem(
                         "select filepath from datablocksexternal "
                         "where unifiedname = ?", (unifName,))
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
@@ -2068,7 +2068,7 @@ class WikiData:
                 if filePath is not None:
                     # The entry is already in an external file, so overwrite it
                     writeEntireFile(join(self.dataDir, filePath), newdata,
-                            self.editorTextMode and isinstance(newdata, unicode),
+                            self.editorTextMode and isinstance(newdata, str),
                             self.wikiDocument.getWikiConfig().getint("main",
                                 "wikiPageFiles_writeFileMode", 0))
 
@@ -2086,11 +2086,11 @@ class WikiData:
                         "wikiPageFiles_maxNameLength", 120)
 
                 # Find unused filename
-                icf = iterCompatibleFilename(unifName, u".data",
+                icf = iterCompatibleFilename(unifName, ".data",
                         asciiOnly=asciiOnly, maxLength=maxFnLength)
 
                 for i in range(30):   # "while True" would be too dangerous
-                    fileName = icf.next()
+                    fileName = next(icf)
                     existing = self.connWrap.execSqlQuerySingleColumn(
                             "select filenamelowercase "
                             "from datablocksexternal where filenamelowercase = ?",
@@ -2106,7 +2106,7 @@ class WikiData:
                 
                 filePath = join(self.dataDir, fileName)
                 writeEntireFile(filePath, newdata,
-                        self.editorTextMode and isinstance(newdata, unicode),
+                        self.editorTextMode and isinstance(newdata, str),
                         self.wikiDocument.getWikiConfig().getint("main",
                             "wikiPageFiles_writeFileMode", 0))
                 fileSig = self.wikiDocument.getFileSignatureBlock(filePath)
@@ -2120,7 +2120,7 @@ class WikiData:
                         (unifName, fileName, fileName.lower(), fileSig))
                 self.commitNeeded = True
 
-            except (IOError, OSError, ValueError), e:
+            except (IOError, OSError, ValueError) as e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
 
@@ -2136,7 +2136,7 @@ class WikiData:
             datablock = self.connWrap.execSqlQuerySingleItem(
                     "select unifiedname from datablocks where unifiedname = ?",
                     (unifName,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -2147,7 +2147,7 @@ class WikiData:
             datablock = self.connWrap.execSqlQuerySingleItem(
                     "select unifiedname from datablocksexternal where unifiedname = ?",
                     (unifName,))
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -2184,7 +2184,7 @@ class WikiData:
                         "delete from datablocksexternal "
                         "where unifiedname = ?", (unifName,))
 
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -2272,13 +2272,13 @@ class WikiData:
             DbStructure.recreateCacheTables(self.connWrap)
             self.commitNeeded = True
             self.commit()
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
 
     def setDbSettingsValue(self, key, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         DbStructure.setSettingsValue(self.connWrap, key, value)
         self.commitNeeded = True
 
@@ -2297,7 +2297,7 @@ class WikiData:
                     "update wikiwords set presentationdatablock = ? where "
                     "word = ?", (datablock, word))
             self.commitNeeded = True
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
@@ -2311,7 +2311,7 @@ class WikiData:
             return self.connWrap.execSqlQuerySingleItem(
                     "select presentationdatablock from wikiwords where word = ?",
                     (word,), strConv=False)
-        except (IOError, OSError, ValueError), e:
+        except (IOError, OSError, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 

@@ -10,7 +10,7 @@
 try:
     import kjbuckets
 except ImportError:
-    import kjbuckets0
+    from . import kjbuckets0
     kjbuckets = kjbuckets0
 
 #

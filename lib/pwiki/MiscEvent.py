@@ -241,14 +241,14 @@ class MiscEvent(object):
         """
         Has the event the specified key?
         """
-        return self.properties.has_key(key)
+        return key in self.properties
 
     def has_key_in(self, keyseq):
         """
         Returns true iff it has at least one key in the sequence of keys keyseq
         """
         for key in keyseq:
-            if self.has_key(key):
+            if key in self:
                 return True
                 
         return False
@@ -309,7 +309,7 @@ class MiscEvent(object):
         @throws IllegalArgumentException   if this is not a clone
         """
         if self.getParent() is None:
-            raise StandardError("This must be a clone")  # TODO Create/Find a better exception
+            raise Exception("This must be a clone")  # TODO Create/Find a better exception
 
         self.properties[key] = value
         return self
@@ -338,7 +338,7 @@ class MiscEvent(object):
         @throws IllegalArgumentException   if this is not a clone
         """
         if self.getParent() is None:
-            raise StandardError("This must be a clone")  # TODO Create/Find a better exception
+            raise Exception("This must be a clone")  # TODO Create/Find a better exception
 
         if first is not None:
             first.miscEventHappened(self);
@@ -522,7 +522,7 @@ class KeyFunctionSink(object):
     
     def miscEventHappened(self, evt):
         for k, f in self.activationTable:
-            if evt.has_key(k):
+            if k in evt:
                 f(evt)
 
 
@@ -620,6 +620,6 @@ class DebugSimple(object):
         self.text = text
     
     def miscEventHappened(self, evt):
-        print self.text, repr(evt.properties)
+        print(self.text, repr(evt.properties))
 
 

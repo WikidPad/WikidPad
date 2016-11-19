@@ -13,7 +13,7 @@ from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, pathEnc
 
 if SystemInfo.isWindows():
     try:
-        import WindowsHacks
+        from . import WindowsHacks
     except:
         if SystemInfo.isWindows():
             traceback.print_exc()
@@ -24,7 +24,7 @@ else:
 # GtkHacks for the Clipboard Catcher
 
 try:
-    import GtkHacks
+    from . import GtkHacks
 except:
     import ExceptionLogger
     ExceptionLogger.logOptionalComponentException(
@@ -43,8 +43,8 @@ else:
     def startFile(mainControl, link):
         # We need mainControl only for this version of startFile()
 
-        startPath = mainControl.getConfig().get("main", "fileLauncher_path", u"")
-        if startPath == u"":
+        startPath = mainControl.getConfig().get("main", "fileLauncher_path", "")
+        if startPath == "":
             wx.LaunchDefaultBrowser(link)
             return
 

@@ -27,7 +27,7 @@ def deserialize(description):
     """ Dual of serialize
     """
     # base type
-    if not isinstance(description, types.TupleType) or len(description) != 2:
+    if not isinstance(description, tuple) or len(description) != 2:
         return description
 
     # pull out the class name and marshal data
@@ -39,14 +39,14 @@ def deserialize(description):
         return desc
     if name == "list":
         # list case: map deserialize across desc
-        return map(deserialize, desc)
+        return list(map(deserialize, desc))
 
     # all other cases are classes of semantics
-    import semantics
+    from . import semantics
     klass = getattr(semantics, name)
     (args1, args2) = desc
     args1 = tuple(map(deserialize, args1))
-    ob = apply(klass, args1)
+    ob = klass(*args1)
     ob.demarshal(args2)
     return ob
 

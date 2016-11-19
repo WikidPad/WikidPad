@@ -14,7 +14,7 @@
 # Setting case sensitivity for keywords MUST happen BEFORE
 #   declaration of keywords.
 
-import kjSet
+from . import kjSet
 import string
 import re
 import string
@@ -87,7 +87,7 @@ def DumpStringWindow(Str, Pos, Offset=15):
     end = Pos+Offset
     if start<0: start = 0
     if end>len(Str): end = len(Str)
-    L.append(`Str[start:Pos]`+"*"+`Str[Pos:end]`)
+    L.append(repr(Str[start:Pos])+"*"+repr(Str[Pos:end]))
     from string import join
     return join(L, "\n")
 class LexDictionary:
@@ -162,15 +162,15 @@ class LexDictionary:
         self.regexprlist = []
 
     def Dump(self):
-        print "comments = ", self.commentstrings
-        print "punctuations = ", self.punctuationlist
-        print "keywordmap ="
+        print("comments = ", self.commentstrings)
+        print("punctuations = ", self.punctuationlist)
+        print("keywordmap =")
         self.keywordmap.Dump()
-        print "regexprlist =", self.regexprlist
+        print("regexprlist =", self.regexprlist)
 
     def __getitem__(self, key):
         # try to match string to a keyword
-        if self.keywordmap.has_key(key):
+        if key in self.keywordmap:
             return self.keywordmap[key]
 
         # try to match a regular expression
@@ -180,7 +180,7 @@ class LexDictionary:
             if index == length:
                 break
         else:
-            raise LexTokenError, "no match for string: " + `key`
+            raise LexTokenError("no match for string: " + repr(key))
 
         # use the function to interpret the string, if given
         if function != None:
@@ -195,7 +195,7 @@ class LexDictionary:
         # upcase the string, if needed
         if self.keywordmap.caseInsensitive:
             str = string.upper(str)
-        if not self.keywordmap.has_key(str):
+        if str not in self.keywordmap:
             # redundancy for to avoid excess construction during parsing
             token = (KEYFLAG,str)
             self.keywordmap[str] = (token,str)
@@ -217,7 +217,7 @@ class LexDictionary:
             if token[1] == string:
                 break
         else:
-            raise UnkTermError, "no such terminal"
+            raise UnkTermError("no such terminal")
         return token
 
     def __setitem__(self,key,value):
@@ -248,9 +248,9 @@ class LexDictionary:
         ''' register a string as a punctuation
         '''
         if type(Instring) != type("") or len(Instring)!=1:
-            raise BadPunctError, "punctuation must be string of length 1"
+            raise BadPunctError("punctuation must be string of length 1")
         if Instring in string.whitespace:
-            raise BadPunctError, "punctuation may not be whitespace"
+            raise BadPunctError("punctuation may not be whitespace")
         self.punctuationlist = self.punctuationlist + Instring
         return self.keyword(Instring)
 
@@ -294,7 +294,7 @@ class LexDictionary:
                 if offset != -1:
                     if offset<1:
                         info = DumpStringWindow(String,StartPosition)
-                        raise LexTokenError, "zero length comment "+info
+                        raise LexTokenError("zero length comment "+info)
                     commentfound = 1
                     StartPosition = StartPosition + offset
                     totalOffset = totalOffset + offset
@@ -315,7 +315,7 @@ class LexDictionary:
                     return ((Flag, value) , offset + totalOffset)
             if not (commentfound or whitespacefound):
                 info = DumpStringWindow(String,StartPosition)
-                raise LexTokenError, "Lexical parse failure "+info
+                raise LexTokenError("Lexical parse failure "+info)
 
 # alternate, experimental implementation
 
@@ -355,7 +355,7 @@ class lexdictionary:
                 if fl[1]==str:
                     return fl
                 else:
-                    raise UnkTermError, "no such terminal"
+                    raise UnkTermError("no such terminal")
 
     __setitem__ = Dump
 
@@ -364,9 +364,9 @@ class lexdictionary:
 
     def punctuation(self, Instring):
         if type(Instring) != type("") or len(Instring)!=1:
-            raise BadPunctError, "punctuation must be string of length 1"
+            raise BadPunctError("punctuation must be string of length 1")
         if Instring in string.whitespace:
-            raise BadPunctError, "punctuation may not be whitespace"
+            raise BadPunctError("punctuation may not be whitespace")
         self.punctuationlist = self.punctuationlist + Instring
         return self.keyword(Instring)
 
@@ -401,8 +401,7 @@ class lexdictionary:
             if skip>0:
                 if skip==0:
                     info = DumpStringWindow(String, StartPosition)
-                    raise LexTokenError, \
-                        "zero length whitespace or comment "+info
+                    raise LexTokenError("zero length whitespace or comment "+info)
                 StartPosition = StartPosition + skip
                 totalOffset = totalOffset + skip
                 continue
@@ -430,7 +429,7 @@ class lexdictionary:
                         return result
             # error if we get here
             info = DumpStringWindow(String, StartPosition)
-            raise LexTokenError, "Lexical token not found "+info
+            raise LexTokenError("Lexical token not found "+info)
 
     def isCaseSensitive(self):
         return not self.keywordmap.caseInsensitive
@@ -465,28 +464,28 @@ class KeywordDict:
 
     def Dump(self):
         if self.caseInsensitive:
-            print "  case insensitive"
+            print("  case insensitive")
         else:
-            print "  case sensitive"
-        keys = self.KeyDict.keys()
-        print "  keyDict has ", len(keys), " elts"
+            print("  case sensitive")
+        keys = list(self.KeyDict.keys())
+        print("  keyDict has ", len(keys), " elts")
         for key in keys:
-            print "     ", key," maps to ",self.KeyDict[key]
-        firstchars = self.FirstcharDict.keys()
-        print "  firstcharDict has ", len(firstchars), " elts"
+            print("     ", key," maps to ",self.KeyDict[key])
+        firstchars = list(self.FirstcharDict.keys())
+        print("  firstcharDict has ", len(firstchars), " elts")
         for char in firstchars:
-            print "     ", char," maps to ",self.FirstcharDict[char]
+            print("     ", char," maps to ",self.FirstcharDict[char])
 
     # set item assumes value has correct case already, if case sensitive
     def __setitem__(self, key, value):
         if len(key)<1:
-            raise LexTokenError, "Keyword of length 0"
+            raise LexTokenError("Keyword of length 0")
         if self.caseInsensitive:
             KEY = string.upper(key)
         else:
             KEY = key
         firstchar = KEY[0:1]
-        if self.FirstcharDict.has_key(firstchar):
+        if firstchar in self.FirstcharDict:
             self.FirstcharDict[firstchar] = \
                 self.FirstcharDict[firstchar] + [(KEY, value)]
         else:
@@ -505,7 +504,7 @@ class KeywordDict:
         caseins = self.caseInsensitive
         if caseins:
             First = string.upper(First)
-        if fcd.has_key(First):
+        if First in fcd:
             Keylist = fcd[First]
         else:
             return 0
@@ -539,7 +538,7 @@ class KeywordDict:
     def has_key(self,key):
         if self.caseInsensitive:
             key = string.upper(key)
-        return self.KeyDict.has_key(key)
+        return key in self.KeyDict
 
 # LexStringWalker walks through a string looking for
 # substrings recognized by a lexical dictionary
@@ -570,10 +569,10 @@ class LexStringWalker:
             self.PastEOF = 1
         return Token
 
-    def next(self):
+    def __next__(self):
         if self.Done:
             data = self.DUMP()
-            raise LexTokenError, "no next past end of file "+data
+            raise LexTokenError("no next past end of file "+data)
         elif self.PastEOF:
             self.Done=1
         elif self.NextPosition > self.Position:
@@ -582,7 +581,7 @@ class LexStringWalker:
             dummy = self.getmember()
             if self.NextPosition <= self.Position:
                 data = self.DUMP()
-                raise LexTokenError, "Lexical walker not advancing "+data
+                raise LexTokenError("Lexical walker not advancing "+data)
             self.Position = self.NextPosition
 
 class ParserObj:
@@ -716,11 +715,11 @@ class ParserObj:
             #Stack.Push( ThingToPush )
 
             # move to next token, next state
-            Stream.next()
+            next(Stream)
             # error if end of stream
             if not Stream.more(): # optimized Stream.PastEOF (?)
                 data = Stream.DUMP()
-                raise EOFError, 'end of stream during parse '+data
+                raise EOFError('end of stream during parse '+data)
 
             current = nextState
             tokenVal = Stream.getmember()
@@ -764,7 +763,7 @@ class ParserObj:
                flag = %s
                map = %s """ % (flag, FSM.map(current,token))
             data = data + s
-            raise FlowError, 'unexpected else '+data
+            raise FlowError('unexpected else '+data)
     def GotoState(self, rule):
         ''' compute the state to goto after a reduction is performed on a rule.
             Algorithm: determine the state at beginning of reduction
@@ -794,21 +793,21 @@ class ParserObj:
         # make this parse error nicer (add diagnostic methods?)
         L = [""]
         L.append("*******************************")
-        L.append("current state = "+`State`)
+        L.append("current state = "+repr(State))
         L.append("expects: ")
         expects = ""
         for (flag,name) in self.FSM.Expects(State):
             if flag in (TERMFLAG, KEYFLAG):
-                expects = expects + `name`+ ", "
+                expects = expects + repr(name)+ ", "
         L.append(expects)
-        L.append(`rest`)
-        L.append("current token = " + `Token`)
+        L.append(repr(rest))
+        L.append("current token = " + repr(Token))
         #print "Stack =",
         #self.StackDump(5)
         #print
         from string import join
         data = self.LexStream.DUMP() + join(L, "\n")
-        raise SyntaxError, 'unexpected token sequence.' + data
+        raise SyntaxError('unexpected token sequence.' + data)
 
     def StackDump(self, N):
         Stack = self.Stack
@@ -818,7 +817,7 @@ class ParserObj:
         else:
             Start = 1
         for i in range(Start,Topkey+1):
-            print " :: ", Stack[i],
+            print(" :: ", Stack[i], end=' ')
 
     def GO(self):
         '''execute parsing until done
@@ -845,8 +844,8 @@ def DefaultReductFun( RuleResultsList, Context ):
     ''' used as a default reduction function for rules
     '''
     if WARNONDEFAULTS:
-        print "warn: default reduction."
-        print "   ", RuleResultsList
+        print("warn: default reduction.")
+        print("   ", RuleResultsList)
     return RuleResultsList
 
 class ParseRule:
@@ -865,17 +864,17 @@ class ParseRule:
         #print BodyList
         # check some of the arguments (very limited!)
         if len(goalNonTerm) != 2 or goalNonTerm[0] != NONTERMFLAG:
-            raise TypeError, "goal of rule must be nonterminal"
+            raise TypeError("goal of rule must be nonterminal")
         for m in BodyList:
             #print m
             if len(m) != 2:
-                raise TypeError, "invalid body form for rule"
+                raise TypeError("invalid body form for rule")
         self.Nonterm = goalNonTerm
         self.Body = BodyList
         self.ReductFun = ReductFunction
 
     def __repr__(self):
-        return THISMODULE + ".ParseRule" + `self.components()`
+        return THISMODULE + ".ParseRule" + repr(self.components())
 
     def components(self):
         ''' marshal-able components of a rule
@@ -911,9 +910,9 @@ class ParseRule:
 
             # the names from rule and stack must match (?)
             if SEname != REname:
-                print SEname, REname
-                print self
-                raise ReductError, " token names don't match"
+                print(SEname, REname)
+                print(self)
+                raise ReductError(" token names don't match")
 
             # store the values for the reduction
             BodyResults[Bindex] = SEvalue
@@ -926,7 +925,7 @@ class ParseRule:
         reduct = self.ReductFun(BodyResults, Context)
         if WARNONDEFAULTS and self.ReductFun is DefaultReductFun:
             # should check whether name is defined before this...
-            print "  default used on ", self.Name
+            print("  default used on ", self.Name)
         #Reduction( self.ReductFun, BodyResults, BodyNames )
         return (Stack, reduct)
 
@@ -937,7 +936,7 @@ def PrintDefaultBindings(rulelist):
     '''
     for r in rulelist:
         if r.ReductFun is DefaultReductFun:
-            print r.Name
+            print(r.Name)
 
 class FSMachine:
     def __init__(self, rootNonTerm):
@@ -972,18 +971,18 @@ class FSMachine:
     def DUMP(self, DumpMapData=1, DumpStateData=1, ForbiddenMark={}):
         ''' ForbiddenMark is for filtering out maps to an error state
         '''
-        print "root nonterminal is ", self.root_nonTerminal
-        print "start at ", self.initial_state
-        print "end at ", self.successful_final_state
-        print "number of states: ", self.maxState
+        print("root nonterminal is ", self.root_nonTerminal)
+        print("start at ", self.initial_state)
+        print("end at ", self.successful_final_state)
+        print("number of states: ", self.maxState)
         if DumpStateData:
-            print
+            print()
             for State in range(0,self.maxState+1):
                 Data = self.States[State]
-                print State, ": ", Data
+                print(State, ": ", Data)
         if DumpMapData:
-            print
-            for key in self.StateTokenMap.keys():
+            print()
+            for key in list(self.StateTokenMap.keys()):
                 map = self.StateTokenMap[key]
                 if map[0][0] == MOVETOFLAG:
                     ToStateData = self.States[map[0][1]]
@@ -992,14 +991,14 @@ class FSMachine:
                     else:
                         Mark = ToStateData[1]
                     if Mark != ForbiddenMark:
-                        print key, " > ", map, " = ", ToStateData
+                        print(key, " > ", map, " = ", ToStateData)
                 else:
-                    print key, " > reduction to rule number ", map[0][1]
+                    print(key, " > reduction to rule number ", map[0][1])
 
     def Expects(self, State):
         ''' what tokens does a state expect?
         '''
-        keys = self.StateTokenMap.keys()
+        keys = list(self.StateTokenMap.keys())
         Tokens = kjSet.NewSet( [] )
         for (state1,token) in keys:
             if State == state1:
@@ -1012,7 +1011,7 @@ class FSMachine:
             returns the number of the new state
         '''
         if not kind in (TRANSFLAG,TERMFLAG,REDUCEFLAG):
-            raise TypeError, "unknown state kind"
+            raise TypeError("unknown state kind")
         available = self.maxState+1
 
         self.States[available] = [kind] + AdditionalInfo
@@ -1025,10 +1024,10 @@ class FSMachine:
             no nondeterminism is allowed.
         '''
         key = (fromState, TokenRep)
-        if not self.StateTokenMap.has_key(key):
+        if key not in self.StateTokenMap:
             self.StateTokenMap[ key ] = ((REDUCEFLAG, Rulenum),)
         else:
-            raise ReductError, "attempt to set ambiguous reduction"
+            raise ReductError("attempt to set ambiguous reduction")
 
     def SetMap(self, fromState, TokenRep, toState):
         ''' Install a "shift" or "goto transition in the FSM:
@@ -1036,13 +1035,12 @@ class FSMachine:
             transitions
         '''
         key = (fromState, TokenRep)
-        if self.StateTokenMap.has_key(key):
+        if key in self.StateTokenMap:
             Old = self.StateTokenMap[key]
             if Old[0][0] != MOVETOFLAG:
                 # if the old value was not an integer, not a "normal state":
                 # complain:
-                raise NondetError, \
-                    "attempt to make inappropriate transition ambiguous"
+                raise NondetError("attempt to make inappropriate transition ambiguous")
             self.StateTokenMap[key] = Old + ((MOVETOFLAG,toState),)
         else:
             self.StateTokenMap[key] = ((MOVETOFLAG,toState),)
@@ -1068,7 +1066,7 @@ class FSMachine:
             except KeyError:
                 return (NOMATCHFLAG, 0)
         else:
-            raise FlowError, "unexpected else (2)"
+            raise FlowError("unexpected else (2)")
 
 class Grammar:
     ''' the grammar class:
@@ -1097,7 +1095,7 @@ class Grammar:
     def PrintDefaults(self):
         ''' look for default bindings
         '''
-        print "Default bindings on:"
+        print("Default bindings on:")
         PrintDefaultBindings(self.RuleL)
 
     def SetCaseSensitivity( self, Boolean ):
@@ -1137,7 +1135,7 @@ class Grammar:
         '''
         self.RuleNameToIndex = RuleNameDict
         # add a Name attribute to the rules of the rule list
-        for ruleName in RuleNameDict.keys():
+        for ruleName in list(RuleNameDict.keys()):
             index = RuleNameDict[ ruleName ]
             self.RuleL[ index ].Name = ruleName
 
@@ -1235,7 +1233,7 @@ class UnMarshaller:
             if kind == KEYFLAG:
                 tokens[tokenindex] = LexD.keyword(name)
             elif not kind in [TERMFLAG, NONTERMFLAG]:
-                raise FlowError, "unknown token type"
+                raise FlowError("unknown token type")
         # not needed
         self.tokens = tokens
 
@@ -1248,7 +1246,7 @@ class UnMarshaller:
         RuleList = [None] * nRules
         for index in range(nRules):
             (Name, Components) = RuleTuples[index]
-            rule = apply(ParseRule, Components)
+            rule = ParseRule(*Components)
             rule.Name = Name
             RuleList[index] = rule
             NameIndex[Name] = index

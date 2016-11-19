@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
@@ -14,7 +14,7 @@ from .wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown, \
 
 from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 from . import SystemInfo
 from .StringOps import escapeForIni, unescapeForIni, pathWordAndAnchorToWikiUrl
@@ -26,7 +26,7 @@ from .SearchAndReplace import stripSearchString
 
 from .DocPagePresenter import BasicDocPagePresenter
 
-import DocPages
+from . import DocPages
 
 
 class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
@@ -132,7 +132,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
     def getCurrentTabTitle(self):
         sel = self.GetSelection()
         if sel == -1:
-            return u""
+            return ""
 
         return self.GetPageText(sel)
 
@@ -191,7 +191,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
     def getTabCtrlsAndTheirPositions(self):
         panePosDict = {}
         for pane in self.GetAuiManager().GetAllPanes():
-            if pane.name == u"dummy":
+            if pane.name == "dummy":
                 continue
 
             tabCtrl = pane.window._tabs
@@ -233,18 +233,18 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         x_coord = None
         y_coord = None
         try:
-            if direction == u"right":
-                x_coord = min([i[0] for i in tabCtrlPos.values() if i[0]-x > 0])
-                y_coord = min([i[1] for i in tabCtrlPos.values() if i[0] == x_coord and i[1]-y >= 0])
-            elif direction == u"left":
-                x_coord = max([i[0] for i in tabCtrlPos.values() if x-i[0] > 0])
-                y_coord = min([i[1] for i in tabCtrlPos.values() if i[0] == x_coord and i[1]-y >= 0])
-            elif direction == u"above":
-                y_coord = max([i[1] for i in tabCtrlPos.values() if y-i[1] > 0])
-                x_coord = min([i[0] for i in tabCtrlPos.values() if i[1] == y_coord and i[0]-x >= 0])
-            elif direction == u"below":
-                y_coord = min([i[1] for i in tabCtrlPos.values() if i[1] - y > 0])
-                x_coord = min([i[0] for i in tabCtrlPos.values() if i[1] == y_coord and i[0]-x >= 0])
+            if direction == "right":
+                x_coord = min([i[0] for i in list(tabCtrlPos.values()) if i[0]-x > 0])
+                y_coord = min([i[1] for i in list(tabCtrlPos.values()) if i[0] == x_coord and i[1]-y >= 0])
+            elif direction == "left":
+                x_coord = max([i[0] for i in list(tabCtrlPos.values()) if x-i[0] > 0])
+                y_coord = min([i[1] for i in list(tabCtrlPos.values()) if i[0] == x_coord and i[1]-y >= 0])
+            elif direction == "above":
+                y_coord = max([i[1] for i in list(tabCtrlPos.values()) if y-i[1] > 0])
+                x_coord = min([i[0] for i in list(tabCtrlPos.values()) if i[1] == y_coord and i[0]-x >= 0])
+            elif direction == "below":
+                y_coord = min([i[1] for i in list(tabCtrlPos.values()) if i[1] - y > 0])
+                x_coord = min([i[0] for i in list(tabCtrlPos.values()) if i[1] == y_coord and i[0]-x >= 0])
             else:
                 return None
         except ValueError:
@@ -254,7 +254,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
 
         new_ctrl = None
-        for ctrl, pos in tabCtrlPos.iteritems():
+        for ctrl, pos in tabCtrlPos.items():
             if x_coord is None:
                 if pos[1] == y_coord:
                     new_ctrl = ctrl
@@ -319,7 +319,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         """
         possible_directions = {}
-        for direction in [u"left", u"right", u"above", u"below"]:
+        for direction in ["left", "right", "above", "below"]:
             possible_directions[direction] = self.getTabCtrlTo(direction, presenter)
 
         return possible_directions
@@ -338,15 +338,15 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             return
 
         if len(openWikiWords) < 2:
-            config.set("main", "further_wiki_words", u"")
+            config.set("main", "further_wiki_words", "")
         else:
-            fwws = u";".join([escapeForIni(w, u" ;") for w in openWikiWords[1:]])
+            fwws = ";".join([escapeForIni(w, " ;") for w in openWikiWords[1:]])
             config.set("main", "further_wiki_words", fwws)
 
         if len(openWikiWords) > 0:
             config.set("main", "last_wiki_word", openWikiWords[0])
 
-            ltsc = u";".join([escapeForIni(w, u" ;") for w in subCtrls])
+            ltsc = ";".join([escapeForIni(w, " ;") for w in subCtrls])
             config.set("main", "wiki_lastTabsSubCtrls", ltsc)
 
             config.set("main", "wiki_lastActiveTabNo", activeNo)
@@ -744,8 +744,8 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         wikiWord = self.lastContextMenuPresenter.getWikiWord()
         if wikiWord is None:
             wx.MessageBox(
-                    _(u"This can only be done for the page of a wiki word"),
-                    _(u'Not a wiki page'), wx.OK, self)
+                    _("This can only be done for the page of a wiki word"),
+                    _('Not a wiki page'), wx.OK, self)
             return
 
         path = self.mainControl.getWikiDocument().getWikiConfigPath()
@@ -766,13 +766,13 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 
         paramDict = {"presenter": pres, "main control": mc}
         mc.getUserActionCoord().reactOnUserEvent(
-                u"mouse/middleclick/pagetab", paramDict)
+                "mouse/middleclick/pagetab", paramDict)
 
 
     def miscEventHappened(self, miscevt):
         idx = self.GetPageIndex(miscevt.getSource())
         if idx != wx.NOT_FOUND:
-            if miscevt.has_key("changed presenter title"):
+            if "changed presenter title" in miscevt:
                 presenter = miscevt.getSource()
 
                 self.SetPageText(idx, miscevt.get("title"))
@@ -781,7 +781,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
                     self.mainControl.refreshPageStatus()
 
         elif miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("closed current wiki"):
+            if "closed current wiki" in miscevt:
                 # self._closeAllButCurrentTab()
                 self._closeAllTabs()
 
@@ -789,14 +789,14 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 # ----- Implementation of StorablePerspective methods -----
 
     def getPerspectiveType(self):
-        return u"MainAreaPanel"
+        return "MainAreaPanel"
         
     def getStoredPerspective(self):
         # Based on AuiNotebook.SavePerspective()
         
         # Build list of panes/tabs
         # Version code
-        tabs = u"v1/"
+        tabs = "v1/"
         all_panes = self._mgr.GetAllPanes()
 
         sel_wnd = self.GetCurrentPage()
@@ -804,7 +804,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         paneDescs = []
         
         for pane in all_panes:
-            paneDesc = u""
+            paneDesc = ""
 
             if pane.name == "dummy":
                 continue
@@ -814,15 +814,15 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 #             if tabs:
 #                 tabs += u"|"
 
-            paneDesc += pane.name + u"="
+            paneDesc += pane.name + "="
 
             # add tab id's
             page_count = tabframe._tabs.GetPageCount()
 
             tabDescs = []
 
-            for p in xrange(page_count):
-                tabDesc = u""
+            for p in range(page_count):
+                tabDesc = ""
 
                 page = tabframe._tabs.GetPage(p)
                 if not isinstance(page.window, StorablePerspective):
@@ -835,25 +835,25 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
                 # page_idx = self._tabs.GetIdxFromWindow(page.window)
 
                 if sel_wnd is page.window:
-                    tabDesc += u"*"
+                    tabDesc += "*"
                 elif p == tabframe._tabs.GetActivePageIdx():
-                    tabDesc += u"+"
+                    tabDesc += "+"
                 else:
-                    tabDesc += u" "
+                    tabDesc += " "
                     
-                tabDesc += escapeForIni(page.window.getPerspectiveType(), u"|=,@") + u"="
-                tabDesc += escapeForIni(page.caption, u"|=,@") + u"="
-                tabDesc += unicode(self._mruTabSequence.find(page.window)) + u"="
-                tabDesc += escapeForIni(tabPerspect, u"|=,@")
+                tabDesc += escapeForIni(page.window.getPerspectiveType(), "|=,@") + "="
+                tabDesc += escapeForIni(page.caption, "|=,@") + "="
+                tabDesc += str(self._mruTabSequence.find(page.window)) + "="
+                tabDesc += escapeForIni(tabPerspect, "|=,@")
                 
                 tabDescs.append(tabDesc)
 
-            paneDesc += u",".join(tabDescs)
+            paneDesc += ",".join(tabDescs)
             
             paneDescs.append(paneDesc)
 
 
-        tabs += u"|".join(paneDescs) + u"@"
+        tabs += "|".join(paneDescs) + "@"
 
         # Add frame perspective
         tabs += self._mgr.SavePerspective()
@@ -871,7 +871,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         """
         # Based on AuiNotebook.LoadPerspective()
 
-        if not data.startswith(u"v1/"):
+        if not data.startswith("v1/"):
             return False
 
         data = data[3:]
@@ -884,7 +884,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         # some of them (currently not)
         windowsToDel = []
 
-        for i in xrange(tab_count):
+        for i in range(tab_count):
             wnd = self._tabs.GetWindowFromIdx(i)
 
             # find out which onscreen tab ctrl owns this tab
@@ -907,22 +907,22 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         # Main area panel is empty at this point
 
         sel_wnd = None
-        tabs = data[0:data.index(u"@")]
+        tabs = data[0:data.index("@")]
         to_break1 = False
 
         while 1:
-            if u"|" not in tabs:
+            if "|" not in tabs:
                 to_break1 = True
                 tab_part = tabs
             else:
-                tab_part = tabs[0:tabs.index(u'|')]
+                tab_part = tabs[0:tabs.index('|')]
 
-            if u"=" not in tab_part:
+            if "=" not in tab_part:
                 # No pages in this perspective...
                 return False
 
             # Get pane name
-            pane_name = tab_part[0:tab_part.index(u"=")]
+            pane_name = tab_part[0:tab_part.index("=")]
 
             # create a new tab frame
             new_tabs = aui.TabFrame(self)
@@ -939,11 +939,11 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             self._mgr.AddPane(new_tabs, pane_info)
 
             # Get list of tab id's and move them to pane
-            tab_list = tab_part[tab_part.index(u"=")+1:]
+            tab_list = tab_part[tab_part.index("=")+1:]
             to_break2, active_found = False, False
 
-            for tab in tab_list.split(u","):
-                if tab == u"":
+            for tab in tab_list.split(","):
+                if tab == "":
                     continue
 
 #                 if u"," not in tab_list:
@@ -963,7 +963,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 #                     break
 
                 # if more parts are available after an additional '=' they are ignored
-                perspectType, caption, mruOrder, wndPerspective = tab.split(u"=", 4)[:4]
+                perspectType, caption, mruOrder, wndPerspective = tab.split("=", 4)[:4]
                 perspectType = unescapeForIni(perspectType)
                 caption = unescapeForIni(caption)
                 wndPerspective = unescapeForIni(wndPerspective)
@@ -998,10 +998,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
                     traceback.print_exc()
                 # --- end WikidPad specific ---
                     
-                if c == u'+':
+                if c == '+':
                     dest_tabs.SetActivePage(newpage_idx)
                     active_found = True
-                elif c == u'*':
+                elif c == '*':
                     sel_wnd = page.window
 
 #                 if to_break2:
@@ -1022,10 +1022,10 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             if to_break1:
                 break
 
-            tabs = tabs[tabs.index(u'|')+1:]
+            tabs = tabs[tabs.index('|')+1:]
 
         # Load the frame perspective
-        frames = data[data.index(u'@')+1:]
+        frames = data[data.index('@')+1:]
         self._mgr.LoadPerspective(frames)
 
         self.RemoveEmptyTabFrames()

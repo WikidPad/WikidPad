@@ -1,7 +1,7 @@
-from __future__ import with_statement
+
 
 import threading, traceback, collections, heapq
-from thread import allocate_lock as _allocate_lock
+from _thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep
 
 import wx
@@ -288,7 +288,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         self._fireStateChange(False)
                         return
 
-                except Exception, e:
+                except Exception as e:
                     traceback.print_exc() # ?
                     retObj.setException(e)
 
@@ -300,7 +300,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                 retObj.setResult(fct(*args, **kwargs))
                 self.incDoneJobCount()
 
-            except Exception, e:
+            except Exception as e:
                 traceback.print_exc() # ?
                 retObj.setException(e)
             finally:
@@ -448,7 +448,7 @@ def callInMainThread(fct, *args, **kwargs):
     def _mainRun(*args, **kwargs):
         try:
             returnOb.result = fct(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             returnOb.exception = e
         finally:
@@ -474,7 +474,7 @@ def callInMainThreadAsync(fct, *args, **kwargs):
     def _mainRun(*args, **kwargs):
         try:
             fct(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
 
     wx.CallAfter(_mainRun, *args, **kwargs)
@@ -587,7 +587,8 @@ class _TimeoutRLock(threading._Verbose):
 
     # Internal methods used by condition variables
 
-    def _acquire_restore(self, (count, owner)):
+    def _acquire_restore(self, xxx_todo_changeme):
+        (count, owner) = xxx_todo_changeme
         self.__block.acquire()
         self.__count = count
         self.__owner = owner
@@ -712,7 +713,7 @@ class DictFromFields(object):
     and retrieve all fields which do not start with double underscore.
     """
     def getDict(self):
-        return dict(((k, v) for k, v in self.__dict__.iteritems()
+        return dict(((k, v) for k, v in self.__dict__.items()
                 if not k.startswith("__")))
 
 
@@ -758,7 +759,7 @@ def iterMergesort(list_of_lists, key=None):
     heap = []
     for i, itr in enumerate(iter(pl) for pl in list_of_lists):
         try:
-            item = itr.next()
+            item = next(itr)
             toadd = (key(item), i, item, itr) if key else (item, i, itr)
             heap.append(toadd)
         except StopIteration:
@@ -770,7 +771,7 @@ def iterMergesort(list_of_lists, key=None):
             _, idx, item, itr = heap[0]
             yield item  # , itr
             try:
-                item = itr.next()
+                item = next(itr)
                 heapq.heapreplace(heap, (key(item), idx, item, itr) )
             except StopIteration:
                 heapq.heappop(heap)
@@ -780,7 +781,7 @@ def iterMergesort(list_of_lists, key=None):
             item, idx, itr = heap[0]
             yield item  # , itr
             try:
-                heapq.heapreplace(heap, (itr.next(), idx, itr))
+                heapq.heapreplace(heap, (next(itr), idx, itr))
             except StopIteration:
                 heapq.heappop(heap)
 

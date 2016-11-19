@@ -1,11 +1,11 @@
-from __future__ import with_statement
+
 
 import traceback
 import difflib, re
 
 import wx, wx.stc, wx.xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker, \
+from .wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker, \
         appendToMenuByMenuDesc
 
 from Consts import FormatTypes
@@ -39,7 +39,7 @@ def bytelenSct_mbcs(us):
     return len(StringOps.mbcsEnc(us)[0])
 
 
-_WORD_DIVIDER = re.compile(ur"(\b[\w']+)",
+_WORD_DIVIDER = re.compile(r"(\b[\w']+)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -137,8 +137,8 @@ class InlineDiffControl(SearchableScintillaControl):
         if charWrap is None:
             docPage = self.baseDocPage
             if docPage is not None:
-                charWrap = docPage.getAttributeOrGlobal(u"wrap_type",
-                        u"word").lower().startswith(u"char")
+                charWrap = docPage.getAttributeOrGlobal("wrap_type",
+                        "word").lower().startswith("char")
             else:
                 charWrap = False
         if onOrOff:
@@ -182,7 +182,7 @@ class InlineDiffControl(SearchableScintillaControl):
         self.setTextScrollProtected(text)
         self.SetReadOnly(readOnly)
         
-        self.presenter.setTitle(_(u"<Diff from %s to %s>") % (fromVerNo, toVerNo))
+        self.presenter.setTitle(_("<Diff from %s to %s>") % (fromVerNo, toVerNo))
 
 
     def showDiffsNewFrom(self, baseDocPage, fromText, fromVerNo):
@@ -204,22 +204,22 @@ class InlineDiffControl(SearchableScintillaControl):
         charPos = 0
         for tag, i1, i2, j1, j2 in ops:
             if tag == "replace":
-                procText = fromText[i1:i2].replace("\n", u"\n ")
+                procText = fromText[i1:i2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
 
-                procText = toText[j1:j2].replace("\n", u"\n ")
+                procText = toText[j1:j2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "delete":
-                procText = fromText[i1:i2].replace("\n", u"\n ")
+                procText = fromText[i1:i2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "insert":
-                procText = toText[j1:j2].replace("\n", u"\n ")
+                procText = toText[j1:j2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
@@ -236,12 +236,12 @@ class InlineDiffControl(SearchableScintillaControl):
         if len(divided) == 0:
             return [], []
         
-        if divided[0] == u"":
+        if divided[0] == "":
             del divided[0]
             if len(divided) == 0:
                 return [], []
         
-        if divided[-1] == u"":
+        if divided[-1] == "":
             del divided[-1]
             if len(divided) == 0:
                 return [], []
@@ -269,7 +269,7 @@ class InlineDiffControl(SearchableScintillaControl):
         charPos = 0
         for tag, i1, i2, j1, j2 in ops:
             if tag == "replace":
-                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
@@ -278,17 +278,17 @@ class InlineDiffControl(SearchableScintillaControl):
                 toPosIdx[j2]
                 toText[toPosIdx[j1]:toPosIdx[j2]]
 
-                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "delete":
-                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "insert":
-                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
@@ -301,7 +301,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
     def _buildViewText(self):
-        return u"".join([n.getText() for n in self.procTokens])
+        return "".join([n.getText() for n in self.procTokens])
 
 
 
@@ -510,7 +510,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
 _CONTEXT_MENU_INTEXT_BASE = \
-u"""
+"""
 Copy;CMD_CLIPBOARD_COPY
 Select All;CMD_SELECT_ALL
 -
@@ -520,7 +520,7 @@ Close Tab;CMD_CLOSE_CURRENT_TAB
 
 # Entries to support i18n of context menus
 if False:
-    N_(u"Copy")
-    N_(u"Select All")
+    N_("Copy")
+    N_("Select All")
 
-    N_(u"Close Tab")
+    N_("Close Tab")

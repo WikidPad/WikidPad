@@ -19,8 +19,8 @@
 
 import sys, traceback, types
 
-from kjbuckets_select import kjbuckets
-import serialize
+from .kjbuckets_select import kjbuckets
+from . import serialize
 
 Tuple = kjbuckets.kjDict
 Graph = kjbuckets.kjGraph
@@ -76,7 +76,7 @@ class HashJoiner:
             rbindings[b] = b
         self.eqs = eqs = eqs + kjbuckets.kjGraph(rbindings)
         witness = witness.remap(eqs)
-        known = kjbuckets.kjSet(witness.keys()) & rbindings
+        known = kjbuckets.kjSet(list(witness.keys())) & rbindings
         batts = tuple(known.items())
         if not batts:
             atts = ()
@@ -182,7 +182,7 @@ class HashJoiner:
                 tindex0 = {}
                 test = tindex.has_key
                 test0 = tindex0.has_key
-                for i in xrange(len(subseq)):
+                for i in range(len(subseq)):
                     subst = subseq[i]
                     #print "substs is", subst
                     its = subst.dump(batts)
@@ -215,7 +215,7 @@ class HashJoiner:
                     #print "hash subseq", relname
                     subseqindex = {}
                     test = subseqindex.has_key
-                    for i in xrange(len(subseq)):
+                    for i in range(len(subseq)):
                         subst = subseq[i]
                         its = subst.dump(batts)
                         #print "items1", subseq, batts, its
@@ -248,7 +248,7 @@ class HashJoiner:
                     #print "hash tuples", relname
                     tindex = {}
                     test = tindex.has_key
-                    for i in xrange(len(tuples)):
+                    for i in range(len(tuples)):
                         t = tuples[i]
                         if rassns:
                             t = (t + rassns).Clean()
@@ -297,7 +297,7 @@ class BoundTuple:
         """bindings are name>simpletuple associations."""
         self.eqs = Graph()
         self.assns = Tuple()
-        for (name, simpletuple) in bindings.items():
+        for (name, simpletuple) in list(bindings.items()):
             # XXXX TODO FIXME.
             # there _is_ no 'bind()' method! Fortunately, afaics
             # this constructor is never called with args.
@@ -308,7 +308,7 @@ class BoundTuple:
 
     def marshaldata(self):
         #print "btp marshaldata", self
-        return (self.eqs.items(), self.assns.items(), self.clean, self.closed)
+        return (list(self.eqs.items()), list(self.assns.items()), self.clean, self.closed)
 
     def demarshal(self, args):
         (eitems, aitems, self.clean, self.closed) = args
@@ -320,24 +320,24 @@ class BoundTuple:
         result = BoundTuple()
         e2 = result.eqs
         a2 = result.assns
-        for ((a,b), (c,d)) in self.eqs.items():
+        for ((a,b), (c,d)) in list(self.eqs.items()):
             if a is None:
                 try:
                     a = dict[b]
                 except KeyError:
-                    raise NameError, `b`+": ambiguous or unknown attribute"
+                    raise NameError(repr(b)+": ambiguous or unknown attribute")
             if c is None:
                 try:
                     c = dict[d]
                 except KeyError:
-                    raise NameError, `d`+": ambiguous or unknown attribute"
+                    raise NameError(repr(d)+": ambiguous or unknown attribute")
             e2[(a,b)] = (c,d)
-        for ((a,b), v) in self.assns.items():
+        for ((a,b), v) in list(self.assns.items()):
             if a is None:
                 try:
                     a = dict[b]
                 except KeyError:
-                    raise NameError, `b`+": ambiguous or unknown attribute"
+                    raise NameError(repr(b)+": ambiguous or unknown attribute")
             a2[(a,b)] = v
         result.closed = self.closed
         result.clean = self.clean
@@ -372,13 +372,13 @@ class BoundTuple:
         pinned = kjSet()
         has_index = kjSet()
         needed = kjSet(allrels)
-        akeys = assns.keys()
+        akeys = list(assns.keys())
         for (r,a) in akeys:
             pinned[r]=r # pinned if some value known
         known_map = kjGraph(akeys)
-        for r in known_map.keys():
+        for r in list(known_map.keys()):
             rknown = known_map.neighbors(r)
-            if db.has_key(r):
+            if r in db:
                 rel = db[r]
                 index = rel.choose_index(rknown)
                 if index is not None:
@@ -386,7 +386,7 @@ class BoundTuple:
         if pinned: pinned = pinned & needed
         if has_index: has_index = has_index & needed
         related = kjGraph()
-        for ( (r1, a1), (r2, a2) ) in eqs.items():
+        for ( (r1, a1), (r2, a2) ) in list(eqs.items()):
             related[r1]=r2 # related if equated to other
             related[r2]=r1 # redundant if closed.
         if related: related = needed * related * needed
@@ -406,11 +406,11 @@ class BoundTuple:
         while pinned or related or has_index:
             order.append(choice)
             chosen[choice] = 1
-            if pinned.has_key(choice):
+            if choice in pinned:
                 del pinned[choice]
-            if related.has_key(choice):
+            if choice in related:
                 del related[choice]
-            if has_index.has_key(choice):
+            if choice in has_index:
                 del has_index[choice]
             nexts = related * chosen
             if nexts:
@@ -423,7 +423,7 @@ class BoundTuple:
                 # otherwise one that relates to something...
                 choice = related.choose_key()
         others = kjSet(allrels) - chosen
-        if others: order = order + others.items()
+        if others: order = order + list(others.items())
         return order
 
     def domain(self):
@@ -432,9 +432,9 @@ class BoundTuple:
 
     def __repr__(self):
         result = []
-        for ( (name, att), value) in self.assns.items():
-            result.append( "%s.%s=%s" % (name, att, `value`) )
-        for ( (name, att), (name2, att2) ) in self.eqs.items():
+        for ( (name, att), value) in list(self.assns.items()):
+            result.append( "%s.%s=%s" % (name, att, repr(value)) )
+        for ( (name, att), (name2, att2) ) in list(self.eqs.items()):
             result.append( "%s.%s=%s.%s" % (name, att, name2, att2) )
         if self.clean:
             if not result: return "TRUE"
@@ -447,7 +447,7 @@ class BoundTuple:
         """add equalities to self, only if not closed.
            equalities should be seq of ( (name, att), (name, att) )
            """
-        if self.closed: raise ValueError, "cannot add equalities! Closed!"
+        if self.closed: raise ValueError("cannot add equalities! Closed!")
         e = self.eqs
         for (a, b) in equalities:
             e[a] = b
@@ -462,7 +462,7 @@ class BoundTuple:
             self.eqs = neweqs = (neweqs + ~neweqs).tclosure() # sym, trans closure
             self.closed = 1
         # add trivial equalities to self
-        for x in self.assns.keys():
+        for x in list(self.assns.keys()):
             if not neweqs.member(x,x):
                 neweqs[x] = x
         newassns = self.assns.remap(neweqs)
@@ -557,7 +557,7 @@ class BoundExpression(SimpleRecursive):
         return NontrivialEqPred(self, other)
 
     def attribute(self):
-        return (None, `self`)
+        return (None, repr(self))
 
     def le(self, other):
         """predicate self<=other"""
@@ -610,7 +610,7 @@ class BoundMinus(BoundExpression, SimpleRecursive):
         from types import IntType
         tt = type
         result = self.thing.value(contexts)
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 result[i] = -result[i]
         return result
@@ -631,7 +631,7 @@ class Average(BoundMinus):
     def __init__(self, expr, distinct=0):
         self.distinct = distinct
         if expr.contains_aggregate:
-            raise ValueError, `expr`+": aggregate in aggregate "+self.name
+            raise ValueError(repr(expr)+": aggregate in aggregate "+self.name)
         self.thing = expr
 
     name = "Average"
@@ -648,16 +648,16 @@ class Average(BoundMinus):
     def value(self, contexts):
         if not contexts: return [] # ???
         test = contexts[0]
-        if not test or test.has_key(None):
+        if not test or None in test:
             return self.agg_value(contexts)
         else:
             return [self.all_value(contexts)]
 
     def dvalues(self, values):
         d = {}
-        for i in xrange(len(values)):
+        for i in range(len(values)):
             d[values[i]] = 1
-        return d.keys()
+        return list(d.keys())
 
     def all_value(self, contexts):
         thing = self.thing
@@ -670,16 +670,16 @@ class Average(BoundMinus):
         D = {}
         from types import IntType
         tt = type
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 D[i] = values[i]
-        return D.values()
+        return list(D.values())
 
     def agg_value(self, contexts):
         from types import IntType
         tt = type
         result = list(contexts)
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             context = contexts[i]
             if tt(context) is not IntType:
                 result[i] = self.all_value( context[None] )
@@ -704,7 +704,7 @@ class Median(Average):
     name = "Median"
     def op(self, values):
         if not values:
-            raise ValueError, "Median of empty set"
+            raise ValueError("Median of empty set")
         values = list(values)
         values.sort()
         lvals = len(values)
@@ -756,10 +756,10 @@ def aggregate(assignments, exprlist):
        attribute None > list of subtuple"""
     lexprs = len(exprlist)
     if lexprs<1:
-        raise ValueError, "aggregate on no expressions?"
+        raise ValueError("aggregate on no expressions?")
     lassns = len(assignments)
     pairs = list(exprlist)
-    for i in xrange(lexprs):
+    for i in range(lexprs):
         expr = exprlist[i]
         attributes = [expr.attribute()]*lassns
         values = expr.value(assignments)
@@ -767,26 +767,26 @@ def aggregate(assignments, exprlist):
     #for x in pairs:
         #print "pairs", x
     if lexprs>1:
-        newassnpairs = apply(map, (None,)+tuple(pairs))
+        newassnpairs = list(map(*(None,)+tuple(pairs)))
     else:
         newassnpairs = pairs[0]
     #for x in newassnpairs:
         #print "newassnpairs", x
-    xassns = range(lassns)
+    xassns = list(range(lassns))
     dict = {}
     test = dict.has_key
-    for i in xrange(lassns):
+    for i in range(lassns):
         thesepairs = newassnpairs[i]
         thissubassn = assignments[i]
         if test(thesepairs):
             dict[thesepairs].append(thissubassn)
         else:
             dict[thesepairs] = [thissubassn]
-    items = dict.items()
+    items = list(dict.items())
     result = list(items)
     kjDict = kjbuckets.kjDict
     if lexprs>1:
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             (pairs, subassns) = items[i]
             #print "pairs", pairs
             #print "subassns", subassns
@@ -794,7 +794,7 @@ def aggregate(assignments, exprlist):
             D[None] = subassns
             result[i] = D
     else:
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             (pair, subassns) = items[i]
             #print "pair", pair
             #print "subassns", subassns
@@ -816,18 +816,18 @@ class DescExpr(BoundMinus):
         result = self.thing.value(contexts)
         allwrap = None
         allnowrap = None
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 resulti = result[i]
                 # currently assume only value needing wrapping is string
                 if tt(resulti) is StringType:
                     if allnowrap is not None:
-                        raise ValueError, "(%s, %s) cannot order desc" % (allnowrap, resulti)
+                        raise ValueError("(%s, %s) cannot order desc" % (allnowrap, resulti))
                     allwrap = resulti
                     result[i] = descOb(resulti)
                 else:
                     if allwrap is not None:
-                        raise ValueError, "(%s, %s) cannot order desc" % (allwrap, resulti)
+                        raise ValueError("(%s, %s) cannot order desc" % (allwrap, resulti))
                     allnowrap = resulti
                     result[i] = -resulti
         return result
@@ -856,7 +856,7 @@ class SimpleColumn(SimpleRecursive):
         tt = type
         name = self.name
         result = list(simpletuples)
-        for i in xrange(len(result)):
+        for i in range(len(result)):
             ri = result[i]
             if tt(ri) is not IntType:
                 result[i] = ri[name]
@@ -876,7 +876,7 @@ class NumberedColumn(BoundMinus):
     def relbind(self, dict, db):
         from types import IntType
         if type(self.thing)!=IntType:
-            raise ValueError, `self.thing`+": not a numbered column"
+            raise ValueError(repr(self.thing)+": not a numbered column")
         return self
     def orderbind(self, order):
         return SimpleColumn( order[self.thing-1][0] )
@@ -889,7 +889,7 @@ class OrderExpr(BoundMinus):
             if exp.attribute()==expratt:
                 return SimpleColumn(att)
         else:
-            raise NameError, `self`+": invalid ordering specification"
+            raise NameError(repr(self)+": invalid ordering specification")
     def __repr__(self):
         return "<order expression %s>" % (self.thing,)
 
@@ -932,13 +932,13 @@ def NamedSort(name, ord):
 
 def relbind_sequence(order_list, dict, db):
     result = list(order_list)
-    for i in xrange(len(order_list)):
+    for i in range(len(order_list)):
         result[i] = result[i].relbind(dict,db)
     return result
 
 def orderbind_sequence(order_list, order):
     result = list(order_list)
-    for i in xrange(len(order_list)):
+    for i in range(len(order_list)):
         result[i] = result[i].orderbind(order)
     return result
 
@@ -946,21 +946,21 @@ def order_tuples(order_list, tuples):
     lorder_list = len(order_list)
     ltuples = len(tuples)
     if lorder_list<1:
-        raise ValueError, "order on empty list?"
+        raise ValueError("order on empty list?")
     order_map = list(order_list)
-    for i in xrange(lorder_list):
+    for i in range(lorder_list):
         order_map[i] = order_list[i].value(tuples)
     if len(order_map)>1:
-        order_vector = apply(map, (None,)+tuple(order_map) )
+        order_vector = list(map(*(None,)+tuple(order_map)))
     else:
         order_vector = order_map[0]
     #G = kjbuckets.kjGraph()
-    pairs = map(None, range(ltuples), tuples)
+    pairs = map(None, list(range(ltuples)), tuples)
     ppairs = map(None, order_vector, pairs)
     G = kjbuckets.kjGraph(ppairs)
     #for i in xrange(ltuples):
     #    G[ order_vector[i] ] = (i, tuples[i])
-    Gkeys = G.keys()
+    Gkeys = list(G.keys())
     Gkeys.sort()
     result = list(tuples)
     index = 0
@@ -971,8 +971,7 @@ def order_tuples(order_list, tuples):
             result[index]=y
             index = index+1
     if index!=ltuples:
-        raise ValueError, \
-         "TUPLE LOST IN ORDERING COMPUTATION! (%s,%s)" % (ltuples, index)
+        raise ValueError("TUPLE LOST IN ORDERING COMPUTATION! (%s,%s)" % (ltuples, index))
     return result
 
 class BoundAddition(BoundExpression):
@@ -983,7 +982,7 @@ class BoundAddition(BoundExpression):
         tt = type
         lvs = self.left.value(contexts)
         rvs = self.right.value(contexts)
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 lvs[i] = lvs[i] + rvs[i]
         return lvs
@@ -996,7 +995,7 @@ class BoundSubtraction(BoundExpression):
         tt = type
         lvs = self.left.value(contexts)
         rvs = self.right.value(contexts)
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 lvs[i] = lvs[i] - rvs[i]
         return lvs
@@ -1010,7 +1009,7 @@ class BoundMultiplication(BoundExpression):
         lvs = self.left.value(contexts)
         rvs = self.right.value(contexts)
         #print lvs
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 lvs[i] = lvs[i] * rvs[i]
         return lvs
@@ -1023,7 +1022,7 @@ class BoundDivision(BoundExpression):
         tt = type
         lvs = self.left.value(contexts)
         rvs = self.right.value(contexts)
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             if tt(contexts[i]) is not IntType:
                 lvs[i] = lvs[i] / rvs[i]
         return lvs
@@ -1047,7 +1046,7 @@ class BoundAttribute(BoundExpression):
         try:
             rel = dict[name]
         except KeyError:
-            raise NameError, `name` + ": unknown or ambiguous"
+            raise NameError(repr(name) + ": unknown or ambiguous")
         return BoundAttribute(rel, name)
 
     def uncache(self):
@@ -1070,7 +1069,7 @@ class BoundAttribute(BoundExpression):
         tt = type
         result = list(contexts)
         ra = (self.rel, self.name)
-        for i in xrange(len(result)):
+        for i in range(len(result)):
             if tt(result[i]) is not IntType:
                 result[i] = contexts[i][ra]
         return result
@@ -1147,7 +1146,7 @@ class Constant(BoundExpression):
 
     def attribute(self):
         """invent a pair to identify a constant"""
-        return ('unbound', `self`)
+        return ('unbound', repr(self))
 
     def __repr__(self):
         return str(self.value0)
@@ -1170,14 +1169,14 @@ class TupleCollector:
         return ()
 
     def marshaldata(self):
-        exps = map(serialize.serialize, self.exporder)
+        exps = list(map(serialize.serialize, self.exporder))
         return (self.attorder, exps,
                 self.contains_aggregate, self.contains_nonaggregate)
 
     def demarshal(self, args):
         (self.attorder, exps, self.contains_aggregate,
          self.contains_nonaggregate) = args
-        exporder = self.exporder = map(serialize.deserialize, exps)
+        exporder = self.exporder = list(map(serialize.deserialize, exps))
         self.order = map(None, self.attorder, exporder)
 
     def uncache(self):
@@ -1187,7 +1186,7 @@ class TupleCollector:
     def domain(self):
         all=[]
         for e in self.exporder:
-            all = all+e.domain().items()
+            all = all+list(e.domain().items())
         return kjbuckets.kjSet(all)
 
     def __repr__(self):
@@ -1215,12 +1214,12 @@ class TupleCollector:
         for exp in self.exporder:
             values.append(exp.value(assnlist))
         if len(values)>1:
-            valtups = apply(map, (None,) + tuple(values) )
+            valtups = list(map(*(None,) + tuple(values)))
         else:
             valtups = values[0]
         kjUndump = kjbuckets.kjUndump
         undumper = tuple(self.attorder)
-        for i in xrange(len(valtups)):
+        for i in range(len(valtups)):
             test = assnlist[i]
             if tt(test) is IntType or test is None:
                 valtups[i] = 0 # null/false
@@ -1237,7 +1236,7 @@ class TupleCollector:
         attorder = self.attorder
         exporder = self.exporder
         known = {}
-        for i in xrange(len(order)):
+        for i in range(len(order)):
             (att, exp) = order[i]
             #print exp
             exp = exp.relbind(dict, db)
@@ -1245,19 +1244,19 @@ class TupleCollector:
                 # choose a name for this column
                 #print exp
                 (rname, aname) = exp.attribute()
-                if known.has_key(aname):
+                if aname in known:
                     both = rname+"."+aname
                     att = both
                     count = 0
-                    while known.has_key(att):
+                    while att in known:
                         # crank away!
                         count = count+1
-                        att = both+"."+`count`
+                        att = both+"."+repr(count)
                 else:
                     att = aname
             else:
-                if known.has_key(att):
-                    raise NameError, `att`+" ambiguous in select list"
+                if att in known:
+                    raise NameError(repr(att)+" ambiguous in select list")
             order[i] = (att, exp)
             exporder[i] = exp
             attorder[i] = att
@@ -1354,11 +1353,11 @@ class BTPredicate(SimpleRecursive):
             assns = c.assns
             eqs = c.eqs
             eqsinteresting = 0
-            for (a,b) in eqs.items():
+            for (a,b) in list(eqs.items()):
                 if a!=b:
                     eqsinteresting = 1
             result = assignments[:]
-            for i in xrange(lbt):
+            for i in range(lbt):
                 this = assignments[i]
                 #print "comparing", self, "to", this
                 if type(this) is IntType: continue
@@ -1431,7 +1430,7 @@ class BTor_pred(BTPredicate):
                 members.remove(m)
                 members = members + m.members
         #print "before", members
-        members = self.members = kjbuckets.kjSet(members).items()
+        members = self.members = list(kjbuckets.kjSet(members).items())
         #print members
         for m in members[:]:
             if m.false: members.remove(m)
@@ -1465,15 +1464,15 @@ class BTor_pred(BTPredicate):
             m.uncache()
 
     def domain(self):
-        all = BTPredicate.domain(self).items()
+        all = list(BTPredicate.domain(self).items())
         for x in self.members:
-            all = all + x.domain().items()
+            all = all + list(x.domain().items())
         return kjbuckets.kjSet(all)
 
     def __repr__(self):
         c = self.constraints
         m = self.members
-        mr = map(repr, m)
+        mr = list(map(repr, m))
         mr.sort()
         mr = ' | '.join(mr)
         if not mr: mr = "FALSE_OR"
@@ -1486,7 +1485,7 @@ class BTor_pred(BTPredicate):
            return None if completely true, or simpler form
            or self, if no simplification is possible."""
         ms = self.members
-        for i in xrange(len(ms)):
+        for i in range(len(ms)):
             ms[i] = ms[i].detrivialize()
         # now suck out subordinate ors
         someor = None
@@ -1505,9 +1504,9 @@ class BTor_pred(BTPredicate):
             if m is None: allfalse=0; break # true member
             allfalse = allfalse & m.false
         if allfalse: return ~BTPredicate() # boundary case
-        ms[:] = filter(None, ms)
+        ms[:] = [_f for _f in ms if _f]
         if not ms: return None # all true.
-        ms[:] = kjbuckets.kjSet(ms).items()
+        ms[:] = list(kjbuckets.kjSet(ms).items())
         if len(ms)==1: return ms[0] # or of 1
         return self
 
@@ -1525,7 +1524,7 @@ class BTor_pred(BTPredicate):
 
         # determine questionables
         questionables = current[:]
-        rng = xrange(len(current))
+        rng = range(len(current))
         from types import IntType
         for i in rng:
             if not isinstance(alt1[i], IntType):
@@ -1556,7 +1555,7 @@ class BTor_pred(BTPredicate):
     def __and__(self, other):
         """push "and" down"""
         newmembers = self.members[:]
-        for i in xrange(len(newmembers)):
+        for i in range(len(newmembers)):
             newmembers[i] = newmembers[i] & other
         return BTor_pred(newmembers)
 
@@ -1625,7 +1624,7 @@ class BTnot_pred(BTPredicate):
         if thing.__class__ == BTor_pred:
             # translate to and_not
             members = thing.members[:]
-            for i in xrange(len(members)):
+            for i in range(len(members)):
                 members[i] = ~members[i]
             result = BTand_pred(members)
             return result.detrivialize()
@@ -1635,7 +1634,7 @@ class BTnot_pred(BTPredicate):
             c = thing.constraints # precondition
             if c is not None:
                 members.append(BTPredicate(c))
-            for i in xrange(len(members)):
+            for i in range(len(members)):
                 members[i] = ~members[i]
             result = BTor_pred(members)
             return result.detrivialize()
@@ -1649,7 +1648,7 @@ class BTnot_pred(BTPredicate):
         tt = type
         current = BTPredicate.__call__(self, boundtuples, toplevel)
         omit = self.negated(current)
-        for i in xrange(len(current)):
+        for i in range(len(current)):
             if tt(omit[i]) is not IntType:
                 current[i]=0
         return current
@@ -1685,7 +1684,7 @@ class BTand_pred(BTPredicate):
     def __init__(self, members, precondition=None, *othermembers):
         #print "BTand_pred", (members, precondition)
         members = list(members) + list(othermembers)
-        members = self.members = kjbuckets.kjSet(members).items()
+        members = self.members = list(kjbuckets.kjSet(members).items())
         self.constraints = precondition # common constraints
         if members:
             # common constraints are those in any member
@@ -1693,7 +1692,7 @@ class BTand_pred(BTPredicate):
                 constraints = precondition
             else:
                 constraints = BoundTuple()
-            for i in xrange(len(members)):
+            for i in range(len(members)):
                 m = members[i]
                 mc = m.constraints
                 if mc:
@@ -1702,7 +1701,7 @@ class BTand_pred(BTPredicate):
                     if constraints is None: break
                 if m.__class__==BTPredicate:
                     members[i] = None # subsumed above
-            members = self.members = filter(None, members)
+            members = self.members = [_f for _f in members if _f]
             for m in members:
                 if m.contains_aggregate:
                     self.contains_aggregate=1
@@ -1728,15 +1727,15 @@ class BTand_pred(BTPredicate):
             m.uncache()
 
     def domain(self):
-        all = BTPredicate.domain(self).items()
+        all = list(BTPredicate.domain(self).items())
         for x in self.members:
-            all = all + x.domain().items()
+            all = all + list(x.domain().items())
         return kjbuckets.kjSet(all)
 
     def __repr__(self):
         m = self.members
         c = self.constraints
-        r = map(repr, m)
+        r = list(map(repr, m))
         if self.false: r.insert(0, "FALSE")
         r = ' AND '.join(r)
         r = "(%s)" % r
@@ -1771,16 +1770,16 @@ class BTand_pred(BTPredicate):
             #print "or detected, returning"
             #print result
             return result
-        for i in xrange(len(ms)):
+        for i in range(len(ms)):
             ms[i] = ms[i].detrivialize()
-        ms[:] = filter(None, ms)
+        ms[:] = [_f for _f in ms if _f]
         if not ms:
             #print "returning boundary case of condition"
             if c is None:
                 return None
             else:
                 return BTPredicate(c).detrivialize()
-        ms[:] = kjbuckets.kjSet(ms).items()
+        ms[:] = list(kjbuckets.kjSet(ms).items())
         if len(ms)==1 and c is None:
             #print "and of 1, returning"
             #print ms[0]
@@ -1892,7 +1891,7 @@ class NontrivialEqPred(BTPredicate):
         lv = self.left.value(assigns)
         rv = self.right.value(assigns)
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             t = assigns[i]
             if type(t) is not IntType and lv[i]!=rv[i]:
                 result[i] = 0
@@ -1958,7 +1957,7 @@ class BetweenPredicate(NontrivialEqPred):
         upv = self.upper.value(assigns)
         midv = self.middle.value(assigns)
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             t = assigns[i]
             if tt(t) is not IntType:
                 midvi = midv[i]
@@ -2015,7 +2014,7 @@ class ExistsPred(NontrivialEqPred):
             else:
                 return [0] * len(result)
         kjDict = kjbuckets.kjDict
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             #print "exists uncached"
             assignsi = assigns[i]
             if tt(assignsi) is IntType: continue
@@ -2067,9 +2066,8 @@ class QuantEQ(NontrivialEqPred):
         # test that subquery is single column and determine att
         sl = subq.select_list
         atts = sl.attorder
-        if len(atts)<>1:
-            raise ValueError, \
-              "Quantified predicate requires unit select list: %s" % atts
+        if len(atts)!=1:
+            raise ValueError("Quantified predicate requires unit select list: %s" % atts)
         self.att = atts[0]
         return self
 
@@ -2096,7 +2094,7 @@ class QuantEQ(NontrivialEqPred):
         tt = type
         from types import IntType
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             assignsi = assigns[i]
             if tt(assignsi) is IntType: continue
             thisval = exprvals[i]
@@ -2145,7 +2143,7 @@ class InLits(NontrivialEqPred):
         for l in self.lits:
             d0 = l.domain()
             if d0:
-                d = d + d0.items()
+                d = d + list(d0.items())
         d0 = self.expr.domain()
         if d:
             kjSet = kjbuckets.kjSet
@@ -2188,7 +2186,7 @@ class InLits(NontrivialEqPred):
         expr = self.expr
         exprvals = expr.value(assigns)
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             assignsi = assigns[i]
             if tt(assignsi) is IntType: continue
             thisval = exprvals[i]
@@ -2281,7 +2279,7 @@ class QuantGT(QuantLT):
 def dump_single_column(assigns, att):
     """dump single column assignment"""
     result = assigns[:]
-    for i in xrange(len(result)):
+    for i in range(len(result)):
         result[i] = result[i][att]
     return result
 
@@ -2295,7 +2293,7 @@ class LessPred(NontrivialEqPred):
         lv = self.left.value(assigns)
         rv = self.right.value(assigns)
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             t = assigns[i]
             if not isinstance(t, IntType) and lv[i] >= rv[i]:
                 result[i] = 0
@@ -2316,7 +2314,7 @@ class LessEqPred(LessPred):
         lv = self.left.value(assigns)
         rv = self.right.value(assigns)
         result = assigns[:]
-        for i in xrange(len(assigns)):
+        for i in range(len(assigns)):
             t = assigns[i]
             if not isinstance(t, IntType) and lv[i] > rv[i]:
                 result[i] = 0
@@ -2349,9 +2347,8 @@ class SubQueryExpression(BoundMinus, SimpleRecursive):
         # test that subquery is single column and determine att
         sl = subq.select_list
         atts = sl.attorder
-        if len(atts)<>1:
-            raise ValueError, \
-              "Quantified predicate requires unit select list: %s" % atts
+        if len(atts)!=1:
+            raise ValueError("Quantified predicate requires unit select list: %s" % atts)
         self.att = atts[0]
         return self
 
@@ -2368,9 +2365,8 @@ class SubQueryExpression(BoundMinus, SimpleRecursive):
                 self.cached = 1
                 seval = subq.eval().rows()
                 lse = len(seval)
-                if lse<>1:
-                    raise ValueError, \
-           "const subquery expression must return 1 result: got %s" % lse
+                if lse!=1:
+                    raise ValueError("const subquery expression must return 1 result: got %s" % lse)
                 self.cached_value = cached_value = seval[0][att]
             #print "const subq cached", cached_value
             return [cached_value] * len(contexts)
@@ -2378,7 +2374,7 @@ class SubQueryExpression(BoundMinus, SimpleRecursive):
         tt = type
         result = contexts[:]
         kjDict = kjbuckets.kjDict
-        for i in xrange(len(contexts)):
+        for i in range(len(contexts)):
             contextsi = contexts[i]
             if tt(contextsi) is not IntType:
                 testbtup = BoundTuple()
@@ -2386,9 +2382,8 @@ class SubQueryExpression(BoundMinus, SimpleRecursive):
                 #print "subq exp", testbtup
                 seval = subq.eval(outerboundtuple=testbtup).rows()
                 lse = len(seval)
-                if lse<>1:
-                    raise ValueError, \
-           "dynamic subquery expression must return 1 result: got %s" % lse
+                if lse!=1:
+                    raise ValueError("dynamic subquery expression must return 1 result: got %s" % lse)
                 result[i] = seval[0][att]
                 #print "nonconst subq uncached", result[i], contextsi
         return result
@@ -2410,29 +2405,29 @@ def dynamic_binding(ndynamic, dynamic):
     from types import ListType, TupleType
     if not dynamic:
         if ndynamic>0:
-            raise ValueError, `ndynamic`+" dynamic parameters unbound"
+            raise ValueError(repr(ndynamic)+" dynamic parameters unbound")
         return [kjbuckets.kjDict()]
     ldyn = len(dynamic)
-    undumper = map(None, [0]*ndynamic, range(ndynamic))
+    undumper = map(None, [0]*ndynamic, list(range(ndynamic)))
     undumper = tuple(undumper)
     tdyn = type(dynamic)
     if tdyn is TupleType:
         ldyn = len(dynamic)
         if len(dynamic)!=ndynamic:
-            raise ValueError, "%s,%s: wrong number of dynamics" % (ldyn,ndynamic)
+            raise ValueError("%s,%s: wrong number of dynamics" % (ldyn,ndynamic))
         dynamic = [dynamic]
     elif tdyn is not ListType:
-        raise TypeError, "dynamic parameters must be list or tuple"
+        raise TypeError("dynamic parameters must be list or tuple")
     else:
-        lens = map(len, dynamic)
+        lens = list(map(len, dynamic))
         ndynamic = max(lens)
         if ndynamic!=min(lens):
-            raise ValueError, "dynamic parameters of inconsistent lengths"
-    undumper = map(None, [0]*ndynamic, range(ndynamic))
+            raise ValueError("dynamic parameters of inconsistent lengths")
+    undumper = map(None, [0]*ndynamic, list(range(ndynamic)))
     undumper = tuple(undumper)
     result = list(dynamic)
     kjUndump = kjbuckets.kjUndump
-    for i in xrange(len(dynamic)):
+    for i in range(len(dynamic)):
         dyn = dynamic[i]
         ldyn = len(dyn)
         #print undumper, dyn
@@ -2476,7 +2471,7 @@ class Selector:
                   #raise ValueError, "aggregates/nonaggregates don't mix without grouping"
                 self.all_aggregate = 1
         if where_pred and where_pred.contains_aggregate:
-            raise ValueError, "aggregate in WHERE"
+            raise ValueError("aggregate in WHERE")
         self.query_plan = None
 
     def initargs(self):
@@ -2497,10 +2492,10 @@ class Selector:
     def marshaldata(self):
         order_by = self.order_by
         if order_by:
-            order_by = map(serialize.serialize, order_by)
+            order_by = list(map(serialize.serialize, order_by))
         group_list = self.group_list
         if group_list:
-            group_list = map(serialize.serialize, group_list)
+            group_list = list(map(serialize.serialize, group_list))
         #print "marshaldata"
         #print order_by
         #print group_list
@@ -2509,9 +2504,9 @@ class Selector:
     def demarshal(self, data):
         (order_by, group_list) = data
         if order_by:
-            order_by = map(serialize.deserialize, order_by)
+            order_by = list(map(serialize.deserialize, order_by))
         if group_list:
-            group_list = map(serialize.deserialize, group_list)
+            group_list = list(map(serialize.deserialize, group_list))
         #print "demarshal"
         #print order_by
         #print group_list
@@ -2521,7 +2516,7 @@ class Selector:
     def unbound(self):
         result = self.unbound_set
         if result is None:
-            raise ValueError, "binding not available"
+            raise ValueError("binding not available")
         return result
 
     def uncache(self):
@@ -2552,16 +2547,16 @@ class Selector:
         (attbindings, relbindings, ambiguous, ambiguousatts) = test
         if outerbindings:
             # bind in outerbindings where unambiguous
-            for (a,r) in outerbindings.items():
-                if ((not attbindings.has_key(a))
-                    and (not ambiguousatts.has_key(a)) ):
+            for (a,r) in list(outerbindings.items()):
+                if ((a not in attbindings)
+                    and (a not in ambiguousatts) ):
                     attbindings[a] = r
         # fix "*" select list
         if sl=="*":
             sl = TupleCollector()
-            for (a,r) in attbindings.items():
+            for (a,r) in list(attbindings.items()):
                 sl.addbinding(None, BoundAttribute(r,a))
-            for (dotted, (r,a)) in ambiguous.items():
+            for (dotted, (r,a)) in list(ambiguous.items()):
                 sl.addbinding(dotted, BoundAttribute(r,a))
         sl = sl.relbind(attbindings, db)
         wp = wp.relbind(attbindings, db)
@@ -2600,13 +2595,13 @@ class Selector:
         eqs = kjbuckets.kjGraph(bt.eqs)
         witness = kjbuckets.kjDict()
         # set all known and unbound atts as witnessed
-        for att in bt.assns.keys():
+        for att in list(bt.assns.keys()):
             witness[att] = 1
         #print self, "self.unbound_set", self.unbound_set
-        for att in self.unbound_set.items():
+        for att in list(self.unbound_set.items()):
             witness[att] = 1
         relbindings = self.relbindings
-        allrels = relbindings.keys()
+        allrels = list(relbindings.keys())
         #print relbindings
         allrels = bt.relorder(relbindings, allrels)
         #print allrels
@@ -2633,19 +2628,19 @@ class Selector:
         gl = self.group_list
         hc = self.having_cond
         us = self.union_select
-        all = sl.domain().items()
+        all = list(sl.domain().items())
         if wp is not None:
-            all = all + wp.domain().items()
+            all = all + list(wp.domain().items())
         # ignore group_list ???
         if hc is not None:
-            all = all + hc.domain().items()
+            all = all + list(hc.domain().items())
         kjSet = kjbuckets.kjSet
         kjGraph = kjbuckets.kjGraph
         alldomain = kjSet(all)
         rel_atts = self.rel_atts = kjGraph(all)
         allnames = kjSet()
         #print "relbindings", relbindings.keys()
-        for name in relbindings.keys():
+        for name in list(relbindings.keys()):
             rel = relbindings[name]
             for att in rel.attributes():
                 allnames[ (name, att) ] = 1
@@ -2656,12 +2651,12 @@ class Selector:
             thoseatts = us.attributes()
             if myatts!=thoseatts:
                 if len(myatts)!=len(thoseatts):
-                    raise IndexError, "outer %s, inner %s: union select lists lengths differ"\
-                      % (len(myatts), len(thoseatts))
+                    raise IndexError("outer %s, inner %s: union select lists lengths differ"\
+                      % (len(myatts), len(thoseatts)))
             for p in map(None, myatts, thoseatts):
                 (x,y)=p
                 if x!=y:
-                    raise NameError, "%s union names don't match" % (p,)
+                    raise NameError("%s union names don't match" % (p,))
         self.unbound_set = alldomain - allnames
 
     def attributes(self):
@@ -2695,7 +2690,7 @@ class Selector:
         elif ndynamic:
             dyn = dynamic_binding(ndynamic, dynamic)
             if len(dyn)!=1:
-                raise ValueError, "only one dynamic subst for selection allowed"
+                raise ValueError("only one dynamic subst for selection allowed")
             dyn = dyn[0]
             assn1 = assn1 + dyn
             #print "dynamic", bt
@@ -2705,9 +2700,9 @@ class Selector:
         #print "unbound", unbound_set
         #print unbound_set
         #print self.rel_atts
-        for pair in unbound_set.items():
-            if not assn1.has_key(pair):
-                raise KeyError, `pair`+": unbound in selection"
+        for pair in list(unbound_set.items()):
+            if pair not in assn1:
+                raise KeyError(repr(pair)+": unbound in selection")
         assn1 = (unbound_set * assn1) + assn0
         #print "assn1 now", assn1
         substseq = [assn1]
@@ -2747,7 +2742,7 @@ class Selector:
             tups = union_select.eval(tups, dynamic, outerboundtuple)
         # apply DISTINCT if appropriate
         if self.alldistinct=="DISTINCT":
-            tups = kjbuckets.kjSet(tups).items()
+            tups = list(kjbuckets.kjSet(tups).items())
         # apply ordering if present
         ob = self.order_by
         if ob:
@@ -2800,7 +2795,7 @@ class Union(SimpleRecursive):
         rows = r.rows()
         allrows = rows + assns
         if self.alldistinct=="DISTINCT":
-            allrows = kjbuckets.kjSet(allrows).items()
+            allrows = list(kjbuckets.kjSet(allrows).items())
         return allrows
 
     def __repr__(self):
@@ -2811,7 +2806,7 @@ class Intersect(Union):
         r = self.selection.eval(dyn, outer)
         rows = r.rows()
         kjSet = kjbuckets.kjSet
-        allrows = (kjSet(assns) & kjSet(rows)).items()
+        allrows = list((kjSet(assns) & kjSet(rows)).items())
         return allrows
     op = "INTERSECT"
     def __repr__(self):
@@ -2822,7 +2817,7 @@ class Except(Union):
         r = self.selection.eval(dyn, outer)
         rows = r.rows()
         kjSet = kjbuckets.kjSet
-        allrows = (kjSet(assns) - kjSet(rows)).items()
+        allrows = list((kjSet(assns) - kjSet(rows)).items())
         return allrows
     op = "EXCEPT"
 
@@ -2845,7 +2840,7 @@ class Parse_Context:
         return self.parameter_index
 
 # update/delete/insert statements
-import operations
+from . import operations
 CreateTable = operations.CreateTable
 CreateIndex = operations.CreateIndex
 DropIndex = operations.DropIndex
@@ -2860,7 +2855,7 @@ CreateView = operations.CreateView
 DropView = operations.DropView
 
 # update storage structures from the database store
-import store
+from . import store
 Add_Tuples = store.Add_Tuples
 Erase_Tuples = store.Erase_Tuples
 Reset_Tuples = store.Reset_Tuples

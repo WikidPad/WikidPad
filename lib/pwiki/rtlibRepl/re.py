@@ -102,8 +102,8 @@ This module also defines an exception 'error'.
 """
 
 import sys
-import sre_compile
-import sre_parse
+from . import sre_compile
+from . import sre_parse
 
 # public symbols
 __all__ = [ "match", "search", "sub", "subn", "split", "findall",
@@ -235,11 +235,11 @@ def _compile(*key):
             raise ValueError('Cannot process flags argument with a compiled pattern')
         return pattern
     if not sre_compile.isstring(pattern):
-        raise TypeError, "first argument must be string or compiled pattern"
+        raise TypeError("first argument must be string or compiled pattern")
     try:
         p = sre_compile.compile(pattern, flags)
-    except error, v:
-        raise error, v # invalid expression
+    except error as v:
+        raise error(v) # invalid expression
     if len(_cache) >= _MAXCACHE:
         _cache.clear()
     _cache[cachekey] = p
@@ -253,8 +253,8 @@ def _compile_repl(*key):
     repl, pattern = key
     try:
         p = sre_parse.parse_template(repl, pattern)
-    except error, v:
-        raise error, v # invalid expression
+    except error as v:
+        raise error(v) # invalid expression
     if len(_cache_repl) >= _MAXCACHE:
         _cache_repl.clear()
     _cache_repl[key] = p
@@ -286,19 +286,19 @@ sre_compile._subx = _subx
 
 # register myself for pickling
 
-import copy_reg
+import copyreg
 
 def _pickle(p):
     return _compile, (p.pattern, p.flags)
 
-copy_reg.pickle(_pattern_type, _pickle, _compile)
+copyreg.pickle(_pattern_type, _pickle, _compile)
 
 # --------------------------------------------------------------------
 # experimental stuff (see python-dev discussions for details)
 
 class Scanner:
     def __init__(self, lexicon, flags=0):
-        from sre_constants import BRANCH, SUBPATTERN
+        from .sre_constants import BRANCH, SUBPATTERN
         self.lexicon = lexicon
         # combine phrases into a compound pattern
         p = []

@@ -29,7 +29,7 @@ WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("MenuFunctions", 1), ("Options", 1))
 
 def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
     currWord = wikiDocument.getWikiPageNameForLinkTerm(currWord)
-    firstDef = u""
+    firstDef = ""
     graph = []
 
     coloredSet = set()
@@ -43,21 +43,21 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
         c = wx.NamedColour(colored_node[2].strip())
         
         color_code = rgbToHtmlColor(c.Red(), c.Green(), c.Blue())
-        fontColor = u""
+        fontColor = ""
         if c.Green() < 128:
-            fontColor = u" [fontcolor=white]"
+            fontColor = " [fontcolor=white]"
         
         coloredSet.add(colored_node[0])
 
         if colored_node[0] == currWord:
-            firstDef = u'"%s" [fillcolor="%s"]%s' % \
+            firstDef = '"%s" [fillcolor="%s"]%s' % \
                     (colored_node[0], color_code, fontColor)
         else:
-            graph.append(u'"%s" [fillcolor="%s"]%s' %
+            graph.append('"%s" [fillcolor="%s"]%s' %
                     (colored_node[0], color_code, fontColor))
     
-    if currWord is not None and firstDef == u"":
-        firstDef = u'"%s"' % currWord
+    if currWord is not None and firstDef == "":
+        firstDef = '"%s"' % currWord
 #         firstDef = u'"%s" [fillcolor="%s"]' % (currWord, DEFAULT_NODE_BG_COLOR)
         coloredSet.add(currWord)
 
@@ -76,35 +76,35 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
 
 
 def _buildGraphStyle(config):
-    nodeStyle = [u'style=filled']
+    nodeStyle = ['style=filled']
 
-    val = config.get("main", "plugin_graphVizStructure_nodeFacename", u"")
-    if val != u"":
-        nodeStyle.append(u'fontname="%s"' % val)
+    val = config.get("main", "plugin_graphVizStructure_nodeFacename", "")
+    if val != "":
+        nodeStyle.append('fontname="%s"' % val)
     
     val = config.getint("main", "plugin_graphVizStructure_nodeFontsize", 0)
     if val != 0:
-        nodeStyle.append(u'fontsize=%s' % val)
+        nodeStyle.append('fontsize=%s' % val)
 
-    val = config.get("main", "plugin_graphVizStructure_nodeBorderColor", u"")
-    if val != u"":
-        nodeStyle.append(u'color="%s"' % val)
+    val = config.get("main", "plugin_graphVizStructure_nodeBorderColor", "")
+    if val != "":
+        nodeStyle.append('color="%s"' % val)
 
-    val = config.get("main", "plugin_graphVizStructure_nodeBgColor", u"")
-    if val != u"":
-        nodeStyle.append(u'fillcolor="%s"' % val)
+    val = config.get("main", "plugin_graphVizStructure_nodeBgColor", "")
+    if val != "":
+        nodeStyle.append('fillcolor="%s"' % val)
     
-    nodeStyle = "node [" + u", ".join(nodeStyle) + u"]"
+    nodeStyle = "node [" + ", ".join(nodeStyle) + "]"
  
-    edgeStyle = [u'style=solid']
+    edgeStyle = ['style=solid']
     
-    val = config.get("main", "plugin_graphVizStructure_edgeColor", u"")
-    if val != u"":
-        edgeStyle.append(u'color="%s"' % val)
+    val = config.get("main", "plugin_graphVizStructure_edgeColor", "")
+    if val != "":
+        edgeStyle.append('color="%s"' % val)
 
-    edgeStyle = "edge [" + u", ".join(edgeStyle) + u"]"
+    edgeStyle = "edge [" + ", ".join(edgeStyle) + "]"
     
-    return nodeStyle + u"; " + edgeStyle
+    return nodeStyle + "; " + edgeStyle
 
 
 
@@ -115,20 +115,20 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
     global_includeRe = None
 
     global_exclude_attributes = [re.escape(p[2].strip()) for p in wikiDocument.getAttributeTriples(
-                None, u'global.graph.relation.exclude', None)]
+                None, 'global.graph.relation.exclude', None)]
 
     if len(global_exclude_attributes) > 0:
         global_excludeRe = re.compile(
-                ur"^" + joinRegexes(global_exclude_attributes) + ur"(?:\.|$)",
+                r"^" + joinRegexes(global_exclude_attributes) + r"(?:\.|$)",
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
     else:
         global_include_attributes = [re.escape(p[2].strip()) for p in wikiDocument.getAttributeTriples(
-                    None, u'global.graph.relation.include', None)]
+                    None, 'global.graph.relation.include', None)]
         
         if len(global_include_attributes) > 0:
             global_includeRe = re.compile(
-                    ur"^" + joinRegexes(global_include_attributes)+ ur"(?:\.|$)",
+                    r"^" + joinRegexes(global_include_attributes)+ r"(?:\.|$)",
                     re.DOTALL | re.UNICODE | re.MULTILINE)
 
     graph = []
@@ -155,7 +155,7 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
         if word is None:
             continue
 
-        graph.append(u'"%s" -> "%s" [label="%s"];' % (p[0], word, p[1]))
+        graph.append('"%s" -> "%s" [label="%s"];' % (p[0], word, p[1]))
         wordSet.add(p[0])
         wordSet.add(word)
 
@@ -164,7 +164,7 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
     if not currWord in wordSet:
         currWord = None
 
-    return '\n'.join([u'\ndigraph {', _buildGraphStyle(config)] +
+    return '\n'.join(['\ndigraph {', _buildGraphStyle(config)] +
             _buildNodeDefs(wikiDocument, currWord, wordSet) + graph)
 
 
@@ -172,7 +172,7 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
 def buildChildGraphSource(wikiDocument, currWord, config):
     wikiData = wikiDocument.getWikiData()
 
-    graph = [u'', u'digraph {', _buildGraphStyle(config)]
+    graph = ['', 'digraph {', _buildGraphStyle(config)]
 
     graph += _buildNodeDefs(wikiDocument, currWord)
 
@@ -188,10 +188,10 @@ def buildChildGraphSource(wikiDocument, currWord, config):
             conns.add((word, child))
 
     for word, child in conns:
-        graph.append(u'"%s" -> "%s";' % (word, child))
+        graph.append('"%s" -> "%s";' % (word, child))
 
-    graph.append(u'}')
-    return u'\n'.join(graph)
+    graph.append('}')
+    return '\n'.join(graph)
 
 
 
@@ -213,8 +213,8 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"graph.relation", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler),
-            (u"graph.child", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler)
+            ("graph.relation", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler),
+            ("graph.child", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler)
             )
 
 
@@ -285,7 +285,7 @@ class GraphVizBaseHandler:
         to insert instead of the insertion.        
         """
         
-        if insToken.key == u"graph.relation":
+        if insToken.key == "graph.relation":
             source = buildRelationGraphSource(exporter.getWikiDocument(),
                     insToken.value, exporter.getMainControl().getConfig())
         else:    # insToken.key == u"graph.child"
@@ -294,22 +294,22 @@ class GraphVizBaseHandler:
 
         if not source:
             # Nothing in, nothing out
-            return u""
+            return ""
 
         response, url = self.createImage(exporter.getTempFileSet(), exportType,
                 source, insToken.appendices)
 
         if response is not None:
-            return u'<pre>' + (u'[%s]' % response)+ \
+            return '<pre>' + ('[%s]' % response)+ \
                     '</pre>'
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
-                    u'&nbsp;') % url
+            return ('<img src="%s" border="0" align="bottom" alt="formula" />'
+                    '&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
+            return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 
@@ -321,7 +321,7 @@ class GraphVizBaseHandler:
         
         if self.extAppExe == "":
             # No path to executable -> show message
-            return u"Please set path to GraphViz executables in options", None
+            return "Please set path to GraphViz executables in options", None
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -350,7 +350,7 @@ class GraphVizBaseHandler:
             popenObject.stdin.close()
             popenObject.stdout.close()
 
-            if u"noerror" in [a.strip() for a in insParams]:
+            if "noerror" in [a.strip() for a in insParams]:
                 childErr.read()
                 errResponse = None
             else:
@@ -363,7 +363,7 @@ class GraphVizBaseHandler:
         if errResponse is not None and errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return (_(u"%s Error: %s") % (appname, errResponse)), None
+            return (_("%s Error: %s") % (appname, errResponse)), None
 
         return None, url
 
@@ -429,19 +429,19 @@ def describeMenuItems(wiki):
     kb = wiki.getKeyBindings()
     
     return (
-            (showGraphViz, _(u"Show relation graph") + u"\t" +
-            kb.Plugin_GraphVizStructure_ShowRelationGraph, _(u"Show relation graph")),
+            (showGraphViz, _("Show relation graph") + "\t" +
+            kb.Plugin_GraphVizStructure_ShowRelationGraph, _("Show relation graph")),
            
-            (showGraphSource, _(u"Show rel. graph source") + u"\t" +
+            (showGraphSource, _("Show rel. graph source") + "\t" +
             kb.Plugin_GraphVizStructure_ShowRelationGraphSource,
-            _(u"Show relation graph source")),
+            _("Show relation graph source")),
 
-            (showChildGraph, _(u"Show child graph") + u"\t" +
-            kb.Plugin_GraphVizStructure_ShowChildGraph, _(u"Show child graph")),
+            (showChildGraph, _("Show child graph") + "\t" +
+            kb.Plugin_GraphVizStructure_ShowChildGraph, _("Show child graph")),
 
-            (showChildGraphSource, _(u"Show child graph source") + u"\t" +
+            (showChildGraphSource, _("Show child graph source") + "\t" +
             kb.Plugin_GraphVizStructure_ShowChildGraphSource,
-            _(u"Show child graph source"))
+            _("Show child graph source"))
             )
 
 
@@ -537,18 +537,18 @@ class GraphView(wx.html.HtmlWindow):
                     self.outOfSync = False
                     return
 
-                self.SetPage(uniToGui(u'<img src="%s" border="0" align="top" alt="relation" />'
+                self.SetPage(uniToGui('<img src="%s" border="0" align="top" alt="relation" />'
                         % url))
 
             else:  # self.mode.endswith("/dot/source"):
                 if self.graphDotHandler.extAppExe == "":
                     # No path to executable -> show message
-                    warning = u"To see the graph, you must install GraphViz executable\n"\
-                            u"and set the path to it in options\n\n"
+                    warning = "To see the graph, you must install GraphViz executable\n"\
+                            "and set the path to it in options\n\n"
                 else:
-                    warning = u""
+                    warning = ""
 
-                self.SetPage(uniToGui(u'<pre>%s%s</pre>' %
+                self.SetPage(uniToGui('<pre>%s%s</pre>' %
                         (escapeHtmlNoBreaks(warning), escapeHtmlNoBreaks(source))))
 
         self.outOfSync = False
@@ -651,14 +651,14 @@ def registerOptions(ver, app):
     """
     # Register options
     dgcd = app.getDefaultGlobalConfigDict()
-    dgcd[("main", "plugin_graphVizStructure_nodeFacename")] = u""
-    dgcd[("main", "plugin_graphVizStructure_nodeFontsize")] = u"0"
-    dgcd[("main", "plugin_graphVizStructure_nodeBorderColor")] = u""
-    dgcd[("main", "plugin_graphVizStructure_nodeBgColor")] = u""
-    dgcd[("main", "plugin_graphVizStructure_edgeColor")] = u""
+    dgcd[("main", "plugin_graphVizStructure_nodeFacename")] = ""
+    dgcd[("main", "plugin_graphVizStructure_nodeFontsize")] = "0"
+    dgcd[("main", "plugin_graphVizStructure_nodeBorderColor")] = ""
+    dgcd[("main", "plugin_graphVizStructure_nodeBgColor")] = ""
+    dgcd[("main", "plugin_graphVizStructure_edgeColor")] = ""
 
     # Register panel in options dialog
-    app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _(u"  GraphVizStructure"))
+    app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _("  GraphVizStructure"))
 
 
 
@@ -675,10 +675,10 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         mainsizer.AddGrowableCol(1, 1)
 
         self.tfFacename = wx.TextCtrl(self, -1)
-        facenameButton = wx.Button(self, -1, _(u"..."))
+        facenameButton = wx.Button(self, -1, _("..."))
         facenameButton.SetMinSize((20, -1))
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Node font name:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Node font name:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfFacename, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(facenameButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
@@ -690,7 +690,7 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
 
         ctl = wx.TextCtrl(self, -1)
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Node font size:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Node font size:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add((0, 0), 1)
@@ -699,10 +699,10 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
 
         ctl = wx.TextCtrl(self, -1)
-        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton = wx.Button(self, -1, _("..."))
         colorButton.SetMinSize((20, -1))
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Node border color:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Node border color:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
@@ -712,10 +712,10 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
 
         ctl = wx.TextCtrl(self, -1)
-        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton = wx.Button(self, -1, _("..."))
         colorButton.SetMinSize((20, -1))
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Node background color:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Node background color:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
@@ -725,10 +725,10 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
 
         ctl = wx.TextCtrl(self, -1)
-        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton = wx.Button(self, -1, _("..."))
         colorButton.SetMinSize((20, -1))
 
-        mainsizer.Add(wx.StaticText(self, -1, _(u"Edge color:")), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _("Edge color:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)

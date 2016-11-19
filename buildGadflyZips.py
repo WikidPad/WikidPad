@@ -4,8 +4,8 @@ from distutils.util import byte_compile
 
 # Build dirlist
 
-print "Build Gadfly Zip Files"
-print "Collecting files..."
+print("Build Gadfly Zip Files")
+print("Collecting files...")
 
 walkedFiles = list(os.walk("lib/gadfly"))
 
@@ -24,7 +24,7 @@ filesToZip.append(("sql_mar.py", "sql_mar.py"))
 
 filesToCompile = [f[0] for f in filesToZip]
 
-print "Compiling scripts..."
+print("Compiling scripts...")
 byte_compile(filesToCompile, optimize=0, force=1)
 byte_compile(filesToCompile, optimize=2, force=1)
 
@@ -32,7 +32,7 @@ zfilefull = zipfile.ZipFile("gadfly.zip", "w", zipfile.ZIP_DEFLATED)
 zfilesmall = zipfile.ZipFile("gadfly_small.zip", "w", zipfile.ZIP_DEFLATED)
 
 
-print "Compressing files..."
+print("Compressing files...")
 for src, ziptarget in filesToZip:
     zfilefull.write(src, ziptarget)
     if src.endswith(".py"):

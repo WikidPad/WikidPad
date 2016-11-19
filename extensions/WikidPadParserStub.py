@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import traceback
 
 import wx
@@ -13,7 +13,7 @@ from pwiki.OptionsDialog import PluginOptionsPanel
 WIKIDPAD_PLUGIN = (("WikiParser", 1), ("Options", 1))
 
 WIKI_LANGUAGE_NAME = "wikidpad_default_2_0"
-WIKI_HR_LANGUAGE_NAME = u"WikidPad default 2.0"
+WIKI_HR_LANGUAGE_NAME = "WikidPad default 2.0"
 
 
 def describeWikiLanguage(ver, app):
@@ -101,7 +101,7 @@ def registerOptions(ver, app):
     # Register options
     
     # Interpret footnotes (e.g. [42]) as wiki words?
-    app.getDefaultWikiConfigDict()[("main", "footnotes_as_wikiwords")] = u"False"
+    app.getDefaultWikiConfigDict()[("main", "footnotes_as_wikiwords")] = "False"
 
     # Register panel in options dialog
     app.addWikiWikiLangOptionsDlgPanel(WikiLangOptionsPanel,
@@ -121,7 +121,7 @@ class WikiLangOptionsPanel(PluginOptionsPanel):
 #         pt = self.mainControl.getConfig().getboolean("main",
 #                 "footnotes_as_wikiwords", False)
         self.cbFootnotesAsWws = wx.CheckBox(self, -1,
-                _(u"Footnotes as wiki words"))
+                _("Footnotes as wiki words"))
 #         self.cbFootnotesAsWws.SetValue(pt)
 
 #         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeDot",

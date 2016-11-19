@@ -82,7 +82,7 @@ class gfclient:
     def cursor(self):
         """return a cursor to this policy"""
         if self.closed:
-            raise ValueError, "connection is closed"
+            raise ValueError("connection is closed")
         return gfClientCursor(self)
 
 

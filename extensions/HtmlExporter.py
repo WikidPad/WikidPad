@@ -1,11 +1,11 @@
-from __future__ import with_statement
+
 ## import profilehooks
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 # from Enum import Enumeration
-import sys, os, os.path, string, re, traceback, locale, time, urllib
+import sys, os, os.path, string, re, traceback, locale, time, urllib.request, urllib.parse, urllib.error
 from os.path import join, exists
-from cStringIO import StringIO
+from io import StringIO
 import shutil
 
 import pwiki.urllib_red as urllib
@@ -69,7 +69,7 @@ def _escapeAnchor(name):
                 result.append("=%02x" % oc)
         else:
             result.append(c)
-    return u"".join(result)
+    return "".join(result)
 
 # # Types of export destinations
 # EXPORT_DEST_TYPE_DIR = 1
@@ -108,7 +108,7 @@ class LinkConverterForHtmlMultiPageExport(BasicLinkConverter):
         if relUnAlias not in self.htmlExporter.wordList:
             return default
 
-        return u"#%s" % _escapeAnchor(relUnAlias)
+        return "#%s" % _escapeAnchor(relUnAlias)
 
 
 class FilenameConverter(object):
@@ -124,7 +124,7 @@ class FilenameConverter(object):
         try:
             return self._used[ww]
         except KeyError:
-            for fname in iterCompatibleFilename(ww, u"",
+            for fname in iterCompatibleFilename(ww, "",
                     asciiOnly=self.asciiOnly, maxLength=245):
                 if not fname in self._valueSet:
                     self._used[ww] = fname
@@ -194,35 +194,35 @@ class SizeValue(object):
 
 
 HOR_ALIGN_CSS_ATTR = {
-    u"l" : (u'text-align: left',   u'align="left"'),
-    u"c" : (u'text-align: center', u'align="center"'),
+    "l" : ('text-align: left',   'align="left"'),
+    "c" : ('text-align: center', 'align="center"'),
 #     u"m" : (u'text-align: center', u'align="center"'),
-    u"r" : (u'text-align: right',  u'align="right"'),
-    u"left" : (u'text-align: left',   u'align="left"'),
-    u"center" : (u'text-align: center', u'align="center"'),
-    u"right" : (u'text-align: right',  u'align="right"'),
+    "r" : ('text-align: right',  'align="right"'),
+    "left" : ('text-align: left',   'align="left"'),
+    "center" : ('text-align: center', 'align="center"'),
+    "right" : ('text-align: right',  'align="right"'),
     }
 
 VERT_ALIGN_CSS_ATTR = {
-    u"t" : (u'vertical-align: top',   u'valign="top"'),
-    u"m" : (u'vertical-align: middle', u'valign="middle"'),
-    u"b" : (u'vertical-align: bottom',  u'valign="bottom"'),
-    u"top" : (u'vertical-align: top',   u'valign="top"'),
-    u"middle" : (u'vertical-align: middle', u'valign="middle"'),
-    u"bottom" : (u'vertical-align: bottom',  u'valign="bottom"'),
+    "t" : ('vertical-align: top',   'valign="top"'),
+    "m" : ('vertical-align: middle', 'valign="middle"'),
+    "b" : ('vertical-align: bottom',  'valign="bottom"'),
+    "top" : ('vertical-align: top',   'valign="top"'),
+    "middle" : ('vertical-align: middle', 'valign="middle"'),
+    "bottom" : ('vertical-align: bottom',  'valign="bottom"'),
     }
  
 IMG_ALIGN_ATTR = {
-    u"t": u' align="top"',
-    u"m": u' align="middle"',
-    u"b": u' align="bottom"',
-    u"l": u' align="left"',
-    u"r": u' align="right"',
-    u"top": u' align="top"',
-    u"middle": u' align="middle"',
-    u"bottom": u' align="bottom"',
-    u"left": u' align="left"',
-    u"right": u' align="right"',
+    "t": ' align="top"',
+    "m": ' align="middle"',
+    "b": ' align="bottom"',
+    "l": ' align="left"',
+    "r": ' align="right"',
+    "top": ' align="top"',
+    "middle": ' align="middle"',
+    "bottom": ' align="bottom"',
+    "left": ' align="left"',
+    "right": ' align="right"',
     }
 
 
@@ -281,8 +281,8 @@ class TableCell(object):
         exporter = self.exporter
 
         if self.astNode is None:
-            exporter.outAppend(u'<td class="wikidpad">')
-            exporter.outAppend(u"</td>")
+            exporter.outAppend('<td class="wikidpad">')
+            exporter.outAppend("</td>")
             return
 
 
@@ -313,9 +313,9 @@ class TableCell(object):
 
         attrStr = exporter.combineStyles(css, styles, attribs)
 
-        exporter.outAppend(u"<td{0}>".format(attrStr))
+        exporter.outAppend("<td{0}>".format(attrStr))
         exporter.processAst(self.content, self.astNode)
-        exporter.outAppend(u"</td>")
+        exporter.outAppend("</td>")
     
 
 
@@ -475,8 +475,8 @@ class HtmlExporter(AbstractExporter):
         are listed.
         """
         return (
-            (u"html_multi", _(u'One HTML page')),
-            (u"html_single", _(u'Set of HTML pages'))
+            ("html_multi", _('One HTML page')),
+            ("html_single", _('Set of HTML pages'))
             )
 
 
@@ -493,8 +493,8 @@ class HtmlExporter(AbstractExporter):
         them weren't requested. Panel objects must not be shared by different
         exporter classes.
         """
-        if not u"html_multi" in exportTypes and \
-                not u"html_single" in exportTypes:
+        if not "html_multi" in exportTypes and \
+                not "html_single" in exportTypes:
             return ()
 
         res = wx.xrc.XmlResource.Get()
@@ -510,8 +510,8 @@ class HtmlExporter(AbstractExporter):
                 "html_toc_title"))
 
         return (
-            (u"html_multi", htmlPanel),
-            (u"html_single", htmlPanel)
+            ("html_multi", htmlPanel),
+            ("html_single", htmlPanel)
             )
 
 
@@ -565,7 +565,7 @@ class HtmlExporter(AbstractExporter):
                     "html_export_pics_as_links")),
                     config.getint("main", "export_table_of_contents"),
                     config.get("main", "html_toc_title"),
-                    u"volatile"
+                    "volatile"
                      )
         else:
             ctrls = XrcControls(addoptpanel)
@@ -574,7 +574,7 @@ class HtmlExporter(AbstractExporter):
             tableOfContents = ctrls.chTableOfContents.GetSelection()
             tocTitle = ctrls.tfHtmlTocTitle.GetValue()
 
-            return (picsAsLinks, tableOfContents, tocTitle, u"volatile")
+            return (picsAsLinks, tableOfContents, tocTitle, "volatile")
 
 
     def setAddOpt(self, addOpt, addoptpanel):
@@ -651,7 +651,7 @@ class HtmlExporter(AbstractExporter):
                 compatFilenames, addOpt, progressHandler):
             return
             
-        if exportType in (u"html_single", u"html_multi"):
+        if exportType in ("html_single", "html_multi"):
             volatileDir = self.addOpt[3]
 
             volatileDir = join(self.exportDest, volatileDir)
@@ -670,9 +670,9 @@ class HtmlExporter(AbstractExporter):
             self.referencedStorageFiles = set()
 
 
-        if exportType == u"html_multi":
+        if exportType == "html_multi":
             browserFile = self.exportHtmlMultiFile()
-        elif exportType == u"html_single":
+        elif exportType == "html_single":
             browserFile = self._exportHtmlSingleFiles(self.wordList)
 
         # Other supported types: html_previewWX, html_previewIE, html_previewMOZ,
@@ -691,8 +691,8 @@ class HtmlExporter(AbstractExporter):
                     try:
                         OsAbstract.copyFile(join(wikiPath, rsf),
                                 join(self.exportDest, rsf))
-                    except IOError, e:
-                        raise ExportException(unicode(e))
+                    except IOError as e:
+                        raise ExportException(str(e))
 
 
         if self.mainControl.getConfig().getboolean(
@@ -750,10 +750,10 @@ class HtmlExporter(AbstractExporter):
             
         self.wordList.remove(wikiWord)
         
-        if self.exportType == u"html_multi":
+        if self.exportType == "html_multi":
             self.exportHtmlMultiFile()
 
-        elif self.exportType == u"html_single":
+        elif self.exportType == "html_single":
             self._exportHtmlSingleFiles([])
 
 
@@ -775,10 +775,10 @@ class HtmlExporter(AbstractExporter):
             self.wordList.append(newWord)
 
 
-        if self.exportType == u"html_multi":
+        if self.exportType == "html_multi":
             self.exportHtmlMultiFile()
 
-        elif self.exportType == u"html_single":
+        elif self.exportType == "html_single":
             if newInList:
                 updList = [newWord]
             else:
@@ -812,10 +812,10 @@ class HtmlExporter(AbstractExporter):
             return
 
         try:
-            if self.exportType == u"html_multi":
+            if self.exportType == "html_multi":
                 self.exportHtmlMultiFile()
     
-            elif self.exportType == u"html_single":
+            elif self.exportType == "html_single":
                 self._exportHtmlSingleFiles(updList)
         except WikiWordNotFoundException:
             pass
@@ -827,10 +827,10 @@ class HtmlExporter(AbstractExporter):
 
 
     _INTERNALJUMP_PREFIXMAP = {
-        u"html_previewWX": u"internaljump:",
-        u"html_previewIE": u"http://internaljump/",
-        u"html_previewMOZ": u"file://internaljump/",
-        u"html_previewWK": u"http://internaljump/"
+        "html_previewWX": "internaljump:",
+        "html_previewIE": "http://internaljump/",
+        "html_previewMOZ": "file://internaljump/",
+        "html_previewWK": "http://internaljump/"
     }
 
     def _getInternaljumpPrefix(self):
@@ -838,7 +838,7 @@ class HtmlExporter(AbstractExporter):
             return self._INTERNALJUMP_PREFIXMAP[self.exportType]
         except IndexError:
             raise InternalError(
-                    u"Trying to get internal jump prefix for non-preview export")
+                    "Trying to get internal jump prefix for non-preview export")
 
 
     def setLinkConverter(self, linkConverter):
@@ -891,19 +891,19 @@ class HtmlExporter(AbstractExporter):
                         self.mainControl.getWikiDocument().getWikiName())
             flatTree = rootPage.getFlatTree()
 
-            filePointer.write((u'<h2 class="wikidpad">%s</h2>\n'
+            filePointer.write(('<h2 class="wikidpad">%s</h2>\n'
                     '%s%s<hr class="wikidpad" />') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentTreeBody(flatTree, linkAsFragments=True),
-                    u'<br class="wikidpad" />\n' * sepLineCount))
+                    '<br class="wikidpad" />\n' * sepLineCount))
 
         elif tocMode == 2:
             # Write a content list at beginning
-            filePointer.write((u'<h2 class="wikidpad">%s</h2>\n'
+            filePointer.write(('<h2 class="wikidpad">%s</h2>\n'
                     '%s%s<hr class="wikidpad" />') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentListBody(linkAsFragments=True),
-                    u'<br class="wikidpad" />\n' * sepLineCount))
+                    '<br class="wikidpad" />\n' * sepLineCount))
 
 
         if self.progressHandler is not None:
@@ -914,7 +914,7 @@ class HtmlExporter(AbstractExporter):
         for word in self.wordList:
             if self.progressHandler is not None:
                 step += 1
-                self.progressHandler.update(step, _(u"Exporting %s") % word)
+                self.progressHandler.update(step, _("Exporting %s") % word)
 
             wikiPage = self.wikiDocument.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -933,16 +933,16 @@ class HtmlExporter(AbstractExporter):
                 else:
                     parentLinks = self.getParentLinks(wikiPage, False)
 
-                filePointer.write((u'<span class="wikidpad wiki-name-ref">'
-                        u'[<a name="%s" class="wikidpad">%s</a>]<br class="wikidpad" />'
-                        u'<br class="wikidpad" /></span>'
-                        u'<span class="wikidpad parent-nodes">parent nodes: %s'
-                        u'<br class="wikidpad" /></span>%s%s<hr class="wikidpad" />') %
+                filePointer.write(('<span class="wikidpad wiki-name-ref">'
+                        '[<a name="%s" class="wikidpad">%s</a>]<br class="wikidpad" />'
+                        '<br class="wikidpad" /></span>'
+                        '<span class="wikidpad parent-nodes">parent nodes: %s'
+                        '<br class="wikidpad" /></span>%s%s<hr class="wikidpad" />') %
                         (self.wordAnchor, word,
                         parentLinks,
                         formattedContent,
-                        u'<br class="wikidpad" />\n' * sepLineCount))
-            except Exception, e:
+                        '<br class="wikidpad" />\n' * sepLineCount))
+            except Exception as e:
                 traceback.print_exc()
 
         self.wordAnchor = None
@@ -966,7 +966,7 @@ class HtmlExporter(AbstractExporter):
 
         if self.addOpt[1] in (1, 2):
             # TODO Configurable name
-            outputFile = join(self.exportDest, pathEnc(u"index.html"))
+            outputFile = join(self.exportDest, pathEnc("index.html"))
             try:
                 if exists(pathEnc(outputFile)):
                     os.unlink(pathEnc(outputFile))
@@ -976,21 +976,21 @@ class HtmlExporter(AbstractExporter):
 
                 # TODO Factor out HTML header generation                
                 fp.write(self._getGenericHtmlHeader(self.addOpt[2]) + 
-                        u'    <body class="wikidpad">\n')
+                        '    <body class="wikidpad">\n')
                 if self.addOpt[1] == 1:
                     # Write a content tree
                     rootPage = self.mainControl.getWikiDocument().getWikiPage(
                                 self.mainControl.getWikiDocument().getWikiName())
                     flatTree = rootPage.getFlatTree()
     
-                    fp.write((u'<h2 class="wikidpad">%s</h2>\n'
+                    fp.write(('<h2 class="wikidpad">%s</h2>\n'
                             '%s') %
                             (self.addOpt[2],  # = "Table of Contents"
                             self.getContentTreeBody(flatTree, linkAsFragments=False)
                             ))
                 elif self.addOpt[1] == 2:
                     # Write a content list
-                    fp.write((u'<h2 class="wikidpad">%s</h2>\n'
+                    fp.write(('<h2 class="wikidpad">%s</h2>\n'
                             '%s') %
                             (self.addOpt[2],  # = "Table of Contents"
                             self.getContentListBody(linkAsFragments=False)
@@ -1000,7 +1000,7 @@ class HtmlExporter(AbstractExporter):
 
                 fp.reset()        
                 realfp.close()
-            except Exception, e:
+            except Exception as e:
                 traceback.print_exc()
 
 
@@ -1011,7 +1011,7 @@ class HtmlExporter(AbstractExporter):
         for word in wordListToUpdate:
             if self.progressHandler is not None:
                 step += 1
-                self.progressHandler.update(step, _(u"Exporting %s") % word)
+                self.progressHandler.update(step, _("Exporting %s") % word)
 
             wikiPage = self.wikiDocument.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -1044,7 +1044,7 @@ class HtmlExporter(AbstractExporter):
                     startFile, onlyInclude))
             fp.reset()        
             realfp.close()
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Error while exporting word %s" % repr(word))
             traceback.print_exc()
 
@@ -1066,31 +1066,31 @@ class HtmlExporter(AbstractExporter):
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            result.append((u'<span class="wikidpad parent-nodes">parent nodes: %s'
+            result.append(('<span class="wikidpad parent-nodes">parent nodes: %s'
                     '<br class="wikidpad" /><br class="wikidpad" /></span>\n')
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
         result.append(formattedContent)
         result.append(self.getFileFooter())
         
-        return u"".join(result)
+        return "".join(result)
 
 
-    def _getGenericHtmlHeader(self, title, charSet=u'; charset=UTF-8'):
+    def _getGenericHtmlHeader(self, title, charSet='; charset=UTF-8'):
         styleSheets = []
         for dummy, url in self.styleSheetList:
             styleSheets.append(
-                    u'        <link type="text/css" rel="stylesheet" href="%(url)s">' %
+                    '        <link type="text/css" rel="stylesheet" href="%(url)s">' %
                     locals())
         
-        styleSheets = u"\n".join(styleSheets)
+        styleSheets = "\n".join(styleSheets)
 
 #         styleSheet = self.styleSheet
         config = self.mainControl.getConfig()
         docType = config.get("main", "html_header_doctype",
                 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"')
 
-        return u"""<!%(docType)s>
+        return """<!%(docType)s>
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html%(charSet)s">
@@ -1105,7 +1105,7 @@ class HtmlExporter(AbstractExporter):
         """
         Return file header for an HTML file containing multiple pages
         """
-        return self._getGenericHtmlHeader(title) + u'    <body class="wikidpad">\n'
+        return self._getGenericHtmlHeader(title) + '    <body class="wikidpad">\n'
 
 
     def _getBodyTag(self, wikiPage):
@@ -1119,28 +1119,28 @@ class HtmlExporter(AbstractExporter):
         bgimg = config.get("main", "html_body_background")
 
         # Get attribute settings
-        linkcol = wikiPage.getAttributeOrGlobal(u"html.linkcolor", linkcol)
-        alinkcol = wikiPage.getAttributeOrGlobal(u"html.alinkcolor", alinkcol)
-        vlinkcol = wikiPage.getAttributeOrGlobal(u"html.vlinkcolor", vlinkcol)
-        textcol = wikiPage.getAttributeOrGlobal(u"html.textcolor", textcol)
-        bgcol = wikiPage.getAttributeOrGlobal(u"html.bgcolor", bgcol)
-        bgimg = wikiPage.getAttributeOrGlobal(u"html.bgimage", bgimg)
+        linkcol = wikiPage.getAttributeOrGlobal("html.linkcolor", linkcol)
+        alinkcol = wikiPage.getAttributeOrGlobal("html.alinkcolor", alinkcol)
+        vlinkcol = wikiPage.getAttributeOrGlobal("html.vlinkcolor", vlinkcol)
+        textcol = wikiPage.getAttributeOrGlobal("html.textcolor", textcol)
+        bgcol = wikiPage.getAttributeOrGlobal("html.bgcolor", bgcol)
+        bgimg = wikiPage.getAttributeOrGlobal("html.bgimage", bgimg)
         
         # Filter color
         def filterCol(col, prop):
             if colorDescToRgbTuple(col) is not None:
-                return u'%s="%s"' % (prop, col)
+                return '%s="%s"' % (prop, col)
             else:
-                return u''
+                return ''
         
-        linkcol = filterCol(linkcol, u"link")
-        alinkcol = filterCol(alinkcol, u"alink")
-        vlinkcol = filterCol(vlinkcol, u"vlink")
-        textcol = filterCol(textcol, u"text")
-        bgcol = filterCol(bgcol, u"bgcolor")
+        linkcol = filterCol(linkcol, "link")
+        alinkcol = filterCol(alinkcol, "alink")
+        vlinkcol = filterCol(vlinkcol, "vlink")
+        textcol = filterCol(textcol, "text")
+        bgcol = filterCol(bgcol, "bgcolor")
         
         if bgimg:
-            if bgimg.startswith(u"rel://"):
+            if bgimg.startswith("rel://"):
                 # Relative URL
                 if self.asHtmlPreview:
                     # If preview, make absolute
@@ -1149,12 +1149,12 @@ class HtmlExporter(AbstractExporter):
                     # If export, reformat a bit
                     bgimg = bgimg[6:]
 
-            bgimg = u'background="%s"' % bgimg
+            bgimg = 'background="%s"' % bgimg
         else:
-            bgimg = u''
+            bgimg = ''
             
             
-        if self.exportType in (u"html_previewIE", u"html_previewMOZ", u"html_previewWK"):
+        if self.exportType in ("html_previewIE", "html_previewMOZ", "html_previewWK"):
             dblClick = 'ondblclick="window.location.href = &quot;' + \
                     self._getInternaljumpPrefix() + \
                     'mouse/leftdoubleclick/preview/body&quot;;"'
@@ -1163,7 +1163,7 @@ class HtmlExporter(AbstractExporter):
             dblClick = ''
 
         # Build tagstring
-        bodytag = u" ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg, dblClick))
+        bodytag = " ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg, dblClick))
         if len(bodytag) > 6:  # the 6 spaces
             bodytag = '<body %s class="wikidpad">' % bodytag
         else:
@@ -1179,17 +1179,17 @@ class HtmlExporter(AbstractExporter):
         """
 
         return self._getGenericHtmlHeader(wikiPage.getWikiWord()) + \
-                u"    %s\n" % self._getBodyTag(wikiPage)
+                "    %s\n" % self._getBodyTag(wikiPage)
 
 
 
     def getFileFooter(self):
-        return u"""    </body>
+        return """    </body>
 </html>
 """
 
     def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
-        parents = u""
+        parents = ""
         parentRelations = wikiPage.getParentRelationships()[:]
         self.mainControl.getCollator().sort(parentRelations)
         
@@ -1197,18 +1197,18 @@ class HtmlExporter(AbstractExporter):
             if wordsToInclude and relation not in wordsToInclude:
                 continue
 
-            if parents != u"":
-                parents = parents + u" | "
+            if parents != "":
+                parents = parents + " | "
 
             if asHref:
                 parents = parents +\
-                        u'<span class="wikidpad parent-node"><a href="%s" class="wikidpad">%s</a></span>' %\
+                        '<span class="wikidpad parent-node"><a href="%s" class="wikidpad">%s</a></span>' %\
                         (self.linkConverter.getLinkForWikiWord(relation), relation)
 #                         u'<span class="wikidpad parent-node"><a href="%s.html" class="wikidpad">%s</a></span>' %\
 #                         (self.filenameConverter.getFilenameForWikiWord(relation), relation)
             else:
                 parents = parents +\
-                u'<span class="wikidpad parent-node"><a href="#%s" class="wikidpad">%s</a></span>' %\
+                '<span class="wikidpad parent-node"><a href="#%s" class="wikidpad">%s</a></span>' %\
                 (_escapeAnchor(relation), relation)
 
         return parents
@@ -1225,7 +1225,7 @@ class HtmlExporter(AbstractExporter):
         None if the file (normally for preview mode) shouldn't be copied.
         Must be called after export type is set!
         """
-        asPreview = self.exportType in ("html_previewIE", "html_previewMOZ", u"html_previewWK", "html_previewWX")
+        asPreview = self.exportType in ("html_previewIE", "html_previewMOZ", "html_previewWK", "html_previewWX")
         if asPreview:
             # Step one: Create paths
             pathlist = [
@@ -1332,14 +1332,14 @@ class HtmlExporter(AbstractExporter):
         result = []
         wordToLink = self.linkConverter.getLinkForWikiWord
         
-        result.append(u'<ul class="wikidpad">\n')
+        result.append('<ul class="wikidpad">\n')
         for wikiWord in self.wordList:
-            result.append(u'<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
+            result.append('<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
                     wikiWord))
 
-        result.append(u'</ul>\n')
+        result.append('</ul>\n')
         
-        return u"".join(result)
+        return "".join(result)
 
 
     def getContentTreeBody(self, flatTree, linkAsFragments):   # rootWords
@@ -1372,20 +1372,20 @@ class HtmlExporter(AbstractExporter):
             deepness += 1
             if deepness > lastdeepness:
                 # print "getContentTreeBody9", deepness, lastdeepness
-                result.append(u'<ul class="wikidpad">\n' * (deepness - lastdeepness))
+                result.append('<ul class="wikidpad">\n' * (deepness - lastdeepness))
             elif deepness < lastdeepness:
                 # print "getContentTreeBody10", deepness, lastdeepness
-                result.append(u'</ul>\n' * (lastdeepness - deepness))
+                result.append('</ul>\n' * (lastdeepness - deepness))
                 
             lastdeepness = deepness
 
             wordSet.remove(wikiWord)
 
             # print "getContentTreeBody11", repr(wikiWord)
-            result.append(u'<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
+            result.append('<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
                     wikiWord))
 
-        result.append(u"</ul>\n" * lastdeepness)
+        result.append("</ul>\n" * lastdeepness)
 
         # list words not in the tree
         if len(wordSet) > 0:
@@ -1394,15 +1394,15 @@ class HtmlExporter(AbstractExporter):
             self.mainControl.getCollator().sort(remainList)
             
             # print "getContentTreeBody14", repr(remainList)
-            result.append(u'<ul class="wikidpad">\n')
+            result.append('<ul class="wikidpad">\n')
             for wikiWord in remainList:
-                result.append(u'<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
+                result.append('<li class="wikidpad"><a href="%s" class="wikidpad">%s</a>\n' % (wordToLink(wikiWord),
                         wikiWord))
 
-            result.append(u'</ul>\n')
+            result.append('</ul>\n')
 
 
-        return u"".join(result)
+        return "".join(result)
 
 
     def getCurrentWikiWord(self):
@@ -1426,7 +1426,7 @@ class HtmlExporter(AbstractExporter):
  
         self.asIntHtmlPreview = (self.exportType == "html_previewWX")
         self.asHtmlPreview = self.exportType in ("html_previewWX",
-                "html_previewIE", "html_previewMOZ", u"html_previewWK")
+                "html_previewIE", "html_previewMOZ", "html_previewWK")
         self.wikiWord = word
 
         self.result = []
@@ -1441,30 +1441,30 @@ class HtmlExporter(AbstractExporter):
         # Get attribute pattern
         if self.asHtmlPreview:
             proppattern = self.mainControl.getConfig().get(
-                        "main", "html_preview_proppattern", u"")
+                        "main", "html_preview_proppattern", "")
         else:
             proppattern = self.mainControl.getConfig().get(
-                        "main", "html_export_proppattern", u"")
+                        "main", "html_export_proppattern", "")
 
         self.proppattern = re.compile(proppattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
         if self.asHtmlPreview:
             self.proppatternExcluding = self.mainControl.getConfig().getboolean(
-                        "main", "html_preview_proppattern_is_excluding", u"True")
+                        "main", "html_preview_proppattern_is_excluding", "True")
         else:
             self.proppatternExcluding = self.mainControl.getConfig().getboolean(
-                        "main", "html_export_proppattern_is_excluding", u"True")
+                        "main", "html_export_proppattern_is_excluding", "True")
 
         if self.asHtmlPreview:
             facename = self.mainControl.getConfig().get(
-                    "main", "facename_html_preview", u"")
+                    "main", "facename_html_preview", "")
             if facename:
                 self.outAppend('<font face="%s" class="wikidpad">' % facename)
 
         with self.optsStack:
             self.optsStack["innermostFullPageAst"] = self.basePageAst
-            self.optsStack["innermostPageUnifName"] = u"wikipage/" + word
+            self.optsStack["innermostPageUnifName"] = "wikipage/" + word
             self.optsStack["innermostDocPage"] = wikiPage
             self.processAst(content, self.basePageAst)
 
@@ -1480,11 +1480,11 @@ class HtmlExporter(AbstractExporter):
         couldn't be determined.
         """
         try:
-            if absUrl.startswith(u"file:"):
+            if absUrl.startswith("file:"):
                 absLink = pathnameFromUrl(absUrl)
                 imgFile = file(absLink, "rb")
             else:
-                imgFile = urllib.urlopen(absUrl)
+                imgFile = urllib.request.urlopen(absUrl)
                 imgData = imgFile.read()
                 imgFile.close()
                 imgFile = StringIO(imgData)
@@ -1527,23 +1527,23 @@ class HtmlExporter(AbstractExporter):
         Append toAppend to self.result, maybe remove or modify it according to
         flags
         """
-        if toAppend == u"":    # .strip()
+        if toAppend == "":    # .strip()
             return
 
-        if self.outFlagEatPostBreak and toAppend.strip() == u'<br class="wikidpad" />':
+        if self.outFlagEatPostBreak and toAppend.strip() == '<br class="wikidpad" />':
             self.outFlagEatPostBreak = eatPostBreak
             self.outFlagPostBreakEaten = True
             return
 
         if eatPreBreak and len(self.result) > 0 and \
-                self.result[-1].strip() == u'<br class="wikidpad" />' and \
+                self.result[-1].strip() == '<br class="wikidpad" />' and \
                 not self.outFlagPostBreakEaten:
             self.result[-1] = toAppend
             self.outFlagEatPostBreak = eatPostBreak
             return
         
         if self.outFlagPostBreakEaten:
-            self.outFlagPostBreakEaten = (toAppend.strip() == u'<br class="wikidpad" />')
+            self.outFlagPostBreakEaten = (toAppend.strip() == '<br class="wikidpad" />')
 
         self.outFlagEatPostBreak = eatPostBreak
         self.result.append(toAppend)
@@ -1561,13 +1561,13 @@ class HtmlExporter(AbstractExporter):
 
 
 
-    START_INDENT_MAP = {"normalindent": u'<ul class="wikidpad normalindent">',
-            "ul": u'<ul class="wikidpad bulletlist">', "ol": u'<ol class="wikidpad orderedlist">',
-            "ol-roman" : u'<ol class="wikidpad withroman">',
-            "ol-alpha" : u'<ol class="wikidpad withalpha">'}
+    START_INDENT_MAP = {"normalindent": '<ul class="wikidpad normalindent">',
+            "ul": '<ul class="wikidpad bulletlist">', "ol": '<ol class="wikidpad orderedlist">',
+            "ol-roman" : '<ol class="wikidpad withroman">',
+            "ol-alpha" : '<ol class="wikidpad withalpha">'}
 
-    END_INDENT_MAP = {"normalindent": u'</ul>\n', "ul": u'</ul>\n',
-            "ol": u'</ol>\n', "ol-roman" : u'</ol>\n', "ol-alpha" : u'</ol>\n'}
+    END_INDENT_MAP = {"normalindent": '</ul>\n', "ul": '</ul>\n',
+            "ol": '</ol>\n', "ol-roman" : '</ol>\n', "ol-alpha" : '</ol>\n'}
 
     def outStartIndentation(self, indType):
         """
@@ -1575,7 +1575,7 @@ class HtmlExporter(AbstractExporter):
         ind -- indentation depth
         """
         if indType == "normalindent" and self.asIntHtmlPreview:
-            self.outEatBreaks(u'<blockquote class="wikidpad">')
+            self.outEatBreaks('<blockquote class="wikidpad">')
         else:
             tag = self.START_INDENT_MAP[indType]
 
@@ -1593,7 +1593,7 @@ class HtmlExporter(AbstractExporter):
         ind -- indentation depth
         """
         if indType == "normalindent" and self.asIntHtmlPreview:
-            self.outEatBreaks(u"</blockquote>\n")
+            self.outEatBreaks("</blockquote>\n")
         else:
             tag = self.END_INDENT_MAP[indType]
 
@@ -1607,14 +1607,14 @@ class HtmlExporter(AbstractExporter):
 
 
     def getOutput(self):
-        return u"".join(self.result)
+        return "".join(self.result)
 
 
     def getCommonStylesFromAppendix(self, appendix):
         if appendix is None:
-            return u"", [], []
+            return "", [], []
 
-        cssClass = u""
+        cssClass = ""
 
         styles = []
         attributes = []
@@ -1635,15 +1635,15 @@ class HtmlExporter(AbstractExporter):
         if attributes is None:
             attributes = []
 
-        if cssClass and cssClass[0] != u" ":
-            cssClass = u" " + cssClass
+        if cssClass and cssClass[0] != " ":
+            cssClass = " " + cssClass
 
-        attributes.append(u'class="wikidpad{0}"'.format(cssClass))
+        attributes.append('class="wikidpad{0}"'.format(cssClass))
         
         if styles:
-            attributes.append(u'style="' + u"; ".join(styles) + u'"');
+            attributes.append('style="' + "; ".join(styles) + '"');
         
-        return u" " + u" ".join(attributes)
+        return " " + " ".join(attributes)
 
 
 
@@ -1664,7 +1664,7 @@ class HtmlExporter(AbstractExporter):
         
         # TODO: Move border definition to CSS-file (except for internal preview)
 #         if self.asIntHtmlPreview:
-        self.outAppend(u'<table border="2"{0}>\n'.format(attrStr))
+        self.outAppend('<table border="2"{0}>\n'.format(attrStr))
 #         else:
 #             self.outAppend(u'<table{0}>\n'.format(attrStr))
 
@@ -1684,16 +1684,16 @@ class HtmlExporter(AbstractExporter):
 
 
         for gridRow in grid:
-            self.outAppend(u'<tr class="wikidpad">')
+            self.outAppend('<tr class="wikidpad">')
             for tc in gridRow:
                 tc.processAst()
-            self.outAppend(u'</tr>\n')
+            self.outAppend('</tr>\n')
 
 
         if self.asIntHtmlPreview:
-            self.outAppend(u'</table>\n<br class="wikidpad" />\n') # , eatPostBreak=not self.asIntHtmlPreview)
+            self.outAppend('</table>\n<br class="wikidpad" />\n') # , eatPostBreak=not self.asIntHtmlPreview)
         else:
-            self.outAppend(u'</table>\n')
+            self.outAppend('</table>\n')
 
         self.astNodeStack.pop()
 
@@ -1724,7 +1724,7 @@ class HtmlExporter(AbstractExporter):
         tableBorderWidth = 0
 
         for ap in appendices:
-            if ap.startswith(u"columns "):
+            if ap.startswith("columns "):
                 try:
                     v = int(ap[8:])
                     if v > 0:
@@ -1734,14 +1734,14 @@ class HtmlExporter(AbstractExporter):
             elif ap == "aslist":
                 # No table but comma-separated list
                 asList = True
-            elif ap == u"coldir down":
+            elif ap == "coldir down":
                 # Order in table goes downward first then right
                 # Default is right first then downward
                 coldirDown = True
-            elif ap == u"colwidth equal":
+            elif ap == "colwidth equal":
                 # All columns will have same width
-                colwidth = u"equal"
-            elif ap.startswith(u"table_border_width "):
+                colwidth = "equal"
+            elif ap.startswith("table_border_width "):
                 try:
                     v = int(ap[18:])
                     if v >= 0:
@@ -1752,13 +1752,13 @@ class HtmlExporter(AbstractExporter):
         # To ensure that the sum of percentages is 100 there is a bit
         # work to do. On the other hand this means that the columns
         # don't have exactly equal width
-        if colwidth == u"equal":
+        if colwidth == "equal":
             colwidth = []
             usedPerc = 0
             for i in range(1, cols + 1):
                 cw = i * 100 // cols - usedPerc
                 usedPerc += cw
-                colwidth.append(u"%i%%" % cw)
+                colwidth.append("%i%%" % cw)
 
         if asList:
             firstItem = True
@@ -1771,16 +1771,16 @@ class HtmlExporter(AbstractExporter):
         else:
             # Convert colwidth to HTML attribute
             if colwidth is None:
-                colwidthAttr = [u""] * cols
+                colwidthAttr = [""] * cols
             else:
-                colwidthAttr = [u' width="%s"' % cw for cw in colwidth]
+                colwidthAttr = [' width="%s"' % cw for cw in colwidth]
             
-            tableAttrs = u""
+            tableAttrs = ""
             if tableBorderWidth > 0:
-                tableAttrs += u' border="%s"' % tableBorderWidth
+                tableAttrs += ' border="%s"' % tableBorderWidth
             
             # We need a table for the resultList
-            self.outAppend(u'<table%s class="wikidpad">\n' % tableAttrs)
+            self.outAppend('<table%s class="wikidpad">\n' % tableAttrs)
             colpos = 0
             firstRow = True
 
@@ -1798,38 +1798,38 @@ class HtmlExporter(AbstractExporter):
             for resultItem in resultList:
                 if colpos == 0:
                     # Start table row
-                    self.outAppend(u'<tr class="wikidpad">')
+                    self.outAppend('<tr class="wikidpad">')
                     
                 if firstRow:
-                    self.outAppend(u'<td valign="top"%s class="wikidpad">' %
+                    self.outAppend('<td valign="top"%s class="wikidpad">' %
                             colwidthAttr[colpos])
                 else:
-                    self.outAppend(u'<td valign="top" class="wikidpad">')
+                    self.outAppend('<td valign="top" class="wikidpad">')
                 resultItemProcessor(resultItem)
-                self.outAppend(u'</td>')
+                self.outAppend('</td>')
                 
                 colpos += 1
                 if colpos == cols:
                     # At the end of a row
                     colpos = 0
                     firstRow = False
-                    self.outAppend(u"</tr>\n")
+                    self.outAppend("</tr>\n")
                     
             # Fill the last incomplete row with empty cells if necessary
             if colpos > 0:
                 if firstRow:
                     while colpos < cols:
-                        self.outAppend(u'<td%s class="wikidpad"></td>' %
+                        self.outAppend('<td%s class="wikidpad"></td>' %
                                 colwidthAttr[colpos])
                         colpos += 1
                 else:
                     while colpos < cols:
-                        self.outAppend(u'<td class="wikidpad"></td>')
+                        self.outAppend('<td class="wikidpad"></td>')
                         colpos += 1
 
-                self.outAppend(u'</tr>\n')
+                self.outAppend('</tr>\n')
             
-            self.outAppend(u'</table>')
+            self.outAppend('</table>')
 
 
 
@@ -1860,8 +1860,8 @@ class HtmlExporter(AbstractExporter):
         value = astNode.value
         appendices = astNode.appendices
 
-        if key == u"page":
-            if (u"wikipage/" + value) in self.insertionVisitStack:
+        if key == "page":
+            if ("wikipage/" + value) in self.insertionVisitStack:
                 # Prevent infinite recursion
                 return
 
@@ -1883,7 +1883,7 @@ class HtmlExporter(AbstractExporter):
             offsetHead = 0
 
             # Code to adjust heading level
-            if (u"adjheading" in appendices) or (u"adjheading+" in appendices):
+            if ("adjheading" in appendices) or ("adjheading+" in appendices):
                 minHead = 1000 # Just assuming that there won't be 1000 levels deep heading
                 # Adjust heading level of insertion
                 # First find the lowest heading level used in the inserted page
@@ -1907,7 +1907,7 @@ class HtmlExporter(AbstractExporter):
                         offsetHead = lastSurroundHead - (minHead - 1)
 
 
-            self.insertionVisitStack.append(u"wikipage/" + value)
+            self.insertionVisitStack.append("wikipage/" + value)
             try:
                 
                 # Inside an inserted page we don't want anchors to the
@@ -1933,44 +1933,44 @@ class HtmlExporter(AbstractExporter):
 
             return
             
-        elif key == u"rel":
+        elif key == "rel":
             # List relatives (children, parents)
-            if value == u"parents":
+            if value == "parents":
                 wordList = self.wikiDocument.getWikiData().getParentRelationships(
                         self.wikiWord)
-            elif value == u"children":
-                existingonly = (u"existingonly" in appendices) # or \
+            elif value == "children":
+                existingonly = ("existingonly" in appendices) # or \
                         # (u"existingonly +" in insertionAstNode.appendices)
                 wordList = self.wikiDocument.getWikiData().getChildRelationships(
                         self.wikiWord, existingonly=existingonly,
                         selfreference=False)
-            elif value == u"parentless":
+            elif value == "parentless":
                 wordList = self.wikiDocument.getWikiData().getParentlessWikiWords()
-            elif value == u"undefined":
+            elif value == "undefined":
                 wordList = self.wikiDocument.getWikiData().getUndefinedWords()
-            elif value == u"top":
-                htmlContent = u'<a href="#" class="wikidpad">Top</a>'
-            elif value == u"back":
+            elif value == "top":
+                htmlContent = '<a href="#" class="wikidpad">Top</a>'
+            elif value == "back":
                 if self.asHtmlPreview:
                     htmlContent = \
-                            u'<a href="' + self._getInternaljumpPrefix() + \
-                            u'action/history/back" class="wikidpad">Back</a>'
+                            '<a href="' + self._getInternaljumpPrefix() + \
+                            'action/history/back" class="wikidpad">Back</a>'
                 else:
                     htmlContent = \
-                            u'<a href="javascript:history.go(-1)" class="wikidpad">Back</a>'
+                            '<a href="javascript:history.go(-1)" class="wikidpad">Back</a>'
 
-        elif key == u"self":
+        elif key == "self":
             htmlContent = escapeHtml(self.getCurrentWikiWord())
 
-        elif key == u"savedsearch":
+        elif key == "savedsearch":
             datablock = self.wikiDocument.getWikiData().retrieveDataBlock(
-                    u"savedsearch/" + value)
+                    "savedsearch/" + value)
             if datablock is not None:
                 searchOp = SearchReplaceOperation()
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
 #                 wordList = self.wikiDocument.searchWiki(searchOp)
-        elif key == u"search":
+        elif key == "search":
             searchOp = SearchReplaceOperation()
             searchOp.replaceOp = False
             searchOp.searchStr = value
@@ -2019,48 +2019,48 @@ class HtmlExporter(AbstractExporter):
                     
 
 
-        elif key == u"toc" and value == u"":
+        elif key == "toc" and value == "":
             pageAst = self.getBasePageAst()
 #             pageAst = self.optsStack["innermostFullPageAst"]
 
-            self.outAppend(u'<div class="wikidpad page-toc">\n')
+            self.outAppend('<div class="wikidpad page-toc">\n')
 
             for node in pageAst.iterFlatByName("heading"):
                 headLevel = node.level            
                 if self.asIntHtmlPreview:
                     # Simple indent for internal preview
-                    self.outAppend(u"&nbsp;&nbsp;" * (headLevel - 1))
+                    self.outAppend("&nbsp;&nbsp;" * (headLevel - 1))
                 else:
                     # use css otherwise
-                    self.outAppend(u'<div class="wikidpad page-toc-level%i">' %
+                    self.outAppend('<div class="wikidpad page-toc-level%i">' %
                             headLevel)
 
                 if self.wordAnchor:
-                    anchor = self.wordAnchor + (u"#.h%i" % node.pos)
+                    anchor = self.wordAnchor + ("#.h%i" % node.pos)
                 else:
-                    anchor = u".h%i" % node.pos
+                    anchor = ".h%i" % node.pos
 
-                self.outAppend(u'<a href="#%s" class="wikidpad">' % anchor)
+                self.outAppend('<a href="#%s" class="wikidpad">' % anchor)
 
                 with self.optsStack:
                     self.optsStack["suppressLinks"] = True
                     self.processAst(fullContent, node.contentNode)
 
-                self.outAppend(u'</a>')
+                self.outAppend('</a>')
 
                 if self.asIntHtmlPreview:
-                    self.outAppend(u'<br class="wikidpad" />\n')
+                    self.outAppend('<br class="wikidpad" />\n')
                 else:
-                    self.outAppend(u'</div>\n')
+                    self.outAppend('</div>\n')
 
-            self.outAppend(u"</div>\n")
+            self.outAppend("</div>\n")
 #             htmlContent = u"".join(htmlContent)
 
-        elif key == u"eval":
+        elif key == "eval":
             if not self.mainControl.getConfig().getboolean("main",
                     "insertions_allow_eval", False):
                 # Evaluation of such insertions not allowed
-                htmlContent = _(u'<pre class="wikidpad">[Allow evaluation of insertions in '
+                htmlContent = _('<pre class="wikidpad">[Allow evaluation of insertions in '
                         '"Options", page "Security", option '
                         '"Process insertion scripts"]</pre>')
             else:
@@ -2069,18 +2069,18 @@ class HtmlExporter(AbstractExporter):
                 expr = astNode.value
                 # TODO Test security
                 try:
-                    content = unicode(eval(re.sub(u"[\n\r]", u"", expr),
+                    content = str(eval(re.sub("[\n\r]", "", expr),
                             evalScope))
-                except Exception, e:
+                except Exception as e:
                     s = StringIO()
                     traceback.print_exc(file=s)
-                    htmlContent = u'\n<pre class="wikidpad">\n' + \
-                            escapeHtmlNoBreaks(s.getvalue()) + u'\n</pre>\n'
-        elif key == u"iconimage":
+                    htmlContent = '\n<pre class="wikidpad">\n' + \
+                            escapeHtmlNoBreaks(s.getvalue()) + '\n</pre>\n'
+        elif key == "iconimage":
             imgName = astNode.value
             icPath = wx.GetApp().getIconCache().lookupIconPath(imgName)
             if icPath is None:
-                htmlContent = _(u'<pre class="wikidpad">[Icon "%s" not found]</pre>' % imgName)
+                htmlContent = _('<pre class="wikidpad">[Icon "%s" not found]</pre>' % imgName)
             else:
                 url = self.copiedTempFileCache.get(icPath)
                 if url is None:
@@ -2093,7 +2093,7 @@ class HtmlExporter(AbstractExporter):
                     OsAbstract.copyFile(icPath, dstFullPath)
                     self.copiedTempFileCache[icPath] = url
                 
-                htmlContent = u'<img src="%s" class="wikidpad" />' % url
+                htmlContent = '<img src="%s" class="wikidpad" />' % url
         else:
             # Call external plugins
             exportType = self.exportType
@@ -2110,13 +2110,13 @@ class HtmlExporter(AbstractExporter):
                 try:
                     htmlContent = handler.createContent(self, exportType,
                             astNode)
-                except Exception, e:
+                except Exception as e:
                     s = StringIO()
                     traceback.print_exc(file=s)
-                    htmlContent = u'<pre class="wikidpad">' + mbcsDec(s.getvalue(), 'replace')[0] + u'</pre>'
+                    htmlContent = '<pre class="wikidpad">' + mbcsDec(s.getvalue(), 'replace')[0] + '</pre>'
 
                 if htmlContent is None:
-                    htmlContent = u""
+                    htmlContent = ""
             else:
                 # Try to find a generic handler for export type
                 # "wikidpad_language"
@@ -2128,10 +2128,10 @@ class HtmlExporter(AbstractExporter):
                         # and must be postprocessed
                         content = handler.createContent(self,
                                 "wikidpad_language", astNode)
-                    except Exception, e:
+                    except Exception as e:
                         s = StringIO()
                         traceback.print_exc(file=s)
-                        htmlContent = u'<pre class="wikidpad">' + mbcsDec(s.getvalue(), 'replace')[0] + u'</pre>'
+                        htmlContent = '<pre class="wikidpad">' + mbcsDec(s.getvalue(), 'replace')[0] + '</pre>'
 
         if searchOp is not None:
             wordList = self.wikiDocument.searchWiki(searchOp)
@@ -2140,7 +2140,7 @@ class HtmlExporter(AbstractExporter):
                 # Because a simple search for "foo" includes the page containing
                 # the insertion searching for "foo" there is option "removeself"
                 # to remove the page containing the insertion from the list
-                if self.optsStack["innermostPageUnifName"].startswith(u"wikipage/"):
+                if self.optsStack["innermostPageUnifName"].startswith("wikipage/"):
                     selfPageName = self.wikiDocument.getWikiPageNameForLinkTermOrAsIs(
                             self.optsStack["innermostPageUnifName"][9:])
                     try:
@@ -2186,7 +2186,7 @@ class HtmlExporter(AbstractExporter):
             self.mainControl.getCollator().sort(wordList)
 
             if len(wordList) == 0:
-                content = u""
+                content = ""
             else:
                 self._processInsertionResultList(wordList, self._processWikiWord,
                         appendices)
@@ -2227,7 +2227,7 @@ class HtmlExporter(AbstractExporter):
             linkTo = self.wikiDocument.getWikiPageNameForLinkTerm(wikiWord)
 
             # Test if link to same page itself (maybe with an anchor fragment)
-            if not self.exportType == u"html_multi":
+            if not self.exportType == "html_multi":
                 linkFrom = self.wikiDocument.getWikiPageNameForLinkTerm(
                         self.wikiWord)
                 if linkTo is not None and linkTo == linkFrom:
@@ -2237,25 +2237,25 @@ class HtmlExporter(AbstractExporter):
             # Add anchor fragment if present
             if anchorLink:
                 if selfLink:
-                    link = u"#" + anchorLink
+                    link = "#" + anchorLink
                 else:
-                    link += u"#" + anchorLink
+                    link += "#" + anchorLink
 
             title = None
             if linkTo is not None:
                 propList = self.wikiDocument.getAttributeTriples(linkTo,
-                        u"short_hint", None)
+                        "short_hint", None)
                 if len(propList) > 0:
                     title = propList[-1][2]
 
             if self.optsStack.get("suppressLinks", False):
-                self.outAppend(u'<span class="wikidpad wiki-link">')
+                self.outAppend('<span class="wikidpad wiki-link">')
             else:
                 if title is not None:
-                    self.outAppend(u'<span class="wikidpad wiki-link"><a href="%s" title="%s" class="wikidpad">' %
+                    self.outAppend('<span class="wikidpad wiki-link"><a href="%s" title="%s" class="wikidpad">' %
                             (link, escapeHtmlNoBreaks(title)))
                 else:
-                    self.outAppend(u'<span class="wikidpad wiki-link"><a href="%s" class="wikidpad">' %
+                    self.outAppend('<span class="wikidpad wiki-link"><a href="%s" class="wikidpad">' %
                             link)
 
             if titleNode is not None:
@@ -2266,9 +2266,9 @@ class HtmlExporter(AbstractExporter):
                 self.outAppend(escapeHtml(wikiWord))                        
 
             if self.optsStack.get("suppressLinks", False):
-                self.outAppend(u'</span>')
+                self.outAppend('</span>')
             else:
-                self.outAppend(u'</a></span>')
+                self.outAppend('</a></span>')
         else:
             if titleNode is not None:
                 self.processAst(fullContent, titleNode)
@@ -2285,7 +2285,7 @@ class HtmlExporter(AbstractExporter):
         link = astNode.url
         pointRelative = False  # Should final link be relative?
 
-        if link.startswith(u"rel://"):
+        if link.startswith("rel://"):
             pointRelative = True
             absUrl = self.wikiDocument.makeRelUrlAbsolute(link)
 
@@ -2312,7 +2312,7 @@ class HtmlExporter(AbstractExporter):
                         
                         relPath = StringOps.pathnameFromUrl(link[6:], False)
                 
-                        absUrl = u"file:" + StringOps.urlFromPathname(
+                        absUrl = "file:" + StringOps.urlFromPathname(
                                 os.path.abspath(os.path.join(self.exportDest,
                                 relPath)))
                         link = absUrl
@@ -2328,9 +2328,9 @@ class HtmlExporter(AbstractExporter):
             appendixDict = dict(astNode.appendixNode.entries)
 
         # Decide if this is an image link
-        if appendixDict.has_key("l"):
+        if "l" in appendixDict:
             urlAsImage = False
-        elif appendixDict.has_key("i"):
+        elif "i" in appendixDict:
             urlAsImage = True
         elif self.asHtmlPreview and \
                 self.mainControl.getConfig().getboolean(
@@ -2357,11 +2357,11 @@ class HtmlExporter(AbstractExporter):
         if self.asHtmlPreview:
             # For preview always absolute link
             pointRelative = False
-        elif pointingType == u"abs":
+        elif pointingType == "abs":
             pointRelative = False
-        elif pointingType == u"rel":
+        elif pointingType == "rel":
             pointRelative = True
-        elif pointingType == u"rnr":
+        elif pointingType == "rnr":
             pointRelative = True
             relRelocate = False
 
@@ -2399,19 +2399,19 @@ class HtmlExporter(AbstractExporter):
 
             if sizeInfo is not None:
                 try:
-                    widthStr, heightStr = sizeInfo.split(u"x")
+                    widthStr, heightStr = sizeInfo.split("x")
                     if self.isHtmlSizeValue(widthStr) and \
                             self.isHtmlSizeValue(heightStr):
-                        attribs.append(u'width="{0}" height="{1}"'.format(
+                        attribs.append('width="{0}" height="{1}"'.format(
                                 widthStr, heightStr))
                 except:
                     # something does not meet syntax requirements
                     pass
             
             elif relSizeInfo is not None:
-                params = relSizeInfo.split(u"x")
+                params = relSizeInfo.split("x")
                 if len(params) == 1:
-                    if params[0] == u"":
+                    if params[0] == "":
                         widthStr, heightStr = "100%", "100%"
                     else:
                         widthStr, heightStr = params[0], params[0]
@@ -2437,7 +2437,7 @@ class HtmlExporter(AbstractExporter):
                                 imgWidth, imgHeight = calcResizeArIntoBoundingBox(
                                         imgWidth, imgHeight, 
                                         width.getValue(), height.getValue(),
-                                        appendixDict.has_key("upright") and
+                                        "upright" in appendixDict and
                                         strToBool(appendixDict.get("upright"),
                                         True))
                         
@@ -2445,17 +2445,17 @@ class HtmlExporter(AbstractExporter):
                         imgWidth = max(0, int(round(imgWidth)))
                         imgHeight = max(0, int(round(imgHeight)))
 
-                        attribs.append(u'width="{0}" height="{1}"'.format(
+                        attribs.append('width="{0}" height="{1}"'.format(
                                 imgWidth, imgHeight))
 
-            for key in (u"align", u"a", u"A"):
-                alignInTag = IMG_ALIGN_ATTR.get(appendixDict.get(key), u"")
-                if alignInTag != u'':
+            for key in ("align", "a", "A"):
+                alignInTag = IMG_ALIGN_ATTR.get(appendixDict.get(key), "")
+                if alignInTag != '':
                     attribs.append(alignInTag)
                     break
 
             if self.asIntHtmlPreview:
-                attribs.append(u'border="0"')
+                attribs.append('border="0"')
                 if lowerLink.startswith("file:"):
                     # At least on Windows, wxWidgets has another
                     # opinion how a local file URL should look like
@@ -2465,19 +2465,19 @@ class HtmlExporter(AbstractExporter):
                     
             attrStr = self.combineStyles(css, styles, attribs)
 
-            self.outAppend(u'<img src="{0}"{1} />'.format(link, attrStr))
+            self.outAppend('<img src="{0}"{1} />'.format(link, attrStr))
         else:
             if not self.optsStack.get("suppressLinks", False):
                 # If we are in a title, only image urls would be allowed
                 # but we are not
-                self.outAppend(u'<span class="wikidpad url-link"><a href="%s" class="wikidpad">' % link)
+                self.outAppend('<span class="wikidpad url-link"><a href="%s" class="wikidpad">' % link)
                 if astNode.titleNode is not None:
                     with self.optsStack:
                         self.optsStack["suppressLinks"] = True
                         self.processAst(fullContent, astNode.titleNode)
                 else:
                     self.outAppend(escapeHtml(astNode.coreNode.getString()))                        
-                self.outAppend(u'</a></span>')
+                self.outAppend('</a></span>')
 
 
 
@@ -2489,9 +2489,9 @@ class HtmlExporter(AbstractExporter):
         try:
             for node in pageAst.iterFlatNamed():
                 if not self.processAstNode(node, content, pageAst):
-                    self.outAppend(u'<tt class="wikidpad">' + escapeHtmlNoBreaks(
-                        _(u'[Unknown parser node with name "%s" found]') % node.name) + \
-                        u'</tt>')
+                    self.outAppend('<tt class="wikidpad">' + escapeHtmlNoBreaks(
+                        _('[Unknown parser node with name "%s" found]') % node.name) + \
+                        '</tt>')
         finally:
             self.astNodeStack.pop()
 
@@ -2504,11 +2504,11 @@ class HtmlExporter(AbstractExporter):
         elif tname == "plainText":
             self.outAppend(escapeHtmlNoBreaks(node.getString()))
         elif tname == "lineBreak":
-            self.outAppend(u'<br class="wikidpad" />\n')
+            self.outAppend('<br class="wikidpad" />\n')
         elif tname == "newParagraph":
-            self.outAppend(u'\n<p class="wikidpad" />')
+            self.outAppend('\n<p class="wikidpad" />')
         elif tname == "whitespace":
-            self.outAppend(u" ")
+            self.outAppend(" ")
 
         elif tname == "indentedText":
             self.outStartIndentation("normalindent")
@@ -2532,22 +2532,22 @@ class HtmlExporter(AbstractExporter):
             self.outEndIndentation("ol-alpha")
 
         elif tname == "bullet":
-            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
         elif tname == "number":
-            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
         elif tname == "roman":
-            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
         elif tname == "alpha":
-            self.outAppend(u'\n<li class="wikidpad" />', eatPreBreak=True)
+            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
 
         elif tname == "italics":
-            self.outAppend(u'<i class="wikidpad">')
+            self.outAppend('<i class="wikidpad">')
             self.processAst(content, node)
-            self.outAppend(u'</i>')
+            self.outAppend('</i>')
         elif tname == "bold":
-            self.outAppend(u'<b class="wikidpad">')
+            self.outAppend('<b class="wikidpad">')
             self.processAst(content, node)
-            self.outAppend(u'</b>')
+            self.outAppend('</b>')
 
         elif tname == "htmlTag" or tname == "htmlEntity":
             self.outAppend(node.getString())
@@ -2555,55 +2555,55 @@ class HtmlExporter(AbstractExporter):
             htmlContent = node.htmlContent
             if isinstance(htmlContent, HtmlStartTag):
                 htmlContent = htmlContent.clone()
-                htmlContent.addAttribute(u"class", u"wikidpad")
-                if htmlContent.getTag() in (u"li", u"dl", u"dt", u"dd", u"tr"):
-                    self.outAppend(u"\n")
+                htmlContent.addAttribute("class", "wikidpad")
+                if htmlContent.getTag() in ("li", "dl", "dt", "dd", "tr"):
+                    self.outAppend("\n")
                 
-                if htmlContent.getTag() == u"table":
+                if htmlContent.getTag() == "table":
                     # TODO: Remove for external HTML viewer
-                    htmlContent.addAttribute(u"border", u"2") 
+                    htmlContent.addAttribute("border", "2") 
 
             self.outAppend(htmlContent.asString())
 
         elif tname == "heading":
             if self.optsStack.get("anchorForHeading", True):
                 if self.wordAnchor:
-                    anchor = self.wordAnchor + (u'#.h%i' % node.pos)
+                    anchor = self.wordAnchor + ('#.h%i' % node.pos)
                 else:
-                    anchor = u'.h%i' % node.pos
+                    anchor = '.h%i' % node.pos
 
-                self.outAppend(u'<a name="%s" class="wikidpad"></a>' % anchor)
+                self.outAppend('<a name="%s" class="wikidpad"></a>' % anchor)
 
             headLevel = node.level + self.optsStack.get(
                     "offsetHeadingLevel", 0)
 
             boundHeadLevel = min(6, headLevel)
-            self.outAppend(u'<h%i class="wikidpad heading-level%i">' %
+            self.outAppend('<h%i class="wikidpad heading-level%i">' %
                     (boundHeadLevel, headLevel), eatPreBreak=True)
             self.processAst(content, node.contentNode)
-            self.outAppend(u'</h%i>\n' % boundHeadLevel, eatPostBreak=True)
+            self.outAppend('</h%i>\n' % boundHeadLevel, eatPostBreak=True)
 
         elif tname == "horizontalLine":
-            self.outEatBreaks(u'<hr class="wikidpad" />\n')
+            self.outEatBreaks('<hr class="wikidpad" />\n')
 
         elif tname == "preBlock":
-            self.outAppend(u'<pre class="wikidpad">%s</pre>\n' %
+            self.outAppend('<pre class="wikidpad">%s</pre>\n' %
                     escapeHtmlNoBreaks(
                     node.findFlatByName("preText").getString()), True,
                     not self.asIntHtmlPreview)
             if self.asIntHtmlPreview:
-                self.outAppend(u'<br class="wikidpad" />\n')
+                self.outAppend('<br class="wikidpad" />\n')
         elif tname == "bodyHtmlTag":
             self.outAppend(node.content)
         elif tname == "todoEntry":
-            self.outAppend(u'<span class="wikidpad todo">%s%s' %
+            self.outAppend('<span class="wikidpad todo">%s%s' %
                     (node.key, node.delimiter))
             self.processAst(content, node.valueNode)
-            self.outAppend(u'</span>')
+            self.outAppend('</span>')
         # TODO remove "property"-compatibility
         elif tname in ("property", "attribute"):  # for compatibility with old language plugins
             for propKey, propValue in node.attrs:
-                standardAttribute = u"%s: %s" % (propKey, propValue)
+                standardAttribute = "%s: %s" % (propKey, propValue)
                 standardAttributeMatching = \
                         bool(self.proppattern.match(standardAttribute))
                 # Output only for different truth values
@@ -2611,7 +2611,7 @@ class HtmlExporter(AbstractExporter):
                 # hidden or vice versa)
                 if standardAttributeMatching != self.proppatternExcluding:
                     # TODO remove "property"-compatibility
-                    self.outAppend( u'<span class="wikidpad property attribute">[%s: %s]</span>' % 
+                    self.outAppend( '<span class="wikidpad property attribute">[%s: %s]</span>' % 
                             (escapeHtml(propKey),
                             escapeHtml(propValue)) )
         elif tname == "insertion":
@@ -2623,7 +2623,7 @@ class HtmlExporter(AbstractExporter):
         elif tname == "anchorDef":
             if self.wordAnchor:
                 self.outAppend('<a name="%s" class="wikidpad"></a>' %
-                        (self.wordAnchor + u"#" + node.anchorLink))
+                        (self.wordAnchor + "#" + node.anchorLink))
             else:
                 self.outAppend('<a name="%s" class="wikidpad"></a>' % node.anchorLink)                
         elif tname == "wikiWord":
@@ -2641,21 +2641,21 @@ class HtmlExporter(AbstractExporter):
                 self.outAppend(escapeHtml(node.getString()))
             else:
                 if self.wordAnchor:
-                    fnAnchor = self.wordAnchor + u'#.f' + _escapeAnchor(
+                    fnAnchor = self.wordAnchor + '#.f' + _escapeAnchor(
                             footnoteId)
                 else:
-                    fnAnchor = u'.f' + _escapeAnchor(footnoteId)
+                    fnAnchor = '.f' + _escapeAnchor(footnoteId)
 
                 if fnAnchorNode.pos == node.pos:
                     # Current footnote token tok is an anchor (=last
                     # footnote token with this footnoteId)
 
-                    self.outAppend(u'<a name="%s" class="wikidpad"></a>' % fnAnchor)
+                    self.outAppend('<a name="%s" class="wikidpad"></a>' % fnAnchor)
                     self.outAppend(escapeHtml(node.getString()))
                 else:
                     if not self.optsStack.get("suppressLinks", False):
                         # Current token is not an anchor -> make it a link.
-                        self.outAppend(u'<a href="#%s" class="wikidpad">%s</a>' % (fnAnchor,
+                        self.outAppend('<a href="#%s" class="wikidpad">%s</a>' % (fnAnchor,
                         escapeHtml(node.getString())))
         elif tname == "urlLink":
             self._processUrlLink(content, node)

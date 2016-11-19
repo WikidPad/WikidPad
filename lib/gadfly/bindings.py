@@ -6,7 +6,7 @@
 :Id: $Id: bindings.py,v 1.2 2008/10/26 14:41:01 Michael Butscher Exp $:
 """
 
-import semantics
+from . import semantics
 
 def elt0(list, context):
     """return first member of reduction"""
@@ -253,7 +253,7 @@ def sortint(l, c):
     [num, ord] = l
     from types import IntType
     if type(num)!=IntType or num<=0:
-        raise ValueError, `num`+': col position not positive int'
+        raise ValueError(repr(num)+': col position not positive int')
     return semantics.PositionedSort(num, ord)
 
 def sortcol(l, c):
@@ -373,7 +373,7 @@ def allset(l, c):
 allcount = allset
 
 def set(agg, exp, distinct):
-    import semantics
+    from . import semantics
     if agg=="AVG":
         return semantics.Average(exp, distinct)
     if agg=="COUNT":
@@ -386,7 +386,7 @@ def set(agg, exp, distinct):
         return semantics.Sum(exp, distinct)
     if agg=="MEDIAN":
         return semantics.Median(exp, distinct)
-    raise NameError, `agg`+": unknown aggregate"
+    raise NameError(repr(agg)+": unknown aggregate")
 
 average = count = maximum = minimum = summation = median = elt0
 
@@ -561,7 +561,7 @@ class punter:
     def __init__(self, name):
         self.name = name
     def __call__(self, list, context):
-        print "punt:", self.name, list
+        print("punt:", self.name, list)
         return list
 
 class tracer:
@@ -570,17 +570,17 @@ class tracer:
         self.fn = fn
 
     def __call__(self, list, context):
-        print self.name, list
+        print(self.name, list)
         return self.fn(list, context)
 
 def BindRules(sqlg):
-    for name in sqlg.RuleNameToIndex.keys():
-        if VARS.has_key(name):
+    for name in list(sqlg.RuleNameToIndex.keys()):
+        if name in VARS:
             #print "binding", name
             sqlg.Bind(name, VARS[name]) # nondebug
             #sqlg.Bind(name, tracer(name, VARS[name]) ) # debug
         else:
-            print "unbound", name
+            print("unbound", name)
             sqlg.Bind(name, punter(name))
     return sqlg
 

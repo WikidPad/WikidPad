@@ -35,11 +35,11 @@ def getCollatorByString(locStr, caseMode=None):
     caseMode --  (the flag isn't
             guaranteed to be respected
     """
-    if locStr.lower() == u"c":
+    if locStr.lower() == "c":
         return _CCollator(caseMode)
     else:
-        if locStr.lower() == u"default":
-            locStr = u""
+        if locStr.lower() == "default":
+            locStr = ""
 
         if caseMode == CASEMODE_UPPER_FIRST:
             return _PythonCollatorUppercaseFirst(locStr)
@@ -207,7 +207,7 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
 
     def strcoll(self, left, right):
         ml = min(len(left), len(right))
-        for i in xrange(ml):
+        for i in range(ml):
             lv = 0
             if left[i].islower():
                 lv = 1
@@ -257,12 +257,12 @@ def buildMessageDict(filename):
 
     try:
         lines = codecs.open(pathEnc(infile), "r", "utf-8").readlines()
-    except IOError, msg:
+    except IOError as msg:
 #         print >> sys.stderr, msg
         raise
 
     # Strip BOM
-    if len(lines) > 0 and lines[0].startswith(u"\ufeff"):
+    if len(lines) > 0 and lines[0].startswith("\ufeff"):
         lines[0] = lines[0][1:]
 
     ID = 1
@@ -276,25 +276,25 @@ def buildMessageDict(filename):
     for l in lines:
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
-        if l[0] == u'#' and section == STR:
+        if l[0] == '#' and section == STR:
             add(msgid, msgstr, fuzzy)
             section = None
             fuzzy = 0
         # Record a fuzzy mark
-        if l[:2] == u'#,' and u'fuzzy' in l:
+        if l[:2] == '#,' and 'fuzzy' in l:
             fuzzy = 1
         # Skip comments
-        if l[0] == u'#':
+        if l[0] == '#':
             continue
         # Now we are in a msgid section, output previous section
-        if l.startswith(u'msgid'):
+        if l.startswith('msgid'):
             if section == STR:
                 add(msgid, msgstr, fuzzy)
             section = ID
             l = l[5:]
-            msgid = msgstr = u''
+            msgid = msgstr = ''
         # Now we are in a msgstr section
-        elif l.startswith(u'msgstr'):
+        elif l.startswith('msgstr'):
             section = STR
             l = l[6:]
         # Skip empty lines
@@ -313,9 +313,9 @@ def buildMessageDict(filename):
 #             print "code", repr((msgstr, l))
             msgstr += l
         else:
-            print >> sys.stderr, 'Syntax error on %s:%d' % (infile, lno), \
-                  'before:'
-            print >> sys.stderr, l
+            print('Syntax error on %s:%d' % (infile, lno), \
+                  'before:', file=sys.stderr)
+            print(l, file=sys.stderr)
             raise SyntaxError('Syntax error on %s:%d' % (infile, lno) + 
                     ' before: ' + l)
             # sys.exit(1)
@@ -328,7 +328,7 @@ def buildMessageDict(filename):
 
 
 
-i18nLangList = [("C", u"English")]
+i18nLangList = [("C", "English")]
 
 def loadLangList(appDir):
     global i18nLangList
@@ -340,13 +340,13 @@ def loadLangList(appDir):
         data = data.decode("utf-8")
         
         # Remove BOM if present
-        if data.startswith(u"\ufeff"):
+        if data.startswith("\ufeff"):
             data = data[1:]
         
         for line in data.split("\n"):
             line = line.strip()
             try:
-                localeStr, langTitle = line.split(u"\t", 1)
+                localeStr, langTitle = line.split("\t", 1)
                 localeStr = localeStr.encode("ascii")
                 
                 result.append((localeStr, langTitle))
@@ -358,7 +358,7 @@ def loadLangList(appDir):
         return
 
     except:
-        i18nLangList = [("C", u"English")]
+        i18nLangList = [("C", "English")]
 
 
 def getLangList():
@@ -390,7 +390,7 @@ def getLangTitleForLocaleStr(localeStr):
 
     i = findLangListIndex(localeStr)
     if i == -1:
-        return u"<'%s'>" % localeStr
+        return "<'%s'>" % localeStr
     else:
         return i18nLangList[i][1]
 
@@ -453,7 +453,7 @@ def getI18nEntryDummy(key):
     A double questionmark "??" (the so-called discriminator)
     stops reading and only returns the part before it.
     """
-    return key.split(u"??", 1)[0]
+    return key.split("??", 1)[0]
 
 
 def getI18nEntry(key):
@@ -463,12 +463,12 @@ def getI18nEntry(key):
     global i18nDict
     
     # Without this, the translation meta-data would be shown for the empty key
-    if key == u"":
-        return u""
+    if key == "":
+        return ""
 
     result = i18nDict.get(key)
-    if result is None or result == u"":
-        return key.split(u"??", 1)[0]
+    if result is None or result == "":
+        return key.split("??", 1)[0]
     else:
         return result
 

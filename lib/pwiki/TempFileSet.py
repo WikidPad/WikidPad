@@ -1,7 +1,7 @@
 """
 Temporary file management
 """
-import sys, os, os.path, traceback, tempfile, urllib
+import sys, os, os.path, traceback, tempfile, urllib.request, urllib.parse, urllib.error
 from codecs import BOM_UTF8    # , BOM_UTF16_BE, BOM_UTF16_LE
 
 import wx
@@ -144,7 +144,7 @@ class TempFileSet:
                     path = None
 
         fullPath = createTempFile(content, suffix, path,
-                textMode=isinstance(content, unicode))
+                textMode=isinstance(content, str))
         self.fileSet.add(fullPath)
 
         return self.getRelativePath(relativeTo, fullPath)
@@ -197,7 +197,7 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
             text=textMode)
     try:
         try:
-            if isinstance(content, unicode):
+            if isinstance(content, str):
                 # assert textMode
                 content = content.encode("utf-8")
                 os.write(fd, BOM_UTF8)
@@ -208,10 +208,10 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
                 try:
                     iCont = iter(content)
         
-                    firstContent = iCont.next()
+                    firstContent = next(iCont)
                     
                     unic = False
-                    if isinstance(firstContent, unicode):
+                    if isinstance(firstContent, str):
                         firstContent = firstContent.encode("utf-8")
                         os.write(fd, BOM_UTF8)
                         unic = True
@@ -220,10 +220,10 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
                     os.write(fd, firstContent)
     
                     while True:
-                        content = iCont.next()
+                        content = next(iCont)
     
                         if unic:
-                            assert isinstance(content, unicode)
+                            assert isinstance(content, str)
                             content = content.encode("utf-8")
     
                         assert isinstance(content, str)
@@ -232,7 +232,7 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
                     pass
         finally:
             os.close(fd)
-    except Exception, e:
+    except Exception as e:
         traceback.print_exc()
         # Something went wrong -> try to remove temporary file
         try:
@@ -298,7 +298,7 @@ def getRelativeUrl(relativeTo, fullPath, pythonUrl=False):
     if relativeTo is None or relativeTo == "":
         if pythonUrl:
 #             return escapeHtml(u"file:" + urllib.pathname2url(fullPath))
-            return u"file:" + urlFromPathname(fullPath)
+            return "file:" + urlFromPathname(fullPath)
         else:
             return wx.FileSystem.FileNameToURL(fullPath)
 
@@ -306,7 +306,7 @@ def getRelativeUrl(relativeTo, fullPath, pythonUrl=False):
     if relPath is None:
         if pythonUrl:
 #             return escapeHtml(u"file:" + urllib.pathname2url(fullPath))
-            return u"file:" + urlFromPathname(fullPath)
+            return "file:" + urlFromPathname(fullPath)
         else:
             return wx.FileSystem.FileNameToURL(fullPath)
 
@@ -320,17 +320,17 @@ def getDefaultTempFilePath():
     """
     globalConfig = wx.GetApp().getGlobalConfig()
     tempMode = globalConfig.get("main", "tempHandling_tempMode",
-            u"system")
+            "system")
 
-    if tempMode == u"auto":
+    if tempMode == "auto":
         if wx.GetApp().isInPortableMode():
-            tempMode = u"config"
+            tempMode = "config"
         else:
-            tempMode = u"system"
+            tempMode = "system"
     
-    if tempMode == u"given":
-        return globalConfig.get("main", "tempHandling_tempDir", u"")
-    elif tempMode == u"config":
+    if tempMode == "given":
+        return globalConfig.get("main", "tempHandling_tempDir", "")
+    elif tempMode == "config":
         return wx.GetApp().getGlobalConfigSubDir()
     else:   # tempMode == u"system"
         return None

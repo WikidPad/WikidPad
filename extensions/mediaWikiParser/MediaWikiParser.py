@@ -29,7 +29,7 @@ from pwiki.WikiPyparsing import *
 WIKIDPAD_PLUGIN = (("WikiParser", 1),)
 
 WIKI_LANGUAGE_NAME = "mediawiki_1"
-WIKI_HR_LANGUAGE_NAME = u"MediaWiki 1.0"
+WIKI_HR_LANGUAGE_NAME = "MediaWiki 1.0"
 
 
 
@@ -55,7 +55,7 @@ def buildRegex(regex, name=None, hideOnEmpty=False):
         
     return element
 
-stringEnd = buildRegex(ur"(?!.)", "stringEnd")
+stringEnd = buildRegex(r"(?!.)", "stringEnd")
 
 
 
@@ -107,8 +107,8 @@ def actionCutRightWhitespace(s, l, st, t):
         return None
 
     txt = lt.getText()
-    for i in xrange(len(txt) - 1, -1, -1):
-        if txt[i] not in (u"\t", u" ", u"\n", u"\r"):
+    for i in range(len(txt) - 1, -1, -1):
+        if txt[i] not in ("\t", " ", "\n", "\r"):
             if i < len(txt) - 1:
                 lt.text = txt[:i+1]
                 lt.recalcStrLength()
@@ -120,7 +120,7 @@ def actionCutRightWhitespace(s, l, st, t):
     return None
 
   
-_CHECK_LEFT_RE = re.compile(ur"[ \t]*$", RE_FLAGS)
+_CHECK_LEFT_RE = re.compile(r"[ \t]*$", RE_FLAGS)
 
 
 def preActCheckNothingLeft(s, l, st, pe):
@@ -141,7 +141,7 @@ def validateNonEmpty(s, l, st, t):
 
 
 def precTest(s, l, st, pe):
-    print "--precTest", repr((l, st, type(pe)))
+    print("--precTest", repr((l, st, type(pe))))
 
 
 
@@ -178,13 +178,13 @@ todoContent = Forward().setResultsNameNoCopy("value").setName("value")
 titleContent = Forward().setResultsNameNoCopy("title").setName("title")
 characterAttributionContent = Forward().setName("characterAttributionContent")
 
-whitespace = buildRegex(ur"[ \t]*")
+whitespace = buildRegex(r"[ \t]*")
 whitespace = whitespace.setParseAction(actionHideOnEmpty)
 
-whitespaceOrNl = buildRegex(ur"[ \t\n]*")
+whitespaceOrNl = buildRegex(r"[ \t\n]*")
 whitespaceOrNl = whitespaceOrNl.setParseAction(actionHideOnEmpty)
 
-eolOrEot = buildRegex(ur"\n|(?!.)")
+eolOrEot = buildRegex(r"\n|(?!.)")
 
 
 def addCreateModeAppendixEntry(l, appendixNode, key, data):
@@ -220,7 +220,7 @@ def actionModeAppendix(s, l, st, t):
 
     for entry in t.iterFlatByName("entry"):
         key = entry.findFlatByName("key").getText()
-        if key.endswith(u":") or key.endswith(u"="):
+        if key.endswith(":") or key.endswith("="):
             key = key[:-1]
 
         data = entry.findFlatByName("data").getText()
@@ -231,10 +231,10 @@ def actionModeAppendix(s, l, st, t):
 
 
 
-modeAppendixEntry = buildRegex(ur"(?:(?![;\|\]=:])\S)+[=:]|(?![;\|\]=:])\S",
-        "key") + buildRegex(ur"(?:(?![;\|\]])\S)*", "data")
+modeAppendixEntry = buildRegex(r"(?:(?![;\|\]=:])\S)+[=:]|(?![;\|\]=:])\S",
+        "key") + buildRegex(r"(?:(?![;\|\]])\S)*", "data")
 modeAppendixEntry = modeAppendixEntry.setResultsNameNoCopy("entry")
-modeAppendix = modeAppendixEntry + ZeroOrMore(buildRegex(ur";") + modeAppendixEntry)
+modeAppendix = modeAppendixEntry + ZeroOrMore(buildRegex(r";") + modeAppendixEntry)
 modeAppendix = modeAppendix.addParseAction(actionModeAppendix)
 
 
@@ -242,45 +242,45 @@ modeAppendix = modeAppendix.addParseAction(actionModeAppendix)
 
 # -------------------- Simple formatting --------------------
 
-EscapePlainCharPAT = ur"\\"
+EscapePlainCharPAT = r"\\"
 
-escapedChar = buildRegex(EscapePlainCharPAT) + buildRegex(ur".", "plainText")
-nowikiStandalone = buildRegex(ur"<nowiki ?/>")
+escapedChar = buildRegex(EscapePlainCharPAT) + buildRegex(r".", "plainText")
+nowikiStandalone = buildRegex(r"<nowiki ?/>")
 
-italicsStart = buildRegex(ur"''")
+italicsStart = buildRegex(r"''")
 italicsStart = italicsStart.setParseStartAction(createCheckNotIn(("italics",)))
 
-italicsEnd = buildRegex(ur"''")
+italicsEnd = buildRegex(r"''")
 
 italics = italicsStart + characterAttributionContent + italicsEnd
 italics = italics.setResultsNameNoCopy("italics").setName("italics")
 
-boldStart = buildRegex(ur"'''")
+boldStart = buildRegex(r"'''")
 boldStart = boldStart.setParseStartAction(createCheckNotIn(("bold",)))
 
-boldEnd = buildRegex(ur"'''")
+boldEnd = buildRegex(r"'''")
 
 bold = boldStart + characterAttributionContent + boldEnd
 bold = bold.setResultsNameNoCopy("bold").setName("bold")
 
 
-script = buildRegex(ur"<%") + buildRegex(ur".*?(?=%>)", "code") + \
-        buildRegex(ur"%>")
+script = buildRegex(r"<%") + buildRegex(r".*?(?=%>)", "code") + \
+        buildRegex(r"%>")
 script = script.setResultsNameNoCopy("script")
 
-horizontalLine = buildRegex(ur"----+[ \t]*$", "horizontalLine")\
+horizontalLine = buildRegex(r"----+[ \t]*$", "horizontalLine")\
         .setParseStartAction(preActCheckNothingLeft)
 
 
 # -------------------- HTML --------------------
 
-htmlTag = buildRegex(ur"</?[A-Za-z][A-Za-z0-9:]*(?:/| [^\n>]*)?>", "htmlTag")
+htmlTag = buildRegex(r"</?[A-Za-z][A-Za-z0-9:]*(?:/| [^\n>]*)?>", "htmlTag")
 
 htmlEntity = buildRegex(
-        ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
+        r"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
         "htmlEntity")
 
-htmlComment = buildRegex(ur"<!-- .*? -->")
+htmlComment = buildRegex(r"<!-- .*? -->")
 
 # -------------------- Heading --------------------
 
@@ -296,16 +296,16 @@ def actionHeading(s, l, st, t):
 #         raise ParseException(s, l, "heading must not contain newline")
 
 
-headingStartTag = buildRegex(ur"^={1,15}", "headingStartTag")
+headingStartTag = buildRegex(r"^={1,15}", "headingStartTag")
 
-headingEnd = buildRegex(ur"={1,15}", "headingEndTag") + whitespace + \
-        buildRegex(ur"\n")
+headingEnd = buildRegex(r"={1,15}", "headingEndTag") + whitespace + \
+        buildRegex(r"\n")
 
-heading = headingStartTag + Optional(buildRegex(ur" ")) + \
+heading = headingStartTag + Optional(buildRegex(r" ")) + \
         headingContent + headingEnd
 heading = heading.setResultsNameNoCopy("heading").setParseAction(actionHeading)
 
-newlineInHeading = buildRegex(ur"\n", "newlineInHeading")
+newlineInHeading = buildRegex(r"\n", "newlineInHeading")
 
 
 
@@ -313,25 +313,25 @@ newlineInHeading = buildRegex(ur"\n", "newlineInHeading")
 
 def actionTodoEntry(s, l, st, t):
     t.key = t.findFlatByName("key").getString()
-    t.keyComponents = t.key.split(u".")
+    t.keyComponents = t.key.split(".")
     t.delimiter = t.findFlatByName("todoDelimiter").getString()
     t.valueNode = t.findFlatByName("value")
     t.todos = [(t.key, t.valueNode)]
 
 
 
-todoKey = buildRegex(ur"\b(?:todo|done|wait|action|track|issue|"
-        ur"question|project)(?:\.[^:\s]+)?", "key")
+todoKey = buildRegex(r"\b(?:todo|done|wait|action|track|issue|"
+        r"question|project)(?:\.[^:\s]+)?", "key")
 # todoKey = todoKey.setParseStartAction(preActCheckNothingLeft)
 
-todoEnd = buildRegex(ur"\n|\||(?!.)")
+todoEnd = buildRegex(r"\n|\||(?!.)")
 
-todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent
+todoEntry = todoKey + buildRegex(r":", "todoDelimiter") + todoContent
 
 todoEntry = todoEntry.setResultsNameNoCopy("todoEntry")\
         .setParseAction(actionTodoEntry)
         
-todoEntryWithTermination = todoEntry + Optional(buildRegex(ur"\|"))
+todoEntryWithTermination = todoEntry + Optional(buildRegex(r"\|"))
 
 # Only for LanguageHelper.parseTodoEntry()
 todoAsWhole = todoEntry + stringEnd
@@ -356,17 +356,17 @@ def actionPreBySpaceStart(s, l, st, t):
         # First line with space -> make this a faked "<pre>"-tag
         st.dictStack.getSubTopDict()["inPre"] = True
         t[0].name = "htmlEquivalent"
-        t[0].htmlContent = HtmlStartTag(u"pre")
+        t[0].htmlContent = HtmlStartTag("pre")
 
 def actionPreBySpaceEnd(s, l, st, t):
     t.name = "htmlEquivalent"
-    t.htmlContent = HtmlEndTag(u"pre")
+    t.htmlContent = HtmlEndTag("pre")
 
 
-preHtmlStart = buildRegex(ur"<pre(?: [^\n>]*)?>", "htmlTag")\
+preHtmlStart = buildRegex(r"<pre(?: [^\n>]*)?>", "htmlTag")\
         .setParseAction(actionPreHtmlStart)
 
-preHtmlEnd = buildRegex(ur"</pre(?: [^\n>]*)?>", "htmlTag")
+preHtmlEnd = buildRegex(r"</pre(?: [^\n>]*)?>", "htmlTag")
 
 preHtmlTag = preHtmlStart + content + preHtmlEnd
 preHtmlTag = preHtmlTag.setResultsNameNoCopy("preHtmlTag")\
@@ -374,10 +374,10 @@ preHtmlTag = preHtmlTag.setResultsNameNoCopy("preHtmlTag")\
 #         .setParseStartAction(createCheckNotIn(("preHtmlTag",)))\
 
 
-preBySpaceStart = buildRegex(ur"^ ")
+preBySpaceStart = buildRegex(r"^ ")
 preBySpaceStart = preBySpaceStart.setParseAction(actionPreBySpaceStart)
 
-preBySpaceEnd = buildRegex(ur"^(?! )|(?!.)") | FollowedBy(preHtmlStart)
+preBySpaceEnd = buildRegex(r"^(?! )|(?!.)") | FollowedBy(preHtmlStart)
 preBySpaceEnd.setParseAction(actionPreBySpaceEnd)
 
 preBySpaceFirst = preBySpaceStart + content + preBySpaceEnd
@@ -397,13 +397,13 @@ preBySpace = preBySpace.setResultsNameNoCopy("preBySpace")\
 
 def actionBulletCombinationStartOrContinuation(s, l, st, t):
     prevCombNorm = st.dictStack.getNamedDict("bulletCombination")\
-            .get("prevBulletCombinationNorm", u"")
+            .get("prevBulletCombinationNorm", "")
     newComb = t[0].getText()
     t[0].helperNode = True
 
     # For definition lists the "!" generates the enclosing "dl"-tag
     # it is only used internally and not part of MediaWiki syntax
-    newCombNorm = newComb.replace(u":", u"!:").replace(u";", u"!;")
+    newCombNorm = newComb.replace(":", "!:").replace(";", "!;")
 
     lastBulletChar = newCombNorm[-1]
     st.dictStack.getNamedDict("bulletCombination")\
@@ -411,20 +411,20 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
 
     result = [t[0]]
     # Eliminate equal prefix
-    while prevCombNorm != u"" and newCombNorm != u"" and prevCombNorm[0] == newCombNorm[0]:
+    while prevCombNorm != "" and newCombNorm != "" and prevCombNorm[0] == newCombNorm[0]:
         prevCombNorm = prevCombNorm[1:]
         newCombNorm = newCombNorm[1:]
 
 
-    while prevCombNorm != u"":
-        n = TerminalNode(u"", l, "htmlEquivalent")
+    while prevCombNorm != "":
+        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = prevCombNorm[-1]
         endTag = {
-                u"*": u"ul",
-                u"#": u"ol",
-                u";": u"dt",
-                u":": u"dd",
-                u"!": u"dl",
+                "*": "ul",
+                "#": "ol",
+                ";": "dt",
+                ":": "dd",
+                "!": "dl",
             }[bulletChar]
 
         n.htmlContent = HtmlEndTag(endTag)
@@ -432,48 +432,48 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
         result.append(n)
         prevCombNorm = prevCombNorm[:-1]
 
-    startTag = u""
-    while newCombNorm != u"":
-        n = TerminalNode(u"", l, "htmlEquivalent")
+    startTag = ""
+    while newCombNorm != "":
+        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = newCombNorm[0]
         startTag = {
-                u"*": u"ul",
-                u"#": u"ol",
-                u";": u"dt",
-                u":": u"dd",
-                u"!": u"dl",
+                "*": "ul",
+                "#": "ol",
+                ";": "dt",
+                ":": "dd",
+                "!": "dl",
             }[bulletChar]
         
         n.htmlContent = HtmlStartTag(startTag)
         result.append(n)
         newCombNorm = newCombNorm[1:]
 
-    if lastBulletChar in u"*#":
-        n = TerminalNode(u"", l, "htmlEquivalent")
+    if lastBulletChar in "*#":
+        n = TerminalNode("", l, "htmlEquivalent")
         n.htmlContent = HtmlEmptyTag("li")
         result.append(n)
-    elif lastBulletChar == u":":
-        if startTag != u"dd":
+    elif lastBulletChar == ":":
+        if startTag != "dd":
             # If the last bullet character ':' wasn't part of the common
             # prefix it was processed as last character of newCombNorm
             # and "dd" was set as startTag. In this case the "dd" shouldn't
             # be closed and reopened
-            n = TerminalNode(u"", l, "htmlEquivalent")
-            n.htmlContent = HtmlEndTag(u"dd")
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlEndTag("dd")
             result.append(n)
 
-            n = TerminalNode(u"", l, "htmlEquivalent")
-            n.htmlContent = HtmlStartTag(u"dd")
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlStartTag("dd")
             result.append(n)
-    elif lastBulletChar == u";":
-        if startTag != u"dt":
+    elif lastBulletChar == ";":
+        if startTag != "dt":
             # Same logic as above
-            n = TerminalNode(u"", l, "htmlEquivalent")
-            n.htmlContent = HtmlEndTag(u"dt")
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlEndTag("dt")
             result.append(n)
 
-            n = TerminalNode(u"", l, "htmlEquivalent")
-            n.htmlContent = HtmlStartTag(u"dt")
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlStartTag("dt")
             result.append(n)
 
     return result
@@ -481,20 +481,20 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
 
 def actionBulletCombinationEnd(s, l, st, t):
     prevCombNorm = st.dictStack.getNamedDict("bulletCombination")\
-            .get("prevBulletCombinationNorm", u"")
+            .get("prevBulletCombinationNorm", "")
 
     t[0].helperNode = True
     result = [t[0]]
 
-    while prevCombNorm != u"":
-        n = TerminalNode(u"", l, "htmlEquivalent")
+    while prevCombNorm != "":
+        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = prevCombNorm[-1]
         endTag = {
-                u"*": u"ul",
-                u"#": u"ol",
-                u";": u"dt",
-                u":": u"dd",
-                u"!": u"dl",
+                "*": "ul",
+                "#": "ol",
+                ";": "dt",
+                ":": "dd",
+                "!": "dl",
             }[bulletChar]
 
         n.htmlContent = HtmlEndTag(endTag)
@@ -506,7 +506,7 @@ def actionBulletCombinationEnd(s, l, st, t):
 
 
 
-bulletCombinationStart = buildRegex(ur"^[\*#;:]+", "bulletCombinationStart")\
+bulletCombinationStart = buildRegex(r"^[\*#;:]+", "bulletCombinationStart")\
         .setParseAction(actionBulletCombinationStartOrContinuation)
 
 bulletCombinationContinuation = bulletCombinationStart\
@@ -518,7 +518,7 @@ bulletCombinationStart = bulletCombinationStart
         
 
 
-bulletCombinationEnd = buildRegex(ur"^(?![\*#:;])|(?!.)", "bulletCombinationEnd")\
+bulletCombinationEnd = buildRegex(r"^(?![\*#:;])|(?!.)", "bulletCombinationEnd")\
         .setParseAction(actionBulletCombinationEnd)
 
 bulletCombination = bulletCombinationStart + content + bulletCombinationEnd
@@ -540,9 +540,9 @@ def preActNewLineWhitespace(s, l, st, pe):
 
 
 # Only an empty line
-fakeIndentation = buildRegex(ur"^[ \t]+$")
+fakeIndentation = buildRegex(r"^[ \t]+$")
 
-newLine = buildRegex(ur"\n") + Optional(fakeIndentation)
+newLine = buildRegex(r"\n") + Optional(fakeIndentation)
 
 
 
@@ -569,60 +569,60 @@ def actionSetTableContentInCell(s, l, st, t):
 
 
 def actionTableCaption(s, l, st, t):
-    sn = TerminalNode(u"", l, "htmlEquivalent")
-    sn.htmlContent = HtmlStartTag(u"caption")
+    sn = TerminalNode("", l, "htmlEquivalent")
+    sn.htmlContent = HtmlStartTag("caption")
 
     attNode = t.findFlatByName("tableCaptionHtmlAttributes")
     if attNode is not None:
         sn.htmlContent.addEscapedAttributes(attNode.htmlAttributes)
 
-    en = TerminalNode(u"", l, "htmlEquivalent")
-    en.htmlContent = HtmlEndTag(u"caption")
+    en = TerminalNode("", l, "htmlEquivalent")
+    en.htmlContent = HtmlEndTag("caption")
     
     t.prepend(sn)
     t.append(en)
     
 
 def actionTableRow(s, l, st, t):
-    sn = TerminalNode(u"", l, "htmlEquivalent")
-    sn.htmlContent = HtmlStartTag(u"tr")
+    sn = TerminalNode("", l, "htmlEquivalent")
+    sn.htmlContent = HtmlStartTag("tr")
 
     attNode = t.findFlatByName("tableRowHtmlAttributes")
     if attNode is not None:
         sn.htmlContent.addEscapedAttributes(attNode.htmlAttributes)
 
-    en = TerminalNode(u"", l, "htmlEquivalent")
-    en.htmlContent = HtmlEndTag(u"tr")
+    en = TerminalNode("", l, "htmlEquivalent")
+    en.htmlContent = HtmlEndTag("tr")
 
     t.prepend(sn)
     t.append(en)
 
 
 def actionTableHeaderCell(s, l, st, t):
-    sn = TerminalNode(u"", l, "htmlEquivalent")
-    sn.htmlContent = HtmlStartTag(u"th")
+    sn = TerminalNode("", l, "htmlEquivalent")
+    sn.htmlContent = HtmlStartTag("th")
 
     attNode = t.findFlatByName("tableCellHtmlAttributes")
     if attNode is not None:
         sn.htmlContent.addEscapedAttributes(attNode.htmlAttributes)
 
-    en = TerminalNode(u"", l, "htmlEquivalent")
-    en.htmlContent = HtmlEndTag(u"th")
+    en = TerminalNode("", l, "htmlEquivalent")
+    en.htmlContent = HtmlEndTag("th")
 
     t.prepend(sn)
     t.append(en)
     
 
 def actionTableCell(s, l, st, t):
-    sn = TerminalNode(u"", l, "htmlEquivalent")
-    sn.htmlContent = HtmlStartTag(u"td")
+    sn = TerminalNode("", l, "htmlEquivalent")
+    sn.htmlContent = HtmlStartTag("td")
 
     attNode = t.findFlatByName("tableCellHtmlAttributes")
     if attNode is not None:
         sn.htmlContent.addEscapedAttributes(attNode.htmlAttributes)
 
-    en = TerminalNode(u"", l, "htmlEquivalent")
-    en.htmlContent = HtmlEndTag(u"td")
+    en = TerminalNode("", l, "htmlEquivalent")
+    en.htmlContent = HtmlEndTag("td")
 
     t.prepend(sn)
     t.append(en)
@@ -630,15 +630,15 @@ def actionTableCell(s, l, st, t):
 
 def actionTableMediaWiki(s, l, st, t):
     # TODO: Problem with folding
-    sn = TerminalNode(u"", l, "htmlEquivalent")
-    sn.htmlContent = HtmlStartTag(u"table")
+    sn = TerminalNode("", l, "htmlEquivalent")
+    sn.htmlContent = HtmlStartTag("table")
     
     attNode = t.findFlatByName("tableHtmlAttributes")
     if attNode is not None:
         sn.htmlContent.addEscapedAttributes(attNode.htmlAttributes)
 
-    en = TerminalNode(u"", l, "htmlEquivalent")
-    en.htmlContent = HtmlEndTag(u"table")
+    en = TerminalNode("", l, "htmlEquivalent")
+    en.htmlContent = HtmlEndTag("table")
 
     t.prepend(sn)
     t.append(en)
@@ -659,57 +659,57 @@ def actionGenericHtmlAttributes(s, l, st, t):
 
 # The following HTML tokens are needed later
 
-htmlAttributeValueQuoted = buildRegex(ur'"') + \
-        buildRegex(ur'[^"\n\t]*', "htmlAttributeValue") + \
-        buildRegex(ur'"')
+htmlAttributeValueQuoted = buildRegex(r'"') + \
+        buildRegex(r'[^"\n\t]*', "htmlAttributeValue") + \
+        buildRegex(r'"')
         
-htmlAttributeValueNotQuoted = buildRegex(ur'[^"\n\t ]+', "htmlAttributeValue")
+htmlAttributeValueNotQuoted = buildRegex(r'[^"\n\t ]+', "htmlAttributeValue")
 
-htmlAttribute = whitespace + buildRegex(ur"[A-Za-z0-9]+", "htmlAttributeKey") + \
-        whitespace + buildRegex(ur"=") + whitespace + \
+htmlAttribute = whitespace + buildRegex(r"[A-Za-z0-9]+", "htmlAttributeKey") + \
+        whitespace + buildRegex(r"=") + whitespace + \
         (htmlAttributeValueQuoted | htmlAttributeValueNotQuoted)
 
 htmlAttribute = htmlAttribute.setResultsNameNoCopy("htmlAttribute")
 
 
-tableAttributeStop = whitespace + buildRegex(ur"\|")
+tableAttributeStop = whitespace + buildRegex(r"\|")
 
 genericHtmlAttributes = OneOrMore(htmlAttribute)
 genericHtmlAttributes = genericHtmlAttributes\
         .setResultsNameNoCopy("genericHtmlAttributes")\
         .setParseAction(actionGenericHtmlAttributes)
 
-tableStart = buildRegex(ur"^[ \t]*\{\|") + whitespace + \
+tableStart = buildRegex(r"^[ \t]*\{\|") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableHtmlAttributes")) + \
         whitespaceOrNl
 
-tableEnd = buildRegex(ur"^[ \t]*\|\}[ \t]*(?:\n|$)")
+tableEnd = buildRegex(r"^[ \t]*\|\}[ \t]*(?:\n|$)")
 
-tableCaption = buildRegex(ur"^[ \t]*\|\+") + whitespace + \
+tableCaption = buildRegex(r"^[ \t]*\|\+") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableCaptionHtmlAttributes") +
         tableAttributeStop) + whitespaceOrNl + tableContentInCell
 tableCaption = tableCaption.setParseAction(actionTableCaption)
 
-tableHeaderCell = buildRegex(ur"^[ \t]*!|!!") + whitespace + \
+tableHeaderCell = buildRegex(r"^[ \t]*!|!!") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableCellHtmlAttributes") +
         tableAttributeStop) + whitespaceOrNl + tableContentInCell
 tableHeaderCell = tableHeaderCell.setParseAction(actionTableHeaderCell)\
         .setParseAction(actionSetHelperNodeRecur).addParseAction(actionTableHeaderCell)
 
-tableCell = buildRegex(ur"^[ \t]*\|(?![\}+\-])|\|\|") + whitespace + \
+tableCell = buildRegex(r"^[ \t]*\|(?![\}+\-])|\|\|") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableCellHtmlAttributes") +
         tableAttributeStop) + whitespaceOrNl + tableContentInCell
 tableCell = tableCell.setResultsNameNoCopy("tableCell")\
         .setParseAction(actionSetHelperNodeRecur).addParseAction(actionTableCell)
 
-tableRow = buildRegex(ur"^[ \t]*\|-") + whitespace + \
+tableRow = buildRegex(r"^[ \t]*\|-") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableRowHtmlAttributes")) + \
         whitespaceOrNl + OneOrMore(tableCell | tableHeaderCell)
 
 tableRow = tableRow.setResultsNameNoCopy("tableRow")\
         .setParseAction(actionSetHelperNodeRecur).addParseAction(actionTableRow)
 
-tableFirstRow = Optional(buildRegex(ur"^[ \t]*\|-") + whitespace + \
+tableFirstRow = Optional(buildRegex(r"^[ \t]*\|-") + whitespace + \
         Optional(genericHtmlAttributes.setResultsName("tableRowHtmlAttributes")) + \
         whitespaceOrNl) + OneOrMore(tableCell | tableHeaderCell)
         
@@ -721,7 +721,7 @@ tableMediaWiki = tableStart + Optional(tableCaption) + \
 tableMediaWiki = tableMediaWiki.setResultsNameNoCopy("tableMediaWiki")\
         .setParseAction(actionSetHelperNodeRecur).addParseAction(actionTableMediaWiki)
 
-tableElementMediaWiki = buildRegex(ur"^[ \t]*[\|!]|\|\|")
+tableElementMediaWiki = buildRegex(r"^[ \t]*[\|!]|\|\|")
 
 
 
@@ -732,8 +732,8 @@ tableElementMediaWiki = buildRegex(ur"^[ \t]*[\|!]|\|\|")
 #         buildRegex(ur".*?(?=^[ \t]*>>[ \t]*(?:\n|$))", "plainText") + \
 #         buildRegex(ur"^[ \t]*>>[ \t]*(?:\n|$)")
 
-suppressHighlighting = buildRegex(ur"<nowiki>") + \
-        buildRegex(ur".*?(?=</nowiki>)", "plainText") + buildRegex(ur"</nowiki>")
+suppressHighlighting = buildRegex(r"<nowiki>") + \
+        buildRegex(r".*?(?=</nowiki>)", "plainText") + buildRegex(r"</nowiki>")
 
 
 
@@ -747,10 +747,10 @@ def actionNoExport(s, l, st, t):
     t.name = "noExport"
 
 
-noExportSingleLineEnd = buildRegex(ur"</hide>")
+noExportSingleLineEnd = buildRegex(r"</hide>")
 
 
-noExportSingleLine = buildRegex(ur"<hide>") + content + noExportSingleLineEnd
+noExportSingleLine = buildRegex(r"<hide>") + content + noExportSingleLineEnd
 noExportSingleLine = noExportSingleLine.setResultsNameNoCopy("noExportSl")\
         .setParseStartAction(createCheckNotIn(("noExportSl",)))\
         .setParseAction(actionNoExport)
@@ -762,11 +762,11 @@ def actionBodyHtmlTag(s, l, st, t):
     t.content = t.findFlatByName("bodyHtmlText").getString()
 
 
-bodyHtmlStart = buildRegex(ur"<body(?: [^\n>]*)?>", "htmlTag")
+bodyHtmlStart = buildRegex(r"<body(?: [^\n>]*)?>", "htmlTag")
  
-bodyHtmlEnd = buildRegex(ur"</body>", "htmlTag")
+bodyHtmlEnd = buildRegex(r"</body>", "htmlTag")
 
-bodyHtmlText = buildRegex(ur".*?(?=" + bodyHtmlEnd.getPattern() + ")",
+bodyHtmlText = buildRegex(r".*?(?=" + bodyHtmlEnd.getPattern() + ")",
         "bodyHtmlText")
 
 
@@ -778,37 +778,37 @@ bodyHtmlTag = bodyHtmlTag.setResultsNameNoCopy("bodyHtmlTag")\
 
 # -------------------- Wikiwords and URLs --------------------
 
-BracketStart = u"[["
-BracketStartPAT = ur"\[\["
+BracketStart = "[["
+BracketStartPAT = r"\[\["
 
-BracketEnd = u"]]"
-BracketEndPAT = ur"\]\]"
+BracketEnd = "]]"
+BracketEndPAT = r"\]\]"
 # WikiWordNccPAT = ur"/?(?:/?[^\\/\[\]\|\000-\037=:;#!]+)+" # ur"[\w\-\_ \t]+"
 
 # Single part of subpage path
-WikiWordPathPartPAT = ur"(?!\.\.)[^\\/\[\]\|\000-\037=:;#!]+"
+WikiWordPathPartPAT = r"(?!\.\.)[^\\/\[\]\|\000-\037=:;#!]+"
 WikiPageNamePAT = WikiWordPathPartPAT + "(?:/" + WikiWordPathPartPAT + ")*"
 
 # Begins with dotted path parts which mean to go upward in subpage path
-WikiWordDottedPathPAT = ur"\.\.(?:/\.\.)*(?:/" + WikiWordPathPartPAT + ")*"
-WikiWordNonDottedPathPAT = ur"/{0,2}" + WikiPageNamePAT
+WikiWordDottedPathPAT = r"\.\.(?:/\.\.)*(?:/" + WikiWordPathPartPAT + ")*"
+WikiWordNonDottedPathPAT = r"/{0,2}" + WikiPageNamePAT
 
-WikiWordNccPAT = WikiWordDottedPathPAT + ur"|" + WikiWordNonDottedPathPAT
+WikiWordNccPAT = WikiWordDottedPathPAT + r"|" + WikiWordNonDottedPathPAT
 
-WikiWordTitleStartPAT = ur"\|"
-WikiWordAnchorStart = u"!"
-WikiWordAnchorStartPAT = ur"!"
+WikiWordTitleStartPAT = r"\|"
+WikiWordAnchorStart = "!"
+WikiWordAnchorStartPAT = r"!"
 
 # Bracket start, escaped for reverse RE pattern (for autocompletion)
-BracketStartRevPAT = ur"\[\["
+BracketStartRevPAT = r"\[\["
 # Bracket end, escaped for reverse RE pattern (for autocompletion)
-BracketEndRevPAT = ur"\]\]"
+BracketEndRevPAT = r"\]\]"
 
-WikiWordNccRevPAT = ur"[^\\\[\]\|\000-\037=:;#!]+?"  # ur"[\w\-\_ \t.]+?"
+WikiWordNccRevPAT = r"[^\\\[\]\|\000-\037=:;#!]+?"  # ur"[\w\-\_ \t.]+?"
 
 
-UrlPAT = ur'(?:(?:https?|ftp|rel|wikirel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
-        ur'(?:(?![.,;:!?)]+(?:["\s]|$))[^"\s|\]<>])*'
+UrlPAT = r'(?:(?:https?|ftp|rel|wikirel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
+        r'(?:(?![.,;:!?)]+(?:["\s]|$))[^"\s|\]<>])*'
 
 
 # UrlInBracketsPAT = ur'(?:(?:https?|ftp|rel|wikirel)://|mailto:|Outlook:\S|wiki:/|file:/)'\
@@ -819,7 +819,7 @@ bracketStart = buildRegex(BracketStartPAT)
 bracketEnd = buildRegex(BracketEndPAT)
 
 
-UnescapeExternalFragmentRE   = re.compile(ur"#(.)",
+UnescapeExternalFragmentRE   = re.compile(r"#(.)",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -835,10 +835,10 @@ def actionSearchFragmentExtern(s, l, st, t):
     if lt2 is None:
         return None
     
-    lt2.unescaped = UnescapeExternalFragmentRE.sub(ur"\1", lt2.text)
+    lt2.unescaped = UnescapeExternalFragmentRE.sub(r"\1", lt2.text)
 
 
-UnescapeStandardRE = re.compile(EscapePlainCharPAT + ur"(.)",
+UnescapeStandardRE = re.compile(EscapePlainCharPAT + r"(.)",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
 def actionSearchFragmentIntern(s, l, st, t):
@@ -846,7 +846,7 @@ def actionSearchFragmentIntern(s, l, st, t):
     if lt2 is None:
         return None
 
-    lt2.unescaped = UnescapeStandardRE.sub(ur"\1", lt2.text)
+    lt2.unescaped = UnescapeStandardRE.sub(r"\1", lt2.text)
 
 
 
@@ -869,9 +869,9 @@ def actionWikiWordNcc(s, l, st, t):
         t.wikiWord = resolveWikiWordLink(t.wikiWord.getString(),
                 wikiFormatDetails.basePage)
     else:
-        t.wikiWord = resolveWikiWordLink(u".", wikiFormatDetails.basePage)
+        t.wikiWord = resolveWikiWordLink(".", wikiFormatDetails.basePage)
 
-    if t.wikiWord == u"":
+    if t.wikiWord == "":
         raise ParseException(s, l, "Subpage resolution of wikiword failed")
 
     if t.wikiWord in wikiFormatDetails.wikiDocument.getNccWordBlacklist():
@@ -919,7 +919,7 @@ def actionWikiWordCc(s, l, st, t):
         t.wikiWord = resolveWikiWordLink(t.wikiWord.getString(),
                 wikiFormatDetails.basePage)
 
-        if t.wikiWord == u"":
+        if t.wikiWord == "":
             raise ParseException(s, l, "Subpage resolution of wikiword failed")
 
         try:
@@ -965,10 +965,10 @@ def parseGlobalAppendixEntries(s, l, st, t, ignore=()):
         
         # The longer form is recommended, the short "s" e.g. does not work
         # in appendices for image URLs due to a name clash
-        if key == u"s" or key == u"class":
-            t.cssClass = data.replace(u",", u" ")
-        elif key == u"A" or key == u"align":
-            if data in (u"l", u"c", u"r", u"left", u"center", u"right"):
+        if key == "s" or key == "class":
+            t.cssClass = data.replace(",", " ")
+        elif key == "A" or key == "align":
+            if data in ("l", "c", "r", "left", "center", "right"):
                 t.text_align = data
 
     return s, l, st, t
@@ -992,7 +992,7 @@ def actionUrlLink(s, l, st, t):
     t.appendixNode = t.findFlatByName("urlModeAppendix")
     # In MediaWiki, image links have another syntax. Therefore create appendix
     # to declare link as real link
-    t.appendixNode = addCreateModeAppendixEntry(l, t.appendixNode, u"l", u"")
+    t.appendixNode = addCreateModeAppendixEntry(l, t.appendixNode, "l", "")
     t.coreNode = t.findFlatByName("url")
 
     # Valid URL but may differ from original input (does not for MediaWiki,
@@ -1007,7 +1007,7 @@ def actionAnchorDef(s, l, st, t):
 
 
 def actionUrlModeAppendix(s, l, st, t):
-    s, l, st, t = parseGlobalAppendixEntries(s, l, st, t, ignore=(u"s",))
+    s, l, st, t = parseGlobalAppendixEntries(s, l, st, t, ignore=("s",))
     
 #     t.border = None
 # 
@@ -1039,10 +1039,10 @@ def actionImageUrl(s, l, st, t):
         subNode = node.findFlatByName("keyword")
         if subNode is not None:
             key = subNode.getString()
-            if key in (u"left", u"center", u"right", u"top", u"middle", u"bottom"):
-                modeAppendixEntries.append((u"align", key))
-            elif key == u"upright":
-                modeAppendixEntries.append((u"upright", u"1"))
+            if key in ("left", "center", "right", "top", "middle", "bottom"):
+                modeAppendixEntries.append(("align", key))
+            elif key == "upright":
+                modeAppendixEntries.append(("upright", "1"))
                 
             continue
         
@@ -1057,36 +1057,36 @@ def actionImageUrl(s, l, st, t):
         
         subNode = node.findFlatByName("pixelsize")
         if subNode is not None:
-            psStr = subNode.getString().replace(u"px", u"")
-            modeAppendixEntries.append((u"r", psStr))
+            psStr = subNode.getString().replace("px", "")
+            modeAppendixEntries.append(("r", psStr))
         
         # Pixel size options are currently not processed
 
     # Tell exporter that this is an image url
-    modeAppendixEntries.append((u"i", u""))
+    modeAppendixEntries.append(("i", ""))
 
     t.appendixNode = addCreateModeAppendixEntries(l, t.appendixNode,
             modeAppendixEntries)
 
     if len(cssClasses) > 0:
-        t.cssClass = u" ".join(cssClasses)
+        t.cssClass = " ".join(cssClasses)
 
 
 
-searchFragmentExtern = buildRegex(ur"#") + \
-        buildRegex(ur"(?:(?:#.)|[^ \t\n#])+", "searchFragment")\
+searchFragmentExtern = buildRegex(r"#") + \
+        buildRegex(r"(?:(?:#.)|[^ \t\n#])+", "searchFragment")\
         .setParseAction(actionSearchFragmentExtern)
 
-searchFragmentIntern = buildRegex(ur"#") + buildRegex(ur"(?:(?:" + EscapePlainCharPAT +
-        ur".)|(?!" + WikiWordTitleStartPAT +
-        ur"|" +  BracketEndPAT + ur").)+", "searchFragment")\
+searchFragmentIntern = buildRegex(r"#") + buildRegex(r"(?:(?:" + EscapePlainCharPAT +
+        r".)|(?!" + WikiWordTitleStartPAT +
+        r"|" +  BracketEndPAT + r").)+", "searchFragment")\
         .setParseAction(actionSearchFragmentIntern)
 
 wikiWordAnchorLink = buildRegex(WikiWordAnchorStartPAT) + \
-        buildRegex(ur"[A-Za-z0-9\_]+", "anchorLink")
+        buildRegex(r"[A-Za-z0-9\_]+", "anchorLink")
 
 
-title = buildRegex(WikiWordTitleStartPAT + ur"[ \t]*") + titleContent    # content.setResultsName("title")
+title = buildRegex(WikiWordTitleStartPAT + r"[ \t]*") + titleContent    # content.setResultsName("title")
 
 
 wikiWordNccCore = buildRegex(WikiWordNccPAT, "word")
@@ -1094,11 +1094,11 @@ wikiWordNccCore = buildRegex(WikiWordNccPAT, "word")
 wikiWordNccWithWord = bracketStart + \
         wikiWordNccCore.copy().addParseAction(actionCutRightWhitespace) + \
         Optional(MatchFirst([searchFragmentIntern, wikiWordAnchorLink])) + whitespace + \
-        Optional(title) + bracketEnd + Optional(buildRegex(ur"\w+", "titleTrail"))
+        Optional(title) + bracketEnd + Optional(buildRegex(r"\w+", "titleTrail"))
 
 wikiWordNccSearchInPage = bracketStart + \
         searchFragmentIntern + whitespace + \
-        Optional(title) + bracketEnd + Optional(buildRegex(ur"\w+", "titleTrail"))
+        Optional(title) + bracketEnd + Optional(buildRegex(r"\w+", "titleTrail"))
 
 wikiWordNcc = wikiWordNccWithWord | wikiWordNccSearchInPage
 
@@ -1106,12 +1106,12 @@ wikiWordNcc = wikiWordNcc.setResultsNameNoCopy("wikiWord").setName("wikiWordNcc"
         .setParseAction(actionWikiWordNcc)
 
 
-anchorDef = buildRegex(ur"^[ \t]*anchor:[ \t]*") + buildRegex(ur"[A-Za-z0-9\_]+",
-        "anchor") + buildRegex(ur"\n")
+anchorDef = buildRegex(r"^[ \t]*anchor:[ \t]*") + buildRegex(r"[A-Za-z0-9\_]+",
+        "anchor") + buildRegex(r"\n")
 anchorDef = anchorDef.setResultsNameNoCopy("anchorDef").setParseAction(actionAnchorDef)
 
 
-AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
+AnchorRE = re.compile(r"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1119,20 +1119,20 @@ AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
 urlModeAppendix = modeAppendix.setResultsName("urlModeAppendix").addParseAction(
         actionUrlModeAppendix)
 
-urlWithAppend = buildRegex(UrlPAT, "url") + Optional(buildRegex(ur">") + \
+urlWithAppend = buildRegex(UrlPAT, "url") + Optional(buildRegex(r">") + \
         urlModeAppendix)
 
-urlWithAppendInBrackets = buildRegex(UrlPAT, "url") + Optional(buildRegex(ur">") + \
+urlWithAppendInBrackets = buildRegex(UrlPAT, "url") + Optional(buildRegex(r">") + \
         urlModeAppendix)
 
 
 urlBare = urlWithAppend.setResultsName("urlLinkBare")
 urlBare = urlBare.setParseAction(actionUrlLink)
 
-urlBracketEnd = buildRegex(ur"\]")
+urlBracketEnd = buildRegex(r"\]")
 
-urlTitled = buildRegex(ur"\[") + urlWithAppendInBrackets + \
-        Optional(buildRegex(ur" ") + whitespace + titleContent) + whitespace + \
+urlTitled = buildRegex(r"\[") + urlWithAppendInBrackets + \
+        Optional(buildRegex(r" ") + whitespace + titleContent) + whitespace + \
         urlBracketEnd
 
 urlTitled = urlTitled.setResultsNameNoCopy("urlLinkBracketed").setParseAction(actionUrlLink)
@@ -1144,11 +1144,11 @@ urlRef = urlTitled | urlBare
 #         buildRegex(ur"x?[0-9]+px|[0-9]+x[0-9]+px", "pixelsize") |
 
 
-imageUrlOption = buildRegex(ur"\|") + ( buildRegex(ur"border|frameless|frame|upright|thumb|"
-        ur"left|right|center|none|baseline|sub|super|top|text-top|middle|bottom|text-bottom", "keyword") |
-        buildRegex(ur"[0-9]+px(?:x[0-9]+px)?", "pixelsize") |
-        ( buildRegex(ur"thumb|link|alt|page|class", "key") + buildRegex(ur"=") + 
-            buildRegex(ur"[^\n\t\]|]*", "value") )
+imageUrlOption = buildRegex(r"\|") + ( buildRegex(r"border|frameless|frame|upright|thumb|"
+        r"left|right|center|none|baseline|sub|super|top|text-top|middle|bottom|text-bottom", "keyword") |
+        buildRegex(r"[0-9]+px(?:x[0-9]+px)?", "pixelsize") |
+        ( buildRegex(r"thumb|link|alt|page|class", "key") + buildRegex(r"=") + 
+            buildRegex(r"[^\n\t\]|]*", "value") )
         )
 imageUrlOption = imageUrlOption.setResultsNameNoCopy("imageUrlOption")
 
@@ -1171,11 +1171,11 @@ extractableWikiWord = extractableWikiWord.setResultsNameNoCopy("extractableWikiW
         .parseWithTabs()
 
 
-wikiPageNameRE = re.compile(ur"^" + WikiPageNamePAT + ur"$",
+wikiPageNameRE = re.compile(r"^" + WikiPageNamePAT + r"$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-wikiLinkCoreRE = re.compile(ur"^" + WikiWordNccPAT + ur"$",
+wikiLinkCoreRE = re.compile(r"^" + WikiWordNccPAT + r"$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1184,7 +1184,7 @@ wikiLinkCoreRE = re.compile(ur"^" + WikiWordNccPAT + ur"$",
 
 # TODO: Emulate MediaWiki cite extension
 
-footnotePAT = ur"[0-9]+"
+footnotePAT = r"[0-9]+"
 
 def preActCheckFootnotesAllowed(s, l, st, pe):
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
@@ -1203,7 +1203,7 @@ footnote = footnote.setResultsNameNoCopy("footnote")\
         .setParseAction(actionFootnote)
 
 
-footnoteRE = re.compile(ur"^" + footnotePAT + ur"$",
+footnoteRE = re.compile(r"^" + footnotePAT + r"$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1229,13 +1229,13 @@ def pseudoActionAttrInsQuotedValue(s, l, st, t):
 def actionAttribute(s, l, st, t):
     key = t.findFlatByName("key").getString()
     t.key = key
-    t.keyComponents = t.key.split(u".")
+    t.keyComponents = t.key.split(".")
     t.attrs = [(key, vNode.getString()) for vNode in t.iterFlatByName("value")]
 
 
 def actionInsertion(s, l, st, t):
     t.key = t.findFlatByName("key").getString()
-    t.keyComponents = t.key.split(u".")
+    t.keyComponents = t.key.split(".")
     values = list(vNode.getString() for vNode in t.iterFlatByName("value"))
     t.value = values[0]
     del values[0]
@@ -1243,7 +1243,7 @@ def actionInsertion(s, l, st, t):
 
 
 
-attrInsQuote = buildRegex(ur"\"+|'+|/+|\\+")
+attrInsQuote = buildRegex(r"\"+|'+|/+|\\+")
 attrInsQuoteStart = attrInsQuote.copy()\
         .setParseAction(actionAttrInsValueQuoteStart)
 attrInsQuoteEnd = attrInsQuote.copy()\
@@ -1253,23 +1253,23 @@ attrInsQuotedValue = FindFirst([], attrInsQuoteEnd)\
         .setPseudoParseAction(pseudoActionAttrInsQuotedValue)
 
 # attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
-attrInsNonQuotedValue = buildRegex(ur"(?:[ \t]*[\w\-\_=:,.!?#%|/]+)*", "value")
+attrInsNonQuotedValue = buildRegex(r"(?:[ \t]*[\w\-\_=:,.!?#%|/]+)*", "value")
 
 
 attrInsValue = whitespace + ((attrInsQuoteStart + attrInsQuotedValue + \
         attrInsQuoteEnd) | attrInsNonQuotedValue)
 
-attrInsKey = buildRegex(ur"[\w\-\_\.]+", "key")
+attrInsKey = buildRegex(r"[\w\-\_\.]+", "key")
 
 attribute = bracketStart + whitespace + attrInsKey + \
-        buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
-        ZeroOrMore(buildRegex(ur";") + attrInsValue) + whitespace + bracketEnd
+        buildRegex(r"[ \t]*[=:]") + attrInsValue + \
+        ZeroOrMore(buildRegex(r";") + attrInsValue) + whitespace + bracketEnd
 attribute = attribute.setResultsNameNoCopy("attribute").setParseAction(actionAttribute)
 
 
-insertion = bracketStart + buildRegex(ur":") + whitespace + attrInsKey + \
-        buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
-        ZeroOrMore(buildRegex(ur";") + attrInsValue) + whitespace + bracketEnd
+insertion = bracketStart + buildRegex(r":") + whitespace + attrInsKey + \
+        buildRegex(r"[ \t]*[=:]") + attrInsValue + \
+        ZeroOrMore(buildRegex(r";") + attrInsValue) + whitespace + bracketEnd
 insertion = insertion.setResultsNameNoCopy("insertion").setParseAction(actionInsertion)
 
 
@@ -1277,14 +1277,14 @@ insertion = insertion.setResultsNameNoCopy("insertion").setParseAction(actionIns
 # -------------------- Additional regexes to provide --------------------
 
 # Needed for auto-bullet/auto-unbullet functionality of editor
-BulletRE        = re.compile(ur"^(?P<indentBullet>[ \t]*)"
-        ur"(?P<preLastBullet>[\*#;: \t]*)"
-        ur"(?P<lastBullet>[\*#;:])(?P<lastBulletWhite>[ \t]*)",
+BulletRE        = re.compile(r"^(?P<indentBullet>[ \t]*)"
+        r"(?P<preLastBullet>[\*#;: \t]*)"
+        r"(?P<lastBullet>[\*#;:])(?P<lastBulletWhite>[ \t]*)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # Needed for handleRewrapText
-EmptyLineRE     = re.compile(ur"^[ \t\r\n]*$",
+EmptyLineRE     = re.compile(r"^[ \t\r\n]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1292,30 +1292,30 @@ EmptyLineRE     = re.compile(ur"^[ \t\r\n]*$",
 
 # Reverse REs for autocompletion
 
-RevWikiWordRE2     = re.compile(ur"^" + WikiWordNccRevPAT + BracketStartRevPAT,
+RevWikiWordRE2     = re.compile(r"^" + WikiWordNccRevPAT + BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
 RevAttributeValue     = re.compile(
-        ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)" +
+        r"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)" +
         BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
 
-RevTodoKeyRE = re.compile(ur"^(?:[^:\s]{0,40}\.)??"
-        ur"(?:odot|enod|tiaw|noitca|kcart|eussi|noitseuq|tcejorp)",
+RevTodoKeyRE = re.compile(r"^(?:[^:\s]{0,40}\.)??"
+        r"(?:odot|enod|tiaw|noitca|kcart|eussi|noitseuq|tcejorp)",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
-RevTodoValueRE = re.compile(ur"^[^\n:]{0,30}:" + RevTodoKeyRE.pattern[1:],
+RevTodoValueRE = re.compile(r"^[^\n:]{0,30}:" + RevTodoKeyRE.pattern[1:],
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
-RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" + 
-        WikiWordAnchorStartPAT + BracketEndRevPAT + ur"(?P<wikiWord>" + 
-        WikiWordNccRevPAT + ur")" + BracketStartRevPAT,
+RevWikiWordAnchorRE2 = re.compile(r"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" + 
+        WikiWordAnchorStartPAT + BracketEndRevPAT + r"(?P<wikiWord>" + 
+        WikiWordNccRevPAT + r")" + BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
 
 # Simple todo RE for autocompletion.
-ToDoREWithCapturing = re.compile(ur"^([^:\s]+):[ \t]*(.+?)$",
+ToDoREWithCapturing = re.compile(r"^([^:\s]+):[ \t]*(.+?)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1323,13 +1323,13 @@ ToDoREWithCapturing = re.compile(ur"^([^:\s]+):[ \t]*(.+?)$",
 # For auto-link mode relax
 AutoLinkRelaxSplitRE = re.compile(r"[\W]+", re.IGNORECASE | re.UNICODE)
 
-AutoLinkRelaxJoinPAT = ur"[\W]+"
+AutoLinkRelaxJoinPAT = r"[\W]+"
 AutoLinkRelaxJoinFlags = re.IGNORECASE | re.UNICODE
 
 
 
 # For spell checking
-TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlPAT + u")|\b[\w']+",
+TextWordRE = re.compile(r"(?P<negative>[0-9]+|"+ UrlPAT + ")|\b[\w']+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1366,11 +1366,11 @@ def chooseEndToken(s, l, st, pe):
     return stringEnd
 
 
-endToken = Choice([stringEnd]+TOKEN_TO_END.values(), chooseEndToken)
+endToken = Choice([stringEnd]+list(TOKEN_TO_END.values()), chooseEndToken)
 
 endTokenInTable = endToken | tableElementMediaWiki
 
-endTokenInTitle = endToken | buildRegex(ur"\n")
+endTokenInTitle = endToken | buildRegex(r"\n")
 
 endTokenInCharacterAttribution = endToken | heading
 
@@ -1409,11 +1409,11 @@ titleContent << temp
 findMarkupInHeading = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlighting,
         urlRef, imageUrl, insertion, escapedChar, nowikiStandalone, footnote, wikiWord, bodyHtmlTag,
-        htmlTag, htmlEntity, htmlComment], endToken | buildRegex(ur"\n"))
+        htmlTag, htmlEntity, htmlComment], endToken | buildRegex(r"\n"))
 findMarkupInHeading = findMarkupInHeading.setPseudoParseAction(
         pseudoActionFindMarkup)
 
-temp = ZeroOrMore(NotAny(endToken | buildRegex(ur"\n")) + findMarkupInHeading)
+temp = ZeroOrMore(NotAny(endToken | buildRegex(r"\n")) + findMarkupInHeading)
 temp = temp.leaveWhitespace().parseWithTabs()
 headingContent << temp
 
@@ -1535,7 +1535,7 @@ class _TheParser(object):
         Not part of public API.
         """
         autoLinkRelaxRE = None
-        if formatDetails.autoLinkMode == u"relax":
+        if formatDetails.autoLinkMode == "relax":
             relaxList = formatDetails.wikiDocument.getAutoLinkRelaxInfo()
 
             def recursAutoLink(ast):
@@ -1550,7 +1550,7 @@ class _TheParser(object):
                         start = node.pos
                         
                         threadstop.testValidThread()
-                        while text != u"":
+                        while text != "":
                             # The foundWordText is the text as typed in the page
                             # foundWord is the word as entered in database
                             # These two may differ (esp. in whitespaces)
@@ -1574,7 +1574,7 @@ class _TheParser(object):
 
                             # Add token for text before found word (if any)
                             preText = text[:foundPos]
-                            if preText != u"":
+                            if preText != "":
                                 newAstNodes.append(buildSyntaxNode(preText,
                                         start, "plainText"))
                 
@@ -1687,7 +1687,7 @@ class _WikiLinkPath(object):
         if pageName is not None:
             # Handle wiki word as absolute link
             self.upwardCount = -1
-            self.components = pageName.split(u"/")
+            self.components = pageName.split("/")
             return
 
         if link is None:
@@ -1698,25 +1698,25 @@ class _WikiLinkPath(object):
             self.components = components
             return
         
-        if link == u".":
+        if link == ".":
             # Link to self
             self.upwardCount = 0
             self.components = []
             return
 
-        if link.startswith(u"//"):
+        if link.startswith("//"):
             self.upwardCount = -1
-            self.components = link[2:].split(u"/")
+            self.components = link[2:].split("/")
             return
         
-        if link.startswith(u"/"):
+        if link.startswith("/"):
             self.upwardCount = 0
-            self.components = link[1:].split(u"/")
+            self.components = link[1:].split("/")
             return
 
-        comps = link.split(u"/")
+        comps = link.split("/")
 
-        for i in xrange(0, len(comps)):
+        for i in range(0, len(comps)):
             if comps[i] != "..":
                 self.upwardCount = i + 1
                 self.components = comps[i:]
@@ -1769,25 +1769,25 @@ class _WikiLinkPath(object):
 
 
     def getLinkCore(self):
-        comps = u"/".join(self.components)
+        comps = "/".join(self.components)
         if self.upwardCount == -1:
-            return u"//" + comps
+            return "//" + comps
         elif self.upwardCount == 0:
-            return u"/" + comps
+            return "/" + comps
         elif self.upwardCount == 1:
             return comps
         else:
-            return u"/".join([u".."] * (self.upwardCount - 1)) + u"/" + comps
+            return "/".join([".."] * (self.upwardCount - 1)) + "/" + comps
 
 
     def resolveWikiWord(self, basePath):
         if self.isAbsolute():
             # Absolute is checked separately so basePath can be None if
             # self is absolute
-            return u"/".join(self.components)
+            return "/".join(self.components)
 
         absPath = basePath.joinTo(self)
-        return u"/".join(absPath.components)
+        return "/".join(absPath.components)
 
 
     def resolvePrefixSilenceAndWikiWordLink(self, basePath):
@@ -1801,32 +1801,32 @@ class _WikiLinkPath(object):
         If prefix is None autocompletion is not possible.
         """
         if self.isAbsolute():
-            return u"//", 0, self.resolveWikiWord(None)
+            return "//", 0, self.resolveWikiWord(None)
 
         assert basePath.isAbsolute()
         
         if len(self.components) == 0:
             # link path only consists of ".." -> autocompletion not possible
             if self.upwardCount == 0:
-                return None, None, u"/".join(basePath.components)
+                return None, None, "/".join(basePath.components)
 
-            return None, None, u"/".join(basePath.components[:-self.upwardCount])
+            return None, None, "/".join(basePath.components[:-self.upwardCount])
 
         if self.upwardCount == 0:
-            return u"/", len(basePath.resolveWikiWord(None)) + 1, \
-                    u"/".join(basePath.components + self.components)
+            return "/", len(basePath.resolveWikiWord(None)) + 1, \
+                    "/".join(basePath.components + self.components)
 
         def lenAddOne(s):
             return len(s) + 1 if s != "" else 0
 
         if self.upwardCount == 1:
-            return u"", \
-                    lenAddOne(u"/".join(basePath.components[:-1])), \
-                    u"/".join(basePath.components[:-1] + self.components)
+            return "", \
+                    lenAddOne("/".join(basePath.components[:-1])), \
+                    "/".join(basePath.components[:-1] + self.components)
 
-        return u"/".join([u".."] * (self.upwardCount - 1)) + u"/", \
-                lenAddOne(u"/".join(basePath.components[:-self.upwardCount])), \
-                u"/".join(basePath.components[:-self.upwardCount] +
+        return "/".join([".."] * (self.upwardCount - 1)) + "/", \
+                lenAddOne("/".join(basePath.components[:-self.upwardCount])), \
+                "/".join(basePath.components[:-self.upwardCount] +
                 self.components)
 
 
@@ -1840,7 +1840,7 @@ class _WikiLinkPath(object):
 
     @staticmethod
     def isAbsoluteLinkCore(linkCore):
-        return linkCore.startswith(u"//")
+        return linkCore.startswith("//")
 
 
     @staticmethod
@@ -1896,7 +1896,7 @@ class _WikiLinkPath(object):
 
 
 
-_RE_LINE_INDENT = re.compile(ur"^[ \t]*")
+_RE_LINE_INDENT = re.compile(r"^[ \t]*")
 
 class _TheHelper(object):
     @staticmethod
@@ -1917,7 +1917,7 @@ class _TheHelper(object):
         The function returns None IFF THE WORD IS VALID, an error string
         otherwise
         """
-        if settings is not None and settings.has_key("footnotesAsWws"):
+        if settings is not None and "footnotesAsWws" in settings:
             footnotesAsWws = settings["footnotesAsWws"]
         else:
             if wikiDocument is None:
@@ -1927,12 +1927,12 @@ class _TheHelper(object):
                         "main", "footnotes_as_wikiwords", False)
 
         if not footnotesAsWws and footnoteRE.match(word):
-            return _(u"This is a footnote")
+            return _("This is a footnote")
 
         if wikiPageNameRE.match(word):
             return None
         else:
-            return _(u"This is syntactically not a wiki word")
+            return _("This is syntactically not a wiki word")
 
 
     # TODO More descriptive error messages (which character(s) is/are wrong?)
@@ -1944,7 +1944,7 @@ class _TheHelper(object):
         The function returns None IFF THE WORD IS VALID, an error string
         otherwise
         """
-        if settings is not None and settings.has_key("footnotesAsWws"):
+        if settings is not None and "footnotesAsWws" in settings:
             footnotesAsWws = settings["footnotesAsWws"]
         else:
             if wikiDocument is None:
@@ -1954,12 +1954,12 @@ class _TheHelper(object):
                         "main", "footnotes_as_wikiwords", False)
 
         if not footnotesAsWws and footnoteRE.match(word):
-            return _(u"This is a footnote")
+            return _("This is a footnote")
 
         if wikiLinkCoreRE.match(word):
             return None
         else:
-            return _(u"This is syntactically not a wiki word")
+            return _("This is syntactically not a wiki word")
 
 
     @staticmethod
@@ -2009,11 +2009,11 @@ class _TheHelper(object):
             return linkPath.resolvePrefixSilenceAndWikiWordLink(None)
 
         if basePage is None:
-            return u"", 0, link  # TODO:  Better reaction?
+            return "", 0, link  # TODO:  Better reaction?
         
         basePageName = basePage.getWikiWord()
         if basePageName is None:
-            return u"", 0, link  # TODO:  Better reaction?
+            return "", 0, link  # TODO:  Better reaction?
         
         return linkPath.resolvePrefixSilenceAndWikiWordLink(_WikiLinkPath(
                 pageName=basePageName))
@@ -2062,11 +2062,11 @@ class _TheHelper(object):
         # Split into parts of contiguous alphanumeric characters
         parts = AutoLinkRelaxSplitRE.split(word)
         # Filter empty parts
-        parts = [p for p in parts if p != u""]
+        parts = [p for p in parts if p != ""]
 
         # Instead of original non-alphanum characters allow arbitrary
         # non-alphanum characters
-        pat = ur"\b" + (AutoLinkRelaxJoinPAT.join(parts)) + ur"\b"
+        pat = r"\b" + (AutoLinkRelaxJoinPAT.join(parts)) + r"\b"
         regex = re.compile(pat, AutoLinkRelaxJoinFlags)
 
         return regex
@@ -2089,7 +2089,7 @@ class _TheHelper(object):
         words.sort(key=lambda w: len(w), reverse=True)
         
         return [(_TheHelper._createAutoLinkRelaxWordEntryRE(w), w)
-                for w in words if w != u""]
+                for w in words if w != ""]
 
 
     @staticmethod
@@ -2134,7 +2134,7 @@ class _TheHelper(object):
         Create particularly stable links from a list of words which should be
         put on wikiPage.
         """
-        return u"\n".join([u"%s//%s%s" % (BracketStart, w, BracketEnd)
+        return "\n".join(["%s//%s%s" % (BracketStart, w, BracketEnd)
                 for w in words])
                 
 #     # For compatibility. TODO: Remove
@@ -2143,14 +2143,14 @@ class _TheHelper(object):
 
     @staticmethod
     def createWikiLinkFromText(text, bracketed=True):
-        text = text.replace(BracketStart, u"").replace(BracketEnd, u"")
-        while text.startswith(u"+"):
+        text = text.replace(BracketStart, "").replace(BracketEnd, "")
+        while text.startswith("+"):
             text = text[1:]
         
         text = text.strip()
 
         if len(text) == 0:
-            return u""
+            return ""
 
         text = text[0:1].upper() + text[1:]
         if bracketed:
@@ -2195,13 +2195,13 @@ class _TheHelper(object):
                 relative = False
             else:
                 if protocol == "wiki":
-                    url = u"wiki" + url  # Combines to "wikirel://"
+                    url = "wiki" + url  # Combines to "wikirel://"
 
         if not relative:
             if protocol == "wiki":
-                url = u"wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
+                url = "wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
             else:
-                url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
+                url = "file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
 
         if bracketed:
             url = BracketStart + url + BracketEnd
@@ -2215,7 +2215,7 @@ class _TheHelper(object):
         Build an attribute from key and value.
         TODO: Check for necessary escaping
         """
-        return u"%s%s: %s%s\n" % (BracketStart, key, value, BracketEnd)
+        return "%s%s: %s%s\n" % (BracketStart, key, value, BracketEnd)
         
 
     @staticmethod
@@ -2282,7 +2282,7 @@ class _TheHelper(object):
         # TODO Sort entries appropriately (whatever this means)
 
         wikiData = wikiDocument.getWikiData()
-        baseWordSegments = docPage.getWikiWord().split(u"/")
+        baseWordSegments = docPage.getWikiWord().split("/")
 
         mat2 = RevWikiWordRE2.match(rline)
         mat3 = RevAttributeValue.match(rline)
@@ -2294,7 +2294,7 @@ class _TheHelper(object):
             if closingBracket:
                 wordBracketEnd = BracketEnd
             else:
-                wordBracketEnd = u""
+                wordBracketEnd = ""
             
             backstep = len(tofind)
 
@@ -2316,9 +2316,8 @@ class _TheHelper(object):
             propkey = revStr(mat3.group(3))
             propfill = revStr(mat3.group(2))
             propvalpart = revStr(mat3.group(1))
-            values = filter(lambda pv: pv.startswith(propvalpart),
-                    wikiDocument.getDistinctAttributeValuesByKey(propkey,
-                    builtinAttribs))
+            values = [pv for pv in wikiDocument.getDistinctAttributeValuesByKey(propkey,
+                    builtinAttribs) if pv.startswith(propvalpart)]
 
             for v in values:
                 backStepMap[BracketStart + propkey +
@@ -2335,7 +2334,7 @@ class _TheHelper(object):
 
 #                 tdmat = ToDoREWithCapturing.match(td)
 #                 key = tdmat.group(1) + u":"
-                key = td + u":"
+                key = td + ":"
                 backStepMap[key] = len(tofind)
 
         mat = RevTodoValueRE.match(rline)
@@ -2371,7 +2370,7 @@ class _TheHelper(object):
                 # wikiWord isn't a wiki word
                 pass
 
-        acresult = backStepMap.keys()
+        acresult = list(backStepMap.keys())
         
         if len(acresult) > 0:
             # formatting.BracketEnd
@@ -2428,11 +2427,11 @@ class _TheHelper(object):
             if settings.get("autoBullets", False):
                 match = BulletRE.match(previousLine)
                 if match:
-                    if match.group("lastBullet") == u";":
+                    if match.group("lastBullet") == ";":
                         # Special case: Last bullet was definition term
                         # -> replace by definition data
                         editor.AddText( match.group("indentBullet") +
-                                match.group("preLastBullet") + u":" +
+                                match.group("preLastBullet") + ":" +
                                 match.group("lastBulletWhite") )
                     else:
                         editor.AddText(match.group(0))
@@ -2494,7 +2493,7 @@ class _TheHelper(object):
 
             # if the start of the para is a bullet the subIndent has to change
             if BulletRE.match(editor.GetLine(startLine)):
-                subIndent = indent + u"  "
+                subIndent = indent + "  "
 
             # get the text that will be wrapped
             indentedStartPos = startPos + editor.bytelenSct(indent)
@@ -2517,10 +2516,10 @@ class _TheHelper(object):
 
             if editor.isCharWrap():
                 lines = []
-                for s in xrange(0, len(text), wrapPosition):
+                for s in range(0, len(text), wrapPosition):
                     lines.append(text[s:s+wrapPosition])
                     
-                filledText = u"\n".join(lines)
+                filledText = "\n".join(lines)
             else:
                 filledText = fill(text, width=wrapPosition,
                         initial_indent=indent, 
@@ -2538,9 +2537,9 @@ class _TheHelper(object):
     @staticmethod 
     def handlePasteRawHtml(editor, rawHtml, settings):
         # Remove possible body end tags
-        rawHtml = rawHtml.replace(u"</body>", u"")
+        rawHtml = rawHtml.replace("</body>", "")
         if rawHtml:
-            editor.ReplaceSelection(u"<body>" + rawHtml + u"</body>")
+            editor.ReplaceSelection("<body>" + rawHtml + "</body>")
             return True
 
         return False
@@ -2569,18 +2568,18 @@ class _TheHelper(object):
             selAfterEnd -- Recommended after end of editor selection after replacement
         """
         if formatType == "bold":
-            return StringOps.styleSelection(text, start, afterEnd, u"'''")
+            return StringOps.styleSelection(text, start, afterEnd, "'''")
         elif formatType == "italics":
-            return StringOps.styleSelection(text, start, afterEnd, u"''")
+            return StringOps.styleSelection(text, start, afterEnd, "''")
         elif formatType == "plusHeading":
             level = settings.get("headingLevel", 1)
             ls = StringOps.findLineStart(text, start)
             le = StringOps.findLineEnd(text, start)
-            titleSurrounding = settings.get("titleSurrounding", u"")
+            titleSurrounding = settings.get("titleSurrounding", "")
             cursorShift = level + len(titleSurrounding)
 
-            return (u'=' * level + titleSurrounding + text[ls:le] +
-                    titleSurrounding + u'=' * level, ls, le,
+            return ('=' * level + titleSurrounding + text[ls:le] +
+                    titleSurrounding + '=' * level, ls, le,
                     start + cursorShift, start + cursorShift)
 
         return None
@@ -2591,7 +2590,7 @@ class _TheHelper(object):
         """
         Return default text of the "WikiSettings" page for a new wiki.
         """
-        return _(u"""== Wiki Settings ==
+        return _("""== Wiki Settings ==
 
 These are your default global settings.
 

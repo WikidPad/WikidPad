@@ -98,15 +98,15 @@ import time
 import types
 import warnings
 
-import auibar
-import auibook
-import tabmdi
-import dockart
-import tabart
+from . import auibar
+from . import auibook
+from . import tabmdi
+from . import dockart
+from . import tabart
 
-from aui_utilities import Clip, PaneCreateStippleBitmap, GetDockingImage, GetSlidingPoints
+from .aui_utilities import Clip, PaneCreateStippleBitmap, GetDockingImage, GetSlidingPoints
 
-from aui_constants import *
+from .aui_constants import *
 
 # Define this as a translation function
 _ = wx.GetTranslation
@@ -1048,9 +1048,9 @@ class AuiPaneInfo(object):
 
         if isinstance(arg1, wx.Size):
             ret = self.MinSize1(arg1)
-        elif isinstance(arg1, types.TupleType):
+        elif isinstance(arg1, tuple):
             ret = self.MinSize1(wx.Size(*arg1))
-        elif isinstance(arg1, types.IntType) and arg2 is not None:
+        elif isinstance(arg1, int) and arg2 is not None:
             ret = self.MinSize2(arg1, arg2)
         else:
             raise Exception("Invalid argument passed to `MinSize`: arg1=%s, arg2=%s"%(repr(arg1), repr(arg2)))
@@ -1092,9 +1092,9 @@ class AuiPaneInfo(object):
 
         if isinstance(arg1, wx.Size):
             ret = self.MaxSize1(arg1)
-        elif isinstance(arg1, types.TupleType):
+        elif isinstance(arg1, tuple):
             ret = self.MaxSize1(wx.Size(*arg1))
-        elif isinstance(arg1, types.IntType) and arg2 is not None:
+        elif isinstance(arg1, int) and arg2 is not None:
             ret = self.MaxSize2(arg1, arg2)
         else:
             raise Exception("Invalid argument passed to `MaxSize`: arg1=%s, arg2=%s"%(repr(arg1), repr(arg2)))
@@ -1138,9 +1138,9 @@ class AuiPaneInfo(object):
 
         if isinstance(arg1, wx.Size):
             ret = self.BestSize1(arg1)
-        elif isinstance(arg1, types.TupleType):
+        elif isinstance(arg1, tuple):
             ret = self.BestSize1(wx.Size(*arg1))
-        elif isinstance(arg1, types.IntType) and arg2 is not None:
+        elif isinstance(arg1, int) and arg2 is not None:
             ret = self.BestSize2(arg1, arg2)
         else:
             raise Exception("Invalid argument passed to `BestSize`: arg1=%s, arg2=%s"%(repr(arg1), repr(arg2)))
@@ -2031,7 +2031,7 @@ class AuiDockingGuideWindow(wx.Window):
         :param bool `vertical`: whether it is a vertical docking guide window or not.
         """
 
-        for i in xrange(0, length, 2):
+        for i in range(0, length, 2):
             dc.DrawPoint(point.x, point.y)
             if vertical:
                 point.y += 2
@@ -2144,7 +2144,7 @@ class AuiDockingGuideWindow(wx.Window):
 
         dc.SetPen(wx.Pen(colourIconArrow))
 
-        for i in xrange(4):
+        for i in range(4):
             pt1 = wx.Point(point.x - rx.x*i, point.y - rx.y*i)
             pt2 = wx.Point(point.x + rx.x*(i+1), point.y + rx.y*(i+1))
             dc.DrawLinePoint(pt1, pt2)
@@ -2741,7 +2741,7 @@ class AuiDockingHintWindow(wx.Frame):
         size = self.GetClientSize()
         region = wx.Region(0, 0, size.x, 1)
 
-        for y in xrange(size.y):
+        for y in range(size.y):
 
             # Reverse the order of the bottom 4 bits
             j = (y & 8 and [1] or [0])[0] | (y & 4 and [2] or [0])[0] | \
@@ -3478,10 +3478,10 @@ def CopyDocksAndPanes(src_docks, src_panes):
     dest_docks = src_docks
     dest_panes = src_panes
 
-    for ii in xrange(len(dest_docks)):
+    for ii in range(len(dest_docks)):
         dock = dest_docks[ii]
-        for jj in xrange(len(dock.panes)):
-            for kk in xrange(len(src_panes)):
+        for jj in range(len(dock.panes)):
+            for kk in range(len(src_panes)):
                 if dock.panes[jj] == src_panes[kk]:
                     dock.panes[jj] = dest_panes[kk]
 
@@ -3501,7 +3501,7 @@ def CopyDocksAndPanes2(src_docks, src_panes):
 
     dest_docks = []
 
-    for ii in xrange(len(src_docks)):
+    for ii in range(len(src_docks)):
         dest_docks.append(AuiDockInfo())
         dest_docks[ii].dock_direction = src_docks[ii].dock_direction
         dest_docks[ii].dock_layer = src_docks[ii].dock_layer
@@ -3516,7 +3516,7 @@ def CopyDocksAndPanes2(src_docks, src_panes):
 
     dest_panes = []
 
-    for ii in xrange(len(src_panes)):
+    for ii in range(len(src_panes)):
         dest_panes.append(AuiPaneInfo())
         dest_panes[ii].name = src_panes[ii].name
         dest_panes[ii].caption = src_panes[ii].caption
@@ -3542,10 +3542,10 @@ def CopyDocksAndPanes2(src_docks, src_panes):
         dest_panes[ii].minimize_mode = src_panes[ii].minimize_mode
         dest_panes[ii].minimize_target = src_panes[ii].minimize_target
 
-    for ii in xrange(len(dest_docks)):
+    for ii in range(len(dest_docks)):
         dock = dest_docks[ii]
-        for jj in xrange(len(dock.panes)):
-            for kk in xrange(len(src_panes)):
+        for jj in range(len(dock.panes)):
+            for kk in range(len(src_panes)):
                 if dock.panes[jj] == src_panes[kk]:
                     dock.panes[jj] = dest_panes[kk]
 
@@ -3602,7 +3602,7 @@ def DoInsertDockLayer(panes, dock_direction, dock_layer):
     :param integer `dock_layer`: the :class:`AuiDockInfo` layer to analyze.
     """
 
-    for ii in xrange(len(panes)):
+    for ii in range(len(panes)):
         pane = panes[ii]
         if not pane.IsFloating() and pane.dock_direction == dock_direction and pane.dock_layer >= dock_layer:
             pane.dock_layer = pane.dock_layer + 1
@@ -3643,7 +3643,7 @@ def DoInsertPane(panes, dock_direction, dock_layer, dock_row, dock_pos):
     :param integer `dock_pos`: the :class:`AuiDockInfo` position to analyze.
     """
 
-    for ii in xrange(len(panes)):
+    for ii in range(len(panes)):
         pane = panes[ii]
         if not pane.IsFloating() and pane.dock_direction == dock_direction and \
            pane.dock_layer == dock_layer and  pane.dock_row == dock_row and \
@@ -3825,7 +3825,7 @@ def RemovePaneFromDocks(docks, pane, exc=None):
     :param AuiPaneInfo `exc`: the possible pane exception.
     """
 
-    for ii in xrange(len(docks)):
+    for ii in range(len(docks)):
         d = docks[ii]
         if d == exc:
             continue
@@ -3847,10 +3847,10 @@ def RenumberDockRows(docks):
     :param `docks`: a list of :class:`AuiDockInfo` structures.
     """
 
-    for ii in xrange(len(docks)):
+    for ii in range(len(docks)):
         dock = docks[ii]
         dock.dock_row = ii
-        for jj in xrange(len(dock.panes)):
+        for jj in range(len(dock.panes)):
             dock.panes[jj].dock_row = ii
 
         docks[ii] = dock
@@ -4299,7 +4299,7 @@ class AuiManager(wx.EvtHandler):
         :param `item`: either a pane name or a :class:`Window`.
         """
 
-        if isinstance(item, basestring):
+        if isinstance(item, str):
             return self.GetPaneByName(item)
         else:
             return self.GetPaneByWidget(item)
@@ -4975,7 +4975,7 @@ class AuiManager(wx.EvtHandler):
                 # the DetachPane() call.  This prevets obscure crashes which would
                 # happen at window repaint if the caller forgets to call Update()
                 counter = 0
-                for pi in xrange(len(self._uiparts)):
+                for pi in range(len(self._uiparts)):
                     part = self._uiparts[counter]
                     if part.pane == p:
                         self._uiparts.pop(counter)
@@ -5531,7 +5531,7 @@ class AuiManager(wx.EvtHandler):
         pane_count = len(dock.panes)
 
         # find the pane marked as our action pane
-        for pane_i in xrange(pane_count):
+        for pane_i in range(pane_count):
             pane = dock.panes[pane_i]
             if pane.HasFlag(AuiPaneInfo.actionPane):
                 if action_pane != -1:
@@ -5574,7 +5574,7 @@ class AuiManager(wx.EvtHandler):
             return positions, sizes
 
         offset = 0
-        for pane_i in xrange(action_pane-1, -1, -1):
+        for pane_i in range(action_pane-1, -1, -1):
             amount = positions[pane_i+1] - (positions[pane_i] + sizes[pane_i])
             if amount >= 0:
                 offset += amount
@@ -5586,7 +5586,7 @@ class AuiManager(wx.EvtHandler):
         # if the dock mode is fixed, make sure none of the panes
         # overlap we will bump panes that overlap
         offset = 0
-        for pane_i in xrange(action_pane, pane_count):
+        for pane_i in range(action_pane, pane_count):
             amount = positions[pane_i] - offset
             if amount >= 0:
                 offset += amount
@@ -5660,7 +5660,7 @@ class AuiManager(wx.EvtHandler):
 
             # add pane buttons to the caption
             dummy_parts = []
-            for btn_id in xrange(len(pane.buttons)-1, -1, -1):
+            for btn_id in range(len(pane.buttons)-1, -1, -1):
                 sizer_item = caption_sizer.Add((caption_size, pane_button_size), 0, wx.EXPAND)
                 part = AuiDockUIPart()
                 part.type = AuiDockUIPart.typePaneButton
@@ -5832,7 +5832,7 @@ class AuiManager(wx.EvtHandler):
             pane_positions, pane_sizes = self.GetPanePositionsAndSizes(dock)
 
             offset = 0
-            for pane_i in xrange(pane_count):
+            for pane_i in range(pane_count):
 
                 pane = dock.panes[pane_i]
                 pane_pos = pane_positions[pane_i]
@@ -5879,7 +5879,7 @@ class AuiManager(wx.EvtHandler):
 
         else:
 
-            for pane_i in xrange(pane_count):
+            for pane_i in range(pane_count):
 
                 pane = dock.panes[pane_i]
 
@@ -6157,7 +6157,7 @@ class AuiManager(wx.EvtHandler):
             # reassign the dock_pos to the sequential 0, 1, 2, 3
             # e.g. remove gaps like 1, 2, 30, 500
             if not dock.fixed:
-                for jj in xrange(dock_pane_count):
+                for jj in range(dock_pane_count):
                     pane = dock.panes[jj]
                     pane.dock_pos = jj
 
@@ -6168,7 +6168,7 @@ class AuiManager(wx.EvtHandler):
             if dock.fixed and not action_pane_marked:
                 pane_positions, pane_sizes = self.GetPanePositionsAndSizes(dock)
                 offset = 0
-                for jj in xrange(dock_pane_count):
+                for jj in range(dock_pane_count):
                     pane = dock.panes[jj]
                     pane.dock_pos = pane_positions[jj]
                     amount = pane.dock_pos - offset
@@ -6194,7 +6194,7 @@ class AuiManager(wx.EvtHandler):
         max_layer = 0
         dock_count = len(docks)
 
-        for ii in xrange(dock_count):
+        for ii in range(dock_count):
             max_layer = max(max_layer, docks[ii].dock_layer)
 
         # clear out uiparts
@@ -6208,7 +6208,7 @@ class AuiManager(wx.EvtHandler):
         if oncheck:
             docks = self._docks
 
-        for layer in xrange(max_layer+1):
+        for layer in range(max_layer+1):
             # find any docks in this layer
             arr = FindDocks(docks, -1, layer, -1)
             # if there aren't any, skip to the next layer
@@ -6400,7 +6400,7 @@ class AuiManager(wx.EvtHandler):
 
         pane_count = len(self._panes)
 
-        for ii in xrange(pane_count):
+        for ii in range(pane_count):
             p = self._panes[ii]
             pFrame = p.frame
 
@@ -6503,7 +6503,7 @@ class AuiManager(wx.EvtHandler):
         # the new pane rectangles against the old rectangles that
         # we saved a few lines above here.  If the rectangles have
         # changed, the corresponding panes must also be updated
-        for ii in xrange(pane_count):
+        for ii in range(pane_count):
             p = self._panes[ii]
             if p.window and p.IsShown() and p.IsDocked():
                 if p.rect != old_pane_rects[ii]:
@@ -6535,7 +6535,7 @@ class AuiManager(wx.EvtHandler):
         extra_notebook = len(self._notebooks)
         max_notebook += 1
 
-        for i in xrange(extra_notebook, max_notebook):
+        for i in range(extra_notebook, max_notebook):
             self.CreateNotebook()
 
         # Remove pages from notebooks that no-longer belong there ...
@@ -6544,7 +6544,7 @@ class AuiManager(wx.EvtHandler):
             pageCounter, allPages = 0, pages
 
             # Check each tab ...
-            for page in xrange(pages):
+            for page in range(pages):
 
                 if page >= allPages:
                     break
@@ -6638,7 +6638,7 @@ class AuiManager(wx.EvtHandler):
                 # its current pane, and sort the list by pane.dock_pos
                 # order
                 pages_and_panes = []
-                for idx in reversed(range(pages)):
+                for idx in reversed(list(range(pages))):
                     page = notebook.GetPage(idx)
                     pane = self.GetPane(page)
                     pages_and_panes.append((page, pane))
@@ -6683,7 +6683,7 @@ class AuiManager(wx.EvtHandler):
             want_close = True
 
             pages = notebook.GetPageCount()
-            for page in xrange(pages):
+            for page in range(pages):
 
                 win = notebook.GetPage(page)
                 pane = self.GetPane(win)
@@ -6967,7 +6967,7 @@ class AuiManager(wx.EvtHandler):
         :param `dock`: a :class:`AuiDockInfo` instance.
         """
 
-        for layer in xrange(dock.dock_layer, -1, -1):
+        for layer in range(dock.dock_layer, -1, -1):
 
             bestDock = None
 
@@ -7725,7 +7725,7 @@ class AuiManager(wx.EvtHandler):
 
         # search the dock guides.
         # reverse order to handle the center first.
-        for i in xrange(len(self._guides)-1, -1, -1):
+        for i in range(len(self._guides)-1, -1, -1):
             guide = self._guides[i]
 
             # do hit testing on the guide
@@ -8255,7 +8255,7 @@ class AuiManager(wx.EvtHandler):
 
         # remove any pane already there which bears the same window
         # this happens when you are moving a pane around in a dock
-        for ii in xrange(len(panes)):
+        for ii in range(len(panes)):
             if panes[ii].window == pane_window:
                 docks = RemovePaneFromDocks(docks, panes[ii])
                 panes.pop(ii)
@@ -9915,7 +9915,7 @@ class AuiManager(wx.EvtHandler):
             dock = docks[0]
             pane_positions, pane_sizes = self.GetPanePositionsAndSizes(dock)
 
-            for i in xrange(len(dock.panes)):
+            for i in range(len(dock.panes)):
                 dock.panes[i].dock_pos = pane_positions[i]
 
         pane.state &= ~AuiPaneInfo.actionPane
@@ -10127,7 +10127,7 @@ class AuiManager(wx.EvtHandler):
                 target = paneInfo.name
 
             minimize_toolbar.AddSimpleTool(ID_RESTORE_FRAME, paneInfo.caption, restore_bitmap,
-                                           _(u"Restore %s")%paneInfo.caption, target=target)
+                                           _("Restore %s")%paneInfo.caption, target=target)
             minimize_toolbar.SetAuiManager(self)
             minimize_toolbar.Realize()
             toolpanelname = paneInfo.name + "_min"
@@ -10341,7 +10341,7 @@ class AuiManager(wx.EvtHandler):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.LIGHT_GREY_PEN)
 
-        for i in xrange(int(step)):
+        for i in range(int(step)):
             width, height = win_rect.width - i*wstep, win_rect.height - i*hstep
             x, y = xstart - i*xstep, ystart - i*ystep
             new_rect = wx.Rect(x, y, width, height)
@@ -10381,7 +10381,7 @@ class AuiManager(wx.EvtHandler):
         xstep = int((win_rect.x - hint_rect.x))/step
         ystep = int((win_rect.y - hint_rect.y))/step
 
-        for i in xrange(int(step)):
+        for i in range(int(step)):
             width, height = win_rect.width - i*wstep, win_rect.height - i*hstep
             x, y = xstart - i*xstep, ystart - i*ystep
             new_rect = wx.Rect(x, y, width, height)
@@ -10575,7 +10575,7 @@ class AuiManager(wx.EvtHandler):
         step = stopX/10
         window_size = 0
 
-        for i in xrange(0, stopX, step):
+        for i in range(0, stopX, step):
             window_size = i
             self._sliding_frame.SetDimensions(startX, startY, window_size, stopY)
             self._sliding_frame.Refresh()
@@ -10605,7 +10605,7 @@ class AuiManager(wx.EvtHandler):
         step = stopX/10
         window_size = 0
 
-        for i in xrange(stopX, 0, -step):
+        for i in range(stopX, 0, -step):
             window_size = i
             self._sliding_frame.SetDimensions(startX, startY, window_size, stopY)
             self._sliding_frame.Refresh()

@@ -78,16 +78,16 @@ class RenameWikiWordException(AppBaseException):
         """
         # TODO Move definition outside (attn to i18n)
         PROBLEM_HR_DICT = {
-                self.PRB_RENAME_TO_SAME: _(u"Multiple words rename to same word"),
-                self.PRB_TO_ALREADY_EXISTS: _(u"Word already exists")
+                self.PRB_RENAME_TO_SAME: _("Multiple words rename to same word"),
+                self.PRB_TO_ALREADY_EXISTS: _("Word already exists")
             }
 
         result = []
         for fromWikiWord, toWikiWord, problem in self.affectedRenames:
-            result.append(u"%s -> %s: %s" % (fromWikiWord, toWikiWord,
+            result.append("%s -> %s: %s" % (fromWikiWord, toWikiWord,
                     PROBLEM_HR_DICT[problem]))
         
-        return u"\n".join(result)
+        return "\n".join(result)
 
 
 

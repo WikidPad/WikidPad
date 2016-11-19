@@ -11,7 +11,7 @@ from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
 
 from pwiki.SystemInfo import isWindows
 
-from WikiWordListPopup import WikiWordListPopup
+from .WikiWordListPopup import WikiWordListPopup
 
 
 class TimePresentationBase:

@@ -41,11 +41,11 @@ __all__ = ["NodeList", "EmptyNodeList", "StringTypes", "defproperty"]
 import xml.dom
 
 try:
-    unicode
+    str
 except NameError:
     StringTypes = type(''),
 else:
-    StringTypes = type(''), type(unicode(''))
+    StringTypes = type(''), type(str(''))
 
 
 class NodeList(list):
@@ -100,7 +100,7 @@ class EmptyNodeList(tuple):
 
 
 def defproperty(klass, name, doc):
-    get = getattr(klass, ("_get_" + name)).im_func
+    get = getattr(klass, ("_get_" + name)).__func__
     def set(self, value, name=name):
         raise xml.dom.NoModificationAllowedErr(
             "attempt to modify read-only attribute " + repr(name))

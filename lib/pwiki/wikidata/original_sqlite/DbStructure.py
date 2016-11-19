@@ -586,7 +586,7 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
 
     # Build the sql command to create the table with new schema (needed later)
     sqlcreate = "create table %s (" % tablename
-    sqlcreate += ", ".join(map(lambda sc: "%s %s" % sc, schema))
+    sqlcreate += ", ".join(["%s %s" % sc for sc in schema])
     sqlcreate += ")"
     
 
@@ -616,7 +616,7 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
 
     # This statement would automatically issue a commit if auto commit is off
     connwrap.execSql("pragma table_info(%s)" % tablename)
-    oldcolumns = map(lambda r: r[1], connwrap.fetchall())
+    oldcolumns = [r[1] for r in connwrap.fetchall()]
     
     # Set autoCommit state back
     connwrap.getConnection().setAutoCommit(oldAc, silent=True)
@@ -663,12 +663,12 @@ def createWikiDB(wikiName, dataDir, overwrite=False, wikiDocument=None):
     
     if (wikiDocument is not None):
         dbPath = wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
-                    u"").strip()
+                    "").strip()
                     
-        if (dbPath == u""):
-            dbPath = u"wikiovw.sli"
+        if (dbPath == ""):
+            dbPath = "wikiovw.sli"
     else:
-        dbPath = u"wikiovw.sli"
+        dbPath = "wikiovw.sli"
 
     dbfile = join(dataDir, dbPath)
     if (not exists(pathEnc(dbfile)) or overwrite):
@@ -703,7 +703,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False, wikiDocument=None):
 
     else:
         raise WikiDBExistsException(
-                _(u"database already exists at location: %s") % dataDir)
+                _("database already exists at location: %s") % dataDir)
 
 
 def mbcsToUtf8(s):
@@ -761,7 +761,7 @@ def utf8_bind_fctfinder(stmt, parno, data):
     if type(data) is str:
         return bind_mbcsutftext
 
-    if type(data) is unicode:
+    if type(data) is str:
         return bind_utftext
             
     return sqlite.def_bind_fctfinder(stmt, parno, data)
@@ -833,7 +833,7 @@ def checkDatabaseFormat(connwrap):
 #     tables = map(string.upper, tables)
 
     if getSettingsValue(connwrap, "branchtag") != "WikidPad":
-        return 2, _(u"Database has unknown format branchtag='%s'") \
+        return 2, _("Database has unknown format branchtag='%s'") \
                 % getSettingsValue(connwrap, "branchtag")
 
     formatver = getSettingsInt(connwrap, "formatver")
@@ -842,14 +842,14 @@ def checkDatabaseFormat(connwrap):
     if writecompatver > VERSION_WRITECOMPAT:
         # TODO: Check compatibility
         
-        return 2, _(u"Database has unknown format version='%i'") \
+        return 2, _("Database has unknown format version='%i'") \
                 % formatver
                 
     if formatver < VERSION_DB:
-        return 1, _(u"Update needed, current format version='%i'") \
+        return 1, _("Update needed, current format version='%i'") \
                 % formatver
 
-    return 0, _(u"Database format is up to date")
+    return 0, _("Database format is up to date")
 
 
 def updateDatabase(connwrap, dataDir, pagefileSuffix):
@@ -899,7 +899,7 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         funcWords = []
         for w in allWords:
             w = w.decode("utf-8")
-            if w.startswith(u'['):
+            if w.startswith('['):
                 funcWords.append(w)
             else:
                 wikiWords.append(w)
@@ -924,16 +924,16 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
 
         # Move functional pages to new table "datablocksexternal" and rename them
         for funcWord in funcWords:
-            if funcWord not in (u"[TextBlocks]", u"[PWL]", u"[CCBlacklist]"):
+            if funcWord not in ("[TextBlocks]", "[PWL]", "[CCBlacklist]"):
                 continue # Error ?!
             
-            unifName = u"wiki/" + funcWord[1:-1]
+            unifName = "wiki/" + funcWord[1:-1]
             fullPath = join(dataDir, funcWord + pagefileSuffix)
             
-            icf = iterCompatibleFilename(unifName, u".data")
+            icf = iterCompatibleFilename(unifName, ".data")
             
             for i in range(10):  # Actual "while True", but that's too dangerous
-                newFilename = icf.next()
+                newFilename = next(icf)
                 newPath = join(dataDir, newFilename)
 
                 if exists(pathEnc(newPath)):

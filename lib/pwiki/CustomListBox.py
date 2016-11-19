@@ -1,6 +1,6 @@
 import wx 
 
-from wxHelper import copyTextToClipboard
+from .wxHelper import copyTextToClipboard
 
 class CustomListBox(wx.ListBox):
     """

@@ -1,6 +1,6 @@
 # from MiscEvent import KeyFunctionSink
 
-from DocPagePresenter import BasicDocPagePresenter
+from .DocPagePresenter import BasicDocPagePresenter
 
 
 class AbstractAction(object):
@@ -139,13 +139,13 @@ def _presenterClone(unifName, paramDict):
 
 
 _ACTIONS = (
-        SimpleAction("", u"action/presenter/this/subcontrol/textedit",
+        SimpleAction("", "action/presenter/this/subcontrol/textedit",
             _presenterToTextEdit),
-        SimpleAction("", u"action/presenter/new/foreground/end/page/this/subcontrol/textedit",
+        SimpleAction("", "action/presenter/new/foreground/end/page/this/subcontrol/textedit",
             _presenterToNewTextEdit),
-        SimpleAction("", u"action/presenter/this/close",
+        SimpleAction("", "action/presenter/this/close",
             _presenterClose),
-        SimpleAction("", u"action/presenter/this/clone",
+        SimpleAction("", "action/presenter/this/clone",
             _presenterClone)
     )
 
@@ -209,7 +209,7 @@ class UserActionCoord(object):
     def reactOnUserEvent(self, unifName, paramDict):
         actionUName, action = self.userEventActionMap.get(unifName)
         if action is not None:
-            if not paramDict.has_key("main control"):
+            if "main control" not in paramDict:
                 paramDict["main control"] = self.mainControl
 
             action.doAction(actionUName, paramDict)
@@ -218,7 +218,7 @@ class UserActionCoord(object):
     def runAction(self, actionUName, paramDict=None):
         if paramDict is None:
             paramDict = {"main control": self.mainControl}
-        elif not paramDict.has_key("main control"):
+        elif "main control" not in paramDict:
             paramDict["main control"] = self.mainControl
 
         for action in _ACTIONS:

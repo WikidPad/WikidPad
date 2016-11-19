@@ -3,7 +3,7 @@
 import codecs, new, types, traceback, sys, os, platform, re
 from ctypes import *
 
-import SqliteThin3 as _module
+from . import SqliteThin3 as _module
 
 
 # Error values
@@ -117,7 +117,7 @@ isoLatin1Decoder = codecs.getdecoder("iso-8859-1")
 
 
 def stdToUtf8(s):
-    if type(s) is unicode:
+    if type(s) is str:
         return utf8Encode(s)[0]
     else:
         return utf8Encode(isoLatin1Decoder(s)[0])[0]
@@ -131,7 +131,7 @@ def stdToUtf8(s):
 
 
 def utf8Enc(s):
-    if type(s) is unicode:
+    if type(s) is str:
         return utf8Encode(s)[0]
     else:
         return s
@@ -253,13 +253,13 @@ def bind_int64(stmt, parno, data):
 
 
 _AUTO_BIND_CONVERTS = {
-        types.StringType: "text",
-        types.UnicodeType: "text",
-        types.IntType: "int64",
-        types.LongType: "int64",
-        types.FloatType: "double",
-        types.NoneType: "null",
-        types.BufferType: "blob",
+        bytes: "text",
+        str: "text",
+        int: "int64",
+        int: "int64",
+        float: "double",
+        type(None): "null",
+        memoryview: "blob",
         Binary: "blob"
     }
 
@@ -340,13 +340,13 @@ for restype, fctname in (
         (c_char_p, "column_name") ):
 
 
-    exec """
+    exec("""
     
 def %s(stmt, col):
     "Retrieve a column"
     return _dll.sqlite3_%s(stmt._stmtpointer, c_int(col))  # .value ?
 
-""" % (fctname, fctname)
+""" % (fctname, fctname))
     
     
     getattr(_dll, "sqlite3_"+fctname).restype = restype
@@ -447,7 +447,7 @@ class _SqliteStatement3:
         """
         first=1  # TODO: as dict parameter
         
-        for i in xrange(first, len(datas)+first):
+        for i in range(first, len(datas)+first):
             self.bind_auto(i, datas[i-1], fctfinder)
 
 
@@ -492,13 +492,13 @@ class _SqliteStatement3:
         Retrieve all columns of a row as list
         """
         return [self.column_auto(col, fctfinder) \
-                for col in xrange(0, self.column_count())]
+                for col in range(0, self.column_count())]
 
     def column_hint_multi(self, hint):
         """
         hint -- List of the typefuncs as returned by column_typefuncs
         """
-        return [hint[col](self, col) for col in xrange(len(hint))]
+        return [hint[col](self, col) for col in range(len(hint))]
 
 
     def column_hint_multi_fast(self, hint, arr):
@@ -506,7 +506,7 @@ class _SqliteStatement3:
         hint -- List of the typefuncs as returned by column_typefuncs
         arr -- with length >= hint to use for result instead of creating a new one
         """
-        for col in xrange(len(hint)):
+        for col in range(len(hint)):
             arr[col] = hint[col](self, col)
             
         return arr
@@ -527,10 +527,10 @@ class _SqliteStatement3:
         """
         if fctfinder is None:
             return [AUTO_COLUMN_CONVERTS[self.column_type(col)] \
-                    for col in xrange(0, self.column_count())]
+                    for col in range(0, self.column_count())]
         else:
             return [fctfinder(self, col) \
-                    for col in xrange(0, self.column_count())]
+                    for col in range(0, self.column_count())]
         
     def column_type(self, col):
         return column_type(self, col)
@@ -553,7 +553,7 @@ class _SqliteStatement3:
         self.errhandler(_dll.sqlite3_reset(self._stmtpointer))
 
     def column_name_multi(self):
-        return [column_name(self, col) for col in xrange(0, self.column_count())]
+        return [column_name(self, col) for col in range(0, self.column_count())]
 
 
 
@@ -791,7 +791,7 @@ for restype, fctname in (
         ("c_int", "value_type") ):
 
 
-    exec """
+    exec("""
 
 def {1}(self):
     "Retrieve a value from a user-defined function"
@@ -803,7 +803,7 @@ del {1}
 
 _dll.sqlite3_{1}.restype = {0}
 
-""".format(restype, fctname)
+""".format(restype, fctname))
 
 
 # void (*xFunc)(sqlite3_context*,int,sqlite3_value**)
@@ -815,7 +815,7 @@ _dll.sqlite3_user_data.restype = c_void_p
 
 def _pyFuncCallback(contextptr, nValues, valueptrptr):
     realfunc = _sqliteTransObjects[_dll.sqlite3_user_data(c_void_p(contextptr))]
-    values = [_Value(valueptrptr[i]) for i in xrange(nValues)]
+    values = [_Value(valueptrptr[i]) for i in range(nValues)]
     # print "_pyFuncCallback", repr(realfunc), repr(values), id(realfunc), sys.getrefcount(realfunc)
     try:
         realfunc(_Context(contextptr), values)

@@ -1,6 +1,6 @@
 import re, traceback
 
-from WikiPyparsing import *
+from .WikiPyparsing import *
 
 
 # The specialized optimizer in WikiPyParsing can't handle automatic whitespace
@@ -27,7 +27,7 @@ def buildRegex(regex, resName=None, hideOnEmpty=False, name=None):
 
     return element
 
-stringEnd = buildRegex(ur"(?!.)", "stringEnd", name=u"end of string")
+stringEnd = buildRegex(r"(?!.)", "stringEnd", name="end of string")
 
 
 
@@ -87,7 +87,7 @@ def actionParameterTermOpt(s, l, st, t):
         t.parameterTerm = ptt.getText()
         return
 
-    t.parameterTerm = u""
+    t.parameterTerm = ""
 
 
 def actionAttributeTerm(s, l, st, t):
@@ -95,7 +95,7 @@ def actionAttributeTerm(s, l, st, t):
     
     ptt = t.findFlatByName("value")
     if ptt is None:
-        t.value = u""
+        t.value = ""
     else:
         t.value = ptt.parameterTerm
 
@@ -116,33 +116,33 @@ def actionTwoOpsLeft(s, l, st, t):
 
 
 
-whitespace = buildRegex(ur"[ \t]+")
+whitespace = buildRegex(r"[ \t]+")
 # whitespace = whitespace.setParseAction(actionHide)
 
-optWhitespace = buildRegex(ur"[ \t]*")
+optWhitespace = buildRegex(r"[ \t]*")
 # optWhitespace = optWhitespace.setParseAction(actionHide)
 
 whitespaceOrEnd = whitespace | stringEnd
 
 
-keyParenOpen = buildRegex(ur"\(", name=u"'('") + whitespaceOrEnd
-keyParenClose = buildRegex(ur"\)", name=u"')'") + whitespaceOrEnd
+keyParenOpen = buildRegex(r"\(", name="'('") + whitespaceOrEnd
+keyParenClose = buildRegex(r"\)", name="')'") + whitespaceOrEnd
 
-keyNot = buildRegex(ur"[nN][oO][tT]") + whitespaceOrEnd
-keyAnd = buildRegex(ur"[aA][nN][dD]") + whitespaceOrEnd
-keyOr = buildRegex(ur"[oO][rR]") + whitespaceOrEnd
+keyNot = buildRegex(r"[nN][oO][tT]") + whitespaceOrEnd
+keyAnd = buildRegex(r"[aA][nN][dD]") + whitespaceOrEnd
+keyOr = buildRegex(r"[oO][rR]") + whitespaceOrEnd
 # keyPrefixKey = buildRegex(ur"key:")
 # keyPrefixValue = buildRegex(ur"val(?:ue)?:")
-keyPrefixAtt = buildRegex(ur"att(?:r)?:")
-keyPrefixTodo = buildRegex(ur"todo:")
-keyPrefixPage = buildRegex(ur"page:")
+keyPrefixAtt = buildRegex(r"att(?:r)?:")
+keyPrefixTodo = buildRegex(r"todo:")
+keyPrefixPage = buildRegex(r"page:")
 
 
 keyWord = keyParenOpen | keyParenClose | keyNot | keyAnd | keyOr | \
         keyPrefixAtt | keyPrefixTodo | keyPrefixPage
 
 
-valueQuote = buildRegex(u"\"+|'+|/+", name=u"quoting")
+valueQuote = buildRegex("\"+|'+|/+", name="quoting")
 valueQuoteStart = valueQuote.copy().setParseAction(actionValueQuoteStart)
 valueQuoteEnd = valueQuote.copy().setParseAction(actionValueQuoteEnd)
 
@@ -151,49 +151,49 @@ quotedTerm = valueQuoteStart + FindFirst([], valueQuoteEnd)\
         whitespaceOrEnd
 
 
-nonQuotedTermSnippetNoColon = NotAny(keyWord) + buildRegex(ur"[^ \t:]*",
-        u"nonQuotedTermSnippetNoColon",
-        name=u"non whitespace search snippet without colon")
+nonQuotedTermSnippetNoColon = NotAny(keyWord) + buildRegex(r"[^ \t:]*",
+        "nonQuotedTermSnippetNoColon",
+        name="non whitespace search snippet without colon")
 
-nonQuotedTermSnippet = NotAny(keyWord) + buildRegex(ur"[^ \t]+",
-        u"nonQuotedTermSnippet", name=u"non whitespace search snippet")
+nonQuotedTermSnippet = NotAny(keyWord) + buildRegex(r"[^ \t]+",
+        "nonQuotedTermSnippet", name="non whitespace search snippet")
 nonQuotedTerm = OneOrMore(nonQuotedTermSnippet + whitespaceOrEnd)
 nonQuotedTerm = nonQuotedTerm.setParseAction(actionNonQuotedTerm)
 
 
-parameterTermOpt = quotedTerm | ( NotAny(keyWord) + buildRegex(ur"[^ \t:]*",
-        u"nonQuotedTermSnippetNoColon",
-        name=u"non whitespace regular expression without colon") )
+parameterTermOpt = quotedTerm | ( NotAny(keyWord) + buildRegex(r"[^ \t:]*",
+        "nonQuotedTermSnippetNoColon",
+        name="non whitespace regular expression without colon") )
 parameterTermOpt = parameterTermOpt.setResultsNameNoCopy("parameterTerm")\
         .setParseAction(actionParameterTermOpt)
 
 
-parameterTerm = quotedTerm | ( NotAny(keyWord) + buildRegex(ur"[^ \t:]+",
-        u"nonQuotedTermSnippetNoColon",
-        name=u"non whitespace regular expression without colon") )
+parameterTerm = quotedTerm | ( NotAny(keyWord) + buildRegex(r"[^ \t:]+",
+        "nonQuotedTermSnippetNoColon",
+        name="non whitespace regular expression without colon") )
 parameterTerm = parameterTerm.setResultsNameNoCopy("parameterTerm")\
         .setParseAction(actionParameterTermOpt)
 
 
-attributeTerm = keyPrefixAtt + buildRegex(ur" ?") + \
+attributeTerm = keyPrefixAtt + buildRegex(r" ?") + \
         parameterTermOpt.setResultsName("key") + optWhitespace + \
-        Optional( buildRegex(ur": ?") + 
+        Optional( buildRegex(r": ?") + 
         parameterTerm.setResultsName("value") + optWhitespace )
 
 attributeTerm = attributeTerm.setResultsNameNoCopy("attributeTerm")\
         .setParseAction(actionAttributeTerm)
 
 
-todoTerm = keyPrefixTodo + buildRegex(ur" ?") + \
+todoTerm = keyPrefixTodo + buildRegex(r" ?") + \
         parameterTermOpt.setResultsName("key") + optWhitespace + \
-        Optional( buildRegex(ur": ?") + 
+        Optional( buildRegex(r": ?") + 
         parameterTerm.setResultsName("value") + optWhitespace )
 
 todoTerm = todoTerm.setResultsNameNoCopy("todoTerm")\
         .setParseAction(actionAttributeTerm)
 
 
-pageTerm = keyPrefixPage + buildRegex(ur" ?") + \
+pageTerm = keyPrefixPage + buildRegex(r" ?") + \
         parameterTerm.setResultsName("pageName") + optWhitespace
 
 pageTerm = pageTerm.setResultsNameNoCopy("pageTerm")\

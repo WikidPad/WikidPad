@@ -23,25 +23,25 @@ def Empty(Set):
         return 0
 
 def get_elts(Set):
-    return Set.keys()
+    return list(Set.keys())
 
 def member(Elt,Set):
-    return Set.has_key(Elt)
+    return Elt in Set
 
 # in place mutators:
 # returns if no change otherwise 1
 
 def addMember(Elt,Set):
     change = 0
-    if not Set.has_key(Elt):
+    if Elt not in Set:
         Set[Elt] = 1
         change = 1
     return change
 
 def Augment(Set, OtherSet):
     change = 0
-    for Elt in OtherSet.keys():
-        if not Set.has_key(Elt):
+    for Elt in list(OtherSet.keys()):
+        if Elt not in Set:
             Set[Elt] = 1
             change = 1
     return change
@@ -49,8 +49,8 @@ def Augment(Set, OtherSet):
 
 def Mask(Set, OtherSet):
     change = 0
-    for Elt in OtherSet.keys():
-        if Set.has_key(Elt):
+    for Elt in list(OtherSet.keys()):
+        if Elt in Set:
             del Set[Elt]
             change = 1
     return change
@@ -59,15 +59,15 @@ def Mask(Set, OtherSet):
 
 def Intersection(Set1, Set2):
     Result = {}
-    for Elt in Set1.keys():
-        if Set2.has_key(Elt):
+    for Elt in list(Set1.keys()):
+        if Elt in Set2:
             Result[Elt] = 1
     return Result
 
 def Difference(Set1, Set2):
     Result = {}
-    for Elt in Set1.keys():
-        if not Set2.has_key(Elt):
+    for Elt in list(Set1.keys()):
+        if Elt not in Set2:
             Result[Elt] = 1
     return Result
 
@@ -79,8 +79,8 @@ def Union(Set1,Set2):
 
 def Subset(Set1,Set2):
     Result = 1
-    for Elt in Set1.keys():
-        if not Set2.has_key(Elt):
+    for Elt in list(Set1.keys()):
+        if Elt not in Set2:
             Result = 0
             return Result # nonlocal
     return Result
@@ -102,7 +102,7 @@ def NewDG(pairlist):
 
 def GetPairs(Graph):
     result = []
-    Sources = Graph.keys()
+    Sources = list(Graph.keys())
     for S in Sources:
         Dests = get_elts( Graph[S] )
         ThesePairs = [None] * len(Dests)
@@ -114,7 +114,7 @@ def GetPairs(Graph):
 
 def AddArc(Graph, Source, Dest):
     change = 0
-    if Graph.has_key(Source):
+    if Source in Graph:
         Adjacent = Graph[Source]
         if not member(Dest,Adjacent):
             addMember(Dest,Adjacent)
@@ -125,19 +125,19 @@ def AddArc(Graph, Source, Dest):
     return change
 
 def Neighbors(Graph,Source):
-    if Graph.has_key(Source):
+    if Source in Graph:
         return get_elts(Graph[Source])
     else:
         return []
 
 def HasArc(Graph, Source, Dest):
     result = 0
-    if Graph.has_key(Source) and member(Dest, Graph[Source]):
+    if Source in Graph and member(Dest, Graph[Source]):
         result = 1
     return result
 
 def Sources(Graph):
-    return Graph.keys()
+    return list(Graph.keys())
 
 # when G1, G2 and G3 are different graphs this results in
 #   G1 = G1 U ( G2 o G3 )
@@ -207,7 +207,7 @@ def BGadd(elt, B):
         cursor = oldlen
         B[OLD] = START
     if B[cursor] != None:
-        raise IndexError, "can't insert?"
+        raise IndexError("can't insert?")
     # add the elt
     B[cursor] = (elt,)
     B[NEW] = cursor
@@ -226,7 +226,7 @@ def BGgetdel(B):
         if cursor>=blen: cursor = START
         if cursor == B[OLD]: break # wrapped
     if B[cursor] == None:
-        raise IndexError, "delete from empty grabbag(?)"
+        raise IndexError("delete from empty grabbag(?)")
     # test to see if bag is empty (position cursor2 at nonempty slot)
     cursor2 = cursor+1
     if cursor2>=blen: cursor2 = START
@@ -244,8 +244,8 @@ def BGgetdel(B):
 
 def BGtest(n):
     B = NewBG()
-    rn = range(n)
-    rn2 = range(n-2)
+    rn = list(range(n))
+    rn2 = list(range(n-2))
     for i in rn:
         for j in rn:
             B = BGadd( (i,j), B)
@@ -253,7 +253,7 @@ def BGtest(n):
             x = BGgetdel(B)
         for j in rn2:
             y = BGgetdel(B)
-        print (i, x, y)
+        print((i, x, y))
     return B
 
 #

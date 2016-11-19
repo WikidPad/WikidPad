@@ -43,9 +43,9 @@ class SyntaxError(Exception):
 
 
 def usage(code, msg=''):
-    print >> sys.stderr, __doc__
+    print(__doc__, file=sys.stderr)
     if msg:
-        print >> sys.stderr, msg
+        print(msg, file=sys.stderr)
     sys.exit(code)
 
 
@@ -61,7 +61,7 @@ def usage(code, msg=''):
 def generate():
     "Return the generated output."
     global MESSAGES
-    keys = MESSAGES.keys()
+    keys = list(MESSAGES.keys())
     # the keys are sorted in the .mo file
     keys.sort()
     offsets = []
@@ -88,7 +88,7 @@ def generate():
         voffsets += [l2, o2+valuestart]
     offsets = koffsets + voffsets
     output = struct.pack("Iiiiiii",
-                         0x950412deL,       # Magic
+                         0x950412de,       # Magic
                          0,                 # Version
                          len(keys),         # # of entries
                          7*4,               # start of key index
@@ -116,13 +116,13 @@ def buildMessageDict(filename):
 
     try:
         lines = codecs.open(infile, "r", "utf-8").readlines()
-    except IOError, msg:
+    except IOError as msg:
 #         print >> sys.stderr, msg
         raise
         # sys.exit(1)
 
     # Strip BOM
-    if len(lines) > 0 and lines[0].startswith(u"\ufeff"):
+    if len(lines) > 0 and lines[0].startswith("\ufeff"):
         lines[0] = lines[0][1:]
 
     ID = 1
@@ -136,25 +136,25 @@ def buildMessageDict(filename):
     for l in lines:
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
-        if l[0] == u'#' and section == STR:
+        if l[0] == '#' and section == STR:
             add(msgid, msgstr, fuzzy)
             section = None
             fuzzy = 0
         # Record a fuzzy mark
-        if l[:2] == u'#,' and u'fuzzy' in l:
+        if l[:2] == '#,' and 'fuzzy' in l:
             fuzzy = 1
         # Skip comments
-        if l[0] == u'#':
+        if l[0] == '#':
             continue
         # Now we are in a msgid section, output previous section
-        if l.startswith(u'msgid'):
+        if l.startswith('msgid'):
             if section == STR:
                 add(msgid, msgstr, fuzzy)
             section = ID
             l = l[5:]
-            msgid = msgstr = u''
+            msgid = msgstr = ''
         # Now we are in a msgstr section
-        elif l.startswith(u'msgstr'):
+        elif l.startswith('msgstr'):
             section = STR
             l = l[6:]
         # Skip empty lines
@@ -172,9 +172,9 @@ def buildMessageDict(filename):
         elif section == STR:
             msgstr += l
         else:
-            print >> sys.stderr, 'Syntax error on %s:%d' % (infile, lno), \
-                  'before:'
-            print >> sys.stderr, l
+            print('Syntax error on %s:%d' % (infile, lno), \
+                  'before:', file=sys.stderr)
+            print(l, file=sys.stderr)
             raise SyntaxError('Syntax error on %s:%d' % (infile, lno) + 
                     ' before: ' + l)
             # sys.exit(1)
@@ -207,8 +207,8 @@ def make(filename, outfile):
 
     try:
         open(outfile,"wb").write(output)
-    except IOError,msg:
-        print >> sys.stderr, msg
+    except IOError as msg:
+        print(msg, file=sys.stderr)
 
 
 
@@ -216,7 +216,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hVo:',
                                    ['help', 'version', 'output-file='])
-    except getopt.error, msg:
+    except getopt.error as msg:
         usage(1, msg)
 
     outfile = None
@@ -225,14 +225,14 @@ def main():
         if opt in ('-h', '--help'):
             usage(0)
         elif opt in ('-V', '--version'):
-            print >> sys.stderr, "msgfmt.py", __version__
+            print("msgfmt.py", __version__, file=sys.stderr)
             sys.exit(0)
         elif opt in ('-o', '--output-file'):
             outfile = arg
     # do it
     if not args:
-        print >> sys.stderr, 'No input file given'
-        print >> sys.stderr, "Try `msgfmt --help' for more information."
+        print('No input file given', file=sys.stderr)
+        print("Try `msgfmt --help' for more information.", file=sys.stderr)
         return
 
     for filename in args:

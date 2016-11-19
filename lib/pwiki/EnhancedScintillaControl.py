@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
@@ -112,7 +112,7 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
 
     def Cut(self):
         self.Copy()
-        self.ReplaceSelection(u"")
+        self.ReplaceSelection("")
 
     def Copy(self):
         raise NotImplementedError

@@ -10,7 +10,7 @@
 
 
 
-import sys, os, traceback, os.path, glob, shutil, imp, warnings, ConfigParser
+import sys, os, traceback, os.path, glob, shutil, imp, warnings, configparser
 os.stat_float_times(True)
 
 if not hasattr(sys, 'frozen'):
@@ -26,16 +26,16 @@ from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 # imports VERSION_TUPLE for plugins which may expect it here
 from Consts import VERSION_STRING, VERSION_TUPLE
 
-import __builtin__
+import builtins
 
 # Dummies for localization
 def N_(s):
     return s
-__builtin__.N_ = N_
+builtins.N_ = N_
 del N_
 
 
-__builtin__._ = N_
+builtins._ = N_
 
 
 del __builtin__
@@ -64,7 +64,7 @@ def _putPathPrepends():
     and contains adjustments to the installation, namely additional
     ZIP-files to add to sys.path.
     """
-    parser = ConfigParser.RawConfigParser()
+    parser = configparser.RawConfigParser()
     try:
         f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                 "binInst.ini"), "rU")
@@ -75,14 +75,14 @@ def _putPathPrepends():
             for opt, val in parser.items("sysPathPrepend"):
                 sys.path.insert(0, os.path.join(os.path.dirname(
                         os.path.abspath(sys.argv[0])), val))
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             pass
 
         try:
             for opt, val in parser.items("sysPathAppend"):
                 sys.path.append(os.path.join(os.path.dirname(
                         os.path.abspath(sys.argv[0])), val))
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             pass
 
     except IOError:
@@ -209,15 +209,15 @@ class ErrorFrame(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, -1, title, size = (300, 200),
                 style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
-        dlg_m = wx.MessageDialog(self, _(u"Error starting WikidPad"),
-              _(u'Error!'), wx.OK)
+        dlg_m = wx.MessageDialog(self, _("Error starting WikidPad"),
+              _('Error!'), wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
         self.Close()
 
 class Error(wx.App):   
     def OnInit(self):
-        errorFrame = ErrorFrame(None, -1, _(u"Error"))
+        errorFrame = ErrorFrame(None, -1, _("Error"))
         self.SetTopWindow(errorFrame)
         return False
 
@@ -234,7 +234,7 @@ def main():
         app.MainLoop()
     #     srePersistent.saveCodeCache()
         
-    except Exception, e:
+    except Exception as e:
         traceback.print_exc()
         exception = e
         error = Error(0)

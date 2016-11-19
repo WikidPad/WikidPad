@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
@@ -11,7 +11,7 @@ from . import SystemInfo
 
 from . import wxHelper
 
-from EnhancedScintillaControl import EnhancedScintillaControl
+from .EnhancedScintillaControl import EnhancedScintillaControl
 
 
 # from wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
@@ -30,7 +30,7 @@ class SearchableScintillaControl(EnhancedScintillaControl):
         self.mainControl = mainControl
 
         self.incSearchCharStartPos = -1
-        self.searchStr = u""
+        self.searchStr = ""
 
 
     def getPresenter(self):

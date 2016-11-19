@@ -1,11 +1,11 @@
-from __future__ import with_statement
+
 
 # import profilehooks
 # profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
 from weakref import WeakValueDictionary
-import os, os.path, time, shutil, traceback, ConfigParser
+import os, os.path, time, shutil, traceback, configparser
 # from collections import deque
 
 import re
@@ -36,7 +36,7 @@ from ..SearchAndReplace import SearchReplaceOperation
 from .. import SpellChecker
 from .. import Trashcan
 
-import DbBackendUtils, FileStorage
+from . import DbBackendUtils, FileStorage
 
 # Some functions import parts of the whoosh library
 
@@ -67,12 +67,12 @@ def createWikiDb(pWiki, dbtype, wikiName, dataDir, overwrite=False):
     wdm = _openDocuments.get(dataDir)
     if wdm is not None:
         raise WikiDBExistsException(
-                _(u"Database exists already and is currently in use"))
+                _("Database exists already and is currently in use"))
 
     wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(dbtype)
     if wikiDataFactory is None:
         raise NoDbHandlerException(
-                _(u"Data handler %s not available") % dbtype)
+                _("Data handler %s not available") % dbtype)
 
     createWikiDbFunc(wikiName, dataDir, overwrite)
 
@@ -93,15 +93,15 @@ def openWikiDocument(wikiConfigFilename, dbtype=None, wikiLang=None,
     if wdm is not None:
         if dbtype is not None and dbtype != wdm.getDbtype():
             # Same database can't be opened twice with different db handlers
-            raise WrongDbHandlerException(_(u"Database is already in use "
-                    u'with database handler "%s". '
-                    u"Can't open with different handler.") %
+            raise WrongDbHandlerException(_("Database is already in use "
+                    'with database handler "%s". '
+                    "Can't open with different handler.") %
                     wdm.getDbtype())
 
         if wikiLang is not None and wikiLang != wdm.getWikiDefaultWikiLanguage():
-            raise WrongWikiLanguageException(_(u"Database is already in use "
-                    u'with wiki language handler "%s". '
-                    u"Can't open with different handler.") %
+            raise WrongWikiLanguageException(_("Database is already in use "
+                    'with wiki language handler "%s". '
+                    "Can't open with different handler.") %
                     wdm.getWikiDefaultWikiLanguage())
 
         wdm.incRefCount()
@@ -140,7 +140,7 @@ def splitConfigPathAndWord(wikiCombinedFilename):
     try:
         wikiConfig.loadConfig(wikiConfigFilename)
         return wikiConfigFilename, None
-    except ConfigParser.ParsingError, e:
+    except configparser.ParsingError as e:
         # try to recover by checking if the parent dir contains the real wiki file
         # if it does the current wiki file must be a wiki word file, so open the
         # real wiki to the wiki word.
@@ -174,7 +174,7 @@ def splitConfigPathAndWord(wikiCombinedFilename):
         # code PersonalWikiFrame.openWiki
         return wikiConfigFilename, None
 
-    except Exception, e:
+    except Exception as e:
         # Something else went wrong (file not present or not accessible)
         traceback.print_exc()
         return None, None
@@ -187,7 +187,7 @@ def getGlobalFuncPage(funcTag):
     if len(funcTag) == 0:
         return None  # TODO throw exception?
 
-    if not funcTag.startswith(u"global/"):
+    if not funcTag.startswith("global/"):
         return None  # TODO throw exception?
 
     value = _globalFuncPages.get(funcTag)
@@ -300,10 +300,10 @@ class WikiDataManager(MiscEventSourceMixin):
             createLock=True, recoveryMode=False):
         MiscEventSourceMixin.__init__(self)
 
-        self.lockFileName = wikiConfigFilename + u".lock"
+        self.lockFileName = wikiConfigFilename + ".lock"
         if not ignoreLock and os.path.exists(pathEnc(self.lockFileName)):
             raise LockedWikiException(
-                    _(u"Wiki is probably already in use by other instance"))
+                    _("Wiki is probably already in use by other instance"))
 
         if createLock:
             try:
@@ -325,9 +325,9 @@ class WikiDataManager(MiscEventSourceMixin):
 
         try:
             wikiConfig.loadConfig(wikiConfigFilename)
-        except ConfigParser.ParsingError, e:
+        except configparser.ParsingError as e:
             raise BadConfigurationFileException(
-                    _(u"Wiki configuration file is corrupted"))
+                    _("Wiki configuration file is corrupted"))
 
         # config variables
         wikiName = wikiConfig.get("main", "wiki_name")
@@ -337,7 +337,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if wikiName is None or dataDir is None:
             self._releaseLockFile()
             raise BadConfigurationFileException(
-                    _(u"Wiki configuration file is corrupted"))
+                    _("Wiki configuration file is corrupted"))
 
         # os.access does not answer reliably if file is writable
         # (at least on Windows), therefore we have to just open it
@@ -370,19 +370,19 @@ class WikiDataManager(MiscEventSourceMixin):
             # Probably old database version without handler tag
             self._releaseLockFile()
             raise UnknownDbHandlerException(
-                    _(u'No data handler information found, probably '
-                    u'"Original Gadfly" is right.'))
+                    _('No data handler information found, probably '
+                    '"Original Gadfly" is right.'))
 
         if not isDbHandlerAvailable(wikidhName):
             self._releaseLockFile()
             raise DbHandlerNotAvailableException(
-                    _(u'Required data handler "%s" unknown to WikidPad') % wikidhName)
+                    _('Required data handler "%s" unknown to WikidPad') % wikidhName)
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(wikidhName)
         if wikiDataFactory is None:
             self._releaseLockFile()
             raise NoDbHandlerException(
-                    _(u'Error on initializing data handler "%s"') % wikidhName)
+                    _('Error on initializing data handler "%s"') % wikidhName)
 
         if wikiLangName is None:
             wikiLangName = wikiConfig.get("main", "wiki_wikiLanguage",
@@ -393,7 +393,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if GetApp().getWikiLanguageDescription(wikiLangName) is None:
             self._releaseLockFile()
             raise UnknownWikiLanguageException(
-                    _(u'Required wiki language handler "%s" not available') %
+                    _('Required wiki language handler "%s" not available') %
                             wikiLangName)
 
         self.wikiLangName = wikiLangName
@@ -417,7 +417,7 @@ class WikiDataManager(MiscEventSourceMixin):
         
         if self.recoveryMode:
             if self.wikiData.checkCapability("recovery mode") is None:
-                raise WikiDataException(_(u"Recovery mode not supported"))
+                raise WikiDataException(_("Recovery mode not supported"))
 
         if not self.recoveryMode:
             self.wikiWideHistory.readOverview()
@@ -451,7 +451,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.wikiData.connect(recoveryMode=True)
             else:
                 self.wikiData.connect()
-        except DbWriteAccessError, e:
+        except DbWriteAccessError as e:
             traceback.print_exc()
             writeException = e
 
@@ -611,9 +611,9 @@ class WikiDataManager(MiscEventSourceMixin):
 
             # Invalidate all cached pages to prevent yet running threads from
             # using them
-            for page in self.wikiPageDict.values():
+            for page in list(self.wikiPageDict.values()):
                 page.invalidate()
-            for page in self.funcPageDict.values():
+            for page in list(self.funcPageDict.values()):
                 page.invalidate()
             
             wikiTempDir = self.getWikiTempDir()
@@ -684,7 +684,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def formatPageTitle(self, rawTitle, basePage=None):
         ptp = unescapeWithRe(self.getWikiConfig().get(
-                "main", "wikiPageTitlePrefix", u""))
+                "main", "wikiPageTitlePrefix", ""))
                 
         level = self.getWikiConfig().getint("main",
                 "wikiPageTitle_headingLevel", 0)
@@ -695,16 +695,16 @@ class WikiDataManager(MiscEventSourceMixin):
     
             info = langHelper.formatSelectedText(rawTitle,
                     0, len(rawTitle), "plusHeading",
-                    {"headingLevel": level, "titleSurrounding": u" "}) # TODO level
+                    {"headingLevel": level, "titleSurrounding": " "}) # TODO level
 
             if info is None:
-                return ptp + u" " + rawTitle
+                return ptp + " " + rawTitle
     
             replacement, repStart, repAfterEnd, selStart, selAfterEnd = info[:5]
             
             return ptp + rawTitle[:repStart] + replacement + rawTitle[repAfterEnd:]
         else:
-            return ptp + u" " + rawTitle
+            return ptp + " " + rawTitle
 
 
 
@@ -714,7 +714,7 @@ class WikiDataManager(MiscEventSourceMixin):
         By default, it is u"++ "
         """
         return unescapeWithRe(self.getWikiConfig().get(
-                "main", "wikiPageTitlePrefix", u"++"))
+                "main", "wikiPageTitlePrefix", "++"))
 
     def getWikiTempDir(self):
 #         if GetApp().getGlobalConfig().getboolean("main", "tempFiles_inWikiDir",
@@ -820,11 +820,11 @@ class WikiDataManager(MiscEventSourceMixin):
         Convert a relative or absolute file URL to an absolute path.
         Returns None if fileurl isn't "file:" or "rel:" protocol
         """
-        if fileurl.startswith(u"rel://"):
+        if fileurl.startswith("rel://"):
             relpath = pathnameFromUrl(fileurl[6:], False)
             return os.path.abspath(os.path.join(os.path.dirname(
                     self.getWikiConfigPath()), relpath))
-        elif fileurl.startswith(u"file:"):
+        elif fileurl.startswith("file:"):
             return os.path.abspath(pathnameFromUrl(fileurl))
         else:
             return None
@@ -836,19 +836,19 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         relurl, add = StringOps.decomposeUrlQsFrag(relurl)
         
-        if relurl.startswith(u"rel://"):
+        if relurl.startswith("rel://"):
             relpath = pathnameFromUrl(relurl[6:], False)
 
-            url = u"file:" + urlFromPathname(
+            url = "file:" + urlFromPathname(
                     os.path.abspath(os.path.join(os.path.dirname(
                             self.getWikiConfigPath()), relpath)), addSafe=addSafe)
 
 #             return url
             return StringOps.composeUrlQsFrag(url, add)
-        elif relurl.startswith(u"wikirel://"):
+        elif relurl.startswith("wikirel://"):
             relpath = pathnameFromUrl(relurl[10:], False)
 
-            url = u"wiki:" + urlFromPathname(
+            url = "wiki:" + urlFromPathname(
                     os.path.abspath(os.path.join(os.path.dirname(
                             self.getWikiConfigPath()), relpath)), addSafe=addSafe)
 
@@ -871,7 +871,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if relPath is None:
             return None
 
-        return u"rel://" + urlFromPathname(relPath, addSafe=addSafe)
+        return "rel://" + urlFromPathname(relPath, addSafe=addSafe)
 
 
     def makeAbsUrlRelative(self, url, addSafe=''):
@@ -881,18 +881,18 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         link, add = StringOps.decomposeUrlQsFrag(url)
 
-        if link.startswith(u"file:"):
+        if link.startswith("file:"):
             link = self.makeAbsPathRelUrl(StringOps.pathnameFromUrl(
                     link), addSafe=addSafe)
             if link is None:
                 return None  # Error message?
-        elif link.startswith(u"wiki:"):
+        elif link.startswith("wiki:"):
             link = self.makeAbsPathRelUrl(StringOps.pathnameFromUrl(
                     link), addSafe=addSafe)
             if link is None:
                 return None  # Error message?
             else:
-                link = u"wiki" + link  # Combines to "wikirel://"
+                link = "wiki" + link  # Combines to "wikirel://"
         else:
             return None  # Error message?
             
@@ -1043,7 +1043,7 @@ class WikiDataManager(MiscEventSourceMixin):
         with self.pageRetrievingLock:
             if not self.isDefinedWikiLinkTerm(wikiWord):
                 raise WikiWordNotFoundException(
-                        _(u"Word '%s' not in wiki") % wikiWord)
+                        _("Word '%s' not in wiki") % wikiWord)
     
             return self.getWikiPageNoError(wikiWord)
 
@@ -1143,7 +1143,7 @@ class WikiDataManager(MiscEventSourceMixin):
         global _globalFuncPages
 
         with self.pageRetrievingLock:
-            if funcTag.startswith(u"global/"):
+            if funcTag.startswith("global/"):
                 value = getGlobalFuncPage(funcTag)
             else:
                 value = self.funcPageDict.get(funcTag)
@@ -1200,7 +1200,7 @@ class WikiDataManager(MiscEventSourceMixin):
         This works also with wiki pages (unified name starting with "wikipage/")
         but does not return aliases in this case
         """
-        if unifName.startswith(u"wikipage/"):
+        if unifName.startswith("wikipage/"):
             return self.isDefinedWikiPageName(unifName[9:])
             
         # TODO Create native method in WikiData classes
@@ -1349,7 +1349,7 @@ class WikiDataManager(MiscEventSourceMixin):
             #   Some of them are essential to find anything or to follow
             #   links.
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update basic link info"))
+                progresshandler.update(step, _("Update basic link info"))
                 wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                 if isinstance(wikiPage, AliasWikiPage):
                     # This should never be an alias page, so fetch the
@@ -1365,7 +1365,7 @@ class WikiDataManager(MiscEventSourceMixin):
             self.getWikiData().setDbSettingsValue(
                     "syncWikiWordMatchtermsUpToDate", "1")
             
-            progresshandler.update(step, _(u"Starting update thread"))
+            progresshandler.update(step, _("Starting update thread"))
 
             self.getWikiData().fullyResetMetaDataState()
             self.pushDirtyMetaDataUpdate()
@@ -1438,7 +1438,7 @@ class WikiDataManager(MiscEventSourceMixin):
             #   Some of them are essential to find anything or to follow
             #   links.
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update basic link info"))
+                progresshandler.update(step, _("Update basic link info"))
                 wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                 if isinstance(wikiPage, AliasWikiPage):
                     # This should never be an alias page, so fetch the
@@ -1458,7 +1458,7 @@ class WikiDataManager(MiscEventSourceMixin):
             #   define how the rest has to be interpreted, therefore they
             #   must be processed first.
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update attributes of %s") %
+                progresshandler.update(step, _("Update attributes of %s") %
                         wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
@@ -1482,7 +1482,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
             # Step three: update the rest of the syntax (todos, relations)
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update syntax of %s") % wikiWord)
+                progresshandler.update(step, _("Update syntax of %s") % wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
@@ -1503,7 +1503,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if self.isSearchIndexEnabled():
                 # Step four: update index
                 for wikiWord in wikiWords:
-                    progresshandler.update(step, _(u"Update index of %s") % wikiWord)
+                    progresshandler.update(step, _("Update index of %s") % wikiWord)
                     try:
                         wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                         if isinstance(wikiPage, AliasWikiPage):
@@ -1523,7 +1523,7 @@ class WikiDataManager(MiscEventSourceMixin):
  
                     step += 1
 
-            progresshandler.update(step - 1, _(u"Final cleanup"))
+            progresshandler.update(step - 1, _("Final cleanup"))
             # Give possibility to do further reorganisation
             # specific to database backend
             self.getWikiData().cleanupAfterRebuild(progresshandler)
@@ -1539,7 +1539,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def getWikiWordSubpages(self, wikiWord):
         return self.getWikiData().getDefinedWikiPageNamesStartingWith(
-                wikiWord + u"/")
+                wikiWord + "/")
 
 
     def buildRenameSeqWithSubpages(self, fromWikiWord, toWikiWord):
@@ -1557,7 +1557,7 @@ class WikiDataManager(MiscEventSourceMixin):
         errMsg = langHelper.checkForInvalidWikiWord(toWikiWord, self)
 
         if errMsg:
-            raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") %
+            raise WikiDataException(_("'%s' is an invalid wiki word. %s") %
                     (toWikiWord, errMsg))
 
         # Build dictionary of renames
@@ -1576,7 +1576,7 @@ class WikiDataManager(MiscEventSourceMixin):
         toSet = set()
         sameToSet = set()
         
-        for key, value in renameDict.iteritems():
+        for key, value in renameDict.items():
             if self.isDefinedWikiPageName(value):
                 errorRenames.append((key, value,
                         RenameWikiWordException.PRB_TO_ALREADY_EXISTS))
@@ -1591,13 +1591,13 @@ class WikiDataManager(MiscEventSourceMixin):
             # List which ones
             errorRenames += [(key, value,
                     RenameWikiWordException.PRB_RENAME_TO_SAME)
-                    for key, value in renameDict.iteritems()
+                    for key, value in renameDict.items()
                     if value in sameToSet]
 
         if errorRenames:
             raise RenameWikiWordException(errorRenames)
 
-        return renameDict.items()
+        return list(renameDict.items())
 
 
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
@@ -1613,12 +1613,12 @@ class WikiDataManager(MiscEventSourceMixin):
         errMsg = langHelper.checkForInvalidWikiWord(toWikiWord, self)
 
         if errMsg:
-            raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") %
+            raise WikiDataException(_("'%s' is an invalid wiki word. %s") %
                     (toWikiWord, errMsg))
 
         if self.isDefinedWikiLinkTerm(toWikiWord):
             raise WikiDataException(
-                    _(u"Cannot rename '%s' to '%s', '%s' already exists") %
+                    _("Cannot rename '%s' to '%s', '%s' already exists") %
                     (wikiWord, toWikiWord, toWikiWord))
 
         try:
@@ -1637,7 +1637,7 @@ class WikiDataManager(MiscEventSourceMixin):
         wikiWordTitle = self.getWikiPageTitle(wikiWord)
         
         if wikiWordTitle is not None:
-            prevTitle = self.formatPageTitle(wikiWordTitle) + u"\n"
+            prevTitle = self.formatPageTitle(wikiWordTitle) + "\n"
         else:
             prevTitle = None
 
@@ -1655,7 +1655,7 @@ class WikiDataManager(MiscEventSourceMixin):
             # Rename config file
             renamedConfigPath = os.path.join(
                     os.path.dirname(wikiConfigPath),
-                    u"%s.wiki" % toWikiWord)
+                    "%s.wiki" % toWikiWord)
             os.rename(wikiConfigPath, renamedConfigPath)
 
             # Load it again
@@ -1677,7 +1677,7 @@ class WikiDataManager(MiscEventSourceMixin):
             sarOp.wikiWide = True
             sarOp.wildCard = 'regex'
             sarOp.caseSensitive = True
-            sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
+            sarOp.searchStr = r"\b" + re.escape(wikiWord) + r"\b"
             
             for resultWord in self.searchWiki(sarOp):
                 wikiPage = self.getWikiPage(resultWord)
@@ -1717,7 +1717,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if prevTitle is not None and content.startswith(prevTitle):
             # Replace previous title with new one
             content = self.formatPageTitle(self.getWikiPageTitle(toWikiWord)) + \
-                    u"\n" + content[len(prevTitle):]
+                    "\n" + content[len(prevTitle):]
             page.replaceLiveText(content)
 
         page.initiateUpdate()
@@ -1741,10 +1741,10 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.autoLinkRelaxInfo
 
 
-    _TITLE_SPLIT_RE1 = re.compile(ur"([" + StringOps.UPPERCASE + ur"]+)" + 
-            ur"([" + StringOps.UPPERCASE + ur"][" + StringOps.LOWERCASE + ur"])")
-    _TITLE_SPLIT_RE2 = re.compile(ur"([" + StringOps.LOWERCASE + ur"])" +
-            ur"([" + StringOps.UPPERCASE + ur"])")
+    _TITLE_SPLIT_RE1 = re.compile(r"([" + StringOps.UPPERCASE + r"]+)" + 
+            r"([" + StringOps.UPPERCASE + r"][" + StringOps.LOWERCASE + r"])")
+    _TITLE_SPLIT_RE2 = re.compile(r"([" + StringOps.LOWERCASE + r"])" +
+            r"([" + StringOps.UPPERCASE + r"])")
 
 
     def getWikiPageTitle(self, wikiWord):
@@ -1766,8 +1766,8 @@ class WikiDataManager(MiscEventSourceMixin):
 #                     r'\1 \2', wikiWord)
 #             title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2',
 #                     title)
-            title = self._TITLE_SPLIT_RE1.sub(ur'\1 \2', wikiWord)
-            title = self._TITLE_SPLIT_RE2.sub(ur'\1 \2', title)
+            title = self._TITLE_SPLIT_RE1.sub(r'\1 \2', wikiWord)
+            title = self._TITLE_SPLIT_RE2.sub(r'\1 \2', title)
             return title
         else:  # creaMode == 2: No title at all.
             return None
@@ -1789,7 +1789,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 exclusionSet = set()
                 preResultSet = set()
                 
-                for k in self.wikiPageDict.keys():
+                for k in list(self.wikiPageDict.keys()):
                     wikiPage = self.wikiPageDict.get(k)
                     if wikiPage is None:
                         continue
@@ -1834,7 +1834,7 @@ class WikiDataManager(MiscEventSourceMixin):
             resultList = s.search(q, limit=None)
             
             result = [rd["unifName"][9:] for rd in resultList
-                    if rd["unifName"].startswith(u"wikipage/")]
+                    if rd["unifName"].startswith("wikipage/")]
             
             threadstop.testValidThread()
             return result
@@ -1898,7 +1898,7 @@ class WikiDataManager(MiscEventSourceMixin):
             # Warning!!! rmtree() is very dangerous, don't make a mistake here!
             shutil.rmtree(indexPath, ignore_errors=True)
 
-        self.getWikiConfig().set("main", "indexSearch_formatNo", u"0")
+        self.getWikiConfig().set("main", "indexSearch_formatNo", "0")
 
 
     def getSearchIndex(self, clear=False):
@@ -1926,7 +1926,7 @@ class WikiDataManager(MiscEventSourceMixin):
             self.whooshIndex = whoosh.index.open_dir(indexPath)
             
             self.getWikiConfig().set("main", "indexSearch_formatNo",
-                    unicode(Consts.SEARCHINDEX_FORMAT_NO))
+                    str(Consts.SEARCHINDEX_FORMAT_NO))
 
         self.whooshIndex = self.whooshIndex.refresh()
 
@@ -2003,16 +2003,16 @@ class WikiDataManager(MiscEventSourceMixin):
         default formatting details if a concrete wiki page is not available.
         """
         withCamelCase = strToBool(self.getGlobalAttributeValue(
-                u"camelCaseWordsEnabled", True))
+                "camelCaseWordsEnabled", True))
 
 #         footnotesAsWws = self.getWikiConfig().getboolean(
 #                 "main", "footnotes_as_wikiwords", False)
 
         autoLinkMode = self.getGlobalAttributeValue(
-                u"auto_link", u"off").lower()
+                "auto_link", "off").lower()
 
         paragraphMode = strToBool(self.getGlobalAttributeValue(
-                u"paragraph_mode", False))
+                "paragraph_mode", False))
 
         langHelper = GetApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
@@ -2042,7 +2042,7 @@ class WikiDataManager(MiscEventSourceMixin):
 #                 footnotesAsWws=False,
                 wikiDocument=None,
                 basePage=None,
-                autoLinkMode=u"off",
+                autoLinkMode="off",
                 paragraphMode=False
                 )
 
@@ -2207,7 +2207,7 @@ class WikiDataManager(MiscEventSourceMixin):
         Attribute itself must not contain the "global." prefix
         """
         return self.getWikiData().getGlobalAttributes().get(
-                u"global." + attribute, default)
+                "global." + attribute, default)
         
 
     def reconnect(self):
@@ -2231,7 +2231,7 @@ class WikiDataManager(MiscEventSourceMixin):
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self.dbtype)
         if wikiDataFactory is None:
             raise NoDbHandlerException(
-                    _(u"Data handler %s not available") % self.dbtype)
+                    _("Data handler %s not available") % self.dbtype)
 
         self.ensureWikiTempDir()
         wikiData = wikiDataFactory(self, self.dataDir, self.getWikiTempDir())
@@ -2310,19 +2310,19 @@ class WikiDataManager(MiscEventSourceMixin):
         Handle misc events from DocPages
         """
         if miscevt.getSource() is self.wikiConfiguration:
-            if miscevt.has_key("changed configuration"):
+            if "changed configuration" in miscevt:
                 attrs = miscevt.getProps().copy()
                 attrs["changed wiki configuration"] = True
                 self._handleWikiConfigurationChanged(miscevt)
                 self.fireMiscEventProps(attrs)
         elif miscevt.getSource() is GetApp():
-            if miscevt.has_key("reread cc blacklist needed"):
+            if "reread cc blacklist needed" in miscevt:
                 self._updateCcWordBlacklist()
-            elif miscevt.has_key("reread ncc blacklist needed"):
+            elif "reread ncc blacklist needed" in miscevt:
                 self._updateNccWordBlacklist()
-            elif miscevt.has_key("pause background threads"):
+            elif "pause background threads" in miscevt:
                 self.updateExecutor.pause()
-            elif miscevt.has_key("resume background threads"):
+            elif "resume background threads" in miscevt:
                 self.updateExecutor.start()
         elif isinstance(miscevt.getSource(), DocPage):
             # These messages come from (classes derived from) DocPage,
@@ -2336,28 +2336,28 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.fireMiscEventProps(attrs)
                 miscevt.getSource().queueRemoveFromSearchIndex()  # TODO: Check for possible failure!!!
                 # TODO: Add new on rename
-            elif miscevt.has_key("updated wiki page"):
+            elif "updated wiki page" in miscevt:
                 self.autoLinkRelaxInfo = None
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
 #                 miscevt.getSource().putIntoSearchIndex()
-            elif miscevt.has_key("saving new wiki page"):            
+            elif "saving new wiki page" in miscevt:            
                 self.autoLinkRelaxInfo = None
 #                 miscevt.getSource().putIntoSearchIndex()
-            elif miscevt.has_key("reread cc blacklist needed"):
+            elif "reread cc blacklist needed" in miscevt:
                 self._updateCcWordBlacklist()
 
                 attrs = miscevt.getProps().copy()
                 attrs["funcPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-            elif miscevt.has_key("reread ncc blacklist needed"):
+            elif "reread ncc blacklist needed" in miscevt:
                 self._updateNccWordBlacklist()
 
                 attrs = miscevt.getProps().copy()
                 attrs["funcPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-            elif miscevt.has_key("updated func page"):
+            elif "updated func page" in miscevt:
                 # This was send from a FuncPage object, send it again
                 # The event also contains more specific information
                 # handled by PersonalWikiFrame
@@ -2365,7 +2365,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs["funcPage"] = miscevt.getSource()
 
                 self.fireMiscEventProps(attrs)
-            elif miscevt.has_key("visited doc page"):
+            elif "visited doc page" in miscevt:
                 attrs = miscevt.getProps().copy()
                 attrs["docPage"] = miscevt.getSource()
 

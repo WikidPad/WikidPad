@@ -6,7 +6,7 @@ Plugin to implement default printing methods plain text and HTML
 
 import re, traceback
 
-import cStringIO as StringIO
+import io as StringIO
 
 import wx
 
@@ -39,7 +39,7 @@ def describePrintsV01(mainControl):
 
 
 
-_CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
+_CUT_RE = re.compile(r"\n|\f| +|[^ \n\f]+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -60,7 +60,7 @@ class PlainTextPrint:
         mainControl -- PersonalWikiFrame object
         """
         return (
-            ("plain_text", u'Plain text'),
+            ("plain_text", 'Plain text'),
             )
 
     def getAddOptPanelsForTypes(self, guiparent, printTypes):
@@ -76,7 +76,7 @@ class PlainTextPrint:
         them weren't requested. Panel objects must not be shared by different
         print classes.
         """
-        if not u"plain_text" in printTypes:
+        if not "plain_text" in printTypes:
             return ()
 
         res = wx.xrc.XmlResource.Get()
@@ -108,7 +108,7 @@ class PlainTextPrint:
                 OnChoosePlainTextFont)
 
         return (
-            (u"plain_text", panel),
+            ("plain_text", panel),
             )
 
 
@@ -172,7 +172,7 @@ class PlainTextPrint:
         def getTextFromWord(word):
             return self.wikiDocument.getWikiPage(word).getLiveText()
 
-        contents = map(getTextFromWord, self.wordList)
+        contents = list(map(getTextFromWord, self.wordList))
         # Ensure that each wiki word content ends with newline
         for i, c in enumerate(contents):
             if len(c) > 0 and c[-1] != "\n":
@@ -196,7 +196,7 @@ class PlainTextPrint:
         try:
             self.separator = unescapeWithRe(addopt[1])
         except:
-            self.separator = u"\n\n\n\n"   # TODO Error message?
+            self.separator = "\n\n\n\n"   # TODO Error message?
 
 
     def doPrint(self, printer, wikiDocument, wordList, printType, addopt):
@@ -246,7 +246,7 @@ class PlainTextPrint:
 
         preview = wx.PrintPreview(printout, printout2, pddata)
 
-        frame = wx.PreviewFrame(preview, self.mainControl, _(u"Print Preview"),
+        frame = wx.PreviewFrame(preview, self.mainControl, _("Print Preview"),
                 style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
 
         frame.Initialize()
@@ -259,12 +259,12 @@ class PlainTextPrint:
 
 
 class PlainTextPrintout(wx.Printout):
-    def __init__(self, text, printer, addOpt, title=_(u"Printout")):
+    def __init__(self, text, printer, addOpt, title=_("Printout")):
         wx.Printout.__init__(self, title)
 
         self.mm2logUnitsFactor = None
         self.printer = printer
-        self.text = text.replace(u"\t", u"    ")  # TODO Better and configurable
+        self.text = text.replace("\t", "    ")  # TODO Better and configurable
         self.psddata = self.printer.getPageSetupDialogData()
         self.pageCharStartIndex = [0, 0] # For each page number, store the begin in text
         self.cuttedText = None
@@ -408,7 +408,7 @@ class PlainTextPrintout(wx.Printout):
             cuttedText = _CUT_RE.findall(
                     text[self.pageCharStartIndex[pageNum]:lastCharPos])
 
-        currLine = u""
+        currLine = ""
         currLineWidth = 0
         w, stepY, d, e = dc.GetFullTextExtent("aaaaaaaa")
 
@@ -422,7 +422,7 @@ class PlainTextPrintout(wx.Printout):
             flushLine = False
             flushPage = False
 
-            if part[0] == u" ":
+            if part[0] == " ":
                 # One or more spaces -> Append to current line if possible,
                 # throw away and start new print line if not
                 partWidth = dc.GetTextExtent(part)[0]
@@ -435,10 +435,10 @@ class PlainTextPrintout(wx.Printout):
                     currLineWidth = linewidth
 
                 textpos += len(part)
-            elif part[0] == u"\n":
+            elif part[0] == "\n":
                 flushLine = True
                 textpos += 1
-            elif part[0] == u"\f":
+            elif part[0] == "\f":
                 # New page
                 flushPage = True
                 textpos += 1
@@ -448,7 +448,7 @@ class PlainTextPrintout(wx.Printout):
 #                 linewidth = dc.GetTextExtent(currLine + part)[0]
                 if linewidth > prAreaWidth:
                     # Part doesn't fit into current print line
-                    if currLine != u"":
+                    if currLine != "":
                         # Current print line already contains text ->
                         # Make new print line and reread part
                         flushLine = True
@@ -456,7 +456,7 @@ class PlainTextPrintout(wx.Printout):
                     else:
                         # A single "word" which doesn't fit into a line
                         # TODO Use bisect algorithm?
-                        for partPos in xrange(1, len(part)):
+                        for partPos in range(1, len(part)):
                             partWidth = dc.GetTextExtent(part[:partPos])[0]
                             if partWidth > prAreaWidth:
                                 break
@@ -481,7 +481,7 @@ class PlainTextPrintout(wx.Printout):
                 if pageNum != -1:
                     dc.DrawText(currLine, posxLu, posyLu)
 
-                currLine = u""
+                currLine = ""
                 currLineWidth = 0
                 posyLu += stepY
                 if posyLu + stepY > printRectLu[3]:
@@ -515,7 +515,7 @@ class HtmlPrint:
     @staticmethod
     def getPrintTypes(mainControl):
         return (
-            ("html_simple", u'HTML'),
+            ("html_simple", 'HTML'),
             )
 
     def getAddOptPanelsForTypes(self, guiparent, printTypes):
@@ -586,17 +586,17 @@ class HtmlPrint:
             return self.wikiDocument.getWikiPage(word).getLiveText()
 
         exporterInstance = PluginManager.getExporterTypeDict(
-                self.mainControl, False)[u"html_single"][0](self.mainControl)
+                self.mainControl, False)["html_single"][0](self.mainControl)
 
         # TODO Progress handler
         # TODO Set additional options
         exporterInstance.setJobData(self.wikiDocument, self.wordList,
-                u"html_previewWX", None, False,
+                "html_previewWX", None, False,
                 exporterInstance.getAddOpt(None), progressHandler=None)
 
         self.tempFileSet = TempFileSet()
         exporterInstance.tempFileSet = self.tempFileSet
-        exporterInstance.styleSheet = u""
+        exporterInstance.styleSheet = ""
 
         realfp = StringIO.StringIO()
         exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
@@ -640,7 +640,7 @@ class HtmlPrint:
 
             preview = wx.PrintPreview(printout, printout2, pddata)
 
-            frame = wx.PreviewFrame(preview, self.mainControl, _(u"Print Preview"),
+            frame = wx.PreviewFrame(preview, self.mainControl, _("Print Preview"),
                     style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
 
             frame.Initialize()
@@ -684,7 +684,7 @@ class HtmlWKPrint(HtmlPrint):
     def getPrintTypes(mainControl):
         if WKHtmlWindow:
             return (
-                ("html_webkit", u'HTML (Webkit)'),
+                ("html_webkit", 'HTML (Webkit)'),
                 )
         else:
             return ()
@@ -695,20 +695,20 @@ class HtmlWKPrint(HtmlPrint):
             return self.wikiDocument.getWikiPage(word).getLiveText()
 
         exporterInstance = PluginManager.getExporterTypeDict(
-                self.mainControl, False)[u"html_single"][0](self.mainControl)
+                self.mainControl, False)["html_single"][0](self.mainControl)
 
         # TODO Progress handler
         # TODO Set additional options
         exporterInstance.setJobData(self.wikiDocument, self.wordList,
-                u"html_previewWK", None, False,
+                "html_previewWK", None, False,
                 exporterInstance.getAddOpt(None), progressHandler=None)
 
         self.tempFileSet = TempFileSet()
         exporterInstance.tempFileSet = self.tempFileSet
-        exporterInstance.styleSheet = u""
+        exporterInstance.styleSheet = ""
 
         htpath = self.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="").decode("latin-1")
 
         realfp = StringIO.StringIO()
         with open(htpath, "w") as realfp:

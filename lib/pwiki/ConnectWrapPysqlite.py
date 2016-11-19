@@ -165,21 +165,21 @@ class ConnectWrapBase:
         globalConfig = GetApp().getGlobalConfig()
         if globalConfig.getboolean("main", "tempHandling_preferMemory",
                 False):
-            tempMode = u"memory"
+            tempMode = "memory"
         else:
             tempMode = globalConfig.get("main", "tempHandling_tempMode",
-                    u"system")
+                    "system")
     
-        if tempMode == u"auto":
+        if tempMode == "auto":
             if GetApp().isInPortableMode():
-                tempMode = u"config"
+                tempMode = "config"
             else:
-                tempMode = u"system"
+                tempMode = "system"
         
-        if tempMode == u"memory":
+        if tempMode == "memory":
             self.execSql("pragma temp_store = 2")
-        elif tempMode == u"given":
-            tempDir = globalConfig.get("main", "tempHandling_tempDir", u"")
+        elif tempMode == "given":
+            tempDir = globalConfig.get("main", "tempHandling_tempDir", "")
             try:
                 self.execSql("pragma temp_store_directory = '%s'" %
                         utf8Enc(tempDir)[0])
@@ -187,7 +187,7 @@ class ConnectWrapBase:
                 self.execSql("pragma temp_store_directory = ''")
     
             self.execSql("pragma temp_store = 1")
-        elif tempMode == u"config":
+        elif tempMode == "config":
             self.execSql("pragma temp_store_directory = '%s'" %
                     utf8Enc(GetApp().getGlobalConfigSubDir())[0])
             self.execSql("pragma temp_store = 1")

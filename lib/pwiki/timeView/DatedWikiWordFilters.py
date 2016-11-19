@@ -54,7 +54,7 @@ class DatedWikiWordFilterBase:
         step = wx.TimeSpan_Days(self.dayResolution)
 
         dayWordCounts = []
-        for i in xrange(count):
+        for i in range(count):
             dayWordCounts.append(len(self.getWikiWordsForDay(day)))
             day = day + step
         
@@ -128,7 +128,7 @@ class DatedWikiWordFilterBase:
 class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
 
     def getDisplayName(self):
-        return _(u"Modified")
+        return _("Modified")
         
     def getWikiWordsForDay(self, day):
         wikiDocument = self.getWikiDocument()

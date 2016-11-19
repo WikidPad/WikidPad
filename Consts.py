@@ -25,7 +25,7 @@ from pwiki.Enum import Enumeration
 
 VERSION_TUPLE = ("wikidPad", 2, 3, 115, 0)
 VERSION_STRING = "wikidPad 2.3beta15"
-HOMEPAGE = u"http://wikidpad.sourceforge.net"
+HOMEPAGE = "http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
 CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"

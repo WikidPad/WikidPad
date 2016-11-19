@@ -6,9 +6,9 @@ import traceback
 
 import wx, wx.xrc
 
-from wxHelper import *
+from .wxHelper import *
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 
 
@@ -77,7 +77,7 @@ class LogWindow(wx.Panel):
         res = wx.xrc.XmlResource.Get()
         res.LoadOnPanel(self, parent, "LogWindow")
         self.ctrls = XrcControls(self)
-        self.ctrls.lcEntries.InsertColumn(0, _(u"Message"))
+        self.ctrls.lcEntries.InsertColumn(0, _("Message"))
 
         self.messages = []
         self.sizeVisible = True

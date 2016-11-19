@@ -1,4 +1,4 @@
-from __future__ import absolute_import, with_statement
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -26,8 +26,8 @@ class TrashBagList(EnhancedListControl):
         self.dialog = dialog
         self.contextMenuItem = -1
 
-        self.InsertColumn(0, u"", width=1)  # wiki word
-        self.InsertColumn(1, u"", width=1)  # trash date
+        self.InsertColumn(0, "", width=1)  # wiki word
+        self.InsertColumn(1, "", width=1)  # trash date
 
 #         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(),
@@ -55,7 +55,7 @@ class TrashBagList(EnhancedListControl):
         # In trashcan the bags are listed from oldest to newest, we need
         # it the other way
         self.bagList = [bag for bag in reversed(trashcan.getTrashBags())
-                if bag.originalUnifiedName.startswith(u"wikipage/")]
+                if bag.originalUnifiedName.startswith("wikipage/")]
 
         self._updatePresentation()
 
@@ -65,7 +65,7 @@ class TrashBagList(EnhancedListControl):
             self.DeleteAllItems()
 
             formatStr = self.mainControl.getConfig().get("main",
-                    "pagestatus_timeformat", u"%Y %m %d")
+                    "pagestatus_timeformat", "%Y %m %d")
             # timeView_dateFormat
 
             for i, bag in enumerate(self.bagList):
@@ -177,7 +177,7 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             importer = TrashBagMptImporter(self, self.mainControl,
                     i < len(bags) - 1, initialRbChoice)
             # TODO: Catch ImportError
-            importer.doImport(wikiDoc, u"multipage_text", None,
+            importer.doImport(wikiDoc, "multipage_text", None,
                     False, importer.getAddOpt(None), importData=data)
             
             initialRbChoice = importer.initialRbChoice
@@ -198,8 +198,8 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             return
         
         answer = wx.MessageBox(
-                _(u"Delete %i elements from trashcan?") %
-                len(bags), _(u"Delete from trashcan"),
+                _("Delete %i elements from trashcan?") %
+                len(bags), _("Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
         if answer != wx.YES:
@@ -224,8 +224,8 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             return
 
         answer = wx.MessageBox(
-                _(u"Delete all elements from trashcan?"),
-                _(u"Delete from trashcan"),
+                _("Delete all elements from trashcan?"),
+                _("Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
         if answer != wx.YES:
@@ -269,7 +269,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         self.ctrls.rbSkip.Enable(allowSkip)
         
-        if unifName.startswith(u"wikipage/"):
+        if unifName.startswith("wikipage/"):
             nameCollision = unifName[9:]
         else:
             nameCollision = unifName  # Should not happen
@@ -348,7 +348,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         if msg is None:
             self.ctrls.btnOk.Enable(True)
-            self.ctrls.stErrorMessage.SetLabel(u"")
+            self.ctrls.stErrorMessage.SetLabel("")
         else:
             self.ctrls.btnOk.Enable(False)
             self.ctrls.stErrorMessage.SetLabel(msg)
@@ -357,7 +357,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
     def _checkValidToWikiWord(self, toWikiWord):
 
         if not toWikiWord or len(toWikiWord) == 0:
-            return u"" # No error message, but disable OK
+            return "" # No error message, but disable OK
             
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.mainControl.getWikiDefaultWikiLanguage())
@@ -372,7 +372,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 #             return _(u"Can't rename to itself")
 
         if not self.mainControl.getWikiDocument().isCreatableWikiWord(toWikiWord):
-            return _(u"Word already exists")
+            return _("Word already exists")
 
         # Word is OK
         return None
@@ -420,13 +420,13 @@ class TrashBagMptImporter(MultiPageTextImporter):
             self.tempDb.execSql("""
                     update entries set renameImportTo = ?
                     where unifName = ?;
-                    """, (u"wikipage/" + element, unifName))
+                    """, ("wikipage/" + element, unifName))
             return True
         elif ret == TrashBagRenameDialog.RET_RENAME_WIKIELEMENT:
             self.tempDb.execSql("""
                     update entries set renamePresentTo = ?
                     where unifName = ?;
-                    """, (u"wikipage/" + element, unifName))
+                    """, ("wikipage/" + element, unifName))
             return True
 
         return False

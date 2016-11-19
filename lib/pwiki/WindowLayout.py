@@ -534,24 +534,24 @@ class WindowSashLayouter:
         self.preserveSashPositions()       
 
         proxiedCachedWindows = {}
-        for n, w in self.winNameToProxy.iteritems():
+        for n, w in self.winNameToProxy.items():
             proxiedCachedWindows[n] = w
             w.Reparent(self.mainWindow)    # TODO Reparent not available for all OS'
 
-        self.cleanMainWindow(proxiedCachedWindows.values())
+        self.cleanMainWindow(list(proxiedCachedWindows.values()))
 
 
         self.realize(proxiedCachedWindows)
 
         # Destroy windows which weren't reused
         # TODO Call close method of object window if present
-        for n, w in proxiedCachedWindows.iteritems():
+        for n, w in proxiedCachedWindows.items():
             w.close()
             w.Destroy()
 
 
     def close(self):
-        for w in self.winNameToObject.itervalues():
+        for w in self.winNameToObject.values():
             w.close()
 
 
@@ -583,7 +583,7 @@ class WindowSashLayouter:
 
 
     def containsWindow(self, winName):
-        return self.winNameToSashWindow.has_key(winName)
+        return winName in self.winNameToSashWindow
 
 
     def expandWindow(self, winName, flag=True):
@@ -657,16 +657,16 @@ class WindowSashLayouter:
         relTo = winProps.get("layout relative to")
         if relTo is None:
             if len(self.windowPropsList) > 0:
-                raise WinLayoutException(u"All except first window must relate "
-                        u"to another window. %s is not first window" %
+                raise WinLayoutException("All except first window must relate "
+                        "to another window. %s is not first window" %
                         winProps["name"])
 
             self.windowPropsList.append(winProps)
         else:
             relation = winProps.get("layout relation")
             if relation not in ("above", "below", "left", "right"):
-                raise WinLayoutException((u"Window %s must relate to previously "
-                            u"entered window") % winProps["name"])
+                raise WinLayoutException(("Window %s must relate to previously "
+                            "entered window") % winProps["name"])
             # Check if relTo relates to already entered window
             for pr in self.windowPropsList:
                 if pr["name"] == relTo:
@@ -674,8 +674,8 @@ class WindowSashLayouter:
                     self.windowPropsList.append(winProps)
                     break
             else:
-                raise WinLayoutException((u"Window %s must relate to previously "
-                            u"entered window") % winProps["name"])
+                raise WinLayoutException(("Window %s must relate to previously "
+                            "entered window") % winProps["name"])
         
 
     def preserveSashPositions(self):
@@ -693,13 +693,13 @@ class WindowSashLayouter:
 
             self.updateWindowProps(currProps)
         
-            if currProps.has_key("layout sash position") and \
-                    newProps.has_key("layout sash position"):
+            if "layout sash position" in currProps and \
+                    "layout sash position" in newProps:
                 newProps["layout sash position"] = \
                         currProps["layout sash position"]
 
-            if currProps.has_key("layout sash effective position") and \
-                    newProps.has_key("layout sash effective position"):
+            if "layout sash effective position" in currProps and \
+                    "layout sash effective position" in newProps:
                 newProps["layout sash effective position"] = \
                         currProps["layout sash effective position"]
 
@@ -730,11 +730,11 @@ class WindowSashLayouter:
 
 def winPropsToString(winProps):
     return "&".join([escapeForIni(k, ";:&") + ":" + escapeForIni(v, ";:&")
-            for k, v in winProps.iteritems()])
+            for k, v in winProps.items()])
 
 
 def stringToWinprops(s):
-    if type(s) is unicode:
+    if type(s) is str:
         s = str(s)
 
     items = [(unescapeForIni(item.split(":", 1)[0]),
@@ -840,7 +840,7 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
             # First show subControl scName, then hide the others
             # to avoid flicker
             self.subControls[scName].setLayerVisible(True, scName)
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
 #                 if n != scName:
                 if c is not subControl:
                     c.setLayerVisible(False, n)
@@ -856,17 +856,17 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
         return self.subControls.get(self.lastVisibleCtrlName)
         
     def hasSubControl(self, scName):
-        return self.subControls.has_key(scName)
+        return scName in self.subControls
 
     def setLayerVisible(self, vis, scName=""):
         if self.visible == vis:
             return
 
         if vis:
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
                 c.setLayerVisible(n == self.lastVisibleCtrlName, n)
         else:
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
                 c.setLayerVisible(False, n)
 
         self.visible = vis
@@ -875,7 +875,7 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
         return self.visible
         
     def close(self):
-        for c in frozenset(self.subControls.values()): # Same control may appear
+        for c in frozenset(list(self.subControls.values())): # Same control may appear
                             # multiple times
             c.close()
 
@@ -934,7 +934,7 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
 
         self.subControls[scName].Show(True)
 
-        for n, c in self.subControls.iteritems():
+        for n, c in self.subControls.items():
 #             if n != scName:
             if c is not subControl:
                 if self.visible:

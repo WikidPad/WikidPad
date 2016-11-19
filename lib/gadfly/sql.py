@@ -7,14 +7,14 @@
 '''
 
 def getSQL():
-    from grammar import DeclareTerminals
+    from .grammar import DeclareTerminals
     from gadfly import kjParser
     infile = 'sql_mar' # changed to my own lib version for py2exe
     try:
         SQLG = kjParser.UnMarshalGram(infile)
-    except ImportError, e:
-        print e
-        raise ImportError, "Couldn't find new sql_mar.py - has setup.py been run?"
+    except ImportError as e:
+        print(e)
+        raise ImportError("Couldn't find new sql_mar.py - has setup.py been run?")
     DeclareTerminals(SQLG)
     return SQLG
 

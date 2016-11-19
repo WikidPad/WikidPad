@@ -5,8 +5,8 @@ from glob import glob
 try:
     import py2exe
 except ImportError:
-    print "This setup.py file is solely made for building the Windows binary"
-    print ""
+    print("This setup.py file is solely made for building the Windows binary")
+    print("")
     raise
 from py2exe.build_exe import Target
 

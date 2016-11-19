@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -26,11 +26,11 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         TimePresentationBase.__init__(self, mainControl, wikiWordFilter)
 
-        self.InsertColumn(0, u"", width=1)  # date
-        self.InsertColumn(1, u"", width=1)  # number of wiki words
+        self.InsertColumn(0, "", width=1)  # date
+        self.InsertColumn(1, "", width=1)  # number of wiki words
 
         # Now gather some information
-        self.InsertStringItem(0, u"1")
+        self.InsertStringItem(0, "1")
         self.itemHeight = self.GetItemRect(0).GetHeight()
         
         self.popupShiftX = 20
@@ -244,7 +244,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         massWordCounts = self.wikiWordFilter.getMassWikiWordCountForDays(
                 currTime, self.visibleItemCount)
         
-        for i in xrange(self.visibleItemCount):
+        for i in range(self.visibleItemCount):
             wordCount = massWordCounts[i]
             content.append((currTime, wordCount))
             maxWordCount = max(maxWordCount, wordCount)
@@ -403,7 +403,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         precalculated elsewhere.
         """
         formatStr = self.mainControl.getConfig().get("main",
-                "timeView_dateFormat", u"%Y %m %d")
+                "timeView_dateFormat", "%Y %m %d")
                 
         today = wx.DateTime.Now()
         today.ResetTime()
@@ -562,7 +562,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 #             self.contextMenuWikiWords = cmc
 
 
-            appendToMenuByMenuDesc(menu, u"-\n" + _CONTEXT_MENU_TIMELINE)
+            appendToMenuByMenuDesc(menu, "-\n" + _CONTEXT_MENU_TIMELINE)
             
             self.PopupMenu(menu)
         finally:
@@ -628,7 +628,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         word = self.contextMenuWikiWords[evt.GetId()]
 #         self.mainControl.activateWikiWord(word, 0)
         self.mainControl.activatePageByUnifiedName(
-                u"wikipage/" + word, 0)
+                "wikipage/" + word, 0)
 
 
 
@@ -756,7 +756,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
     def OnEndLabelEdit(self, evt):
         formatStr = self.mainControl.getConfig().get("main",
-                "timeView_dateFormat", u"%Y %m %d")
+                "timeView_dateFormat", "%Y %m %d")
                 
         self.labelEdit = False
         
@@ -788,16 +788,16 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
 
 _CONTEXT_MENU_TIMELINE = \
-u"""
+"""
 +Show empty days;CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS;Show dates without associated wiki words
 +Sort dates ascending;CMD_CHECKBOX_TIMELINE_DATE_ASCENDING;List dates ascending or descending
 """
 
 # Entries to support i18n of context menus
 if False:
-    N_(u"Show empty days")
-    N_(u"Show dates without associated wiki words")
-    N_(u"Sort dates ascending")
-    N_(u"List dates ascending or descending")
+    N_("Show empty days")
+    N_("Show dates without associated wiki words")
+    N_("Sort dates ascending")
+    N_("List dates ascending or descending")
 
 

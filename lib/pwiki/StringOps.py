@@ -12,16 +12,16 @@ from struct import pack, unpack
 import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile, math
 
 # import urllib_red as urllib
-import urllib, urlparse, cgi
+import urllib.request, urllib.parse, urllib.error, urllib.parse, cgi
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
 import wx
 
 import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as _re
-from WikiExceptions import *
+from .WikiExceptions import *
 
-from Utilities import between
+from .Utilities import between
 
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
@@ -109,7 +109,7 @@ def mbcsEnc(input, errors="strict"):
 
 
 def mbcsDec(input, errors="strict"):
-    if isinstance(input, unicode):
+    if isinstance(input, str):
         return input, len(input)
     else:
         return _mbcsDec(input, errors)
@@ -148,7 +148,7 @@ if isWindows():
         if s.startswith("\\\\"):
             return s
 
-        return u"\\\\?\\" + os.path.abspath(s)
+        return "\\\\?\\" + os.path.abspath(s)
 
     def longPathDec(s):
         if s is None:
@@ -205,8 +205,8 @@ def unicodeToCompFilename(us):
         if ord(c) > 255:
             result.append("$%04x" % ord(c))
             continue
-        if c in u"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+\
-                u"{}()+-_,.%":   # Allowed characters
+        if c in "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+\
+                "{}()+-_,.%":   # Allowed characters
             result.append(str(c))
             continue
 
@@ -225,7 +225,7 @@ def strWithNone(s):
 
 def uniWithNone(u):
     if u is None:
-        return u""
+        return ""
     
     return u
 
@@ -246,9 +246,9 @@ def strToBool(s, default=False):
     except ValueError:
         # Not an integer
         s = s.lower()
-        if s in (u"true", u"yes", u"on"):
+        if s in ("true", "yes", "on"):
             return True
-        if s in (u"false", u"no", u"off"):
+        if s in ("false", "no", "off"):
             return False
 
         return default
@@ -275,7 +275,7 @@ def contentToUnicode(content):
     Try to detect the text encoding of content
     and return converted unicode
     """
-    if isinstance(content, unicode):
+    if isinstance(content, str):
         return content
 
     if content.startswith(BOM_UTF8):
@@ -384,7 +384,7 @@ def writeEntireFile(filename, content, textMode=False,
             f = open(filename, "wb")
 
         try:
-            if isinstance(content, unicode):
+            if isinstance(content, str):
                 # assert textMode
                 content = content.encode("utf-8")
                 f.write(BOM_UTF8)
@@ -395,10 +395,10 @@ def writeEntireFile(filename, content, textMode=False,
                 try:
                     iCont = iter(content)
         
-                    firstContent = iCont.next()
+                    firstContent = next(iCont)
                     
                     unic = False
-                    if isinstance(firstContent, unicode):
+                    if isinstance(firstContent, str):
                         firstContent = firstContent.encode("utf-8")
                         f.write(BOM_UTF8)
                         unic = True
@@ -407,10 +407,10 @@ def writeEntireFile(filename, content, textMode=False,
                     f.write(firstContent)
     
                     while True:
-                        content = iCont.next()
+                        content = next(iCont)
     
                         if unic:
-                            assert isinstance(content, unicode)
+                            assert isinstance(content, str)
                             content = content.encode("utf-8")
     
                         assert isinstance(content, str)
@@ -427,7 +427,7 @@ def writeEntireFile(filename, content, textMode=False,
         suffix = os.path.splitext(filename)[1]
     
         if basePath == "":
-            basePath = u"."
+            basePath = "."
     
         tempPath = TempFileSet.createTempFile(content, suffix=suffix, path=basePath,
                 textMode=textMode)
@@ -470,7 +470,7 @@ def removeBracketsFilename(fn):
     Remove brackets (real brackets, not configurable) from a filename
     """
     n, ext = os.path.splitext(fn)
-    if n.startswith(u"[") and n.endswith(u"]"):
+    if n.startswith("[") and n.endswith("]"):
         n = n[1:-1]
 
     return n + ext
@@ -482,7 +482,7 @@ def revStr(s):
     """
     s = list(s)
     s.reverse()
-    return u"".join(s)
+    return "".join(s)
 
 def splitKeep(s, delim):
     """
@@ -520,11 +520,11 @@ def measureIndent(indent):
 
 def findLineStart(text, pos):
     # This is even right if no newline is found
-    return text.rfind(u"\n", 0, pos) + 1
+    return text.rfind("\n", 0, pos) + 1
 
 
 def findLineEnd(text, pos):
-    result = text.find(u"\n", pos)
+    result = text.find("\n", pos)
     if result == -1:
         return len(text)
     else:
@@ -599,7 +599,7 @@ def styleSelection(text, start, afterEnd, startChars, endChars=None):
 
     
 
-def splitFill(text, delim, count, fill=u""):
+def splitFill(text, delim, count, fill=""):
     """
     Split text by delim into up to count pieces. If less
     pieces than count+1 are available, additional pieces are added containing
@@ -648,7 +648,7 @@ def obfuscateShortcut(shortcut):
     item as being a shortcut. I haven't found a better way.
     Unused at the moment.
     """
-    return u"".join([u"\u200B" + c for c in shortcut])
+    return "".join(["\u200B" + c for c in shortcut])
 
 
 
@@ -660,8 +660,8 @@ def escapeHtml(data):
 
     # must do ampersand first
 
-    return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
-            replace(u"<", u"&lt;").replace(u"\n", u"<br />\n")
+    return data.replace("&", "&amp;").replace(">", "&gt;").\
+            replace("<", "&lt;").replace("\n", "<br />\n")
 
 
 def escapeHtmlNoBreaks(data):
@@ -671,8 +671,8 @@ def escapeHtmlNoBreaks(data):
 
     # must do ampersand first
 
-    return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
-            replace(u"<", u"&lt;")
+    return data.replace("&", "&amp;").replace(">", "&gt;").\
+            replace("<", "&lt;")
 
 
 
@@ -704,14 +704,14 @@ class HtmlStartTag(AbstractHtmlItem):
         if attributes is None:
             self.attributes = {}
         else:
-            self.attributes = dict((k, escapeHtml(v).replace(u"\"", u"&quot;"))
-                    for k, v in attributes.iteritems())
+            self.attributes = dict((k, escapeHtml(v).replace("\"", "&quot;"))
+                    for k, v in attributes.items())
     
     def addAttribute(self, key, value):
         if value is None:
             value = key
 
-        self.attributes[key] = escapeHtml(value).replace(u"\"", u"&quot;")
+        self.attributes[key] = escapeHtml(value).replace("\"", "&quot;")
 
 
     def addEscapedAttribute(self, key, value):
@@ -730,16 +730,16 @@ class HtmlStartTag(AbstractHtmlItem):
         return self.tag
 
     def getStringForAttributes(self):
-        return u" ".join(
-                k + u"=\"" + v + u"\""
-                for k, v in self.attributes.iteritems())
+        return " ".join(
+                k + "=\"" + v + "\""
+                for k, v in self.attributes.items())
     
     def asString(self):
         if len(self.attributes) == 0:
-            return u"<" + self.tag + u">"
+            return "<" + self.tag + ">"
         
         attrString = self.getStringForAttributes()
-        return u"<" + self.tag + u" " + attrString + u">"
+        return "<" + self.tag + " " + attrString + ">"
 
 
     def clone(self):
@@ -753,10 +753,10 @@ class HtmlEmptyTag(HtmlStartTag):
     
     def asString(self):
         if len(self.attributes) == 0:
-            return u"<" + self.tag + u" />"
+            return "<" + self.tag + " />"
         
         attrString = self.getStringForAttributes()
-        return u"<" + self.tag + u" " + attrString + u" />"
+        return "<" + self.tag + " " + attrString + " />"
 
     def clone(self):
         return HtmlEmptyTag(self.tag, self.attributes)
@@ -770,7 +770,7 @@ class HtmlEndTag(AbstractHtmlItem):
         self.tag = tag
     
     def asString(self):
-        return u"</" + self.tag + u">"
+        return "</" + self.tag + ">"
 
     def clone(self):
         return HtmlEndTag(self.tag)
@@ -797,7 +797,7 @@ class HtmlEntity(AbstractHtmlItem):
 
     
 
-def escapeForIni(text, toEscape=u""):
+def escapeForIni(text, toEscape=""):
     """
     Return an escaped version of string. Always escaped will be backslash and
     all characters with ASCII value < 32. Additional characters can be given in
@@ -807,26 +807,26 @@ def escapeForIni(text, toEscape=u""):
     Returns: unicode string
     """
     # Escape '\'
-    text = text.replace(u"\\", u"\\x%02x" % ord("\\"))
+    text = text.replace("\\", "\\x%02x" % ord("\\"))
 
     # Escape everything with ord < 32
-    for i in xrange(32):
-        text = text.replace(unichr(i), u"\\x%02x" % i)
+    for i in range(32):
+        text = text.replace(chr(i), "\\x%02x" % i)
 
     for c in toEscape:
-        text = text.replace(c, u"\\x%02x" % ord(c))
+        text = text.replace(c, "\\x%02x" % ord(c))
 
     return text
 
 
 def _unescapeForIniHelper(match):
-    return unichr(int(match.group(1), 16))
+    return chr(int(match.group(1), 16))
 
 def unescapeForIni(text):
     """
     Inverse of escapeForIni()
     """
-    return _re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)
+    return _re.sub(r"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)
 
 
 # def escapeWithRe(text):
@@ -837,19 +837,19 @@ def unescapeWithRe(text):
     """
     Unescape things like \n or \f. Throws exception if unescaping fails
     """
-    return _re.sub(u"", text, u"", 1)
+    return _re.sub("", text, "", 1)
 
 
 def re_sub_escape(pattern):
     """
     Escape the replacement pattern for a re.sub function
     """
-    return pattern.replace(u"\\", u"\\\\").replace(u"\n", u"\\n").replace(
-            u"\r", u"\\r").replace(u"\t", u"\\t").replace(u"\f", u"\\f")
+    return pattern.replace("\\", "\\\\").replace("\n", "\\n").replace(
+            "\r", "\\r").replace("\t", "\\t").replace("\f", "\\f")
 
 
 HTML_DIGITCOLOR = _re.compile(
-        ur"^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$",
+        r"^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$",
         _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
 
@@ -937,7 +937,7 @@ def base64BlockEncode(data):
     if len(b64) > 0:
         result.append(b64)
 
-    return u"\n".join(result)
+    return "\n".join(result)
 
 
 # Just for completeness
@@ -989,7 +989,7 @@ def strftimeUB(frmStr, timet=None):
     try:
         return formatWxDate(frmStr, wx.DateTimeFromTimeT(timet))
     except TypeError:
-        return _(u"Inval. timestamp")  #  TODO Better errorhandling?
+        return _("Inval. timestamp")  #  TODO Better errorhandling?
 
 
 
@@ -1035,7 +1035,7 @@ def getRelativeFilePathAndTestContained(location, toFilePath):
     locLen = len(locParts)
     fileParts = splitpath(toFilePath)
 
-    for i in xrange(len(locParts)):
+    for i in range(len(locParts)):
         if len(fileParts) == 0:
             break  # TODO Error ???
 
@@ -1060,7 +1060,7 @@ def getRelativeFilePathAndTestContained(location, toFilePath):
     result += fileParts
     
     if len(result) == 0:
-        return u"", False
+        return "", False
     else:
         return os.path.join(*result), isContained
 
@@ -1095,9 +1095,9 @@ def _asciiFlexibleUrlUnquote(part):
     Unquote ascii-only parts of an url
     """
     if len(part) == 0:
-        return u""
+        return ""
     # Get bytes out of percent-quoted URL
-    linkBytes = urllib.unquote(part)
+    linkBytes = urllib.parse.unquote(part)
     # Try to interpret bytes as UTF-8
     try:
         return linkBytes.decode("utf8", "strict")
@@ -1107,7 +1107,7 @@ def _asciiFlexibleUrlUnquote(part):
             return mbcsDec(linkBytes, "strict")[0]
         except UnicodeDecodeError:
             # Failed, too -> leave link part unmodified. TODO: Doesn't make sense, will fail as well.
-            return unicode(part)
+            return str(part)
 
 
 def flexibleUrlUnquote(link):
@@ -1132,19 +1132,19 @@ def flexibleUrlUnquote(link):
         
         result += _asciiFlexibleUrlUnquote(asciiPart)
 
-        unicodePart = u""
+        unicodePart = ""
         while i < len(link) and ord(link[i]) >= 128:
             unicodePart += link[i]
             i += 1
         
         result += unicodePart
         
-    return unicode(result.value())
+    return str(result.value())
 
 
 
-URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/",
-        u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`", u'"', u"%"))
+URL_RESERVED = frozenset((";", "?", ":", "@", "&", "=", "+", ",", "/",
+        "{", "}", "|", "\\", "^", "~", "[", "]", "`", '"', "%"))
 
 
 
@@ -1225,7 +1225,7 @@ def ntUrlFromPathname(p, addSafe=''):
     comp = p.split(':')
     if len(comp) != 2 or len(comp[0]) > 1:
         error = 'Bad path: ' + p
-        raise IOError, error
+        raise IOError(error)
 
     drive = urlQuote(comp[0].upper(), safe='/' + addSafe)
     components = comp[1].split('\\')
@@ -1248,7 +1248,7 @@ def macUrlFromPathname(pathname, addSafe=''):
     convert mac pathname to /-delimited pathname
     """
     if '/' in pathname:
-        raise RuntimeError, "Cannot convert pathname containing slashes"
+        raise RuntimeError("Cannot convert pathname containing slashes")
     components = pathname.split(':')
     # Remove empty first and/or last component
     if components[0] == '':
@@ -1275,7 +1275,7 @@ elif os.name == 'mac':
     urlFromPathname = macUrlFromPathname
 else:
     def urlFromPathname(fn, addSafe=''):
-        if isinstance(fn, unicode):
+        if isinstance(fn, str):
             fn = utf8Enc(fn, "replace")[0]
             
         # riscos not supported
@@ -1306,7 +1306,7 @@ def ntPathnameFromUrl(url, testFileType=True):
     if url.startswith("file:") or url.startswith("wiki:"):
         url = url[5:]
     elif testFileType:
-        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+        raise RuntimeError('Cannot convert non-local URL to pathname')
         
     # Strip fragment or query if present
     url, dummy = decomposeUrlQsFrag(url)
@@ -1358,14 +1358,14 @@ def macPathnameFromUrl(url, testFileType=True):
     #
     # XXXX The .. handling should be fixed...
     #
-    tp = urllib.splittype(url)[0]
+    tp = urllib.parse.splittype(url)[0]
     if tp and tp != 'file' and tp != 'wiki':
-        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+        raise RuntimeError('Cannot convert non-local URL to pathname')
     # Turn starting /// into /, an empty hostname means current host
     if url[:3] == '///':
         url = url[2:]
     elif url[:2] == '//':
-        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+        raise RuntimeError('Cannot convert non-local URL to pathname')
 
     # Strip fragment or query if present
     url, dummy = decomposeUrlQsFrag(url)
@@ -1409,7 +1409,7 @@ def elsePathnameFromUrl(url, testFileType=True):
     elif url.startswith("file:") or url.startswith("wiki:"):
         url = url[5:]
     elif testFileType:
-        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+        raise RuntimeError('Cannot convert non-local URL to pathname')
     
     # Strip fragment or query if present
     url, dummy = decomposeUrlQsFrag(url)
@@ -1429,7 +1429,7 @@ else:
 
 
 
-_DECOMPOSE_URL_RE = _re.compile(ur"([^?#]*)((?:[?#].*)?)", _re.UNICODE | _re.DOTALL);
+_DECOMPOSE_URL_RE = _re.compile(r"([^?#]*)((?:[?#].*)?)", _re.UNICODE | _re.DOTALL);
 
 
 def decomposeUrlQsFrag(url):
@@ -1453,15 +1453,15 @@ def composeUrlQsFrag(mainUrl, additional):
 def _quoteChar(c):
     oc = ord(c)
     if oc < 256:
-        return u"%%%02X" % oc
+        return "%%%02X" % oc
     else:
-        return u"@%04X" % oc
+        return "@%04X" % oc
 
 
-_ESCAPING_CHARACTERS = u"%@~"
+_ESCAPING_CHARACTERS = "%@~"
 
-_FORBIDDEN_CHARACTERS = frozenset(u":/\\*?\"'<>|;![]" + _ESCAPING_CHARACTERS)
-_FORBIDDEN_START = _FORBIDDEN_CHARACTERS | frozenset(u".$ -")
+_FORBIDDEN_CHARACTERS = frozenset(":/\\*?\"'<>|;![]" + _ESCAPING_CHARACTERS)
+_FORBIDDEN_START = _FORBIDDEN_CHARACTERS | frozenset(".$ -")
 
 # Allowed ascii characters remaining: #&()+,=[]^_`{}
 
@@ -1529,7 +1529,7 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
 
     if len(baseName) > 0:
         # First try, no random part
-        yield u"".join(baseQuoted) + suffix
+        yield "".join(baseQuoted) + suffix
     
     # Add random part to length
     overallLength += 1 + randomLength
@@ -1538,13 +1538,13 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
     while overallLength > maxLength:
         overallLength -= len(baseQuoted.pop())
    
-    beforeRandom = u"".join(baseQuoted) + u"~"
+    beforeRandom = "".join(baseQuoted) + "~"
 
     # Now we try MD5-Hash. This is one last try to create a filename which
     # is non-ambigously connected to the baseName
     hashStr = getMd5B36ByString(baseName)[-randomLength:]
     if len(hashStr) < randomLength:
-        hashStr = u"0" * (randomLength - len(hashStr)) + hashStr
+        hashStr = "0" * (randomLength - len(hashStr)) + hashStr
 
     yield beforeRandom + hashStr + suffix
 
@@ -1558,17 +1558,17 @@ def _unquoteCharRepl(matchObj):
     
     if s[0] == "%":
         v = int(s[1:3], 16)
-        return unichr(v)
+        return chr(v)
     else:   #  s[0] == "@":
         v = int(s[1:5], 16)
-        return unichr(v)
+        return chr(v)
 
 
-_FILENAME_UNQUOTE_RE = _re.compile(ur"%[A-Fa-f0-9]{2}|@[A-Fa-f0-9]{4}",
+_FILENAME_UNQUOTE_RE = _re.compile(r"%[A-Fa-f0-9]{2}|@[A-Fa-f0-9]{4}",
         _re.UNICODE | _re.DOTALL | _re.MULTILINE)
 
 
-def guessBaseNameByFilename(filename, suffix=u""):
+def guessBaseNameByFilename(filename, suffix=""):
     """
     Try to guess the basename for a particular file name created by
     iterCompatibleFilename() as far as it can be reconstructed.
@@ -1581,7 +1581,7 @@ def guessBaseNameByFilename(filename, suffix=u""):
     # else?
 
     # After a tilde begins the random part, so remove
-    tildI = filename.find(u"~")
+    tildI = filename.find("~")
     if tildI > 0:  # tildI == 0 would mean a nameless file
         filename = filename[:tildI]
 
@@ -1590,13 +1590,13 @@ def guessBaseNameByFilename(filename, suffix=u""):
 
 
 
-_RNDBASESEQ = u"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+_RNDBASESEQ = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def createRandomString(length):
     """
     Create a unicode string of  length  random characters and digits
     """
-    return u"".join([random.choice(_RNDBASESEQ) for i in range(length)])
+    return "".join([random.choice(_RNDBASESEQ) for i in range(length)])
 
 
 
@@ -1621,7 +1621,7 @@ def getMd5B36ByString(text):
     
     Based on http://code.activestate.com/recipes/111286/
     """
-    if isinstance(text, unicode):
+    if isinstance(text, str):
         text = text.encode("utf-8")
     
 #     digest = hashlib.md5(text).digest()
@@ -1707,7 +1707,7 @@ def wikiUrlToPathWordAndAnchor(url):
     """
     # Change "wiki:" url to "http:" for urlparse
     linkHt = "http:" + url[5:]
-    parsed = urlparse.urlparse(linkHt)
+    parsed = urllib.parse.urlparse(linkHt)
     # Parse query string into dictionary
     queryDict = cgi.parse_qs(parsed[4])
     # Retrieve wikiword to open if existing
@@ -1721,7 +1721,7 @@ def wikiUrlToPathWordAndAnchor(url):
     parsed[5] = ""
     parsed = tuple(parsed)
 
-    filePath = pathnameFromUrl(urlparse.urlunparse(parsed)[5:], False)
+    filePath = pathnameFromUrl(urllib.parse.urlunparse(parsed)[5:], False)
 
 #     filePath = urllib.url2pathname(url)
 
@@ -1755,7 +1755,7 @@ def pathWordAndAnchorToWikiUrl(filePath, wikiWordToOpen, anchorToOpen):
     
 
 def joinRegexes(patternList):
-    return u"(?:(?:" + u")|(?:".join(patternList) + u"))"
+    return "(?:(?:" + ")|(?:".join(patternList) + "))"
 
 
 
@@ -1987,159 +1987,159 @@ def getBinCompactForDiff(a, b):
 # Interestingly it isn't noticeably faster to set the constants directly than
 # calculating it at each start, but it doesn't need "unicodedata.pyd"
 
-LOWERCASE = u'abcdefghijklmnopqrstuvwxyz\xaa\xb5\xba\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff\u0101\u0103\u0105\u0107\u0109\u010b\u010d\u010f\u0111\u0113\u0115\u0117\u0119\u011b\u011d\u011f\u0121\u0123\u0125\u0127\u0129\u012b\u012d\u012f\u0131\u0133\u0135\u0137\u0138\u013a\u013c\u013e\u0140\u0142\u0144\u0146\u0148\u0149\u014b\u014d\u014f\u0151\u0153\u0155\u0157\u0159\u015b\u015d\u015f\u0161\u0163\u0165\u0167\u0169\u016b\u016d\u016f\u0171\u0173\u0175\u0177\u017a\u017c\u017e\u017f\u0180\u0183\u0185\u0188\u018c\u018d\u0192\u0195\u0199\u019a\u019b\u019e\u01a1\u01a3\u01a5\u01a8\u01aa\u01ab\u01ad\u01b0\u01b4\u01b6\u01b9\u01ba\u01bd\u01be\u01bf\u01c6\u01c9\u01cc\u01ce\u01d0\u01d2\u01d4\u01d6\u01d8\u01da\u01dc\u01dd\u01df\u01e1\u01e3\u01e5\u01e7\u01e9\u01eb\u01ed\u01ef\u01f0\u01f3\u01f5\u01f9\u01fb\u01fd\u01ff\u0201\u0203\u0205\u0207\u0209\u020b\u020d\u020f\u0211\u0213\u0215\u0217\u0219\u021b\u021d\u021f\u0223\u0225\u0227\u0229\u022b\u022d\u022f\u0231\u0233\u0250\u0251\u0252\u0253\u0254\u0255\u0256\u0257\u0258\u0259\u025a\u025b\u025c\u025d\u025e\u025f\u0260\u0261\u0262\u0263\u0264\u0265\u0266\u0267\u0268\u0269\u026a\u026b\u026c\u026d\u026e\u026f\u0270\u0271\u0272\u0273\u0274\u0275\u0276\u0277\u0278\u0279\u027a\u027b\u027c\u027d\u027e\u027f\u0280\u0281\u0282\u0283\u0284\u0285\u0286\u0287\u0288\u0289\u028a\u028b\u028c\u028d\u028e\u028f\u0290\u0291\u0292\u0293\u0294\u0295\u0296\u0297\u0298\u0299\u029a\u029b\u029c\u029d\u029e\u029f\u02a0\u02a1\u02a2\u02a3\u02a4\u02a5\u02a6\u02a7\u02a8\u02a9\u02aa\u02ab\u02ac\u02ad\u0390\u03ac\u03ad\u03ae\u03af\u03b0\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9\u03ca\u03cb\u03cc\u03cd\u03ce\u03d0\u03d1\u03d5\u03d6\u03d7\u03d9\u03db\u03dd\u03df\u03e1\u03e3\u03e5\u03e7\u03e9\u03eb\u03ed\u03ef\u03f0\u03f1\u03f2\u03f3\u03f5\u0430\u0431\u0432\u0433\u0434\u0435\u0436\u0437\u0438\u0439\u043a\u043b\u043c\u043d\u043e\u043f\u0440\u0441\u0442\u0443\u0444\u0445\u0446\u0447\u0448\u0449\u044a\u044b\u044c\u044d\u044e\u044f\u0450\u0451\u0452\u0453\u0454\u0455\u0456\u0457\u0458\u0459\u045a\u045b\u045c\u045d\u045e\u045f\u0461\u0463\u0465\u0467\u0469\u046b\u046d\u046f\u0471\u0473\u0475\u0477\u0479\u047b\u047d\u047f\u0481\u048b\u048d\u048f\u0491\u0493\u0495\u0497\u0499\u049b\u049d\u049f\u04a1\u04a3\u04a5\u04a7\u04a9\u04ab\u04ad\u04af\u04b1\u04b3\u04b5\u04b7\u04b9\u04bb\u04bd\u04bf\u04c2\u04c4\u04c6\u04c8\u04ca\u04cc\u04ce\u04d1\u04d3\u04d5\u04d7\u04d9\u04db\u04dd\u04df\u04e1\u04e3\u04e5\u04e7\u04e9\u04eb\u04ed\u04ef\u04f1\u04f3\u04f5\u04f9\u0501\u0503\u0505\u0507\u0509\u050b\u050d\u050f\u0561\u0562\u0563\u0564\u0565\u0566\u0567\u0568\u0569\u056a\u056b\u056c\u056d\u056e\u056f\u0570\u0571\u0572\u0573\u0574\u0575\u0576\u0577\u0578\u0579\u057a\u057b\u057c\u057d\u057e\u057f\u0580\u0581\u0582\u0583\u0584\u0585\u0586\u0587\u1e01\u1e03\u1e05\u1e07\u1e09\u1e0b\u1e0d\u1e0f\u1e11\u1e13\u1e15\u1e17\u1e19\u1e1b\u1e1d\u1e1f\u1e21\u1e23\u1e25\u1e27\u1e29\u1e2b\u1e2d\u1e2f\u1e31\u1e33\u1e35\u1e37\u1e39\u1e3b\u1e3d\u1e3f\u1e41\u1e43\u1e45\u1e47\u1e49\u1e4b\u1e4d\u1e4f\u1e51\u1e53\u1e55\u1e57\u1e59\u1e5b\u1e5d\u1e5f\u1e61\u1e63\u1e65\u1e67\u1e69\u1e6b\u1e6d\u1e6f\u1e71\u1e73\u1e75\u1e77\u1e79\u1e7b\u1e7d\u1e7f\u1e81\u1e83\u1e85\u1e87\u1e89\u1e8b\u1e8d\u1e8f\u1e91\u1e93\u1e95\u1e96\u1e97\u1e98\u1e99\u1e9a\u1e9b\u1ea1\u1ea3\u1ea5\u1ea7\u1ea9\u1eab\u1ead\u1eaf\u1eb1\u1eb3\u1eb5\u1eb7\u1eb9\u1ebb\u1ebd\u1ebf\u1ec1\u1ec3\u1ec5\u1ec7\u1ec9\u1ecb\u1ecd\u1ecf\u1ed1\u1ed3\u1ed5\u1ed7\u1ed9\u1edb\u1edd\u1edf\u1ee1\u1ee3\u1ee5\u1ee7\u1ee9\u1eeb\u1eed\u1eef\u1ef1\u1ef3\u1ef5\u1ef7\u1ef9\u1f00\u1f01\u1f02\u1f03\u1f04\u1f05\u1f06\u1f07\u1f10\u1f11\u1f12\u1f13\u1f14\u1f15\u1f20\u1f21\u1f22\u1f23\u1f24\u1f25\u1f26\u1f27\u1f30\u1f31\u1f32\u1f33\u1f34\u1f35\u1f36\u1f37\u1f40\u1f41\u1f42\u1f43\u1f44\u1f45\u1f50\u1f51\u1f52\u1f53\u1f54\u1f55\u1f56\u1f57\u1f60\u1f61\u1f62\u1f63\u1f64\u1f65\u1f66\u1f67\u1f70\u1f71\u1f72\u1f73\u1f74\u1f75\u1f76\u1f77\u1f78\u1f79\u1f7a\u1f7b\u1f7c\u1f7d\u1f80\u1f81\u1f82\u1f83\u1f84\u1f85\u1f86\u1f87\u1f90\u1f91\u1f92\u1f93\u1f94\u1f95\u1f96\u1f97\u1fa0\u1fa1\u1fa2\u1fa3\u1fa4\u1fa5\u1fa6\u1fa7\u1fb0\u1fb1\u1fb2\u1fb3\u1fb4\u1fb6\u1fb7\u1fbe\u1fc2\u1fc3\u1fc4\u1fc6\u1fc7\u1fd0\u1fd1\u1fd2\u1fd3\u1fd6\u1fd7\u1fe0\u1fe1\u1fe2\u1fe3\u1fe4\u1fe5\u1fe6\u1fe7\u1ff2\u1ff3\u1ff4\u1ff6\u1ff7\u2071\u207f\u210a\u210e\u210f\u2113\u212f\u2134\u2139\u213d\u2146\u2147\u2148\u2149\ufb00\ufb01\ufb02\ufb03\ufb04\ufb05\ufb06\ufb13\ufb14\ufb15\ufb16\ufb17\uff41\uff42\uff43\uff44\uff45\uff46\uff47\uff48\uff49\uff4a\uff4b\uff4c\uff4d\uff4e\uff4f\uff50\uff51\uff52\uff53\uff54\uff55\uff56\uff57\uff58\uff59\uff5a'
-UPPERCASE = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd8\xd9\xda\xdb\xdc\xdd\xde\u0100\u0102\u0104\u0106\u0108\u010a\u010c\u010e\u0110\u0112\u0114\u0116\u0118\u011a\u011c\u011e\u0120\u0122\u0124\u0126\u0128\u012a\u012c\u012e\u0130\u0132\u0134\u0136\u0139\u013b\u013d\u013f\u0141\u0143\u0145\u0147\u014a\u014c\u014e\u0150\u0152\u0154\u0156\u0158\u015a\u015c\u015e\u0160\u0162\u0164\u0166\u0168\u016a\u016c\u016e\u0170\u0172\u0174\u0176\u0178\u0179\u017b\u017d\u0181\u0182\u0184\u0186\u0187\u0189\u018a\u018b\u018e\u018f\u0190\u0191\u0193\u0194\u0196\u0197\u0198\u019c\u019d\u019f\u01a0\u01a2\u01a4\u01a6\u01a7\u01a9\u01ac\u01ae\u01af\u01b1\u01b2\u01b3\u01b5\u01b7\u01b8\u01bc\u01c4\u01c7\u01ca\u01cd\u01cf\u01d1\u01d3\u01d5\u01d7\u01d9\u01db\u01de\u01e0\u01e2\u01e4\u01e6\u01e8\u01ea\u01ec\u01ee\u01f1\u01f4\u01f6\u01f7\u01f8\u01fa\u01fc\u01fe\u0200\u0202\u0204\u0206\u0208\u020a\u020c\u020e\u0210\u0212\u0214\u0216\u0218\u021a\u021c\u021e\u0220\u0222\u0224\u0226\u0228\u022a\u022c\u022e\u0230\u0232\u0386\u0388\u0389\u038a\u038c\u038e\u038f\u0391\u0392\u0393\u0394\u0395\u0396\u0397\u0398\u0399\u039a\u039b\u039c\u039d\u039e\u039f\u03a0\u03a1\u03a3\u03a4\u03a5\u03a6\u03a7\u03a8\u03a9\u03aa\u03ab\u03d2\u03d3\u03d4\u03d8\u03da\u03dc\u03de\u03e0\u03e2\u03e4\u03e6\u03e8\u03ea\u03ec\u03ee\u03f4\u0400\u0401\u0402\u0403\u0404\u0405\u0406\u0407\u0408\u0409\u040a\u040b\u040c\u040d\u040e\u040f\u0410\u0411\u0412\u0413\u0414\u0415\u0416\u0417\u0418\u0419\u041a\u041b\u041c\u041d\u041e\u041f\u0420\u0421\u0422\u0423\u0424\u0425\u0426\u0427\u0428\u0429\u042a\u042b\u042c\u042d\u042e\u042f\u0460\u0462\u0464\u0466\u0468\u046a\u046c\u046e\u0470\u0472\u0474\u0476\u0478\u047a\u047c\u047e\u0480\u048a\u048c\u048e\u0490\u0492\u0494\u0496\u0498\u049a\u049c\u049e\u04a0\u04a2\u04a4\u04a6\u04a8\u04aa\u04ac\u04ae\u04b0\u04b2\u04b4\u04b6\u04b8\u04ba\u04bc\u04be\u04c0\u04c1\u04c3\u04c5\u04c7\u04c9\u04cb\u04cd\u04d0\u04d2\u04d4\u04d6\u04d8\u04da\u04dc\u04de\u04e0\u04e2\u04e4\u04e6\u04e8\u04ea\u04ec\u04ee\u04f0\u04f2\u04f4\u04f8\u0500\u0502\u0504\u0506\u0508\u050a\u050c\u050e\u0531\u0532\u0533\u0534\u0535\u0536\u0537\u0538\u0539\u053a\u053b\u053c\u053d\u053e\u053f\u0540\u0541\u0542\u0543\u0544\u0545\u0546\u0547\u0548\u0549\u054a\u054b\u054c\u054d\u054e\u054f\u0550\u0551\u0552\u0553\u0554\u0555\u0556\u10a0\u10a1\u10a2\u10a3\u10a4\u10a5\u10a6\u10a7\u10a8\u10a9\u10aa\u10ab\u10ac\u10ad\u10ae\u10af\u10b0\u10b1\u10b2\u10b3\u10b4\u10b5\u10b6\u10b7\u10b8\u10b9\u10ba\u10bb\u10bc\u10bd\u10be\u10bf\u10c0\u10c1\u10c2\u10c3\u10c4\u10c5\u1e00\u1e02\u1e04\u1e06\u1e08\u1e0a\u1e0c\u1e0e\u1e10\u1e12\u1e14\u1e16\u1e18\u1e1a\u1e1c\u1e1e\u1e20\u1e22\u1e24\u1e26\u1e28\u1e2a\u1e2c\u1e2e\u1e30\u1e32\u1e34\u1e36\u1e38\u1e3a\u1e3c\u1e3e\u1e40\u1e42\u1e44\u1e46\u1e48\u1e4a\u1e4c\u1e4e\u1e50\u1e52\u1e54\u1e56\u1e58\u1e5a\u1e5c\u1e5e\u1e60\u1e62\u1e64\u1e66\u1e68\u1e6a\u1e6c\u1e6e\u1e70\u1e72\u1e74\u1e76\u1e78\u1e7a\u1e7c\u1e7e\u1e80\u1e82\u1e84\u1e86\u1e88\u1e8a\u1e8c\u1e8e\u1e90\u1e92\u1e94\u1ea0\u1ea2\u1ea4\u1ea6\u1ea8\u1eaa\u1eac\u1eae\u1eb0\u1eb2\u1eb4\u1eb6\u1eb8\u1eba\u1ebc\u1ebe\u1ec0\u1ec2\u1ec4\u1ec6\u1ec8\u1eca\u1ecc\u1ece\u1ed0\u1ed2\u1ed4\u1ed6\u1ed8\u1eda\u1edc\u1ede\u1ee0\u1ee2\u1ee4\u1ee6\u1ee8\u1eea\u1eec\u1eee\u1ef0\u1ef2\u1ef4\u1ef6\u1ef8\u1f08\u1f09\u1f0a\u1f0b\u1f0c\u1f0d\u1f0e\u1f0f\u1f18\u1f19\u1f1a\u1f1b\u1f1c\u1f1d\u1f28\u1f29\u1f2a\u1f2b\u1f2c\u1f2d\u1f2e\u1f2f\u1f38\u1f39\u1f3a\u1f3b\u1f3c\u1f3d\u1f3e\u1f3f\u1f48\u1f49\u1f4a\u1f4b\u1f4c\u1f4d\u1f59\u1f5b\u1f5d\u1f5f\u1f68\u1f69\u1f6a\u1f6b\u1f6c\u1f6d\u1f6e\u1f6f\u1fb8\u1fb9\u1fba\u1fbb\u1fc8\u1fc9\u1fca\u1fcb\u1fd8\u1fd9\u1fda\u1fdb\u1fe8\u1fe9\u1fea\u1feb\u1fec\u1ff8\u1ff9\u1ffa\u1ffb\u2102\u2107\u210b\u210c\u210d\u2110\u2111\u2112\u2115\u2119\u211a\u211b\u211c\u211d\u2124\u2126\u2128\u212a\u212b\u212c\u212d\u2130\u2131\u2133\u213e\u213f\u2145\uff21\uff22\uff23\uff24\uff25\uff26\uff27\uff28\uff29\uff2a\uff2b\uff2c\uff2d\uff2e\uff2f\uff30\uff31\uff32\uff33\uff34\uff35\uff36\uff37\uff38\uff39\uff3a'
+LOWERCASE = 'abcdefghijklmnopqrstuvwxyz\xaa\xb5\xba\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff\u0101\u0103\u0105\u0107\u0109\u010b\u010d\u010f\u0111\u0113\u0115\u0117\u0119\u011b\u011d\u011f\u0121\u0123\u0125\u0127\u0129\u012b\u012d\u012f\u0131\u0133\u0135\u0137\u0138\u013a\u013c\u013e\u0140\u0142\u0144\u0146\u0148\u0149\u014b\u014d\u014f\u0151\u0153\u0155\u0157\u0159\u015b\u015d\u015f\u0161\u0163\u0165\u0167\u0169\u016b\u016d\u016f\u0171\u0173\u0175\u0177\u017a\u017c\u017e\u017f\u0180\u0183\u0185\u0188\u018c\u018d\u0192\u0195\u0199\u019a\u019b\u019e\u01a1\u01a3\u01a5\u01a8\u01aa\u01ab\u01ad\u01b0\u01b4\u01b6\u01b9\u01ba\u01bd\u01be\u01bf\u01c6\u01c9\u01cc\u01ce\u01d0\u01d2\u01d4\u01d6\u01d8\u01da\u01dc\u01dd\u01df\u01e1\u01e3\u01e5\u01e7\u01e9\u01eb\u01ed\u01ef\u01f0\u01f3\u01f5\u01f9\u01fb\u01fd\u01ff\u0201\u0203\u0205\u0207\u0209\u020b\u020d\u020f\u0211\u0213\u0215\u0217\u0219\u021b\u021d\u021f\u0223\u0225\u0227\u0229\u022b\u022d\u022f\u0231\u0233\u0250\u0251\u0252\u0253\u0254\u0255\u0256\u0257\u0258\u0259\u025a\u025b\u025c\u025d\u025e\u025f\u0260\u0261\u0262\u0263\u0264\u0265\u0266\u0267\u0268\u0269\u026a\u026b\u026c\u026d\u026e\u026f\u0270\u0271\u0272\u0273\u0274\u0275\u0276\u0277\u0278\u0279\u027a\u027b\u027c\u027d\u027e\u027f\u0280\u0281\u0282\u0283\u0284\u0285\u0286\u0287\u0288\u0289\u028a\u028b\u028c\u028d\u028e\u028f\u0290\u0291\u0292\u0293\u0294\u0295\u0296\u0297\u0298\u0299\u029a\u029b\u029c\u029d\u029e\u029f\u02a0\u02a1\u02a2\u02a3\u02a4\u02a5\u02a6\u02a7\u02a8\u02a9\u02aa\u02ab\u02ac\u02ad\u0390\u03ac\u03ad\u03ae\u03af\u03b0\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9\u03ca\u03cb\u03cc\u03cd\u03ce\u03d0\u03d1\u03d5\u03d6\u03d7\u03d9\u03db\u03dd\u03df\u03e1\u03e3\u03e5\u03e7\u03e9\u03eb\u03ed\u03ef\u03f0\u03f1\u03f2\u03f3\u03f5\u0430\u0431\u0432\u0433\u0434\u0435\u0436\u0437\u0438\u0439\u043a\u043b\u043c\u043d\u043e\u043f\u0440\u0441\u0442\u0443\u0444\u0445\u0446\u0447\u0448\u0449\u044a\u044b\u044c\u044d\u044e\u044f\u0450\u0451\u0452\u0453\u0454\u0455\u0456\u0457\u0458\u0459\u045a\u045b\u045c\u045d\u045e\u045f\u0461\u0463\u0465\u0467\u0469\u046b\u046d\u046f\u0471\u0473\u0475\u0477\u0479\u047b\u047d\u047f\u0481\u048b\u048d\u048f\u0491\u0493\u0495\u0497\u0499\u049b\u049d\u049f\u04a1\u04a3\u04a5\u04a7\u04a9\u04ab\u04ad\u04af\u04b1\u04b3\u04b5\u04b7\u04b9\u04bb\u04bd\u04bf\u04c2\u04c4\u04c6\u04c8\u04ca\u04cc\u04ce\u04d1\u04d3\u04d5\u04d7\u04d9\u04db\u04dd\u04df\u04e1\u04e3\u04e5\u04e7\u04e9\u04eb\u04ed\u04ef\u04f1\u04f3\u04f5\u04f9\u0501\u0503\u0505\u0507\u0509\u050b\u050d\u050f\u0561\u0562\u0563\u0564\u0565\u0566\u0567\u0568\u0569\u056a\u056b\u056c\u056d\u056e\u056f\u0570\u0571\u0572\u0573\u0574\u0575\u0576\u0577\u0578\u0579\u057a\u057b\u057c\u057d\u057e\u057f\u0580\u0581\u0582\u0583\u0584\u0585\u0586\u0587\u1e01\u1e03\u1e05\u1e07\u1e09\u1e0b\u1e0d\u1e0f\u1e11\u1e13\u1e15\u1e17\u1e19\u1e1b\u1e1d\u1e1f\u1e21\u1e23\u1e25\u1e27\u1e29\u1e2b\u1e2d\u1e2f\u1e31\u1e33\u1e35\u1e37\u1e39\u1e3b\u1e3d\u1e3f\u1e41\u1e43\u1e45\u1e47\u1e49\u1e4b\u1e4d\u1e4f\u1e51\u1e53\u1e55\u1e57\u1e59\u1e5b\u1e5d\u1e5f\u1e61\u1e63\u1e65\u1e67\u1e69\u1e6b\u1e6d\u1e6f\u1e71\u1e73\u1e75\u1e77\u1e79\u1e7b\u1e7d\u1e7f\u1e81\u1e83\u1e85\u1e87\u1e89\u1e8b\u1e8d\u1e8f\u1e91\u1e93\u1e95\u1e96\u1e97\u1e98\u1e99\u1e9a\u1e9b\u1ea1\u1ea3\u1ea5\u1ea7\u1ea9\u1eab\u1ead\u1eaf\u1eb1\u1eb3\u1eb5\u1eb7\u1eb9\u1ebb\u1ebd\u1ebf\u1ec1\u1ec3\u1ec5\u1ec7\u1ec9\u1ecb\u1ecd\u1ecf\u1ed1\u1ed3\u1ed5\u1ed7\u1ed9\u1edb\u1edd\u1edf\u1ee1\u1ee3\u1ee5\u1ee7\u1ee9\u1eeb\u1eed\u1eef\u1ef1\u1ef3\u1ef5\u1ef7\u1ef9\u1f00\u1f01\u1f02\u1f03\u1f04\u1f05\u1f06\u1f07\u1f10\u1f11\u1f12\u1f13\u1f14\u1f15\u1f20\u1f21\u1f22\u1f23\u1f24\u1f25\u1f26\u1f27\u1f30\u1f31\u1f32\u1f33\u1f34\u1f35\u1f36\u1f37\u1f40\u1f41\u1f42\u1f43\u1f44\u1f45\u1f50\u1f51\u1f52\u1f53\u1f54\u1f55\u1f56\u1f57\u1f60\u1f61\u1f62\u1f63\u1f64\u1f65\u1f66\u1f67\u1f70\u1f71\u1f72\u1f73\u1f74\u1f75\u1f76\u1f77\u1f78\u1f79\u1f7a\u1f7b\u1f7c\u1f7d\u1f80\u1f81\u1f82\u1f83\u1f84\u1f85\u1f86\u1f87\u1f90\u1f91\u1f92\u1f93\u1f94\u1f95\u1f96\u1f97\u1fa0\u1fa1\u1fa2\u1fa3\u1fa4\u1fa5\u1fa6\u1fa7\u1fb0\u1fb1\u1fb2\u1fb3\u1fb4\u1fb6\u1fb7\u1fbe\u1fc2\u1fc3\u1fc4\u1fc6\u1fc7\u1fd0\u1fd1\u1fd2\u1fd3\u1fd6\u1fd7\u1fe0\u1fe1\u1fe2\u1fe3\u1fe4\u1fe5\u1fe6\u1fe7\u1ff2\u1ff3\u1ff4\u1ff6\u1ff7\u2071\u207f\u210a\u210e\u210f\u2113\u212f\u2134\u2139\u213d\u2146\u2147\u2148\u2149\ufb00\ufb01\ufb02\ufb03\ufb04\ufb05\ufb06\ufb13\ufb14\ufb15\ufb16\ufb17\uff41\uff42\uff43\uff44\uff45\uff46\uff47\uff48\uff49\uff4a\uff4b\uff4c\uff4d\uff4e\uff4f\uff50\uff51\uff52\uff53\uff54\uff55\uff56\uff57\uff58\uff59\uff5a'
+UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd8\xd9\xda\xdb\xdc\xdd\xde\u0100\u0102\u0104\u0106\u0108\u010a\u010c\u010e\u0110\u0112\u0114\u0116\u0118\u011a\u011c\u011e\u0120\u0122\u0124\u0126\u0128\u012a\u012c\u012e\u0130\u0132\u0134\u0136\u0139\u013b\u013d\u013f\u0141\u0143\u0145\u0147\u014a\u014c\u014e\u0150\u0152\u0154\u0156\u0158\u015a\u015c\u015e\u0160\u0162\u0164\u0166\u0168\u016a\u016c\u016e\u0170\u0172\u0174\u0176\u0178\u0179\u017b\u017d\u0181\u0182\u0184\u0186\u0187\u0189\u018a\u018b\u018e\u018f\u0190\u0191\u0193\u0194\u0196\u0197\u0198\u019c\u019d\u019f\u01a0\u01a2\u01a4\u01a6\u01a7\u01a9\u01ac\u01ae\u01af\u01b1\u01b2\u01b3\u01b5\u01b7\u01b8\u01bc\u01c4\u01c7\u01ca\u01cd\u01cf\u01d1\u01d3\u01d5\u01d7\u01d9\u01db\u01de\u01e0\u01e2\u01e4\u01e6\u01e8\u01ea\u01ec\u01ee\u01f1\u01f4\u01f6\u01f7\u01f8\u01fa\u01fc\u01fe\u0200\u0202\u0204\u0206\u0208\u020a\u020c\u020e\u0210\u0212\u0214\u0216\u0218\u021a\u021c\u021e\u0220\u0222\u0224\u0226\u0228\u022a\u022c\u022e\u0230\u0232\u0386\u0388\u0389\u038a\u038c\u038e\u038f\u0391\u0392\u0393\u0394\u0395\u0396\u0397\u0398\u0399\u039a\u039b\u039c\u039d\u039e\u039f\u03a0\u03a1\u03a3\u03a4\u03a5\u03a6\u03a7\u03a8\u03a9\u03aa\u03ab\u03d2\u03d3\u03d4\u03d8\u03da\u03dc\u03de\u03e0\u03e2\u03e4\u03e6\u03e8\u03ea\u03ec\u03ee\u03f4\u0400\u0401\u0402\u0403\u0404\u0405\u0406\u0407\u0408\u0409\u040a\u040b\u040c\u040d\u040e\u040f\u0410\u0411\u0412\u0413\u0414\u0415\u0416\u0417\u0418\u0419\u041a\u041b\u041c\u041d\u041e\u041f\u0420\u0421\u0422\u0423\u0424\u0425\u0426\u0427\u0428\u0429\u042a\u042b\u042c\u042d\u042e\u042f\u0460\u0462\u0464\u0466\u0468\u046a\u046c\u046e\u0470\u0472\u0474\u0476\u0478\u047a\u047c\u047e\u0480\u048a\u048c\u048e\u0490\u0492\u0494\u0496\u0498\u049a\u049c\u049e\u04a0\u04a2\u04a4\u04a6\u04a8\u04aa\u04ac\u04ae\u04b0\u04b2\u04b4\u04b6\u04b8\u04ba\u04bc\u04be\u04c0\u04c1\u04c3\u04c5\u04c7\u04c9\u04cb\u04cd\u04d0\u04d2\u04d4\u04d6\u04d8\u04da\u04dc\u04de\u04e0\u04e2\u04e4\u04e6\u04e8\u04ea\u04ec\u04ee\u04f0\u04f2\u04f4\u04f8\u0500\u0502\u0504\u0506\u0508\u050a\u050c\u050e\u0531\u0532\u0533\u0534\u0535\u0536\u0537\u0538\u0539\u053a\u053b\u053c\u053d\u053e\u053f\u0540\u0541\u0542\u0543\u0544\u0545\u0546\u0547\u0548\u0549\u054a\u054b\u054c\u054d\u054e\u054f\u0550\u0551\u0552\u0553\u0554\u0555\u0556\u10a0\u10a1\u10a2\u10a3\u10a4\u10a5\u10a6\u10a7\u10a8\u10a9\u10aa\u10ab\u10ac\u10ad\u10ae\u10af\u10b0\u10b1\u10b2\u10b3\u10b4\u10b5\u10b6\u10b7\u10b8\u10b9\u10ba\u10bb\u10bc\u10bd\u10be\u10bf\u10c0\u10c1\u10c2\u10c3\u10c4\u10c5\u1e00\u1e02\u1e04\u1e06\u1e08\u1e0a\u1e0c\u1e0e\u1e10\u1e12\u1e14\u1e16\u1e18\u1e1a\u1e1c\u1e1e\u1e20\u1e22\u1e24\u1e26\u1e28\u1e2a\u1e2c\u1e2e\u1e30\u1e32\u1e34\u1e36\u1e38\u1e3a\u1e3c\u1e3e\u1e40\u1e42\u1e44\u1e46\u1e48\u1e4a\u1e4c\u1e4e\u1e50\u1e52\u1e54\u1e56\u1e58\u1e5a\u1e5c\u1e5e\u1e60\u1e62\u1e64\u1e66\u1e68\u1e6a\u1e6c\u1e6e\u1e70\u1e72\u1e74\u1e76\u1e78\u1e7a\u1e7c\u1e7e\u1e80\u1e82\u1e84\u1e86\u1e88\u1e8a\u1e8c\u1e8e\u1e90\u1e92\u1e94\u1ea0\u1ea2\u1ea4\u1ea6\u1ea8\u1eaa\u1eac\u1eae\u1eb0\u1eb2\u1eb4\u1eb6\u1eb8\u1eba\u1ebc\u1ebe\u1ec0\u1ec2\u1ec4\u1ec6\u1ec8\u1eca\u1ecc\u1ece\u1ed0\u1ed2\u1ed4\u1ed6\u1ed8\u1eda\u1edc\u1ede\u1ee0\u1ee2\u1ee4\u1ee6\u1ee8\u1eea\u1eec\u1eee\u1ef0\u1ef2\u1ef4\u1ef6\u1ef8\u1f08\u1f09\u1f0a\u1f0b\u1f0c\u1f0d\u1f0e\u1f0f\u1f18\u1f19\u1f1a\u1f1b\u1f1c\u1f1d\u1f28\u1f29\u1f2a\u1f2b\u1f2c\u1f2d\u1f2e\u1f2f\u1f38\u1f39\u1f3a\u1f3b\u1f3c\u1f3d\u1f3e\u1f3f\u1f48\u1f49\u1f4a\u1f4b\u1f4c\u1f4d\u1f59\u1f5b\u1f5d\u1f5f\u1f68\u1f69\u1f6a\u1f6b\u1f6c\u1f6d\u1f6e\u1f6f\u1fb8\u1fb9\u1fba\u1fbb\u1fc8\u1fc9\u1fca\u1fcb\u1fd8\u1fd9\u1fda\u1fdb\u1fe8\u1fe9\u1fea\u1feb\u1fec\u1ff8\u1ff9\u1ffa\u1ffb\u2102\u2107\u210b\u210c\u210d\u2110\u2111\u2112\u2115\u2119\u211a\u211b\u211c\u211d\u2124\u2126\u2128\u212a\u212b\u212c\u212d\u2130\u2131\u2133\u213e\u213f\u2145\uff21\uff22\uff23\uff24\uff25\uff26\uff27\uff28\uff29\uff2a\uff2b\uff2c\uff2d\uff2e\uff2f\uff30\uff31\uff32\uff33\uff34\uff35\uff36\uff37\uff38\uff39\uff3a'
 
 
 
 _COLORBASE = {
-    u"aliceblue": "#f0f8ff",
-    u"antiquewhite": "#faebd7",
-    u"aqua": "#00ffff",
-    u"aquamarine": "#7fffd4",
-    u"azure": "#f0ffff",
-    u"beige": "#f5f5dc",
-    u"bisque": "#ffe4c4",
-    u"black": "#000000",
-    u"blanchedalmond": "#ffebcd",
-    u"blue": "#0000ff",
-    u"blueviolet": "#8a2be2",
-    u"brown": "#a52a2a",
-    u"burlywood": "#deb887",
-    u"cadetblue": "#5f9ea0",
-    u"chartreuse": "#7fff00",
-    u"chocolate": "#d2691e",
-    u"coral": "#ff7f50",
-    u"cornflowerblue": "#6495ed",
-    u"cornsilk": "#fff8dc",
-    u"crimson": "#dc143c",
-    u"cyan": "#00ffff",
-    u"darkblue": "#00008b",
-    u"darkcyan": "#008b8b",
-    u"darkgoldenrod": "#b8860b",
-    u"darkgray": "#a9a9a9",
-    u"darkgrey": "#a9a9a9",
-    u"darkgreen": "#006400",
-    u"darkkhaki": "#bdb76b",
-    u"darkmagenta": "#8b008b",
-    u"darkolivegreen": "#556b2f",
-    u"darkorange": "#ff8c00",
-    u"darkorchid": "#9932cc",
-    u"darkred": "#8b0000",
-    u"darksalmon": "#e9967a",
-    u"darkseagreen": "#8fbc8f",
-    u"darkslateblue": "#483d8b",
-    u"darkslategray": "#2f4f4f",
-    u"darkslategrey": "#2f4f4f",
-    u"darkturquoise": "#00ced1",
-    u"darkviolet": "#9400d3",
-    u"deeppink": "#ff1493",
-    u"deepskyblue": "#00bfff",
-    u"dimgray": "#696969",
-    u"dimgrey": "#696969",
-    u"dodgerblue": "#1e90ff",
-    u"firebrick": "#b22222",
-    u"floralwhite": "#fffaf0",
-    u"forestgreen": "#228b22",
-    u"fuchsia": "#ff00ff",
-    u"gainsboro": "#dcdcdc",
-    u"ghostwhite": "#f8f8ff",
-    u"gold": "#ffd700",
-    u"goldenrod": "#daa520",
-    u"gray": "#808080",
-    u"grey": "#808080",
-    u"green": "#008000",
-    u"greenyellow": "#adff2f",
-    u"honeydew": "#f0fff0",
-    u"hotpink": "#ff69b4",
-    u"indianred": "#cd5c5c",
-    u"indigo": "#4b0082",
-    u"ivory": "#fffff0",
-    u"khaki": "#f0e68c",
-    u"lavender": "#e6e6fa",
-    u"lavenderblush": "#fff0f5",
-    u"lawngreen": "#7cfc00",
-    u"lemonchiffon": "#fffacd",
-    u"lightblue": "#add8e6",
-    u"lightcoral": "#f08080",
-    u"lightcyan": "#e0ffff",
-    u"lightgoldenrodyellow": "#fafad2",
-    u"lightgray": "#d3d3d3",
-    u"lightgrey": "#d3d3d3",
-    u"lightgreen": "#90ee90",
-    u"lightpink": "#ffb6c1",
-    u"lightsalmon": "#ffa07a",
-    u"lightseagreen": "#20b2aa",
-    u"lightskyblue": "#87cefa",
-    u"lightslategray": "#778899",
-    u"lightslategrey": "#778899",
-    u"lightsteelblue": "#b0c4de",
-    u"lightyellow": "#ffffe0",
-    u"lime": "#00ff00",
-    u"limegreen": "#32cd32",
-    u"linen": "#faf0e6",
-    u"magenta": "#ff00ff",
-    u"maroon": "#800000",
-    u"mediumaquamarine": "#66cdaa",
-    u"mediumblue": "#0000cd",
-    u"mediumorchid": "#ba55d3",
-    u"mediumpurple": "#9370d8",
-    u"mediumseagreen": "#3cb371",
-    u"mediumslateblue": "#7b68ee",
-    u"mediumspringgreen": "#00fa9a",
-    u"mediumturquoise": "#48d1cc",
-    u"mediumvioletred": "#c71585",
-    u"midnightblue": "#191970",
-    u"mintcream": "#f5fffa",
-    u"mistyrose": "#ffe4e1",
-    u"moccasin": "#ffe4b5",
-    u"navajowhite": "#ffdead",
-    u"navy": "#000080",
-    u"oldlace": "#fdf5e6",
-    u"olive": "#808000",
-    u"olivedrab": "#6b8e23",
-    u"orange": "#ffa500",
-    u"orangered": "#ff4500",
-    u"orchid": "#da70d6",
-    u"palegoldenrod": "#eee8aa",
-    u"palegreen": "#98fb98",
-    u"paleturquoise": "#afeeee",
-    u"palevioletred": "#d87093",
-    u"papayawhip": "#ffefd5",
-    u"peachpuff": "#ffdab9",
-    u"peru": "#cd853f",
-    u"pink": "#ffc0cb",
-    u"plum": "#dda0dd",
-    u"powderblue": "#b0e0e6",
-    u"purple": "#800080",
-    u"red": "#ff0000",
-    u"rosybrown": "#bc8f8f",
-    u"royalblue": "#4169e1",
-    u"saddlebrown": "#8b4513",
-    u"salmon": "#fa8072",
-    u"sandybrown": "#f4a460",
-    u"seagreen": "#2e8b57",
-    u"seashell": "#fff5ee",
-    u"sienna": "#a0522d",
-    u"silver": "#c0c0c0",
-    u"skyblue": "#87ceeb",
-    u"slateblue": "#6a5acd",
-    u"slategray": "#708090",
-    u"slategrey": "#708090",
-    u"snow": "#fffafa",
-    u"springgreen": "#00ff7f",
-    u"steelblue": "#4682b4",
-    u"tan": "#d2b48c",
-    u"teal": "#008080",
-    u"thistle": "#d8bfd8",
-    u"tomato": "#ff6347",
-    u"turquoise": "#40e0d0",
-    u"violet": "#ee82ee",
-    u"wheat": "#f5deb3",
-    u"white": "#ffffff",
-    u"whitesmoke": "#f5f5f5",
-    u"yellow": "#ffff00",
-    u"yellowgreen": "#9acd32"
+    "aliceblue": "#f0f8ff",
+    "antiquewhite": "#faebd7",
+    "aqua": "#00ffff",
+    "aquamarine": "#7fffd4",
+    "azure": "#f0ffff",
+    "beige": "#f5f5dc",
+    "bisque": "#ffe4c4",
+    "black": "#000000",
+    "blanchedalmond": "#ffebcd",
+    "blue": "#0000ff",
+    "blueviolet": "#8a2be2",
+    "brown": "#a52a2a",
+    "burlywood": "#deb887",
+    "cadetblue": "#5f9ea0",
+    "chartreuse": "#7fff00",
+    "chocolate": "#d2691e",
+    "coral": "#ff7f50",
+    "cornflowerblue": "#6495ed",
+    "cornsilk": "#fff8dc",
+    "crimson": "#dc143c",
+    "cyan": "#00ffff",
+    "darkblue": "#00008b",
+    "darkcyan": "#008b8b",
+    "darkgoldenrod": "#b8860b",
+    "darkgray": "#a9a9a9",
+    "darkgrey": "#a9a9a9",
+    "darkgreen": "#006400",
+    "darkkhaki": "#bdb76b",
+    "darkmagenta": "#8b008b",
+    "darkolivegreen": "#556b2f",
+    "darkorange": "#ff8c00",
+    "darkorchid": "#9932cc",
+    "darkred": "#8b0000",
+    "darksalmon": "#e9967a",
+    "darkseagreen": "#8fbc8f",
+    "darkslateblue": "#483d8b",
+    "darkslategray": "#2f4f4f",
+    "darkslategrey": "#2f4f4f",
+    "darkturquoise": "#00ced1",
+    "darkviolet": "#9400d3",
+    "deeppink": "#ff1493",
+    "deepskyblue": "#00bfff",
+    "dimgray": "#696969",
+    "dimgrey": "#696969",
+    "dodgerblue": "#1e90ff",
+    "firebrick": "#b22222",
+    "floralwhite": "#fffaf0",
+    "forestgreen": "#228b22",
+    "fuchsia": "#ff00ff",
+    "gainsboro": "#dcdcdc",
+    "ghostwhite": "#f8f8ff",
+    "gold": "#ffd700",
+    "goldenrod": "#daa520",
+    "gray": "#808080",
+    "grey": "#808080",
+    "green": "#008000",
+    "greenyellow": "#adff2f",
+    "honeydew": "#f0fff0",
+    "hotpink": "#ff69b4",
+    "indianred": "#cd5c5c",
+    "indigo": "#4b0082",
+    "ivory": "#fffff0",
+    "khaki": "#f0e68c",
+    "lavender": "#e6e6fa",
+    "lavenderblush": "#fff0f5",
+    "lawngreen": "#7cfc00",
+    "lemonchiffon": "#fffacd",
+    "lightblue": "#add8e6",
+    "lightcoral": "#f08080",
+    "lightcyan": "#e0ffff",
+    "lightgoldenrodyellow": "#fafad2",
+    "lightgray": "#d3d3d3",
+    "lightgrey": "#d3d3d3",
+    "lightgreen": "#90ee90",
+    "lightpink": "#ffb6c1",
+    "lightsalmon": "#ffa07a",
+    "lightseagreen": "#20b2aa",
+    "lightskyblue": "#87cefa",
+    "lightslategray": "#778899",
+    "lightslategrey": "#778899",
+    "lightsteelblue": "#b0c4de",
+    "lightyellow": "#ffffe0",
+    "lime": "#00ff00",
+    "limegreen": "#32cd32",
+    "linen": "#faf0e6",
+    "magenta": "#ff00ff",
+    "maroon": "#800000",
+    "mediumaquamarine": "#66cdaa",
+    "mediumblue": "#0000cd",
+    "mediumorchid": "#ba55d3",
+    "mediumpurple": "#9370d8",
+    "mediumseagreen": "#3cb371",
+    "mediumslateblue": "#7b68ee",
+    "mediumspringgreen": "#00fa9a",
+    "mediumturquoise": "#48d1cc",
+    "mediumvioletred": "#c71585",
+    "midnightblue": "#191970",
+    "mintcream": "#f5fffa",
+    "mistyrose": "#ffe4e1",
+    "moccasin": "#ffe4b5",
+    "navajowhite": "#ffdead",
+    "navy": "#000080",
+    "oldlace": "#fdf5e6",
+    "olive": "#808000",
+    "olivedrab": "#6b8e23",
+    "orange": "#ffa500",
+    "orangered": "#ff4500",
+    "orchid": "#da70d6",
+    "palegoldenrod": "#eee8aa",
+    "palegreen": "#98fb98",
+    "paleturquoise": "#afeeee",
+    "palevioletred": "#d87093",
+    "papayawhip": "#ffefd5",
+    "peachpuff": "#ffdab9",
+    "peru": "#cd853f",
+    "pink": "#ffc0cb",
+    "plum": "#dda0dd",
+    "powderblue": "#b0e0e6",
+    "purple": "#800080",
+    "red": "#ff0000",
+    "rosybrown": "#bc8f8f",
+    "royalblue": "#4169e1",
+    "saddlebrown": "#8b4513",
+    "salmon": "#fa8072",
+    "sandybrown": "#f4a460",
+    "seagreen": "#2e8b57",
+    "seashell": "#fff5ee",
+    "sienna": "#a0522d",
+    "silver": "#c0c0c0",
+    "skyblue": "#87ceeb",
+    "slateblue": "#6a5acd",
+    "slategray": "#708090",
+    "slategrey": "#708090",
+    "snow": "#fffafa",
+    "springgreen": "#00ff7f",
+    "steelblue": "#4682b4",
+    "tan": "#d2b48c",
+    "teal": "#008080",
+    "thistle": "#d8bfd8",
+    "tomato": "#ff6347",
+    "turquoise": "#40e0d0",
+    "violet": "#ee82ee",
+    "wheat": "#f5deb3",
+    "white": "#ffffff",
+    "whitesmoke": "#f5f5f5",
+    "yellow": "#ffff00",
+    "yellowgreen": "#9acd32"
 }
 
 

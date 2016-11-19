@@ -5,6 +5,7 @@
 :Copyright: Aaron Robert Watters, 1994
 :Id: $Id: kjbuckets0.py,v 1.1 2006/01/07 15:01:24 Michael Butscher Exp $:
 """
+from functools import reduce
 
 ### needs more thorough testing!
 
@@ -29,7 +30,7 @@ class kjGraph:
         #print args
         if args:
             if len(args)>1:
-                raise ValueError, "only 1 or 0 argument supported"
+                raise ValueError("only 1 or 0 argument supported")
             from types import IntType, ListType, TupleType
             arg = args[0]
             targ = type(arg)
@@ -46,24 +47,24 @@ class kjGraph:
             aclass = arg.__class__
             if aclass is kjGraph:
                 aktl = arg.key_to_list
-                for k in aktl.keys():
+                for k in list(aktl.keys()):
                     key_to_list[k] = aktl[k][:]
                 return
             if aclass is kjDict or aclass is kjSet:
                 adict = arg.dict
-                for k in adict.keys():
+                for k in list(adict.keys()):
                     key_to_list[k] = [ adict[k] ]
                 return
-            raise ValueError, "arg for kjGraph must be tuple, list, or kjTable"
+            raise ValueError("arg for kjGraph must be tuple, list, or kjTable")
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.items())
+        return "%s(%s)" % (self.__class__.__name__, list(self.items()))
 
     def _setitems(self, thing):
         #print "kjGraph._setitem", thing
         #print "setitems", thing
         if self.hashed is not None:
-            raise ValueError, "table has been hashed, it is immutable"
+            raise ValueError("table has been hashed, it is immutable")
         try:
             for (k,v) in thing:
                 #print k,v, "going"
@@ -84,13 +85,13 @@ class kjGraph:
             if kjtabletest(thing):
                 self._setitems(thing._pairs())
                 self.dirty = thing.dirty
-            else: raise ValueError, "cannot setitems with %s" % type(thing)
+            else: raise ValueError("cannot setitems with %s" % type(thing))
         except unhashable:
-            raise TypeError, "unhashable type"
+            raise TypeError("unhashable type")
 
     def __setitem__(self, item, value):
         ktl = self.key_to_list
-        if ktl.has_key(item):
+        if item in ktl:
             l = ktl[item]
             if value not in l:
                 l.append(value)
@@ -105,10 +106,10 @@ class kjGraph:
         del self.key_to_list[item]
 
     def choose_key(self):
-        return self.key_to_list.keys()[0]
+        return list(self.key_to_list.keys())[0]
 
     def _pairs(self, justtot=0):
-        myitems = self.key_to_list.items()
+        myitems = list(self.key_to_list.items())
         tot = 0
         for (k, v) in myitems:
             tot = tot + len(v)
@@ -123,8 +124,8 @@ class kjGraph:
         return result
 
     def __len__(self):
-        v = self.key_to_list.values()
-        lv = map(len, v)
+        v = list(self.key_to_list.values())
+        lv = list(map(len, v))
         from operator import add
         return reduce(add, lv, 0)
 
@@ -132,9 +133,9 @@ class kjGraph:
         return self._pairs()
 
     def values(self):
-        v = self.key_to_list.values()
+        v = list(self.key_to_list.values())
         from operator import add
-        tot = reduce(add, map(len, v), 0)
+        tot = reduce(add, list(map(len, v)), 0)
         result = [None] * tot
         count = 0
         for l in v:
@@ -144,11 +145,11 @@ class kjGraph:
         return result
 
     def keys(self):
-        return self.key_to_list.keys()
+        return list(self.key_to_list.keys())
 
     def member(self, k, v):
         ktl = self.key_to_list
-        if ktl.has_key(k):
+        if k in ktl:
             return v in ktl[k]
         return 0
 
@@ -156,7 +157,7 @@ class kjGraph:
 
     def add(self, k, v):
         ktl = self.key_to_list
-        if ktl.has_key(k):
+        if k in ktl:
             l = ktl[k]
             if v not in l:
                 l.append(v)
@@ -166,7 +167,7 @@ class kjGraph:
     def delete_arc(self, k, v):
         self.dirty = 1
         if self.hashed is not None:
-            raise ValueError, "table has been hashed, it is  immutable"
+            raise ValueError("table has been hashed, it is  immutable")
         try:
             l = self.key_to_list[k]
             i = l.index(v)
@@ -174,10 +175,10 @@ class kjGraph:
             if not l:
                 del self.key_to_list[k]
         except:
-            raise KeyError, "not in table"# % (k,v)
+            raise KeyError("not in table")# % (k,v)
 
     def has_key(self, k):
-        return self.key_to_list.has_key(k)
+        return k in self.key_to_list
 
     def subset(self, other):
         oc = other.__class__
@@ -185,7 +186,7 @@ class kjGraph:
             oktl = other.key_to_list
             sktl = self.key_to_list
             otest = oktl.has_key
-            for k in sktl.keys():
+            for k in list(sktl.keys()):
                 if otest(k):
                     l = sktl[k]
                     ol = oktl[k]
@@ -199,7 +200,7 @@ class kjGraph:
             sktl = self.key_to_list
             odict = other.dict
             otest = odict.has_key
-            for k in sktl.keys():
+            for k in list(sktl.keys()):
                 if otest(k):
                     l = sktl[k]
                     ov = odict[k]
@@ -229,11 +230,11 @@ class kjGraph:
                 newhorizon = []
                 for n in horizon:
                     for n2 in self.neighbors(n):
-                        if not d.has_key(n2):
+                        if n2 not in d:
                             newhorizon.append(n2)
                             d[n2] = 1
                 horizon = newhorizon
-            return kjSet(d.keys())
+            return kjSet(list(d.keys()))
 
     # ????
     def ident(self):
@@ -246,11 +247,11 @@ class kjGraph:
         try:
             raise self
         except (kjSet, kjDict):
-            raise ValueError, "tclosure only defined on graphs"
+            raise ValueError("tclosure only defined on graphs")
         except kjGraph:
             pass
         except:
-            raise ValueError, "tclosure only defined on graphs"
+            raise ValueError("tclosure only defined on graphs")
         result = kjGraph(self)
         result.dirty = self.dirty
         addit = result.add
@@ -259,7 +260,7 @@ class kjGraph:
             more = result*result
             if more.subset(result):
                 return result
-            for (x,y) in more.items():
+            for (x,y) in list(more.items()):
                 addit(x,y)
 
     def Clean(self):
@@ -277,7 +278,7 @@ class kjGraph:
         return kjDict(X*self).Clean()
 
     def dump(self, seq):
-        result = map(None, seq)
+        result = list(seq)
         for i in range(len(result)):
             result[i] = self[result[i]]
         if len(seq) == 1:
@@ -289,7 +290,7 @@ class kjGraph:
         if self.hashed is not None:
             return self.hashed
         items = self._pairs()
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             (a,b) = items[i]
             try:
                 b = hash(b)
@@ -313,7 +314,7 @@ class kjGraph:
         oi.sort()
         return cmp(si, oi)
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self.key_to_list: return 1
         return 0
 
@@ -325,7 +326,7 @@ class kjGraph:
         oc = other.__class__
         if oc is kjGraph:
             oktl = other.key_to_list
-            for k in oktl.keys():
+            for k in list(oktl.keys()):
                 l = oktl[k]
                 if rtest(k):
                     rl = rktl[k]
@@ -336,7 +337,7 @@ class kjGraph:
                     rktl[k] = l[:]
         elif oc is kjSet or oc is kjDict:
             odict = other.dict
-            for k in odict.keys():
+            for k in list(odict.keys()):
                 ov = odict[k]
                 if rtest(k):
                     rl = rktl[k]
@@ -345,7 +346,7 @@ class kjGraph:
                 else:
                     rktl[k] = [ov]
         else:
-            raise ValueError, "kjGraph adds only with kjTable"
+            raise ValueError("kjGraph adds only with kjTable")
         return result
 
     __or__ = __add__
@@ -358,7 +359,7 @@ class kjGraph:
         if oc is kjGraph:
             oktl = other.key_to_list
             otest = oktl.has_key
-            for k in sktl.keys():
+            for k in list(sktl.keys()):
                 l = sktl[k][:]
                 if otest(k):
                     ol = oktl[k]
@@ -372,7 +373,7 @@ class kjGraph:
         elif oc is kjSet or oc is kjDict:
             odict = other.dict
             otest = odict.has_key
-            for k in sktl.keys():
+            for k in list(sktl.keys()):
                 l = sktl[k][:]
                 if otest(k):
                     ov = odict[k]
@@ -381,7 +382,7 @@ class kjGraph:
                 if l:
                     rktl[k] = l
         else:
-            raise ValueError, "kjGraph diffs only with kjTable"
+            raise ValueError("kjGraph diffs only with kjTable")
         return result
 
     def __mul__(self, other):
@@ -392,7 +393,7 @@ class kjGraph:
         if oc is kjGraph:
             oktl = other.key_to_list
             otest = other.has_key
-            for sk in sktl.keys():
+            for sk in list(sktl.keys()):
                 sklist = []
                 for sv in sktl[sk]:
                     if otest(sv):
@@ -402,7 +403,7 @@ class kjGraph:
         elif oc is kjSet or oc is kjDict:
             odict = other.dict
             otest = odict.has_key
-            for sk in sktl.keys():
+            for sk in list(sktl.keys()):
                 sklist=[]
                 for sv in sktl[sk]:
                     if otest(sv):
@@ -410,13 +411,13 @@ class kjGraph:
                 if sklist:
                     rktl[sk] = sklist
         else:
-            raise ValueError, "kjGraph composes only with kjTable"
+            raise ValueError("kjGraph composes only with kjTable")
         return result
 
     def __invert__(self):
         result = self.__class__()
         pairs = self._pairs()
-        for i in xrange(len(pairs)):
+        for i in range(len(pairs)):
             (k,v) = pairs[i]
             pairs[i] = (v,k)
         result._setitems(pairs)
@@ -431,7 +432,7 @@ class kjGraph:
             rktl = result.key_to_list
             oktl = other.key_to_list
             otest = oktl.has_key
-            for k in self.keys():
+            for k in list(self.keys()):
                 if otest(k):
                     l = sktl[k]
                     ol = oktl[k]
@@ -446,14 +447,14 @@ class kjGraph:
             rdict = result.dict
             odict = other.dict
             stest = sktl.has_key
-            for k in odict.keys():
+            for k in list(odict.keys()):
                 if stest(k):
                     v = odict[k]
                     l = sktl[k]
                     if v in l:
                         rdict[k] = v
         else:
-            raise ValueError, "kjGraph intersects only with kjTable"
+            raise ValueError("kjGraph intersects only with kjTable")
         result.dirty = self.dirty or other.dirty
         return result
 
@@ -484,7 +485,7 @@ class kjDict(kjGraph):
             argc = arg0.__class__
             if argc is kjGraph:
                 ktl = arg0.key_to_list
-                for k in ktl.keys():
+                for k in list(ktl.keys()):
                     l = ktl[k]
                     if len(l)>1: self.dirty=1
                     for v in l:
@@ -492,19 +493,19 @@ class kjDict(kjGraph):
                 return
             if argc is kjSet or argc is kjDict:
                 adict = arg0.dict
-                for (k,v) in adict.items():
+                for (k,v) in list(adict.items()):
                     dict[k]=v
                 return
-        raise ValueError, "kjDict initializes only from list, tuple, kjTable, or int"
+        raise ValueError("kjDict initializes only from list, tuple, kjTable, or int")
 
     def _setitems(self, thing):
         #print "kjDict._setitem", thing
         if self.hashed is not None:
-            raise KeyError, "table hashed, cannot modify"
+            raise KeyError("table hashed, cannot modify")
         dict = self.dict
         try:
             for (k,v) in thing:
-                if dict.has_key(k) and dict[k]!=v:
+                if k in dict and dict[k]!=v:
                     self.dirty = 1
                 dict[k] = v
         except:
@@ -517,15 +518,15 @@ class kjDict(kjGraph):
         else:
             sdict = self.dict
             result = [None] * ld
-            for i in xrange(ld):
+            for i in range(ld):
                 result[i] = sdict[ dumper[i] ]
             return tuple(result)
 
     def __setitem__(self, item, value):
         if self.hashed is not None:
-            raise ValueError, "table has been hashed, it is immutable"
+            raise ValueError("table has been hashed, it is immutable")
         d = self.dict
-        if d.has_key(item):
+        if item in d:
             if d[item]!=value:
                 self.dirty = 1
         self.dict[item]=value
@@ -535,28 +536,28 @@ class kjDict(kjGraph):
 
     def __delitem__(self, item):
         if self.hashed is not None:
-            raise ValueError, "table has been hashed, it is immutable"
+            raise ValueError("table has been hashed, it is immutable")
         self.dirty = 1
         del self.dict[item]
 
     def choose_key(self):
-        return self.dict.keys()[0]
+        return list(self.dict.keys())[0]
 
     def __len__(self):
         return len(self.dict)
 
     def _pairs(self, justtot=0):
         if justtot: return len(self.dict)
-        return self.dict.items()
+        return list(self.dict.items())
 
     def values(self):
-        return self.dict.values()
+        return list(self.dict.values())
 
     def keys(self):
-        return self.dict.keys()
+        return list(self.dict.keys())
 
     def items(self):
-        return self.dict.items()
+        return list(self.dict.items())
 
     def remap(self, X):
         if X.__class__ is kjGraph:
@@ -567,7 +568,7 @@ class kjDict(kjGraph):
             inself = selfd.has_key
             inresult = resultd.has_key
             ktl = X.key_to_list
-            for k in ktl.keys():
+            for k in list(ktl.keys()):
                 for v in ktl[k]:
                     if inself(v):
                         map = selfd[v]
@@ -602,10 +603,10 @@ class kjDict(kjGraph):
             rdict = result.dict
             rtest = result.has_key
             sdict = s.dict
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 rdict[k] = sdict[k]
             odict = o.dict
-            for k in odict.keys():
+            for k in list(odict.keys()):
                 if rtest(k):
                     if rdict[k]!=odict[k]:
                         result.dirty=1
@@ -615,7 +616,7 @@ class kjDict(kjGraph):
         if oc is kjGraph:
             return kjGraph.__add__(o,s)
         else:
-            raise ValueError, "kjDict unions only with kjTable"
+            raise ValueError("kjDict unions only with kjTable")
 
     __or__ = __add__
 
@@ -628,7 +629,7 @@ class kjDict(kjGraph):
             odict = o.dict
             sdict = s.dict
             stest = sdict.has_key
-            for k in odict.keys():
+            for k in list(odict.keys()):
                 v = odict[k]
                 if stest(k) and sdict[k]==v:
                     rdict[k] = v
@@ -646,7 +647,7 @@ class kjDict(kjGraph):
         if oc is kjDict:
             odict = o.dict
             otest = odict.has_key
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 v = sdict[k]
                 if otest(k):
                     if odict[k]!=v:
@@ -657,7 +658,7 @@ class kjDict(kjGraph):
         if oc is kjGraph:
             oktl = o.key_to_list
             otest = oktl.has_key
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 v = sdict[k]
                 if otest(k):
                     if v not in oktl[k]:
@@ -665,7 +666,7 @@ class kjDict(kjGraph):
                 else:
                     rdict[k] = v
             return result
-        raise ValueError, "kjDict only diffs with kjGraph, kjDict"
+        raise ValueError("kjDict only diffs with kjGraph, kjDict")
 
     def __mul__(s,o):
         oc = o.__class__
@@ -676,7 +677,7 @@ class kjDict(kjGraph):
             rdict = result.dict
             odict = o.dict
             otest = odict.has_key
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 kv = sdict[k]
                 if otest(kv):
                     rdict[k] = odict[kv]
@@ -684,7 +685,7 @@ class kjDict(kjGraph):
         elif oc is kjGraph:
             return kjGraph(s) * o
         else:
-            raise ValueError, "kjDict only composes with kjTable"
+            raise ValueError("kjDict only composes with kjTable")
 
     def member(self, k, v):
         d = self.dict
@@ -699,10 +700,10 @@ class kjDict(kjGraph):
         if self.dict[k] == v:
             del self.dict[k]
         else:
-            raise KeyError, "pair not in table"
+            raise KeyError("pair not in table")
 
     def has_key(self, k):
-        return self.dict.has_key(k)
+        return k in self.dict
 
     def neighbors(self, k):
         try:
@@ -715,26 +716,26 @@ class kjDict(kjGraph):
         try:
             while 1:
                 next = d[k]
-                if result.has_key(next): break
+                if next in result: break
                 result[next] = 1
                 k = next
         except KeyError:
             pass
-        return kjSet(result.keys())
+        return kjSet(list(result.keys()))
 
     def __invert__(self):
         result = kjDict()
         dr = result.dict
         drtest = dr.has_key
         ds = self.dict
-        for (a,b) in ds.items():
+        for (a,b) in list(ds.items()):
             if drtest(b):
                 result.dirty=1
             dr[b]=a
         result.dirty = self.dirty or result.dirty
         return result
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self.dict: return 1
         return 0
 
@@ -744,7 +745,7 @@ class kjDict(kjGraph):
         if oc is kjDict or oc is kjSet:
             odict = o.dict
             otest = odict.has_key
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 v = sdict[k]
                 if otest(k):
                     if odict[k]!=v:
@@ -754,7 +755,7 @@ class kjDict(kjGraph):
         elif oc is kjGraph:
             oktl = o.key_to_list
             otest = oktl.has_key
-            for k in sdict.keys():
+            for k in list(sdict.keys()):
                 v = sdict[k]
                 if otest(k):
                     if v not in oktl[k]:
@@ -762,14 +763,14 @@ class kjDict(kjGraph):
                 else:
                     return 0
         else:
-            raise ValueError, "kjDict subset test only for kjTable"
+            raise ValueError("kjDict subset test only for kjTable")
         return 1
 
     def add(s, k, v):
         if s.hashed is not None:
-            raise ValueError, "table has been hashed, immutable"
+            raise ValueError("table has been hashed, immutable")
         sdict = s.dict
-        if sdict.has_key(k):
+        if k in sdict:
             if sdict[k]!=v:
                 s.dirty = 1
         sdict[k] = v
@@ -785,7 +786,7 @@ class kjSet(kjDict):
         largs = len(args)
         if largs<1: return
         if largs>1:
-            raise ValueError, "at most one argument supported"
+            raise ValueError("at most one argument supported")
         from types import IntType, TupleType, ListType
         arg0 = args[0]
         targ0 = type(arg0)
@@ -796,11 +797,11 @@ class kjSet(kjDict):
             return
         argc = arg0.__class__
         if argc is kjDict or argc is kjSet:
-            stuff = arg0.dict.keys()
+            stuff = list(arg0.dict.keys())
         elif argc is kjGraph:
-            stuff = arg0.key_to_list.keys()
+            stuff = list(arg0.key_to_list.keys())
         else:
-            raise ValueError, "kjSet from kjTable, int, list, tuple only"
+            raise ValueError("kjSet from kjTable, int, list, tuple only")
         for x in stuff:
             dict[x] = x
 
@@ -810,9 +811,9 @@ class kjSet(kjDict):
             result = kjSet()
             result.dirty = s.dirty or o.dirty
             rdict = result.dict
-            for x in s.dict.keys():
+            for x in list(s.dict.keys()):
                 rdict[x]=x
-            for x in o.dict.keys():
+            for x in list(o.dict.keys()):
                 rdict[x]=x
             return result
         elif oc is kjDict:
@@ -828,7 +829,7 @@ class kjSet(kjDict):
             result.dirty = s.dirty or o.dirty
             rdict = result.dict
             otest = o.dict.has_key
-            for x in s.dict.keys():
+            for x in list(s.dict.keys()):
                 if not otest(x):
                     rdict[x] = x
             return result
@@ -843,19 +844,19 @@ class kjSet(kjDict):
             rdict = result.dict
             odict = o.dict
             otest = odict.has_key
-            for x in s.dict.keys():
+            for x in list(s.dict.keys()):
                 if otest(x) and odict[x]==x:
                     rdict[x] = x
             return result
         elif oc is kjGraph:
             return kjGraph.__and__(o,s)
-        raise ValueError, "kjSet only intersects with kjTable"
+        raise ValueError("kjSet only intersects with kjTable")
 
     # illegal methods
     values = keys = remap = None
 
     def __repr__(self):
-        return "kjSet(%s)" % self.items()
+        return "kjSet(%s)" % list(self.items())
 
     def _setelts(self, items):
         #print "kjSet.setelts", items
@@ -863,12 +864,12 @@ class kjSet(kjDict):
             items = items._pairs()
         except:
             items = list(items)
-            for i in xrange(len(items)):
+            for i in range(len(items)):
                 items[i] = (items[i], items[i])
             self._setitems(items)
         else:
             items = list(items)
-            for i in xrange(len(items)):
+            for i in range(len(items)):
                 items[i] = (items[i][0], items[i][0])
         self._setitems(items)
         # hack!
@@ -879,7 +880,7 @@ class kjSet(kjDict):
     def _pairs(self, justtot=0):
         if justtot: return kjDict._pairs(self, justtot=1)
         pairs = kjDict.keys(self)
-        for i in xrange(len(pairs)):
+        for i in range(len(pairs)):
             pairs[i] = (pairs[i], pairs[i])
         return pairs
 
@@ -893,19 +894,19 @@ class kjSet(kjDict):
     #reachable = neighbors
 
     def __getitem__(self, item):
-        test = self.dict.has_key(item)
+        test = item in self.dict
         if test: return 1
-        raise KeyError, "item not in set"
+        raise KeyError("item not in set")
 
     def __setitem__(self, item, ignore):
         d = self.dict
         if self.hashed:
-            raise ValueError, "table hashed, immutable"
+            raise ValueError("table hashed, immutable")
         d[item] = item
 
     def add(self, elt):
         if self.hashed:
-            raise ValueError, "table hashed, immutable"
+            raise ValueError("table hashed, immutable")
         self.dict[elt] = elt
 
     def __mul__(s,o):
@@ -933,7 +934,7 @@ def more_general(t1, t2):
     except kjGraph:
         return t1.__class__
     except:
-        raise ValueError, "cannot coerce, not kjtable"
+        raise ValueError("cannot coerce, not kjtable")
 
 def less_general(t1,t2):
     try:
@@ -950,7 +951,7 @@ def less_general(t1,t2):
     except kjGraph:
         return t2.__class__
     except:
-        raise ValueError, "cannot coerce, not kjtable"
+        raise ValueError("cannot coerce, not kjtable")
 
 def kjUndump(t1, t2):
     result = kjDict()
@@ -960,7 +961,7 @@ def kjUndump(t1, t2):
         rdict[t1[0]] = t2
     else:
         # tightly bound to implementation
-        for i in xrange(lt1):
+        for i in range(lt1):
             rdict[t1[i]] = t2[i]
     return result
 

@@ -47,7 +47,7 @@ class TimeViewCtrl(wx.Notebook):
         self.versionPanel.setSubControl("version explorer", vep)
         self.versionPanel.switchSubControl("version explorer")
         
-        self.AddPage(self.versionPanel, _(u"Versions"))
+        self.AddPage(self.versionPanel, _("Versions"))
 
 
         wwh = WikiWideHistoryPanel(self.wwHistoryPanel, -1, self.mainControl)
@@ -55,7 +55,7 @@ class TimeViewCtrl(wx.Notebook):
         self.wwHistoryPanel.setSubControl("wiki wide history", wwh)
         self.wwHistoryPanel.switchSubControl("wiki wide history")
         
-        self.AddPage(self.wwHistoryPanel, _(u"Wiki-wide history"))
+        self.AddPage(self.wwHistoryPanel, _("Wiki-wide history"))
         
         self.notebookPages = [self.modifiedPanel, self.versionPanel,
                 self.wwHistoryPanel]
@@ -67,9 +67,9 @@ class TimeViewCtrl(wx.Notebook):
         lastTab = self.mainControl.getConfig().get("main",
                 "timeView_lastSelectedTab")
 
-        if lastTab == u"version":
+        if lastTab == "version":
             tabIdx = 1
-        elif lastTab == u"wiki wide history":
+        elif lastTab == "wiki wide history":
             tabIdx = 2
         else:
             tabIdx = 0
@@ -87,7 +87,7 @@ class TimeViewCtrl(wx.Notebook):
     def close(self):
         """
         """
-        lastTab = (u"modified", u"version", u"wiki wide history")[
+        lastTab = ("modified", "version", "wiki wide history")[
                 self.GetSelection()]
 
         self.mainControl.getConfig().set("main",
