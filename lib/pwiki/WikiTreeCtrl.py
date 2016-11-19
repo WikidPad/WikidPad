@@ -239,35 +239,34 @@ class WikiWordNode(AbstractNode):
         if self.ancestors is None:
             parent = self.getParentNode()
             if parent is not None:
-                result = parent.getAncestors().copy()
-                result.add(parent.getWikiWord())
+                result = parent.getAncestors().union((parent.getWikiWord(),))
             else:
-                result = set()
+                result = frozenset()
 
             self.ancestors = result
 
         return self.ancestors            
 
 
-    def _getValidChildren(self, wikiPage, withFields=()):
-        """
-        Get all valid children, filter out undefined and/or cycles
-        if options are set accordingly
-        """
-        config = self.treeCtrl.pWiki.getConfig()
-
-        if config.getboolean("main", "tree_no_cycles"):
-            # Filter out cycles
-            ancestors = self.getAncestors()
-        else:
-            ancestors = frozenset()  # Empty
-
-        relations = wikiPage.getChildRelationships(
-                existingonly=self.treeCtrl.getHideUndefined(),
-                selfreference=False, withFields=withFields,
-                excludeSet=ancestors)
-
-        return relations
+#     def _getValidChildren(self, wikiPage, withFields=()):
+#         """
+#         Get all valid children, filter out undefined and/or cycles
+#         if options are set accordingly
+#         """
+#         config = self.treeCtrl.pWiki.getConfig()
+# 
+#         if config.getboolean("main", "tree_no_cycles"):
+#             # Filter out cycles
+#             ancestors = self.getAncestors()
+#         else:
+#             ancestors = frozenset()  # Empty
+# 
+#         relations = wikiPage.getChildRelationships(
+#                 existingonly=self.treeCtrl.getHideUndefined(),
+#                 selfreference=False, withFields=withFields,
+#                 excludeSet=ancestors)
+# 
+#         return relations
 
 
     def _hasValidChildren(self, wikiPage):  # TODO More efficient
@@ -486,7 +485,7 @@ class WikiWordRelabelNode(WikiWordNode):
         """
         Returns a set with the ancestor words (parent, grandparent, ...).
         """
-        return set()
+        return frozenset()
 
 #     def getNodePresentation(self):
 #         if self.newLabel:
@@ -494,12 +493,12 @@ class WikiWordRelabelNode(WikiWordNode):
 #         else:
 #             return WikiWordNode.getNodePresentation(self)
 
-    def _getValidChildren(self, wikiPage, withFields=False):
-        """
-        Get all valid children, filter out undefined and/or cycles
-        if options are set accordingly. A WikiWordSearchNode has no children.
-        """        
-        return []
+#     def _getValidChildren(self, wikiPage, withFields=False):
+#         """
+#         Get all valid children, filter out undefined and/or cycles
+#         if options are set accordingly. A WikiWordSearchNode has no children.
+#         """        
+#         return []
 
     def _hasValidChildren(self, wikiPage):  # TODO More efficient
         """
