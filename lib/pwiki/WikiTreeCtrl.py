@@ -276,7 +276,7 @@ class WikiWordNode(AbstractNode):
         """
         if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
             # Filter out cycles
-            ancestors = self.getAncestors()
+            ancestors = self.getAncestors().union((self.getWikiWord(),))
         else:
             ancestors = frozenset()  # Empty
 
@@ -423,7 +423,7 @@ class WikiWordNode(AbstractNode):
 
         if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
             # Filter out cycles
-            ancestors = self.getAncestors()
+            ancestors = self.getAncestors().union((self.getWikiWord(),))
         else:
             ancestors = frozenset()  # Empty
 
