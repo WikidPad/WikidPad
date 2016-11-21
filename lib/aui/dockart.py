@@ -38,7 +38,7 @@ _ctypes = False
 
 # -- AuiDefaultDockArt class implementation --
 
-class AuiDefaultDockArt(object):
+class AuiDefaultDockArt:
     """
     Dock art provider code - a dock provider provides all drawing functionality to the AUI dock manager.
     This allows the dock manager to have a plugable look-and-feel.

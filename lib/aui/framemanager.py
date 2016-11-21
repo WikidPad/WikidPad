@@ -171,7 +171,7 @@ EVT_AUI_PERSPECTIVE_CHANGED = wx.PyEventBinder(wxEVT_AUI_PERSPECTIVE_CHANGED, 0)
 
 # ---------------------------------------------------------------------------- #
 
-class AuiDockInfo(object):
+class AuiDockInfo:
     """ A class to store all properties of a dock. """
 
     def __init__(self):
@@ -218,7 +218,7 @@ class AuiDockInfo(object):
 
 # ---------------------------------------------------------------------------- #
 
-class AuiDockingGuideInfo(object):
+class AuiDockingGuideInfo:
     """ A class which holds information about VS2005 docking guide windows. """
 
     def __init__(self, other=None):
@@ -304,7 +304,7 @@ class AuiDockingGuideInfo(object):
 
 # ---------------------------------------------------------------------------- #
 
-class AuiDockUIPart(object):
+class AuiDockUIPart:
     """ A class which holds attributes for a UI part in the interface. """
 
     typeCaption = 0
@@ -330,7 +330,7 @@ class AuiDockUIPart(object):
 
 # ---------------------------------------------------------------------------- #
 
-class AuiPaneButton(object):
+class AuiPaneButton:
     """ A simple class which describes the caption pane button attributes. """
 
     def __init__(self, button_id):
@@ -471,7 +471,7 @@ class AuiManagerEvent(wx.PyCommandEvent):
 
 # ---------------------------------------------------------------------------- #
 
-class AuiPaneInfo(object):
+class AuiPaneInfo:
     """
     AuiPaneInfo specifies all the parameters for a pane. These parameters specify where
     the pane is on the screen, whether it is docked or floating, or hidden. In addition,

@@ -965,7 +965,7 @@ class WikiData:
         """
         Function works for read-only wiki.
         """
-        class CachedWikiPageLinkTermDict(object):
+        class CachedWikiPageLinkTermDict:
             def __init__(self, outer):
                 self.outer = outer
                 self.cache = {}

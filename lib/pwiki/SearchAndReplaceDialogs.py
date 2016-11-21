@@ -33,7 +33,7 @@ from .SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
 
 
 
-class _SearchResultItemInfo(object):
+class _SearchResultItemInfo:
     __slots__ = ("__weakref__", "wikiWord", "occCount", "occNumber", "occHtml",
             "occPos", "html", "maxCountOccurrences")
 

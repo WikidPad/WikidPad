@@ -60,7 +60,7 @@ from functools import reduce
    """
 
 
-class SimplePluginAPI(object):
+class SimplePluginAPI:
     """encapsulates a single plugin api and stores the functions of various
        plugins implementing that api. It takes a unique descriptor and a list
        of function names at creation time. For each function name a member is
@@ -113,7 +113,7 @@ class SimplePluginAPI(object):
 #                 self._plugins[f].remove(getattr(module,f))
 
 
-class WrappedPluginAPI(object):
+class WrappedPluginAPI:
     """
     Constructor takes as keyword arguments after descriptor names.
     
@@ -190,7 +190,7 @@ class WrappedPluginAPI(object):
 
 
 
-class PluginAPIAggregation(object):
+class PluginAPIAggregation:
     def __init__(self, *apis):
         self._apis = apis
 
@@ -215,7 +215,7 @@ class PluginAPIAggregation(object):
 
 
 
-class PluginManager(object):
+class PluginManager:
     """manages all PluginAPIs and plugins."""
     def __init__(self, directories, systemDirIdx=-1):
         self.pluginAPIs = {}  # Dictionary {<type name>:<verReg dict>}

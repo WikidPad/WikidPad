@@ -313,7 +313,7 @@ class TabTextCtrl(ExpandoTextCtrl):
 
 # ----------------------------------------------------------------------
 
-class AuiNotebookPage(object):
+class AuiNotebookPage:
     """
     A simple class which holds information about tab captions, bitmaps and
     colours.
@@ -350,7 +350,7 @@ class AuiNotebookPage(object):
 
 # ----------------------------------------------------------------------
 
-class AuiTabContainerButton(object):
+class AuiTabContainerButton:
     """
     A simple class which holds information about tab buttons and their state.
     """
@@ -593,7 +593,7 @@ class AuiNotebookEvent(CommandNotebookEvent):
 # Class TabNavigatorProps
 # ---------------------------------------------------------------------------- #
 
-class TabNavigatorProps(object):
+class TabNavigatorProps:
     """
     Data storage class for managing and providing access to :class:`TabNavigatorWindow` properties.
     """
@@ -861,7 +861,7 @@ class TabNavigatorWindow(wx.Dialog):
 # ----------------------------------------------------------------------
 # -- AuiTabContainer class implementation --
 
-class AuiTabContainer(object):
+class AuiTabContainer:
     """
     AuiTabContainer is a class which contains information about each tab.
     It also can render an entire tab control to a specified DC.

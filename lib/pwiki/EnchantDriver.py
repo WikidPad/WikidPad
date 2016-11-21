@@ -491,7 +491,7 @@ class DictNotFoundError(Error):
     """Exception raised when a requested dictionary could not be found."""
     pass
 
-class ProviderDesc(object):
+class ProviderDesc:
     """Simple class describing an Enchant provider.
     Each provider has the following information associated with it:
 
@@ -523,7 +523,7 @@ class ProviderDesc(object):
         return hash(self.name + self.desc + self.file)
 
 
-class _EnchantObject(object):
+class _EnchantObject:
     """Base class for enchant objects.
     
     This class implements some general functionality for interfacing with

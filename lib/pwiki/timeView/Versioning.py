@@ -27,7 +27,7 @@ from ..DocPages import AbstractWikiPage
 DAMAGED = object()
 
 
-class VersionEntry(object):
+class VersionEntry:
     __slots__ = ("creationTimeStamp", "unifiedBasePageName", "description",
             "versionNumber", "contentDifferencing", "contentEncoding",
             "xmlNode")

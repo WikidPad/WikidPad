@@ -1,6 +1,6 @@
 import re
 
-class _DummmyWikiLanguageDetails(object):
+class _DummmyWikiLanguageDetails:
     """
     Dummy class for simpler comparing of wiki language format details if real
     details are not given.
@@ -19,7 +19,7 @@ DUMMY_WIKI_LANGUAGE_DETAILS = _DummmyWikiLanguageDetails()
 
 
 
-class WikiPageFormatDetails(object):
+class WikiPageFormatDetails:
     """
     Store some details of the formatting of a specific page
     """
@@ -118,7 +118,7 @@ def getFootnoteAnchorDict(pageAst):
 
 _RE_LINE_INDENT = re.compile(r"^[ \t]*")
 
-class BasicLanguageHelper(object):
+class BasicLanguageHelper:
     @staticmethod
     def reset():
         pass

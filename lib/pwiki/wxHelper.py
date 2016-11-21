@@ -79,7 +79,7 @@ class XrcControls:
 
 
 
-class WindowUpdateLocker(object):
+class WindowUpdateLocker:
     """
     Python translation of wxWindowUpdateLocker.
     Usage:
@@ -102,7 +102,7 @@ class WindowUpdateLocker(object):
 
 
 
-class _TopLevelLockerClass(object):
+class _TopLevelLockerClass:
     """
     Provides context in which all top level windows are locked
     Usage:
@@ -709,7 +709,7 @@ def runDialogModalFactory(clazz):
     return runModal
 
 
-class ModalDialogMixin(object):
+class ModalDialogMixin:
     @classmethod
     def runModal(clazz, *args, **kwargs):
         dlg = clazz(*args, **kwargs)
@@ -1094,7 +1094,7 @@ class ProxyPanel(wx.Panel):
         size = evt.GetSize()
 
 
-class ProgressHandler(object):
+class ProgressHandler:
     """
     Implementation of a GuiProgressListener to
     show a progress dialog

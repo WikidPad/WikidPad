@@ -30,7 +30,7 @@ from . import StringOps
 DAMAGED = object()
 
 
-class TrashBag(object):
+class TrashBag:
     """
     A trash bag contains all parts of a wikiword, wikipage content itself and
     dependent datablocks (e.g. old versions). It provides also a small subset

@@ -83,7 +83,7 @@ def contentToUnicode(content):
 
 
 
-class AbstractExporter(object):
+class AbstractExporter:
     def __init__(self, mainControl):
         self.wikiDocument = None
         self.mainControl = mainControl
@@ -451,9 +451,9 @@ class _SeparatorWatchUtf8Writer(utf8Writer):
         self.buffer = []
         self.firstSeparatorCallDone = False
 
-    def write(self, object):
-        self.buffer.append(object)
-        utf8Writer.write(self, object)
+    def write(self, obj):
+        self.buffer.append(obj)
+        utf8Writer.write(self, obj)
 
     def writelines(self, list):
         self.buffer += list
@@ -481,7 +481,7 @@ class _SeparatorWatchUtf8Writer(utf8Writer):
 
 
 
-class MultiPageTextWikiPageWriter(object):
+class MultiPageTextWikiPageWriter:
     """
     Exports in multipage text format
     """

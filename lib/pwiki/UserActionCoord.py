@@ -3,7 +3,7 @@
 from .DocPagePresenter import BasicDocPagePresenter
 
 
-class AbstractAction(object):
+class AbstractAction:
     def __init__(self):
         pass
     
@@ -165,7 +165,7 @@ def registerActions(actions):
 
 
 
-class UserActionCoord(object):
+class UserActionCoord:
     """
     Executes simple actions and associates some user events like clicking with
     the mouse somewhere with an action.

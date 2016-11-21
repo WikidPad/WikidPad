@@ -19,7 +19,7 @@ from .. import DocPages
 
 DAMAGED = object()
 
-class HistoryEntry(object):
+class HistoryEntry:
     __slots__ = ("visitedTimeStamp", "unifiedPageName",
             "xmlNode")
 
@@ -90,7 +90,7 @@ class HistoryEntry(object):
 
 
 
-class WikiWideHistory(object, MiscEventSourceMixin):
+class WikiWideHistory(MiscEventSourceMixin):
     """
     Represents the history of visited wikiwords independent of particular page.
     """

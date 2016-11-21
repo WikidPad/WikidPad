@@ -76,7 +76,7 @@ def _escapeAnchor(name):
 # EXPORT_DEST_TYPE_FILE = 2
 
 
-class BasicLinkConverter(object):
+class BasicLinkConverter:
     def __init__(self, wikiDocument, htmlExporter):
         self.htmlExporter = htmlExporter
         self.wikiDocument = wikiDocument
@@ -111,7 +111,7 @@ class LinkConverterForHtmlMultiPageExport(BasicLinkConverter):
         return "#%s" % _escapeAnchor(relUnAlias)
 
 
-class FilenameConverter(object):
+class FilenameConverter:
     def __init__(self, asciiOnly):
         self.asciiOnly = asciiOnly
         self.reset()
@@ -133,7 +133,7 @@ class FilenameConverter(object):
 
 
 
-class SizeValue(object):
+class SizeValue:
     """
     Represents a single size value, either a pixel or percent size.
     """
@@ -227,7 +227,7 @@ IMG_ALIGN_ATTR = {
 
 
 
-class TableCell(object):
+class TableCell:
     MODE_VALID = 0
     MODE_CONTINUATION = 1
     

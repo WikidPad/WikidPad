@@ -60,7 +60,7 @@ _typeinfo_map = {
     "NMTOKENS": minidom.TypeInfo(None, "nmtokens"),
     }
 
-class ElementInfo(object):
+class ElementInfo:
     __slots__ = '_attr_info', '_model', 'tagName'
 
     def __init__(self, tagName, model=None):
@@ -461,7 +461,7 @@ class ExpatBuilder:
 # where allowed.
 _ALLOWED_FILTER_RETURNS = (FILTER_ACCEPT, FILTER_REJECT, FILTER_SKIP)
 
-class FilterVisibilityController(object):
+class FilterVisibilityController:
     """Wrapper around a DOMBuilderFilter which implements the checks
     to make the whatToShow filter attribute work."""
 
@@ -517,7 +517,7 @@ class FilterVisibilityController(object):
         }
 
 
-class FilterCrutch(object):
+class FilterCrutch:
     __slots__ = '_builder', '_level', '_old_start', '_old_end'
 
     def __init__(self, builder):

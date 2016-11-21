@@ -254,7 +254,7 @@ class ToolbarCommandCapture(wx.PyEvtHandler):
 
 # ----------------------------------------------------------------------
 
-class AuiToolBarItem(object):
+class AuiToolBarItem:
     """
     AuiToolBarItem is a toolbar element.
     
@@ -723,7 +723,7 @@ class AuiToolBarItem(object):
 
 # ----------------------------------------------------------------------
 
-class AuiDefaultToolBarArt(object):
+class AuiDefaultToolBarArt:
     """
     Toolbar art provider code - a tab provider provides all drawing functionality to the :class:`AuiToolBar`.
     This allows the :class:`AuiToolBar` to have a plugable look-and-feel.

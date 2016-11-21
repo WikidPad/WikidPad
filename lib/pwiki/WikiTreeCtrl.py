@@ -34,7 +34,7 @@ from .DocPagePresenter import BasicDocPagePresenter
 from .AdditionalDialogs import SelectWikiWordDialog
 
 
-class NodeStyle(object):
+class NodeStyle:
     """
     A simple structure to hold all necessary information to present a tree node.
     """
@@ -65,7 +65,7 @@ _SETTABLE_ATTRS = ("bold", "icon", "color", "bgcolor")
 
 
 # New style class to allow __slots__ for efficiency
-class AbstractNode(object):
+class AbstractNode:
     """
     Especially for view nodes. An instance of a derived class
     is saved in funcData for such special nodes

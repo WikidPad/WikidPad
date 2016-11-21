@@ -967,7 +967,7 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
                 "title": shortTitle})
 
 
-class StorablePerspective(object):
+class StorablePerspective:
     """
     Interface for window objects which can save and restore their state
     """

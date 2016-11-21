@@ -50,7 +50,7 @@ class MiscEventSourceMixin:
 
 
 
-class ListenerList(object):
+class ListenerList:
     __slots__ = ("__weakref__", "listeners", "userCount", "cleanupFlag",
             "parentList")
 
@@ -200,7 +200,7 @@ class ListenerList(object):
 
 
 
-class MiscEvent(object):
+class MiscEvent:
     __slots__ = ("__weakref__", "listenerList", "source", "properties", "parent",
             "activeListenerIndex")
 
@@ -608,7 +608,7 @@ class KeyFunctionSinkAR(KeyFunctionSink):
 
 
 
-class DebugSimple(object):
+class DebugSimple:
     """
     A MiscEvent sink which dispatches events further to other functions
     """

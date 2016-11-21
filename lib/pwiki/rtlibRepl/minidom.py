@@ -470,7 +470,7 @@ defproperty(Attr, "localName",  doc="Namespace-local name of this attribute.")
 defproperty(Attr, "schemaType", doc="Schema type for this attribute.")
 
 
-class NamedNodeMap(object):
+class NamedNodeMap:
     """The attribute list is a transient interface to the underlying
     dictionaries.  Mutations here will change the underlying element's
     dictionary.
@@ -625,7 +625,7 @@ defproperty(NamedNodeMap, "length",
 AttributeList = NamedNodeMap
 
 
-class TypeInfo(object):
+class TypeInfo:
     __slots__ = 'namespace', 'name'
 
     def __init__(self, namespace, name):
@@ -903,7 +903,7 @@ def _set_attribute_node(element, attr):
     attr.__dict__['ownerElement'] = element
 
 
-class Childless(object):
+class Childless:
     """Mixin that makes childless-ness easy to implement and avoids
     the complexity of the Node methods that deal with children.
     """
@@ -1190,7 +1190,7 @@ class CDATASection(Text):
         writer.write("<![CDATA[%s]]>" % self.data)
 
 
-class ReadOnlySequentialNamedNodeMap(object):
+class ReadOnlySequentialNamedNodeMap:
     __slots__ = '_seq',
 
     def __init__(self, seq=()):
@@ -1462,7 +1462,7 @@ class DOMImplementation(DOMImplementationLS):
     def _create_document(self):
         return Document()
 
-class ElementInfo(object):
+class ElementInfo:
     """Object that represents content-model information for an element.
 
     This implementation is not expected to be used in practice; DOM

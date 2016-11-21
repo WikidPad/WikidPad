@@ -810,7 +810,7 @@ class _MissingGrid(EnhancedGrid.EnhancedGrid):
 
 
 
-class _MissingLinkingPagesItemInfo(object):
+class _MissingLinkingPagesItemInfo:
     __slots__ = ("__weakref__", "unifName", "wikiWord", "hitList",
             "fileCleanupDialog")
 
@@ -1189,7 +1189,7 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
 #
 #
 #
-# class MissingGridRow(object):
+# class MissingGridRow:
 #     """
 #     One row in the grid of missing files (referenced but not present)
 #     """

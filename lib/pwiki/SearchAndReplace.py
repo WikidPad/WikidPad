@@ -1166,7 +1166,7 @@ class TodoNode(AbstractContentSearchNode):
 
 
 # Special whoosh formatter class
-class SimpleHtmlFormatter(object):
+class SimpleHtmlFormatter:
     """Returns a string in which the matched terms are enclosed in <b></b>.
     """
     

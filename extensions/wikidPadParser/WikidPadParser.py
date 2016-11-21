@@ -44,7 +44,7 @@ ParserElement.setDefaultWhitespaceChars("")
 RE_FLAGS = re.DOTALL | re.UNICODE | re.MULTILINE
 
 
-class IndentInfo(object):
+class IndentInfo:
     __slots__ = ("level", "type")
     def __init__(self, type):
         self.level = 0
@@ -1385,7 +1385,7 @@ def _buildBaseDict(wikiDocument=None, formatDetails=None):
 # so changes may occur!
 
 
-class _TheParser(object):
+class _TheParser:
     @staticmethod
     def reset():
         """
@@ -1526,7 +1526,7 @@ THE_PARSER = _TheParser()
 
 
 
-class WikiLanguageDetails(object):
+class WikiLanguageDetails:
     """
     Stores state of wiki language specific options and allows to check if
     two option sets are equivalent.
@@ -1555,7 +1555,7 @@ class WikiLanguageDetails(object):
                 self.footnotesAsWws == details.footnotesAsWws
 
 
-class _WikiLinkPath(object):
+class _WikiLinkPath:
     __slots__ = ("upwardCount", "components")
     def __init__(self, link=None, pageName=None, upwardCount=-1,
             components=None):
@@ -1775,7 +1775,7 @@ class _WikiLinkPath(object):
 
 _RE_LINE_INDENT = re.compile(r"^[ \t]*")
 
-class _TheHelper(object):
+class _TheHelper:
     @staticmethod
     def reset():
         pass

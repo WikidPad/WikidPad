@@ -13,13 +13,9 @@ from .WikiExceptions import NotCurrentThreadException, \
 from . import MiscEvent
 
 
-class Dummy(object):
-    pass
-
-
 # ---------- Thread handling and task execution ----------
 
-class BasicThreadStop(object):
+class BasicThreadStop:
     """
     An object of this or a derived class is handed over to long running
     operations which might run in a separate thread and maybe must be stopped
@@ -99,7 +95,7 @@ class ThreadHolder(BasicThreadStop):
 
 
 
-class ExecutionResult(object):
+class ExecutionResult:
     __slots__ = ("result", "exception", "state")
 
     def __init__(self):
@@ -491,7 +487,7 @@ def callInMainThreadAsync(fct, *args, **kwargs):
 
 if __debug__:
 
-    class _Verbose(object):
+    class _Verbose:
 
         def __init__(self, verbose=None):
             if verbose is None:
@@ -507,7 +503,7 @@ if __debug__:
 
 else:
     # Disable this when using "python -O"
-    class _Verbose(object):
+    class _Verbose:
         def __init__(self, verbose=None):
             pass
         def _note(self, *args):
@@ -685,7 +681,7 @@ def seqEnforceContained(seq, allowedSeq):
 
 
 
-# class FlagHolder(object):
+# class FlagHolder:
 #     __slots__ = ("__weakref__", "flag")
 #     
 #     def __init__(self):
@@ -736,7 +732,7 @@ class DefaultDictParam(dict):
         return val
 
 
-class DictFromFields(object):
+class DictFromFields:
     """
     Helper to create dictionary. Create an object from it, set fields on it
     and retrieve all fields which do not start with double underscore.

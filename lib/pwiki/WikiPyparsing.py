@@ -165,7 +165,7 @@ def _xml_escape(data):
         data = data.replace(from_, to_)
     return data
 
-class _Constants(object):
+class _Constants:
     pass
 
 if not _PY3K:
@@ -275,7 +275,7 @@ class RecursiveGrammarException(Exception):
 RE_ALL = re.IGNORECASE | re.LOCALE | re.MULTILINE | re.DOTALL | re.UNICODE | re.VERBOSE
 
 
-class NecessaryRegexProvider(object):
+class NecessaryRegexProvider:
     """
     Classes implementing this may provide a regex which must necessarily match
     to match the parser element. If getRegex() returns None, such a regex
@@ -303,7 +303,7 @@ class NecessaryRegexProvider(object):
 
 
 
-# class _ParseResultsWithOffset(object):
+# class _ParseResultsWithOffset:
 #     def __init__(self,p1,p2):
 #         self.tup = (p1,p2)
 #     def __getitem__(self,i):
@@ -328,7 +328,7 @@ def getTokenLength(tokList):
 
 
 
-class SyntaxNode(object):
+class SyntaxNode:
     __slots__ = ("pos", "strLength", "name", "__dict__", "__weakref__")
     def __init__(self, pos, name):
         self.name = name
@@ -786,7 +786,7 @@ class TerminalNode(SyntaxNode):
 
 
 
-class ParsingState(object):
+class ParsingState:
     """
     State object handed to action callbacks with additional information
     about the parsing state.
@@ -872,7 +872,7 @@ def nullDebugAction(*args):
     """'Do-nothing' debug action, to suppress debugging output during parsing."""
     pass
 
-class ParserElement(object):
+class ParserElement:
     """Abstract base level parser element class."""
     DEFAULT_WHITE_CHARS = " \n\t\r"
 
@@ -4282,7 +4282,7 @@ class OneOrMore(ParseElementEnhance, NecessaryRegexProvider):
         return ret
 
 
-class _NullToken(object):
+class _NullToken:
     def __bool__(self):
         return False
     __nonzero__ = __bool__
@@ -4778,7 +4778,7 @@ class Suppress(TokenConverter):
         return self
 
 
-class OnlyOnce(object):
+class OnlyOnce:
     """Wrapper for parse actions, to ensure they are only called once."""
     def __init__(self, methodCall):
         self.callable = ParserElement._normalizeParseActionArgs(methodCall)
@@ -4834,7 +4834,7 @@ def combineRegexFlags(flags, flagsMask, otherFlags, otherFlagsMask):
 
 
 
-class RegexCombiner(object):
+class RegexCombiner:
     # Match or search for the first matching expression
     REMODE_MATCH = 0
     REMODE_SEARCH = 1

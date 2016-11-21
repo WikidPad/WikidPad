@@ -68,7 +68,7 @@ from . import DocPages
 
 
 
-class RequestGridRow(object):
+class RequestGridRow:
     __slots__ = ("doImport", "importVersion", "collisionWithPresent", "renamable",
             "unifNamePrefix", "itemName", "renameImportTo", "renamePresentTo",
             "errorMessage")

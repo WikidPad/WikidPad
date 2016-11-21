@@ -1738,7 +1738,7 @@ def joinRegexes(patternList):
 
 
 
-class SnippetCollector(object):
+class SnippetCollector:
     """
     Collects (byte/uni)string snippets in a list. This is faster than
     using string += string.
