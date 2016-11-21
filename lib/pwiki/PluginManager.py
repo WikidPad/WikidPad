@@ -339,7 +339,7 @@ class PluginManager(object):
                         if ext == '.py':
                             with open(fullname) as f:
                                 module = imp.load_module(packageName + "." + moduleName, f,
-                                        mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
+                                        fullname, (".py", "r", imp.PY_SOURCE))
                         elif ext == '.zip':
                             module = imp.new_module(
                                     packageName + "." + moduleName)

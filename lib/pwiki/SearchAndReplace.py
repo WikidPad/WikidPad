@@ -484,13 +484,13 @@ def _serNode(stream, sarOp, obj):
     global _PERSID_TO_CLASS_MAP
 
     if stream.isReadMode():
-        persId = stream.serString("")
+        persId = stream.serUniUtf8("")
         cl = _PERSID_TO_CLASS_MAP[persId]
         obj = cl(sarOp)
         obj.serializeBin(stream)
         return obj
     else:
-        stream.serString(obj.CLASS_PERSID)
+        stream.serUniUtf8(obj.CLASS_PERSID)
         obj.serializeBin(stream)
         return obj
 
@@ -1240,7 +1240,7 @@ class ListWikiPagesOperation:
 
         stream -- StringOps.SerializeStream object
         """
-        self.ordering = stream.serString(self.ordering)
+        self.ordering = stream.serUniUtf8(self.ordering)
         self.searchOpTree = _serNode(stream, self, self.searchOpTree)
 
 
@@ -1545,7 +1545,7 @@ class SearchReplaceOperation:
         self.cycleToStart = stream.serBool(self.cycleToStart)
         self.booleanOp = stream.serBool(self.booleanOp)
 
-        self.wildCard = stream.serString(self.wildCard)
+        self.wildCard = stream.serUniUtf8(self.wildCard)
 
         if version > 0:
             self.listWikiPagesOp.serializeBin(stream)
@@ -1555,7 +1555,7 @@ class SearchReplaceOperation:
             self.listWikiPagesOp = ListWikiPagesOperation()
         
         if version > 1:
-            self.indexSearch = stream.serString(self.indexSearch)
+            self.indexSearch = stream.serUniUtf8(self.indexSearch)
         elif stream.isReadMode():
             self.indexSearch = 'no'
         
@@ -1609,12 +1609,12 @@ class SearchReplaceOperation:
 
     def getPackedSettings(self):
         """
-        Returns a byte sequence (string) containing the current settings
+        Returns bytes containing the current settings
         of all data members (except title and cache info (searchOpTree)).
         This can be saved in the database and restored later with
         setPackedSettings()
         """
-        stream = SerializeStream(stringBuf="", readMode=False)
+        stream = SerializeStream(byteBuf=b"", readMode=False)
         self.serializeBin(stream)
 
         return stream.getBytes()
@@ -1622,10 +1622,10 @@ class SearchReplaceOperation:
 
     def setPackedSettings(self, data):
         """
-        Set member variables according to the byte sequence stored in
+        Set member variables according to the bytes stored in
         data by getPackedSettings()
         """
-        stream = SerializeStream(stringBuf=data, readMode=True)
+        stream = SerializeStream(byteBuf=data, readMode=True)
         self.serializeBin(stream)
 
         self.clearCache()

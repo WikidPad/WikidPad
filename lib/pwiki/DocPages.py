@@ -1113,7 +1113,7 @@ class AbstractWikiPage(DataCarryingPage):
                 # Version 0
                 return struct.unpack("=iiiii", datablock) + (None,)
             else:
-                ss = Serialization.SerializeStream(stringBuf=datablock)
+                ss = Serialization.SerializeStream(byteBuf=datablock)
                 rcVer = ss.serUint8(1)
                 if rcVer == 1:
                     # Compatible to version 1                
@@ -1233,7 +1233,7 @@ class WikiPage(AbstractWikiPage):
                         struct.pack("=iiiii", *pt[:5]))
             else:
                 # Write it in new version 1
-                ss = Serialization.SerializeStream(stringBuf=True, readMode=False)
+                ss = Serialization.SerializeStream(byteBuf=b"", readMode=False)
                 ss.serUint8(1)  # Read compatibility version
                 ss.serUint8(1)  # Real version
                 # First five numbers
@@ -2371,7 +2371,7 @@ class FunctionalPage(DataCarryingPage):
                 "[%s].wiki" % subtag)
         try:
             tbContent = loadEntireTxtFile(tbLoc)
-            return fileContentToUnicode(lineendToInternal(tbContent))
+            return fileContentToUnicode(tbContent)
         except:
             return ""
 

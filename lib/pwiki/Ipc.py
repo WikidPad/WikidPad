@@ -81,8 +81,8 @@ class RemoteCmdHandler(socketserver.StreamRequestHandler):
         read = 0
         while read < 300:
             c = self.rfile.read(1)
-            if c == "\n" or c == "":
-                return "".join(result)
+            if c == b"\n" or c == b"":
+                return (b"".join(result)).decode("latin-1")
 
             result.append(c)
             read += 1
@@ -101,7 +101,7 @@ class RemoteCmdHandler(socketserver.StreamRequestHandler):
                     self.wfile.write("+App cookie ok\n")
                     # Authentication passed
                     sst = SerializeStream(fileObj=self.rfile, readMode=True)
-                    cmdline = sst.serArrString(())
+                    cmdline = sst.serArrUniUtf8(())
                     evt = RemoteCommandEvent(cmdline)
                     wx.GetApp().GetTopWindow().AddPendingEvent(evt)
                 else:
@@ -153,21 +153,5 @@ def stopCommandServer():
     
     if theServer is not None:
         theServer.close()
-
-
-
-
-#wxPython demo code ----------------------------------------------------------------------
-
-
-
-#----------------------------------------------------------------------
-
-# 
-#     evt = MyEvent(myEVT_BUTTON_CLICKPOS, self.GetId())
-#     evt.SetMyVal(pt)
-#     #print id(evt), sys.getrefcount(evt)
-#     self.GetEventHandler().ProcessEvent(evt)
-#     #print id(evt), sys.getrefcount(evt)
 
 

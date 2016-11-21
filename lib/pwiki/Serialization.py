@@ -1,5 +1,5 @@
 from struct import pack, unpack
-import io as StringIO
+import io
 
 import Consts
 
@@ -14,22 +14,22 @@ from .WikiExceptions import *
 # Especially used in SearchAndReplace.py, class SearchReplaceOperation
 
 class SerializeStream:
-    def __init__(self, fileObj=None, stringBuf=None, readMode=True):
+    def __init__(self, fileObj=None, byteBuf=None, readMode=True):
         """
         fileObj -- file-like object to wrap.
-        stringBuf -- if not None, ignore fileObj, read from stringBuf
-                instead or write to a new string buffer depending
+        byteBuf -- if not None, ignore fileObj, read from byteBuf
+                instead or write to a new byte buffer depending
                 on readMode. Use getBytes() to retrieve written bytes
         readMode -- True; read from fileobj, False: write to fileobj
         """
         self.fileObj = fileObj 
         self.readMode = readMode
 
-        if stringBuf is not None:
+        if byteBuf is not None:
             if self.readMode:
-                self.fileObj = StringIO.StringIO(stringBuf)
+                self.fileObj = io.BytesIO(stringBuf)
             else:
-                self.fileObj = StringIO.StringIO()
+                self.fileObj = io.BytesIO()
 
     def isReadMode(self):
         """
@@ -39,18 +39,17 @@ class SerializeStream:
         
     def setBytesToRead(self, b):
         """
-        Sets a string to read from via StringIO
+        Sets a byte object to read from via StringIO
         """
-        self.fileObj = StringIO.StringIO(b)
+        self.fileObj = io.BytesIO(b)
         self.readMode = True
 
         
     def useBytesToWrite(self):
         """
-        Sets the stream to write mode writing to a byte buffer (=string)
-        via StringIO
+        Sets the stream to write mode writing to a byte buffer via BytesIO
         """
-        self.fileObj = StringIO.StringIO()
+        self.fileObj = io.BytesIO()
         self.readMode = False
 
         
@@ -109,9 +108,9 @@ class SerializeStream:
             return val
 
 
-    def serString(self, s):
+    def serByteBlock(self, s):
         """
-        Serialize string s, including length. This means: if stream is in read
+        Serialize byte block s, including length. This means: if stream is in read
         mode, s is ignored and the string read from stream is returned,
         if in write mode, s is written and returned
         """
@@ -129,9 +128,9 @@ class SerializeStream:
         Serialize unicode string, encoded as UTF-8
         """
         if self.isReadMode():
-            return utf8Dec(self.serString(""), "replace")[0]
+            return utf8Dec(self.serBytes(b""), "replace")[0]
         else:
-            self.serString(utf8Enc(us)[0])
+            self.serByteBlock(utf8Enc(us)[0])
             return us
 
 
@@ -149,20 +148,50 @@ class SerializeStream:
                 self.writeBytes("\0")
             
             return tv
-            
-    def serArrString(self, abs):
+
+    def serArrUniUtf8(self, aus):
         """
-        Serialize array of byte strings
+        Serialize array of unicode strings, encoded as UTF-8
         """
         l = self.serUint32(len(abs)) # Length of array
-
+        
         if self.isReadMode() and l != len(abs):
             abs = [""] * l
 
         for i in range(l):
-            abs[i] = self.serString(abs[i])
+            abs[i] = self.serUniUtf8(abs[i])
             
         return abs
+
+
+    def serArrByteBlock(self, aus):
+        """
+        Serialize array of byte blocks
+        """
+        l = self.serUint32(len(abs)) # Length of array
+        
+        if self.isReadMode() and l != len(abs):
+            abs = [b""] * l
+
+        for i in range(l):
+            abs[i] = self.serByteBlock(abs[i])
+
+        return abs
+
+            
+#     def serArrString(self, abs):
+#         """
+#         Serialize array of byte strings
+#         """
+#         l = self.serUint32(len(abs)) # Length of array
+# 
+#         if self.isReadMode() and l != len(abs):
+#             abs = [""] * l
+# 
+#         for i in range(l):
+#             abs[i] = self.serString(abs[i])
+#             
+#         return abs
         
     def serArrUint32(self, an):
         """

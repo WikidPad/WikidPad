@@ -1,6 +1,6 @@
 """Convert a NT pathname to a file URL and vice versa."""
 import string
-from . import urllib_red as urllib
+# from . import urllib_red as urllib
 
 
 
@@ -13,6 +13,7 @@ def url2pathname(url):
 
             C:\foo\bar\spam.foo
     """
+    from . import urllib_red as urllib
     if not '|' in url:
         # No drive specifier, just convert slashes
         if url[:4] == '////':
@@ -44,6 +45,7 @@ def pathname2url(p):
 
             ///C|/foo/bar/spam.foo
     """
+    from . import urllib_red as urllib
 
     if not ':' in p:
         # No drive specifier, just convert slashes and quote the name

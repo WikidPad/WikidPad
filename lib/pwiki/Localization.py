@@ -347,7 +347,7 @@ def loadLangList(appDir):
             line = line.strip()
             try:
                 localeStr, langTitle = line.split("\t", 1)
-                localeStr = localeStr.encode("ascii")
+                # localeStr = localeStr.encode("ascii")
                 
                 result.append((localeStr, langTitle))
             except:
@@ -400,6 +400,7 @@ def getLangTitleForLocaleStr(localeStr):
 # Function taken from Python 2.4 standard library module gettext.py
 def _expand_lang(locale):
     from locale import normalize
+    
     locale = normalize(locale)
     COMPONENT_CODESET   = 1 << 0
     COMPONENT_TERRITORY = 1 << 1

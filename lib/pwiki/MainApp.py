@@ -245,7 +245,7 @@ class App(wx.App, MiscEventSourceMixin):
 
             # We create a "password" so that no other user can send commands to this
             # WikidPad instance.
-            appCookie = createRandomString(30).encode("ascii")
+            appCookie = createRandomString(30)
             
             try:
                 port = Ipc.createCommandServer(appCookie)
@@ -263,7 +263,7 @@ class App(wx.App, MiscEventSourceMixin):
                     # There seems to be(!) another instance already
                     # TODO Try to send commandline
                     appLockContent = loadEntireFile(os.path.join(
-                            self.globalConfigSubDir, "AppLock.lock"))
+                            self.globalConfigSubDir, "AppLock.lock")).decode("latin-1")
     #                 f = open(), "r")
     #                 f.read()
     #                 f.close()
@@ -289,13 +289,13 @@ class App(wx.App, MiscEventSourceMixin):
                                 sock.connect(("127.0.0.1", remotePort))
                                 greet = self._readSocketLine(sock)
                                 if greet == "WikidPad_command_server 1.0":
-                                    sock.send("cmdline\n" + appCookie + "\n")
+                                    sock.send(("cmdline\n" + appCookie + "\n").encode("ascii"))
                                     
                                     ack = self._readSocketLine(sock)
                                     if ack[0] == "+":
                                         # app cookie ok
-                                        sst = SerializeStream(stringBuf="", readMode=False)
-                                        sst.serArrString(sys.argv[1:])
+                                        sst = SerializeStream(byteBuf=b"", readMode=False)
+                                        sst.serArrUniUtf8(sys.argv[1:])
                                         sock.send(sst.getBytes())
                                     
                                         return True
@@ -339,7 +339,7 @@ class App(wx.App, MiscEventSourceMixin):
                 if port != -1:
                     # Server is connected, start it
                     Ipc.startCommandServer()
-        
+                    
                     appLockContent = appCookie + "\n" + str(port) + "\n"
                     appLockPath = os.path.join(self.globalConfigSubDir,
                             "AppLock.lock")
@@ -392,7 +392,7 @@ class App(wx.App, MiscEventSourceMixin):
 
         res = wx.xrc.XmlResource.Get()
         res.SetFlags(0)
-        res.LoadFromString(rd)
+        res.LoadFromBuffer(rd)
         
 #         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
 #         res.LoadFromString(rd)
@@ -489,8 +489,8 @@ class App(wx.App, MiscEventSourceMixin):
         read = 0
         while read < 300:
             c = sock.recv(1)
-            if c == "\n" or c == "":
-                return "".join(result)
+            if c == b"\n" or c == b"":
+                return (b"".join(result)).decode("latin-1")
             result.append(c)
             read += 1
             
