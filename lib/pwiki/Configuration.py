@@ -241,14 +241,12 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
                 default_section=None, interpolation=None)
         
         try:
-            configFile = open(self.configPath, 'rt', encoding="utf-8",
+            configFile = open(fn, 'rt', encoding="utf-8",
                     errors="surrogateescape")
         except FileNotFoundError:
             raise MissingConfigurationFileException(_("Config file not found"))
         
-        readFiles = config.read_file(configFile, encoding="utf-8",
-                errors="surrogateescape")
-
+        config.read_file(configFile)
         self.setConfigParserObject(config, fn)
 
 
