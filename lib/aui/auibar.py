@@ -18,7 +18,6 @@ import types
 from .aui_utilities import BitmapFromBits, StepColour, GetLabelSize
 from .aui_utilities import GetBaseColour, MakeDisabledBitmap
 
-from . import framemanager
 from .aui_constants import *
 
 # wxPython version string
@@ -549,7 +548,7 @@ class AuiToolBarItem:
             clockwise = False
 
         if not rotated_bitmap.IsOk():
-            rotated_bitmap = wx.BitmapFromImage(bitmap_to_rotate.ConvertToImage().Rotate90(clockwise))
+            rotated_bitmap = wx.Bitmap(bitmap_to_rotate.ConvertToImage().Rotate90(clockwise))
 
         return rotated_bitmap
 
@@ -1112,7 +1111,7 @@ class AuiDefaultToolBarArt:
         if horizontal:
             dc.DrawBitmap(dropbmp, dropbmp_x, dropbmp_y, True)
         else:
-            dc.DrawBitmap(wx.BitmapFromImage(dropbmp.ConvertToImage().Rotate90(item.GetOrientation() == AUI_TBTOOL_VERT_CLOCKWISE)),
+            dc.DrawBitmap(wx.Bitmap(dropbmp.ConvertToImage().Rotate90(item.GetOrientation() == AUI_TBTOOL_VERT_CLOCKWISE)),
                           dropbmp_x, dropbmp_y, True)
             
         # set the item's text colour based on if it is disabled
@@ -1421,7 +1420,7 @@ class AuiDefaultToolBarArt:
 
                 item.SetOrientation(orientation)                    
                     
-                menuPopup.AppendItem(m)
+                menuPopup.Append(m)
                 if kind in [ITEM_CHECK, ITEM_RADIO]:            
                     state = (item.state & AUI_BUTTON_STATE_CHECKED and [True] or [False])[0]
                     m.Check(state)
@@ -3689,6 +3688,7 @@ class AuiToolBar(wx.PyControl):
                         else:
                             pane = manager.GetPane(self)
                             
+                        from . import framemanager
                         e = framemanager.AuiManagerEvent(framemanager.wxEVT_AUI_PANE_MIN_RESTORE)
 
                         e.SetManager(manager)

@@ -107,8 +107,8 @@ class AuiDefaultTabArt:
     def __init__(self):
         """ Default class constructor. """
 
-        self._normal_font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        self._selected_font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        self._normal_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        self._selected_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         self._selected_font.SetWeight(wx.BOLD)
         self._measuring_font = self._selected_font
 
@@ -944,7 +944,7 @@ class AuiDefaultTabArt:
                 if page.bitmap:
                     menuItem.SetBitmap(page.bitmap)
 
-                menuPopup.AppendItem(menuItem)
+                menuPopup.Append(menuItem)
                 
             else:
                 
@@ -1478,7 +1478,7 @@ class AuiSimpleTabArt:
                 if page.bitmap:
                     menuItem.SetBitmap(page.bitmap)
 
-                menuPopup.AppendItem(menuItem)
+                menuPopup.Append(menuItem)
                 
             else:
                 
@@ -1964,7 +1964,7 @@ class FF2TabArt(AuiDefaultTabArt):
         self.DrawTabBackground(dc, rr, page.active, (agwFlags & AUI_NB_BOTTOM) == 0)
 
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
-        dc.SetPen(wx.Pen(wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNSHADOW)))
+        dc.SetPen(wx.Pen(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNSHADOW)))
 
         # Draw the tab as rounded rectangle
         dc.DrawPolygon(tabPoints)
@@ -2122,9 +2122,9 @@ class FF2TabArt(AuiDefaultTabArt):
         topStartColour = wx.WHITE
 
         if not focus:
-            topStartColour = LightColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE), 50)
+            topStartColour = LightColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE), 50)
 
-        topEndColour = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
+        topEndColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE)
         bottomStartColour = topEndColour
         bottomEndColour = topEndColour
 

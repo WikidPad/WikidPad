@@ -24,8 +24,6 @@ import datetime, traceback
 
 from wx.lib.expando import ExpandoTextCtrl
 
-# TODO: from . import framemanager   doesn't work
-from . import framemanager
 from . import tabart as TA
 
 from .aui_utilities import LightColour, MakeDisabledBitmap, TabDragImage
@@ -649,7 +647,7 @@ class TabNavigatorWindow(wx.Dialog):
         if props.Icon.GetSize() != (16, 16):
             img = self._props.Icon.ConvertToImage()
             img.Rescale(16, 16, wx.IMAGE_QUALITY_HIGH)
-            self._props.Icon = wx.BitmapFromImage(img)
+            self._props.Icon = wx.Bitmap(img)
 
         if self._props.Font.IsOk():
             self.Font = self._props.Font
@@ -663,7 +661,7 @@ class TabNavigatorWindow(wx.Dialog):
 
         mem_dc = wx.MemoryDC()
         mem_dc.SelectObject(wx.EmptyBitmap(1,1))
-        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         font.SetWeight(wx.BOLD)
         mem_dc.SetFont(font)
 
@@ -691,8 +689,8 @@ class TabNavigatorWindow(wx.Dialog):
         self._panel.Bind(wx.EVT_PAINT, self.OnPanelPaint)
         self._panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnPanelEraseBg)
 
-        self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE))
-        self._listBox.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE))
+        self.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE))
+        self._listBox.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE))
         self.PopulateListControl(parent)
 
         self.SetInitialSize(props.MinSize)
@@ -820,7 +818,7 @@ class TabNavigatorWindow(wx.Dialog):
         mem_dc = wx.MemoryDC()
         mem_dc.SelectObject(bmp)
 
-        endColour = wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNSHADOW)
+        endColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNSHADOW)
         startColour = LightColour(endColour, 50)
         mem_dc.GradientFillLinear(rect, startColour, endColour, wx.SOUTH)
 
@@ -832,7 +830,7 @@ class TabNavigatorWindow(wx.Dialog):
         mem_dc.DrawBitmap(self._props.Icon, bmpPt.x, bmpPt.y, True)
 
         # get the text position, and draw it
-        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         font.SetWeight(wx.BOLD)
         mem_dc.SetFont(font)
         fontHeight = mem_dc.GetCharHeight()
@@ -2695,7 +2693,7 @@ class TabFrame(wx.PyWindow):
 # ----------------------------------------------------------------------
 # -- AuiNotebook class implementation --
 
-class AuiNotebook(wx.PyPanel):
+class AuiNotebook(wx.Panel):
     """
     AuiNotebook is a notebook control which implements many features common in applications with dockable panes.
     Specifically, AuiNotebook implements functionality which allows the user to rearrange tab
@@ -2719,7 +2717,7 @@ class AuiNotebook(wx.PyPanel):
          chosen by either the windowing system or wxPython, depending on platform;
         :param Size `size`: the control size. A value of (-1, -1) indicates a default size,
          chosen by either the windowing system or wxPython, depending on platform;
-        :param integer `style`: the underlying :class:`PyPanel` window style;
+        :param integer `style`: the underlying :class:`Panel` window style;
         :param integer `agwStyle`: the AGW-specific window style. This can be a combination of the following bits:
 
          ==================================== ==================================
@@ -2769,7 +2767,8 @@ class AuiNotebook(wx.PyPanel):
         self._tabBounds = (-1, -1)
         self._click_tab = None
 
-        wx.PyPanel.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE, name=name)
+        wx.Panel.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE, name=name)
+        from . import framemanager
         self._mgr = framemanager.AuiManager()
         self._tabs = AuiTabContainer(self)
 
@@ -2800,7 +2799,7 @@ class AuiNotebook(wx.PyPanel):
         """
         
         self._mgr.UnInit()
-        return wx.PyPanel.Destroy(self)
+        return wx.Panel.Destroy(self)
         
 
     def __getitem__(self, index):
@@ -2862,7 +2861,8 @@ class AuiNotebook(wx.PyPanel):
         self._mgr.SetManagedWindow(self)
         self._mgr.SetAGWFlags(AUI_MGR_DEFAULT)
         self._mgr.SetDockSizeConstraint(1.0, 1.0) # no dock size constraint
-
+        
+        from . import framemanager
         self._mgr.AddPane(self._dummy_wnd, framemanager.AuiPaneInfo().Name("dummy").Bottom().CaptionVisible(False).Show(False))
         self._mgr.Update()
 
@@ -3019,6 +3019,7 @@ class AuiNotebook(wx.PyPanel):
 
             # create a pane info structure with the information
             # about where the pane should be added
+            from . import framemanager
             pane_info = framemanager.AuiPaneInfo().Name(pane_name).Bottom().CaptionVisible(False)
             self._mgr.AddPane(new_tabs, pane_info)
 
@@ -3331,6 +3332,7 @@ class AuiNotebook(wx.PyPanel):
         info.active = False
         info.control = control
 
+        from . import framemanager
         originalPaneMgr = framemanager.GetManager(page)
         if originalPaneMgr:
             originalPane = originalPaneMgr.GetPane(page)
@@ -4212,6 +4214,7 @@ class AuiNotebook(wx.PyPanel):
 
         tabframe._tabs.SetAGWFlags(self._agwFlags)
         tabframe._tabs.SetArtProvider(self._tabs.GetArtProvider().Clone())
+        from . import framemanager
         self._mgr.AddPane(tabframe, framemanager.AuiPaneInfo().Center().CaptionVisible(False).
                           PaneBorder((self._agwFlags & AUI_NB_SUB_NOTEBOOK) == 0))
 
@@ -4306,6 +4309,7 @@ class AuiNotebook(wx.PyPanel):
             dest_tabs.AddButton(clone.id, clone.location, clone.bitmap, clone.dis_bitmap)
         # create a pane info structure with the information
         # about where the pane should be added
+        from . import framemanager
         pane_info = framemanager.AuiPaneInfo().Bottom().CaptionVisible(False)
 
         if direction == wx.LEFT:
@@ -4413,7 +4417,7 @@ class AuiNotebook(wx.PyPanel):
         For unknown reason it seems impossible to set focus to notebook directly
         so it is set to active tab control in this case
         """
-        wx.PyPanel.SetFocus(self)
+        wx.Panel.SetFocus(self)
         if self.FindFocus() is self:
             return
         
@@ -4970,6 +4974,7 @@ class AuiNotebook(wx.PyPanel):
                 new_tabs._tabs.SetArtProvider(self._tabs.GetArtProvider().Clone())
                 new_tabs._tabs.SetAGWFlags(self._agwFlags)
 
+                from . import framemanager
                 self._mgr.AddPane(new_tabs, framemanager.AuiPaneInfo().Bottom().CaptionVisible(False), mouse_client_pt)
                 self._mgr.Update()
                 dest_tabs = new_tabs._tabs
@@ -5064,6 +5069,8 @@ class AuiNotebook(wx.PyPanel):
            
         """
 
+        from . import framemanager
+
         root_manager = framemanager.GetManager(self)
         page_title = self.GetPageText(page_index)
         page_contents = self.GetPage(page_index)
@@ -5134,6 +5141,8 @@ class AuiNotebook(wx.PyPanel):
         :param `event`: a :class:`CloseEvent` event to be processed.
         """
 
+        from . import framemanager
+        
         root_manager = framemanager.GetManager(self)
         if root_manager and root_manager != self._mgr:
             pane = event.pane
@@ -5165,6 +5174,8 @@ class AuiNotebook(wx.PyPanel):
 
         :param `pane`: an instance of :class:`~lib.agw.aui.framemanager.AuiPaneInfo`.
         """
+
+        from . import framemanager
 
         root_manager = framemanager.GetManager(self)
 
@@ -5645,10 +5656,10 @@ class AuiNotebook(wx.PyPanel):
 
         :param Font `font`: the new font to use to draw tab labels in their normal, un-selected state.
 
-        :note: Overridden from :class:`PyPanel`.
+        :note: Overridden from :class:`Panel`.
         """
 
-        wx.PyPanel.SetFont(self, font)
+        wx.Panel.SetFont(self, font)
 
         selectedFont = wx.Font(font.GetPointSize(), font.GetFamily(),
                                font.GetStyle(), wx.BOLD, font.GetUnderlined(),
@@ -5831,7 +5842,7 @@ class AuiNotebook(wx.PyPanel):
         already override it to return ``True`` and user-defined classes with similar behaviour
         should do it as well to allow the library to handle such windows appropriately.
 
-        :note: Overridden from :class:`PyPanel`.
+        :note: Overridden from :class:`Panel`.
         """
 
         return True

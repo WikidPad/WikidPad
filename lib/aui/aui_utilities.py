@@ -137,11 +137,11 @@ def BitmapFromBits(bits, w, h, colour):
      raw bitmap.
     """
 
-    img = wx.BitmapFromBits(bits, w, h).ConvertToImage()
+    img = wx.Bitmap(bits, w, h).ConvertToImage()
     img.Replace(0, 0, 0, 123, 123, 123)
     img.Replace(255, 255, 255, colour.Red(), colour.Green(), colour.Blue())
     img.SetMaskColour(123, 123, 123)
-    return wx.BitmapFromImage(img)
+    return wx.Bitmap(img)
 
 
 def IndentPressedBitmap(rect, button_state):

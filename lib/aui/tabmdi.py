@@ -263,7 +263,7 @@ class AuiMDIParentFrame(wx.Frame):
 # AuiMDIChildFrame
 #-----------------------------------------------------------------------------
 
-class AuiMDIChildFrame(wx.PyPanel):
+class AuiMDIChildFrame(wx.Panel):
 
     def __init__(self, parent, id=wx.ID_ANY, title="", pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name="AuiMDIChildFrame"):
@@ -281,7 +281,7 @@ class AuiMDIChildFrame(wx.PyPanel):
         cli_size = pClientWindow.GetClientSize()
 
         # create the window off-screen to prevent flicker
-        wx.PyPanel.__init__(self, pClientWindow, id, wx.Point(cli_size.x+1, cli_size.y+1),
+        wx.Panel.__init__(self, pClientWindow, id, wx.Point(cli_size.x+1, cli_size.y+1),
                             size, wx.NO_BORDER, name=name)
 
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
@@ -569,7 +569,7 @@ class AuiMDIChildFrame(wx.PyPanel):
     
     def Show(self, show=True):
 
-        wx.PyPanel.Show(self, show)
+        wx.Panel.Show(self, show)
 
 
     def ApplyMDIChildFrameRect(self):
