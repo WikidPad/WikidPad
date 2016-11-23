@@ -460,7 +460,7 @@ class GraphView(wx.html.HtmlWindow):
         
         self.mode = mode
         
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
 
 
     def _updateTempFilePrefPath(self):
@@ -686,7 +686,7 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         self.addOptionEntry("plugin_graphVizStructure_nodeFacename",
                 self.tfFacename, "t")
         
-        wx.EVT_BUTTON(self, facenameButton.GetId(), self.OnSelectFaceNode)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectFaceNode, id=facenameButton.GetId())
 
 
         ctl = wx.TextCtrl(self, -1)

@@ -169,7 +169,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 #         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
 
-        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
+        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
 
 

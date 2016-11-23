@@ -115,14 +115,13 @@ class PrintMainDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
-        wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+        self.Bind(wx.EVT_CHOICE, self.OnExportTo, id=GUI_ID.chExportTo)
+        self.Bind(wx.EVT_CHOICE, self.OnChSelectedSet, id=GUI_ID.chSelectedSet)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
-        wx.EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
-#         wx.EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
-#                 self.OnChoosePlainTextFont)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnPrint)
+        self.Bind(wx.EVT_BUTTON, self.OnPreview, id=GUI_ID.btnPreview)
+        self.Bind(wx.EVT_BUTTON, self.OnPageSetup, id=GUI_ID.btnPageSetup)
+#         self.Bind(wx.EVT_BUTTON, self.OnChoosePlainTextFont, id=GUI_ID.btnChoosePlainTextFont)
+        self.Bind(wx.EVT_BUTTON, self.OnPrint, id=wx.ID_OK)
 
 
     def _transferOptionsToPrinter(self):

@@ -182,17 +182,17 @@ def buildIconsSubmenu(iconCache):
     iconsMenu = wx.Menu()
 
     iconsMenu1 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'A-C', iconsMenu1)
+    iconsMenu.AppendSubMenu(iconsMenu1, 'A-C')
     iconsMenu2 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'D-F', iconsMenu2)
+    iconsMenu.AppendSubMenu(iconsMenu2, 'D-F')
     iconsMenu3 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'G-L', iconsMenu3)
+    iconsMenu.AppendSubMenu(iconsMenu3, 'G-L')
     iconsMenu4 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'M-P', iconsMenu4)
+    iconsMenu.AppendSubMenu(iconsMenu4, 'M-P')
     iconsMenu5 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'Q-S', iconsMenu5)
+    iconsMenu.AppendSubMenu(iconsMenu5, 'Q-S')
     iconsMenu6 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'T-Z', iconsMenu6)
+    iconsMenu.AppendSubMenu(iconsMenu6, 'T-Z')
 
     icons = list(iconCache.iconLookupCache.keys());  # TODO: Create function?
     icons.sort()    # TODO sort with collator
@@ -220,7 +220,7 @@ def buildIconsSubmenu(iconCache):
         menuItem = wx.MenuItem(iconsSubMenu, menuID, icname, icname)
         bitmap = iconCache.lookupIcon(icname)
         menuItem.SetBitmap(bitmap)
-        iconsSubMenu.AppendItem(menuItem)
+        iconsSubMenu.Append(menuItem)
 
     return (iconsMenu, iconMap)
 
@@ -261,7 +261,7 @@ def buildColorsSubmenu():
         if cl.Green() < 128:
             menuItem.SetTextColour(wx.WHITE)
 
-        colorsSubMenu.AppendItem(menuItem)
+        colorsSubMenu.Append(menuItem)
 
     return (colorsMenu, colorMap)
 

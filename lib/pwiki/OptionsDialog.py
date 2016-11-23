@@ -155,8 +155,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 dottedButtonId = params[0].GetId()
                 self.idToOptionEntryMap[dottedButtonId] = oct
 
-                wx.EVT_BUTTON(self, dottedButtonId,
-                        self.OnDottedButtonPressed)
+                self.Bind(wx.EVT_BUTTON, self.OnDottedButtonPressed, id=dottedButtonId)
 
 
     def checkOk(self):
@@ -979,8 +978,7 @@ class OptionsDialog(wx.Dialog):
                     dottedButtonId = self.ctrls[params[0]].GetId()
                     self.idToOptionEntryMap[dottedButtonId] = oct
 
-                    wx.EVT_BUTTON(self, dottedButtonId,
-                            self.OnDottedButtonPressed)
+                    self.Bind(wx.EVT_BUTTON, self.OnDottedButtonPressed, id=dottedButtonId)
 
         # Options with special treatment
         self.ctrls.cbNewWindowWikiUrl.SetValue(
@@ -1027,50 +1025,36 @@ class OptionsDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_LISTBOX, self.OnLbPages, id=GUI_ID.lbPages)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectFaceHtmlPrev, id=GUI_ID.btnSelectFaceHtmlPrev)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,
-                lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,
-                _("Wave files (*.wav)|*.wav")))
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,                lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,                _("Wave files (*.wav)|*.wav")))
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectExportDefaultDir,
-                lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir))
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir), id=GUI_ID.btnSelectExportDefaultDir)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectWikiOpenNewDefaultDir,
-                lambda evt: self.selectDirectory(
-                self.ctrls.tfWikiOpenNewDefaultDir))
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(self.ctrls.tfWikiOpenNewDefaultDir), id=GUI_ID.btnSelectWikiOpenNewDefaultDir)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,
-                lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,                lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
                 _("All files (*.*)|*")))
 
-        wx.EVT_BUTTON(self, GUI_ID.btnPasteTypeOrderUp,
-                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp())
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp(), id=GUI_ID.btnPasteTypeOrderUp)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnPasteTypeOrderDown,
-                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown())
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown(), id=GUI_ID.btnPasteTypeOrderDown)
 
 
-        wx.EVT_CHOICE(self, GUI_ID.chTempHandlingTempMode,
-                self.OnUpdateUiAfterChange)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chTempHandlingTempMode)
 
-        wx.EVT_CHECKBOX(self, GUI_ID.cbEditorImageTooltipsLocalUrls,
-                self.OnUpdateUiAfterChange)
-        wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
-                self.OnUpdateUiAfterChange)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbEditorImageTooltipsLocalUrls)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chEditorImagePasteFileType)
 
-        wx.EVT_CHOICE(self, GUI_ID.chHtmlPreviewRenderer,
-                self.OnUpdateUiAfterChange)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chHtmlPreviewRenderer)
 
-        wx.EVT_CHECKBOX(self, GUI_ID.cbWwSearchCountOccurrences,
-                self.OnUpdateUiAfterChange)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbWwSearchCountOccurrences)
 
-        wx.EVT_CHECKBOX(self, GUI_ID.cbSingleProcess,
-                self.OnUpdateUiAfterChange)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbSingleProcess)
 
 
     def _refreshForPage(self):
@@ -1397,7 +1381,7 @@ class OptionsDialog(wx.Dialog):
         fontDesc = tfield.GetValue()
 
         # if fontDesc != u"":
-        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
 
         # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT,
 

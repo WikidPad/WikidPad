@@ -486,6 +486,8 @@ def callInMainThreadAsync(fct, *args, **kwargs):
 
 
 if __debug__:
+    
+    _VERBOSE = False
 
     class _Verbose:
 
@@ -518,7 +520,7 @@ class _TimeoutRLock(_Verbose):
     Modified version of threading._RLock from standard library
     """
     def __init__(self, timeout=None, verbose=None):
-        threading._Verbose.__init__(self, verbose)
+        _Verbose.__init__(self, verbose)
         self.__block = _allocate_lock()
         self.__owner = None
         self.__count = 0

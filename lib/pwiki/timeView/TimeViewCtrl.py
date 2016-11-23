@@ -78,7 +78,7 @@ class TimeViewCtrl(wx.Notebook):
         self._adjustVisibilitySubControls(tabIdx)
 
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged,
                 id=self.GetId())
 #         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)

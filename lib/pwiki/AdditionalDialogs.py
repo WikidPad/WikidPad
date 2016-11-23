@@ -62,13 +62,13 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
-        wx.EVT_TEXT(self, ID, self.OnText)
-        wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-        wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-        wx.EVT_LISTBOX(self, ID, self.OnListBox)
-        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=ID)
+        self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
+        self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
+        self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
 
 
     def _fillListContent(self, searchTxt):
@@ -203,18 +203,18 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_TEXT(self, ID, self.OnText)
-        wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-        wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-        wx.EVT_KEY_DOWN(self.ctrls.lb, self.OnKeyDownListBox)
-        wx.EVT_LISTBOX(self, ID, self.OnListBox)
-        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnCreate, self.OnCreate)
-        wx.EVT_CHOICE(self, GUI_ID.chSort, self.OnChoiceSort)
-        wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
-        wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
-        wx.EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=ID)
+        self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
+        self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
+        self.ctrls.lb.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownListBox)
+        self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate)
+        self.Bind(wx.EVT_CHOICE, self.OnChoiceSort, id=GUI_ID.chSort)
+        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground)
 
     def OnOk(self, evt):
         if self.activateSelectedWikiWords(0):
@@ -522,12 +522,11 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
-        wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
-        wx.EVT_CHECKBOX(self, GUI_ID.cbSortAlphabetically,
-                self.OnCbSortAlphabetically)
+        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_CHECKBOX, self.OnCbSortAlphabetically, id=GUI_ID.cbSortAlphabetically)
 
 
     def OnDelete(self, evt):
@@ -664,21 +663,21 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_TEXT(self, GUI_ID.tfToWikiWord, self.OnTextToWikiWord)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_TEXT, self.OnTextToWikiWord, id=GUI_ID.tfToWikiWord)
 
 
 
-#         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+#         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 # 
-#         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-#         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
-#         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
-#         wx.EVT_BUTTON(self, GUI_ID.btnCreate, self.OnCreate)
-#         wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
-#         wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
-#         wx.EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
+#         self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
+#         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
+#         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
+#         self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+#         self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate)
+#         self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
+#         self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+#         self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground)
 
 
 
@@ -816,8 +815,8 @@ class SelectIconDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.lc.GetId(), self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnOk, id=self.lc.GetId())
 
     def GetValue(self):
         """
@@ -945,8 +944,8 @@ class DateformatDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
         
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=XRCID("fieldFormat")) 
 
 
     def OnText(self, evt):
@@ -1037,9 +1036,9 @@ class FontFaceDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
             
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_LISTBOX(self, GUI_ID.lbFacenames, self.OnFaceSelected)
-        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbFacenames, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_LISTBOX, self.OnFaceSelected, id=GUI_ID.lbFacenames)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lbFacenames)
 
 
     def OnOk(self, evt):
@@ -1164,17 +1163,17 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
-        wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+        self.Bind(wx.EVT_CHOICE, self.OnExportTo, id=GUI_ID.chExportTo)
+        self.Bind(wx.EVT_CHOICE, self.OnChSelectedSet, id=GUI_ID.chSelectedSet)
 
-        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedExports, self.OnLoadAndRunExport)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadAndRunExport, id=GUI_ID.lbSavedExports)
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectDestination, self.OnSelectDest)
-        wx.EVT_BUTTON(self, GUI_ID.btnSaveExport, self.OnSaveExport)
-        wx.EVT_BUTTON(self, GUI_ID.btnLoadExport, self.OnLoadExport)
-        wx.EVT_BUTTON(self, GUI_ID.btnLoadAndRunExport, self.OnLoadAndRunExport)
-        wx.EVT_BUTTON(self, GUI_ID.btnDeleteExports, self.OnDeleteExports)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectDest, id=GUI_ID.btnSelectDestination)
+        self.Bind(wx.EVT_BUTTON, self.OnSaveExport, id=GUI_ID.btnSaveExport)
+        self.Bind(wx.EVT_BUTTON, self.OnLoadExport, id=GUI_ID.btnLoadExport)
+        self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunExport, id=GUI_ID.btnLoadAndRunExport)
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteExports, id=GUI_ID.btnDeleteExports)
 
 
     def _refreshForEtype(self):
@@ -1641,10 +1640,10 @@ class ImportDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_CHOICE(self, GUI_ID.chImportFormat, self.OnImportFormat)
+        self.Bind(wx.EVT_CHOICE, self.OnImportFormat, id=GUI_ID.chImportFormat)
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectSource, self.OnSelectSrc)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectSrc, id=GUI_ID.btnSelectSource)
 
 
     def _refreshForItype(self):
@@ -1835,7 +1834,7 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
     def GetValue(self):
@@ -2004,8 +2003,8 @@ class SimpleInfoDialog(wx.Dialog):
 
         mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 0)
         
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_CANCEL)
 
         self.SetSizer(mainsizer)
         self.Fit()
@@ -2135,7 +2134,7 @@ class WikiJobDialog(SimpleInfoDialog):
         self.OnTimer(None)
         self.timer.Start(500, False)
 
-        wx.EVT_TIMER(self, GUI_ID.TIMER_JOBDIALOG, self.OnTimer)
+        self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
 
 #     def OnOk(self, evt):

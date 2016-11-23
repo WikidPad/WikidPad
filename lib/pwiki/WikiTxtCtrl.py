@@ -267,16 +267,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
         wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
 
-#         wx.EVT_LEFT_DOWN(self, self.OnClick)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
-        wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
+#         self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
+        self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
 
 #         if config.getboolean("main", "editor_useImeWorkaround", False):
-#             wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
+#             self.Bind(wx.EVT_CHAR, self.OnChar_ImeWorkaround)
 
-        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
+        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
 #         self.incSearchCharStartPos = 0
         self.incSearchPreviousHiddenLines = None
@@ -303,49 +303,36 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.contextMenuSpellCheckSuggestions = None
 
         # Connect context menu events to functions
-        wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
-        wx.EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
+        self.Bind(wx.EVT_MENU, lambda evt: self.Undo(), id=GUI_ID.CMD_UNDO)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Redo(), id=GUI_ID.CMD_REDO)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML,
-                lambda evt: self.pasteRawHtml())
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+        self.Bind(wx.EVT_MENU, lambda evt: self.Cut(), id=GUI_ID.CMD_CLIPBOARD_CUT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Paste(), id=GUI_ID.CMD_CLIPBOARD_PASTE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pasteRawHtml(), id=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+        self.Bind(wx.EVT_MENU, lambda evt: self.ReplaceSelection(""), id=GUI_ID.CMD_TEXT_DELETE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN), id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT), id=GUI_ID.CMD_ZOOM_OUT)
 
 
         for sps in self.SUGGESTION_CMD_IDS:
-            wx.EVT_MENU(self, sps, self.OnReplaceThisSpellingWithSuggestion)
+            self.Bind(wx.EVT_MENU, self.OnReplaceThisSpellingWithSuggestion, id=sps)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_SESSION,
-                self.OnAddThisSpellingToIgnoreSession)
-        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL,
-                self.OnAddThisSpellingToIgnoreGlobal)
-        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL,
-                self.OnAddThisSpellingToIgnoreLocal)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreSession, id=GUI_ID.CMD_ADD_THIS_SPELLING_SESSION)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreGlobal, id=GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreLocal, id=GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_UP,
-                self.OnLogicalLineMove)
-        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT,
-                self.OnLogicalLineMove)
-        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_DOWN,
-                self.OnLogicalLineMove)
-        wx.EVT_MENU(self, GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT,
-                self.OnLogicalLineMove)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_UP)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_DOWN)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
-                self.OnActivateNewTabBackgroundThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
-                self.OnActivateNewWindowThis)
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
@@ -378,22 +365,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 lambda evt: self.OnActivateNewTabBackgroundThis(evt, "below"))
 
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS,
-                self.OnConvertUrlAbsoluteRelativeThis)
+        self.Bind(wx.EVT_MENU, self.OnConvertUrlAbsoluteRelativeThis, id=GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
-                self.OnOpenContainingFolderThis)
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_DELETE_FILE,
-                self.OnDeleteFile)
+        self.Bind(wx.EVT_MENU, self.OnDeleteFile, id=GUI_ID.CMD_DELETE_FILE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_RENAME_FILE,
-                self.OnRenameFile)
+        self.Bind(wx.EVT_MENU, self.OnRenameFile, id=GUI_ID.CMD_RENAME_FILE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
-                self.OnClipboardCopyUrlToThisAnchor)
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopyUrlToThisAnchor, id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_TEMPLATE, self.OnSelectTemplate)
+        self.Bind(wx.EVT_MENU, self.OnSelectTemplate, id=GUI_ID.CMD_SELECT_TEMPLATE)
 
     # 2.8 does not support SetEditable - Define a dummy function for now
     if wx.version().startswith("2.8"):
@@ -422,7 +404,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         """
 #         Now we can register idle handler.
 #         """
-#         wx.EVT_IDLE(self, self.OnIdle)
+#         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 
     def Copy(self, text=None):
@@ -1318,7 +1300,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             if self.presenter.getConfig().getboolean("main",
                     "editor_useImeWorkaround", False):
-                wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
+                self.Bind(wx.EVT_CHAR, self.OnChar_ImeWorkaround)
             self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
             self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
             self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
@@ -1502,7 +1484,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             if not reused:
                 # For a new id, an event must be set
-                wx.EVT_MENU(self, menuID, self.OnTemplateUsed)
+                self.Bind(wx.EVT_MENU, self.OnTemplateUsed, id=menuID)
 
             menu.Append(menuID, tn)
 
@@ -1636,7 +1618,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             font.SetWeight(wx.FONTWEIGHT_BOLD)
                             menuitem.SetFont(font)
 
-                            menu.AppendItem(menuitem)
+                            menu.Append(menuitem)
 
                         self.contextMenuSpellCheckSuggestions = suggestions
                     # Show other spelling menu items
@@ -1678,8 +1660,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU)
 
                     menu.AppendSeparator()
-                    menu.AppendMenu(wx.NewId(), _('Use Template'),
-                            templateSubmenu)
+                    menu.AppendSubMenu(templateSubmenu, _('Use Template'))
                 else:
                     appendToMenuByMenuDesc(menu,
                             _CONTEXT_MENU_SELECT_TEMPLATE)

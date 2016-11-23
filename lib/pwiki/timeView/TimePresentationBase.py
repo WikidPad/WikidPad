@@ -36,8 +36,8 @@ class TimePresentationBase:
         self.layerVisible = True
         self.sizeVisible = True
 
-        wx.EVT_MOTION(self, self.OnMouseMotion)
-        wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
+        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
 
 
     def isVisibleEffect(self):

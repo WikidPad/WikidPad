@@ -74,22 +74,6 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
         self._resetKeyBindings()
 
 
-#         # Connect context menu events to functions
-#         wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
-#         wx.EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
-# 
-#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
-#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
-#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
-#         wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
-# 
-#         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
-#         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
-#                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
-#         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
-#                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
-
-
     def Cut(self):
         self.Copy()
         self.ReplaceSelection("")

@@ -29,12 +29,9 @@ class TrashBagList(EnhancedListControl):
         self.InsertColumn(0, "", width=1)  # wiki word
         self.InsertColumn(1, "", width=1)  # trash date
 
-#         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(),
-                self.dialog.OnCmdRestoreSelected)
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#         wx.EVT_MENU(self, GUI_ID.CMD_TRASHBAG_RESTORE,
-#                 self.OnCmdTrashBagRestore)
+#         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.dialog.OnCmdRestoreSelected, id=self.GetId())
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         self.updateContent()
 
@@ -150,9 +147,9 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
         listCtrl = TrashBagList(self.mainControl, self, self, GUI_ID.listDetails)
         res.AttachUnknownControl("listDetails", listCtrl, self)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnRestoreSelected, self.OnCmdRestoreSelected)
-        wx.EVT_BUTTON(self, GUI_ID.btnDeleteSelected, self.OnCmdDeleteSelected)
-        wx.EVT_BUTTON(self, GUI_ID.btnDeleteAll, self.OnCmdDeleteAll)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdRestoreSelected, id=GUI_ID.btnRestoreSelected)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdDeleteSelected, id=GUI_ID.btnDeleteSelected)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdDeleteAll, id=GUI_ID.btnDeleteAll)
 
 
     def GetValue(self):
@@ -285,16 +282,14 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         self.updateValidToWikiWord()
         
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnCancel)
-        wx.EVT_TEXT(self, GUI_ID.tfTrashBagTo, self.OnTextTrashBagTo)
-        wx.EVT_TEXT(self, GUI_ID.tfWikiElementTo, self.OnTextWikiElementTo)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbOverwrite, self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbSkip, self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbRenameTrashBag,
-                self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbRenameWikiElement,
-                self.OnRadioButtonChanged)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
+        self.Bind(wx.EVT_TEXT, self.OnTextTrashBagTo, id=GUI_ID.tfTrashBagTo)
+        self.Bind(wx.EVT_TEXT, self.OnTextWikiElementTo, id=GUI_ID.tfWikiElementTo)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbOverwrite)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbSkip)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbRenameTrashBag)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbRenameWikiElement)
 
         # Fixes focus bug under Linux
         self.SetFocus()

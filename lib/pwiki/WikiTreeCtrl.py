@@ -1329,18 +1329,18 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         
         self.onOptionsChanged(None)
 
-        wx.EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
-        wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
-        wx.EVT_RIGHT_UP(self, self.OnRightButtonUp)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnTreeItemActivated, id=ID)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightButtonDown)
+        self.Bind(wx.EVT_RIGHT_UP, self.OnRightButtonUp)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self._bindSelection()
 
-#         wx.EVT_TREE_BEGIN_RDRAG(self, ID, self.OnTreeBeginRDrag)
-        wx.EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
-        wx.EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
-        wx.EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
+#         self.Bind(wx.EVT_TREE_BEGIN_RDRAG, self.OnTreeBeginRDrag, id=ID)
+        self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnTreeItemExpand, id=ID)
+        self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnTreeItemCollapse, id=ID)
+        self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnTreeBeginDrag, id=ID)
 
 #        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
@@ -1354,25 +1354,25 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         menuID = wx.NewId()
 #         self.contextMenuWikiWords.Append(menuID, _(u'Add icon attribute'),
 #                 _(u'Open icon select dialog'))
-#         wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showSelectIconDialog())
+#         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showSelectIconDialog(), id=menuID)
 
         # Build icon menu
         # Build full submenu for icons
         iconsMenu, self.cmdIdToIconName = \
                 AttributeHandling.buildIconsSubmenu(wx.GetApp().getIconCache())
         for cmi in list(self.cmdIdToIconName.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+            self.Bind(wx.EVT_MENU, self.OnInsertIconAttribute, id=cmi)
 
-        self.contextMenuWikiWords.AppendMenu(wx.NewId(),
-                _('Add icon attribute'), iconsMenu)
+        self.contextMenuWikiWords.AppendSubMenu(iconsMenu,
+                _('Add icon attribute'))
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = AttributeHandling.buildColorsSubmenu()
         for cmi in list(self.cmdIdToColorName.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+            self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
-        self.contextMenuWikiWords.AppendMenu(wx.NewId(), _('Add color attribute'),
-                colorsMenu)
+        self.contextMenuWikiWords.AppendSubMenu(colorsMenu,
+                _('Add color attribute'))
 
         self.contextMenuNode = None  # Tree node for which a context menu was shown
         self.selectedNodeWhileContext = None # Tree node which was selected
@@ -1380,30 +1380,26 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 # selection jumps normally back to this node
 
         # TODO Let PersonalWikiFrame handle this 
-        wx.EVT_MENU(self, GUI_ID.CMD_RENAME_THIS_WIKIWORD,
-                lambda evt: self.pWiki.showWikiWordRenameDialog(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
-        wx.EVT_MENU(self, GUI_ID.CMD_DELETE_THIS_WIKIWORD,
-                lambda evt: self.pWiki.showWikiWordDeleteDialog(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordRenameDialog(
+                self.GetPyData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordDeleteDialog(
+                self.GetPyData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
         wx.EVT_MENU(self, GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD,
                 lambda evt: self.pWiki.insertAttribute("bookmarked", "true",
                     self.GetPyData(self.contextMenuNode).getWikiWord()))
-        wx.EVT_MENU(self, GUI_ID.CMD_SETASROOT_THIS_WIKIWORD,
-                lambda evt: self.pWiki.setWikiWordAsRoot(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.setWikiWordAsRoot(
+                self.GetPyData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_COLLAPSE_TREE,
-                lambda evt: self.collapseAll())
+        self.Bind(wx.EVT_MENU, lambda evt: self.collapseAll(),
+                id=GUI_ID.CMD_COLLAPSE_TREE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS,
-                self.OnAppendWikiWord)
-        wx.EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS,
-                self.OnPrependWikiWord)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD,
-                self.OnCmdClipboardCopyUrlToThisWikiWord)
+        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, id=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, id=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
                 
 
 
@@ -1726,7 +1722,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetBackgroundColour(wx.Colour(*coltuple))
 
-        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT, 
         font.SetNativeFontInfoUserDesc(config.get(
                 "main", "tree_font_nativeDesc", ""))

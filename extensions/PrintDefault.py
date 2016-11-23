@@ -104,8 +104,8 @@ class PlainTextPrint:
 
         panel.fontDesc = config.get("main", "print_plaintext_font")
 
-        wx.EVT_BUTTON(panel, GUI_ID.btnChoosePlainTextFont,
-                OnChoosePlainTextFont)
+        panel.Bind(wx.EVT_BUTTON, OnChoosePlainTextFont,
+                id=GUI_ID.btnChoosePlainTextFont)
 
         return (
             ("plain_text", panel),

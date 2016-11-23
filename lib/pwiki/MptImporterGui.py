@@ -553,8 +553,8 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnTest, self.OnTest)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, id=GUI_ID.btnTest)
 
 
     def OnOk(self, evt):

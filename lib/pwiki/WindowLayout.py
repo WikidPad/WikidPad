@@ -220,7 +220,7 @@ SASH_NONE = 100
 
 class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
     def __init__(self, *args, **kwargs):
-        wx.SashLayoutWindow.__init__(self, *args, **kwargs)
+        wx.adv.SashLayoutWindow.__init__(self, *args, **kwargs)
         
         self.effectiveSashPos = 0
         self.minimalEffectiveSashPos = 0
@@ -231,13 +231,13 @@ class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
         self.SetMinimumSizeX(1)
         self.SetMinimumSizeY(1)
 
-        wx.EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+        self.Bind(wx.adv.EVT_SASH_DRAGGED, self.OnSashDragged) #self.GetId(), )
 
         if isLinux():
             self._CURSOR_SIZEWE = wx.StockCursor(wx.CURSOR_SIZEWE)
             self._CURSOR_SIZENS = wx.StockCursor(wx.CURSOR_SIZENS)
-            wx.EVT_MOTION(self, self.MouseMotion)
-            wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
+            self.Bind(wx.EVT_MOTION, self.MouseMotion)
+            self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         
     if isLinux():
 
@@ -265,7 +265,7 @@ class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
             return
 
         self.centerWindow = centerWindow
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
 
     def align(self, al):
@@ -447,7 +447,7 @@ class WindowSashLayouter:
                     enclWin = self.mainWindow
 
             sashWin = SmartSashLayoutWindow(enclWin, -1,
-                wx.DefaultPosition, (30, 30), wx.SW_3DSASH)
+                wx.DefaultPosition, (30, 30), wx.adv.SW_3DSASH)
             
             proxyWin = proxiedCachedWindows.get(winName)
             if proxyWin is not None:

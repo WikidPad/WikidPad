@@ -89,14 +89,14 @@ class WikiWordListPopup(wx.Frame):
         # self.Layout()
         setWindowPos(self, fullVisible=True)
         
-        wx.EVT_MIDDLE_DOWN(self.resultBox, self.OnListMiddleButtonDown)
-        wx.EVT_MOTION(self.resultBox, self.OnListMouseMotion)
-        wx.EVT_LEFT_DOWN(self.resultBox, self.OnListLeftButtonDown)
-        wx.EVT_LEAVE_WINDOW(self.resultBox, self.OnListMouseLeave)
+        self.resultBox.Bind(wx.EVT_MIDDLE_DOWN, self.OnListMiddleButtonDown)
+        self.resultBox.Bind(wx.EVT_MOTION, self.OnListMouseMotion)
+        self.resultBox.Bind(wx.EVT_LEFT_DOWN, self.OnListLeftButtonDown)
+        self.resultBox.Bind(wx.EVT_LEAVE_WINDOW, self.OnListMouseLeave)
         
 
-#         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
-#         wx.EVT_CLOSE(self, self.OnClose)
+#         self.resultBox.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+#         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 
     def updateList(self):

@@ -72,23 +72,24 @@ class SpellCheckerDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, GUI_ID.btnIgnore, self.OnIgnore)
-        wx.EVT_BUTTON(self, GUI_ID.btnIgnoreAll, self.OnIgnoreAll)
-        wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
-        wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
-        wx.EVT_BUTTON(self, GUI_ID.btnAddWordGlobal, self.OnAddWordGlobal)
-        wx.EVT_BUTTON(self, GUI_ID.btnAddWordLocal, self.OnAddWordLocal)
-        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
-        wx.EVT_CLOSE(self, self.OnClose)
+        self.Bind(wx.EVT_BUTTON, self.OnIgnore, id=GUI_ID.btnIgnore)
+        self.Bind(wx.EVT_BUTTON, self.OnIgnoreAll, id=GUI_ID.btnIgnoreAll)
+        self.Bind(wx.EVT_BUTTON, self.OnReplace, id=GUI_ID.btnReplace)
+        self.Bind(wx.EVT_BUTTON, self.OnReplaceAll, id=GUI_ID.btnReplaceAll)
+        self.Bind(wx.EVT_BUTTON, self.OnAddWordGlobal, id=GUI_ID.btnAddWordGlobal)
+        self.Bind(wx.EVT_BUTTON, self.OnAddWordLocal, id=GUI_ID.btnAddWordLocal)
+        self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CANCEL)        
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
                 
 #         EVT_LISTBOX(self, GUI_ID.lbReplaceSuggestions,
 #                 self.OnLbReplaceSuggestions)
-        wx.EVT_LIST_ITEM_SELECTED(self, GUI_ID.lbReplaceSuggestions,
-                self.OnLbReplaceSuggestions)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnLbReplaceSuggestions,
+                id=GUI_ID.lbReplaceSuggestions)
 
-        wx.EVT_CHAR(self.ctrls.tfReplaceWith, self.OnCharReplaceWith)
-        wx.EVT_CHAR(self.ctrls.lbReplaceSuggestions, self.OnCharReplaceSuggestions)
+        self.ctrls.tfReplaceWith.Bind(wx.EVT_CHAR, self.OnCharReplaceWith)
+        self.ctrls.lbReplaceSuggestions.Bind(wx.EVT_CHAR,
+                self.OnCharReplaceSuggestions)
 
 
     def _showInfo(self, msg):

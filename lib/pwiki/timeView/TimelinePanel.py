@@ -70,27 +70,23 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         self.minMaxDayCache = None
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-#         wx.EVT_SIZE(self, self.OnSize)
-#         wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBg)
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-#         wx.EVT_MOTION(self, self.OnMouseMotion)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
+#         self.Bind(wx.EVT_SIZE, self.OnSize)
+#         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBg)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+#         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
 
-        wx.EVT_LIST_BEGIN_LABEL_EDIT(self, self.GetId(), self.OnBeginLabelEdit)
-        wx.EVT_LIST_END_LABEL_EDIT(self, self.GetId(), self.OnEndLabelEdit)
+        self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit, id=self.GetId())
+        self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnEndLabelEdit, id=self.GetId())
         
-        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS,
-                self.OnCmdCheckShowEmptyDays)
-        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS,
-                self.OnCmdCheckUpdateEmptyDays)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
-                self.OnCmdCheckDateAscending)
-        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
-                self.OnCmdCheckUpdateDateAscending)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
 
 
 
@@ -543,17 +539,17 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 
                 if not reused:
                     # For a new id, an event must be set
-                    wx.EVT_MENU(self, menuID, self.OnWikiWordInMenu)
+                    self.Bind(wx.EVT_MENU, self.OnWikiWordInMenu, id=menuID)
 
 #                 if len(reusableIds) > 0:
 #                     menuId = reusableIds.pop()
 #                 else:
 #                     menuId = wx.NewId()
-#                     wx.EVT_MENU(self, menuId, self.OnWikiWordInMenu)
+#                     self.Bind(wx.EVT_MENU, self.OnWikiWordInMenu, id=menuId)
 # 
 #                 cmc[menuId] = word
                 menuItem = wx.MenuItem(menu, menuID, word)
-                menu.AppendItem(menuItem)
+                menu.Append(menuItem)
 
 #             # Add remaining ids to prevent them from getting lost
 #             for i in reusableIds:

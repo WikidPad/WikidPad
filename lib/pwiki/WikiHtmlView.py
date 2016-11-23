@@ -151,30 +151,30 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.exporterInstance.setLinkConverter(
                 LinkConverterForPreview(self.presenter.getWikiDocument()))
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        wx.EVT_KEY_UP(self, self.OnKeyUp)
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
-                self.OnActivateNewTabBackgroundThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
-                self.OnActivateNewWindowThis)
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), id=GUI_ID.CMD_ZOOM_OUT)
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)        
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis,
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis,
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis,
+                id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
-                self.OnOpenContainingFolderThis)
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis,
+                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
-        wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
-        wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel)
-        wx.EVT_MOTION(self, self.OnMouseMotion)
+        self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
 
 
     def setLayerVisible(self, vis, scName=""):

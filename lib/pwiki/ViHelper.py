@@ -1443,14 +1443,14 @@ class ViVisualBell(wxPopupOrFrame):
 
         self.Show()
         if close_delay > 0:
-            wx.EVT_TIMER(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE,
-                    self.OnClose)
+            self.Bind(wx.EVT_TIMER, self.OnClose,
+                    id=GUI_ID.TIMER_VISUAL_BELL_CLOSE)
 
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_VISUAL_BELL_CLOSE)
             self.closeTimer.Start(close_delay, True)
         else:
-            wx.EVT_KEY_DOWN(self.text, self.OnClose)
-            wx.EVT_KILL_FOCUS(self.text, self.OnClose)
+            self.text.Bind(wx.EVT_KEY_DOWN, self.OnClose)
+            self.text.Bind(wx.EVT_KILL_FOCUS, self.OnClose)
             self.SetFocus()
 
 
@@ -1509,12 +1509,12 @@ class ViHintDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose,
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if self.closeDelay:
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
@@ -2666,10 +2666,10 @@ class ViInputDialog(wx.Panel):
 #        self.dialog_start_size = rect.GetSize()
         #self.dialog_start_size = rect.GetSize()
 
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_VI_UPDATE_CMD, self.CheckViInput)
+        self.Bind(wx.EVT_TIMER, self.CheckViInput, id=GUI_ID.TIMER_VI_UPDATE_CMD)
 
         self.ctrls.viInputTextField.SetBackgroundColour(
                 ViInputDialog.COLOR_YELLOW)
@@ -2678,14 +2678,14 @@ class ViInputDialog(wx.Panel):
 
         #wx.EVT_SET_FOCUS(self.ctrls.viInputListBox, self.FocusInputField)
 
-        wx.EVT_TEXT(self, GUI_ID.viInputTextField, self.OnText)
-        wx.EVT_KEY_DOWN(self.ctrls.viInputTextField, self.OnKeyDownInput)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncViInputClose)
-        wx.EVT_MOUSE_EVENTS(self.ctrls.viInputTextField, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.viInputTextField)
+        self.ctrls.viInputTextField.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncViInputClose,
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.ctrls.viInputTextField.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
-        wx.EVT_LEFT_DOWN(self.ctrls.viInputListBox, self.OnLeftMouseListBox)
-        wx.EVT_LEFT_DCLICK(self.ctrls.viInputListBox, self.OnLeftMouseDoubleListBox)
+        self.ctrls.viInputListBox.Bind(wx.EVT_LEFT_DOWN, self.OnLeftMouseListBox)
+        self.ctrls.viInputListBox.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftMouseDoubleListBox)
 
         if self.closeDelay:
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
@@ -2696,7 +2696,7 @@ class ViInputDialog(wx.Panel):
         self.list_selection = None
 
         self.block_kill_focus = False
-        wx.EVT_KILL_FOCUS(self.ctrls.viInputTextField, self.OnKillFocus)
+        self.ctrls.viInputTextField.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
     def StartCmd(self, ctrl, cmd_history, text, selection_range=None, 
                                                             run_cmd=False):
@@ -3106,7 +3106,7 @@ class ViCmdList(wx.html.HtmlListBox):
 
         self.parent = parent
 
-        wx.EVT_LISTBOX_DCLICK(self, -1, self.OnDClick)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnDClick, id=-1)
 
         self.ClearData()
 

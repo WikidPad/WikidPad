@@ -109,15 +109,15 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
         self.SetBackgroundColour(wx.WHITE)
 
-        wx.EVT_PAINT(self, self.OnPaint)
-        wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
-        wx.EVT_SIZE(self, self.OnSize)
-        wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
 
-#         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
-#         wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
+#         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+#         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         
-#         wx.EVT_MOTION(self, self.OnMotion)
+#         self.Bind(wx.EVT_MOTION, self.OnMotion)
 
 
     def adjustToSize(self):

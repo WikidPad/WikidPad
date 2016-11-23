@@ -219,7 +219,7 @@ TR_TWIST_BUTTONS = wx.TR_TWIST_BUTTONS                         # still used by w
 
 TR_SINGLE = wx.TR_SINGLE                                       # for convenience
 TR_MULTIPLE = wx.TR_MULTIPLE                                   # can select multiple items
-TR_EXTENDED = wx.TR_EXTENDED                                   # TODO: allow extended selection
+TR_EXTENDED = 0x40                                             # TODO: allow extended selection
 TR_HAS_VARIABLE_ROW_HEIGHT = wx.TR_HAS_VARIABLE_ROW_HEIGHT     # what it says
 
 TR_EDIT_LABELS = wx.TR_EDIT_LABELS                             # can edit item labels
@@ -369,7 +369,7 @@ nYD\xdb\xc9:\xcex\x0f\xe2\xadu2\x13\x8e0>\x1d\xc6\xff\xfa\xfd\xff\x17\x91K\
 \xd0\xd1]\x98\xbdm\xdc\x00\x00\x00\x00IEND\xaeB`\x82\x91\xe2\x08\x8f' )
 
 def GetFlaggedBitmap():
-    return wx.BitmapFromImage(GetFlaggedImage())
+    return wx.Bitmap(GetFlaggedImage())
 
 def GetFlaggedImage():
     stream = io.StringIO(GetFlaggedData())
@@ -397,7 +397,7 @@ def GetNotFlaggedData():
 \xd6\x00\x00\x00\x00IEND\xaeB`\x82&\x11\xab!' )
 
 def GetNotFlaggedBitmap():
-    return wx.BitmapFromImage(GetNotFlaggedImage())
+    return wx.Bitmap(GetNotFlaggedImage())
 
 def GetNotFlaggedImage():
     stream = io.StringIO(GetNotFlaggedData())
@@ -418,7 +418,7 @@ def GetCheckedData():
 \xeb\x9c\x12\x9a\x00\x92\xccS\x9f" )
 
 def GetCheckedBitmap():
-    return wx.BitmapFromImage(GetCheckedImage())
+    return wx.Bitmap(GetCheckedImage())
 
 def GetCheckedImage():
     stream = io.StringIO(GetCheckedData())
@@ -437,7 +437,7 @@ def GetNotCheckedData():
 \x00\x87S=\xbe" )
 
 def GetNotCheckedBitmap():
-    return wx.BitmapFromImage(GetNotCheckedImage())
+    return wx.Bitmap(GetNotCheckedImage())
 
 def GetNotCheckedImage():
     stream = io.StringIO(GetNotCheckedData())
@@ -1840,8 +1840,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self._spacing = 18
 
         # Brushes for focused/unfocused items (also gradient type)
-        self._hilightBrush = wx.Brush(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT))
-        btnshadow = wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNSHADOW)
+        self._hilightBrush = wx.Brush(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT))
+        btnshadow = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNSHADOW)
         self._hilightUnfocusedBrush = wx.Brush(btnshadow)
         r, g, b = btnshadow.Red(), btnshadow.Green(), btnshadow.Blue()
         backcolour = (max((r >> 1) - 20, 0),
@@ -1878,7 +1878,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         # Default normal and bold fonts for an item
         self._hasFont = True
-        self._normalFont = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        self._normalFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         self._boldFont = wx.Font(self._normalFont.GetPointSize(), self._normalFont.GetFamily(),
                                  self._normalFont.GetStyle(), wx.BOLD, self._normalFont.GetUnderlined(),
                                  self._normalFont.GetFaceName(), self._normalFont.GetEncoding())
@@ -1907,7 +1907,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self._disabledColour = wx.Colour(180, 180, 180)
 
         # Gradient selection colours        
-        self._firstcolour = color= wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+        self._firstcolour = color= wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
         self._secondcolour = wx.WHITE
         self._usegradients = False
         self._gradientstyle = 0   # Horizontal Gradient
@@ -2583,8 +2583,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             raise Exception("\nERROR: Invalid Tree Item. ")
 
         if highlight:
-            bg = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
-            fg = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
+            bg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+            fg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
 
         item.Attr().SetTextColour(fg)
         item.Attr.SetBackgroundColour(bg)
@@ -2641,7 +2641,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         """Sets the CustomTreeCtrl font."""
 
         if font is None or not font.IsOk():
-            font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
 
         wx.ScrolledWindow.SetFont(self, font)
 
@@ -2753,7 +2753,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         """Sets the first gradient colour."""
         
         if colour is None:
-            colour = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+            colour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
 
         self._firstcolour = colour
         if self._usegradients:
@@ -4151,7 +4151,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 bmp = imageList.GetBitmap(ii)
                 image = wx.ImageFromBitmap(bmp)
                 image = GrayOut(image)
-                newbmp = wx.BitmapFromImage(image)
+                newbmp = wx.Bitmap(image)
                 self._grayedImageList.Add(newbmp)
         
         
@@ -4218,7 +4218,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             bmp = self._imageListCheck.GetBitmap(ii)
             image = wx.ImageFromBitmap(bmp)
             image = GrayOut(image)
-            newbmp = wx.BitmapFromImage(image)
+            newbmp = wx.Bitmap(image)
             self._grayedCheckList.Add(newbmp)
 
         self._dirty = True
@@ -4464,7 +4464,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             if wx.Platform == "__WXMAC__":
                 if not self._hasFocus:
                     dc.SetBrush(wx.TRANSPARENT_BRUSH) 
-                    dc.SetPen(wx.Pen(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT), 1, wx.SOLID)) 
+                    dc.SetPen(wx.Pen(wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT), 1, wx.SOLID)) 
                 else:
                     dc.SetBrush(self._hilightBrush) 
             else:
@@ -4680,9 +4680,9 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
             if item.IsSelected():
                 if (wx.Platform == "__WXMAC__" and self._hasFocus):
-                    colText = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
+                    colText = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
                 else:
-                    colText = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
+                    colText = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
             else:
                 attr = item.GetAttributes()
                 if attr and attr.HasTextColour():
@@ -6055,9 +6055,9 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         """Gets the class default attributes."""
 
         attr = wx.VisualAttributes()
-        attr.colFg = wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOWTEXT)
-        attr.colBg = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
-        attr.font  = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        attr.colFg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT)
+        attr.colBg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_LISTBOX)
+        attr.font  = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         return attr
 
     GetClassDefaultAttributes = classmethod(GetClassDefaultAttributes)

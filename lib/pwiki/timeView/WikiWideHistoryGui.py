@@ -50,17 +50,16 @@ class WikiWideHistoryPanel(EnhancedListControl):
         else:
             self.onConstructedMainWindow(None)
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
-#         wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_SIZE(self, self.OnSize)
-#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+#         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+#         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
         
-        wx.EVT_MENU(self, GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL,
-                self.OnCmdDeleteAll)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAll, id=GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL)
 
         self.onWikiStateChanged(None)
 

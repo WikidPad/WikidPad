@@ -29,7 +29,7 @@ class CustomListBox(wx.ListBox):
         self.menu = wx.Menu()
         copy_menu_item = wx.MenuItem(self.menu, wx.NewId(), '&Copy text')
         self.menu.Bind(wx.EVT_MENU, self.CopySelection, copy_menu_item)
-        self.menu.AppendItem(copy_menu_item)
+        self.menu.Append(copy_menu_item)
 
     def ShowPopupMenu(self, evt):
         position = self.ScreenToClient(wx.GetMousePosition())

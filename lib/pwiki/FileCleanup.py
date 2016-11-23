@@ -908,19 +908,19 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
         self.itemInfo = []
         self.SetItemCount(0)
         
-        wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
-        wx.EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnDClick, id=ID)
 
 #         self.contextMenuSelection = -2
 
-#         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
-#         wx.EVT_LEFT_DCLICK(self, self.OnLeftDown)
-#         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
-#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+#         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+#         self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
+#         self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
+#         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+#         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 # 
 # 
-#         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
+#         self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)
 #         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
 #                 self.OnActivateNewTabThis)
 #         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
@@ -1233,7 +1233,7 @@ class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
     def GetValue(self):
@@ -1314,8 +1314,8 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnTest, self.OnTest)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, id=GUI_ID.btnTest)
         
 
         self.__sinkWikiDoc = wxKeyFunctionSink((
@@ -1327,11 +1327,11 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
         
         
 
-#         wx.EVT_TEXT(self, ID, self.OnText)
-#         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-#         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
-#         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+#         self.Bind(wx.EVT_TEXT, self.OnText, id=ID)
+#         self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
+#         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
+#         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
+#         self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
 
     def GetValue(self):
         return self.value

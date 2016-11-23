@@ -63,20 +63,17 @@ class InlineDiffControl(SearchableScintillaControl):
 
         wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
 
-        wx.EVT_MENU(self.tabContextMenu, GUI_ID.CMD_DIFF_SWAP_FROM_TO,
-                self.OnCmdSwapFromTo)
+        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdSwapFromTo, id=GUI_ID.CMD_DIFF_SWAP_FROM_TO)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN), id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT), id=GUI_ID.CMD_ZOOM_OUT)
 
 
 

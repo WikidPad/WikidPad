@@ -260,15 +260,15 @@ def addTreeToMenu(container, menu, idRecycler, evtSender, evtRcvFunc):
 
             if not reused:
                 # For a new id, an event must be set
-                wx.EVT_MENU(evtSender, menuID, evtRcvFunc)
+                evtSender.Bind(wx.EVT_MENU, evtRcvFunc, id=menuID)
 
             menuItem = wx.MenuItem(menu, menuID, item.title)
-            menu.AppendItem(menuItem)
+            menu.Append(menuItem)
         elif isinstance(item, Container):
             # Handle subcontainer recursively
             submenu = wx.Menu()
             addTreeToMenu(item, submenu, idRecycler, evtSender, evtRcvFunc)
-            menu.AppendMenu(wx.NewId(), item.title, submenu)
+            menu.AppendSubMenu(submenu, item.title)
 
    
    
@@ -322,12 +322,11 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectPath, self.OnSelectPath)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectIcon, self.OnSelectIcon)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectPath, id=GUI_ID.btnSelectPath)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectIcon, id=GUI_ID.btnSelectIcon)
 
-        wx.EVT_CHECKBOX(self, GUI_ID.cbShowInToolbar,
-                self.OnShowInToolbar)
+        self.Bind(wx.EVT_CHECKBOX, self.OnShowInToolbar, id=GUI_ID.cbShowInToolbar)
 
 
     def getValue(self):

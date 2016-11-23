@@ -25,9 +25,25 @@ def _unescapeWithRe(text):
     return re.sub("", text, "", 1)
 
 
+
+class wxSourceId:
+    """
+    Can be used either as id number or as source in wx.EvtHandler.Bind() calls
+    """
+
+    def __init__(self, value):
+        self._value = value
+    
+    def __int__(self):
+        return self._value
+    
+    GetId = __int__
+
+
 class wxIdPool:
     def __init__(self):
-        self._poolmap={}
+        self._xrcPoolcache = {}
+        self._poolmap = {}
 
     def __getattr__(self, name):
         """Returns a new wx-Id for each new string <name>.
@@ -37,16 +53,20 @@ class wxIdPool:
         If the name is in the XRC id-table its value there will be returned
         """
         try:
-            return XRCID(name)
+            if name not in self._xrcPoolcache:
+                self._xrcPoolcache[name] = wxSourceId(XRCID(name))
+                
+            return self._xrcPoolcache[name]
         except:
             try:
                 return self._poolmap[name]
             except KeyError:
-                id = wx.NewId()
+                id = wxSourceId(wx.NewId())
                 self._poolmap[name] = id
                 return id
                 
     __getitem__ = __getattr__
+
 
 
 GUI_ID = wxIdPool()
@@ -795,7 +815,7 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
             self.eventSource.addListener(self, self.ifdestroyed is None)
 
         if self.ifdestroyed is not None:
-            wx.EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
+            self.ifdestroyed.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
 
     def OnDestroy(self, evt):
@@ -1064,7 +1084,7 @@ class ProxyPanel(wx.Panel):
         
         self.subWindow = None
         
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
     def __repr__(self):
         return "<ProxyPanel " + str(id(self)) + " for " + repr(self.subWindow) + ">"
@@ -1246,7 +1266,7 @@ class ReorderableListBox(wx.ListBox):
     def SetLabelsAndClientDatas(self, labels, datas):
         with WindowUpdateLocker(self):
             self.Clear()
-            self.AppendItems(labels)
+            self.Append(labels)
             
             for i, d in enumerate(datas):
                 self.SetClientData(i, d)

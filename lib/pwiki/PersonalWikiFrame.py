@@ -11,7 +11,7 @@ import time
 
 import pickle  # to create dependency?
 
-import wx, wx.html
+import wx, wx.adv, wx.html
 
 # import urllib_red as urllib
 # import urllib
@@ -715,14 +715,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if bitmap:
             menuitem.SetBitmap(bitmap)
 
-        menu.AppendItem(menuitem)
+        menu.Append(menuitem)
         if evtfct is not None:
-            wx.EVT_MENU(self, menuID, evtfct)
+            self.Bind(wx.EVT_MENU, evtfct, id=menuID)
 
         if updatefct is not None:
             if isinstance(updatefct, tuple):
                 updatefct = _buildChainedUpdateEventFct(updatefct)
-            wx.EVT_UPDATE_UI(self, menuID, updatefct)
+            self.Bind(wx.EVT_UPDATE_UI, updatefct, id=menuID)
 
         return menuitem
 
@@ -775,7 +775,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('Create new wiki'), self.OnWikiNew)
 
         openWikiMenu = wx.Menu()
-        wikiMenu.AppendMenu(wx.NewId(), _('&Open'), openWikiMenu)
+        wikiMenu.AppendSubMenu(openWikiMenu, _('&Open'))
 
         self.addMenuItem(openWikiMenu, _('In &This Window...') + '\t' +
                 self.keyBindings.OpenWiki,
@@ -792,14 +792,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wikiMenu.AppendSeparator()
 
         self.recentWikisMenu = wx.Menu()
-        wikiMenu.AppendMenu(wx.NewId(), _('&Recent'), self.recentWikisMenu)
+        wikiMenu.AppendSubMenu(self.recentWikisMenu, _('&Recent'))
 
         self.rereadRecentWikis()
 
 
         self.favoriteWikisMenu = wx.Menu()  # TODO: Try to avoid rebuilding it each time wiki menu is recreated
         self.fillFavoriteWikisMenu(self.favoriteWikisMenu)
-        wikiMenu.AppendMenu(wx.NewId(), _("F&avorites"), self.favoriteWikisMenu)
+        wikiMenu.AppendSubMenu(self.favoriteWikisMenu, _("F&avorites"))
 
 
         if wikiData is not None:
@@ -814,7 +814,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if wikiData is not None:
             exportWikisMenu = wx.Menu()
-            wikiMenu.AppendMenu(wx.NewId(), _('Publish as HTML'), exportWikisMenu)
+            wikiMenu.AppendSubMenu(exportWikisMenu, _('Publish as HTML'))
 
             self.addMenuItem(exportWikisMenu,
                     _('Wiki as Single HTML Page'),
@@ -867,7 +867,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.OnShowWikiPropertiesDialog)
 
         maintenanceMenu = wx.Menu()
-        wikiMenu.AppendMenu(wx.NewId(), _('Maintenance'), maintenanceMenu)
+        wikiMenu.AppendSubMenu(maintenanceMenu, _('Maintenance'))
 
         if wikiData is not None:
             if wikiData.checkCapability("rebuild") == 1:
@@ -959,7 +959,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wx.NewId()
         wikiMenu.Append(menuID, _('E&xit'), _('Exit'))
-        wx.EVT_MENU(self, menuID, lambda evt: self.exitWiki())
+        self.Bind(wx.EVT_MENU, lambda evt: self.exitWiki(), id=menuID)
         wx.App.SetMacExitMenuItemId(menuID)
 
         return wikiMenu
@@ -969,17 +969,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #     
 # #             menuID=wx.NewId()
 # #             wikiMenu.Append(menuID, '&Store version', 'Store new version')
-# #             wx.EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
+# #             self.Bind(wx.EVT_MENU, lambda evt: self.showStoreVersionDialog(), id=menuID)
 #     
 #             menuID=wx.NewId()
 #             wikiMenu.Append(menuID, _(u'&Retrieve version'),
 #                     _(u'Retrieve previous version'))
-#             wx.EVT_MENU(self, menuID, lambda evt: self.showSavedVersionsDialog())
+#             self.Bind(wx.EVT_MENU, lambda evt: self.showSavedVersionsDialog(), id=menuID)
 #     
 #             menuID=wx.NewId()
 #             wikiMenu.Append(menuID, _(u'Delete &All Versions'),
 #                     _(u'Delete all stored versions'))
-#             wx.EVT_MENU(self, menuID, lambda evt: self.showDeleteAllVersionsDialog())
+#             self.Bind(wx.EVT_MENU, lambda evt: self.showDeleteAllVersionsDialog(), id=menuID)
 
 
 
@@ -1011,7 +1011,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     newMenu, newSub = sub.get(comp, (None, None))
                     if newMenu is None:
                         newMenu = wx.Menu()
-                        menu.AppendMenu(-1, comp, newMenu)
+                        menu.AppendSubMenu(newMenu, comp)
                         newSub = {}
                         sub[comp] = newMenu, newSub
                     
@@ -1044,7 +1044,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             if not reused:
                 # For a new id, an event must be set
-                wx.EVT_MENU(self, menuID, self.OnRecentWikiUsed)
+                self.Bind(wx.EVT_MENU, self.OnRecentWikiUsed, id=menuID)
 
             menu.Append(menuID, wiki)
 
@@ -1128,7 +1128,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menu.Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS,
                 _("Reread text blocks"),
                 _("Reread the text block file(s) and recreate menu"))
-        wx.EVT_MENU(self, GUI_ID.CMD_REREAD_TEXT_BLOCKS, self.OnRereadTextBlocks)
+        self.Bind(wx.EVT_MENU, self.OnRereadTextBlocks,
+                id=GUI_ID.CMD_REREAD_TEXT_BLOCKS)
 
 
     def OnTextBlockUsed(self, evt):
@@ -1183,14 +1184,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menu.Append(GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES,
                 _("Add wiki"),
                 _("Add a wiki to the favorites"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES,
-                self.OnAddToFavoriteWikis)
+        self.Bind(wx.EVT_MENU, self.OnAddToFavoriteWikis,
+                id=GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES)
 
         menu.Append(GUI_ID.CMD_MANAGE_FAVORITE_WIKIS,
                 _("Manage favorites"),
                 _("Manage favorites"))
-        wx.EVT_MENU(self, GUI_ID.CMD_MANAGE_FAVORITE_WIKIS,
-                self.OnManageFavoriteWikis)
+        self.Bind(wx.EVT_MENU, self.OnManageFavoriteWikis,
+                id=GUI_ID.CMD_MANAGE_FAVORITE_WIKIS)
 
 
     def OnFavoriteWikiUsed(self, evt):
@@ -1430,7 +1431,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         logLineMoveMenu = wx.Menu()
-        editMenu.AppendMenu(wx.NewId(), _('&Line Move'), logLineMoveMenu)
+        editMenu.AppendSubMenu(logLineMoveMenu, _('&Line Move'))
         
         self.addMenuItem(logLineMoveMenu, _('&Up') +
                 '\t' + self.keyBindings.LogLineUp,
@@ -1481,7 +1482,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         insertMenu = wx.Menu()
-        editMenu.AppendMenu(wx.NewId(), _('&Insert'), insertMenu)
+        editMenu.AppendSubMenu(insertMenu, _('&Insert'))
 
 
         self.addMenuItemByUnifNameTable(insertMenu,
@@ -1505,7 +1506,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         settingsMenu = wx.Menu()
-        editMenu.AppendMenu(wx.NewId(), _('&Settings'), settingsMenu)
+        editMenu.AppendSubMenu(settingsMenu, _('&Settings'))
 
 
         self.addMenuItem(settingsMenu, _('&Date Format...'),
@@ -1518,14 +1519,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnCmdCheckWrapMode, 
                 updatefct=self.OnUpdateWrapMode,
                 kind=wx.ITEM_CHECK)
-
-
-#         menuID=wx.NewId()
-#         wrapModeMenuItem = wx.MenuItem(settingsMenu, menuID, _(u"Auto-&Wrap"),
-#                 _(u"Set if editor should wrap long lines"), wx.ITEM_CHECK)
-#         settingsMenu.AppendItem(wrapModeMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateWrapMode)
 
 
         self.addMenuItem(settingsMenu, _("Auto-&Indent"),
@@ -1628,7 +1621,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_SHOW_TOOLBAR,
 #                 _(u'Show Toolbar') + u'\t' + self.keyBindings.ShowToolbar, 
 #                 _(u"Show Toolbar"), wx.ITEM_CHECK)
-#         viewMenu.AppendItem(menuItem)
+#         viewMenu.Append(menuItem)
 #         wx.EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
 #                 not self.getConfig().getboolean("main", "toolbar_show", True)))
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
@@ -1664,17 +1657,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wxHelper.appendToMenuByMenuDesc(tabsMenu, FOLD_MENU, self.keyBindings)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_SHOW_FOLDING,
-                self.OnCmdCheckShowFolding)
-        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_SHOW_FOLDING,
-                self.OnUpdateShowFolding)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowFolding, id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateShowFolding, id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_TOGGLE_CURRENT_FOLDING,
-                lambda evt: self.getActiveEditor().toggleCurrentFolding())
-        wx.EVT_MENU(self, GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT,
-                lambda evt: self.getActiveEditor().unfoldAll())
-        wx.EVT_MENU(self, GUI_ID.CMD_FOLD_ALL_IN_CURRENT,
-                lambda evt: self.getActiveEditor().foldAll())
+        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().toggleCurrentFolding(), id=GUI_ID.CMD_TOGGLE_CURRENT_FOLDING)
+        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().unfoldAll(), id=GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().foldAll(), id=GUI_ID.CMD_FOLD_ALL_IN_CURRENT)
         
 
 
@@ -1793,7 +1781,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 updatefct=(self.OnUpdateDisReadOnlyPage,))
 
         convertMenu = wx.Menu()
-        formatMenu.AppendMenu(wx.NewId(), _('&Convert'), convertMenu)
+        formatMenu.AppendSubMenu(convertMenu, _('&Convert'))
         
         self.addMenuItemByUnifNameTable(convertMenu,
         """
@@ -1828,7 +1816,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         iconsMenu, cmdIdToIconName = AttributeHandling.buildIconsSubmenu(
                 wx.GetApp().getIconCache())
         for cmi in list(cmdIdToIconName.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
+            self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
         formatMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_NAME,
                 _('&Icon Name'), iconsMenu)
@@ -1840,7 +1828,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         colorsMenu, cmdIdToColorName = AttributeHandling.buildColorsSubmenu()
         for cmi in list(cmdIdToColorName.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
+            self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
         formatMenu.AppendMenu(GUI_ID.MENU_ADD_STRING_NAME,
                 _('&Color Name'), colorsMenu)
@@ -1851,13 +1839,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         addAttributeMenu = wx.Menu()
-        formatMenu.AppendMenu(wx.NewId(), _('&Add Attribute'), addAttributeMenu)
+        formatMenu.AppendSubMenu(addAttributeMenu, _('&Add Attribute'))
 
         # Build full submenu for icon attributes
         iconsMenu, self.cmdIdToIconNameForAttribute = AttributeHandling.buildIconsSubmenu(
                 wx.GetApp().getIconCache())
         for cmi in list(self.cmdIdToIconNameForAttribute.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+            self.Bind(wx.EVT_MENU, self.OnInsertIconAttribute, id=cmi)
 
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
                 _('&Icon Attribute'), iconsMenu)
@@ -1867,7 +1855,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Build submenu for color attributes
         colorsMenu, self.cmdIdToColorNameForAttribute = AttributeHandling.buildColorsSubmenu()
         for cmi in list(self.cmdIdToColorNameForAttribute.keys()):
-            wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+            self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
                 _('&Color Attribute'), colorsMenu)
@@ -2019,7 +2007,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 #         menuID=wx.NewId()
 #         helpMenu.Append(menuID, _(u'&Open WikidPadHelp'), _(u'Open WikidPadHelp'))
-#         wx.EVT_MENU(self, menuID, openHelp)
+#         self.Bind(wx.EVT_MENU, openHelp, id=menuID)
 
         helpMenu.AppendSeparator()
 
@@ -2054,7 +2042,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menuID = wx.ID_ABOUT
         helpMenu.Append(menuID, _('&About'), _('About WikidPad'))
 
-        wx.EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
+        self.Bind(wx.EVT_MENU, lambda evt: self.showAboutDialog(), id=menuID)
 
         self.mainmenu.Append(wikiMenu, _('&Wiki'))
         self.mainmenu.Append(editMenu, _('&Edit'))
@@ -2066,14 +2054,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu.Append(extraMenu, _('E&xtra'))
 
         
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&Wiki'), wikiMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&Edit'), editMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&View'), viewMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&Tabs'), tabsMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'Wiki &Page'), wikiPageMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&Format'), formatMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'&Navigate'), navigateMenu)
-#         self.mainmenu.AppendMenu(wx.NewId(), _(u'E&xtra'), extraMenu)
+#         self.mainmenu.AppendSubMenu(wikiMenu, _(u'&Wiki'))
+#         self.mainmenu.AppendSubMenu(editMenu, _(u'&Edit'))
+#         self.mainmenu.AppendSubMenu(viewMenu, _(u'&View'))
+#         self.mainmenu.AppendSubMenu(tabsMenu, _(u'&Tabs'))
+#         self.mainmenu.AppendSubMenu(wikiPageMenu, _(u'Wiki &Page'))
+#         self.mainmenu.AppendSubMenu(formatMenu, _(u'&Format'))
+#         self.mainmenu.AppendSubMenu(navigateMenu, _(u'&Navigate'))
+#         self.mainmenu.AppendSubMenu(extraMenu, _(u'E&xtra'))
 
 
 
@@ -2115,13 +2103,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_BACK
         tb.AddSimpleTool(tbID, icon, _("Back") + " " + self.keyBindings.GoBack,
                 _("Back"))
-        wx.EVT_TOOL(self, tbID, self._OnEventToCurrentDocPPresenter)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
         icon = self.lookupSystemIcon("tb_forward")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD
         tb.AddSimpleTool(tbID, icon, _("Forward") + " " + self.keyBindings.GoForward,
                 _("Forward"))
-        wx.EVT_TOOL(self, tbID, self._OnEventToCurrentDocPPresenter)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
         icon = self.lookupSystemIcon("tb_home")
         tbID = wx.NewId()
@@ -2136,25 +2124,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(tbID, icon,
                 _("Open Wiki Word") + " " + self.keyBindings.OpenWikiWord,
                 _("Open Wiki Word"))
-        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
+        self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordOpenDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_lens")
         tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, _("Search") + " " + self.keyBindings.SearchWiki,
                 _("Search"))
-        wx.EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
+        self.Bind(wx.EVT_TOOL, lambda evt: self.showSearchDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_cycle")
         tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, _("Find current word in tree"),
                 _("Find current word in tree"))
-        wx.EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
+        self.Bind(wx.EVT_TOOL, lambda evt: self.findCurrentWordInTree(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_up")
         tbID = GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE
         tb.AddSimpleTool(tbID, icon, _("Go upward from a subpage"),
                 _("Go upward from a subpage"))
-        wx.EVT_TOOL(self, tbID, self._OnEventToCurrentDocPPresenter)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
         tb.AddSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
@@ -2167,13 +2155,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
                 _("Rename Wiki Word") + " " + self.keyBindings.Rename,
                 _("Rename Wiki Word"))
-#         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
+#         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordRenameDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_delete")
         tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
                 _("Delete Wiki Word") + " " + self.keyBindings.Delete,
                 _("Delete Wiki Word"))
-#         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
+#         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordDeleteDialog(), id=tbID)
 
         tb.AddSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
@@ -2205,24 +2193,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupSystemIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
         tb.AddSimpleTool(tbID, icon, _("Zoom In"), _("Zoom In"))
-        wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
+        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
 
         icon = self.lookupSystemIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
         tb.AddSimpleTool(tbID, icon, _("Zoom Out"), _("Zoom Out"))
-        wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
+        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
 
 
         self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH,
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
         tb.AddControl(self.fastSearchField)
-        wx.EVT_KEY_DOWN(self.fastSearchField, self.OnFastSearchKeyDown)
+        self.fastSearchField.Bind(wx.EVT_KEY_DOWN, self.OnFastSearchKeyDown)
 
         icon = self.lookupSystemIcon("tb_wikize")
         tb.AddSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
                 _("Wikize Selected Word ") + self.keyBindings.MakeWikiWord,
                 _("Wikize Selected Word"))
-#         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
+#         self.Bind(wx.EVT_TOOL, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()), id=tbID)
 
         # Build favorite wikis tool buttons
         toolEntries = [(None, None)] * 9
@@ -2245,7 +2233,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             icon = self.resolveIconDescriptor(entry.iconDesc, defIcon)
             tbID = menuID
             tb.AddSimpleTool(tbID, icon, entry.title, entry.value)
-#             wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)   # TODO Check if needed on Linux/GTK
+#             self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)   # TODO Check if needed on Linux/GTK
 
 
         # get info for any plugin toolbar items and create them as necessary
@@ -2286,7 +2274,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.statusBar.SetFieldsCount(3)
         
         self.statusBarTimer = wx.Timer(self)
-        wx.EVT_TIMER(self, self.statusBarTimer.GetId(), self.OnStatusBarTimer)
+        self.Bind(wx.EVT_TIMER, self.OnStatusBarTimer, self.statusBarTimer)
+#        self.Bind(wx.EVT_TIMER, self.OnStatusBarTimer, id=self.statusBarTimer.GetId())
 
         # Measure necessary widths of status fields
         dc = wx.ClientDC(self.statusBar)
@@ -2314,7 +2303,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.getConfig().getboolean("main", "toolbar_show", True):
             self.setShowToolbar(True)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
+        self.Bind(wx.EVT_MENU, self.OnSwitchFocus, id=GUI_ID.CMD_SWITCH_FOCUS)
 
         # Table with additional possible accelerators
         ADD_ACCS = (
@@ -2347,7 +2336,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY)
                     for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)]
     
-            wx.EVT_MENU(self, GUI_ID.SPECIAL_EAT_KEY, lambda evt: None)
+            self.Bind(wx.EVT_MENU, lambda evt: None, id=GUI_ID.SPECIAL_EAT_KEY)
 
         self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
@@ -2375,24 +2364,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         # Register the App IDLE handler
-#         wx.EVT_IDLE(self, self.OnIdle)
+#         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
-        wx.EVT_ACTIVATE(self, self.OnActivate)
+        self.Bind(wx.EVT_ACTIVATE, self.OnActivate)
 
         # Register the App close handler
-        wx.EVT_CLOSE(self, self.OnCloseButton)
+        self.Bind(wx.EVT_CLOSE, self.OnCloseButton)
 
 #         # Check resizing to layout sash windows
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self.Bind(wx.EVT_ICONIZE, self.OnIconize)
-        wx.EVT_MAXIMIZE(self, self.OnMaximize)
+        self.Bind(wx.EVT_MAXIMIZE, self.OnMaximize)
         
-        wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
-        wx.EVT_MENU(self, GUI_ID.CMD_GO_NEXT_TAB, self._OnRoundtripEvent)
-        wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self._OnRoundtripEvent)
-        wx.EVT_MENU(self, GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD,
-                self.OnCmdFocusFastSearchField)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_CLOSE_CURRENT_TAB)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_GO_NEXT_TAB)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_GO_PREVIOUS_TAB)
+        self.Bind(wx.EVT_MENU, self.OnCmdFocusFastSearchField, id=GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
@@ -2616,10 +2604,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.HOTKEY_ID_HIDESHOW_BYWIKI,
                     self.configuration.get("main",
                     "hotKey_showHide_byWiki", ""))
-        wx.EVT_HOTKEY(self.hotKeyDummyWindow, self.HOTKEY_ID_HIDESHOW_BYAPP,
-                self.OnShowHideHotkey)
-        wx.EVT_HOTKEY(self.hotKeyDummyWindow, self.HOTKEY_ID_HIDESHOW_BYWIKI,
-                self.OnShowHideHotkey)
+        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey, id=self.HOTKEY_ID_HIDESHOW_BYAPP)
+        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey, id=self.HOTKEY_ID_HIDESHOW_BYWIKI)
 
 
     def createWindow(self, winProps, parent):
@@ -4328,7 +4314,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                             'pwiki.ico'), wx.BITMAP_TYPE_ICO)
 
                 img.Rescale(20, 20)
-                bmp = wx.BitmapFromImage(img)
+                bmp = wx.Bitmap(img)
                 icon = wx.IconFromBitmap(bmp)
                 self.tbIcon.SetIcon(icon, tooltip)
             else:
@@ -4398,7 +4384,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.windowLayouter.realize()
         self.windowLayouter.layout()
 
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self.tree = self.windowLayouter.getWindowByName("maintree")
         self.logWindow = self.windowLayouter.getWindowByName("log")
@@ -5891,30 +5877,26 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
 
-class TaskBarIcon(wx.TaskBarIcon):
+class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self, pWiki):
         wx.TaskBarIcon.__init__(self)
         self.pWiki = pWiki
 
         # Register menu events
-        wx.EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
+        self.Bind(wx.EVT_MENU, self.OnLeftUp, id=GUI_ID.TBMENU_RESTORE)
         wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE,
                 lambda evt: (self.pWiki.saveAllDocPages(),
                 self.pWiki.getWikiData().commit()))
-        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, self.OnCmdExit)
+        self.Bind(wx.EVT_MENU, self.OnCmdExit, id=GUI_ID.TBMENU_EXIT)
 
         if self.pWiki.clipboardInterceptor is not None:
-            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-                    self.pWiki.OnClipboardCatcherAtCursor)
-            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-                    self.pWiki.OnClipboardCatcherOff)
+            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherAtCursor, id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
+            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherOff, id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
 
-            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-                    self.pWiki.OnUpdateClipboardCatcher)
-            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-                    self.pWiki.OnUpdateClipboardCatcher)
+            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
+            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
 
-        wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
+        self.Bind(wx.EVT_TASKBAR_LEFT_UP, self.OnLeftUp)
 
 
     def prepareExit(self):
@@ -5941,11 +5923,11 @@ class TaskBarIcon(wx.TaskBarIcon):
             menuItem = wx.MenuItem(tbMenu,
                     GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     _("Clipboard Catcher at Cursor"), "", wx.ITEM_CHECK)
-            tbMenu.AppendItem(menuItem)
+            tbMenu.Append(menuItem)
 
             menuItem = wx.MenuItem(tbMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
                     _("Clipboard Catcher off"), "", wx.ITEM_CHECK)
-            tbMenu.AppendItem(menuItem)
+            tbMenu.Append(menuItem)
             
             tbMenu.AppendSeparator()
 
@@ -6015,9 +5997,3 @@ if False:
 # Clipboard Catcher off;CMD_CLIPBOARD_CATCHER_OFF
 # -
 # """
-
-
-
-
-#         This function must FOLLOW the actual update eventhandler in the
-#         updatefct tuple of self.addMenuItem.

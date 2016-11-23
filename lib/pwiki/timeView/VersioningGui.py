@@ -103,26 +103,21 @@ class VersionExplorerPanel(EnhancedListControl):
 
         self.updateList()
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
-        wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_SIZE(self, self.OnSize)
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_INLINE,
-                self.OnCmdDiffInline)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffInline, id=GUI_ID.CMD_VERSIONING_DIFF_INLINE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_FROM,
-                self.OnCmdDiffSetFrom)
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_TO,
-                self.OnCmdDiffSetTo)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetFrom, id=GUI_ID.CMD_VERSIONING_DIFF_SET_FROM)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetTo, id=GUI_ID.CMD_VERSIONING_DIFF_SET_TO)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_VERSION,
-                self.OnCmdDeleteVersion)
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA,
-                self.OnCmdDeleteAllVersionData)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteVersion, id=GUI_ID.CMD_VERSIONING_DELETE_VERSION)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAllVersionData, id=GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA)
 
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
 #                 self.OnCmdCheckUpdateDateAscending)
@@ -435,7 +430,7 @@ class VersionExplorerPanel(EnhancedListControl):
         Now we can register idle handler.
         """
         pass
-#         wx.EVT_IDLE(self, self.OnIdle)
+#         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 
 #     def OnIdle(self, evt):

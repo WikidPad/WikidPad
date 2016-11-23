@@ -428,7 +428,7 @@ class MultiPageTextAddOptPanel(wx.Panel):
         
         self.ctrls = XrcControls(self)
         
-        wx.EVT_CHOICE(self, GUI_ID.chFileVersion, self.OnFileVersionChoice)
+        self.Bind(wx.EVT_CHOICE, self.OnFileVersionChoice, id=GUI_ID.chFileVersion)
 
 
     def OnFileVersionChoice(self, evt):

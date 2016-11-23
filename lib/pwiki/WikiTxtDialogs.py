@@ -63,12 +63,12 @@ class IncrementalSearchDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose, 
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
@@ -264,7 +264,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
     def GetValue(self):
@@ -470,11 +470,11 @@ class ImagePasteDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
-                self.OnFileTypeChoice)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_CHOICE, self.OnFileTypeChoice,
+                id=GUI_ID.chEditorImagePasteFileType)
 
-        wx.EVT_SIZE(self.ctrls.pnImagePreviewContainer,
+        self.ctrls.pnImagePreviewContainer.Bind(wx.EVT_SIZE,
                 self.OnSizePreviewBitmapContainer)
 
 
@@ -511,7 +511,7 @@ class ImagePasteDialog(wx.Dialog):
         img_resize = self.origImage.Scale(newWidth, newHeight,
                 quality = wx.IMAGE_QUALITY_HIGH)
 
-        bmp = wx.BitmapFromImage(img_resize)
+        bmp = wx.Bitmap(img_resize)
         with WindowUpdateLocker(self):
             self.bitmapControl.SetPosition((0,0))
             self.bitmapControl.SetBitmap(bmp)
@@ -537,7 +537,7 @@ class RenameFileDialog(wx.Dialog):
         self.SetSizerAndFit(sizer)
         self.text_ctrl = text_ctrl
 
-        wx.EVT_SET_FOCUS(self.text_ctrl, self.OnFocus)
+        self.text_ctrl.Bind(wx.EVT_SET_FOCUS, self.OnFocus)
         self.text_ctrl.SetFocus()
 
 
