@@ -355,7 +355,7 @@ class Attr(Node):
 
     _child_node_types = (Node.TEXT_NODE, Node.ENTITY_REFERENCE_NODE)
 
-    __slots__ = ("__dict__",)
+#     __slots__ = ("__dict__",)
 
     def __init__(self, qName, namespaceURI=EMPTY_NAMESPACE, localName=None,
                  prefix=None):

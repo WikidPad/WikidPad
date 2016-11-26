@@ -32,7 +32,7 @@ from . import Serialization
 UNDEFINED = object()
 
 
-class DocPage(object, MiscEventSourceMixin):
+class DocPage(MiscEventSourceMixin):
     """
     Abstract common base class for WikiPage and FunctionalPage
     """

@@ -1,4 +1,4 @@
-import wx, wx.xrc
+import wx, wx.xrc, wx.html
 import wx.lib.dialogs
 from . import SystemInfo
 from .wxHelper import GUI_ID, getAccelPairFromKeyDown, getTextFromClipboard
@@ -26,11 +26,11 @@ from functools import reduce
 # TODO: should be configurable
 AUTOCOMPLETE_BOX_HEIGHT = 50
 
-# Key accels use a different sep in >= 2.9
-if wx.version() >= 2.9:
-    ACCEL_SEP = "+"
-else:
-    ACCEL_SEP = "-"
+# # Key accels use a different sep in >= 2.9
+# if wx.version() >= 2.9:
+#     ACCEL_SEP = "+"
+# else:
+ACCEL_SEP = "-"
 
 def formatListBox(x, y):
     html = "<table width=100% height=5px><tr><td>{0}</td><td align='right'><font color='gray'>{1}</font></td></tr></table>".format(x, y)
@@ -356,21 +356,21 @@ class ViHelper():
         pass
 
     def OnChar(self, evt):
-	"""
-	Handles EVT_CHAR events necessary for MS Windows
-	"""
+        """
+        Handles EVT_CHAR events necessary for MS Windows
+        """
         m = self.mode
 
         key = evt.GetKeyCode()
 
-	# OnChar seems to throw different keycodes if ctrl is pressed.
-	# a = 1, b = 2 ... z = 26
-	# will not handle different cases
+        # OnChar seems to throw different keycodes if ctrl is pressed.
+        # a = 1, b = 2 ... z = 26
+        # will not handle different cases
         if evt.ControlDown():
-	    key = key + 96
+            key = key + 96
             key = ("Ctrl", key)
 
-	self.HandleKey(key, m, evt)
+        self.HandleKey(key, m, evt)
 
 
     def OnViKeyDown(self, evt):
@@ -446,33 +446,33 @@ class ViHelper():
             return
 
         # On linux we can just use GetRawKeyCode() and work directly with
-	# its return. On windows we have to skip this event (for keys which 
-	# will produce a char event to wait for EVT_CHAR (self.OnChar()) to 
-	# get the correct key translation
+        # its return. On windows we have to skip this event (for keys which 
+        # will produce a char event to wait for EVT_CHAR (self.OnChar()) to 
+        # get the correct key translation
         elif key not in self.key_map:
             key = evt.GetRawKeyCode()
         else:
-	    # Keys present in the key_map should be consitent across
-	    # all platforms and can be handled directly.
+            # Keys present in the key_map should be consitent across
+            # all platforms and can be handled directly.
             key = self.AddModifierToKeychain(key, evt)
-	    #self.HandleKey(key, m, evt)
+            #self.HandleKey(key, m, evt)
             if not self.HandleKey(key, m, evt):
                 # For wxPython 2.9.5 we need this otherwise menu accels don't 
                 # seem to be triggered (though they worked in previous versions?)
                 evt.Skip()
             return
 
-	
-    	# What about os-x?
-	if not SystemInfo.isLinux():
-	    # Manual fix for some windows problems may be necessary
-	    # e.g. Ctrl-[ won't work
-	    evt.Skip()
-	    return
+        
+            # What about os-x?
+        if not SystemInfo.isLinux():
+            # Manual fix for some windows problems may be necessary
+            # e.g. Ctrl-[ won't work
+            evt.Skip()
+            return
 
         key = self.AddModifierToKeychain(key, evt)
 
-	if not self.HandleKey(key, m, evt):
+        if not self.HandleKey(key, m, evt):
             # For wxPython 2.9.5 we need this otherwise menu accels don't 
             # seem to be triggered (though they worked in previous versions?)
             evt.Skip()
@@ -1049,23 +1049,23 @@ class ViHelper():
             for i in menu_items:
                 menu_item = self.menu_bar.FindItemById(i)
                 accel = menu_item.GetAccel()
-		if accel is not None:
-		    try:
-			if accel.ToString() in self.viKeyAccels:
-			    label = menu_item.GetItemLabel()
-			    self.menuShortCuts[i] = (label)
-			    # Removing the end part of the label is enough to disable the
-			    # accelerator. This is used instead of SetAccel() so as to
-			    # preserve menu accelerators.
-			    # NOTE: doesn't seem to override ctrl-n!
-			    menu_item.SetText(label.split("\t")[0]+"\tNone")
-		    except:
-			# Key errors appear in windows! (probably due to
-			# unicode support??).
-			if chr(accel.GetKeyCode()) in self.viKeyAccels:
-			    label = menu_item.GetItemLabel()
-			    self.menuShortCuts[i] = (label)
-			    menu_item.SetText(label.split("\t")[0]+"\tNone")
+                if accel is not None:
+                    try:
+                        if accel.ToString() in self.viKeyAccels:
+                            label = menu_item.GetItemLabel()
+                            self.menuShortCuts[i] = (label)
+                            # Removing the end part of the label is enough to disable the
+                            # accelerator. This is used instead of SetAccel() so as to
+                            # preserve menu accelerators.
+                            # NOTE: doesn't seem to override ctrl-n!
+                            menu_item.SetText(label.split("\t")[0]+"\tNone")
+                    except:
+                        # Key errors appear in windows! (probably due to
+                        # unicode support??).
+                        if chr(accel.GetKeyCode()) in self.viKeyAccels:
+                            label = menu_item.GetItemLabel()
+                            self.menuShortCuts[i] = (label)
+                            menu_item.SetText(label.split("\t")[0]+"\tNone")
 
 
 #-----------------------------------------------------------------------------
@@ -1888,7 +1888,7 @@ class CmdParser():
 
     def ShowKeybindings(self, args=None):
         # A quick and dirty way to view all currently registered vi
-	# keybindings and the functions they call
+        # keybindings and the functions they call
 
         keys = self.ctrl.vi.keys
 
@@ -1900,15 +1900,15 @@ class CmdParser():
 
             for binding in keys[mode]:
                 chain = " ".join([self.ctrl.vi.GetCharFromCode(i) 
-					for i in binding])
+                                        for i in binding])
 
                 text.append("{0} : {1}".format(chain, 
-			keys[mode][binding][1][0].__name__))
+                        keys[mode][binding][1][0].__name__))
 
         text = "\n".join(text)
 
         dlg = wx.lib.dialogs.ScrolledMessageDialog(
-		self.ctrl.presenter.getMainControl(), text, "Keybindings")
+                self.ctrl.presenter.getMainControl(), text, "Keybindings")
 
         if dlg.ShowModal():
             pass
@@ -3089,7 +3089,7 @@ class ViInputDialog(wx.Panel):
         self.FocusInputField()
 
 
-class ViCmdList(wx.HtmlListBox):
+class ViCmdList(wx.html.HtmlListBox):
     def __init__(self, parent):
         """
         Html list box which holds completion info.p

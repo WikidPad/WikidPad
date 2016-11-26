@@ -1,6 +1,6 @@
 import configparser
 import traceback
-import io as StringIO
+import io
 
 # from os.path import *
 
@@ -26,23 +26,21 @@ class UnknownOptionException(Exception): pass
 
 def _setValue(section, option, value, config):
     """
-    if value is of type str, it is assumed to be mbcs-coded
-    if section or option are of type str, they are assumed to be utf8 coded
+    if value is of type bytes, it is assumed to be mbcs-coded
+    if section or option are of type bytes, they are assumed to be utf8 coded
         (it is recommended to use only ascii characters for section/option
         names)
     """
-    if type(section) is str:
-        section = utf8Enc(section)[0]
+    if type(section) is bytes:
+        section = utf8Dec(section)[0]
 
-    if type(option) is str:
-        option = utf8Enc(option)[0]
+    if type(option) is bytes:
+        option = utf8Dec(option)[0]
 
-    if type(value) is str:
-        value = utf8Enc(mbcsDec(value)[0])[0]
-    elif type(value) is str:
-        value = utf8Enc(value)[0]
-    else:
-        value = utf8Enc(str(value))[0]
+    if type(value) is bytes:
+        value = mbcsDec(value)[0]
+    elif type(value) is not str:
+        value = str(value)
 
     if not config.has_section(section):
         config.add_section(section)
@@ -131,11 +129,11 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         Return a configuration value returned as string/unicode which
         is entered in given section and has specified option key.
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         result = None
 
@@ -150,15 +148,15 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         if result is None:
             return default
 
-        try:
-            result = utf8Dec(result)[0]
-        except UnicodeError:
-            # Result is not Utf-8 -> try mbcs
-            try:
-                result = mbcsDec(result)[0]
-            except UnicodeError:
-                # Result can't be converted
-                result = default
+#         try:
+#             result = utf8Dec(result)[0]
+#         except UnicodeError:
+#             # Result is not Utf-8 -> try mbcs
+#             try:
+#                 result = mbcsDec(result)[0]
+#             except UnicodeError:
+#                 # Result can't be converted
+#                 result = default
 
         return result
 
@@ -167,11 +165,11 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         """
         Return the default configuration value as string/unicode
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         if self.isOptionAllowed(section, option):
             return self.configDefaults[(section, option)]
@@ -197,22 +195,22 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         Only options can be set/retrieved which have an entry in the
         defaults and if the configParserObject is valid.
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         return self.configParserObject is not None and \
                 (section, option) in self.configDefaults
 
     # TODO Allow in read-only mode?
     def set(self, section, option, value):
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         if self.isOptionAllowed(section, option):
             _setValue(section, option, value, self.configParserObject)
@@ -239,16 +237,24 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             self.setConfigParserObject(None, None)
             return
 
-        config = configparser.ConfigParser()
-        readFiles = config.read(fn)
-        if len(readFiles) > 0:
-            self.setConfigParserObject(config, fn)
-        else:
+        config = configparser.ConfigParser(empty_lines_in_values=False,
+                default_section=None, interpolation=None)
+        
+        try:
+            configFile = open(self.configPath, 'rt', encoding="utf-8",
+                    errors="surrogateescape")
+        except FileNotFoundError:
             raise MissingConfigurationFileException(_("Config file not found"))
+        
+        readFiles = config.read_file(configFile, encoding="utf-8",
+                errors="surrogateescape")
+
+        self.setConfigParserObject(config, fn)
 
 
     def createEmptyConfig(self, fn):
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(empty_lines_in_values=False,
+                default_section=None, interpolation=None)
         self.setConfigParserObject(config, fn)
 
     def getFallthroughDict(self):
@@ -263,9 +269,10 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             return
 
         if self.configParserObject:
-            sfile = StringIO.StringIO()
+            sfile = io.StringIO()
             self.configParserObject.write(sfile)
-            configFile = open(self.configPath, 'w')
+            configFile = open(self.configPath, 'wt', encoding="utf-8",
+                    errors="surrogateescape")
             try:
                 self.configParserObject.write(configFile)
             finally:
@@ -303,11 +310,11 @@ class CombinedConfiguration(_AbstractConfiguration):
         Return a configuration value returned as string/unicode which
         is entered in given section and has specified option key.
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         result = None
 
@@ -353,11 +360,11 @@ class CombinedConfiguration(_AbstractConfiguration):
         """
         Return the default configuration value as string/unicode
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         result = None
 
@@ -397,11 +404,11 @@ class CombinedConfiguration(_AbstractConfiguration):
         Only options can be set/retrieved which have an entry in the
         defaults and if the configParserObject is valid.
         """
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         checkWiki = True
         checkGlobal = True
@@ -423,11 +430,11 @@ class CombinedConfiguration(_AbstractConfiguration):
 
 
     def set(self, section, option, value):
-        if type(section) is str:
-            section = utf8Enc(section)[0]
+        if type(section) is bytes:
+            section = utf8Dec(section)[0]
 
-        if type(option) is str:
-            option = utf8Enc(option)[0]
+        if type(option) is bytes:
+            option = utf8Dec(option)[0]
 
         if option.startswith("option/wiki/"):
             option = option[12:]

@@ -10,7 +10,7 @@ if False:
 
 import ExceptionLogger
 
-import wx, wx.xrc
+import wx, wx.adv, wx.xrc
 
 # import srePersistent
 # srePersistent.loadCodeCache()
@@ -127,7 +127,7 @@ class App(wx.App, MiscEventSourceMixin):
         
         WindowLayout.initiateAfterWxApp()
         self.removeAppLockOnExit = False
-        wx.EVT_END_SESSION(self, self.OnEndSession)
+        self.Bind(wx.EVT_END_SESSION, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
         self.mainFrameSet = set()
@@ -206,8 +206,8 @@ class App(wx.App, MiscEventSourceMixin):
                 "startup_splashScreen_show", True):
             bitmap = wx.Bitmap(os.path.join(appdir, "icons/pwiki.ico"))
             if bitmap:
-                splash = wx.SplashScreen(bitmap,
-                      wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT, 15000, None,
+                splash = wx.adv.SplashScreen(bitmap,
+                      wx.adv.SPLASH_CENTRE_ON_SCREEN|wx.adv.SPLASH_TIMEOUT, 15000, None,
                       style=wx.BORDER_NONE|wx.FRAME_NO_TASKBAR)
                 wx.Yield()
 

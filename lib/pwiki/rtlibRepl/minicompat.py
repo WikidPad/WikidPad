@@ -39,6 +39,7 @@
 __all__ = ["NodeList", "EmptyNodeList", "StringTypes", "defproperty"]
 
 import xml.dom
+import types
 
 try:
     unicode
@@ -100,7 +101,15 @@ class EmptyNodeList(tuple):
 
 
 def defproperty(klass, name, doc):
-    get = getattr(klass, ("_get_" + name)).__func__
+#     print( "--defproperty1", repr((klass, name, getattr(klass, ("_get_" + name)),
+#             dir(getattr(klass, ("_get_" + name))))) )
+# 
+#     print( "defproperty5", repr(klass._get_firstChild) )
+    get = getattr(klass, ("_get_" + name))
+    
+    if isinstance(get, (types.MethodType, types.BuiltinMethodType )):
+        get = get.__func__
+
     def set(self, value, name=name):
         raise xml.dom.NoModificationAllowedErr(
             "attempt to modify read-only attribute " + repr(name))
