@@ -508,11 +508,11 @@ class ProxyMiscEvent(MiscEvent):
 
 
 
-class KeyFunctionSink(object):
+class KeyFunctionSink:
     """
     A MiscEvent sink which dispatches events further to other functions
     """
-    __slots__ = ("__weakref__", "activationTable")
+#     __slots__ = ("__weakref__", "activationTable")
     
     def __init__(self, activationTable):
         """

@@ -1,6 +1,6 @@
-import types, string, pprint, exceptions
+import types, string, pprint
 
-class EnumException(exceptions.Exception):
+class EnumException(Exception):
     pass
 
 class Enumeration:
@@ -14,7 +14,7 @@ class Enumeration:
         for x in enumList:
             if type(x) == tuple:
                 x, i = x
-            if type(x) != bytes:
+            if type(x) != str:
                 raise EnumException("enum name is not a string: " + x)
             if type(i) != int:
                 raise EnumException("enum value is not an integer: " + i)

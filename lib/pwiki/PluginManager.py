@@ -1,7 +1,7 @@
 
 
 from zipimport import zipimporter
-import os, sys, traceback, os.path, imp, new, collections
+import os, sys, traceback, os.path, imp, collections
 
 # sys.path.append(ur"C:\Daten\Projekte\Wikidpad\Next20\extensions")
 

@@ -491,7 +491,7 @@ class NamedNodeMap(object):
 
     def item(self, index):
         try:
-            return self[list(self._attrs.keys())[index]]
+            return self[self._attrs.keys()[index]]
         except IndexError:
             return None
 

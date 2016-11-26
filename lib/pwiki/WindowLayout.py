@@ -1,6 +1,6 @@
 import traceback
 
-import wx
+import wx, wx.adv
 
 from .MiscEvent import MiscEventSourceMixin
 from .StringOps import escapeForIni, unescapeForIni
@@ -218,7 +218,7 @@ SASH_LEFT = 3
 SASH_NONE = 100
 
 
-class SmartSashLayoutWindow(wx.SashLayoutWindow):
+class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
     def __init__(self, *args, **kwargs):
         wx.SashLayoutWindow.__init__(self, *args, **kwargs)
         
@@ -269,19 +269,19 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
 
 
     def align(self, al):
-        if al == wx.LAYOUT_TOP:
+        if al == wx.adv.LAYOUT_TOP:
             self.SetOrientation(wx.LAYOUT_HORIZONTAL)
             self.SetAlignment(wx.LAYOUT_TOP)
             self.SetSashVisible(wx.SASH_BOTTOM, True)
-        elif al == wx.LAYOUT_BOTTOM:
+        elif al == wx.adv.LAYOUT_BOTTOM:
             self.SetOrientation(wx.LAYOUT_HORIZONTAL)
             self.SetAlignment(wx.LAYOUT_BOTTOM)
             self.SetSashVisible(wx.SASH_TOP, True)
-        elif al == wx.LAYOUT_LEFT:
+        elif al == wx.adv.LAYOUT_LEFT:
             self.SetOrientation(wx.LAYOUT_VERTICAL)
             self.SetAlignment(wx.LAYOUT_LEFT)
             self.SetSashVisible(wx.SASH_RIGHT, True)
-        elif al == wx.LAYOUT_RIGHT:
+        elif al == wx.adv.LAYOUT_RIGHT:
             self.SetOrientation(wx.LAYOUT_VERTICAL)
             self.SetAlignment(wx.LAYOUT_RIGHT)
             self.SetSashVisible(wx.SASH_LEFT, True)
@@ -376,10 +376,10 @@ class WindowSashLayouter:
     """
     
     _RELATION_TO_ALIGNMENT = {
-            "above": wx.LAYOUT_TOP,
-            "below": wx.LAYOUT_BOTTOM,
-            "left": wx.LAYOUT_LEFT,
-            "right": wx.LAYOUT_RIGHT
+            "above": wx.adv.LAYOUT_TOP,
+            "below": wx.adv.LAYOUT_BOTTOM,
+            "left": wx.adv.LAYOUT_LEFT,
+            "right": wx.adv.LAYOUT_RIGHT
     }
 
     def __init__(self, mainWindow, createWindowFunc):
@@ -804,7 +804,7 @@ def calculateMainWindowLayoutCfString(config):
 
 
 
-class LayeredControlPresenter(object, MiscEventSourceMixin):
+class LayeredControlPresenter(MiscEventSourceMixin):
     """
     Controls appearance of multiple controls laying over each other in
     one panel or notebook.

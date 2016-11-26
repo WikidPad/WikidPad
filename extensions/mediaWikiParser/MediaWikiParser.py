@@ -11,7 +11,7 @@ from textwrap import fill
 
 import wx
 
-import re    # from pwiki.rtlibRepl import re
+import re
 from pwiki.WikiExceptions import *
 from pwiki import StringOps
 from pwiki.StringOps import revStr, HtmlStartTag, HtmlEmptyTag, HtmlEndTag

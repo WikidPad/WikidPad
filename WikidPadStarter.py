@@ -38,7 +38,7 @@ del N_
 builtins._ = N_
 
 
-del __builtin__
+#? del __builtin__
 
 
 # create a Trace object

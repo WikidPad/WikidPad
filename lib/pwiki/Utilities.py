@@ -485,10 +485,39 @@ def callInMainThreadAsync(fct, *args, **kwargs):
 
 
 
+
+
+
+
+if __debug__:
+
+    class _Verbose(object):
+
+        def __init__(self, verbose=None):
+            if verbose is None:
+                verbose = _VERBOSE
+            self.__verbose = verbose
+
+        def _note(self, format, *args):
+            if self.__verbose:
+                format = format % args
+                format = "%s: %s\n" % (
+                    current_thread().name, format)
+                _sys.stderr.write(format)
+
+else:
+    # Disable this when using "python -O"
+    class _Verbose(object):
+        def __init__(self, verbose=None):
+            pass
+        def _note(self, *args):
+            pass
+
+
 def TimeoutRLock(*args, **kwargs):
     return _TimeoutRLock(*args, **kwargs)
 
-class _TimeoutRLock(threading._Verbose):
+class _TimeoutRLock(_Verbose):
     """
     Modified version of threading._RLock from standard library
     """

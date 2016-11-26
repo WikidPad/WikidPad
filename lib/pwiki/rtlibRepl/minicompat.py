@@ -41,11 +41,11 @@ __all__ = ["NodeList", "EmptyNodeList", "StringTypes", "defproperty"]
 import xml.dom
 
 try:
-    str
+    unicode
 except NameError:
     StringTypes = type(''),
 else:
-    StringTypes = type(''), type(str(''))
+    StringTypes = type(''), type(unicode(''))
 
 
 class NodeList(list):

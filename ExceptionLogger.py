@@ -34,6 +34,10 @@ class StdErrReplacement:
         for l in it:
             self.write(l)
             
+    
+    def flush(self):
+        pass
+            
 # 
 
 def onException(typ, value, trace):
