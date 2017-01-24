@@ -1602,8 +1602,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
         """
-        modifyText -- Should the text of links to the renamed page be
-                modified? This text replacement works unreliably
+        modifyText -- Should the text of links to the renamed page
+                      be modified?
         """
         global _openDocuments
         
@@ -1672,38 +1672,44 @@ class WikiDataManager(MiscEventSourceMixin):
         del self.wikiPageDict[wikiWord]
 
         if modifyText:
-            # now we have to search the wiki files and replace the old word with the new
+            # Search the wiki pages and replace the old wiki word with the new.
+            #
+            # All links to WikiWord match the pattern "\bWikiWord\b", but not
+            # all matches are valid links to WikiWord (there can be false
+            # positives); use "\bWikiWord\b" to quickly find (using the
+            # index) all pages possibly containing links to the old wiki word,
+            # but use the AST of resulting pages to (reliably) replace links.
             sarOp = SearchReplaceOperation()
             sarOp.wikiWide = True
             sarOp.wildCard = 'regex'
             sarOp.caseSensitive = True
             sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
-            
-            for resultWord in self.searchWiki(sarOp):
+
+            for resultWord in self.searchWiki(sarOp):  # resultWord = page name
                 wikiPage = self.getWikiPage(resultWord)
-                text = wikiPage.getLiveTextNoTemplate()
-                if text is None:
-                    continue
+                ast = wikiPage.getLivePageAst()
 
-                sarOp.replaceStr = re_sub_escape(toWikiWord)
-                sarOp.replaceOp = True
-                sarOp.cycleToStart = False
+                # replace WikiWord, [WikiWord], [WikiWord|Title], ...
+                for ntnode in ast.iterDeepByName("wikiWord"):  # NonTerminalNode
+                    if ntnode.wikiWord != wikiWord:
+                        continue
+                    ntnode.wikiWord = toWikiWord
+                    tnode = ntnode.findFlatByName("word")  # TerminalNode
+                    assert tnode.text == wikiWord
+                    tnode.text = toWikiWord
 
-                charStartPos = 0
-    
-                while True:
-                    found = sarOp.searchText(text, charStartPos)
-                    start, end = found[:2]
-                    
-                    if start is None: break
-                    
-                    repl = sarOp.replace(text, found)
-                    text = text[:start] + repl + text[end:]  # TODO Faster?
-                    charStartPos = start + len(repl)
+                # replace [:page: WikiWord]
+                for ntnode in ast.iterDeepByName("insertion"):
+                    if ntnode.key != u'page' or ntnode.value != wikiWord:
+                        continue
+                    ntnode.value = toWikiWord
+                    tnode = ntnode.findFlatByName("value")
+                    assert tnode.text == wikiWord
+                    tnode.text = toWikiWord
 
+                # update text
+                text = ast.getString()
                 wikiPage.replaceLiveText(text)
-#                 wikiPage.update(text)
-
 
         # Now we modify the page heading if not yet done by text replacing
         page = self.getWikiPage(toWikiWord)

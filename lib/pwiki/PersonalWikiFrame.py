@@ -3919,7 +3919,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Returns True if renaming was done successful.
         
         modifyText -- Should the text of links to the renamed page be
-                modified? (This text replacement works unreliably)
+                      modified?
         processSubpages -- Should subpages be renamed as well?
         """
         if wikiWord is None or not self.requireWriteAccess():

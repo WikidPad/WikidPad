@@ -793,8 +793,8 @@ msgid "Modif. date must match"
 msgstr "Должна совпадать дата изменения"
 
 #: WikidPad.xrc:0
-msgid "Modify all links to the wiki word (unreliable!)"
-msgstr "Изменить все ссылки на вики-слово (опасно!)"
+msgid "Modify all links to the wiki word"
+msgstr "Изменить все ссылки на вики-слово"
 
 #: WikidPad.xrc:0
 msgid "Move into file storage"

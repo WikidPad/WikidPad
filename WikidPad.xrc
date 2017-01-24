@@ -257,7 +257,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbRenameDefaultModifyLinks">
-          <label>Modify all links to the wiki word (unreliable!)</label>
+          <label>Modify all links to the wiki word</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4058,7 +4058,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbModifyLinks">
-          <label>Modify all links to the wiki word (unreliable!)</label>
+          <label>Modify all links to the wiki word</label>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>

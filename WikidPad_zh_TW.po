@@ -809,8 +809,8 @@ msgid "Modif. date must match"
 msgstr "修改日期必須匹配"
 
 #: WikidPad.xrc:0
-msgid "Modify all links to the wiki word (unreliable!)"
-msgstr "修改指向該維基字的所有鏈接（不可靠！）"
+msgid "Modify all links to the wiki word"
+msgstr "修改指向該維基字的所有鏈接"
 
 #: WikidPad.xrc:0
 msgid "Move into file storage"
