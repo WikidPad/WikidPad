@@ -1,6 +1,8 @@
 from struct import pack, unpack
 import io as StringIO
 
+import Consts
+
 from .StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
         base64BlockDecode
 
@@ -289,10 +291,9 @@ def serFromXmlInt(xmlNode, tag, default=None):
 _TYPE_TO_TYPENAME = (
         (bool, "bool"),
         (int, "int"),
-        (int, "long"),
         (float, "float"),
         (str, "unicode"),
-        (str, "str")
+        (Consts.BYTETYPES, "str"),
     )
 
 
@@ -303,7 +304,7 @@ _TYPENAME_TO_FACTORY = {
         "float": float,
         "unicode": str,
         "str": base64BlockDecode,
-        "bool": strToBool
+        "bool": strToBool,
     }
 
 

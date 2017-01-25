@@ -20,10 +20,9 @@ import wx
 
 import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as _re
 from .WikiExceptions import *
+from Consts import BYTETYPES
 
-from .Utilities import between
-
-LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
+from . import Utilities
 
 from .SystemInfo import isOSX, isLinux, isWindows
 
@@ -31,6 +30,11 @@ from .SystemInfo import isOSX, isLinux, isWindows
 # To generate dependencies for py2exe/py2app
 import encodings.utf_8, encodings.latin_1, encodings.utf_16, \
         encodings.utf_16_be, encodings.utf_16_le, encodings.ascii
+
+
+
+LINEEND_SPLIT_RE_STR = _re.compile(r"\r\n?|\n")
+LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 
 
 
@@ -45,13 +49,28 @@ utf8Writer = codecs.getwriter("utf-8")
 def convertLineEndings(text, newLe):
     """
     Convert line endings of text to string newLe which should be
-    "\n", "\r" or "\r\n". If newLe or text is unicode, the result
-    will be unicode, too.
+    "\n", "\r" or "\r\n". If text is bytes/unicode, the result
+    will be bytes/unicode, too.
     """
-    return newLe.join(LINEEND_SPLIT_RE.split(text))
+
+    if isinstance(text, BYTETYPES):
+        if isinstance(newLe, str):
+            newLe = newLe.encode("latin-1")
+        
+        return newLe.join(LINEEND_SPLIT_RE_BYTES.split(text))
+    else:
+        if isinstance(newLe, BYTETYPES):
+            newLe = newLe.decode("latin-1")
+        
+        return newLe.join(LINEEND_SPLIT_RE_STR.split(text))
+
+
 
 def lineendToInternal(text):
-    return convertLineEndings(text, "\n")
+    return convertLineEndings(text, b"\n")
+
+def lineendToOs(text):
+    return convertLineEndings(text, os.linesep)
 
 
 
@@ -63,9 +82,6 @@ if isOSX():
     mbcsReader = codecs.getreader("mac_roman")
     mbcsWriter = codecs.getwriter("mac_roman")
 
-    def lineendToOs(text):
-        return convertLineEndings(text, "\r")
-
 elif isLinux():
     # Could be wrong encoding
 #     LINUX_ENCODING = "latin-1"
@@ -73,15 +89,12 @@ elif isLinux():
     LINUX_ENCODING = locale.getpreferredencoding()
 
     if not LINUX_ENCODING:
-        LINUX_ENCODING = "utf8"
+        LINUX_ENCODING = "utf-8"
 
     _mbcsEnc = codecs.getencoder(LINUX_ENCODING)
     _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
     mbcsReader = codecs.getreader(LINUX_ENCODING)
     mbcsWriter = codecs.getwriter(LINUX_ENCODING)
-
-    def lineendToOs(text):
-        return convertLineEndings(text, "\n")
 
 else:
     # generate dependencies for py2exe
@@ -92,9 +105,6 @@ else:
     mbcsReader = codecs.getreader("mbcs")
     mbcsWriter = codecs.getwriter("mbcs")
 
-    def lineendToOs(text):
-        return convertLineEndings(text, "\r\n")
-
 
 # mbcsEnc is idempotent for the first item of returned tuple
 # pathEnc and longPathEnc are also idempotent
@@ -102,7 +112,7 @@ else:
 
 
 def mbcsEnc(input, errors="strict"):
-    if isinstance(input, str):
+    if isinstance(input, BYTETYPES):
         return input, len(input)
     else:
         return _mbcsEnc(input, errors)
@@ -138,7 +148,7 @@ if isWindows():
     if not os.path.supports_unicode_filenames:
         raise InternalError("This Python version does not support unicode paths")
     
-    # To process pathes longer than 255 characters, Windows (NT and following)
+    # To process paths longer than 255 characters, Windows (NT and following)
     # expects an absolute path prefixed with \\?\
 
     def longPathEnc(s):
@@ -220,7 +230,7 @@ def uniWithNone(u):
 
 def strToBool(s, default=False):
     """
-    Try to interpret string (or unicode) s as
+    Try to interpret string s as
     boolean, return default if string can't be
     interpreted
     """
@@ -245,51 +255,28 @@ def strToBool(s, default=False):
 # TODO More formats
 def fileContentToUnicode(content):
     """
-    Try to detect the text encoding of content
+    Try to detect the text encoding of byte content
     and return converted unicode
     """
     if content.startswith(BOM_UTF8):
-        return content[len(BOM_UTF8):].decode("utf-8", "replace")
+        return content[len(BOM_UTF8):].decode("utf-8", "surrogateescape")
     elif content.startswith(BOM_UTF16_BE):
-        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
+        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "surrogateescape")
     elif content.startswith(BOM_UTF16_LE):
-        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
+        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
     else:
-        return mbcsDec(content, "replace")[0]
-
-
-def contentToUnicode(content):
-    """
-    Try to detect the text encoding of content
-    and return converted unicode
-    """
-    if isinstance(content, str):
-        return content
-
-    if content.startswith(BOM_UTF8):
-        return content[len(BOM_UTF8):].decode("utf-8", "replace")
-    elif content.startswith(BOM_UTF16_BE):
-        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
-    elif content.startswith(BOM_UTF16_LE):
-        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
-    else:
-        try:
-            return content.decode("utf-8", "strict")
-        except UnicodeDecodeError:
-            return mbcsDec(content, "replace")[0]
-
+        return mbcsDec(content, "surrogateescape")[0]
 
 
 
 
 def loadEntireTxtFile(filename):
     """
-    Load entire file (text mode) and return its content.
+    Load entire file, adjust line endings and return its byte content.
     """
-    rf = open(pathEnc(filename), "rU")
+    rf = open(pathEnc(filename), "rb")
     try:
-        result = rf.read()
-        return result
+        return lineendToInternal(rf.read())
     finally:
         rf.close()
 
@@ -332,15 +319,14 @@ def loadEntireFile(filename, textMode=False):
     """
     Load entire file and return its content.
     """
+    with open(pathEnc(filename), "rb") as rf:
+        content = rf.read()
+    
     if textMode:
-        rf = open(pathEnc(filename), "rU")
-    else:
-        rf = open(pathEnc(filename), "rb")
+        content = lineendToInternal(content)
+    
+    return content
 
-    try:
-        return rf.read()
-    finally:
-        rf.close()
 
 
 # Constants for writeFileMode of writeEntireFile
@@ -366,18 +352,19 @@ def writeEntireFile(filename, content, textMode=False,
     appropriate for the OS.
     """
     if writeFileMode == WRITE_FILE_MODE_OVERWRITE:
-        if textMode:
-            f = open(filename, "w")
-        else:
-            f = open(filename, "wb")
+        f = open(filename, "wb")
 
         try:
             if isinstance(content, str):
                 # assert textMode
                 content = content.encode("utf-8")
                 f.write(BOM_UTF8)
+                if textMode:
+                    content = lineendToOs(content)
                 f.write(content)
-            elif isinstance(content, str):
+            elif isinstance(content, BYTETYPES):
+                if textMode:
+                    content = lineendToOs(content)
                 f.write(content)
             else:    # content is a sequence
                 try:
@@ -391,7 +378,9 @@ def writeEntireFile(filename, content, textMode=False,
                         f.write(BOM_UTF8)
                         unic = True
     
-                    assert isinstance(firstContent, str)
+                    assert isinstance(firstContent, BYTETYPES)
+                    if textMode:
+                        content = lineendToOs(content)
                     f.write(firstContent)
     
                     while True:
@@ -401,7 +390,9 @@ def writeEntireFile(filename, content, textMode=False,
                             assert isinstance(content, str)
                             content = content.encode("utf-8")
     
-                        assert isinstance(content, str)
+                        assert isinstance(content, BYTETYPES)
+                        if textMode:
+                            content = lineendToOs(content)
                         f.write(content)
                 except StopIteration:
                     pass
@@ -1486,7 +1477,7 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
     randomLength - Length of the random sequence (without leading tilde)
 
     """
-    maxLength = between(20 + len(suffix) + randomLength, maxLength, 250)
+    maxLength = Utilities.between(20 + len(suffix) + randomLength, maxLength, 250)
 
     baseName = mbcsDec(baseName)[0]
 

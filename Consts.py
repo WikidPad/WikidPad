@@ -35,6 +35,12 @@ CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"
 DEADBLOCKTIMEOUT = 1800
 
 
+# For use in isinstance(v, BYTETYPES)
+BYTETYPES = (bytes, bytearray) 
+
+
+
+
 # Scintilla known format types and numbers
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading1", "Heading2", "Heading3",

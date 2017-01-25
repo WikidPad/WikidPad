@@ -6,7 +6,8 @@ from codecs import BOM_UTF8    # , BOM_UTF16_BE, BOM_UTF16_LE
 
 import wx
 
-from .StringOps import urlFromPathname, relativeFilePath, escapeHtml, pathEnc
+from .StringOps import urlFromPathname, relativeFilePath, escapeHtml, pathEnc, \
+        lineendToOs
 
 
 class TempFileSet:
@@ -194,15 +195,19 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
         path = getDefaultTempFilePath()
     
     fd, fullPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(path),
-            text=textMode)
+            text=False)
     try:
         try:
             if isinstance(content, str):
                 # assert textMode
                 content = content.encode("utf-8")
                 os.write(fd, BOM_UTF8)
+                if textMode:
+                    content = lineendToOs(content)
                 os.write(fd, content)
-            elif isinstance(content, str):
+            elif isinstance(content, BYTETYPES):
+                if textMode:
+                    content = lineendToOs(content)
                 os.write(fd, content)
             else:    # content is a sequence
                 try:
@@ -216,7 +221,9 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
                         os.write(fd, BOM_UTF8)
                         unic = True
     
-                    assert isinstance(firstContent, str)
+                    assert isinstance(firstContent, BYTETYPES)
+                    if textMode:
+                        content = lineendToOs(content)
                     os.write(fd, firstContent)
     
                     while True:
@@ -226,7 +233,9 @@ def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
                             assert isinstance(content, str)
                             content = content.encode("utf-8")
     
-                        assert isinstance(content, str)
+                        assert isinstance(content, BYTETYPES)
+                        if textMode:
+                            content = lineendToOs(content)
                         os.write(fd, content)
                 except StopIteration:
                     pass

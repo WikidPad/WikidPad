@@ -61,6 +61,27 @@ def retrieveSavedExportsList(mainControl, wikiData, continuousExport):
     return result
 
 
+def contentToUnicode(content):
+    """
+    Try to detect the text encoding of byte content
+    and return converted unicode
+    """
+    if isinstance(content, str):
+        return content
+
+    if content.startswith(BOM_UTF8):
+        return content[len(BOM_UTF8):].decode("utf-8", "replace")
+    elif content.startswith(BOM_UTF16_BE):
+        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
+    elif content.startswith(BOM_UTF16_LE):
+        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
+    else:
+        try:
+            return content.decode("utf-8", "strict")
+        except UnicodeDecodeError:
+            return mbcsDec(content, "replace")[0]
+
+
 
 class AbstractExporter(object):
     def __init__(self, mainControl):
@@ -968,7 +989,7 @@ class MultiPageTextExporter(AbstractExporter):
 
     def _recoveryExportWikiWords(self):
         def writeWord(word, content, modified, created, visited):
-            if isinstance(content, str):
+            if isinstance(content, Consts.BYTETYPES):
                 content = StringOps.contentToUnicode(content)
 
             self.exportFile.writeSeparator()
