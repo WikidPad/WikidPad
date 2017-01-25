@@ -853,6 +853,7 @@ GLOBALDEFAULTS = {
             # this is only necessary for special layouts where ctrl-level uses fundamentally different layout
             # than base and shift level
     ("main", "zombieCheck"): "True", # Check for already running processes? Only active if "single_process" is True
+    ("main", "cpu_affinity"): "-1", # Assign process to a single CPU? -1: Use CPU affinity on startup; greater numbers denote a particular CPU
 
     ("main", "tempHandling_preferMemory"): "False", # Prefer to store temporary data in memory where this is possible?
     ("main", "tempHandling_tempMode"): u"system", # Mode for storing of temporary data.

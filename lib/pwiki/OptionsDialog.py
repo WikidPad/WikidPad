@@ -376,6 +376,10 @@ class OptionsDialog(wx.Dialog):
             # application-wide options
             ("single_process", "cbSingleProcess", "b"),
             ("zombieCheck", "cbZombieCheck", "b"),
+
+            ("cpu_affinity", "chCpuAffinity", "selt",
+                [u"-1"]),
+            
             ("wikiPathes_relative", "cbWikiPathesRelative", "b"),
             ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
                 "t"),
@@ -880,7 +884,19 @@ class OptionsDialog(wx.Dialog):
 
         self.ctrls.chHtmlPreviewRenderer.Enable(
                 len(self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData) > 1)
-
+        
+        # CPU affinity
+        
+        self.ctrls.chCpuAffinity.optionsDialog_clientData = [-1]
+        
+        if OsAbstract.getCpuCount() > 1:
+            self.ctrls.chCpuAffinity.optionsDialog_clientData += range(
+                    OsAbstract.getCpuCount())
+            for i in range(OsAbstract.getCpuCount()):
+                self.ctrls.chCpuAffinity.Append(unicode(i))
+        else:
+            self.ctrls.chCpuAffinity.Enable(False)
+                
         # Reorderable paste type list
         
         # Retrieve default and configured paste order
@@ -1250,7 +1266,7 @@ class OptionsDialog(wx.Dialog):
 
         if wikiDocument is not None and self.ctrls.cbWikiReadOnly.GetValue():
             wikiDocument.setWriteAccessDeniedByConfig(True)
-            
+
         # Store paste type order
         config.set("main", "editor_paste_typeOrder",
                 ";".join(self.ctrls.rlPasteTypeOrder.GetClientDatas()))
