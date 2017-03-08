@@ -1600,46 +1600,147 @@ class WikiDataManager(MiscEventSourceMixin):
         return renameDict.items()
 
 
+    @staticmethod
+    def _replaceWikiWordLinks(page, wikiWord, toWikiWord, langHelper):
+        """Replace on page all links to wikiWord with links to toWikiWord.
+
+        Note: this is not a simple (search and replace) text operation,
+        but uses the AST of page to reliably replace links.
+
+        Updated links are created using langHelper.createLinkFromWikiWord
+        and langHelper.createRelativeLinkFromWikiWord.
+
+        Absolute links will be replaced with relative links (but will of
+        course point to the correct wiki word).
+        """
+        print "    _replaceWikiWordLinks on %r" % page.getWikiWord()
+        ast = page.getLivePageAst()
+
+        nodes_to_change = [node for node in ast.iterDeepByName("wikiWord")
+                           if node.wikiWord == wikiWord]
+        for node in nodes_to_change:
+            # Nodes will be changed in place. Because the length of each
+            # updated node will typically be different from the old length,
+            # the pos of nodes in the AST after updated nodes will be wrong.
+            # However, if the AST is only used to get the text of the page,
+            # this does not matter, as ast.getString() does not depend on pos.
+            pos, old_link = node.pos, node.getString()
+
+            has_title = node.titleNode is not None
+            has_search = node.fragmentNode is not None
+            # has_anchor = node.anchorLink is not None
+
+            if wikiWord == page.getWikiWord():  # link to self
+                wikiWord = u'.'
+
+            if not has_title and not has_search:
+                # WikiWord, [wikiWord], WikiWord!anchor, [wikiWord]!anchor
+                #
+                # Note: we need to treat these differently, because a CamelCase
+                # wiki word can be replaced by a wiki word that requires
+                # brackets and vice versa (the other links are always
+                # bracketed, see else clause below).
+                if node.sub[0].text == u'[':  # [wikiWord], bracketed wiki word
+                    assert node.sub[1].name == 'word'
+                    assert node.sub[2].text == u']'
+                    del node.sub[0]  # remove u'['
+                    del node.sub[1]  # remove u']'
+                link = langHelper.createLinkFromWikiWord(toWikiWord, page)
+                # link is CamelCase or bracketed, can be put on page like that
+                node.sub[0].text = link
+
+            else:
+                # [wikiWord|title], [wikiWord|title]!anchor, [wikiWord#search],
+                # [wikiWord#search|title], [wikiWord#search|title]!anchor, ...
+                link_no_brackets = langHelper.createRelativeLinkFromWikiWord(
+                    toWikiWord, page.getWikiWord(), downwardOnly=False)
+                node.findFlatByName("word").text = link_no_brackets
+
+            new_link = node.getString()
+            print "      pos %d: %r -> %r" % (pos, old_link, new_link)
+
+        # update text
+        text = ast.getString()  # get text with updated links
+        page.replaceLiveText(text)
+
+
+    @staticmethod
+    def _replaceWikiWordValues(page, wikiWord, toWikiWord, langHelper):
+        """Replace on page all attribute values equal to wikiWord with
+        the value toWikiWord.
+
+        Note: this is not a simple (search and replace) text operation,
+              but uses the AST of page to reliably replace values.
+        """
+        print "    _replaceWikiWordValues on %r" % page.getWikiWord()
+        wikidoc = page.getWikiDocument()
+        ast = page.getLivePageAst()
+
+        changed_at_least_one_node = False
+        nodes_to_check = [  # attribute and instertion nodes
+            node for node in ast.iterDeep()
+            if node.name == "attribute" or node.name == "insertion"]
+
+        for node in nodes_to_check:  # changes node in place
+            node_changed = False
+            pos, old_attr = node.pos, node.getString()
+            # key = node.key
+            for tnode in node.iterFlatByName("value"):
+                value = tnode.text
+                errMsg = langHelper.checkForInvalidWikiLink(value, wikidoc)
+                if errMsg:
+                    continue
+                valueWikiWord = langHelper.resolveWikiWordLink(value, page)
+                if valueWikiWord != wikiWord:
+                    continue
+                link_no_brackets = langHelper.createRelativeLinkFromWikiWord(
+                    toWikiWord, page.getWikiWord(), downwardOnly=False)
+                tnode.text = link_no_brackets  # set value to toWikiWord
+                node_changed = True
+
+            if node_changed:
+                changed_at_least_one_node = True
+                new_attr = node.getString()
+                print "      pos %d: %r -> %r" % (pos, old_attr, new_attr)
+
+        if changed_at_least_one_node:
+            page.replaceLiveText(ast.getString())
+
+
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
+        """Rename wikiWord to toWikiWord.
+
+        modifyText -- Update links to the renamed page?
+
+        Note: wikiWord page should already be saved before renaming.
         """
-        modifyText -- Should the text of links to the renamed page
-                      be modified?
-        """
-        global _openDocuments
-        
+        print "  WikiDataManager.renameWikiWord: %r -> %r" % (wikiWord,
+                                                              toWikiWord)
         langHelper = GetApp().createWikiLanguageHelper(
-                self.getWikiDefaultWikiLanguage())
-
+            self.getWikiDefaultWikiLanguage())
         errMsg = langHelper.checkForInvalidWikiWord(toWikiWord, self)
-
         if errMsg:
-            raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") %
-                    (toWikiWord, errMsg))
-
+            raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") % (
+                toWikiWord, errMsg))
         if self.isDefinedWikiLinkTerm(toWikiWord):
             raise WikiDataException(
                     _(u"Cannot rename '%s' to '%s', '%s' already exists") %
                     (wikiWord, toWikiWord, toWikiWord))
-
         try:
-            oldWikiPage = self.getWikiPage(wikiWord)
+            wikiPage = self.getWikiPage(wikiWord)
         except WikiWordNotFoundException:
             # So create page first
-            oldWikiPage = self.createWikiPage(wikiWord)
-            oldWikiPage.writeToDatabase()
+            wikiPage = self.createWikiPage(wikiWord)
+            wikiPage.writeToDatabase()
 
-        self.getWikiData().renameWord(wikiWord, toWikiWord)
-        
+        wikiData = self.getWikiData()
+        wikiWordParents = set(wikiData.getParentRelationships(wikiWord))
+
         # TODO: Replace always?
-        
         # Check if replacing previous title of page with new one
-
         wikiWordTitle = self.getWikiPageTitle(wikiWord)
-        
         if wikiWordTitle is not None:
-            prevTitle = self.formatPageTitle(wikiWordTitle) + u"\n"
-        else:
-            prevTitle = None
+            wikiWordTitle = self.formatPageTitle(wikiWordTitle) + u"\n"
 
         # if the root was renamed we have a little more to do
         if wikiWord == self.getWikiName():
@@ -1663,73 +1764,83 @@ class WikiDataManager(MiscEventSourceMixin):
             self.wikiName = toWikiWord
             
             # Update dict of open documents (= wiki data managers)
+            global _openDocuments
             del _openDocuments[wikiConfigPath]
             _openDocuments[renamedConfigPath] = self
 
-        oldWikiPage.renameVersionData(toWikiWord)
-        oldWikiPage.queueRemoveFromSearchIndex()
-        oldWikiPage.informRenamedWikiPage(toWikiWord)
-        del self.wikiPageDict[wikiWord]
+        # rename wikiPage
+        dirty = wikiPage.getDirty()[0]
+        assert not dirty  # page should already be saved before renaming
+        wikiData.renameWord(wikiWord, toWikiWord)
+        wikiPage.renameVersionData(toWikiWord)
+        wikiPage.queueRemoveFromSearchIndex()
+        wikiPage.informRenamedWikiPage(toWikiWord)
+        # informRenamedWikiPage sends an event that will (if the page is opened
+        # in an editor) cause docPagePresenter to save and unload the page, and
+        # then load toWikiWord. This requires wikiPage to be already saved.
+        # Otherwise, it would be saved now, before being unloaded, but using the
+        # old name, and hence recreating the page with the old name. Therefore,
+        # save pages in the renameSeq loop (in PersonalWikiFrame.renameWikiWord)
+        # after each iteration when updating links.
+        del self.wikiPageDict[wikiWord]  # remove from .getWikiPage() cache
 
         if modifyText:
-            # Search the wiki pages and replace the old wiki word with the new.
-            #
-            # All links to WikiWord match the pattern "\bWikiWord\b", but not
-            # all matches are valid links to WikiWord (there can be false
-            # positives); use "\bWikiWord\b" to quickly find (using the
-            # index) all pages possibly containing links to the old wiki word,
-            # but use the AST of resulting pages to (reliably) replace links.
+            # update links in wikiWord's parent pages
+            print "    wikiWordParents:", repr(wikiWordParents)
+            for ww in wikiWordParents:
+                parentPage = self.getWikiPage(ww)
+                self._replaceWikiWordLinks(parentPage, wikiWord, toWikiWord,
+                                           langHelper)
+
+            # find insertions ~ [:page: ..]
             sarOp = SearchReplaceOperation()
             sarOp.wikiWide = True
             sarOp.wildCard = 'regex'
             sarOp.caseSensitive = True
-            sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
+            sarOp.searchStr = ur'\[\s*:\s*page\s*[=:][^\]]*\]'
+            # Note: searching for [:page: wikiWord] is not enough because
+            # we need to resolve the insertion value using langHelper to
+            # handle subpage links, e.g., [:page: ../toppage]. We thus need
+            # to check all page insertions, which can be slow. To speed this
+            # up, we could cache resolved page insertions in the database.
 
-            for resultWord in self.searchWiki(sarOp):  # resultWord = page name
-                wikiPage = self.getWikiPage(resultWord)
-                ast = wikiPage.getLivePageAst()
+            wikiWordsWithInsertions = self.searchWiki(sarOp)
+            # print "    wikiWordsWithInsertions:", repr(wikiWordsWithInsertions)
 
-                # replace WikiWord, [WikiWord], [WikiWord|Title], ...
-                for ntnode in ast.iterDeepByName("wikiWord"):  # NonTerminalNode
-                    if ntnode.wikiWord != wikiWord:
-                        continue
-                    ntnode.wikiWord = toWikiWord
-                    tnode = ntnode.findFlatByName("word")  # TerminalNode
-                    assert tnode.text == wikiWord
-                    tnode.text = toWikiWord
+            wikiWordsToCheck = set(wikiWordsWithInsertions)
 
-                # replace [:page: WikiWord]
-                for ntnode in ast.iterDeepByName("insertion"):
-                    if ntnode.key != u'page' or ntnode.value != wikiWord:
-                        continue
-                    ntnode.value = toWikiWord
-                    tnode = ntnode.findFlatByName("value")
-                    assert tnode.text == wikiWord
-                    tnode.text = toWikiWord
+            # find attributes with wiki word values ~ [key: ..]
+            for key in AttributeHandling.ATTRIBUTES_WITH_WIKIWORD_VALUES:
+                for ww, attr, value in self.getAttributeTriples(
+                        word=None, key=key, value=None):
+                    # Note: value=None: we can not use value=wikiWord, because
+                    # the attribute value needs to be resolved using langHelper,
+                    # to handle subpage links (value=wikiWord does a literal
+                    # comparison). We thus need to check all attributes that
+                    # can have wikiword values, which can be slow. To speed
+                    # this up, we could cache resolved attribute values in
+                    # the database.
+                    wikiWordsToCheck.add(ww)
 
-                # update text
-                text = ast.getString()
-                wikiPage.replaceLiveText(text)
+            # update attribute values
+            print "    wikiWordsToCheck:", repr(wikiWordsToCheck)
+            for ww in wikiWordsToCheck:
+                page = self.getWikiPage(ww)
+                self._replaceWikiWordValues(page, wikiWord, toWikiWord,
+                                            langHelper)
 
-        # Now we modify the page heading if not yet done by text replacing
-        page = self.getWikiPage(toWikiWord)
+        # Now we modify the page heading
+        toWikiPage = self.getWikiPage(toWikiWord)
         # But first update the match terms which need synchronous updating
-        page.refreshSyncUpdateMatchTerms()
-
-        self.getWikiData().setMetaDataState(toWikiWord,
-                Consts.WIKIWORDMETADATA_STATE_DIRTY)
-
-        content = page.getLiveText()
-        if prevTitle is not None and content.startswith(prevTitle):
+        toWikiPage.refreshSyncUpdateMatchTerms()
+        wikiData.setMetaDataState(toWikiWord, Consts.WIKIWORDMETADATA_STATE_DIRTY)
+        content = toWikiPage.getLiveText()
+        if wikiWordTitle is not None and content.startswith(wikiWordTitle):
             # Replace previous title with new one
-            content = self.formatPageTitle(self.getWikiPageTitle(toWikiWord)) + \
-                    u"\n" + content[len(prevTitle):]
-            page.replaceLiveText(content)
-
-        page.initiateUpdate()
-
-
-#             page.update(content)
+            toWikiWordTitle = self.formatPageTitle(self.getWikiPageTitle(toWikiWord))
+            content = toWikiWordTitle + u"\n" + content[len(wikiWordTitle):]
+            toWikiPage.replaceLiveText(content)
+        toWikiPage.initiateUpdate()
 
 
     # TODO threadstop?

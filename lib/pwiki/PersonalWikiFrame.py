@@ -3914,14 +3914,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText, processSubpages):
-        """
-        Renames current wiki word to toWikiWord.
-        Returns True if renaming was done successful.
+        """Rename wikiWord to toWikiWord.
+        Return True if renaming was done successful.
         
-        modifyText -- Should the text of links to the renamed page be
-                      modified?
+        modifyText      -- Update links to the renamed page?
         processSubpages -- Should subpages be renamed as well?
         """
+        print "\nPersonalWikiFrame.renameWikiWord: %r -> %r" % (wikiWord,
+                                                                toWikiWord)
         if wikiWord is None or not self.requireWriteAccess():
             return False
 
@@ -3930,29 +3930,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         try:
             if processSubpages:
                 renameSeq = wikiDoc.buildRenameSeqWithSubpages(wikiWord,
-                        toWikiWord)
+                                                               toWikiWord)
             else:
                 renameSeq = [(wikiWord, toWikiWord)]
 
+            # Renaming a page requires the page to be already saved,
+            # so save (all pages) before calling wikiDoc.renameWikiWord.
             self.saveAllDocPages()
 
-            # TODO Don't recycle variable names!
-            for wikiWord, toWikiWord in renameSeq:
-
-                if wikiWord == wikiDoc.getWikiName():
+            print "  renameSeq =", repr(renameSeq)
+            for src, dst in renameSeq:
+                if src == wikiDoc.getWikiName():
                     # Renaming of root word = renaming of wiki config file
                     wikiConfigFilename = wikiDoc.getWikiConfigPath()
                     self.removeFromWikiHistory(wikiConfigFilename)
-    #                 self.wikiHistory.remove(wikiConfigFilename)
-                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
-                            modifyText)
+                    # self.wikiHistory.remove(wikiConfigFilename)
+                    wikiDoc.renameWikiWord(src, dst, modifyText)
                     # Store some additional information
                     self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
                 else:
-                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
-                            modifyText)
+                    wikiDoc.renameWikiWord(src, dst, modifyText)
 
-            return True
+                if modifyText:
+                    # Updating links can modify wiki pages that will
+                    # be renamed in (one of) the next iteration(s)
+                    # (when processing subpages), so we need to save
+                    # pages every next iteration when updating links.
+                    self.saveAllDocPages()
+
+            return True  # all went well
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise

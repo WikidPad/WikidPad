@@ -25,6 +25,7 @@ from .LogWindow import LogMessage
 from .DocPages import WikiPage
 
 
+ATTRIBUTES_WITH_WIKIWORD_VALUES = [u'template', u'parent', u'import_scripts']
 
 wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
