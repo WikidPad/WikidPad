@@ -362,7 +362,11 @@ class AttributeCheckParent(AbstractAttributeCheck):
 
         wikiWord = self.wikiPage.getWikiWord()
 
-        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+        try:
+            targetWikiWord = langHelper.resolveWikiWordLink(attrValue,
+                                                            self.wikiPage)
+        except ValueError:
+            targetWikiWord = None
 
         if not wikiDocument.isDefinedWikiLinkTerm(targetWikiWord):
             # Word does not exist
@@ -421,7 +425,11 @@ class AttributeCheckAlias(AbstractAttributeCheck):
             self.attrChecker.appendLogMessage(msg)
             return
 
-        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+        try:
+            targetWikiWord = langHelper.resolveWikiWordLink(attrValue,
+                                                            self.wikiPage)
+        except ValueError:
+            targetWikiWord = None
 
         if wikiDocument.isDefinedWikiPageName(targetWikiWord):
             # Word exists and isn't an alias
@@ -484,7 +492,11 @@ class AttributeCheckTemplate(AbstractAttributeCheck):
             self.attrChecker.appendLogMessage(msg)
             return
 
-        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+        try:
+            targetWikiWord = langHelper.resolveWikiWordLink(attrValue,
+                                                            self.wikiPage)
+        except ValueError:
+            targetWikiWord = None
 
         if not wikiDocument.isDefinedWikiLinkTerm(targetWikiWord):
             # Word doesn't exist

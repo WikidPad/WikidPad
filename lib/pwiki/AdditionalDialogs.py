@@ -18,7 +18,7 @@ except:
     sqlite = None
 
 
-from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
+from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN, ModifyText
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
         escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
@@ -690,11 +690,13 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
             return
 
         toWikiWord = self.ctrls.tfToWikiWord.GetValue()
-
+        if self.ctrls.cbModifyLinks.GetValue():
+            modifyText = ModifyText.advanced
+        else:
+            modifyText = ModifyText.off
         try:
             self.mainControl.renameWikiWord(self.fromWikiWord, toWikiWord,
-                    self.ctrls.cbModifyLinks.GetValue(),
-                    self.ctrls.cbRenameSubPages.GetValue())
+                    modifyText, self.ctrls.cbRenameSubPages.GetValue())
         except RenameWikiWordException, e:
             wx.MessageBox(_(u"Can't process renaming:\n%s") %
                     e.getFlowText(), _(u"Can't rename"),

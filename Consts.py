@@ -106,3 +106,8 @@ SEARCHINDEX_FORMAT_NO = 4
 
 TEXTEDITOP_INSERT = 1
 TEXTEDITOP_DELETE = 2
+
+# Methods available to update wiki word references (modify text)
+# when renaming wiki words (see PersonalWikiFrame.renameWikiWord
+# and WikiDataManager.renameWikiWords):
+ModifyText = Enumeration('ModifyText', ['off', 'advanced', 'simple'])

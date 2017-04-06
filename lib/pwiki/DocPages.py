@@ -1358,9 +1358,11 @@ class WikiPage(AbstractWikiPage):
                 for parent in parents:
                     try:
                         parentPage = self.wikiDocument.getWikiPage(parent)
-                        templateWord = langHelper.resolveWikiWordLink(
-                                parentPage.getAttribute("template"),
-                                parentPage)
+                        try:
+                            templateWord = langHelper.resolveWikiWordLink(
+                                parentPage.getAttribute("template"), parentPage)
+                        except ValueError:
+                            templateWord = None
                         if templateWord is not None and \
                                 self.wikiDocument.isDefinedWikiLinkTerm(
                                         templateWord):
@@ -1734,7 +1736,7 @@ class WikiPage(AbstractWikiPage):
                 self.wikiPageName, u"alias", None):
             threadstop.testValidThread()
             if not langHelper.checkForInvalidWikiLink(v,
-                    self.getWikiDocument()):
+                                                      self.getWikiDocument()):
 #                 matchTerms.append((v, ALIAS_TYPE, self.wikiPageName, -1, -1))
                 matchTerms.append((langHelper.resolveWikiWordLink(v, self),
                         ALIAS_TYPE, self.wikiPageName, -1, -1))

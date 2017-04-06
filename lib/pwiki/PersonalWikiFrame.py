@@ -25,7 +25,7 @@ from . import TextTree
 from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 
 from WikiExceptions import *
-from Consts import HOMEPAGE
+from Consts import HOMEPAGE, ModifyText
 
 from . import Utilities
 from . import SystemInfo
@@ -3913,55 +3913,61 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 raise
 
 
-    def renameWikiWord(self, wikiWord, toWikiWord, modifyText, processSubpages):
-        """Rename wikiWord to toWikiWord.
-        Return True if renaming was done successful.
+    def renameWikiWord(self, word, toWord, modifyText=ModifyText.advanced,
+                       processSubpages=True):
+        """Rename `word` to `toWord`, return True if successful.
         
-        modifyText      -- Update links to the renamed page?
-        processSubpages -- Should subpages be renamed as well?
+        modifyText (ModifyText) -- Update references to the renamed page(s)?
+
+            ModifyText.off (0)
+            ModifyText.advanced (recommended) (1)
+            ModifyText.simple (2)
+
+            See: WikiDataManager.renameWikiWords
+
+        processSubpages (bool) -- Should subpages be renamed as well?
         """
-        print "\nPersonalWikiFrame.renameWikiWord: %r -> %r" % (wikiWord,
-                                                                toWikiWord)
-        if wikiWord is None or not self.requireWriteAccess():
+        print (u"\nPersonalWikiFrame.renameWikiWord: %r -> %r, "
+               u"modifyText=%r, processSubpages=%r" % (word, toWord,
+               modifyText, processSubpages))
+
+        if word is None or not self.requireWriteAccess():
             return False
 
         wikiDoc = self.getWikiDocument()
 
         try:
             if processSubpages:
-                renameSeq = wikiDoc.buildRenameSeqWithSubpages(wikiWord,
-                                                               toWikiWord)
+                renameSeq = wikiDoc.buildRenameSeqWithSubpages(word, toWord)
             else:
-                renameSeq = [(wikiWord, toWikiWord)]
+                renameSeq = [(word, toWord)]
+
+            renameDict = {oldPageName: newPageName
+                          for oldPageName, newPageName in renameSeq}
 
             # Renaming a page requires the page to be already saved,
-            # so save (all pages) before calling wikiDoc.renameWikiWord.
+            # so save (all pages) before renaming:
             self.saveAllDocPages()
 
-            print "  renameSeq =", repr(renameSeq)
-            for src, dst in renameSeq:
-                if src == wikiDoc.getWikiName():
-                    # Renaming of root word = renaming of wiki config file
-                    wikiConfigFilename = wikiDoc.getWikiConfigPath()
-                    self.removeFromWikiHistory(wikiConfigFilename)
-                    # self.wikiHistory.remove(wikiConfigFilename)
-                    wikiDoc.renameWikiWord(src, dst, modifyText)
-                    # Store some additional information
-                    self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
-                else:
-                    wikiDoc.renameWikiWord(src, dst, modifyText)
+            wikiDoc.renameWikiWords(renameDict, modifyText)
 
-                if modifyText:
-                    # Updating links can modify wiki pages that will
-                    # be renamed in (one of) the next iteration(s)
-                    # (when processing subpages), so we need to save
-                    # pages every next iteration when updating links.
-                    self.saveAllDocPages()
+            # renaming of root word = renaming of wiki config file
+            rename_config = wikiDoc.getWikiName() in renameDict
+            if rename_config:
+                wikiConfigFilename = wikiDoc.getWikiConfigPath()
+                self.removeFromWikiHistory(wikiConfigFilename)
+                # store some additional information
+                self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
+
+            if modifyText != ModifyText.off:
+                self.saveAllDocPages()
 
             return True  # all went well
+
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
+
         except WikiDataException, e:
             traceback.print_exc()                
             self.displayErrorMessage(unicode(e))
