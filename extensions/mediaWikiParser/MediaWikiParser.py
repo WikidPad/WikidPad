@@ -1251,7 +1251,8 @@ attrInsQuotedValue = FindFirst([], attrInsQuoteEnd)\
         .setPseudoParseAction(pseudoActionAttrInsQuotedValue)
 
 # attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
-attrInsNonQuotedValue = buildRegex(ur"(?:[ \t]*[\w\-\_=:,.!?#%|/]+)*", "value")
+ATTR_INS_NON_QUOTED_VALUE_PATTERN = ur"(?:[ \t]*[\w\-\_=:,.!?#%|/]+)*"
+attrInsNonQuotedValue = buildRegex(ATTR_INS_NON_QUOTED_VALUE_PATTERN, "value")
 
 
 attrInsValue = whitespace + ((attrInsQuoteStart + attrInsQuotedValue + \
@@ -2769,7 +2770,7 @@ def languageHelperFactory(intLanguageName, debugMode):
 
 ATTRIBUTE_FMT = u'[[{key}: {values}]]'  # also possible: [[{key}={values}]]
 
-INSERTION_FMT = u'[[:{key}:{space}{value}{appendix}]]'
+INSERTION_FMT = u'[[:{key}:{space}{value}{appendices}]]'
 
 WIKI_WORD_FMT = {  # fmt_nr -> fmt
         # non-camelcase
@@ -2784,16 +2785,33 @@ WIKI_WORD_FMT = {  # fmt_nr -> fmt
         # MediaWiki does not recognize CamelCase as wiki words
 }
 
-
-SPECIAL_CHARS_THAT_REQUIRE_QUOTES = {u':', u'=', u'+', u'[', u']', u'\n', u'/'}
+# (?:[ \t]*[\w\-\_=:,.!?#%|/]+)*
+valid_non_quoted_value = re.compile(ATTR_INS_NON_QUOTED_VALUE_PATTERN + u'$')
 
 
 def needs_quotes(s):
-    return any(c in SPECIAL_CHARS_THAT_REQUIRE_QUOTES for c in s)
+    return not valid_non_quoted_value.match(s)
+
+
+def count_max_number_of_consecutive_quotes(s):
+    n = i = 0
+    for c in s:
+        if c == u'"':
+            i += 1
+        else:
+            i = 0
+        if i > n:
+            n = i
+    return n
 
 
 def quote(s):
-    return u'"' + s + u'"'
+    n = count_max_number_of_consecutive_quotes(s)
+    return u'"' * (n + 1) + s + u'"' * (n + 1)
+
+
+def quote_if_needed(s):
+    return quote(s) if needs_quotes(s) else s
 
 
 class TextFormatter(object):
@@ -2892,9 +2910,8 @@ class TextFormatter(object):
         .key
         .attrs
         """
-        values = u'; '.join(value for key, value in node.attrs)
-        if needs_quotes(values):
-            values = quote(values)
+        values = u'; '.join(quote_if_needed(value)
+                            for key, value in node.attrs if value)
         return ATTRIBUTE_FMT.format(key=node.key, values=values)
 
     def visit_insertion(self, node):
@@ -2905,19 +2922,16 @@ class TextFormatter(object):
         .value
         .appendices
         """
-        key, value = node.key, node.value
-        if needs_quotes(value):
-            value = quote(value)
+        key, value = node.key, quote_if_needed(node.value)
         space = u' ' if value else u''
         if not node.appendices:
-            appendix = u''
+            appendices = u''
         else:
-            s = u'; '.join(node.appendices)
-            if needs_quotes(s):
-                s = quote(s)
-            appendix = u'; ' + s
+            s = u'; '.join(quote_if_needed(appendix)
+                           for appendix in node.appendices)
+            appendices = u'; ' + s
         return INSERTION_FMT.format(key=key, space=space,
-                                    value=value, appendix=appendix)
+                                    value=value, appendices=appendices)
 
 
 THE_TEXT_FORMATTER = TextFormatter()

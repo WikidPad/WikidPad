@@ -99,7 +99,7 @@ BracketEndRevPAT = ur"\]\]"
 # add payload for text generator:
 payload = {
     u'ATTRIBUTE_FMT': u'[[{key}: {values}]]',
-    u'INSERTION_FMT': u'[[:{key}:{space}{value}{appendix}]]',
+    u'INSERTION_FMT': u'[[:{key}:{space}{value}{appendices}]]',
     u'WIKI_WORD_FMT': {
         0: u'[[{link_core}]]',
         1: u'[[{link_core}]]!{anchor}',

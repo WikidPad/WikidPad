@@ -42,6 +42,8 @@ from tests.helper import (
     TESTS_DIR, get_text, parse, MockWikiDocument, getApp,
     WikiWordNotFoundException, NodeFinder, ast_eq)
 
+from wikidPadParser.WikidPadParser import count_max_number_of_consecutive_quotes
+
 
 LANGUAGE_NAME = 'wikidpad_default_2_0'
 WIKIDPADHELP_DATA_DIR = os.path.abspath(u'WikidPadHelp/data')
@@ -905,8 +907,8 @@ def test_generate_WikidPadHelp():
     skip = {
         u'MediaWiki%2FTextFormatting',  # Media Wiki syntax, not WikidPadParser
     }
-    known_differences = 0
-    unknown_differences = 0
+    nof_known_differences = 0
+    nof_unknown_differences = 0
     for nr, path in enumerate(sorted(paths), 1):
         pageName, _ = os.path.splitext(os.path.basename(path))
         if pageName in skip:
@@ -941,11 +943,11 @@ def test_generate_WikidPadHelp():
                 except KeyError:
                     known_difference = None
                 if result_line == known_difference:
-                    known_differences += 1
+                    nof_known_differences += 1
                     continue  # ok, we know about this difference
 
                 # we have an unknown difference here
-                unknown_differences += 1
+                nof_unknown_differences += 1
                 if add_unknown_differences_to_annotation_file:
                     if current_page_correct:  # first error for this page
                         current_page_correct = False
@@ -954,8 +956,8 @@ def test_generate_WikidPadHelp():
                     f.write(u'!= ' + result_line + u'\n')
 
     msg = u'TOTAL: %d known differences, %d unknown differences'
-    msg %= (known_differences, unknown_differences)
-    assert not unknown_differences, msg
+    msg %= (nof_known_differences, nof_unknown_differences)
+    assert not nof_unknown_differences, msg
 
 
 def test_generate_WikidPadHelp_selection():
@@ -993,9 +995,9 @@ def test_generate_WikidPadHelp_selection():
         (u'PageName', u'[key: value; value2]',
          'attribute', u'[key: value; value2]'),
         (u'PageName', u'[key: "value: with special char"]',
-         'attribute', u'[key: "value: with special char"]'),
+         'attribute', u'[key: value: with special char]'),
         (u'PageName', u'[key: "value = special"]',
-         'attribute', u'[key: "value = special"]'),
+         'attribute', u'[key: value = special]'),
         (u'pageName', u'[wikiword]#searchfragment',
          'wikiWord',  u'[wikiword#searchfragment]'),
         (u'pageName', u'[wikiword#searchfragment]',
@@ -1025,9 +1027,9 @@ def test_generate_WikidPadHelp_selection():
         (u'Insertions', u'[:rel: children;existingonly;columns 2;coldir down]',
          'insertion',   u'[:rel: children; existingonly; columns 2; coldir down]'),
         (u'Insertions', u'[:search:"todo:todo"]',
-         'insertion',  u'[:search: "todo:todo"]'),
+         'insertion',  u'[:search: todo:todo]'),
         (u'Insertions', u'[:search:"todo:todo";showtext]',
-         'insertion',   u'[:search: "todo:todo"; showtext]'),
+         'insertion',   u'[:search: todo:todo; showtext]'),
         (u'Insertions', u'[:eval:"5+6"]',
          'insertion',   u'[:eval: "5+6"]'),
         (u'ExternalGraphicalApplications',
@@ -1103,3 +1105,62 @@ plot [-pi/2:pi] cos(x),-(sin(x) > sin(x+1) ? sin(x) : sin(x+1))
         result = langHelper.generate_text(ast, page)[1:-2]
         assert result == formatted_text, u'%d: %r on %r -> %r != %r' % (
             nr, text, pageName, result, formatted_text)
+
+
+def test_count_max_number_of_consecutive_quotes():
+    f = count_max_number_of_consecutive_quotes
+    assert f(u'abc') == 0
+    assert f(u'abc"de"b""ed') == 2
+    assert f(u'"""abc"de"b""ed') == 3
+    assert f(u'"""abc"de"b""""ed"""') == 4
+    assert f(u'"a"b"c"d"') == 1
+
+
+def test_generate_text_quotes():
+    test_values = u'''
+    ## input text -> expected output
+
+    [person.email: "Test@imap.server.com"]      |  [person.email: "Test@imap.server.com"]
+    [:page: "IncrementalSearch"]                |  [:page: IncrementalSearch]
+    [:page: //IncrementalSearch//]              |  [:page: IncrementalSearch]
+    [:page: /////IncrementalSearch/////]        |  [:page: IncrementalSearch]
+    [:page: \\IncrementalSearch\\]              |  [:page: IncrementalSearch]
+    [:eval:"5+6"]                               |  [:eval: "5+6"]
+    [contact: "Carl [Home]"]                    |  [contact: "Carl [Home]"]
+    [alias: Foo; Bar; FooBar]                   |  [alias: Foo; Bar; FooBar]
+    [key: ""value 1 with " in it""; "value2"; "final #%! value ?"]  |  [key: ""value 1 with " in it""; value2; final #%! value ?]
+    [key: """value"""""]                        | [key: """value"""""]
+    [key: """value "special" ""a"" "b" """; c]  | [key: """value "special" ""a"" "b" """; c]
+    [key: a;; b; c; ""d"""]                     | [key: a; b; c; ""d"""]
+    [:rel: "children"; existingonly; columns 2; ""coldir down"""]  |  [:rel: children; existingonly; columns 2; ""coldir down"""]
+
+    '''
+
+    def parse_test_values(s):
+        for line in s.splitlines():
+            line = line.strip()
+            if not line or line.startswith(u'#'):
+                continue
+            input_text, output_text = [s.strip() for s in line.split(u'|')]
+            yield input_text, output_text
+
+    def err_msg():
+        msg = u'%r -> %r != %r'
+        return msg % (text_fragment_in, result_fragment, text_fragment_out)
+
+    pageName = u'PageName'
+    wikidoc = MockWikiDocument({pageName: u''}, LANGUAGE_NAME)
+    page = wikidoc.getWikiPage(pageName)
+    langHelper = getApp().createWikiLanguageHelper(LANGUAGE_NAME)
+    tests = parse_test_values(test_values)
+    for text_fragment_in, text_fragment_out in tests:
+        text_in = u'\n%s\n\n' % text_fragment_in
+        text_out = u'\n%s\n\n' % text_fragment_out
+        page.setContent(text_in)
+        ast = page.getLivePageAst()
+        nf = NodeFinder(ast)
+        assert (nf.count('attribute') == 1 or
+                nf.count('insertion') == 1), text_fragment_in
+        result = langHelper.generate_text(ast, page)
+        result_fragment = result.strip()
+        assert result == text_out, err_msg()

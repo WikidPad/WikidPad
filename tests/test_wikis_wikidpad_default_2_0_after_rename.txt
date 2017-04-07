@@ -348,11 +348,11 @@ command. You will now see a dialog asking you the new name of the wiki word.
 ++ Attributes
 
 
-[template: "//Super"]
-[:page: "//Super/SubPage2"]
-[:page: "//Super"]
-[:eqn: VALUE; "//Main"]
-[parent: "//Super"]
+[template: //Super]
+[:page: //Super/SubPage2]
+[:page: //Super]
+[:eqn: VALUE; //Main]
+[parent: //Super]
 [import_scripts: TestPage]
 [key: TestPage]
 --------------------------------------------------------------------------------
@@ -416,7 +416,7 @@ Links to to both my children: [/Sub] and [Top]
 
 Link to parent: [..] and to myself [.].
 
-[template: "//Template"]
+[template: //Template]
 
 --------------------------------------------------------------------------------
 

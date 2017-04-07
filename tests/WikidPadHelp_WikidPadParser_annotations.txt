@@ -405,3 +405,8 @@ WikiDocumentAttributes
 WikidPadOnUSB
 -- For technical details how this all works, see [ApplicationConfigurationFiles].
 == For technical details how this all works, see ApplicationConfigurationFiles.
+Insertions
+-- [:search:"todo:todo"]
+== [:search: todo:todo]
+-- [:search:"todo:todo";showtext]
+== [:search: todo:todo; showtext]
