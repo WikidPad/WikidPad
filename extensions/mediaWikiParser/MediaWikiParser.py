@@ -2786,7 +2786,8 @@ WIKI_WORD_FMT = {  # fmt_nr -> fmt
 }
 
 # (?:[ \t]*[\w\-\_=:,.!?#%|/]+)*
-valid_non_quoted_value = re.compile(ATTR_INS_NON_QUOTED_VALUE_PATTERN + u'$')
+# valid_non_quoted_value = re.compile(ATTR_INS_NON_QUOTED_VALUE_PATTERN + u'$')
+valid_non_quoted_value = re.compile(ur"[ \t\w\-_=:,.!?#%|/]*$")
 
 
 def needs_quotes(s):

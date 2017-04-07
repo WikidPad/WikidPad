@@ -1133,6 +1133,7 @@ def test_generate_text_quotes():
     [key: """value "special" ""a"" "b" """; c]  | [key: """value "special" ""a"" "b" """; c]
     [key: a;; b; c; ""d"""]                     | [key: a; b; c; ""d"""]
     [:rel: "children"; existingonly; columns 2; ""coldir down"""]  |  [:rel: children; existingonly; columns 2; ""coldir down"""]
+    [key: "Elisabeth Willemslaan F. 156450, 113150 Wespelaar (Haacht) B"]  |  [key: "Elisabeth Willemslaan F. 156450, 113150 Wespelaar (Haacht) B"]
 
     '''
 
