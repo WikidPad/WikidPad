@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for MediaWiki language "MediaWiki 1"
-# Last modified (format YYYY-MM-DD): 2013-05-06
+# Last modified (format YYYY-MM-DD): 2017-06-08
 
 
 import locale, sys, traceback

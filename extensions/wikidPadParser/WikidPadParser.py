@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2013-05-06
+# Last modified (format YYYY-MM-DD): 2017-06-08
 from pwiki.Utilities import Counter
 
 import locale, sys, string, traceback
