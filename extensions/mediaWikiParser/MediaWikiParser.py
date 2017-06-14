@@ -23,6 +23,7 @@ locale.setlocale(locale.LC_ALL, '')
 
 from pwiki.WikiPyparsing import *
 
+
 WIKIDPAD_PLUGIN = (("WikiParser", 1),)
 
 WIKI_LANGUAGE_NAME = "mediawiki_1"
@@ -848,10 +849,12 @@ def actionSearchFragmentIntern(s, l, st, t):
 
 
 def resolveWikiWordLink(linkCore, basePage):
-    """Return page name (absolute link).
+    """
+    Return page name (absolute link).
 
     If using subpages this is used to resolve a link to the right
-    wiki word relative to basePage on which the link is placed."""
+    wiki word relative to basePage on which the link is placed.
+    """
     return _TheHelper.resolvePrefixSilenceAndWikiWordLink(linkCore, basePage)[2]
    
 
@@ -870,7 +873,7 @@ def actionWikiWordNcc(s, l, st, t):
     try:
         t.wikiWord = resolveWikiWordLink(link, wikiFormatDetails.basePage)
     except ValueError:
-        raise ParseException(s, l, "Subpage resolution of wiki word failed")
+        raise ParseException(s, l, "Subpage resolution of wikiword failed")
 
     if t.wikiWord in wikiFormatDetails.wikiDocument.getNccWordBlacklist():
         raise ParseException(s, l, "Non-CamelCase word is in blacklist")
@@ -920,7 +923,7 @@ def actionWikiWordCc(s, l, st, t):
         try:
             t.wikiWord = resolveWikiWordLink(link, wikiFormatDetails.basePage)
         except ValueError:
-            raise ParseException(s, l, "Subpage resolution of wiki word failed")
+            raise ParseException(s, l, "Subpage resolution of wikiword failed")
 
         try:
             if t.wikiWord in wikiFormatDetails.wikiDocument.getCcWordBlacklist():
@@ -1682,7 +1685,7 @@ class WikiLanguageDetails(object):
 
 
 class _WikiLinkPath(object):
-    # __slots__ = ("upwardCount", "components")
+    __slots__ = ("upwardCount", "components")
 
     def __init__(self, linkCore=None, pageName=None,
                  upwardCount=-1, components=None):
@@ -1692,25 +1695,25 @@ class _WikiLinkPath(object):
         if pageName is None and linkCore is None:
             self.upwardCount = upwardCount
             self.components = [] if components is None else components
-            if self.upwardCount == -1 and not self.components:
+            if self.upwardCount == -1 and len(self.components) == 0:
                 raise ValueError(u"'//' is not a valid link.")
             return
 
         if pageName is not None:
-            # handle wiki word as absolute link
+            # Handle wiki word as absolute link
             self.upwardCount = -1
             self.components = pageName.split(u"/")
             return
 
         assert linkCore is not None
 
-        if linkCore == u'//':
+        if linkCore == u"//":
             raise ValueError(u"'//' is not a valid link.")
 
-        if linkCore.endswith(u'/'):
+        if linkCore.endswith(u"/"):
             raise ValueError(u"linkCore can not end with '/'.")
 
-        if not linkCore:
+        if linkCore == u"":
             raise ValueError(u"linkCore can not be empty.")
 
         if linkCore.startswith(u"//"):
@@ -1741,11 +1744,11 @@ class _WikiLinkPath(object):
 
     def clone(self):
         return _WikiLinkPath(upwardCount=self.upwardCount,
-                             components=self.components[:])
+                components=self.components[:])
 
     def __repr__(self):
-        s = u"_WikiLinkPath(upwardCount=%i, components=%r)"
-        return s % (self.upwardCount, self.components)
+        return "_WikiLinkPath(upwardCount=%i, components=%s)" % \
+                (self.upwardCount, repr(self.components))
 
     def isAbsolute(self):
         return self.upwardCount == -1
@@ -1762,15 +1765,16 @@ class _WikiLinkPath(object):
             if other.upwardCount <= len(self.components):
                 self.components = (self.components[:-other.upwardCount] +
                                    other.components)
-                if self.upwardCount == -1 and not self.components:
+                if self.upwardCount == -1 and len(self.components) == 0:
                     raise ValueError(u'Not possible to go to root.')
             else:
-                # going back further than self was deep (eliminating
+                # Going back further than self was deep (eliminating
                 # more components than self had)
+
                 if self.upwardCount == -1:
                     raise ValueError(u'Can not go upward from root.')
                 else:
-                    # add up upwardCount of other path after subtracting
+                    # Add up upwardCount of other path after subtracting
                     # number of own components because otherPath walked
                     # over them already
                     self.upwardCount += (other.upwardCount -
@@ -1779,10 +1783,10 @@ class _WikiLinkPath(object):
 
     def getLinkCore(self):
         if self.upwardCount == -1:
-            assert self.components
+            assert len(self.components) > 0
             return u'//' + u'/'.join(self.components)
         elif self.upwardCount == 0:
-            if not self.components:
+            if len(self.components) == 0:
                 return u'.'
             else:
                 return u'/' + u'/'.join(self.components)
@@ -1796,7 +1800,9 @@ class _WikiLinkPath(object):
                 return prefix + u'/'.join(self.components)
 
     def resolveWikiWord(self, basePath=None):
-        """Return page name."""
+        """
+        Return page name.
+        """
         if self.isAbsolute():
             # Absolute is checked separately so basePath can be None if
             # self is absolute
@@ -1807,7 +1813,8 @@ class _WikiLinkPath(object):
         return u"/".join(absPath.components)
 
     def resolvePrefixSilenceAndWikiWordLink(self, basePath):
-        """Return tuple (prefix, silence, pageName).
+        """
+        Return tuple (prefix, silence, pageName).
 
         If using subpages this is used to resolve a link to the right
         wiki word for autocompletion.
@@ -1820,11 +1827,11 @@ class _WikiLinkPath(object):
         If `prefix` is None autocompletion is not possible.
         """
         if self.isAbsolute():
-            return u"//", 0, self.resolveWikiWord()
+            return u"//", 0, self.resolveWikiWord(None)
 
         assert basePath.isAbsolute()
 
-        if not self.components:
+        if len(self.components) == 0:
             # link path only consists of ".." -> autocompletion not possible
             if self.upwardCount == 0:  # u'.'
                 return None, None, u"/".join(basePath.components)
@@ -1838,7 +1845,7 @@ class _WikiLinkPath(object):
                     u"/".join(basePath.components + self.components))
 
         def lenAddOne(s):
-            return len(s) + 1 if s else 0
+            return len(s) + 1 if s != u"" else 0
 
         if self.upwardCount == 1:
             return (u"",
@@ -1862,8 +1869,9 @@ class _WikiLinkPath(object):
 
     @staticmethod
     def getRelativePathByAbsPaths(targetAbsPath, baseAbsPath,
-                                  downwardOnly=True):
-        """Create a link to targetAbsPath relative to baseAbsPath.
+            downwardOnly=True):
+        """
+        Create a link to targetAbsPath relative to baseAbsPath.
 
         If downwardOnly is False, the link may contain parts to go to parents
         or siblings in path (in this wiki language, ".." is used for this).
@@ -1887,19 +1895,20 @@ class _WikiLinkPath(object):
             if basePath != targetPath[:len(basePath)]:
                 return None
             return _WikiLinkPath(upwardCount=0,
-                                 components=targetPath[len(basePath):])
+                    components=targetPath[len(basePath):])
         else:
             # Remove common path elements
-            while targetPath and basePath and targetPath[0] == basePath[0]:
+            while len(targetPath) > 0 and len(basePath) > 0 and \
+                    targetPath[0] == basePath[0]:
                 del targetPath[0]
                 del basePath[0]
 
-            if not basePath:
-                assert targetPath
+            if len(basePath) == 0:
+                assert len(targetPath) > 0
                 return _WikiLinkPath(upwardCount=0, components=targetPath)
 
             return _WikiLinkPath(upwardCount=len(basePath),
-                                 components=targetPath)
+                    components=targetPath)
 
     def __eq__(self, other):
         return ((self.upwardCount, self.components) ==
@@ -2001,7 +2010,8 @@ class _TheHelper(object):
 
 
     resolveWikiWordLink = staticmethod(resolveWikiWordLink)
-    """Return page name (absolute link).
+    """
+    Return page name (absolute link).
 
     If using subpages this is used to resolve a link to the right
     wiki word relative to basePage on which the link is placed.
@@ -2012,7 +2022,8 @@ class _TheHelper(object):
 
     @staticmethod
     def resolvePrefixSilenceAndWikiWordLink(linkCore, basePage):
-        """Return tuple (prefix, silence, pageName).
+        """
+        Return tuple (prefix, silence, pageName).
 
         If using subpages this is used to resolve a link to the right
         wiki word for autocompletion.
@@ -2184,7 +2195,8 @@ class _TheHelper(object):
 
     @staticmethod
     def createRelativeLinkFromWikiWord(word, baseWord, downwardOnly=True):
-        """Create a link to `word` relative to `baseWord`.
+        """
+        Create a link to `word` relative to `baseWord`.
 
         If `downwardOnly` is False, the link may contain parts to go to parents
         or siblings in path (in this wiki language, ".." are used for this).
@@ -2196,7 +2208,8 @@ class _TheHelper(object):
             raise ValueError(u'Target can not be empty.')
 
         relPath = _WikiLinkPath.getRelativePathByAbsPaths(_WikiLinkPath(
-                pageName=word), _WikiLinkPath(pageName=baseWord),
+                _WikiLinkPath(pageName=word),
+                _WikiLinkPath(pageName=baseWord),
                 downwardOnly=downwardOnly)
         
         if relPath is None:
@@ -2211,7 +2224,8 @@ class _TheHelper(object):
 
     @staticmethod
     def createWikiLinkPathFromPageName(targetPageName, basePageName, absolute):
-        """Create relative or absolute wiki link to pageName.
+        """
+        Create relative or absolute wiki link to pageName.
 
         Used in WikiDataManager._updateWikiWordReferences.
         """

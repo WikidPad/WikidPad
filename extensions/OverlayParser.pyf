@@ -1,14 +1,15 @@
 """
 This is a demonstration plugin for constructing a wiki language parser based
 on the default parser which doesn't need permanent updates (but maybe from
-time to time).
+time to time). To try it you have to rename the file suffix from ".pyf" to
+".py".
 
 Until now it was only possible to create a copy of the default parser plugin
 and modify it in the desired way. This meaned that each change in the default
 parser had to be done to the copied parser as well.
 
 For simple changes (like double brackets for links as this plugin
-demonstrates) it can be done more comfortable now by giving some
+demonstrates) it can be done more comfortably now by giving some
 redefinitions of definitions in default parser which are used instead of the
 original ones. If other parts of the default parser change an overlay parser
 automatically uses these changes without a manual update.
