@@ -562,7 +562,8 @@ GLOBALDEFAULTS = {
             # Seems to help against some problems with Vietnamese input programs
 #     ("main", "wikiWord_rename_wikiLinks"): u"0", # When renaming wiki word, should it try to rename links to the word, too?
 #             # 0:No, 1:Yes, 2:Ask for each renaming
-    ("main", "wikiWord_renameDefault_modifyWikiLinks"): u"False", # When renaming wiki word, should it try to rename links to the word, too?
+    ("main", "wikiWord_renameDefault_modifyWikiLinks"): u"off", # When renaming wiki word, should it try to rename links to the word, too?
+            # "off": No link rename, "advanced": New method, rather reliable, "simple": Old method, unreliable but fast
             # This is the default setting but can be modified for each rename operation.
     ("main", "wikiWord_renameDefault_renameSubPages"): u"True", # When renaming wiki word, should sub pages also be renamed
             # This is the default setting but can be modified for each rename operation

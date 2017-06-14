@@ -658,8 +658,13 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.stFromWikiWord.SetLabel(self.fromWikiWord)
         self.ctrls.tfToWikiWord.SetValue(self.fromWikiWord)
         self.ctrls.btnOk.Enable(False)
-        self.ctrls.cbModifyLinks.SetValue(self.mainControl.getConfig().getboolean(
-                "main", "wikiWord_renameDefault_modifyWikiLinks", False))
+#         self.ctrls.cbModifyLinks.SetValue(self.mainControl.getConfig().getboolean(
+#                 "main", "wikiWord_renameDefault_modifyWikiLinks", False))
+        self.ctrls.chModifyLinks.SetSelection(
+                {"off": 0, "false": 0, "advanced": 1, "true": 1, "simple":2}
+                .get(self.mainControl.getConfig()
+                    .get("main", "wikiWord_renameDefault_modifyWikiLinks", "off")
+                    .lower(), 0))
         self.ctrls.cbRenameSubPages.SetValue(self.mainControl.getConfig().getboolean(
                 "main", "wikiWord_renameDefault_renameSubPages", True))
 
@@ -690,10 +695,19 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
             return
 
         toWikiWord = self.ctrls.tfToWikiWord.GetValue()
-        if self.ctrls.cbModifyLinks.GetValue():
-            modifyText = ModifyText.advanced
-        else:
+        
+        try:
+            modifyText = (ModifyText.off, ModifyText.advanced, ModifyText.simple)[
+                    self.ctrls.chModifyLinks.GetSelection()]
+        except IndexError:
             modifyText = ModifyText.off
+        
+#         if self.ctrls.cbModifyLinks.GetValue():
+#             modifyText = ModifyText.advanced
+#         else:
+#             modifyText = ModifyText.off
+
+
         try:
             self.mainControl.renameWikiWord(self.fromWikiWord, toWikiWord,
                     modifyText, self.ctrls.cbRenameSubPages.GetValue())

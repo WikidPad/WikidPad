@@ -1640,7 +1640,7 @@ class WikiDataManager(MiscEventSourceMixin):
         wikidoc = page.getWikiDocument()
         pageName = page.getNonAliasPage().getWikiWord()  # real name, not alias
 
-        print u"Updating references on %r" % pageName
+#         print u"Updating references on %r" % pageName
 
         def update(value):
             """If value points to an old page name, return linkCore that
@@ -1667,7 +1667,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 return newLinkCore
 
         # transform AST by changing nodes in place
-        ast = page.getLivePageAst()  # is always AST of the real page
+        ast = page.getLivePageAst().cloneDeep()  # is always AST of the real page
         for node in ast.iterDeep():
             if node.name == "wikiWord":
                 try:
@@ -1744,7 +1744,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         Note: `word` page should already be saved before renaming!
         """
-        print u"WikiDataManager.renameWikiWord: %r -> %r" % (word, toWord)
+#         print u"WikiDataManager.renameWikiWord: %r -> %r" % (word, toWord)
 
         langHelper = GetApp().createWikiLanguageHelper(
             self.getWikiDefaultWikiLanguage())
@@ -1873,7 +1873,7 @@ class WikiDataManager(MiscEventSourceMixin):
         Note: renaming requires the pages to be already saved, so save
         pages before renaming.
         """
-        print u'WikiDataManager.renameWikiWords renameDict = %r' % renameDict
+#         print u'WikiDataManager.renameWikiWords renameDict = %r' % renameDict
 
         # 1. rename all pages
         for oldPageName, newPageName in renameDict.iteritems():
@@ -1888,7 +1888,7 @@ class WikiDataManager(MiscEventSourceMixin):
         for oldPageName in renameDict:
             to_update |= self._findPagesThatReferenceWord(oldPageName)
 
-        print u"(Candidate) pages with text to update = %r" % to_update
+#         print u"(Candidate) pages with text to update = %r" % to_update
 
         if modifyText == ModifyText.advanced:
             langHelper = GetApp().createWikiLanguageHelper(
