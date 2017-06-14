@@ -9,7 +9,7 @@ WikidPad directory:
 
 """
 import __builtin__
-from collections import Counter
+from pwiki.Utilities import Counter
 import io
 from itertools import chain
 import os

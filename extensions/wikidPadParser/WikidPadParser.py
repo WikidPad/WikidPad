@@ -3,7 +3,7 @@
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
 # Last modified (format YYYY-MM-DD): 2013-05-06
-from collections import Counter
+from pwiki.Utilities import Counter
 
 import locale, sys, string, traceback
 

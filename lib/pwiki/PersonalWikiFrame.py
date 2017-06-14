@@ -3915,7 +3915,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def renameWikiWord(self, word, toWord, modifyText=ModifyText.advanced,
                        processSubpages=True):
-        """Rename `word` to `toWord`, return True if successful.
+        """
+        Rename `word` to `toWord`, return True if successful.
         
         modifyText (ModifyText) -- Update references to the renamed page(s)?
 
@@ -3927,9 +3928,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         processSubpages (bool) -- Should subpages be renamed as well?
         """
-        print (u"\nPersonalWikiFrame.renameWikiWord: %r -> %r, "
-               u"modifyText=%r, processSubpages=%r" % (word, toWord,
-               modifyText, processSubpages))
+#         print (u"\nPersonalWikiFrame.renameWikiWord: %r -> %r, "
+#                u"modifyText=%r, processSubpages=%r" % (word, toWord,
+#                modifyText, processSubpages))
 
         if word is None or not self.requireWriteAccess():
             return False
@@ -3942,8 +3943,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             else:
                 renameSeq = [(word, toWord)]
 
-            renameDict = {oldPageName: newPageName
-                          for oldPageName, newPageName in renameSeq}
+            renameDict = dict((oldPageName, newPageName)
+                          for oldPageName, newPageName in renameSeq)
 
             # Renaming a page requires the page to be already saved,
             # so save (all pages) before renaming:
