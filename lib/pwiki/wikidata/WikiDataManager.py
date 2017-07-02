@@ -1662,8 +1662,8 @@ class WikiDataManager(MiscEventSourceMixin):
                     newPageName, pageName, oldLinkPath.isAbsolute())
                 newLinkCore = newLinkPath.getLinkCore()
 
-                print u'    - pos %r: %r -> %r' % (node.pos, value,
-                                                   newLinkCore)
+#                 print u'    - pos %r: %r -> %r' % (node.pos, value,
+#                                                    newLinkCore)
                 return newLinkCore
 
         # transform AST by changing nodes in place
@@ -1807,8 +1807,10 @@ class WikiDataManager(MiscEventSourceMixin):
             _openDocuments[renamedConfigPath] = self
 
         # rename page
-        dirty = wordPage.getDirty()[0]
-        assert not dirty  # page should already be saved before renaming!
+        if wordPage.getDirty()[0]:
+            wordPage.writeToDatabase()
+
+        assert not wordPage.getDirty()[0]  # page should already be saved before renaming!
         wikiData.renameWord(word, toWord)
         wordPage.renameVersionData(toWord)
         wordPage.queueRemoveFromSearchIndex()
@@ -1875,22 +1877,19 @@ class WikiDataManager(MiscEventSourceMixin):
         """
 #         print u'WikiDataManager.renameWikiWords renameDict = %r' % renameDict
 
-        # 1. rename all pages
-        for oldPageName, newPageName in renameDict.iteritems():
-            self.renameWikiWord(oldPageName, newPageName)
-
-        if modifyText == ModifyText.off:
-            return
-
-        # 2. update text of all affected pages, i.e., all pages with
+        # 1. update text of all affected pages, i.e., all pages with
         #    references to the old page names
-        to_update = set()
-        for oldPageName in renameDict:
-            to_update |= self._findPagesThatReferenceWord(oldPageName)
 
 #         print u"(Candidate) pages with text to update = %r" % to_update
 
+
+        if modifyText == ModifyText.off:
+            pass
         if modifyText == ModifyText.advanced:
+            to_update = set()
+            for oldPageName in renameDict:
+                to_update |= self._findPagesThatReferenceWord(oldPageName)
+
             langHelper = GetApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
             for wikiword in to_update:
@@ -1900,13 +1899,28 @@ class WikiDataManager(MiscEventSourceMixin):
                 page.replaceLiveText(text)
 
         elif modifyText == ModifyText.simple:
-            for wikiword in to_update:
+            # We have to search the wiki files and replace the old words with the new
+            sarOp = SearchReplaceOperation()
+            sarOp.wikiWide = True
+            sarOp.wildCard = 'regex'
+            sarOp.caseSensitive = True
+            sarOp.searchStr = u"|".join(ur"\b" + re.escape(ww) + ur"\b"
+                    for ww in renameDict)
+            
+            for wikiword in self.searchWiki(sarOp):
                 page = self.getWikiPage(wikiword)
                 for oldPageName, newPageName in renameDict.iteritems():
                     text = self._searchAndReplaceWikiWordReferences(
                         page, oldPageName, newPageName)
                     if text is not None:
                         page.replaceLiveText(text)
+
+
+        # 2. rename all pages in database
+        for oldPageName, newPageName in renameDict.iteritems():
+            self.renameWikiWord(oldPageName, newPageName)
+
+
 
 
     def _findPagesThatReferenceWord(self, word):
