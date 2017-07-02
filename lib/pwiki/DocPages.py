@@ -1821,7 +1821,7 @@ class WikiPage(AbstractWikiPage):
         with self.textOperationLock:
             threadstop.testValidThread()
 
-            if not self.getWikiDocument().isSearchIndexEnabled():
+            if self.isInvalid() or not self.getWikiDocument().isSearchIndexEnabled():
                 return True  # Or false?
             
             liveTextPlaceHold = self.liveTextPlaceHold
@@ -1846,6 +1846,10 @@ class WikiPage(AbstractWikiPage):
 
         # Check within lock if data is current yet
         with self.textOperationLock:
+            if self.isInvalid(): 
+                writer.cancel()
+                return True  # Or false?
+
             if not liveTextPlaceHold is self.liveTextPlaceHold:
                 writer.cancel()
                 return False
@@ -1866,16 +1870,18 @@ class WikiPage(AbstractWikiPage):
         unifName = self.getUnifiedPageName()
         
         writer = None
-        try:
-            searchIdx = self.getWikiDocument().getSearchIndex()
-            writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
-            writer.delete_by_term("unifName", unifName)
-        except:
-            if writer is not None:
-                writer.cancel()
-            raise
-
-        writer.commit()
+        
+        with self.textOperationLock:
+            try:
+                searchIdx = self.getWikiDocument().getSearchIndex()
+                writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
+                writer.delete_by_term("unifName", unifName)
+            except:
+                if writer is not None:
+                    writer.cancel()
+                raise
+    
+            writer.commit()
 
 
     def queueRemoveFromSearchIndex(self):
