@@ -1666,7 +1666,8 @@ class WikiDataManager(MiscEventSourceMixin):
 #                                                    newLinkCore)
                 return newLinkCore
 
-        # transform AST by changing nodes in place
+        # transform AST by changing nodes in place. For safety reasons only
+        # a clone of the original AST is modified
         ast = page.getLivePageAst().cloneDeep()  # is always AST of the real page
         for node in ast.iterDeep():
             if node.name == "wikiWord":
@@ -1682,9 +1683,9 @@ class WikiDataManager(MiscEventSourceMixin):
                         newPageName, pageName, oldLinkPath.isAbsolute())
                     node.linkPath = newLinkPath
 
-                    print u'    - pos %r: %r -> %r' % (
-                        node.pos,
-                        oldLinkPath.getLinkCore(), newLinkPath.getLinkCore())
+#                     print u'    - pos %r: %r -> %r' % (
+#                         node.pos,
+#                         oldLinkPath.getLinkCore(), newLinkPath.getLinkCore())
 
             elif node.name == "attribute":
                 if node.key in ATTRIBUTES_WITH_WIKIWORD_VALUES:
