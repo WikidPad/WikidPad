@@ -2,8 +2,8 @@
 This module defines a connect wrapper similar to those in the "DbStructure.py"
 files, but for Python's built-in pysqlite3.
 
-Some day I will explain here why two sqlite implementations are needed in
-WikidPad.
+At the end of this file I try to explain why two sqlite implementations are
+needed in WikidPad.
 """
 
 
@@ -216,4 +216,46 @@ class ConnectWrapSyncCommit(ConnectWrapBase):
 
     # Other functions are already defined by ConnectWrapBase
 
+
+
+
+
+"""
+When I evaluated pysqlite3 first time (with Python 2.4 where it wasn't part of
+standard library) I found some problems. Maybe they don't exist in current
+versions anymore but there wasn't a reason to change it later:
+
+First was just that I wasn't sure if pysqlite would be easily
+available/compilable on other platforms while I could assume that the pure
+sqlite shared library would be. Since Python 2.5 this is of course no issue anymore.
+
+
+Another finding was that in my tests reading from a table or query was sometimes
+slower with pysqlite than with my own ctypes-based wrappers. Reason was probably
+that pysqlite has to check the type of each single data item before retrieving
+it because sqlite doesn't require a fixed datatype for a table field(=column)
+unlike most other SQL-databases.
+
+As WikidPad doesn't need this feature and doesn't use null values either my
+wrapper is optimized to assume that the types in the first row also apply
+to all following rows.
+
+
+Third thing is (or was, I don't know for sure) that if a "pragma" statement is
+issued pysqlite always automatically prepends it with a "commit". This makes
+sense for some pragmas but not all.
+
+During upgrading the database format from an earlier WikidPad version to the
+current one some "pragma table_info" statements are necessary. These upgrade
+steps should of course be encapsulated in a transaction which would break due to
+pysqlite's behavior.
+
+
+
+"ConnectWrapPysqlite.py" was created later when pysqlite was already part of
+standard library and it could be assumed therefore that it would be available
+everywhere. It is used only for some data processing for the file cleanup
+maintenance functionality and for importing of wiki pages from a
+multipage text file.
+"""
 
