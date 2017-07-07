@@ -204,3 +204,13 @@ except ImportError:
         """
         funcobj.__isabstractmethod__ = True
         return funcobj
+
+try:
+    WindowsError = WindowsError
+except NameError:
+    class WindowsError(Exception):
+        pass
+
+
+
+    

@@ -9,7 +9,7 @@ The dialog has two additional options:
 *Modify all links to the wiki word*
 If checked, WikidPad tries to update all of the wiki pages in the database that have links to the renamed word.
 
-For a large wiki this can be a relatively slow operation. Furthermore the updating does not always work reliably, sometimes it modifies things which aren't intended as links. Therefore it is often better to make this update later by hand (maybe by using wiki-wide search and replace).
+For a large wiki this can be a relatively slow operation.
 
 *Also rename subpages*
 If checked, all [Subpages] of the page are renamed accordingly, e.g. if you rename "ebay" to "OnlineTrade" then "ebay/Circlet" becomes "OnlineTrade/Circlet" and "ebay/Couch/BuyerAddress" becomes "OnlineTrade/Couch/BuyerAddress".

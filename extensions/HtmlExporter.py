@@ -1874,7 +1874,10 @@ class HtmlExporter(AbstractExporter):
                     self.mainControl.getWikiDocument()):
                 return
 
-            value = langHelper.resolveWikiWordLink(value, containingPage)
+            try:
+                value = langHelper.resolveWikiWordLink(value, containingPage)
+            except ValueError:
+                return
 
             docpage = self.wikiDocument.getWikiPageNoError(value)
             pageAst = docpage.getLivePageAst()

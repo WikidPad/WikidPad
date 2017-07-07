@@ -26,10 +26,10 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 from __future__ import with_statement
-import errno, os, sys, tempfile
+import errno, os, sys, tempfile, time
 from threading import Lock
 
-from whoosh.compat import BytesIO, memoryview_
+from whoosh.compat import BytesIO, memoryview_, WindowsError
 from whoosh.filedb.structfile import BufferFile, StructFile
 from whoosh.index import _DEF_INDEX_NAME, EmptyIndexError
 from whoosh.util import random_name
@@ -509,7 +509,7 @@ class FileStorage(Storage):
         for fname in files:
             try:
                 os.remove(os.path.join(path, fname))
-            except OSError:
+            except (OSError, WindowsError):
                 if not ignore:
                     raise
 
@@ -534,8 +534,13 @@ class FileStorage(Storage):
         if self.readonly:
             raise ReadOnlyError
 
-        os.remove(self._fpath(name))
-
+        # Hack to prevent some Windows file lock problems of unknown cause
+        try:
+            os.remove(self._fpath(name))
+        except WindowsError:
+            time.sleep(0.2)
+            os.remove(self._fpath(name))
+            
     def rename_file(self, oldname, newname, safe=False):
         if self.readonly:
             raise ReadOnlyError
