@@ -446,6 +446,15 @@ It has a few restrictions at the moment:
     * Only compares the executable (path and name) of new and existing processes. So when you do not use the Windows binary to start but Python directly it warns about other processes started with the same "python(w).exe"
     * Does not warn about processes started by other users (this is intentional)
 
+*Run on CPU no.*
+Set the CPU (or CPU core, more exactly) on which WikidPad should run.
+
+Especially on Linux WikidPad is often faster if bound to a single core because the underlying Python interpreter doesn't work well with multiple cores.
+
+Currently you can either choose "(Startup)" which means to use the core(s) WikidPad was bound to on its startup or the number of a core in your computer (numbers start at zero).
+
+Works for Windows and Linux only.
+
 *No cycles in tree*
 If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
 
