@@ -133,13 +133,12 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
     """
     """
     def __init__(self, mainControl, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "TrashcanDialog")
+        res.LoadDialog(self, parent, "TrashcanDialog")
 
         self.ctrls = XrcControls(self)
         self.ctrls.btnClose.SetId(wx.ID_CANCEL)
@@ -249,15 +248,14 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
     def __init__(self, mainControl, parent, unifName, allowSkip=False,
             initialRbChoice=None):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.value = self.RET_CANCEL, None
         self.unifName = unifName
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "TrashBagRenameDialog")
+        res.LoadDialog(self, parent, "TrashBagRenameDialog")
 
         self.ctrls = XrcControls(self)
         self.ctrls.btnOk.SetId(wx.ID_OK)

@@ -525,15 +525,14 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
     """
 
     def __init__(self, mainControl, db, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.db = db
         self.value = False
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "MultiPageTextImporterDialog")
+        res.LoadDialog(self, parent, "MultiPageTextImporterDialog")
 
         self.ctrls = XrcControls(self)
 

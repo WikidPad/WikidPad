@@ -280,14 +280,13 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         """
         entry -- FavoriteWikisEntry
         """
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.parent = parent
         self.entry = entry
         self.value = None
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.parent, "AddWikiToFavoriteWikisDialog")
+        res.LoadDialog(self, self.parent, "AddWikiToFavoriteWikisDialog")
 
         self.ctrls = XrcControls(self)
 

@@ -38,12 +38,11 @@ class SpellCheckerDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "SpellCheckDialog")
+        res.LoadDialog(self, parent, "SpellCheckDialog")
 
         if title is not None:
             self.SetTitle(title)

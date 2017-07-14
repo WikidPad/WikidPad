@@ -233,12 +233,11 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
 
     def __init__(self, pWiki, ID, filepastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "FilePasteDialog")
+        res.LoadDialog(self, self.pWiki, "FilePasteDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -436,12 +435,11 @@ class ImagePasteSaver:
 class ImagePasteDialog(wx.Dialog):
     def __init__(self, pWiki, ID, imgpastesaver, img, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "ImagePasteDialog")
+        res.LoadDialog(self, self.pWiki, "ImagePasteDialog")
 
         self.ctrls = XrcControls(self)
 

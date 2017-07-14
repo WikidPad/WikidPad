@@ -23,8 +23,7 @@ class PrintMainDialog(wx.Dialog):
     
     def __init__(self, mainControl, ID, title="Print",
                  pos=wx.DefaultPosition, size=wx.DefaultSize, exportTo=None):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.printer = self.mainControl.printer
@@ -32,7 +31,7 @@ class PrintMainDialog(wx.Dialog):
 #         self.plainTextFontDesc = self.printer.plainTextFontDesc
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.mainControl, "PrintMainDialog")
+        res.LoadDialog(self, self.mainControl, "PrintMainDialog")
         
         self.ctrls = XrcControls(self)
         

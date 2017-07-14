@@ -177,8 +177,7 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         self.value = None
@@ -186,7 +185,7 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ignoreTextChange = 0
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "OpenWikiWordDialog")
+        res.LoadDialog(self, parent, "OpenWikiWordDialog")
 
         if title is not None:
             self.SetTitle(title)
@@ -633,8 +632,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.fromWikiWord = fromWikiWord
@@ -642,7 +640,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.value = None
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "RenameWikiWordDialog")
+        res.LoadDialog(self, parent, "RenameWikiWordDialog")
 
         if title is not None:
             self.SetTitle(title)
@@ -912,13 +910,12 @@ class DateformatDialog(wx.Dialog):
         """
         deffmt -- Initial value for format string
         """
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
         
         self.mainControl = mainControl
         self.value = ""     
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "DateformatDialog")
+        res.LoadDialog(self, parent, "DateformatDialog")
 
         if title is not None:
             self.SetTitle(title)
@@ -999,15 +996,14 @@ class FontFaceDialog(wx.Dialog):
         value -- Current value of a text field containing a face name (used to
                  choose default item in the shown list box)
         """
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.parent = parent
         self.mainControl = mainControl
         self.value = value
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.parent, "FontFaceDialog")
+        res.LoadDialog(self, self.parent, "FontFaceDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1571,16 +1567,16 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
 class ImportDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Import",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
+                    
+        wx.Dialog.__init__(self)
+
         from . import Importers
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
-        
         self.parent = parent
         self.mainControl = mainControl
         
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.parent, "ImportDialog")
+        res.LoadDialog(self, self.parent, "ImportDialog")
 
         self.ctrls = XrcControls(self)
 

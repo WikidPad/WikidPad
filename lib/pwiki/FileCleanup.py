@@ -1211,14 +1211,13 @@ class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
     """
 
     def __init__(self, mainControl, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.value = None
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "FileCleanupInitialDialog")
+        res.LoadDialog(self, parent, "FileCleanupInitialDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1261,8 +1260,7 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
             FileCleanupDialog.ORPHANED_DEFAULTACTIONCHOICELIST = [_("Keep"),
                     _("Delete"), _("Collect")]
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.db = db
@@ -1272,7 +1270,7 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
             # since dialog was opened
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "FileCleanupDialog")
+        res.LoadDialog(self, parent, "FileCleanupDialog")
 
         self.ctrls = XrcControls(self)
 
