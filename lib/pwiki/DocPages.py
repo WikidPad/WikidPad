@@ -2051,6 +2051,7 @@ class WikiPage(AbstractWikiPage):
         excludeSet -- set of words which should be excluded from the list
         includeSet -- wikiWords to include in the result
         """
+        from functools import cmp_to_key
         
         wikiDocument = self.wikiDocument
         
@@ -2066,7 +2067,7 @@ class WikiPage(AbstractWikiPage):
                     selfreference=False, withFields=("firstcharpos",),
                     excludeSet=excludeSet, includeSet=includeSet)
 
-            relations.sort(_cmpNumbersItem1)
+            relations.sort(key=cmp_to_key(_cmpNumbersItem1))
             # Remove firstcharpos
             relations = [r[0] for r in relations]
         elif childSortOrder == "mod_oldest":
@@ -2074,7 +2075,7 @@ class WikiPage(AbstractWikiPage):
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
                     excludeSet=excludeSet, includeSet=includeSet)
-            relations.sort(_cmpNumbersItem1)
+            relations.sort(key=cmp_to_key(_cmpNumbersItem1))
             # Remove firstcharpos
             relations = [r[0] for r in relations]
         elif childSortOrder == "mod_newest":
@@ -2082,7 +2083,7 @@ class WikiPage(AbstractWikiPage):
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
                     excludeSet=excludeSet, includeSet=includeSet)
-            relations.sort(_cmpNumbersItem1Rev)
+            relations.sort(key=cmp_to_key(_cmpNumbersItem1Rev))
             # Remove firstcharpos
             relations = [r[0] for r in relations]            
         else:
@@ -2097,8 +2098,7 @@ class WikiPage(AbstractWikiPage):
                     return coll.strcoll(
                             b.lower(), a.lower())
                             
-                # TODO Python 3.0 supports only key argument, no cmp. function
-                relations.sort(cmpLowerDesc) # sort alphabetically
+                relations.sort(key=cmp_to_key(cmpLowerDesc)) # sort alphabetically
             elif childSortOrder.startswith("asc"):
                 coll = wikiDocument.getCollator()
 
@@ -2106,7 +2106,7 @@ class WikiPage(AbstractWikiPage):
                     return coll.strcoll(
                             a.lower(), b.lower())
 
-                relations.sort(cmpLowerAsc)
+                relations.sort(key=cmp_to_key(cmpLowerAsc))
 
 
 

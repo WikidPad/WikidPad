@@ -23,6 +23,8 @@ def _collectHandlers():
     for h in hdls:
         _handlers.append((h[0], h[1],
                 WikiData_original_gadfly.getWikiDataHandler))
+    
+#     print("--_collectHandlers34", repr(_handlers))
 
 def listHandlers():
     global _handlers

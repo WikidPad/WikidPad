@@ -997,7 +997,7 @@ class AuiDefaultToolBarArt:
             
                 dc.SetPen(wx.Pen(self._highlight_colour))
                 dc.SetBrush(wx.Brush(StepColour(self._highlight_colour, 150)))
-                dc.DrawRectangleRect(rect)
+                dc.DrawRectangle(rect)
             
             elif item.GetState() & AUI_BUTTON_STATE_HOVER or item.IsSticky():
             
@@ -1009,7 +1009,7 @@ class AuiDefaultToolBarArt:
                 if item.GetState() & AUI_BUTTON_STATE_CHECKED:
                     dc.SetBrush(wx.Brush(StepColour(self._highlight_colour, 180)))
 
-                dc.DrawRectangleRect(rect)
+                dc.DrawRectangle(rect)
             
             elif item.GetState() & AUI_BUTTON_STATE_CHECKED:
             
@@ -1017,7 +1017,7 @@ class AuiDefaultToolBarArt:
                 # hover, otherwise hovers won't draw properly for checked items
                 dc.SetPen(wx.Pen(self._highlight_colour))
                 dc.SetBrush(wx.Brush(StepColour(self._highlight_colour, 170)))
-                dc.DrawRectangleRect(rect)
+                dc.DrawRectangle(rect)
             
         if item.GetState() & AUI_BUTTON_STATE_DISABLED:
             bmp = item.GetDisabledBitmap()
@@ -1076,15 +1076,15 @@ class AuiDefaultToolBarArt:
         
             dc.SetPen(wx.Pen(self._highlight_colour))
             dc.SetBrush(wx.Brush(StepColour(self._highlight_colour, 140)))
-            dc.DrawRectangleRect(button_rect)
-            dc.DrawRectangleRect(dropdown_rect)
+            dc.DrawRectangle(button_rect)
+            dc.DrawRectangle(dropdown_rect)
         
         elif item.GetState() & AUI_BUTTON_STATE_HOVER or item.IsSticky():
         
             dc.SetPen(wx.Pen(self._highlight_colour))
             dc.SetBrush(wx.Brush(StepColour(self._highlight_colour, 170)))
-            dc.DrawRectangleRect(button_rect)
-            dc.DrawRectangleRect(dropdown_rect)
+            dc.DrawRectangle(button_rect)
+            dc.DrawRectangle(dropdown_rect)
 
         elif item.GetState() & AUI_BUTTON_STATE_CHECKED:
             # it's important to put this code in an else statment after the 
@@ -3655,7 +3655,7 @@ class AuiToolBar(wx.PyControl):
         else:
 
             if self._action_item and hit_item == self._action_item:
-                self.SetToolTipString("")
+                self.SetToolTip("")
 
                 if hit_item.kind in [ITEM_CHECK, ITEM_RADIO]:
                     toggle = not (self._action_item.state & AUI_BUTTON_STATE_CHECKED)
@@ -3843,7 +3843,7 @@ class AuiToolBar(wx.PyControl):
         if not self._dragging and self._action_item != None and self._action_pos != wx.Point(-1, -1) and \
            abs(event.GetX() - self._action_pos.x) + abs(event.GetY() - self._action_pos.y) > 5:
         
-            self.SetToolTipString("")
+            self.SetToolTip("")
             self._dragging = True
 
             e = AuiToolBarEvent(wxEVT_COMMAND_AUITOOLBAR_BEGIN_DRAG, self.GetId())
@@ -3875,14 +3875,14 @@ class AuiToolBar(wx.PyControl):
 
                 if packing_hit_item.short_help != "":
                     self.StartPreviewTimer()
-                    self.SetToolTipString(packing_hit_item.short_help)
+                    self.SetToolTip(packing_hit_item.short_help)
                 else:
-                    self.SetToolTipString("")
+                    self.SetToolTip("")
                     self.StopPreviewTimer()
             
         else:
         
-            self.SetToolTipString("")
+            self.SetToolTip("")
             self._tip_item = None
             self.StopPreviewTimer()
         

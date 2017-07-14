@@ -104,7 +104,7 @@ def ChopText(dc, text, max_size):
     """
     
     # first check if the text fits with no problems
-    x, y, dummy = dc.GetMultiLineTextExtent(text)
+    x, y = dc.GetMultiLineTextExtent(text)
     
     if x <= max_size:
         return text

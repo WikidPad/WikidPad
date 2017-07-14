@@ -3,7 +3,7 @@
 # This module does currently not support date and time handling
 
 
-import exceptions, re
+import re
 
 from . import SqliteThin3
 
@@ -28,10 +28,10 @@ Binary = SqliteThin3.Binary
 
 # Exceptions
 
-class Warning(exceptions.Exception):
+class Warning(Exception):
     pass
     
-class Error(exceptions.Exception):
+class Error(Exception):
     pass
 
 class InterfaceError(Error):

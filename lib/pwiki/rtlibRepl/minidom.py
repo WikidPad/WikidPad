@@ -1952,8 +1952,8 @@ def _get_StringIO():
 
 def _get_cStringIO():
     # we don't need Unicode if we have an encoding
-    from io import StringIO
-    return StringIO()
+    from io import BytesIO
+    return BytesIO()
 
 
 def _do_pulldom_parse(func, args, kwargs):

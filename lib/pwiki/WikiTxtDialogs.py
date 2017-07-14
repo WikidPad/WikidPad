@@ -503,7 +503,7 @@ class ImagePasteDialog(wx.Dialog):
 
 
     def OnSizePreviewBitmapContainer(self, evt):
-        bbWidth, bbHeight = self.ctrls.pnImagePreviewContainer.GetSizeTuple()
+        bbWidth, bbHeight = self.ctrls.pnImagePreviewContainer.GetSize()
 
         newWidth, newHeight = Utilities.calcResizeArIntoBoundingBox(
                 self.origImgWidth, self.origImgHeight, bbWidth, bbHeight)

@@ -963,10 +963,10 @@ def strftimeUB(frmStr, timet=None):
     if timet is GMT.
     """
     if timet is None:
-        return formatWxDate(frmStr, wx.DateTime_Now())
+        return formatWxDate(frmStr, wx.DateTime.Now())
 
     try:
-        return formatWxDate(frmStr, wx.DateTimeFromTimeT(timet))
+        return formatWxDate(frmStr, wx.DateTime.FromTimeT(timet))
     except TypeError:
         return _("Inval. timestamp")  #  TODO Better errorhandling?
 
@@ -1076,7 +1076,7 @@ def _asciiFlexibleUrlUnquote(part):
     if len(part) == 0:
         return ""
     # Get bytes out of percent-quoted URL
-    linkBytes = urllib.parse.unquote(part)
+    linkBytes = urllib.parse.unquote_to_bytes(part.encode("ascii"))
     # Try to interpret bytes as UTF-8
     try:
         return linkBytes.decode("utf8", "strict")
@@ -1086,7 +1086,7 @@ def _asciiFlexibleUrlUnquote(part):
             return mbcsDec(linkBytes, "strict")[0]
         except UnicodeDecodeError:
             # Failed, too -> leave link part unmodified. TODO: Doesn't make sense, will fail as well.
-            return str(part)
+            return part
 
 
 def flexibleUrlUnquote(link):
@@ -1100,7 +1100,7 @@ def flexibleUrlUnquote(link):
         return None
 
     i = 0
-    result = SnippetCollector()
+    result = SnippetCollector("")
 
     while i < len(link):
 
@@ -1118,7 +1118,7 @@ def flexibleUrlUnquote(link):
         
         result += unicodePart
         
-    return str(result.value())
+    return result.value()
 
 
 
@@ -1255,7 +1255,7 @@ elif os.name == 'mac':
 else:
     def urlFromPathname(fn, addSafe=''):
         if isinstance(fn, str):
-            fn = utf8Enc(fn, "replace")[0]
+            fn = fn.encode("utf-8", "surrogateescape")[0].decode("latin-1")
             
         # riscos not supported
         url = urlQuote(fn, safe='/$' + addSafe)
@@ -1743,9 +1743,14 @@ class SnippetCollector:
     Collects (byte/uni)string snippets in a list. This is faster than
     using string += string.
     """
-    def __init__(self):
+    def __init__(self, emptyElement):
+        """
+        emptyElement --- must be either "" for strings or b"" for bytes. Defines
+                which data type is processed by this SnippetCollector
+        """
         self.snippets = []
         self.length = 0
+        self.emptyElement = emptyElement
 
     def drop(self, length):
         """
@@ -1777,7 +1782,7 @@ class SnippetCollector:
         return self
 
     def value(self):
-        return "".join(self.snippets)
+        return self.emptyElement.join(self.snippets)
     
     def __len__(self):
         return self.length

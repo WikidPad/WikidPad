@@ -259,13 +259,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
         ))
 
 
-        wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
-        wx.stc.EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
-        wx.stc.EVT_STC_MODIFIED(self, ID, self.OnModified)
-        wx.stc.EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
-        wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
-        wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
-        wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
+        self.Bind(wx.stc.EVT_STC_STYLENEEDED, self.OnStyleNeeded, id=ID)
+        self.Bind(wx.stc.EVT_STC_CHARADDED, self.OnCharAdded, id=ID)
+        self.Bind(wx.stc.EVT_STC_MODIFIED, self.OnModified, id=ID)
+        self.Bind(wx.stc.EVT_STC_USERLISTSELECTION, self.OnUserListSelection, id=ID)
+        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.OnMarginClick, id=ID)
+        self.Bind(wx.stc.EVT_STC_DWELLSTART, self.OnDwellStart, id=ID)
+        self.Bind(wx.stc.EVT_STC_DWELLEND, self.OnDwellEnd, id=ID)
 
 #         self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
@@ -1888,6 +1888,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         found = searchOp.searchDocPageAndText(targetPage,
                 targetPage.getLiveText(), 0)
+        
+        # Python 2.6, None and int were comparable, in Py 3.4 no more
+        if found[0] is None:
+            return found
 
         if found[0] >= forbiddenSearchfragHit[0] and \
                 found[0] < forbiddenSearchfragHit[1]:
@@ -3946,9 +3950,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                 return False
 
 
-class WikiTxtCtrlDropTarget(wx.PyDropTarget):
+class WikiTxtCtrlDropTarget(wx.DropTarget):
     def __init__(self, editor):
-        wx.PyDropTarget.__init__(self)
+        wx.DropTarget.__init__(self)
 
         self.editor = editor
         self.resetDObject()

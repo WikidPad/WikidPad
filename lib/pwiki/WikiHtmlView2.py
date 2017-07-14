@@ -636,7 +636,7 @@ class WikiHtmlView2(wx.Panel):
         """
         js_path = os.path.join(self.presenter.getMainControl().wikiAppDir, "lib", "js", "onload_jquery.js")
 
-	if os.path.isfile(js_path):
+        if os.path.isfile(js_path):
             try:
                 with open(js_path) as f:
                     self.html.RunScript(f.read())

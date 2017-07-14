@@ -1,9 +1,8 @@
 # -*- coding: ISO-8859-1 -*-
 
-import codecs, new, types, traceback, sys, os, platform, re
+import codecs, types, traceback, sys, os, platform, re
 from ctypes import *
 
-from . import SqliteThin3 as _module
 
 
 # Error values
@@ -105,6 +104,7 @@ else:
 
 
 utf8Encode = codecs.getencoder("UTF8")
+utf8Decode = codecs.getdecoder("UTF8")
 
 # try:
 #     mbcsEncode = codecs.getencoder("mbcs")
@@ -120,7 +120,8 @@ def stdToUtf8(s):
     if type(s) is str:
         return utf8Encode(s)[0]
     else:
-        return utf8Encode(isoLatin1Decoder(s)[0])[0]
+        return utf8Encode(isoLatin1Decoder(s, "surrogateescape")[0],
+                "surrogateescape")[0]
 
 
 # def mbcsEnc(s):
@@ -131,8 +132,8 @@ def stdToUtf8(s):
 
 
 def utf8Enc(s):
-    if type(s) is str:
-        return utf8Encode(s)[0]
+    if isinstance(s, str):
+        return utf8Encode(s, "surrogateescape")[0]
     else:
         return s
 
@@ -218,7 +219,7 @@ def bind_text(stmt, parno, data):
     """
     See bind_blob for description.
     """
-    stmt.errhandler(_dll.sqlite3_bind_text(stmt._stmtpointer, parno, c_char_p(data), len(data), SQLITE_TRANSIENT))
+    stmt.errhandler(_dll.sqlite3_bind_text(stmt._stmtpointer, parno, c_char_p(utf8Enc(data)), len(data), SQLITE_TRANSIENT))
 
 
 def bind_null(stmt, parno, data=None):
@@ -256,7 +257,6 @@ _AUTO_BIND_CONVERTS = {
         bytes: "text",
         str: "text",
         int: "int64",
-        int: "int64",
         float: "double",
         type(None): "null",
         memoryview: "blob",
@@ -272,7 +272,7 @@ def find_bindfct(data):
     fn = _AUTO_BIND_CONVERTS.get(type(data), None)
     
     if fn is not None:
-        return getattr(_module, "bind_"+fn)
+        return globals()["bind_" + fn]   # getattr(_module, "bind_"+fn)
     else:
         if isinstance(data, Binary):
             return bind_blob
@@ -303,18 +303,27 @@ def column_blob(stmt, col):
     return _dll.sqlite3_column_blob(stmt._stmtpointer, col).contents.raw   # Return Blob instead?
 
 
-def column_text(stmt, col):
+def column_text_raw(stmt, col):
     """
-    Retrieve a text object as string from a db row after a SELECT statement was performed
+    Retrieve a text object as bytes from a db row after a SELECT statement was performed
     col -- zero based column index
     """
     length = _dll.sqlite3_column_bytes(stmt._stmtpointer, col)
     if length == 0:
-        return ""
+        return b""
 
     _dll.sqlite3_column_text.restype = POINTER(c_char * length)  # TODO: Thread safety
     
     return _dll.sqlite3_column_text(stmt._stmtpointer, col).contents.raw
+
+
+def column_text(stmt, col):
+    """
+    Retrieve a text object as unistring (assuming that text bytes were UTF-8
+    encoded) from a db row after a SELECT statement was performed
+    col -- zero based column index
+    """
+    return utf8Decode(column_text_raw(stmt, col), "surrogateescape")[0]
 
 
 def column_null(stmt, col):
@@ -647,9 +656,10 @@ class SqliteDb3:
     
     def errmsg(self):
         """
-        Return English error message for most recent API call (in UTF8)
+        Return English error message for most recent API call (as unistring)
         """
-        return _dll.sqlite3_errmsg(self._dbpointer)
+        return _dll.sqlite3_errmsg(self._dbpointer).decode("utf-8",
+                "surrogateescape")
    
    
     # TODO Support deletion

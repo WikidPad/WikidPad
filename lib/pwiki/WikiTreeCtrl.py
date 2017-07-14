@@ -690,6 +690,8 @@ class TodoNode(AbstractNode):
         Returns a sequence of Nodes for the children of this node.
         This is called before expanding the node
         """
+        from functools import cmp_to_key
+        
         wikiData = self.treeCtrl.pWiki.getWikiData()
         addedTodoSubCategories = []
         addedWords = []
@@ -736,7 +738,7 @@ class TodoNode(AbstractNode):
 
         collator.sort(addedTodoSubCategories)
 
-        addedWords.sort(cmpAddWords)  # TODO no compare function support in Python 3!
+        addedWords.sort(key=cmp_to_key(cmpAddWords))
 
         result = []
         # First list real categories, then right sides, then words
@@ -2478,7 +2480,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     langHelper.createAbsoluteLinksFromWikiWords(
                     (itemobj.getWikiWord(),)))
 
-            wikiWordDataOb = wx.DataObjectSimple(wx.CustomDataFormat(
+            wikiWordDataOb = wx.DataObjectSimple(wx.DataFormat(
                     "application/x-wikidpad-unifiedname"))
             wikiWordDataOb.SetData(
                     ("wikipage/" + itemobj.getWikiWord()).encode("utf-8"))

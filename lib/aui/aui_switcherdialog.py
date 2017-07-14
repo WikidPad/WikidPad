@@ -570,7 +570,7 @@ class SwitcherItems:
         dc.SetLogicalFunction(wx.COPY)
         dc.SetBrush(wx.Brush(backgroundColour))
         dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect(win.GetClientRect())
+        dc.DrawRectangle(win.GetClientRect())
         dc.SetBackgroundMode(wx.TRANSPARENT)
 
         for i in range(len(self._items)):
@@ -578,7 +578,7 @@ class SwitcherItems:
             if i == self._selection:
                 dc.SetPen(wx.Pen(selectionOutlineColour))
                 dc.SetBrush(wx.Brush(selectionColour))
-                dc.DrawRectangleRect(item.GetRect())
+                dc.DrawRectangle(item.GetRect())
             
             clippingRect = wx.Rect(*item.GetRect())
             clippingRect.Deflate(1, 1)
@@ -1145,12 +1145,12 @@ class SwitcherDialog(wx.Dialog):
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
             rect = self.GetClientRect()
-            dc.DrawRectangleRect(rect)
+            dc.DrawRectangle(rect)
 
             # Draw border around the HTML control
             rect = wx.Rect(*self._descriptionCtrl.GetRect())
             rect.Inflate(1, 1)
-            dc.DrawRectangleRect(rect)
+            dc.DrawRectangle(rect)
 
     
     def OnSelectItem(self, event):

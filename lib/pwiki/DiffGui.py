@@ -60,8 +60,7 @@ class InlineDiffControl(SearchableScintillaControl):
                 self.mainControl.presentationExt.faces["mono"])
         self.setWrapMode(config.getboolean("main", "wrap_mode"))
 
-
-        wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
+        self.Bind(wx.stc.EVT_STC_STYLENEEDED, self.OnStyleNeeded, id=ID)
 
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 

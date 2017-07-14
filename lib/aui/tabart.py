@@ -358,10 +358,10 @@ class AuiDefaultTabArt:
             caption = "Xj"
 
         dc.SetFont(self._selected_font)
-        selected_textx, selected_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        selected_textx, selected_texty = dc.GetMultiLineTextExtent(caption)
 
         dc.SetFont(self._normal_font)
-        normal_textx, normal_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        normal_textx, normal_texty = dc.GetMultiLineTextExtent(caption)
 
         control = page.control
 
@@ -566,7 +566,7 @@ class AuiDefaultTabArt:
             textx += controlW + 4
             
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
@@ -669,7 +669,7 @@ class AuiDefaultTabArt:
         """
 
         dc.SetFont(self._measuring_font)
-        measured_textx, measured_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        measured_textx, measured_texty = dc.GetMultiLineTextExtent(caption)
 
         # add padding around the text
         tab_width = measured_textx
@@ -1166,10 +1166,10 @@ class AuiSimpleTabArt:
         agwFlags = self.GetAGWFlags()
         
         dc.SetFont(self._selected_font)
-        selected_textx, selected_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        selected_textx, selected_texty = dc.GetMultiLineTextExtent(caption)
 
         dc.SetFont(self._normal_font)
-        normal_textx, normal_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        normal_textx, normal_texty = dc.GetMultiLineTextExtent(caption)
 
         control = page.control
 
@@ -1282,7 +1282,7 @@ class AuiSimpleTabArt:
             text_offset += controlW + 4
 
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
@@ -1372,7 +1372,7 @@ class AuiSimpleTabArt:
         """
         
         dc.SetFont(self._measuring_font)
-        measured_textx, measured_texty, dummy = dc.GetMultiLineTextExtent(caption)
+        measured_textx, measured_texty = dc.GetMultiLineTextExtent(caption)
 
         tab_height = measured_texty + 4
         tab_width = measured_textx + tab_height + 5
@@ -1537,7 +1537,7 @@ class AuiSimpleTabArt:
                 controlW, controlH = page.control.GetSize()
                 max_y = max(max_y, controlH+4)
                 
-            textx, texty, dummy = dc.GetMultiLineTextExtent(page.caption)
+            textx, texty = dc.GetMultiLineTextExtent(page.caption)
             max_y = max(max_y, texty)
         
         return max_y + 3
@@ -1784,10 +1784,10 @@ class VC71TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
 
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
@@ -1811,7 +1811,7 @@ class VC71TabArt(AuiDefaultTabArt):
             textx += controlW + 4
 
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         out_button_rect = wx.Rect()
@@ -2019,10 +2019,10 @@ class FF2TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width + 1)
@@ -2049,7 +2049,7 @@ class FF2TabArt(AuiDefaultTabArt):
             textx += controlW + 4
         
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
@@ -2354,10 +2354,10 @@ class VC8TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x))
@@ -2384,7 +2384,7 @@ class VC8TabArt(AuiDefaultTabArt):
             textx += controlW + 4
 
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
         
         # draw focus rectangle
@@ -2717,10 +2717,10 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty, dummy = dc.GetMultiLineTextExtent(caption)
+            textx, texty = dc.GetMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - leftw)
@@ -2744,7 +2744,7 @@ class ChromeTabArt(AuiDefaultTabArt):
             text_offset += controlW + 4
 
         # draw tab text
-        rectx, recty, dummy = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
                 
         out_button_rect = wx.Rect()

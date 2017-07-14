@@ -117,7 +117,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
     if pos is not None:
         currentX, currentY = pos
     else:
-        currentX, currentY = win.GetPositionTuple()
+        currentX, currentY = win.GetPosition()
         
 #     screenX, screenY = getOverallDisplaysSize()
     clRect = getOverallDisplaysClientRect()
@@ -136,7 +136,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
         currentY = clRectBottom - 100
 
     if fullVisible:
-        sizeX, sizeY = win.GetSizeTuple()
+        sizeX, sizeY = win.GetSize()
         if currentX + sizeX > clRectRight:
             currentX = clRectRight - sizeX
         if currentY + sizeY > clRectBottom:
@@ -153,7 +153,7 @@ def setWindowSize(win, size=None):
     if size is not None:
         sizeX, sizeY = size
     else:
-        sizeX, sizeY = win.GetSizeTuple()
+        sizeX, sizeY = win.GetSize()
 
 #     screenX, screenY = getOverallDisplaysSize()    
     clRect = getOverallDisplaysClientRect()
@@ -198,7 +198,7 @@ def getRelativePositionTupleToAncestor(win, ancestor):
     resultx = 0
     resulty = 0
     while win is not None and win is not ancestor:
-        x, y = win.GetPositionTuple()
+        x, y = win.GetPosition()
         resultx += x
         resulty += y
         

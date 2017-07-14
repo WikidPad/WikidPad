@@ -715,7 +715,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         self.presenter.getMainControl().statusBar.SetStatusText(status, 0)
 
-        self.SetToolTipString(callTip)
+        self.SetToolTip(callTip)
 
 
 

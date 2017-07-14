@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 
-import string, locale, codecs, os, sys, os.path, traceback
+import string, locale, codecs, os, sys, os.path, traceback, functools
 
 import Consts
 
@@ -73,8 +73,7 @@ class AbstractCollator:
 
         ascend -- If True sort ascending, descending otherwise
         """
-        # TODO Python 3.0 will no longer support compare function in sort
-        lst.sort(self.strcoll, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(self.strcoll), reverse=not ascend)
 #         if not ascend:
 #             lst.reverse()
 
@@ -86,7 +85,7 @@ class AbstractCollator:
         def strcollByItem(left, right):
             return self.strcoll(left[i], right[i])
 
-        lst.sort(strcollByItem, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(strcollByItem), reverse=not ascend)
 
 
     def sortByFirst(self, lst, ascend=True):
@@ -94,7 +93,7 @@ class AbstractCollator:
         Similar to sort(), but lst items are sequences where only the first
         element is taken for sorting.
         """
-        lst.sort(self.strcollByFirst, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(self.strcollByFirst), reverse=not ascend)
 #         if not ascend:
 #             lst.reverse()
 

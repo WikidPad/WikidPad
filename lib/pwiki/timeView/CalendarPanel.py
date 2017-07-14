@@ -252,7 +252,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         """
         Recalculate layout after a size change.
         """
-        pWidth, pHeight = self.GetSizeTuple()
+        pWidth, pHeight = self.GetSize()
 
         self.sizeVisible = pWidth >= 5 and pHeight >= 5
 
@@ -474,7 +474,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
     def OnPaint(self, evt):
         ## _prof.start()
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.AutoBufferedPaintDC(self)
         dc.SetBackground(wx.WHITE_BRUSH)
         dc.Clear()
         dc.SetBackground(wx.NullBrush)
@@ -703,7 +703,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 #         """
 #         Recalculate layout after a size change.
 #         """
-#         pWidth, pHeight = self.GetSizeTuple()
+#         pWidth, pHeight = self.GetSize()
 #         
 #         # How many months side by side
 #         self.monthCols = \

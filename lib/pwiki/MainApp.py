@@ -209,7 +209,7 @@ class App(wx.App, MiscEventSourceMixin):
                 splash = wx.adv.SplashScreen(bitmap,
                       wx.adv.SPLASH_CENTRE_ON_SCREEN|wx.adv.SPLASH_TIMEOUT, 15000, None,
                       style=wx.BORDER_NONE|wx.FRAME_NO_TASKBAR)
-                wx.Yield()
+                self.Yield()
 
         try:
             return self.initStep2(cmdLine)
@@ -267,7 +267,6 @@ class App(wx.App, MiscEventSourceMixin):
     #                 f = open(), "r")
     #                 f.read()
     #                 f.close()
-                    print( "--initStep2_85", repr((self.globalConfigSubDir, len(appLockContent))) )
                     
                     lines = appLockContent.split("\n")
                     if len(lines) != 3:
@@ -279,7 +278,6 @@ class App(wx.App, MiscEventSourceMixin):
                         return True # TODO Error handling!!!
     
                     appCookie = lines[0]
-                    print( "--initStep2_98", repr((len(appCookie))) )
                     remotePort = int(lines[1])
     
                     if port != remotePort:
@@ -341,8 +339,6 @@ class App(wx.App, MiscEventSourceMixin):
                 if port != -1:
                     # Server is connected, start it
                     Ipc.startCommandServer()
-                    
-                    print( "--initStep2_135", repr((len(appCookie), port)) )
                     
                     appLockContent = (appCookie + "\n" + str(port) + "\n") \
                             .encode("latin-1")
@@ -576,7 +572,7 @@ class App(wx.App, MiscEventSourceMixin):
                     
             oldObj = evt.GetEventObject()
 
-            scPos = evt.GetEventObject().ClientToScreen(evt.GetPositionTuple())
+            scPos = evt.GetEventObject().ClientToScreen(evt.GetPosition())
             wnd = wx.FindWindowAtPoint(scPos)
             if wnd is not None and wnd is not oldObj:
 #                 newPos = wnd.ScreenToClient(scPos)

@@ -1766,7 +1766,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     def OnCmdAsResultlist(self, evt):
         self.Hide()
         
-        ownPos = self.GetPositionTuple()
+        ownPos = self.GetPosition()
         oldRelBoxPos = self.getResultListPositionTuple()
         
         frame = FastSearchPopup(self.GetParent(), self.mainControl, -1,
@@ -2388,7 +2388,7 @@ class FastSearchPopup(wx.Frame):
         self.Hide()
         self.fixate()
 
-        ownPos = self.GetPositionTuple()
+        ownPos = self.GetPosition()
         oldRelBoxPos = self.getResultListPositionTuple()
 
         dlg = SearchWikiDialog(self.GetParent(), self.mainControl, -1,
@@ -2476,7 +2476,7 @@ class FastSearchPopup(wx.Frame):
 
     def OnClose(self, evt):
         if not self.fixed:
-            width, height = self.GetSizeTuple()
+            width, height = self.GetSize()
             config = self.mainControl.getConfig()
             config.set("main", "fastSearch_sizeX", str(width))
             config.set("main", "fastSearch_sizeY", str(height))

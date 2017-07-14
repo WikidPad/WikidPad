@@ -55,6 +55,9 @@
 # 
 # Modifications by Michael Butscher May 2010:
 # - Parameter in SelectItem() to suppress event generation
+# 
+# Modifications by Michael Butscher Nov. 2016:
+# - Updates to Python 3.4
 #
 #
 # End Of Comments
@@ -163,6 +166,7 @@ import wx
 import zlib
 import io
 import types
+import functools
 import traceback
 
 
@@ -490,7 +494,7 @@ def DrawTreeItemButton(win, dc, rect, flags):
     # white background
     dc.SetPen(wx.GREY_PEN)
     dc.SetBrush(wx.WHITE_BRUSH)
-    dc.DrawRectangleRect(rect)
+    dc.DrawRectangle(rect)
 
     # black lines
     xMiddle = rect.x + rect.width/2
@@ -544,7 +548,7 @@ class DragImage(wx.DragImage):
 
         tempdc = wx.ClientDC(treeCtrl)
         tempdc.SetFont(font)
-        width, height, dummy = tempdc.GetMultiLineTextExtent(text + "M")
+        width, height = tempdc.GetMultiLineTextExtent(text + "M")
         
         image = item.GetCurrentImage()
 
@@ -687,19 +691,19 @@ class TreeItemAttr:
     def HasTextColour(self):
         """Returns whether the attribute has text colour."""
         
-        return self._colText != wx.NullColour
+        return self._colText.IsOk() # != wx.NullColour
 
 
     def HasBackgroundColour(self):
         """Returns whether the attribute has background colour."""
         
-        return self._colBack != wx.NullColour
+        return self._colBack.IsOk() # != wx.NullColour
 
 
     def HasFont(self):
         """Returns whether the attribute has font."""
 
-        return self._font != wx.NullFont
+        return self._font.IsOk() # != wx.NullFont
 
 
     # getters
@@ -1180,7 +1184,7 @@ class GenericTreeItem:
                                     # children but has a [+] button
         self._isBold = False        # render the label in bold font
         self._isItalic = False      # render the label in italic font
-        self._ownsAttr = False      # delete attribute when done
+        self._ownsAttr = False      # delete attribute when done (TODO: Remove, not needed for Python)
         self._type = ct_type        # item type: 0=normal, 1=check, 2=radio
         self._checked = False       # only meaningful for check and radio
         self._enabled = True        # flag to enable/disable an item
@@ -1970,6 +1974,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         attr = self.GetDefaultAttributes()
         self.SetOwnForegroundColour(attr.colFg)
         self.SetOwnBackgroundColour(wx.WHITE)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         
         if not self._hasFont:
             self.SetOwnFont(attr.font)
@@ -3954,7 +3959,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             if wx.Platform in ["__WXMSW__", "__WXMAC__"]:
                 self.Update()
         else:
-            wx.YieldIfNeeded()
+            wx.GetApp().Yield(onlyIfNeeded=True)
 
         # now scroll to the item
         item_y = item.GetY()
@@ -4000,7 +4005,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             if wx.Platform in ["__WXMSW__", "__WXMAC__"]:
                 self.Update()
         else:
-            wx.YieldIfNeeded()
+            wx.GetApp().Yield(onlyIfNeeded=True)
 
         # now scroll to the item
         item_y = item.GetY()
@@ -4049,7 +4054,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         
         if len(children) > 1:
             self._dirty = True
-            children.sort(self.OnCompareItems)
+            children.sort(key=functools.cmp_to_key(self.OnCompareItems))
         
 
     def GetImageList(self):
@@ -4316,7 +4321,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         
         dc.SetPen(oldpen)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
-        dc.DrawRectangleRect(rect)
+        dc.DrawRectangle(rect)
         dc.SetBrush(oldbrush)
 
 
@@ -4357,7 +4362,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
 
         dc.SetPen(oldpen)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
-        dc.DrawRectangleRect(rect)
+        dc.DrawRectangle(rect)
         dc.SetBrush(oldbrush)
         
 
@@ -4434,7 +4439,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             else:
                 dc.SetTextForeground(self.GetHyperTextNewColour())
 
-        text_w, text_h, dummy = dc.GetMultiLineTextExtent(item.GetText())
+        text_w, text_h = dc.GetMultiLineTextExtent(item.GetText())
 
         image = item.GetCurrentImage()
         checkimage = item.GetCurrentCheckedImage()
@@ -4504,7 +4509,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                         if self._hasFocus: flags = flags | wx.CONTROL_FOCUSED
                         wx.RendererNative.Get().DrawItemSelectionRect(self, dc, itemrect, flags) 
                     else:
-                        dc.DrawRectangleRect(itemrect)
+                        dc.DrawRectangle(itemrect)
 
         else:
 
@@ -4537,7 +4542,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                         if self._hasFocus: flags = flags | wx.CONTROL_FOCUSED
                         wx.RendererNative.Get().DrawItemSelectionRect(self, dc, itemrect, flags) 
                     else:
-                        dc.DrawRectangleRect(itemrect)
+                        dc.DrawRectangle(itemrect)
                             
             # On GTK+ 2, drawing a 'normal' background is wrong for themes that
             # don't allow backgrounds to be customized. Not drawing the background,
@@ -4556,7 +4561,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                     else:                          # Vertical
                         self.DrawVerticalGradient(dc, itemrect, self._hasFocus)
                 else:
-                    dc.DrawRectangleRect(itemrect)
+                    dc.DrawRectangle(itemrect)
                         
         if image != _NO_IMAGE:
         
@@ -4864,11 +4869,11 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         """Handles the wx.EVT_PAINT event."""
 
 #         dc = wx.PaintDC(self)
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.AutoBufferedPaintDC(self)
         
         
         
-        if self._backgroundColour == wx.NullColour:
+        if not self._backgroundColour.IsOk():  # == wx.NullColour:
             bgBrush = wx.Brush(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
         else:
             bgBrush = wx.Brush(self._backgroundColour)
@@ -4886,9 +4891,9 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         dc.SetPen(self._dottedPen)
             
         y = 2
-        dc.BeginDrawing()
+#         dc.BeginDrawing()
         self.PaintLevel(self._anchor, dc, 0, y)
-        dc.EndDrawing()
+#         dc.EndDrawing()
         
 
     def OnEraseBackground(self, event):
@@ -5326,7 +5331,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             if wx.Platform in ["__WXMSW__", "__WXMAC__"]:
                 self.Update()
             else:
-                wx.YieldIfNeeded()
+                wx.GetApp().Yield(onlyIfNeeded=True)
 
         if self._textCtrl != None and item != self._textCtrl.item():
             self._textCtrl.StopEditing()
@@ -5427,11 +5432,11 @@ class CustomTreeCtrl(wx.ScrolledWindow):
 
                 if self.GetEventHandler().ProcessEvent(hevent):
                     if hevent.IsAllowed():
-                        self.SetToolTipString(hevent._label)
+                        self.SetToolTip(hevent._label)
                     else:
                         if flags & TREE_HITTEST_ONITEMLABEL:
                             hPt = event.GetPosition()
-                            hPt.x = self.GetSizeTuple()[0]  # To right border
+                            hPt.x = self.GetSize()[0]  # To right border
                             hPt = self.CalcUnscrolledPosition(hPt)
                             
                             # If point at right border is inside label the
@@ -5440,9 +5445,9 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                                     TREE_HITTEST_ONITEMLABEL:
                                 tooltipString = hoverItem.GetText()
 
-                        self.SetToolTipString(tooltipString)
+                        self.SetToolTip(tooltipString)
                 else:
-                    self.SetToolTipString(tooltipString)
+                    self.SetToolTip(tooltipString)
 
                 if hoverItem.IsHyperText() and (flags & TREE_HITTEST_ONITEMLABEL) and hoverItem.IsEnabled():
                     self.SetCursor(wx.Cursor(wx.CURSOR_HAND))
@@ -5589,7 +5594,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                 self.Refresh()
             else:
                 # Probably this is not enough on GTK. Try a Refresh() if it does not work.
-                wx.YieldIfNeeded()
+                wx.GetApp().Yield(onlyIfNeeded=True)
         
         else:
 
@@ -5825,7 +5830,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         else:
             dc.SetFont(self._normalFont)
 
-        text_w, text_h, dummy = dc.GetMultiLineTextExtent(item.GetText())
+        text_w, text_h = dc.GetMultiLineTextExtent(item.GetText())
         text_h+=2
 
         # restore normal font

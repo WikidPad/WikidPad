@@ -29,7 +29,7 @@ class StyleCollector(StringOps.SnippetCollector):
     Scintilla editor component
     """
     def __init__(self, defaultStyleNo, text, bytelenSct, startCharPos=0):   
-        super(StyleCollector, self).__init__()
+        super(StyleCollector, self).__init__(b"")
         self.defaultStyleNo = defaultStyleNo
         self.text = text
         self.bytelenSct = bytelenSct
@@ -49,17 +49,17 @@ class StyleCollector(StringOps.SnippetCollector):
             # There is possibly a gap between end of last style and current one
             # -> fill it with default style
             bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
-            self.append(chr(self.defaultStyleNo) * bytestylelen)
+            self.append(bytes((self.defaultStyleNo,)) * bytestylelen)
 
         self.charPos = targetCharPos + targetLength
             
         bytestylelen = self.bytelenSct(self.text[targetCharPos:self.charPos])
-        self.append(chr(styleNo) * bytestylelen)
+        self.append(bytes((styleNo,)) * bytestylelen)
 
     def value(self):
         if self.charPos < len(self.text):
             bytestylelen = self.bytelenSct(self.text[self.charPos:len(self.text)])
-            self.append(chr(self.defaultStyleNo) * bytestylelen)
+            self.append(bytes((self.defaultStyleNo,)) * bytestylelen)
 
         return super(StyleCollector, self).value()
 
@@ -73,6 +73,7 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
 
         self._resetKeyBindings()
 
+    bytelenSct = staticmethod(bytelenSct)
 
     def Cut(self):
         self.Copy()

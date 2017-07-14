@@ -231,7 +231,7 @@ if SystemInfo.isWindows():
         respectively are available on clipboard
         """
         cb = wx.TheClipboard
-        df = wx.CustomDataFormat("HTML Format")
+        df = wx.DataFormat("HTML Format")
         avail = cb.IsSupported(df)
 #         avail = wx.IsClipboardFormatAvailable(df.GetType())
         
@@ -249,7 +249,7 @@ if SystemInfo.isWindows():
         cb = wx.TheClipboard
         cb.Open()
         try:
-            df = wx.CustomDataFormat("HTML Format")
+            df = wx.DataFormat("HTML Format")
             dataob = wx.CustomDataObject(df)
     
             if cb.GetData(dataob):
@@ -335,7 +335,7 @@ else:
         respectively are available on clipboard
         """
         cb = wx.TheClipboard
-        df = wx.CustomDataFormat("text/html")
+        df = wx.DataFormat("text/html")
         avail = cb.IsSupported(df)
 
         return (avail, False)
@@ -353,7 +353,7 @@ else:
         cb = wx.TheClipboard
         cb.Open()
         try:
-            dataob = wx.CustomDataObject(wx.CustomDataFormat("text/html"))
+            dataob = wx.CustomDataObject(wx.DataFormat("text/html"))
             if cb.GetData(dataob):
                 if dataob.GetSize() > 0:
                     raw = dataob.GetData()

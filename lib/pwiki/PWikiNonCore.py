@@ -11,9 +11,7 @@ import traceback, os.path
 
 import wx
 
-from . import wxHelper, StringOps, Exporters, DocPages
-
-from .wikidata import WikiDocument
+from . import wxHelper, StringOps, Exporters, WikiDocument, DocPages
 
 from . import Trashcan
 

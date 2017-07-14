@@ -32,14 +32,11 @@ from . import SystemInfo
 from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from . import WindowLayout
 
-from .wikidata import DbBackendUtils, WikiDocument
-
-# To generate py2exe dependency
-from . import WikiDocument
+from .wikidata import DbBackendUtils
 
 from . import OsAbstract
 
-from . import DocPages
+from . import WikiDocument, DocPages
 
 from .PWikiNonCore import PWikiNonCore
 

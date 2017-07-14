@@ -741,8 +741,7 @@ bind_text = sqlite.def_bind_fctfinder(None, None, "")
 column_text = sqlite.AUTO_COLUMN_CONVERTS[sqlite.SQLITE_TEXT]
 
 
-def column_utftext(stmt, col):
-    return utf8Dec(column_text(stmt, col), "replace")[0]
+column_utftext = column_text
 
 
 def bind_mbcsutftext(stmt, parno, data):

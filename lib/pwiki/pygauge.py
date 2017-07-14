@@ -321,7 +321,7 @@ class PyGauge(wx.Window):
         :param `event`: a :class:`PaintEvent` event to be processed.
         """
 
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.AutoBufferedPaintDC(self)
         rect = self.GetClientRect()
         
         dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
@@ -329,12 +329,12 @@ class PyGauge(wx.Window):
         colour = self.GetBackgroundColour()
         dc.SetBrush(wx.Brush(colour))
         dc.SetPen(wx.Pen(colour))
-        dc.DrawRectangleRect(rect)
+        dc.DrawRectangle(rect)
         
         
         if self._border_colour:
             dc.SetPen(wx.Pen(self.GetBorderColour()))
-            dc.DrawRectangleRect(rect)
+            dc.DrawRectangle(rect)
             pad = 1 + self.GetBorderPadding()
             rect.Deflate(pad,pad)
 
@@ -353,7 +353,7 @@ class PyGauge(wx.Window):
                 w = rect.width * (float(self._valueSorted[i]) / self._range)
                 r = copy.copy(rect)
                 r.width = w 
-                dc.DrawRectangleRect(r)
+                dc.DrawRectangle(r)
                 
         if self._drawIndicatorText:
             dc.SetFont(self._drawIndicatorText_font)
