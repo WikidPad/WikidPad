@@ -1383,7 +1383,7 @@ class OptionsDialog(wx.Dialog):
         selfile = wx.FileSelector(_("Select File"),
                 tfield.GetValue(), wildcard = wildcard + "|" + \
                         _("All files (*.*)|*"),
-                flags=wx.OPEN, parent=self)
+                flags=wx.FD_OPEN, parent=self)
 
         if selfile:
             tfield.SetValue(selfile)

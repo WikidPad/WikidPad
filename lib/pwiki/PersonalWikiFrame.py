@@ -5526,7 +5526,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     flags=wx.FD_OPEN, parent=self)
 
 #         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.FD_OPEN)
         if path:
             self.openWiki(mbcsDec(os.path.abspath(path), "replace")[0])
         else:
@@ -5543,7 +5543,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.getDefDirForWikiOpenNew(), wildcard="*.wiki",
                     flags=wx.FD_OPEN, parent=self)
 #         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.FD_OPEN)
         if path:
             try:
                 clAction = CmdLineAction([])
@@ -5569,7 +5569,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     flags=wx.FD_OPEN, parent=self)
 
 #         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.FD_OPEN)
         if path:
             self.openWiki(mbcsDec(os.path.abspath(path), "replace")[0],
                     ignoreWdhName=True)

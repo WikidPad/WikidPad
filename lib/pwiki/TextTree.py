@@ -359,7 +359,7 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         selfile = wx.FileSelector(_("Select wiki for favorites"),
                 self.ctrls.tfPathOrUrl.GetValue(),
                 default_filename = "", default_extension = "",
-                wildcard = "*.wiki", flags=wx.OPEN, parent=self)
+                wildcard = "*.wiki", flags=wx.FD_OPEN, parent=self)
 
         if selfile:
             self.ctrls.tfPathOrUrl.SetValue(selfile)

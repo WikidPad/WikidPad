@@ -244,7 +244,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             self.inputPanel.setGridErrorMessage(
                     self.requestGridData[0][1].errorMessage)
             
-            wx.grid.EVT_GRID_SELECT_CELL(self, self.OnGridSelectCell)
+            self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelectCell)
 
 
 

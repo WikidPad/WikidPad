@@ -1311,7 +1311,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
             selfile = wx.FileSelector(_("Select Export File"),
                     self.ctrls.tfDestination.GetValue(),
                     default_filename = "", default_extension = "",
-                    wildcard = wcs, flags=wx.SAVE | wx.OVERWRITE_PROMPT,
+                    wildcard = wcs, flags=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                     parent=self)
 
             if selfile:
@@ -1745,7 +1745,7 @@ class ImportDialog(wx.Dialog):
             selfile = wx.FileSelector(_("Select Import File"),
                     self.ctrls.tfSource.GetValue(),
                     default_filename = "", default_extension = "",
-                    wildcard = wcs, flags=wx.OPEN | wx.FILE_MUST_EXIST,
+                    wildcard = wcs, flags=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
                     parent=self)
 
             if selfile:
