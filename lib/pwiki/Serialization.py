@@ -27,7 +27,7 @@ class SerializeStream:
 
         if byteBuf is not None:
             if self.readMode:
-                self.fileObj = io.BytesIO(stringBuf)
+                self.fileObj = io.BytesIO(byteBuf)
             else:
                 self.fileObj = io.BytesIO()
 
@@ -128,7 +128,7 @@ class SerializeStream:
         Serialize unicode string, encoded as UTF-8
         """
         if self.isReadMode():
-            return utf8Dec(self.serBytes(b""), "replace")[0]
+            return utf8Dec(self.serByteBlock(b""), "replace")[0]
         else:
             self.serByteBlock(utf8Enc(us)[0])
             return us
@@ -140,12 +140,12 @@ class SerializeStream:
         """
         if self.isReadMode():
             b = self.readBytes(1)
-            return b != "\0"
+            return b != b"\0"
         else:
             if tv:
-                self.writeBytes("1")
+                self.writeBytes(b"1")
             else:
-                self.writeBytes("\0")
+                self.writeBytes(b"\0")
             
             return tv
 

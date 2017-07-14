@@ -70,7 +70,7 @@ class LogMessage:
 
 class LogWindow(wx.Panel):
     def __init__(self, parent, id, mainControl):
-        wx.Panel.__init__(self, parent)
+        wx.Panel.__init__(self)
 #         d = wx.PrePanel()
 #         self.PostCreate(d)
 

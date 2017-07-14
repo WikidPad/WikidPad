@@ -1994,7 +1994,7 @@ class SimpleInfoDialog(wx.Dialog):
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.lineSizer = wx.FlexGridSizer(0, 2)
+        self.lineSizer = wx.FlexGridSizer(2)
         self.lineSizer.AddGrowableCol(1, 1)
 
         self.fillInfoLines()
