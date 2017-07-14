@@ -438,7 +438,7 @@ class TabDragImage(wx.DragImage):
         :param `tabArt`: an instance of :class:`~lib.agw.aui.tabart.AuiDefaultTabArt` or one of its derivations.
         """
 
-        self._backgroundColour = wx.NamedColour("pink")        
+        self._backgroundColour = wx.Colour("pink")        
         self._bitmap = self.CreateBitmap(notebook, page, button_state, tabArt)
         wx.DragImage.__init__(self, self._bitmap)
 

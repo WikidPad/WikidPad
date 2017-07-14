@@ -6,6 +6,7 @@ from codecs import BOM_UTF8    # , BOM_UTF16_BE, BOM_UTF16_LE
 
 import wx
 
+from Consts import BYTETYPES
 from .StringOps import urlFromPathname, relativeFilePath, escapeHtml, pathEnc, \
         lineendToOs
 

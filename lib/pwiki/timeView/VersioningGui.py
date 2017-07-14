@@ -588,12 +588,12 @@ class VersionExplorerPanel(EnhancedListControl):
                 if entry.versionNumber == currVn:
                     selected = self.GetItemCount()
 
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
 
             if selected == -1 and currVn == 0:
                 selected = self.GetItemCount()
 
-            self.InsertStringItem(self.GetItemCount(), message)
+            self.InsertItem(self.GetItemCount(), message)
 #             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.autosizeColumn(0)
             self.SelectSingle(selected, scrollVisible=True)

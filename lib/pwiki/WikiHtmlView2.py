@@ -369,21 +369,33 @@ class WikiHtmlView2(wx.Panel):
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_LEFT,                 lambda evt: self.OnActivateThis(evt, "left"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT,                lambda evt: self.OnActivateNewTabThis(evt, "left"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT,                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "left"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"),
+                id=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "left"),
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+                evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_RIGHT,                 lambda evt: self.OnActivateThis(evt, "right"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT,                lambda evt: self.OnActivateNewTabThis(evt, "right"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT,                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "right"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"),
+                id=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "right"),
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+                evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_ABOVE,                 lambda evt: self.OnActivateThis(evt, "above"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE,                lambda evt: self.OnActivateNewTabThis(evt, "above"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE,                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "above"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"),
+                id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"),
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+                evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_BELOW,                lambda evt: self.OnActivateThis(evt, "below"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW,                lambda evt: self.OnActivateNewTabThis(evt, "below"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW,                lambda evt: self.OnActivateNewTabBackgroundThis(evt, "below"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"),
+                id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"),
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+                evt, "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
 
 
@@ -1237,7 +1249,7 @@ if ((typeof jQuery !== 'undefined')) {
             self.Thaw()
             self.deferredScrollPos = None
             self.counterResizeIgnore = 0
-        except wx.PyDeadObjectError:
+        except RuntimeError:
             # There will be a better way to do this
             pass
 

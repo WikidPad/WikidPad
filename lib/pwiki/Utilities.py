@@ -434,7 +434,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
 
 
 def callInMainThread(fct, *args, **kwargs):
-    if wx.Thread_IsMain() or not wx.GetApp().IsMainLoopRunning():
+    if wx.IsMainThread() or not wx.GetApp().IsMainLoopRunning():
         return fct(*args, **kwargs)
     
     returnOb = ExecutionResult()
@@ -465,7 +465,7 @@ def callInMainThread(fct, *args, **kwargs):
 
 
 def callInMainThreadAsync(fct, *args, **kwargs):
-    if wx.Thread_IsMain() or not wx.GetApp().IsMainLoopRunning():
+    if wx.IsMainThread() or not wx.GetApp().IsMainLoopRunning():
         return fct(*args, **kwargs)
     def _mainRun(*args, **kwargs):
         try:

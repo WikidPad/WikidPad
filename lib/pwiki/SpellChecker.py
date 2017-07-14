@@ -233,7 +233,7 @@ class SpellCheckerDialog(wx.Dialog):
         
         self.ctrls.lbReplaceSuggestions.DeleteAllItems()
         for s in sugglist:
-            self.ctrls.lbReplaceSuggestions.InsertStringItem(
+            self.ctrls.lbReplaceSuggestions.InsertItem(
                     self.ctrls.lbReplaceSuggestions.GetItemCount(), s)
 #         self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         autosizeColumn(self.ctrls.lbReplaceSuggestions, 0)

@@ -912,7 +912,7 @@ class AbstractWikiPage(DataCarryingPage):
 #         if self.livePageAstBuildLock.acquire(False):
 #             self.livePageAstBuildLock.release()
 #         else:
-#             if wx.Thread_IsMain(): traceback.print_stack()
+#             if wx.IsMainThread(): traceback.print_stack()
 
         with self.livePageAstBuildLock:   # TODO: Timeout?
             threadstop.testValidThread()

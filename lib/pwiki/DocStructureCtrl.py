@@ -276,7 +276,7 @@ class DocStructureCtrl(EnhancedListControl):
         with WindowUpdateLocker(self):
             self.DeleteAllItems()
             for start, headLevel, text in self.tocList:
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
 #             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.autosizeColumn(0)
             self.checkSelectionChanged(callAlways=True)

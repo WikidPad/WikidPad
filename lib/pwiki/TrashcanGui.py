@@ -66,8 +66,8 @@ class TrashBagList(EnhancedListControl):
             # timeView_dateFormat
 
             for i, bag in enumerate(self.bagList):
-                self.InsertStringItem(i, bag.originalUnifiedName[9:])
-                self.SetStringItem(i, 1, bag.getFormattedTrashDate(formatStr))
+                self.InsertItem(i, bag.originalUnifiedName[9:])
+                self.SetItem(i, 1, bag.getFormattedTrashDate(formatStr))
             
             self.autosizeColumn(0)
             self.autosizeColumn(1)

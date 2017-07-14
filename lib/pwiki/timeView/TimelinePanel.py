@@ -30,7 +30,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.InsertColumn(1, "", width=1)  # number of wiki words
 
         # Now gather some information
-        self.InsertStringItem(0, "1")
+        self.InsertItem(0, "1")
         self.itemHeight = self.GetItemRect(0).GetHeight()
         
         self.popupShiftX = 20
@@ -51,7 +51,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.stepDays = 1
         
         self.DeleteAllItems()
-        self.clientHeight = self.GetClientSizeTuple()[1]
+        self.clientHeight = self.GetClientSize()[1]
         
         self.visibleItemCount = (self.clientHeight - 6) // self.itemHeight
         
@@ -164,8 +164,8 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             self.updateContent()
 
 
-    def SetSize(self, size):
-        wx.ListCtrl.SetSize(self, size)
+    def SetSize(self, *size):
+        wx.ListCtrl.SetSize(self, *size)
 
         oldVisible = self.isVisibleEffect()
         self.adjustToSize()

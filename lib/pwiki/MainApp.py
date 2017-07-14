@@ -267,6 +267,7 @@ class App(wx.App, MiscEventSourceMixin):
     #                 f = open(), "r")
     #                 f.read()
     #                 f.close()
+                    print( "--initStep2_85", repr((self.globalConfigSubDir, len(appLockContent))) )
                     
                     lines = appLockContent.split("\n")
                     if len(lines) != 3:
@@ -278,6 +279,7 @@ class App(wx.App, MiscEventSourceMixin):
                         return True # TODO Error handling!!!
     
                     appCookie = lines[0]
+                    print( "--initStep2_98", repr((len(appCookie))) )
                     remotePort = int(lines[1])
     
                     if port != remotePort:
@@ -340,7 +342,10 @@ class App(wx.App, MiscEventSourceMixin):
                     # Server is connected, start it
                     Ipc.startCommandServer()
                     
-                    appLockContent = appCookie + "\n" + str(port) + "\n"
+                    print( "--initStep2_135", repr((len(appCookie), port)) )
+                    
+                    appLockContent = (appCookie + "\n" + str(port) + "\n") \
+                            .encode("latin-1")
                     appLockPath = os.path.join(self.globalConfigSubDir,
                             "AppLock.lock")
     

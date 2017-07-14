@@ -40,7 +40,7 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
                 not (colored_node[0] in wordSet):
             continue
 
-        c = wx.NamedColour(colored_node[2].strip())
+        c = wx.Colour(colored_node[2].strip())
         
         color_code = rgbToHtmlColor(c.Red(), c.Green(), c.Blue())
         fontColor = ""

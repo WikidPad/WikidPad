@@ -421,8 +421,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.userActionCoord.applyConfiguration()
 
         self.Show(True)
-
-        EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
+        
+        self.Bind(EVT_REMOTE_COMMAND,  self.OnRemoteCommand)
 
         # Inform that idle handlers and window-specific threads can now be started
         self.mainWindowConstructed = True
@@ -1394,16 +1394,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.textBlocksMenu = wx.Menu()
         self.fillTextBlocksMenu(self.textBlocksMenu)
 
-        editMenu.AppendMenu(GUI_ID.MENU_TEXT_BLOCKS, _('Paste T&extblock'),
-                self.textBlocksMenu)
-        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_TEXT_BLOCKS,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
-        
+        editMenu.AppendSubMenu(self.textBlocksMenu, _('Paste T&extblock'))
+        self.Bind(wx.EVT_UPDATE_UI,
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                id=GUI_ID.MENU_TEXT_BLOCKS)
+
 
         if self.clipboardInterceptor is not None:
             clipCatchMenu = wx.Menu()
-            editMenu.AppendMenu(wx.NewId(), _('C&lipboard Catcher'),
-                    clipCatchMenu)
+            editMenu.AppendSubMenu(clipCatchMenu, _('C&lipboard Catcher'))
 
             self.addMenuItem(clipCatchMenu, _('Set at Page') + '\t' +
                     self.keyBindings.CatchClipboardAtPage, 
@@ -1818,10 +1817,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(cmdIdToIconName.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
-        formatMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_NAME,
+        formatMenu.Append(GUI_ID.MENU_ADD_ICON_NAME,
                 _('&Icon Name'), iconsMenu)
-        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_NAME,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
+        self.Bind(wx.EVT_UPDATE_UI,
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                id=GUI_ID.MENU_ADD_ICON_NAME)
 
         self.cmdIdToInsertString = cmdIdToIconName
         
@@ -1830,10 +1830,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(cmdIdToColorName.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
-        formatMenu.AppendMenu(GUI_ID.MENU_ADD_STRING_NAME,
+        formatMenu.Append(GUI_ID.MENU_ADD_STRING_NAME,
                 _('&Color Name'), colorsMenu)
-        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_STRING_NAME,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
+        self.Bind(wx.EVT_UPDATE_UI,
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                id=GUI_ID.MENU_ADD_STRING_NAME)
 
         self.cmdIdToInsertString.update(cmdIdToColorName)
 
@@ -1847,20 +1848,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(self.cmdIdToIconNameForAttribute.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertIconAttribute, id=cmi)
 
-        addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
+        addAttributeMenu.Append(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
                 _('&Icon Attribute'), iconsMenu)
-        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
+        self.Bind(wx.EVT_UPDATE_UI,
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                id=GUI_ID.MENU_ADD_ICON_ATTRIBUTE)
 
         # Build submenu for color attributes
         colorsMenu, self.cmdIdToColorNameForAttribute = AttributeHandling.buildColorsSubmenu()
         for cmi in list(self.cmdIdToColorNameForAttribute.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
-        addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
-                _('&Color Attribute'), colorsMenu)
-        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)))
+        addAttributeMenu.Append(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
+                _('&Color Attribute'))
+        self.Bind(wx.EVT_UPDATE_UI,
+                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                id=GUI_ID.MENU_ADD_COLOR_ATTRIBUTE)
 
         # TODO: Bold attribute
 
@@ -1959,7 +1962,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         extraMenu.AppendSeparator()
 
         evaluationMenu=wx.Menu()
-        extraMenu.AppendMenu(wx.NewId(), _("Scripts"), evaluationMenu,
+        extraMenu.AppendSubMenu(evaluationMenu, _("Scripts"),
                 _("Run scripts, evaluate expressions"))
 
         self.addMenuItem(evaluationMenu, _('&Eval') + '\t' + self.keyBindings.Eval,
@@ -2115,9 +2118,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, _("Wiki Home") + " " + self.keyBindings.GoHome,
                 _("Wiki Home"))
-        wx.EVT_TOOL(self, tbID,
-                lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
-                forceTreeSyncFromRoot=True))
+
+        self.Bind(wx.EVT_TOOL, lambda evt: self.openWikiPage(
+                self.getWikiDocument().getWikiName(), forceTreeSyncFromRoot=True),
+                id=tbID)
 
         icon = self.lookupSystemIcon("tb_doc")
         tbID = wx.NewId()
@@ -2248,14 +2252,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             icon = self.resolveIconDescriptor(icondesc, defIcon)
             # tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
             tb.AddSimpleTool(tbID, icon, tooltip, statustext)
-            wx.EVT_TOOL(self, tbID, lambda evt: function(self, evt))
+            self.Bind(wx.EVT_TOOL, lambda evt: function(self, evt), id=tbID)
 
             if updateFunction is not None:
-                wx.EVT_UPDATE_UI(self, tbID, lambda evt: updateFunction(self, evt))
+                self.Bind(wx.EVT_UPDATE_UI, lambda evt: updateFunction(self, evt),
+                id=tbID)
             
             if rightclickFunction is not None:
-                wx.EVT_TOOL_RCLICKED(self, tbID, lambda evt: rightclickFunction(self, evt))
-
+                self.Bind(wx.EVT_TOOL_RCLICKED,
+                lambda evt: rightclickFunction(self, evt), id=tbID)
 
         for item in toolbarItems:
             addPluginTool(*item)
@@ -5879,14 +5884,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self, pWiki):
-        wx.TaskBarIcon.__init__(self)
+        wx.adv.TaskBarIcon.__init__(self)
         self.pWiki = pWiki
 
         # Register menu events
         self.Bind(wx.EVT_MENU, self.OnLeftUp, id=GUI_ID.TBMENU_RESTORE)
-        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE,
-                lambda evt: (self.pWiki.saveAllDocPages(),
-                self.pWiki.getWikiData().commit()))
+        self.Bind(wx.EVT_MENU, lambda evt: (self.pWiki.saveAllDocPages(),
+                self.pWiki.getWikiData().commit()), id=GUI_ID.TBMENU_SAVE)
         self.Bind(wx.EVT_MENU, self.OnCmdExit, id=GUI_ID.TBMENU_EXIT)
 
         if self.pWiki.clipboardInterceptor is not None:
@@ -5896,12 +5900,12 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
             self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
 
-        self.Bind(wx.EVT_TASKBAR_LEFT_UP, self.OnLeftUp)
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_UP, self.OnLeftUp)
 
 
     def prepareExit(self):
         # Another desperate try to prevent crashing
-        self.Unbind(wx.EVT_TASKBAR_LEFT_UP)
+        self.Unbind(wx.adv.EVT_TASKBAR_LEFT_UP)
 
 
     def OnCmdExit(self, evt):

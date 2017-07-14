@@ -243,10 +243,10 @@ class WikiWideHistoryPanel(EnhancedListControl):
 #                 if entry.versionNumber == currVn:
 #                     selected = self.GetItemCount()
 
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
                 
                 text = entry.getFormattedVisitedDate(formatStr)
-                self.SetStringItem(self.GetItemCount() - 1, 1, text)
+                self.SetItem(self.GetItemCount() - 1, 1, text)
 
 #             if selected == -1 and currVn == 0:
 #                 selected = self.GetItemCount()

@@ -234,9 +234,9 @@ def buildColorsSubmenu():
     colorsMenu = wx.Menu()
 
     colorsMenu1 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), 'A-L', colorsMenu1)
+    colorsMenu.AppendSubMenu(colorsMenu1, 'A-L')
     colorsMenu2 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), 'M-Z', colorsMenu2)
+    colorsMenu.AppendSubMenu(colorsMenu2, 'M-Z')
     
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
@@ -252,7 +252,7 @@ def buildColorsSubmenu():
         menuItem = wx.MenuItem(colorsSubMenu, menuID, translatedColorName,
                 translatedColorName)
         
-        cl = wx.NamedColour(cn)
+        cl = wx.Colour(cn)
 
         menuItem.SetBackgroundColour(cl)
 

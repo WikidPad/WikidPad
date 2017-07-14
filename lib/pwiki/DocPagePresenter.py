@@ -627,7 +627,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
             self.tabProgressBar.SetBorderColour(wx.BLACK)
 
             self.getAUITabCtrl().Refresh()
-        except wx.PyDeadObjectError:
+        except RuntimeError:
             pass
 
 

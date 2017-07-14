@@ -3927,7 +3927,7 @@ class AuiToolBar(wx.PyControl):
         
             gripper_rect = self._gripper_sizer_item.GetRect()
             if gripper_rect.Contains((event.GetX(), event.GetY())):
-                cursor = wx.StockCursor(wx.CURSOR_SIZING)
+                cursor = wx.Cursor(wx.CURSOR_SIZING)
             
         event.SetCursor(cursor)
 

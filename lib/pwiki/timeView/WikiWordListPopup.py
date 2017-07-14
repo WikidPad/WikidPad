@@ -105,7 +105,7 @@ class WikiWordListPopup(wx.Frame):
             self.resultBox.DeleteAllItems()
 
             for i, w in enumerate(self.listContent):
-                self.resultBox.InsertStringItem(i, w)
+                self.resultBox.InsertItem(i, w)
                 
 #             self.resultBox.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.resultBox.autosizeColumn(0)

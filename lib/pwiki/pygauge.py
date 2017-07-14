@@ -116,7 +116,7 @@ import wx
 import copy
 
 
-class PyGauge(wx.PyWindow):
+class PyGauge(wx.Window):
     """ 
     This class provides a visual alternative for :class:`Gauge`. It currently 
     only support determinate mode (see :meth:`PyGauge.SetValue() <PyGauge.SetValue>` and
@@ -134,10 +134,10 @@ class PyGauge(wx.PyWindow):
          chosen by either the windowing system or wxPython, depending on platform;
         :param `size`: the control size. A value of (-1, -1) indicates a default size,
          chosen by either the windowing system or wxPython, depending on platform;
-        :param `style`: the underlying :class:`PyWindow` window style.
+        :param `style`: the underlying :class:`Window` window style.
         """
 
-        wx.PyWindow.__init__(self, parent, id, pos, size, style)
+        wx.Window.__init__(self, parent, id, pos, size, style)
         
         self._size = size
         
@@ -166,7 +166,7 @@ class PyGauge(wx.PyWindow):
         the minimal size which doesn't truncate the control, for a panel - the
         same size as it would have after a call to `Fit()`.
 
-        :note: Overridden from :class:`PyWindow`.        
+        :note: Overridden from :class:`Window`.        
         """
         
         return wx.Size(self._size[0], self._size[1])

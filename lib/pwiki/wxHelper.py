@@ -30,6 +30,7 @@ class wxSourceId:
     """
     Can be used either as id number or as source in wx.EvtHandler.Bind() calls
     """
+    __slots__ = ("_value",)
 
     def __init__(self, value):
         self._value = value
@@ -551,8 +552,8 @@ def getAccelPairFromKeyDown(evt):
 
 
 def getAccelPairFromString(s):
-    ae = wx.GetAccelFromString(s)
-    if ae is None:
+    ae = wx.AcceleratorEntry()
+    if not ae.FromString(s):
         return (None, None)
 
     return ae.GetFlags(), ae.GetKeyCode()
@@ -873,11 +874,11 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
                 repr(self.ifdestroyed) + ">"
 
 
-def isDead(wxObj):
+def isDead(wxWnd):
     """
     Check if C++ part of a wx-object is dead already
     """
-    return wxObj.__class__ is wx._core._wxPyDeadObject
+    return not wxWnd  # wxObj.__class__ is wx._core._wxPyDeadObject
 
 
 class IconCache:
@@ -1029,9 +1030,9 @@ class IconCache:
 
 
 
-class LayerSizer(wx.PySizer):
+class LayerSizer(wx.Sizer):
     def __init__(self):
-        wx.PySizer.__init__(self)
+        wx.Sizer.__init__(self)
         self.addedItemIds = set()
 
     def CalcMin(self):
@@ -1049,7 +1050,7 @@ class LayerSizer(wx.PySizer):
         pId = id(item)
         if pId not in self.addedItemIds:
              self.addedItemIds.add(pId)
-             wx.PySizer.Add(self, item)
+             wx.Sizer.Add(self, item)
 
 
     def RecalcSizes(self):
@@ -1059,12 +1060,12 @@ class LayerSizer(wx.PySizer):
         for item in self.GetChildren():
             win = item.GetWindow()
             if win is None:
-                item.SetDimension(pos, size)
+                item.SetSize(pos.x, pos.y, size.GetWidth(), size.GetHeight())
             else:
                 # Bad hack
                 # Needed because some ctrls like e.g. ListCtrl do not support
                 # to overwrite virtual methods like DoSetSize
-                win.SetDimensions(pos.x, pos.y, size.GetWidth(), size.GetHeight())
+                win.SetSize(pos.x, pos.y, size.GetWidth(), size.GetHeight())
 
 
 

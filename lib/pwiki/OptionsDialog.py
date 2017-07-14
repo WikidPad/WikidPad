@@ -1029,32 +1029,50 @@ class OptionsDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
-        self.Bind(wx.EVT_BUTTON, self.OnSelectFaceHtmlPrev, id=GUI_ID.btnSelectFaceHtmlPrev)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectFaceHtmlPrev,
+                id=GUI_ID.btnSelectFaceHtmlPrev)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,                lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,                _("Wave files (*.wav)|*.wav")))
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectFile(
+                self.ctrls.tfClipCatchSoundFile, _("Wave files (*.wav)|*.wav")),
+                id=GUI_ID.btnSelectClipCatchSoundFile)
 
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir), id=GUI_ID.btnSelectExportDefaultDir)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(
+                self.ctrls.tfExportDefaultDir),
+                id=GUI_ID.btnSelectExportDefaultDir)
 
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(self.ctrls.tfWikiOpenNewDefaultDir), id=GUI_ID.btnSelectWikiOpenNewDefaultDir)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(
+                self.ctrls.tfWikiOpenNewDefaultDir),
+                id=GUI_ID.btnSelectWikiOpenNewDefaultDir)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,                lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
-                _("All files (*.*)|*")))
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.selectFile(
+                self.ctrls.tfFileLauncherPath, _("All files (*.*)|*")),
+                id=GUI_ID.btnSelectFileLauncherPath)
 
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp(), id=GUI_ID.btnPasteTypeOrderUp)
+        self.Bind(wx.EVT_BUTTON,
+                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp(),
+                id=GUI_ID.btnPasteTypeOrderUp)
 
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown(), id=GUI_ID.btnPasteTypeOrderDown)
+        self.Bind(wx.EVT_BUTTON,
+                lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown(),
+                id=GUI_ID.btnPasteTypeOrderDown)
 
 
-        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chTempHandlingTempMode)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
+                id=GUI_ID.chTempHandlingTempMode)
 
-        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbEditorImageTooltipsLocalUrls)
-        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chEditorImagePasteFileType)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
+                id=GUI_ID.cbEditorImageTooltipsLocalUrls)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
+                id=GUI_ID.chEditorImagePasteFileType)
 
-        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange, id=GUI_ID.chHtmlPreviewRenderer)
+        self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
+                id=GUI_ID.chHtmlPreviewRenderer)
 
-        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbWwSearchCountOccurrences)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
+                id=GUI_ID.cbWwSearchCountOccurrences)
 
-        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange, id=GUI_ID.cbSingleProcess)
+        self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
+                id=GUI_ID.cbSingleProcess)
 
 
     def _refreshForPage(self):

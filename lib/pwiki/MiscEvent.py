@@ -242,6 +242,8 @@ class MiscEvent:
         Has the event the specified key?
         """
         return key in self.properties
+        
+    __contains__ = has_key
 
     def has_key_in(self, keyseq):
         """
@@ -355,7 +357,7 @@ class MiscEvent:
                 self.activeListenerIndex = i
                 try:
                     l.miscEventHappened(self)
-                except wx.PyDeadObjectError:
+                except RuntimeError:
                     # The object is a wxPython object for which the C++ part was
                     # deleted already, so remove object from listener list.
                     self.listenerList.invalidateObjectAt(i)

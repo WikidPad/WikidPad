@@ -345,7 +345,7 @@ EVT_TREE_ITEM_HYPERLINK = wx.PyEventBinder(wxEVT_TREE_ITEM_HYPERLINK, 1)
 
 def GetFlaggedData():
     return zlib.decompress(
-'x\xda\x012\x02\xcd\xfd\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\r\x00\
+b'x\xda\x012\x02\xcd\xfd\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\r\x00\
 \x00\x00\r\x08\x06\x00\x00\x00r\xeb\xe4|\x00\x00\x00\x04sBIT\x08\x08\x08\x08\
 |\x08d\x88\x00\x00\x01\xe9IDAT(\x91u\x92\xd1K\xd3a\x14\x86\x9f\xef|J2J\xc3%\
 \x85\x8e\x1cb\x93Hl\xd9,\x06F]4\x10\tD3\x83\x88\xc8\xbf\xc0\xb4\xaeBP1\xe9\
@@ -372,13 +372,13 @@ def GetFlaggedBitmap():
     return wx.Bitmap(GetFlaggedImage())
 
 def GetFlaggedImage():
-    stream = io.StringIO(GetFlaggedData())
-    return wx.ImageFromStream(stream)
+    stream = io.BytesIO(GetFlaggedData())
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def GetNotFlaggedData():
     return zlib.decompress(
-'x\xda\x01\xad\x01R\xfe\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\r\x00\
+b'x\xda\x01\xad\x01R\xfe\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\r\x00\
 \x00\x00\r\x08\x06\x00\x00\x00r\xeb\xe4|\x00\x00\x00\x04sBIT\x08\x08\x08\x08\
 |\x08d\x88\x00\x00\x01dIDAT(\x91\x95\xd21K\x82a\x14\x86\xe1\xe7=\xef798\xb8\
 \x89\x0e"|Cd\x94\x88\x83\x065\x88\x108\x88Q\x8b-\xd1\x1f\x88\x9a\n\x04\x11j\
@@ -400,13 +400,13 @@ def GetNotFlaggedBitmap():
     return wx.Bitmap(GetNotFlaggedImage())
 
 def GetNotFlaggedImage():
-    stream = io.StringIO(GetNotFlaggedData())
-    return wx.ImageFromStream(stream)
+    stream = io.BytesIO(GetNotFlaggedData())
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def GetCheckedData():
     return zlib.decompress(
-"x\xda\xeb\x0c\xf0s\xe7\xe5\x92\xe2b``\xe0\xf5\xf4p\t\x02\xd1 \xcc\xc1\x06$\
+b"x\xda\xeb\x0c\xf0s\xe7\xe5\x92\xe2b``\xe0\xf5\xf4p\t\x02\xd1 \xcc\xc1\x06$\
 \x8b^?\xa9\x01R,\xc5N\x9e!\x1c@P\xc3\x91\xd2\x01\xe4\xaf\xf4tq\x0c\xd1\x98\
 \x98<\x853\xe7\xc7y\x07\xa5\x84\xc4\x84\x84\x04\x0b3C1\xbd\x03'N\x1c9p\x84\
 \xe5\xe0\x993gx||\xce\x14\xcc\xea\xec\xect4^7\xbf\x91\xf3&\x8b\x93\xd4\x8c\
@@ -421,13 +421,13 @@ def GetCheckedBitmap():
     return wx.Bitmap(GetCheckedImage())
 
 def GetCheckedImage():
-    stream = io.StringIO(GetCheckedData())
-    return wx.ImageFromStream(stream)
+    stream = io.BytesIO(GetCheckedData())
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def GetNotCheckedData():
     return zlib.decompress(
-"x\xda\xeb\x0c\xf0s\xe7\xe5\x92\xe2b``\xe0\xf5\xf4p\t\x02\xd1 \xcc\xc1\x06$\
+b"x\xda\xeb\x0c\xf0s\xe7\xe5\x92\xe2b``\xe0\xf5\xf4p\t\x02\xd1 \xcc\xc1\x06$\
 \x8b^?\xa9\x01R,\xc5N\x9e!\x1c@P\xc3\x91\xd2\x01\xe4\xe7z\xba8\x86hL\x9c{\
 \xe9 o\x83\x01\x07\xeb\x85\xf3\xed\x86w\x0ed\xdaT\x96\x8a\xbc\x9fw\xe7\xc4\
 \xd9/\x01\x8b\x97\x8a\xd7\xab*\xfar\xf0Ob\x93^\xf6\xd5%\x9d\x85A\xe6\xf6\x1f\
@@ -440,8 +440,8 @@ def GetNotCheckedBitmap():
     return wx.Bitmap(GetNotCheckedImage())
 
 def GetNotCheckedImage():
-    stream = io.StringIO(GetNotCheckedData())
-    return wx.ImageFromStream(stream)
+    stream = io.BytesIO(GetNotCheckedData())
+    return wx.Image(stream)
 
 
 def GrayOut(anImage):
@@ -457,7 +457,7 @@ def GrayOut(anImage):
     else:
         maskColor = None
         
-    data = list(map(ord, list(anImage.GetData())))
+    data = anImage.GetDataBuffer()
 
     for i in range(0, len(data), 3):
         
@@ -467,7 +467,7 @@ def GrayOut(anImage):
         for x in range(3):
             data[i+x] = pixel[x]
 
-    anImage.SetData(''.join(map(chr, data)))
+#     anImage.SetData(b''.join(map(chr, data)))
     
     return anImage
 
@@ -1784,7 +1784,7 @@ def EventFlagsToSelType(style, shiftDown=False, ctrlDown=False):
 # This Is The Main Class.
 # -----------------------------------------------------------------------------
 
-class CustomTreeCtrl(wx.PyScrolledWindow):
+class CustomTreeCtrl(wx.ScrolledWindow):
 
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=TR_DEFAULT_STYLE, ctstyle=0, validator=wx.DefaultValidator,
@@ -1928,7 +1928,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         # Pen Used To Draw The Border Around Selected Items
         self._borderPen = wx.BLACK_PEN
-        self._cursor = wx.StockCursor(wx.CURSOR_ARROW)
+        self._cursor = wx.Cursor(wx.CURSOR_ARROW)
         
         # For Appended Windows
         self._hasWindows = False
@@ -1956,7 +1956,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             self._drawingfunction = wx.RendererNative.Get().DrawTreeItemButton
 
         # Create our container... at last!    
-        wx.PyScrolledWindow.__init__(self, parent, id, pos, size, style|wx.HSCROLL|wx.VSCROLL, name)
+        wx.ScrolledWindow.__init__(self, parent, id, pos, size, style|wx.HSCROLL|wx.VSCROLL, name)
 
         # If the tree display has no buttons, but does have
         # connecting lines, we can use a narrower layout.
@@ -1995,7 +1995,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
     def AcceptsFocus(self):
         # overridden base class method, allows this ctrl to
         # participate in the tab-order, etc.  It's overridable because
-        # of deriving this class from wx.PyScrolledWindow...
+        # of deriving this class from wx.ScrolledWindow...
         return True
     
 
@@ -2451,7 +2451,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         return item.GetData()
 
-    GetItemPyData = GetPyData 
+    GetItemPyData = GetPyData
+    GetItemData = GetPyData
 
 
     def GetItemTextColour(self, item):
@@ -2530,6 +2531,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         item.SetData(data)
 
     SetItemPyData = SetPyData
+    SetItemData = SetPyData
     
 
     def SetItemHasChildren(self, item, has=True):
@@ -4149,7 +4151,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
             for ii in range(imageList.GetImageCount()):
                 bmp = imageList.GetBitmap(ii)
-                image = wx.ImageFromBitmap(bmp)
+                image = bmp.ConvertToImage()
                 image = GrayOut(image)
                 newbmp = wx.Bitmap(image)
                 self._grayedImageList.Add(newbmp)
@@ -4216,7 +4218,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         for ii in range(self._imageListCheck.GetImageCount()):
             
             bmp = self._imageListCheck.GetBitmap(ii)
-            image = wx.ImageFromBitmap(bmp)
+            image = bmp.ConvertToImage()
             image = GrayOut(image)
             newbmp = wx.Bitmap(image)
             self._grayedCheckList.Add(newbmp)
@@ -5443,11 +5445,11 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     self.SetToolTipString(tooltipString)
 
                 if hoverItem.IsHyperText() and (flags & TREE_HITTEST_ONITEMLABEL) and hoverItem.IsEnabled():
-                    self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
+                    self.SetCursor(wx.Cursor(wx.CURSOR_HAND))
                     self._isonhyperlink = True
                 else:
                     if self._isonhyperlink:
-                        self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+                        self.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
                         self._isonhyperlink = False
                 
         # we process left mouse up event (enables in-place edit), right down
