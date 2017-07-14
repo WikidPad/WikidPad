@@ -3,7 +3,7 @@ import sys, os, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext
 from calendar import timegm
-from io import StringIO
+from io import BytesIO, StringIO, TextIOWrapper
 from . import urllib_red as urllib
 
 import wx, wx.xrc
@@ -13,6 +13,7 @@ from .wxHelper import XrcControls
 
 import Consts
 from .StringOps import *
+from .StringOps import MBCS_ENCODING
 
 from .ConnectWrapPysqlite import ConnectWrapSyncCommit
 
@@ -170,13 +171,13 @@ class MultiPageTextImporter:
         returns True if import was done (needed for trashcan)
         """
         if importData is not None:
-            self.rawImportFile = StringIO(importData)
+            self.rawImportFile = BytesIO(importData)  # TODO bytes or string???
         else:
             try:
-                self.rawImportFile = open(pathEnc(importSrc), "rU")
+                self.rawImportFile = open(pathEnc(importSrc), "rb")
             except IOError:
                 raise ImportException(_("Opening import file failed"))
-            
+
         self.wikiDocument = wikiDocument
         self.tempDb = None
         
@@ -193,16 +194,16 @@ class MultiPageTextImporter:
                 bom = self.rawImportFile.read(len(BOM_UTF8))
                 if bom != BOM_UTF8:
                     self.rawImportFile.seek(0)
-                    decodingReader = mbcsReader
-                    decode = mbcsDec
+                    self.importFile = TextIOWrapper(self.rawImportFile,
+                            MBCS_ENCODING, "replace")
                 else:
-                    decodingReader = utf8Reader
-                    decode = utf8Dec
+                    self.importFile = TextIOWrapper(self.rawImportFile,
+                            "utf-8", "replace")
 
-                line = decode(self.rawImportFile.readline())[0]
+                line = self.importFile.readline()
                 if line.startswith("#!"):
                     # Skip initial line with #! to allow execution as shell script
-                    line = decode(self.rawImportFile.readline())[0]
+                    line = self.importFile.readline()
 
                 if not line.startswith("Multipage text format "):
                     raise ImportException(
@@ -218,15 +219,14 @@ class MultiPageTextImporter:
                             self.formatVer)
 
                 # Next is the separator line
-                line = decode(self.rawImportFile.readline())[0]
+                line = self.importFile.readline()
                 if not line.startswith("Separator: "):
                     raise ImportException(
                             _("Bad file format, header not detected"))
 
                 self.separator = line[11:]
                 
-                startPos = self.rawImportFile.tell()
-                self.importFile = decodingReader(self.rawImportFile, "replace")
+                startPos = self.importFile.tell()
 
                 if self.formatVer == 0:
                     self._doImportVer0()
@@ -293,8 +293,7 @@ class MultiPageTextImporter:
 
                         # Back to start of import file and import according to settings 
                         # in temp db
-                        self.rawImportFile.seek(startPos)
-                        self.importFile = decodingReader(self.rawImportFile, "replace")
+                        self.importFile.seek(startPos)
                         self._doImportVer1Pass2()
                         
                         return True
@@ -309,7 +308,7 @@ class MultiPageTextImporter:
                 raise ImportException(str(e))
 
         finally:
-            self.rawImportFile.close()
+            self.importFile.close()
 
 
     def _markMissingDependencies(self):

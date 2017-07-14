@@ -74,36 +74,35 @@ def lineendToOs(text):
 
 
 
+
 if isOSX():
     # generate dependencies for py2app
     import encodings.mac_roman
-    _mbcsEnc = codecs.getencoder("mac_roman")
-    _mbcsDec = codecs.getdecoder("mac_roman")
-    mbcsReader = codecs.getreader("mac_roman")
-    mbcsWriter = codecs.getwriter("mac_roman")
+    
+    MBCS_ENCODING = "mac_roman"
 
 elif isLinux():
     # Could be wrong encoding
-#     LINUX_ENCODING = "latin-1"
-#     LINUX_ENCODING = "utf8"
-    LINUX_ENCODING = locale.getpreferredencoding()
+#     MBCS_ENCODING = "latin-1"
+#     MBCS_ENCODING = "utf8"
+    MBCS_ENCODING = locale.getpreferredencoding()
 
-    if not LINUX_ENCODING:
-        LINUX_ENCODING = "utf-8"
-
-    _mbcsEnc = codecs.getencoder(LINUX_ENCODING)
-    _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
-    mbcsReader = codecs.getreader(LINUX_ENCODING)
-    mbcsWriter = codecs.getwriter(LINUX_ENCODING)
-
+    if not MBCS_ENCODING:
+        MBCS_ENCODING = "utf-8"
+        
 else:
     # generate dependencies for py2exe
     import encodings.ascii
     import encodings.mbcs
-    _mbcsEnc = codecs.getencoder("mbcs")
-    _mbcsDec = codecs.getdecoder("mbcs")
-    mbcsReader = codecs.getreader("mbcs")
-    mbcsWriter = codecs.getwriter("mbcs")
+
+    MBCS_ENCODING = "mbcs"
+
+
+_mbcsEnc = codecs.getencoder(MBCS_ENCODING)
+_mbcsDec = codecs.getdecoder(MBCS_ENCODING)
+mbcsReader = codecs.getreader(MBCS_ENCODING)
+mbcsWriter = codecs.getwriter(MBCS_ENCODING)
+
 
 
 # mbcsEnc is idempotent for the first item of returned tuple
