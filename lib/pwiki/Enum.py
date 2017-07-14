@@ -1,4 +1,4 @@
-import types, string, pprint
+import types, pprint
 
 class EnumException(Exception):
     pass

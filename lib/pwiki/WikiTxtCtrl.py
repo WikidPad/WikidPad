@@ -2986,7 +2986,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         relations = self.getLoadedDocPage().getParentRelationships()[:]
 
         # Apply sort order
-        relations.sort(key=string.lower) # sort alphabetically
+        relations.sort(key=lambda s: s.lower()) # sort alphabetically
 
         return self.agaFormatList(relations)
 

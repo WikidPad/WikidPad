@@ -5,7 +5,7 @@ DB formats to the current one
 """
 
 
-import string, codecs, types, threading, traceback
+import codecs, types, threading, traceback
 
 from os import mkdir, unlink, rename
 from os.path import exists, join
@@ -916,8 +916,8 @@ def checkDatabaseFormat(connwrap):
     indices = connwrap.execSqlQuerySingleColumn("select name from sqlite_master where type='index'")
     tables = connwrap.execSqlQuerySingleColumn("select name from sqlite_master where type='table'")
 
-    indices = list(map(string.upper, indices))
-    tables = list(map(string.upper, tables))
+    indices = [s.upper() for s in indices]
+    tables = [s.upper() for s in tables]
     
     if not "SETTINGS" in tables:
         return 1, _("Update needed")
@@ -956,8 +956,8 @@ def updateDatabase(connwrap, dataDir):
     tables = connwrap.execSqlQuerySingleColumn(
             "select name from sqlite_master where type='table'")
 
-    indices = list(map(string.upper, indices))
-    tables = list(map(string.upper, tables))
+    indices = [s.upper() for s in indices]
+    tables = [s.upper() for s in tables]
     
     # updatedTables = []
     

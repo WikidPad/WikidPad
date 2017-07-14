@@ -18,7 +18,7 @@ import os, os.path
 
 from time import time, localtime
 import datetime
-import string, glob, traceback
+import glob, traceback
 
 from wx import GetApp
 

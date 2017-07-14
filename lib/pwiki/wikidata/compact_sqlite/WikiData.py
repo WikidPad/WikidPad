@@ -18,7 +18,7 @@ import os, os.path
 
 from time import time, localtime
 import datetime
-import string, glob, traceback
+import glob, traceback
 
 from wx import GetApp
 
@@ -2092,7 +2092,7 @@ class WikiData:
 
             indexes = self.connWrap.execSqlQuerySingleColumn(
                     "select name from sqlite_master where type='index'")
-            indexes = list(map(string.upper, indexes))
+            indexes = [s.upper() for s in indexes]
 
             if not "WIKIWORDCONTENT_PKEY" in indexes:
                 # Maybe we have multiple pages with the same name in the database

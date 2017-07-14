@@ -5,7 +5,7 @@
 # Last modified (format YYYY-MM-DD): 2013-05-06
 
 
-import locale, pprint, time, sys, string, traceback
+import locale, pprint, time, sys, traceback
 
 from textwrap import fill
 

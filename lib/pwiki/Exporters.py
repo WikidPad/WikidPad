@@ -4,7 +4,7 @@
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 # from Enum import Enumeration
-import sys, os, string, re, traceback, locale, time, urllib.request, urllib.parse, urllib.error
+import sys, os, re, traceback, locale, time, urllib.request, urllib.parse, urllib.error
 from os.path import join, exists, splitext, abspath
 from io import StringIO
 import shutil

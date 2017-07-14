@@ -2928,7 +2928,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     _('No data handler available to create database.'))
             return
 
-        wikiName = string.replace(wikiName, " ", "")
+        wikiName = wikiName.replace(" ", "")
         wikiDir = os.path.join(wikiDir, wikiName)
         configFileLoc = os.path.join(wikiDir, "%s.wiki" % wikiName)
 

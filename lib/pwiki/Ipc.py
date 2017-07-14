@@ -4,7 +4,7 @@ another WikidPad instance is already active, transfers commandline
 to it and closes the additional instance then.
 """
 
-import os, sys, string, re, traceback
+import os, sys, re, traceback
 import threading, socket, socketserver
 
 import wx

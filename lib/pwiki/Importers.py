@@ -1,5 +1,5 @@
 # from Enum import Enumeration
-import sys, os, string, re, traceback, time, sqlite3
+import sys, os, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext
 from calendar import timegm

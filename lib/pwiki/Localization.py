@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 
-import string, locale, codecs, os, sys, os.path, traceback, functools
+import locale, codecs, os, sys, os.path, traceback, functools
 
 import Consts
 

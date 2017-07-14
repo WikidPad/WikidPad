@@ -3,7 +3,6 @@ Reduced urllib (derived from urllib.py in standard library)
 for Wikidpad to avoid unnecessary dependencies
 """
 
-import string
 import os
 import sys
 
