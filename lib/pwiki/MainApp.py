@@ -220,7 +220,7 @@ class App(wx.App, MiscEventSourceMixin):
 
     def initStep2(self, cmdLine):
         # Block of modules to import while splash screen is shown
-        from .wxHelper import IconCache
+        from .wxHelper import IconCache, SimpleXmlSubclassFactory
         from .Serialization import SerializeStream
         from . import OsAbstract
         from . import Ipc
@@ -394,8 +394,10 @@ class App(wx.App, MiscEventSourceMixin):
         res = wx.xrc.XmlResource.Get()
         res.InitAllHandlers()
         res.SetFlags(0)
+        res.AddSubclassFactory(SimpleXmlSubclassFactory())
+
         res.LoadFromBuffer(rd)
-        
+
 #         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
 #         res.LoadFromString(rd)
 

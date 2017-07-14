@@ -1,12 +1,13 @@
 
 
-import os, os.path, traceback, sys, re
+import os, os.path, traceback, sys, re, importlib
 
-from wx.xrc import XRCCTRL, XRCID, XmlResource
+from wx.xrc import XRCCTRL, XRCID, XmlResource, XmlSubclassFactory
 import wx
 
 from .WikiExceptions import *
 
+from .Utilities import AttrContainer
 from .MiscEvent import KeyFunctionSink
 from . import SystemInfo, StringOps
 
@@ -73,30 +74,99 @@ class wxIdPool:
 GUI_ID = wxIdPool()
 GUI_ID.__doc__="All purpose standard Gui-Id-Pool"
 
- 
+
+
+class _XrcControlsAssociation:
+    """
+    As Phoenix doesn't anymore return the same Python object when
+    calling XRCCTRL or FindWindow multiple times searching  for the same
+    C++ object associated data must be stored separately.
+
+    That's what this class is for. It shouldn't be used directly but it
+    is handled by XrcControls if needed.
+    """
+    
+    def __init__(self, xrcCtrls):
+        self.__xrcCtrls = xrcCtrls
+        self.__idDataMap = {}
+    
+    def _get(self, name):
+        if not name in self.__idDataMap:
+            self.__idDataMap[name] = AttrContainer()
+        
+        return self.__idDataMap[name]
+
+    
+    def __getattr__(self, name):
+        return self._get(name)
+
+
+    def __getitem__(self, name):
+        return self._get(name)
+        
+
+
+
 class XrcControls:
     """
     Convenience wrapper for XRCCTRL
     """
     def __init__(self, basepanel):
         self.__basepanel = basepanel
+        
+        self.__idAssociation = None
+        
+
+    def _get(self, name):
+#         print ("--XrcControls.__getattr__1", repr((name, self.__basepanel)))
+#         if name in self.__cache:
+#             return self.__cache[name]
+
+#         result = XRCCTRL(self.__basepanel, name)
+#         if result is None:
+#             raise InternalError("XML-ID '%s' not found in %s" %
+#                     (name, repr(self.__basepanel)))
+            
+        wid = XRCID(name)    
+
+        result = wx.FindWindowById(wid, self.__basepanel)
+
+        if result is None:
+            raise InternalError("XML-ID '%s' not found in %s" %
+                    (name, repr(self.__basepanel)))
+        
+        return result
+
 
     def __getattr__(self, name):
-        result = XRCCTRL(self.__basepanel, name)
-        if result is None:
-            raise InternalError("XML-ID '%s' not found in %s" %
-                    (name, repr(self.__basepanel)))
-        return result
+        return self._get(name)
+
 
     def __getitem__(self, name):
-        result = XRCCTRL(self.__basepanel, name)
-        if result is None:
-            raise InternalError("XML-ID '%s' not found in %s" %
-                    (name, repr(self.__basepanel)))
-        return result
+        return self._get(name)
+
+
+    @property
+    def _assoc(self):
+        if self.__idAssociation is None:
+            self.__idAssociation = _XrcControlsAssociation(self)
+        
+        return self.__idAssociation
+
 
     def _byId(self, wid):
-        return self.__basepanel.FindWindowById(wid)
+        return self.__basepanel.FindWindow(wid) # self.__basepanel.FindWindowById(wid)
+
+
+
+
+class SimpleXmlSubclassFactory(XmlSubclassFactory):
+    def Create(self, className):
+        modName, plainClassName = className.rsplit(".", 1)
+        module = importlib.import_module(modName)
+        
+        return getattr(module, plainClassName)()
+
 
 
 

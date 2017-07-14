@@ -864,6 +864,24 @@ class IdentityList(list):
         del self[0:len(self)]
 
 
+
+class AttrContainer:
+    """
+    Attribute container. Same objects can be retrieved by attribute or
+    item syntax (similar to JavaScript objects)
+    """
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+        
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+
+
+
 # ---------- Debug Logging ----------
 
 

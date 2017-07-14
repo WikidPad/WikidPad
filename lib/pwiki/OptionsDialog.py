@@ -865,23 +865,23 @@ class OptionsDialog(wx.Dialog):
         # Special options to be prepared before transferring to dialog
         
         # HTML renderer (OS specific)
-        self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData = [0]
+        self.ctrls._assoc.chHtmlPreviewRenderer.clientData = [0]
         if WikiHtmlView.WikiHtmlViewIE is not None:
             self.ctrls.chHtmlPreviewRenderer.Append(_("IE"))
-            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(1)
+            self.ctrls._assoc.chHtmlPreviewRenderer.clientData.append(1)
             self.ctrls.chHtmlPreviewRenderer.Append(_("Mozilla"))
-            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(2)
+            self.ctrls._assoc.chHtmlPreviewRenderer.clientData.append(2)
 
         if WikiHtmlView.WikiHtmlViewWK is not None:
             self.ctrls.chHtmlPreviewRenderer.Append(_("Webkit"))
-            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(3)
+            self.ctrls._assoc.chHtmlPreviewRenderer.clientData.append(3)
 
         if WikiHtmlView.WikiHtmlView2 is not None:
             self.ctrls.chHtmlPreviewRenderer.Append(_("Webview"))
-            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(4)
+            self.ctrls._assoc.chHtmlPreviewRenderer.clientData.append(4)
 
         self.ctrls.chHtmlPreviewRenderer.Enable(
-                len(self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData) > 1)
+                len(self.ctrls._assoc.chHtmlPreviewRenderer.clientData) > 1)
 
         # Reorderable paste type list
         
@@ -932,10 +932,10 @@ class OptionsDialog(wx.Dialog):
                         "main", o)) )
             elif t == "seli":   # Selection -> transfer index
                 sel = self.pWiki.getConfig().getint("main", o)
-                if hasattr(self.ctrls[c], "optionsDialog_clientData"):
+                if hasattr(self.ctrls._assoc[c], "clientData"):
                     # There is client data to take instead of real selection
                     try:
-                        sel = self.ctrls[c].optionsDialog_clientData.index(sel)
+                        sel = self.ctrls._assoc[c].clientData.index(sel)
                     except (IndexError, ValueError):
                         sel = 0
                 self.ctrls[c].SetSelection(sel)
@@ -1222,9 +1222,9 @@ class OptionsDialog(wx.Dialog):
                         escapeForIni(self.ctrls[c].GetValue(), toEscape=" ") )
             elif t == "seli":   # Selection -> transfer index
                 sel = self.ctrls[c].GetSelection()
-                if hasattr(self.ctrls[c], "optionsDialog_clientData"):
+                if hasattr(self.ctrls._assoc[c], "clientData"):
                     # There is client data to take instead of real selection
-                    sel = self.ctrls[c].optionsDialog_clientData[sel]
+                    sel = self.ctrls._assoc[c].clientData[sel]
                 config.set("main", o, str(sel))
             elif t == "selt":   # Selection -> transfer content string
                 try:
