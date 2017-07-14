@@ -40,8 +40,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         self.wikiWord = None
@@ -49,7 +48,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ignoreTextChange = 0
         
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "SelectWikiWordDialog")
+        res.LoadDialog(self, parent, "SelectWikiWordDialog")
 
         if title is not None:
             self.SetTitle(title)
@@ -481,12 +480,14 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
     """
     def __init__(self, pWiki, ID, words, motionType, title=None, default=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+#         d = wx.PreDialog()
+#         self.PostCreate(d)
+
+        wx.Dialog.__init__(self)
         
         self.pWiki = pWiki
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "ChooseWikiWordDialog")
+        res.LoadDialog(self, self.pWiki, "ChooseWikiWordDialog")
         
         self.ctrls = XrcControls(self)
         
@@ -1063,8 +1064,10 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         from . import Exporters
         from .SearchAndReplace import SearchReplaceOperation
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+#         d = wx.PreDialog()
+#         self.PostCreate(d)
+
+        wx.Dialog.__init__(self)
         
         self.mainControl = mainControl
         self.value = None
@@ -1074,7 +1077,7 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         self.savedExports = None
         
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.mainControl, "ExportDialog")
+        res.LoadDialog(self, self.mainControl, "ExportDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1771,14 +1774,15 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
     def __init__(self, parent, ID, mainControl, defDbHandler=None,
             defWikiLang=None, title="", pos=wx.DefaultPosition,
             size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+#         d = wx.PreDialog()
+#         self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.value = None, None, None
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "NewWikiSettingsDialog")
+        res.LoadDialog(self, parent, "NewWikiSettingsDialog")
 
         self.ctrls = XrcControls(self)
 

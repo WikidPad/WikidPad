@@ -2092,23 +2092,31 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
 
         tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
+        
+        def addSimpleTool(tId, icon, longHelp, shortHelp):
+            """
+            Resemble deprecated wx.ToolBar.AddSimpleTool() function
+            """
+            return tb.AddTool(tId, shortHelp, icon, wx.NullBitmap,
+                    shortHelpString=shortHelp, longHelpString=longHelp)
+        
         seperator = self.lookupSystemIcon("tb_seperator")
 
         icon = self.lookupSystemIcon("tb_back")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_BACK
-        tb.AddSimpleTool(tbID, icon, _("Back") + " " + self.keyBindings.GoBack,
+        addSimpleTool(tbID, icon, _("Back") + " " + self.keyBindings.GoBack,
                 _("Back"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
         icon = self.lookupSystemIcon("tb_forward")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD
-        tb.AddSimpleTool(tbID, icon, _("Forward") + " " + self.keyBindings.GoForward,
+        addSimpleTool(tbID, icon, _("Forward") + " " + self.keyBindings.GoForward,
                 _("Forward"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
         icon = self.lookupSystemIcon("tb_home")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, _("Wiki Home") + " " + self.keyBindings.GoHome,
+        addSimpleTool(tbID, icon, _("Wiki Home") + " " + self.keyBindings.GoHome,
                 _("Wiki Home"))
 
         self.Bind(wx.EVT_TOOL, lambda evt: self.openWikiPage(
@@ -2117,83 +2125,83 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_doc")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon,
+        addSimpleTool(tbID, icon,
                 _("Open Wiki Word") + " " + self.keyBindings.OpenWikiWord,
                 _("Open Wiki Word"))
         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordOpenDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_lens")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, _("Search") + " " + self.keyBindings.SearchWiki,
+        addSimpleTool(tbID, icon, _("Search") + " " + self.keyBindings.SearchWiki,
                 _("Search"))
         self.Bind(wx.EVT_TOOL, lambda evt: self.showSearchDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_cycle")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, _("Find current word in tree"),
+        addSimpleTool(tbID, icon, _("Find current word in tree"),
                 _("Find current word in tree"))
         self.Bind(wx.EVT_TOOL, lambda evt: self.findCurrentWordInTree(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_up")
         tbID = GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE
-        tb.AddSimpleTool(tbID, icon, _("Go upward from a subpage"),
+        addSimpleTool(tbID, icon, _("Go upward from a subpage"),
                 _("Go upward from a subpage"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
 
-        tb.AddSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
+        addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
         icon = self.lookupSystemIcon("tb_save")
-        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon,
+        addSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon,
                 _("Save Wiki Word") + " " + self.keyBindings.Save,
                 _("Save Wiki Word"))
 
         icon = self.lookupSystemIcon("tb_rename")
-        tb.AddSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
+        addSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
                 _("Rename Wiki Word") + " " + self.keyBindings.Rename,
                 _("Rename Wiki Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordRenameDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_delete")
-        tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
+        addSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
                 _("Delete Wiki Word") + " " + self.keyBindings.Delete,
                 _("Delete Wiki Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordDeleteDialog(), id=tbID)
 
-        tb.AddSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
+        addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
         icon = self.lookupSystemIcon("tb_heading")
-        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS, icon,
                 _("Heading") + " " + self.keyBindings.Heading, _("Heading"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(
 #                 self.getActiveEditor()))
 
         icon = self.lookupSystemIcon("tb_bold")
-        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_BOLD, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_BOLD, icon,
                 _("Bold") + " " + self.keyBindings.Bold, _("Bold"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(
 #                 self.getActiveEditor()))
 
         icon = self.lookupSystemIcon("tb_italic")
-        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_ITALIC, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_ITALIC, icon,
                 _("Italic") + " " + self.keyBindings.Italic, _("Italic"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(
 #                 self.getActiveEditor()))
 
-        tb.AddSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
+        addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
         icon = self.lookupSystemIcon("tb_switch ed prev")
         tbID = GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW
-        tb.AddSimpleTool(tbID, icon, _("Switch Editor/Preview"),
+        addSimpleTool(tbID, icon, _("Switch Editor/Preview"),
                 _("Switch between editor and preview"))
 
         icon = self.lookupSystemIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
-        tb.AddSimpleTool(tbID, icon, _("Zoom In"), _("Zoom In"))
+        addSimpleTool(tbID, icon, _("Zoom In"), _("Zoom In"))
         self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
 
         icon = self.lookupSystemIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
-        tb.AddSimpleTool(tbID, icon, _("Zoom Out"), _("Zoom Out"))
+        addSimpleTool(tbID, icon, _("Zoom Out"), _("Zoom Out"))
         self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
 
 
@@ -2203,7 +2211,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.fastSearchField.Bind(wx.EVT_KEY_DOWN, self.OnFastSearchKeyDown)
 
         icon = self.lookupSystemIcon("tb_wikize")
-        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
                 _("Wikize Selected Word ") + self.keyBindings.MakeWikiWord,
                 _("Wikize Selected Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()), id=tbID)
@@ -2228,7 +2236,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             icon = self.resolveIconDescriptor(entry.iconDesc, defIcon)
             tbID = menuID
-            tb.AddSimpleTool(tbID, icon, entry.title, entry.value)
+            addSimpleTool(tbID, icon, entry.title, entry.value)
 #             self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)   # TODO Check if needed on Linux/GTK
 
 
@@ -2243,7 +2251,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             icon = self.resolveIconDescriptor(icondesc, defIcon)
             # tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
-            tb.AddSimpleTool(tbID, icon, tooltip, statustext)
+            addSimpleTool(tbID, icon, tooltip, statustext)
             self.Bind(wx.EVT_TOOL, lambda evt: function(self, evt), id=tbID)
 
             if updateFunction is not None:

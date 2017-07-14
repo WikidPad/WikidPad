@@ -10,8 +10,7 @@ class CustomListBox(wx.ListBox):
         """
         As Xrc is used it needs to be initialized in a special way
         """
-        f=wx.PreListBox()
-        self.PostCreate(f)
+        wx.ListBox.__init__(self, *args, **kwargs)
         self.Bind( wx.EVT_WINDOW_CREATE , self.OnCreate)
 
     def OnCreate(self,evt):

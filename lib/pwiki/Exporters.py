@@ -420,11 +420,13 @@ class TextExporter(AbstractExporter):
 
 class MultiPageTextAddOptPanel(wx.Panel):
     def __init__(self, parent):
-        p = wx.PrePanel()
-        self.PostCreate(p)
+#         p = wx.PrePanel()
+#         self.PostCreate(p)
+        
+        wx.Panel.__init__(self)
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnPanel(self, parent, "ExportSubMultipageText")
+        res.LoadPanel(self, parent, "ExportSubMultipageText")
         
         self.ctrls = XrcControls(self)
         

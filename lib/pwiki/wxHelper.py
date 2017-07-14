@@ -1206,8 +1206,7 @@ class ReorderableListBox(wx.ListBox):
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0 and len(kwargs) == 0:
-            f = wx.PreListBox()
-            self.PostCreate(f)
+            wx.ListBox.__init__(self)
             self.Bind(wx.EVT_WINDOW_CREATE, self.OnCreate)
         else:
             wx.ListBox.__init__(self, *args, **kwargs)

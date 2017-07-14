@@ -3102,7 +3102,7 @@ class ViCmdList(wx.html.HtmlListBox):
           selected
         """
 
-        wx.HtmlListBox.__init__(self, parent, -1)
+        wx.html.HtmlListBox.__init__(self, parent, -1)
 
         self.parent = parent
 

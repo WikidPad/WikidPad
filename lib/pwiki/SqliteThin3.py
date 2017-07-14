@@ -407,7 +407,7 @@ def getLibVersion():
     """
     _dll.sqlite3_libversion.restype = c_char_p
 
-    return utf8Encode(_dll.sqlite3_libversion())[0]
+    return utf8Decode(_dll.sqlite3_libversion())[0]
 
 
 

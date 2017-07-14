@@ -22,8 +22,8 @@ from . import WikiHtmlView
 
 
 class DefaultOptionsPanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+    def __init__(self, *args, **kwargs):
+        wx.Panel.__init__(self, *args, **kwargs)
 
     def setVisible(self, vis):
         return True
@@ -40,12 +40,13 @@ class ResourceOptionsPanel(DefaultOptionsPanel):
     GUI of panel is defined by a ressource.
     """
     def __init__(self, parent, resName):
-        p = wx.PrePanel()
-        self.PostCreate(p)
+        DefaultOptionsPanel.__init__(self)
+#         p = wx.PrePanel()
+#         self.PostCreate(p)
 #         self.optionsDlg = optionsDlg
         res = wx.xrc.XmlResource.Get()
 
-        res.LoadOnPanel(self, parent, resName)
+        res.LoadPanel(self, parent, resName)
 
     def setVisible(self, vis):
         return True
@@ -763,13 +764,15 @@ class OptionsDialog(wx.Dialog):
     def __init__(self, pWiki, ID, startPanelName=None, title="Options",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+#         d = wx.PreDialog()
+#         self.PostCreate(d)
+
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         self.oldSettings = {}
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
+        res.LoadDialog(self, self.pWiki, "OptionsDialog")
 
         self.combinedOptionToControl = self.OPTION_TO_CONTROL_GLOBAL
 

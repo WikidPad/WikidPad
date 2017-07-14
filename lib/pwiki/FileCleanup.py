@@ -2,7 +2,7 @@
 """
 import os, os.path, traceback, sqlite3
 
-import wx, wx.xrc
+import wx, wx.html, wx.xrc
 
 from .wxHelper import GUI_ID, wxKeyFunctionSink, XrcControls, \
         ModalDialogMixin
@@ -895,9 +895,9 @@ class _MissingLinkingPagesItemInfo:
 
 
 
-class _MissingLinkingPagesListBox(wx.HtmlListBox):
+class _MissingLinkingPagesListBox(wx.html.HtmlListBox):
     def __init__(self, parent, db, mainControl, collator, ID):
-        wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
+        wx.html.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
 
         self.fileCleanupDialog = parent
         self.db = db

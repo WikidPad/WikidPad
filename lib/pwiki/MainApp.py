@@ -392,6 +392,7 @@ class App(wx.App, MiscEventSourceMixin):
         ## _prof.stop()
 
         res = wx.xrc.XmlResource.Get()
+        res.InitAllHandlers()
         res.SetFlags(0)
         res.LoadFromBuffer(rd)
         
@@ -670,6 +671,8 @@ class App(wx.App, MiscEventSourceMixin):
             wx.MessageBox(_("An error occurred during this session\nSee file %s") %
                     os.path.join(ExceptionLogger.getLogDestDir()),
                     "Error", style = wx.OK)
+        
+        return 0
 
 
     def getMainFrameSet(self):

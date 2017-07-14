@@ -128,9 +128,9 @@ class _SearchResultItemInfo:
 
 
 
-class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
+class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
     def __init__(self, parent, pWiki, ID):
-        wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
+        wx.html.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
 
         self.pWiki = pWiki
         self.searchWikiDialog = parent
@@ -623,13 +623,13 @@ class SearchPageDialog(wx.Dialog):
     def __init__(self, mainControl, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.mainControl, "SearchPageDialog")
+        res.LoadDialog(self, self.mainControl, "SearchPageDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1047,13 +1047,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
 
 #         _prof.start()
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "SearchWikiDialog")
+        res.LoadDialog(self, parent, "SearchWikiDialog")
         if srListBox is None:
             srListBox = SearchResultListBox(self, self.mainControl,
                     GUI_ID.htmllbPages)
