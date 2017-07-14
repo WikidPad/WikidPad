@@ -1,6 +1,6 @@
 
 
-import threading, traceback, collections, heapq
+import sys, threading, traceback, collections, heapq, logging
 from _thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep
 
@@ -155,6 +155,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         for i in range(self.dequeCount))
 
     def start(self):
+        debuglog("SingleThreadExecutor starting")
         with self.dequeCondition:
             self.paused = False
             if self.thread is not None and self.thread.isAlive():
@@ -165,6 +166,8 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
             self.thread = threading.Thread(target=self._runQueue)
             self.thread.setDaemon(self.daemon)
             self.thread.start()
+            debuglog("SingleThreadExecutor thread created",
+                    self.thread, self.daemon)
             self._fireStateChange(True)
 
 
@@ -396,10 +399,16 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         False))
             self.dequeCondition.notify()
 
+        debuglog("SingleThreadExecutor ending, joining thread",
+                self.thread, self.daemon)
+
         self.thread.join(120)  # TODO: Replace by constant
 
         if self.thread.isAlive():
             raise DeadBlockPreventionTimeOutError()
+
+        debuglog("SingleThreadExecutor ending, thread terminated",
+                thread=self.thread, daemon=self.daemon)
 
         self.thread = None
 
@@ -853,6 +862,26 @@ class IdentityList(list):
         
     def clear(self):
         del self[0:len(self)]
+
+
+# ---------- Debug Logging ----------
+
+
+if False:
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
+    
+    def debuglog(msg, *args, **kwargs):
+        msg = msg + ", ".join(repr(arg) for arg in args) + "; " + \
+                ", ".join(k + "=" + repr(v) for k, v in kwargs.items())
+        
+        logging.debug(msg)
+
+else:
+
+    def debuglog(msg, *args, **kwargs):
+        pass
+
+
 
 
 # ---------- Misc ----------

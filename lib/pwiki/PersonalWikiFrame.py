@@ -3,7 +3,8 @@
 
 ## import profilehooks
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
-
+# import trace
+# tracer = trace.Trace(count=0, trace=1)
 
 import os, os.path, sys, gc, traceback, string, re, collections
 from os.path import *

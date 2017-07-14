@@ -793,6 +793,14 @@ def _getAllChildWindowsRecurs(win, winSet):
         _getAllChildWindowsRecurs(c, winSet)
 
 
+def debugListChildWindows(win):
+
+    def _recurs(win, deep):
+        print(" " * deep + repr(win), "id=" + repr(win.GetId()), "name=" + repr(win.GetName()), "RTTI=" + repr(win.GetClassName()))
+        for c in win.GetChildren():
+            _recurs(c, deep+2)
+    
+    _recurs(win, 0)
 
 
 class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):

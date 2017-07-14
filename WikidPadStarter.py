@@ -53,6 +53,9 @@ builtins._ = N_
 import ExceptionLogger
 ExceptionLogger.startLogger(VERSION_STRING)
 
+# import faulthandler
+# faulthandler.dump_traceback_later(20, repeat=True)
+
 
 # ## import hotshot
 # ## _prof = hotshot.Profile("hotshot.prf")
