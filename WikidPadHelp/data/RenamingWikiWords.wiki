@@ -7,9 +7,15 @@ While typing the input is checked against most conditions which may prevent a re
 The dialog has two additional options:
 
 *Modify all links to the wiki word*
-If checked, WikidPad tries to update all of the wiki pages in the database that have links to the renamed word.
+Controls if WikidPad should try to update all of the wiki pages in the database that have links to the renamed word. For a large wiki this can be a relatively slow operation.
 
-For a large wiki this can be a relatively slow operation. Furthermore the updating does not always work reliably, sometimes it modifies things which aren't intended as links. Therefore it is often better to make this update later by hand (maybe by using wiki-wide search and replace).
+Unfortunately there is no perfect method to update each and every link and reference correctly.
+
+Choices:
+    * No: Don't update links
+    * Advanced: Reliable method which also adjusts e.g. relative subpage links but doesn't touch embedded Python scripts
+    * Simple: Dumb search and replace method
+
 
 *Also rename subpages*
 If checked, all [Subpages] of the page are renamed accordingly, e.g. if you rename "ebay" to "OnlineTrade" then "ebay/Circlet" becomes "OnlineTrade/Circlet" and "ebay/Couch/BuyerAddress" becomes "OnlineTrade/Couch/BuyerAddress".

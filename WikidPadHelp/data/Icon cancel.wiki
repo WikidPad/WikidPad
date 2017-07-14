@@ -1,2 +1,2 @@
-++ Icon cancel
+﻿++ Icon cancel
 [icon: cancel]

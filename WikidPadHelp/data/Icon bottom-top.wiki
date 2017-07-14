@@ -1,2 +1,2 @@
-++ Icon bottom-top
+﻿++ Icon bottom-top
 [icon: bottom-top]

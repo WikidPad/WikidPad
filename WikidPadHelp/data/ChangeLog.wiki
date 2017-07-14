@@ -1,6 +1,22 @@
 ﻿++ Change Log
 
 
+Jul. 07, 2017 (2.3beta16)
+
+    * Advanced link modification when renaming wiki page, much more
+      reliable than previous simple search and replace method
+      (thanks to Peter van Hese).
+      See [RenamingWikiWords#*Modify all links to the wiki word*]
+    * Windows and Linux: Option to set CPU affinity to single
+      CPU core (mainly useful on Linux).
+      See [OptionsDialog#*Run on CPU no.*]
+    * WikidPadParser: Backslash + newline now create a line break,
+      even in paragraph mode.
+    * Bug fixed: Wiki word tree node referring to itself although
+      option "no cycles in tree" is set.
+
+
+
 Apr. 26, 2016 (2.3beta15)
 
     * New wiki-bound option to let wiki page files simply be

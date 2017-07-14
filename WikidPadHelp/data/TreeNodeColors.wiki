@@ -1,4 +1,4 @@
-++ Tree Node Colors
+﻿++ Tree Node Colors
 
 This is the list of colors supported in the tree control via the
 [color: LIGHT STEEL BLUE] attribute.

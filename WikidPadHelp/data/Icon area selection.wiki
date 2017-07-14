@@ -1,2 +1,2 @@
-++ Icon area selection
+﻿++ Icon area selection
 [icon: area selection]
