@@ -27,14 +27,14 @@ class FileStorage:
     component, so it must be replaced by a new instance if a new wiki is loaded.
     """
     
-    def __init__(self, wikiDataManager, storagePath):
+    def __init__(self, wikiDocument, storagePath):
         """
         mainControl -- PersonalWikiFrame instance
-        wikiDataManager -- WikiDataManager instance of current wiki
+        wikiDocument -- WikiDocument instance of current wiki
         filePath -- directory path where new files should be stored
                 (doesn't have to exist already)
         """
-        self.wikiDataManager = wikiDataManager
+        self.wikiDocument = wikiDocument
         self.storagePath = storagePath
         
         # Conditions for identity test

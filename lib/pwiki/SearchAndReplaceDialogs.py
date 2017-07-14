@@ -199,7 +199,7 @@ class SearchResultListBox(wx.HtmlListBox, MiscEventSourceMixin):
         """
         Shows the results of search operation sarOp
         found -- list of matching wiki words
-        wikiDocument -- WikiDocument(=WikiDataManager) object
+        wikiDocument -- WikiDocument object
         """
         if found is None or len(found) == 0:
             self.found = []

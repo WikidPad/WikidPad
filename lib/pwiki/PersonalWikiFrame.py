@@ -32,7 +32,7 @@ from . import SystemInfo
 from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from . import WindowLayout
 
-from .wikidata import DbBackendUtils, WikiDataManager
+from .wikidata import DbBackendUtils, WikiDocument
 
 # To generate py2exe dependency
 from . import WikiDocument
@@ -196,7 +196,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # defaults
         self.wikiData = None
-        self.wikiDataManager = None
+        self.wikiDocument = None
         self.lastCursorPositionInPage = {}
         self.wikiHistory = []
         self.nonModalFindDlg = None  # Stores find&replace dialog, if present
@@ -515,35 +515,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.currentWikiDocumentProxyEvent
 
     def getWikiData(self):
-        if self.wikiDataManager is None:
+        if self.wikiDocument is None:
             return None
 
-        return self.wikiDataManager.getWikiData()
-
-    def getWikiDataManager(self):
-        """
-        Deprecated, use getWikiDocument() instead
-        """
-        return self.wikiDataManager
+        return self.wikiDocument.getWikiData()
 
     def getWikiDocument(self):
-        return self.wikiDataManager
+        return self.wikiDocument
 
     def isWikiLoaded(self):
         return self.getWikiDocument() is not None
 
     def getWikiConfigPath(self):
-        if self.wikiDataManager is None:
+        if self.wikiDocument is None:
             return None
 
-        return self.wikiDataManager.getWikiConfigPath()
+        return self.wikiDocument.getWikiConfigPath()
         
     def getWikiDefaultWikiLanguage(self):
-        if self.wikiDataManager is None:
+        if self.wikiDocument is None:
             # No wiki loaded, so take users default
             return wx.GetApp().getUserDefaultWikiLanguage()
 
-        return self.wikiDataManager.getWikiDefaultWikiLanguage()
+        return self.wikiDocument.getWikiDefaultWikiLanguage()
 
     def getCmdLineAction(self):
         return self.cmdLineAction
@@ -1117,7 +1111,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 traceback.print_exc()
 
 
-        page = WikiDataManager.getGlobalFuncPage("global/TextBlocks")
+        page = WikiDocument.getGlobalFuncPage("global/TextBlocks")
         treeData = TextTree.buildTreeFromText(page.getContent(),
                 TextTree.TextBlocksEntry.factory)
         TextTree.addTreeToMenu(treeData,
@@ -1173,7 +1167,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         self.favoriteWikisActivation.clearAssoc()
 
-        page = WikiDataManager.getGlobalFuncPage("global/FavoriteWikis")
+        page = WikiDocument.getGlobalFuncPage("global/FavoriteWikis")
         treeData = TextTree.buildTreeFromText(page.getContent(),
                 TextTree.FavoriteWikisEntry.factory)
         TextTree.addTreeToMenu(treeData,
@@ -1274,7 +1268,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         entry = TextTree.AddWikiToFavoriteWikisDialog.runModal(self, -1, entry)
         
         if entry is not None:
-            page = WikiDataManager.getGlobalFuncPage("global/FavoriteWikis")
+            page = WikiDocument.getGlobalFuncPage("global/FavoriteWikis")
             text = page.getLiveText()
             if len(text) == 0 or text[-1] == "\n":
                 page.appendLiveText(entry.getTextLine() + "\n")
@@ -2976,7 +2970,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             # create the data directory for the data files
             try:
-                WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
+                WikiDocument.createWikiDb(self, wdhName, wikiName, dataDir,
                         False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
@@ -2985,7 +2979,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _('Wiki DB Exists'), wx.YES_NO)
                 answer = dlg.ShowModal()
                 if answer == wx.ID_YES:
-                    WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
+                    WikiDocument.createWikiDb(self, wdhName, wikiName, dataDir,
                         True)
                 else:
                     allIsWell = False
@@ -3028,10 +3022,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                     # open the new wiki
                     self.openWiki(configFileLoc)
-                    p = self.wikiDataManager.createWikiPage(wikiName)
+                    p = self.wikiDocument.createWikiPage(wikiName)
                     p.appendLiveText("\n\n\t* WikiSettings\n", False)
 
-                    p = self.wikiDataManager.createWikiPage("WikiSettings")
+                    p = self.wikiDocument.createWikiPage("WikiSettings")
 
                     langHelper = wx.GetApp().createWikiLanguageHelper(
                             self.getWikiDefaultWikiLanguage())
@@ -3039,7 +3033,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     text = langHelper.getNewDefaultWikiSettingsPage(self)
                     p.replaceLiveText(text, False)
     
-                    p = self.wikiDataManager.createWikiPage("ScratchPad")
+                    p = self.wikiDocument.createWikiPage("ScratchPad")
                     text = "++ Scratch Pad\n\n"
                     p.replaceLiveText(text, False)
 
@@ -3106,7 +3100,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 wikiCombinedFilename))
 
         # make sure the config exists
-        cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
+        cfgPath, splittedWikiWord = WikiDocument.splitConfigPathAndWord(
                 wikiCombinedFilename)
 
         if cfgPath is None:
@@ -3155,9 +3149,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         while True:
             try:
-                wikiDataManager = WikiDataManager.openWikiDocument(
+                wikiDocument = WikiDocument.openWikiDocument(
                         cfgPath, dbtype, wikiLang, ignoreLock, createLock)
-                frmcode, frmtext = wikiDataManager.checkDatabaseFormat()
+                frmcode, frmtext = wikiDocument.checkDatabaseFormat()
                 if frmcode == 2:
                     # Unreadable db format
                     self.displayErrorMessage(
@@ -3174,7 +3168,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if answer == wx.CANCEL:
                         return False
 
-                wikiDataManager.connect()
+                wikiDocument.connect()
                 break
             except (UnknownDbHandlerException, DbHandlerNotAvailableException) as e:
                 # Could not get a handler name from wiki config file
@@ -3259,24 +3253,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # OK, things look good. Now set the member variables.
 
-        self.wikiDataManager = wikiDataManager
+        self.wikiDocument = wikiDocument
         self.currentWikiDocumentProxyEvent.setWatchedEvent(
-                self.wikiDataManager.getMiscEvent())
-        self.wikiDataManager.getUpdateExecutor().getMiscEvent().addListener(self)
+                self.wikiDocument.getMiscEvent())
+        self.wikiDocument.getUpdateExecutor().getMiscEvent().addListener(self)
 
-        if self.wikiDataManager.getUpdateExecutor().getJobCount() > 0:
+        if self.wikiDocument.getUpdateExecutor().getJobCount() > 0:
             self.updateStatusMessage(
                     _("Performing background jobs..."),
                     key="jobInfo", duration=300000)
         else:
             self.dropStatusMessageByKey("jobInfo")
 
-        self.wikiData = wikiDataManager.getWikiData()
+        self.wikiData = wikiDocument.getWikiData()
 
-        self.wikiName = self.wikiDataManager.getWikiName()
-        self.dataDir = self.wikiDataManager.getDataDir()
+        self.wikiName = self.wikiDocument.getWikiName()
+        self.dataDir = self.wikiDocument.getDataDir()
         
-        self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
+        self.getConfig().setWikiConfig(self.wikiDocument.getWikiConfig())
         
         # Open wiki pages which were previously opened (old method before
         # introducing AUI and perspectives)
@@ -3536,11 +3530,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                     traceback.print_exc()
                     pass
                 self.wikiData = None
-                if self.wikiDataManager is not None:
-                    self.wikiDataManager.getUpdateExecutor().getMiscEvent()\
+                if self.wikiDocument is not None:
+                    self.wikiDocument.getUpdateExecutor().getMiscEvent()\
                             .removeListener(self)
                     self.currentWikiDocumentProxyEvent.setWatchedEvent(None)
-                    self.wikiDataManager = None
+                    self.wikiDocument = None
             else:
                 # We had already a problem, so ask what to do
                 if errCloseAnywayMsg() != wx.YES:
@@ -3550,11 +3544,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.hooks.droppingWiki(self, wikiConfigPath)
 
                 self.wikiData = None
-                if self.wikiDataManager is not None:
-                    self.wikiDataManager.getUpdateExecutor().getMiscEvent()\
+                if self.wikiDocument is not None:
+                    self.wikiDocument.getUpdateExecutor().getMiscEvent()\
                             .removeListener(self)
                     self.currentWikiDocumentProxyEvent.setWatchedEvent(None)
-                    self.wikiDataManager = None
+                    self.wikiDocument = None
                 
             self._refreshHotKeys()
             self.statusBarTimer.Stop()
@@ -4671,18 +4665,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 break
 
             if newWord:
-                page = self.wikiDataManager.createWikiPage(validWikiWord)
+                page = self.wikiDocument.createWikiPage(validWikiWord)
                 # TODO Respect template attribute?
-                title = self.wikiDataManager.getWikiPageTitle(validWikiWord)
+                title = self.wikiDocument.getWikiPageTitle(validWikiWord)
                 if title is not None:
                     page.replaceLiveText("%s\n\n%s" % \
-                            (self.wikiDataManager.formatPageTitle(title), text))
+                            (self.wikiDocument.formatPageTitle(title), text))
                     self.saveDocPage(page)
                 else:
                     page.replaceLiveText(text)
                     self.saveDocPage(page)
             else:
-                page = self.wikiDataManager.getWikiPage(validWikiWord)
+                page = self.wikiDocument.getWikiPage(validWikiWord)
                 page.appendLiveText("\n\n" + text)
 
             self.getActiveEditor().ReplaceSelection(
@@ -4748,7 +4742,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.rereadRecentWikis()
             self.refreshPageStatus()
             
-            # TODO Move this to WikiDataManager!
+            # TODO Move this to WikiDocument!
             # Set file storage according to configuration
             
             if self.getWikiDocument() is not None:
@@ -5454,7 +5448,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.hooks.renamedWikiWord(self, oldWord, newWord)
 
 #                 elif miscEvt.has_key("updated wiki page"):
-#                     # This was send from a WikiDocument(=WikiDataManager) object,
+#                     # This was send from a WikiDocument object,
 #                     # send it again to listening components
 #                     self.fireMiscEventProps(miscEvt.getProps())
             elif miscEvt.getSource() is self.getMainAreaPanel():

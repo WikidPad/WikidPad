@@ -1090,7 +1090,7 @@ Table "wikiwords" changed to:
 
 Added column "presentationdatablock" contains byte string describing how to present
 a particular page (window scroll and cursor position). Its content is
-en/decoded by the WikiDataManager.
+en/decoded by the WikiDocument.
 
 Added column "wordnormcase" contains byte string returned by the normCase method
 of a Collator object (see "Localization.py"). The column's content should 

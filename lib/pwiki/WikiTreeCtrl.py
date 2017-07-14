@@ -300,9 +300,9 @@ class WikiWordNode(AbstractNode):
         """
         assert isinstance(baselabel, str)
 
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-        wikiData = wikiDataManager.getWikiData()
-        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+        wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+        wikiData = wikiDocument.getWikiData()
+        wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
 
         style = NodeStyle()
         
@@ -790,8 +790,8 @@ class WikiWordTodoSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+            wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+            wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
                 
             todoNodes = wikiPage.extractTodoNodesFromPageAst(pageAst)
             for node in todoNodes:
@@ -972,8 +972,8 @@ class WikiWordAttributeSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+            wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+            wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
                 
             attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
             for node in attrNodes:

@@ -205,7 +205,7 @@ class PlainTextPrint:
         to print a list of wiki words.
 
         printer -- Printer object
-        wikiDocument -- WikiDataManager aka WikiDocument object
+        wikiDocument -- WikiDocument object
         wordList -- list of wiki words to print
         printType -- bytestring as returned as <print type> by getPrintTypes()
             (only interesting if class provides more than one print type)
@@ -231,7 +231,7 @@ class PlainTextPrint:
         to show a print preview for a list of wiki words.
 
         printer -- Printer object
-        wikiDocument -- WikiDataManager aka WikiDocument object
+        wikiDocument -- WikiDocument object
         wordList -- list of wiki words to print
         printType -- bytestring as returned as <print type> by getPrintTypes()
             (only interesting if class provides more than one print type)

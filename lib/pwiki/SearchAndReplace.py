@@ -1290,7 +1290,7 @@ class ListWikiPagesOperation:
 
     def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
-        Called by WikiDataManager(=WikiDocument) to begin a wiki-wide search
+        Called by WikiDocument to begin a wiki-wide search
         """
         self.wikiDocument = wikiDocument
 
@@ -1874,7 +1874,7 @@ class SearchReplaceOperation:
 
     def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
-        Called by WikiDocument(=WikiDataManager) to begin a wiki-wide search
+        Called by WikiDocument to begin a wiki-wide search
         """
         self.wikiDocument = wikiDocument
 

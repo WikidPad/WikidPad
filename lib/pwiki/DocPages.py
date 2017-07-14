@@ -319,7 +319,7 @@ class AliasWikiPage(DocPage):
     """
     Fake page for an alias name of a wiki page. Most functions are delegated
     to underlying real page
-    Fetched via the (WikiDocument=) WikiDataManager.getWikiPage method.
+    Fetched via the WikiDocument.getWikiPage method.
     """
     def __init__(self, wikiDocument, aliasWikiWord, realWikiPage):
         self.wikiDocument = wikiDocument
@@ -1141,7 +1141,7 @@ class WikiPage(AbstractWikiPage):
     """
     holds the data for a real wikipage (no alias).
 
-    Fetched via the WikiDataManager.getWikiPage method.
+    Fetched via the WikiDocument.getWikiPage method.
     """
     def __init__(self, wikiDocument, wikiWord):
         AbstractWikiPage.__init__(self, wikiDocument, wikiWord)
@@ -1487,7 +1487,7 @@ class WikiPage(AbstractWikiPage):
 
     def renameVersionData(self, newWord):
         """
-        This is called by WikiDocument(=WikiDataManager) during
+        This is called by WikiDocument during
         WikiDocument.renameWikiWord() and shouldn't be called elsewhere.
         """
         with self.textOperationLock:
@@ -1504,7 +1504,7 @@ class WikiPage(AbstractWikiPage):
         Informs object that the page was renamed to newWord.
         This page object itself does not change its name but becomes invalid!
 
-        This function should be called by WikiDocument(=WikiDataManager) only,
+        This function should be called by WikiDocument only,
         use WikiDocument.renameWikiWord() to rename a page.
         """
 

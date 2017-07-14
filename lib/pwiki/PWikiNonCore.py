@@ -13,7 +13,7 @@ import wx
 
 from . import wxHelper, StringOps, Exporters, DocPages
 
-from .wikidata import WikiDataManager
+from .wikidata import WikiDocument
 
 from . import Trashcan
 
@@ -131,7 +131,7 @@ class PWikiNonCore:
             if not exportDest:
                 return
 
-        wikiDoc = WikiDataManager.WikiDataManager(wf, None, None, ignoreLock=True,
+        wikiDoc = WikiDocument.WikiDocument(wf, None, None, ignoreLock=True,
             createLock=False, recoveryMode=True)
             
         wikiDoc.connect()

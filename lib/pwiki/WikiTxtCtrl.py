@@ -962,14 +962,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.unloadCurrentDocPage(evtprops)
         # set the editor text
         content = None
-        wikiDataManager = self.presenter.getWikiDocument()
+        wikiDocument = self.presenter.getWikiDocument()
 
         self.presenter.setDocPage(funcPage)
 
         if self.getLoadedDocPage() is None:
             return  # TODO How to handle?
 
-        globalAttrs = wikiDataManager.getWikiData().getGlobalAttributes()
+        globalAttrs = wikiDocument.getWikiData().getGlobalAttributes()
         # get the font that should be used in the editor
         font = globalAttrs.get("global.font", self.defaultFont)
 
@@ -1024,7 +1024,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         self.unloadCurrentDocPage(evtprops)
         # set the editor text
-        wikiDataManager = self.presenter.getWikiDocument()
+        wikiDocument = self.presenter.getWikiDocument()
 
         self.presenter.setDocPage(wikiPage)
 

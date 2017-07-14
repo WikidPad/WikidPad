@@ -159,7 +159,7 @@ class MultiPageTextImporter:
         """
         Run import operation.
         
-        wikiDocument -- WikiDataManager object
+        wikiDocument -- WikiDocument object
         importType -- string tag to identify how to import
         importSrc -- Path to source directory or file to import from
         compatFilenames -- Should the filenames be decoded from the lowest

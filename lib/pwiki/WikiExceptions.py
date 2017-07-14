@@ -53,7 +53,7 @@ class RenameWikiWordException(AppBaseException):
     """
     Raised on problems with renaming multiple wikiwords at once.
     Constructed in 
-    WikiDataManager.WikiDataManager.buildRenameSeqWithSubpages()
+    WikiDocument.WikiDocument.buildRenameSeqWithSubpages()
     """
     # Problems:
     # Multiple words should be renamed to same word
@@ -102,7 +102,7 @@ class ImportException(AppBaseException): pass
 class SerializationException(AppBaseException): pass
 class VersioningException(AppBaseException): pass
 
-# See WikiDataManager.py. Thrown if requested handler for db backend isn't
+# See WikiDocument.py. Thrown if requested handler for db backend isn't
 #     available
 class NoDbHandlerException(AppBaseException): pass
 class WrongDbHandlerException(AppBaseException): pass
@@ -110,7 +110,7 @@ class DbHandlerNotAvailableException(AppBaseException): pass
 class UnknownDbHandlerException(AppBaseException): pass
 
 
-# See WikiDataManager.py. Thrown if requested handler for wiki language isn't
+# See WikiDocument.py. Thrown if requested handler for wiki language isn't
 #     available
 class UnknownWikiLanguageException(AppBaseException): pass
 class WrongWikiLanguageException(AppBaseException): pass
