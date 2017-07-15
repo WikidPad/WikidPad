@@ -544,7 +544,7 @@ class WikiHtmlView2(wx.Panel):
         elif "PROXY_EVENT//MOUSE_RIGHT_CLICK" in uri:
             self.OnContextMenu()
             evt.Veto()
-            return True
+            return False
         elif "PROXY_EVENT//MOUSE_MIDDLE_CLICK" in uri:
             ctrl = uri.split("PROXY_EVENT//MOUSE_MIDDLE_CLICK/")[1]
 

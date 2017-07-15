@@ -741,6 +741,7 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     in the KeyBindings, e.g. "*ShowFolding". If keyBindings
     parameter is None, all shortcuts (with or without *) are ignored.
     """
+    menuItems = []
     for line in desc.split("\n"):
         if line.strip() == "":
             continue
@@ -779,7 +780,31 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
             if menuID == -1:
                 continue
             parts[2] = _unescapeWithRe(parts[2])
-            menu.Append(menuID, _(title), _(parts[2]), kind)
+
+
+            # Check and see if we want a submenu
+            submenu = None
+            # TODO: this should be recursive to allow for nested submenus
+            if "|" in title:
+                submenu_name, title, = title.split("|")
+
+                # Menu ID's are always negative. -1 is returned if not found
+                submenu_id = menu.FindItem(submenu_name)
+                if submenu_id != -1:
+                    submenu = menu.FindItemById(submenu_id).SubMenu
+                # If we can't find the submenu create it
+                else:
+                    submenu = wx.Menu()
+                    menu.Append(wx.ID_ANY, submenu_name, submenu)
+
+            if submenu is not None:
+                menuItem = submenu.Append(menuID, _(title), _(parts[2]), kind)
+            else:
+                menuItem = menu.Append(menuID, _(title), _(parts[2]), kind)
+            
+            menuItems.append(menuItem)
+
+    return menuItems
 
 
 
