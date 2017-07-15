@@ -250,6 +250,8 @@ class WikiHtmlView2(wx.Panel):
         self.vi = None # Contains ViFunctions instance if vi key handling enabled
         self.keyEventConn = None
 
+        self.page_loaded = False
+
 
         try:
             self.Bind(wx.html2.EVT_WEB_VIEW_NAVIGATING, self.OnPageNavigation, 
@@ -490,7 +492,12 @@ class WikiHtmlView2(wx.Panel):
         # TODO: make extendable - for plugins + VI mode
         uri = flexibleUrlUnquote(evt.GetURL())
 
-        self.html.RunScript(r"""event_str = false;""")
+        # Run script segfaults if WikidPad started with a page in preview
+        # quick hack to prevent this
+        if self.page_loaded:
+            self.html.RunScript(r"""event_str = false;""")
+
+        self.page_loaded = True
 
         # This can lead to an event being vetoed multiple times
         # (which should not be an issue)
@@ -544,7 +551,7 @@ class WikiHtmlView2(wx.Panel):
         elif "PROXY_EVENT//MOUSE_RIGHT_CLICK" in uri:
             self.OnContextMenu()
             evt.Veto()
-            return False
+            return True
         elif "PROXY_EVENT//MOUSE_MIDDLE_CLICK" in uri:
             ctrl = uri.split("PROXY_EVENT//MOUSE_MIDDLE_CLICK/")[1]
 
@@ -568,6 +575,7 @@ class WikiHtmlView2(wx.Panel):
             self.updateStatus(None)
             evt.Veto()
             return True
+        # This breaks if not in VI mode
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
@@ -580,6 +588,13 @@ class WikiHtmlView2(wx.Panel):
 #             return True
 # 
 #         return False
+
+        if "PROXY_EVENT" in uri:
+            # unmanged event, veto it
+            evt.Veto()
+            return True
+
+        return True
 
 
     def OnContextMenu(self):
