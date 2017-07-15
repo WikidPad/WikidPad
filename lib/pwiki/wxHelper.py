@@ -261,7 +261,7 @@ class IdRecycler:
         return self.assoc[id]
 
     def iteritems(self):
-        return iter(self.assoc.items())
+        return iter(list(self.assoc.items()))
 
     def clearAssoc(self):
         """

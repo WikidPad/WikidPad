@@ -2221,7 +2221,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Filter entries from activation map with a digit (1 to 9) in the flags.
         # This digit defines the position in the toolbar.
-        for menuID, entry in self.favoriteWikisActivation.items():
+        for menuID, entry in self.favoriteWikisActivation.iteritems():
             num = entry.getToolbarPosition()
             if num != -1:
                 toolEntries[num - 1] = (menuID, entry)
