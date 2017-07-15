@@ -30,7 +30,7 @@ from . import PluginManager
 # Try and load the html2 webview renderer
 try:
     WikiHtmlViewWK = None
-    if wx.version().startswith(("2.9", "3")):
+    if wx.version().startswith(("2.9", "3", "4")):
         from . import WikiHtmlView2
     else:
         WikiHtmlView2 = None

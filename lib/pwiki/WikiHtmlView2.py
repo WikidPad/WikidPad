@@ -348,6 +348,7 @@ class WikiHtmlView2(wx.Panel):
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
                     "", ".html", relativeTo="")
 
+
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
 
@@ -357,51 +358,62 @@ class WikiHtmlView2(wx.Panel):
         #wx.EVT_KEY_UP(self, self.OnKeyUp)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
-        self.Bind(wx.EVT_MENU, self.OnSelectAll, id=GUI_ID.CMD_SELECT_ALL)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), id=GUI_ID.CMD_ZOOM_IN)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), id=GUI_ID.CMD_ZOOM_OUT)
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, 
+                id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, self.OnSelectAll, 
+                id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), 
+                id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), 
+                id=GUI_ID.CMD_ZOOM_OUT)
 
-        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)        
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)        
-        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)        
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, 
+                id=GUI_ID.CMD_ACTIVATE_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "left"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
+            evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "right"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
+            evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
+            evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"), 
                 id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, 
+            "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
 
 
-        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
-        self.Bind(wx.EVT_MENU, self.OnGoBackInHistory, id=GUI_ID.CMD_HISTORY_BACK)
-        self.Bind(wx.EVT_MENU, self.OnGoForwardInHistory, id=GUI_ID.CMD_HISTORY_FORWARD)
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, 
+                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
+        self.Bind(wx.EVT_MENU, self.OnGoBackInHistory, 
+                id=GUI_ID.CMD_HISTORY_BACK)
+        self.Bind(wx.EVT_MENU, self.OnGoForwardInHistory, 
+                id=GUI_ID.CMD_HISTORY_FORWARD)
 
         #wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
         #wx.EVT_MIDDLE_DOWN(self.html, self.OnMiddleDown)
@@ -430,7 +442,7 @@ class WikiHtmlView2(wx.Panel):
         # Set zoom factor
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
         zoomFact = max(0.1, zoom * 0.1 + 1.0)
-        self.html.SetZoom(zoomFact)
+        self.html.SetZoom(int(zoomFact))
 
         self.jquery = False
 
@@ -879,7 +891,7 @@ if ((typeof jQuery !== 'undefined')) {
                 wikiWord = self.currentLoadedWikiWord
                 try:
                     anchor = status.split("#", 1)[1]
-                except ValueError:
+                except IndexError:
                     anchor = None
     
             if wikiWord is not None:
