@@ -425,7 +425,7 @@ class Trashcan(MiscEventSourceMixin):
 # 
 #         base = None
 #         workList = []
-#         for i in xrange(len(self.trashBags) - 1, -1, -1):
+#         for i in range(len(self.trashBags) - 1, -1, -1):
 #             entry = self.trashBags[i]
 #             if entry.contentDifferencing == u"complete":
 #                 workList = []

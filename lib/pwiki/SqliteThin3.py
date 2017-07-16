@@ -463,7 +463,7 @@ class _SqliteStatement3:
 #     def bind_hint(self, datas, hint):
 #         first=1  # TODO: as dict parameter
 #         
-#         for i in xrange(first, len(datas)+first):
+#         for i in range(first, len(datas)+first):
 #             hint[i-1](self, i, datas[i-1])
 # 
 # 
@@ -474,7 +474,7 @@ class _SqliteStatement3:
 #             return map(find_bindfct, datas)
 #         else:
 #             return map(lambda i: fctfinder(self, i, datas[i-1]),
-#                     xrange(first, len(datas)+first))
+#                     range(first, len(datas)+first))
 
    
     def column_count(self):

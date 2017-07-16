@@ -1954,7 +1954,7 @@ def getBinCompactForDiff(a, b):
 #     uc = []
 #     lc = []
 #     
-#     for i in xrange(0, 0x10000):
+#     for i in range(0, 0x10000):
 #         c = unichr(i)
 #         if category(c) == "Ll":
 #             lc.append(c)
