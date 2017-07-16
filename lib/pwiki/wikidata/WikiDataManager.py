@@ -413,6 +413,10 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
         
+        if self.wikiData.checkCapability("filePerPage") is not None:
+            self.wikiData.setEditorTextMode(self.getWikiConfig().getboolean("main",
+                    "editor_text_mode", False))
+        
         self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
         self.wikiWideHistory = WikiWideHistory(self)
