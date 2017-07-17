@@ -3,7 +3,7 @@ This is a Windows (32 bit) specific file for handling some operations not provid
 by the OS-independent wxPython library.
 """
 
-import ctypes, os, os.path, re, struct, traceback
+import ctypes, os, os.path, re, struct, traceback, multiprocessing
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
         c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer, \
         c_void_p, string_at, sizeof   # , WindowsError
@@ -204,6 +204,29 @@ VkKeyScan = _user32dll.VkKeyScanW
 VkKeyScan.argtypes = [ctypes.c_wchar]
 # SHORT VkKeyScan(          TCHAR ch
 # );
+
+
+
+
+# TODO
+GetCurrentProcess = _kernel32dll.GetCurrentProcess
+# HANDLE WINAPI GetCurrentProcess(void);
+
+
+SetProcessAffinityMask = _kernel32dll.SetProcessAffinityMask
+# BOOL WINAPI SetProcessAffinityMask(
+#   _In_  HANDLE hProcess,
+#   _In_  DWORD_PTR dwProcessAffinityMask
+# );
+
+
+GetProcessAffinityMask = _kernel32dll.GetProcessAffinityMask
+# BOOL WINAPI GetProcessAffinityMask(
+#   _In_   HANDLE hProcess,
+#   _Out_  PDWORD_PTR lpProcessAffinityMask,
+#   _Out_  PDWORD_PTR lpSystemAffinityMask
+# );
+
 
 
 
@@ -602,6 +625,124 @@ def translateAcceleratorByKbLayout(accStr):
         _ACCEL_KEY_MAPPING = resultBack
 
     return cm.group(1) + _ACCEL_KEY_MAPPING.get(cm.group(2), cm.group(2))
+
+
+
+def _getAffMaskIntegerByIndexes(cpuIndexSeq):
+    """
+    Convert sequence of cpus to integer object with appropriate bits set.
+    indexseq -- Sequence of integer index numbers of cpu cores (first is 0).
+            0 <= indexseq < (32 for 32bit and 64 for 64bit Windows)
+    """
+    result = 0
+    
+    max = sizeof(c_uint) * 8;
+
+    for idx in cpuIndexSeq:
+        if idx < 0:
+            raise ValueError()
+        
+        if idx >= max:
+            continue
+
+        result |= 1 << idx
+    
+    return result
+
+
+def _getSystemAffMask():
+    """
+    Retrieve system affinity mask (existing configured processors) as a bitset
+    integer.
+    Setting process affinity mask will fail if it has a 1 set in a bit where
+    system affinity mask has 0.
+    See http://msdn.microsoft.com/en-us/library/windows/desktop/ms683213%28v=vs.85%29.aspx
+    
+    May return 0 on failure
+    """
+
+    procMask = c_uint()
+    sysMask = c_uint()
+    result = GetProcessAffinityMask(GetCurrentProcess(), byref(procMask), byref(sysMask))
+    if result == 0:
+        # Something went wrong
+        return 0
+    
+    return sysMask.value
+
+
+def setCpuAffinity(cpuIndexSeq):
+    """
+    Set affinity of current process to those CPUs listed as sequence of integers
+    in the cpuIndexSeq. Numbers equal or higher than getCpuCount() are ignored.
+    
+    If no valid CPU number is in cpuIndexSeq, function returns False and
+    affinity isn't set.
+    
+    cpuIndexSeq -- Sequence of integer index numbers of cpu cores (first is 0).
+    """
+
+    procIntMask = _getAffMaskIntegerByIndexes(cpuIndexSeq)
+
+    # Restrict to system-known CPUs
+    procIntMask &= _getSystemAffMask()
+    
+    if procIntMask == 0:
+        # No valid CPUs remain
+        return False
+    
+    result = SetProcessAffinityMask(GetCurrentProcess(), c_uint(procIntMask))
+    
+    if result != 0:
+        return True
+        
+    return False
+
+
+def getCpuAffinity():
+    """
+    Get affinity of current process as a list of all CPU numbers to which
+    the process is assigned.
+    
+    May return None if something went wrong.
+    """
+    maxNum = getCpuCount()
+
+    result = []
+
+    procMask = c_uint()
+    sysMask = c_uint()
+    retval = GetProcessAffinityMask(GetCurrentProcess(), byref(procMask), byref(sysMask))
+    if retval == 0:
+        # Something went wrong
+        return None
+
+    procMask = procMask.value
+
+    for i in range(maxNum):
+        if (procMask & (1 << i)) != 0:
+            result.append(i)
+
+    return result
+
+
+
+def getCpuCount():
+    """
+    Returns number of CPUs allowed for the sequence list for setCpuAffinity().
+    Highest number in sequence list must be lower than getCpuCount()
+    
+    The highest valid cpu number is system dependent and may be lower than
+    the number of available CPUs.
+    
+    If setting CPU affinity is not supported, function returns 0
+    """
+    try:
+        return min(sizeof(c_uint) * 8, multiprocessing.cpu_count())
+    except NotImplementedError:
+        return 0
+
+
 
 
 

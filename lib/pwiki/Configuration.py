@@ -565,7 +565,8 @@ GLOBALDEFAULTS = {
             # Seems to help against some problems with Vietnamese input programs
 #     ("main", "wikiWord_rename_wikiLinks"): u"0", # When renaming wiki word, should it try to rename links to the word, too?
 #             # 0:No, 1:Yes, 2:Ask for each renaming
-    ("main", "wikiWord_renameDefault_modifyWikiLinks"): "False", # When renaming wiki word, should it try to rename links to the word, too?
+    ("main", "wikiWord_renameDefault_modifyWikiLinks"): "off", # When renaming wiki word, should it try to rename links to the word, too?
+            # "off": No link rename, "advanced": New method, rather reliable, "simple": Old method, unreliable but fast
             # This is the default setting but can be modified for each rename operation.
     ("main", "wikiWord_renameDefault_renameSubPages"): "True", # When renaming wiki word, should sub pages also be renamed
             # This is the default setting but can be modified for each rename operation
@@ -856,6 +857,7 @@ GLOBALDEFAULTS = {
             # this is only necessary for special layouts where ctrl-level uses fundamentally different layout
             # than base and shift level
     ("main", "zombieCheck"): "True", # Check for already running processes? Only active if "single_process" is True
+    ("main", "cpu_affinity"): "-1", # Assign process to a single CPU? -1: Use CPU affinity on startup; greater numbers denote a particular CPU
 
     ("main", "tempHandling_preferMemory"): "False", # Prefer to store temporary data in memory where this is possible?
     ("main", "tempHandling_tempMode"): "system", # Mode for storing of temporary data.

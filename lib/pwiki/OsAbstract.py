@@ -23,6 +23,15 @@ else:
 
 # GtkHacks for the Clipboard Catcher
 
+
+try:
+    import LinuxHacks
+except:
+    if SystemInfo.isLinux():
+        traceback.print_exc()
+    LinuxHacks = None
+
+
 try:
     from . import GtkHacks
 except:
@@ -30,6 +39,8 @@ except:
     ExceptionLogger.logOptionalComponentException(
             "Initialize GTK hacks in OsAbstract.py")
     GtkHacks = None
+
+
 
 
 # Define startFile
@@ -139,6 +150,29 @@ if WindowsHacks:
 else:
     def checkForOtherInstances():
         return []
+
+
+# Define setCpuAffinity, getCpuAffinity and getCpuCount
+
+if WindowsHacks:
+    setCpuAffinity = WindowsHacks.setCpuAffinity
+    getCpuAffinity = WindowsHacks.getCpuAffinity
+    getCpuCount = WindowsHacks.getCpuCount
+elif LinuxHacks:
+    setCpuAffinity = LinuxHacks.setCpuAffinity
+    getCpuAffinity = LinuxHacks.getCpuAffinity
+    getCpuCount = LinuxHacks.getCpuCount
+else:
+    def setCpuAffinity(cpuIndexSeq):
+        return False
+    
+    def getCpuAffinity():
+        return None
+
+    def getCpuCount():
+        return 0
+
+INITIAL_CPU_AFFINITY = getCpuAffinity()
 
 
 

@@ -1358,9 +1358,11 @@ class WikiPage(AbstractWikiPage):
                 for parent in parents:
                     try:
                         parentPage = self.wikiDocument.getWikiPage(parent)
-                        templateWord = langHelper.resolveWikiWordLink(
-                                parentPage.getAttribute("template"),
-                                parentPage)
+                        try:
+                            templateWord = langHelper.resolveWikiWordLink(
+                                parentPage.getAttribute("template"), parentPage)
+                        except ValueError:
+                            templateWord = None
                         if templateWord is not None and \
                                 self.wikiDocument.isDefinedWikiLinkTerm(
                                         templateWord):
@@ -1734,7 +1736,7 @@ class WikiPage(AbstractWikiPage):
                 self.wikiPageName, "alias", None):
             threadstop.testValidThread()
             if not langHelper.checkForInvalidWikiLink(v,
-                    self.getWikiDocument()):
+                                                      self.getWikiDocument()):
 #                 matchTerms.append((v, ALIAS_TYPE, self.wikiPageName, -1, -1))
                 matchTerms.append((langHelper.resolveWikiWordLink(v, self),
                         ALIAS_TYPE, self.wikiPageName, -1, -1))
@@ -1819,7 +1821,7 @@ class WikiPage(AbstractWikiPage):
         with self.textOperationLock:
             threadstop.testValidThread()
 
-            if not self.getWikiDocument().isSearchIndexEnabled():
+            if self.isInvalid() or not self.getWikiDocument().isSearchIndexEnabled():
                 return True  # Or false?
             
             liveTextPlaceHold = self.liveTextPlaceHold
@@ -1844,6 +1846,10 @@ class WikiPage(AbstractWikiPage):
 
         # Check within lock if data is current yet
         with self.textOperationLock:
+            if self.isInvalid(): 
+                writer.cancel()
+                return True  # Or false?
+
             if not liveTextPlaceHold is self.liveTextPlaceHold:
                 writer.cancel()
                 return False
@@ -1864,16 +1870,18 @@ class WikiPage(AbstractWikiPage):
         unifName = self.getUnifiedPageName()
         
         writer = None
-        try:
-            searchIdx = self.getWikiDocument().getSearchIndex()
-            writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
-            writer.delete_by_term("unifName", unifName)
-        except:
-            if writer is not None:
-                writer.cancel()
-            raise
-
-        writer.commit()
+        
+        with self.textOperationLock:
+            try:
+                searchIdx = self.getWikiDocument().getSearchIndex()
+                writer = searchIdx.writer(timeout=Consts.DEADBLOCKTIMEOUT)
+                writer.delete_by_term("unifName", unifName)
+            except:
+                if writer is not None:
+                    writer.cancel()
+                raise
+    
+            writer.commit()
 
 
     def queueRemoveFromSearchIndex(self):

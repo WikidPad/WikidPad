@@ -782,8 +782,8 @@ msgid "Modif. date must match"
 msgstr "Mód. dátumnak egyeznie kell"
 
 #: WikidPad.xrc:0
-msgid "Modify all links to the wiki word (unreliable!)"
-msgstr "A wikiszó minden hivatkozását lecseréli (megbízhatatlan)"
+msgid "Modify all links to the wiki word"
+msgstr "A wikiszó minden hivatkozását lecseréli"
 
 #: WikidPad.xrc:0
 msgid "Move into file storage"

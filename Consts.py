@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 3, 115, 0)
-VERSION_STRING = "wikidPad 2.3beta15"
+VERSION_TUPLE = ("wikidPad", 2, 3, 116, 0)
+VERSION_STRING = "wikidPad 2.3beta16"
 HOMEPAGE = "http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -112,3 +112,8 @@ SEARCHINDEX_FORMAT_NO = 4
 
 TEXTEDITOP_INSERT = 1
 TEXTEDITOP_DELETE = 2
+
+# Methods available to update wiki word references (modify text)
+# when renaming wiki words (see PersonalWikiFrame.renameWikiWord
+# and WikiDataManager.renameWikiWords):
+ModifyText = Enumeration('ModifyText', ['off', 'advanced', 'simple'])

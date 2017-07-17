@@ -769,8 +769,8 @@ msgid "Modif. date must match"
 msgstr "Ändringsdatum måste matcha"
 
 #: WikidPad.xrc:0
-msgid "Modify all links to the wiki word (unreliable!)"
-msgstr "Ändra alla länkar till wikiordet (osäkert!)"
+msgid "Modify all links to the wiki word"
+msgstr "Ändra alla länkar till wikiordet"
 
 #: WikidPad.xrc:0
 msgid "Move into file storage"

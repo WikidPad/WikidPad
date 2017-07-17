@@ -616,9 +616,10 @@ class App(wx.App, MiscEventSourceMixin):
 
     def _rereadGlobalConfig(self):
         """
-        Make settings from global config which are changeable during session
+        Realize settings from global config which are changeable during session
         """
         from . import Localization
+        from . import OsAbstract
         
         collationOrder = self.globalConfig.get("main", "collation_order")
         collationUppercaseFirst = self.globalConfig.getboolean("main",
@@ -644,6 +645,17 @@ class App(wx.App, MiscEventSourceMixin):
                     "mouse_scrollUnderPointer"))
         except AttributeError:
             pass  # Older wxPython versions didn't support this
+            
+        # Set CPU affinity
+        
+        if OsAbstract.getCpuCount() > 1:
+            aff = self.globalConfig.getint("main", "cpu_affinity", -1)
+            
+            if aff == -1:
+                OsAbstract.setCpuAffinity(OsAbstract.INITIAL_CPU_AFFINITY)
+            else:
+                OsAbstract.setCpuAffinity((aff,))
+
 
 
     def OnEndSession(self, evt):

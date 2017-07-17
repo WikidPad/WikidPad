@@ -18,7 +18,7 @@ except:
     sqlite = None
 
 
-from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
+from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN, ModifyText
 
 from .StringOps import mbcsEnc, mbcsDec, \
         escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
@@ -654,8 +654,13 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.stFromWikiWord.SetLabel(self.fromWikiWord)
         self.ctrls.tfToWikiWord.SetValue(self.fromWikiWord)
         self.ctrls.btnOk.Enable(False)
-        self.ctrls.cbModifyLinks.SetValue(self.mainControl.getConfig().getboolean(
-                "main", "wikiWord_renameDefault_modifyWikiLinks", False))
+#         self.ctrls.cbModifyLinks.SetValue(self.mainControl.getConfig().getboolean(
+#                 "main", "wikiWord_renameDefault_modifyWikiLinks", False))
+        self.ctrls.chModifyLinks.SetSelection(
+                {"off": 0, "false": 0, "advanced": 1, "true": 1, "simple":2}
+                .get(self.mainControl.getConfig()
+                    .get("main", "wikiWord_renameDefault_modifyWikiLinks", "off")
+                    .lower(), 0))
         self.ctrls.cbRenameSubPages.SetValue(self.mainControl.getConfig().getboolean(
                 "main", "wikiWord_renameDefault_renameSubPages", True))
 
@@ -686,11 +691,22 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
             return
 
         toWikiWord = self.ctrls.tfToWikiWord.GetValue()
+        
+        try:
+            modifyText = (ModifyText.off, ModifyText.advanced, ModifyText.simple)[
+                    self.ctrls.chModifyLinks.GetSelection()]
+        except IndexError:
+            modifyText = ModifyText.off
+        
+#         if self.ctrls.cbModifyLinks.GetValue():
+#             modifyText = ModifyText.advanced
+#         else:
+#             modifyText = ModifyText.off
+
 
         try:
             self.mainControl.renameWikiWord(self.fromWikiWord, toWikiWord,
-                    self.ctrls.cbModifyLinks.GetValue(),
-                    self.ctrls.cbRenameSubPages.GetValue())
+                    modifyText, self.ctrls.cbRenameSubPages.GetValue())
         except RenameWikiWordException as e:
             wx.MessageBox(_("Can't process renaming:\n%s") %
                     e.getFlowText(), _("Can't rename"),

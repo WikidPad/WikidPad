@@ -620,7 +620,8 @@ class MultiPageTextImporter:
                 renamePresentTo glob 'wikipage/*'
                 """):
             if wikiDoc.isDefinedWikiPageName(pageFrom):
-                wikiDoc.renameWikiWord(pageFrom, pageTo, False)  # TODO How to handle rename of home page?
+                wikiDoc.renameWikiWords({pageFrom: pageTo}, Consts.ModifyText.off)
+                        # TODO How to handle rename of home page?
 
         # Then remaining data blocks
         for oldUnifName, newUnifName in self.tempDb.execSqlQuery(

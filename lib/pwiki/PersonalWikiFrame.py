@@ -26,7 +26,7 @@ from . import TextTree
 from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 
 from .WikiExceptions import *
-from Consts import HOMEPAGE
+from Consts import HOMEPAGE, ModifyText
 
 from . import Utilities
 from . import SystemInfo
@@ -3905,49 +3905,62 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 raise
 
 
-    def renameWikiWord(self, wikiWord, toWikiWord, modifyText, processSubpages):
+    def renameWikiWord(self, word, toWord, modifyText=ModifyText.advanced,
+                       processSubpages=True):
         """
-        Renames current wiki word to toWikiWord.
-        Returns True if renaming was done successful.
+        Rename `word` to `toWord`, return True if successful.
         
-        modifyText -- Should the text of links to the renamed page be
-                modified? (This text replacement works unreliably)
-        processSubpages -- Should subpages be renamed as well?
+        modifyText (ModifyText) -- Update references to the renamed page(s)?
+
+            ModifyText.off (0)
+            ModifyText.advanced (recommended) (1)
+            ModifyText.simple (2)
+
+            See: WikiDataManager.renameWikiWords
+
+        processSubpages (bool) -- Should subpages be renamed as well?
         """
-        if wikiWord is None or not self.requireWriteAccess():
+#         print (u"\nPersonalWikiFrame.renameWikiWord: %r -> %r, "
+#                u"modifyText=%r, processSubpages=%r" % (word, toWord,
+#                modifyText, processSubpages))
+
+        if word is None or not self.requireWriteAccess():
             return False
 
         wikiDoc = self.getWikiDocument()
 
         try:
             if processSubpages:
-                renameSeq = wikiDoc.buildRenameSeqWithSubpages(wikiWord,
-                        toWikiWord)
+                renameSeq = wikiDoc.buildRenameSeqWithSubpages(word, toWord)
             else:
-                renameSeq = [(wikiWord, toWikiWord)]
+                renameSeq = [(word, toWord)]
 
+            renameDict = dict((oldPageName, newPageName)
+                          for oldPageName, newPageName in renameSeq)
+
+            # Renaming a page requires the page to be already saved,
+            # so save (all pages) before renaming:
             self.saveAllDocPages()
 
-            # TODO Don't recycle variable names!
-            for wikiWord, toWikiWord in renameSeq:
+            wikiDoc.renameWikiWords(renameDict, modifyText)
 
-                if wikiWord == wikiDoc.getWikiName():
-                    # Renaming of root word = renaming of wiki config file
-                    wikiConfigFilename = wikiDoc.getWikiConfigPath()
-                    self.removeFromWikiHistory(wikiConfigFilename)
-    #                 self.wikiHistory.remove(wikiConfigFilename)
-                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
-                            modifyText)
-                    # Store some additional information
-                    self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
-                else:
-                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
-                            modifyText)
+            # renaming of root word = renaming of wiki config file
+            rename_config = wikiDoc.getWikiName() in renameDict
+            if rename_config:
+                wikiConfigFilename = wikiDoc.getWikiConfigPath()
+                self.removeFromWikiHistory(wikiConfigFilename)
+                # store some additional information
+                self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
 
-            return True
+            if modifyText != ModifyText.off:
+                self.saveAllDocPages()
+
+            return True  # all went well
+
         except (IOError, OSError, DbAccessError) as e:
             self.lostAccess(e)
             raise
+
         except WikiDataException as e:
             traceback.print_exc()                
             self.displayErrorMessage(str(e))

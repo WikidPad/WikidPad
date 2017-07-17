@@ -256,12 +256,33 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxCheckBox" name="cbRenameDefaultModifyLinks">
-          <label>Modify all links to the wiki word (unreliable!)</label>
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Modify links to wiki words:</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>3,0</cellpos>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chRenameDefaultModifyLinks">
+              <content>
+                <item>No</item>
+                <item>Advanced (rather reliable)</item>
+                <item>Simple (unreliable)</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+            <cellpos>3,1</cellpos>
+          </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
+        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbRenameDefaultRenameSubPages">
@@ -2604,6 +2625,29 @@
         <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Run on CPU no.:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chCpuAffinity">
+              <content>
+                <item>(Startup)</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND</flag>
+      </object>
+      <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeNoCycles">
           <label>No cycles in tree</label>
         </object>
@@ -4010,8 +4054,7 @@
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
-        <object class="wxFlexGridSizer">
-          <cols>2</cols>
+        <object class="wxGridBagSizer">
           <object class="sizeritem">
             <object class="wxStaticText" name="">
               <label>Rename Word:</label>
@@ -4019,6 +4062,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>0,0</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText" name="stFromWikiWord">
@@ -4027,6 +4071,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>0,1</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText" name="">
@@ -4035,6 +4080,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>1,0</cellpos>
           </object>
           <growablecols>1</growablecols>
           <object class="sizeritem">
@@ -4042,26 +4088,44 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>1,1</cellpos>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="stErrorMessage">
+              <label></label>
+              <style></style>
+              <fg>#FF0000</fg>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>2,0</cellpos>
+            <cellspan>1,2</cellspan>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Modify links to wiki words:</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <cellpos>3,0</cellpos>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chModifyLinks">
+              <content>
+                <item>No</item>
+                <item>Advanced (rather reliable)</item>
+                <item>Simple (unreliable)</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+            <cellpos>3,1</cellpos>
           </object>
         </object>
         <flag>wxALL|wxEXPAND</flag>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticText" name="stErrorMessage">
-          <label></label>
-          <style></style>
-          <fg>#FF0000</fg>
-        </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxCheckBox" name="cbModifyLinks">
-          <label>Modify all links to the wiki word (unreliable!)</label>
-        </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbRenameSubPages">

@@ -359,8 +359,8 @@ class SyntaxNode:
     def findNodesForCharPos(self, charPos):
         raise NotImplementedError  # abstract
 
-#     def cloneDeep(self):
-#         raise NotImplementedError  # abstract
+    def cloneDeep(self):
+        raise NotImplementedError  # abstract
 
 
     @staticmethod
@@ -638,13 +638,12 @@ class NonTerminalNode(SyntaxNode):
         return index
         
 
+    def cloneDeep(self):
+        ret = NonTerminalNode(self.sub, self.pos, self.name)
+        ret.__dict__ = self.__dict__.copy()
+        ret.sub = [n.cloneDeep() for n in self.sub]
 
-#     def cloneDeep(self):
-#         ret = NonTerminalNode(self.sub, self.pos, self.name)
-#         ret.sub = [n.cloneDeep() for n in self.sub]
-#         ret.__dict__ = self.__dict__.copy()
-# 
-#         return ret
+        return ret
 
 
     def _pprintRecurs(self, ind, inc, result):
@@ -772,11 +771,12 @@ class TerminalNode(SyntaxNode):
                     (self.pos, self.strLength, repr(self.name)))
         result.append("%s)" % repr(self.text))
 
-#     def cloneDeep(self):
-#         ret = TerminalNode(self.text, self.pos, self.name)
-#         ret.__dict__ = self.__dict__.copy()
-# 
-#         return ret
+
+    def cloneDeep(self):
+        ret = TerminalNode(self.text, self.pos, self.name)
+        ret.__dict__ = self.__dict__.copy()
+
+        return ret
 
 
 
