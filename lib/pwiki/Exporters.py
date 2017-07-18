@@ -6,7 +6,7 @@
 # from Enum import Enumeration
 import sys, os, re, traceback, locale, time, urllib.request, urllib.parse, urllib.error
 from os.path import join, exists, splitext, abspath
-from io import StringIO
+from io import BytesIO
 import shutil
 ## from xml.sax.saxutils import escape
 
@@ -561,7 +561,7 @@ def getSingleWikiWordPacket(wikiDocument, word, writeVersionData=True,
     bytestring.
     """
     for tryNumber in range(35):
-        stream = StringIO()
+        stream = BytesIO()
         stream.write(BOM_UTF8)
         separator = "-----%s-----" % createRandomString(25)
         exportFile = _SeparatorWatchUtf8Writer(stream, separator)

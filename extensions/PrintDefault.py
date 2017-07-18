@@ -6,7 +6,7 @@ Plugin to implement default printing methods plain text and HTML
 
 import re, traceback
 
-import io as StringIO
+from io import BytesIO
 
 import wx
 
@@ -598,7 +598,7 @@ class HtmlPrint:
         exporterInstance.tempFileSet = self.tempFileSet
         exporterInstance.styleSheet = ""
 
-        realfp = StringIO.StringIO()
+        realfp = BytesIO()
         exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
 
         return realfp.getvalue().decode("utf-8")
@@ -710,8 +710,8 @@ class HtmlWKPrint(HtmlPrint):
         htpath = self.tempFileSet.createTempFile(
                     "", ".html", relativeTo="").decode("latin-1")
 
-        realfp = StringIO.StringIO()
-        with open(htpath, "w") as realfp:
+#         realfp = StringIO.StringIO()
+        with open(htpath, "wb") as realfp:
             exporterInstance.exportHtmlMultiFile(realfp=realfp, tocMode=0)
 
         return htpath  # realfp.getvalue().decode("utf-8")

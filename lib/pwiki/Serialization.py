@@ -39,7 +39,7 @@ class SerializeStream:
         
     def setBytesToRead(self, b):
         """
-        Sets a byte object to read from via StringIO
+        Sets a byte object to read from via BytesIO
         """
         self.fileObj = io.BytesIO(b)
         self.readMode = True
@@ -55,8 +55,8 @@ class SerializeStream:
         
     def getBytes(self):
         """
-        If fileObj is a StringIO object, call this to retrieve the stored
-        string after write operations are finished, but before close() is
+        If fileObj is a BytesIO object, call this to retrieve the stored
+        bytes after write operations are finished, but before close() is
         called
         """
         return self.fileObj.getvalue()

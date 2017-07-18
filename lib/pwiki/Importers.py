@@ -3,7 +3,7 @@ import sys, os, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext
 from calendar import timegm
-from io import BytesIO, StringIO, TextIOWrapper
+from io import BytesIO, TextIOWrapper
 from . import urllib_red as urllib
 
 import wx, wx.xrc

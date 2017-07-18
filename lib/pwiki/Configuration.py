@@ -267,9 +267,9 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             return
 
         if self.configParserObject:
-            sfile = io.StringIO()
-            self.configParserObject.write(sfile)
-            configFile = open(self.configPath, 'wt', encoding="utf-8",
+#             sfile = io.StringIO()
+#             self.configParserObject.write(sfile)
+            configFile = open(self.configPath, 'w', encoding="utf-8",
                     errors="surrogateescape")
             try:
                 self.configParserObject.write(configFile)
