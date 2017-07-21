@@ -28,13 +28,13 @@ from .aui_constants import *
 
 
 # -- GUI helper classes and functions --
-class AuiCommandCapture(wx.PyEvtHandler):
+class AuiCommandCapture(wx.EvtHandler):
     """ A class to handle the dropdown window menu. """
 
     def __init__(self):
         """ Default class constructor. """
 
-        wx.PyEvtHandler.__init__(self)        
+        wx.EvtHandler.__init__(self)        
         self._last_id = 0
 
 
@@ -109,7 +109,7 @@ class AuiDefaultTabArt:
 
         self._normal_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         self._selected_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        self._selected_font.SetWeight(wx.BOLD)
+        self._selected_font.SetWeight(wx.FONTWEIGHT_BOLD)
         self._measuring_font = self._selected_font
 
         self._fixed_tab_width = 100
@@ -816,7 +816,7 @@ class AuiDefaultTabArt:
 
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
             dc.SetPen(self._focusPen)
-            dc.DrawRoundedRectangleRect(focusRect, 2)
+            dc.DrawRoundedRectangle(focusRect, 2)
         
 
     def GetBestTabCtrlSize(self, wnd, pages, required_bmp_size):
@@ -838,7 +838,7 @@ class AuiDefaultTabArt:
         measure_bmp = wx.NullBitmap
         
         if required_bmp_size.IsFullySpecified():
-            measure_bmp = wx.EmptyBitmap(required_bmp_size.x,
+            measure_bmp = wx.Bitmap(required_bmp_size.x,
                                          required_bmp_size.y)
         
         max_y = 0
@@ -994,7 +994,7 @@ class AuiSimpleTabArt:
 
         self._normal_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         self._selected_font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        self._selected_font.SetWeight(wx.BOLD)
+        self._selected_font.SetWeight(wx.FONTWEIGHT_BOLD)
         self._measuring_font = self._selected_font
 
         self._agwFlags = 0
@@ -1223,7 +1223,7 @@ class AuiSimpleTabArt:
         points[5].y = tab_y + tab_height - 1
         points[6] = points[0]
 
-        dc.SetClippingRect(in_rect)
+        dc.SetClippingRegion(in_rect)
         dc.DrawPolygon(points)
 
         dc.SetPen(wx.GREY_PEN)
@@ -1960,7 +1960,7 @@ class FF2TabArt(AuiDefaultTabArt):
         tabPoints[6].x = tabPoints[0].x
         tabPoints[6].y = tabPoints[0].y
 
-        rr = wx.RectPP(tabPoints[2], tabPoints[5])
+        rr = wx.Rect(tabPoints[2], tabPoints[5])
         self.DrawTabBackground(dc, rr, page.active, (agwFlags & AUI_NB_BOTTOM) == 0)
 
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
@@ -2116,8 +2116,8 @@ class FF2TabArt(AuiDefaultTabArt):
             rightPt = wx.Point(rect.x + rect.width - 2, rect.y + (rect.height / 2))
 
         # Define the top region
-        top = wx.RectPP(rect.GetTopLeft(), rightPt)
-        bottom = wx.RectPP(leftPt, rect.GetBottomRight())
+        top = wx.Rect(rect.GetTopLeft(), rightPt)
+        bottom = wx.Rect(leftPt, rect.GetBottomRight())
 
         topStartColour = wx.WHITE
 
@@ -2445,11 +2445,11 @@ class VC8TabArt(AuiDefaultTabArt):
         miny, maxy = min(yList), max(yList)
 
         rect = wx.Rect(minx, maxy, maxx-minx, miny-maxy+1)        
-        region = wx.RegionFromPoints(tabPoints)
+        region = wx.Region(tabPoints)
 
         if self._buttonRect.width > 0:
             buttonRegion = wx.Region(*self._buttonRect)
-            region.XorRegion(buttonRegion)
+            region.Xor(buttonRegion)
         
         dc.SetClippingRegionAsRegion(region)
 

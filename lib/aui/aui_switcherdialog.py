@@ -545,7 +545,7 @@ class SwitcherItems:
         selectionOutlineColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT)
         standardFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         groupFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        groupFont.SetWeight(wx.BOLD)
+        groupFont.SetWeight(wx.FONTWEIGHT_BOLD)
 
         if self.GetBackgroundColour().IsOk():
             backgroundColour = self.GetBackgroundColour()
@@ -563,7 +563,7 @@ class SwitcherItems:
         
             standardFont = self.GetItemFont()   
             groupFont = wx.Font(standardFont.GetPointSize(), standardFont.GetFamily(), standardFont.GetStyle(),
-                                wx.BOLD, standardFont.GetUnderlined(), standardFont.GetFaceName())
+                                wx.FONTWEIGHT_BOLD, standardFont.GetUnderlined(), standardFont.GetFaceName())
         
         textMarginX = SWITCHER_TEXT_MARGIN_X
 
@@ -583,7 +583,7 @@ class SwitcherItems:
             clippingRect = wx.Rect(*item.GetRect())
             clippingRect.Deflate(1, 1)
 
-            dc.SetClippingRect(clippingRect)
+            dc.SetClippingRegion(clippingRect)
 
             if item.GetTextColour().IsOk():
                 dc.SetTextForeground(item.GetTextColour())
@@ -624,7 +624,7 @@ class SwitcherItems:
         sz = wx.Size(150, 16)
         standardFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         groupFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        groupFont.SetWeight(wx.BOLD)
+        groupFont.SetWeight(wx.FONTWEIGHT_BOLD)
 
         textMarginX = SWITCHER_TEXT_MARGIN_X
         textMarginY = SWITCHER_TEXT_MARGIN_Y
@@ -671,13 +671,13 @@ class SwitcherItems:
         return wx.NOT_FOUND
 
 
-class MultiColumnListCtrl(wx.PyControl):
+class MultiColumnListCtrl(wx.Control):
     """ A control for displaying several columns (not scrollable). """
 
     def __init__(self, parent, aui_manager, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=0, validator=wx.DefaultValidator, name="MultiColumnListCtrl"):
 
-        wx.PyControl.__init__(self, parent, id, pos, size, style, validator, name)
+        wx.Control.__init__(self, parent, id, pos, size, style, validator, name)
 
         self._overallSize = wx.Size(200, 100)
         self._modifierKey = wx.WXK_CONTROL

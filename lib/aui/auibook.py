@@ -2317,7 +2317,7 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
                     if self._agwFlags & AUI_NB_TAB_FLOAT:
                         self._drag_image.BeginDrag(wx.Point(0,0), self, fullScreen=True)
                     else:
-                        self._drag_image.BeginDragBounded(wx.Point(0,0), self, self.GetParent())
+                        self._drag_image.BeginDrag(wx.Point(0,0), self, self.GetParent())
 
                     # Capture the mouse cursor position offset relative to
                     # The tab image location

@@ -187,13 +187,13 @@ class AuiToolBarEvent(CommandToolBarEvent):
 
 # ----------------------------------------------------------------------
 
-class ToolbarCommandCapture(wx.PyEvtHandler):
+class ToolbarCommandCapture(wx.EvtHandler):
     """ A class to handle the dropdown window menu. """
     
     def __init__(self):
         """ Default class constructor. """
         
-        wx.PyEvtHandler.__init__(self)
+        wx.EvtHandler.__init__(self)
         self._last_id = 0
 
 
@@ -1503,7 +1503,7 @@ class AuiDefaultToolBarArt:
         return bmp_rect, text_rect
 
     
-class AuiToolBar(wx.PyControl):
+class AuiToolBar(wx.Control):
     """
     AuiToolBar is a completely owner-drawn toolbar perfectly integrated with the AUI layout system.
     This allows drag and drop of toolbars, docking/floating behaviour and the possibility to define
@@ -1547,7 +1547,7 @@ class AuiToolBar(wx.PyControl):
 
         """
         
-        wx.PyControl.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE)
+        wx.Control.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE)
 
         self._sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.SetSizer(self._sizer)
@@ -1623,7 +1623,7 @@ class AuiToolBar(wx.PyControl):
         :note: Overridden from :class:`PyControl`.
         """
 
-        wx.PyControl.SetWindowStyleFlag(self, style|wx.BORDER_NONE)
+        wx.Control.SetWindowStyleFlag(self, style|wx.BORDER_NONE)
         
 
     def SetAGWWindowStyleFlag(self, agwStyle):
@@ -2524,7 +2524,7 @@ class AuiToolBar(wx.PyControl):
         :note: Overridden from :class:`PyControl`.
         """        
 
-        res = wx.PyControl.SetFont(self, font)
+        res = wx.Control.SetFont(self, font)
 
         if self._art:
             self._art.SetFont(font)
@@ -3186,7 +3186,7 @@ class AuiToolBar(wx.PyControl):
     def GetOverflowRect(self):
         """ Returns the rectangle of the overflow button. """
 
-        cli_rect = wx.RectPS(wx.Point(0, 0), self.GetClientSize())
+        cli_rect = wx.Rect(wx.Point(0, 0), self.GetClientSize())
         overflow_rect = wx.Rect(*self._overflow_sizer_item.GetRect())
         overflow_size = self._art.GetElementSize(AUI_TBART_OVERFLOW_SIZE)
 
@@ -3383,7 +3383,7 @@ class AuiToolBar(wx.PyControl):
         if y + height > parent_size.y:
             height = max(0, parent_size.y - y)
 
-        wx.PyControl.DoSetSize(self, x, y, width, height, sizeFlags)
+        wx.Control.DoSetSize(self, x, y, width, height, sizeFlags)
 
 
     def OnIdle(self, event):
@@ -3417,7 +3417,7 @@ class AuiToolBar(wx.PyControl):
         """
 
         dc = wx.AutoBufferedPaintDC(self)
-        cli_rect = wx.RectPS(wx.Point(0, 0), self.GetClientSize())
+        cli_rect = wx.Rect(wx.Point(0, 0), self.GetClientSize())
 
         horizontal = True
         if self._agwStyle & AUI_TB_VERTICAL:
@@ -3521,7 +3521,7 @@ class AuiToolBar(wx.PyControl):
         :param `event`: a :class:`MouseEvent` event to be processed.        
         """
         
-        cli_rect = wx.RectPS(wx.Point(0, 0), self.GetClientSize())
+        cli_rect = wx.Rect(wx.Point(0, 0), self.GetClientSize())
         self.StopPreviewTimer()
 
         if self._gripper_sizer_item:
@@ -3717,7 +3717,7 @@ class AuiToolBar(wx.PyControl):
         :param `event`: a :class:`MouseEvent` event to be processed.        
         """
         
-        cli_rect = wx.RectPS(wx.Point(0, 0), self.GetClientSize())
+        cli_rect = wx.Rect(wx.Point(0, 0), self.GetClientSize())
 
         if self._gripper_sizer_item:
             gripper_rect = self._gripper_sizer_item.GetRect()
@@ -3782,7 +3782,7 @@ class AuiToolBar(wx.PyControl):
         :param `event`: a :class:`MouseEvent` event to be processed.        
         """
         
-        cli_rect = wx.RectPS(wx.Point(0, 0), self.GetClientSize())
+        cli_rect = wx.Rect(wx.Point(0, 0), self.GetClientSize())
 
         if self._gripper_sizer_item:
         

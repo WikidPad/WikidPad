@@ -300,7 +300,7 @@ def DrawMACCloseButton(colour, backColour=None):
     :param Colour `backColour`: the optional background colour for the circle.
     """
 
-    bmp = wx.EmptyBitmapRGBA(16, 16)
+    bmp = wx.Bitmap.FromRGBA(16, 16)
     dc = wx.MemoryDC()
     dc.SelectObject(bmp)
 
@@ -454,7 +454,7 @@ class TabDragImage(wx.DragImage):
         """
 
         control = page.control
-        memory = wx.MemoryDC(wx.EmptyBitmap(1, 1))
+        memory = wx.MemoryDC(wx.Bitmap(1, 1))
 
         tab_size, x_extent = tabArt.GetTabSize(memory, notebook, page.caption, page.bitmap, page.active,
                                                button_state, control)
@@ -462,7 +462,7 @@ class TabDragImage(wx.DragImage):
         tab_width, tab_height = tab_size
         rect = wx.Rect(0, 0, tab_width, tab_height)
 
-        bitmap = wx.EmptyBitmap(tab_width+1, tab_height+1)
+        bitmap = wx.Bitmap(tab_width+1, tab_height+1)
         memory.SelectObject(bitmap)
 
         if wx.Platform == "__WXMAC__":
@@ -550,7 +550,7 @@ def TakeScreenShot(rect):
     # Create a Bitmap that will later on hold the screenshot image
     # Note that the Bitmap must have a size big enough to hold the screenshot
     # -1 means using the current default colour depth
-    bmp = wx.EmptyBitmap(rect.width, rect.height)
+    bmp = wx.Bitmap(rect.width, rect.height)
 
     # Create a memory DC that will be used for actually taking the screenshot
     memDC = wx.MemoryDC()
@@ -602,7 +602,7 @@ def RescaleScreenShot(bmp, thumbnail_size=200):
             img.Rescale(newW, newH, wx.IMAGE_QUALITY_HIGH)
 
     newBmp = img.ConvertToBitmap()
-    otherBmp = wx.EmptyBitmap(newW+5, newH+5)    
+    otherBmp = wx.Bitmap(newW+5, newH+5)    
 
     memDC = wx.MemoryDC()
     memDC.SelectObject(otherBmp)

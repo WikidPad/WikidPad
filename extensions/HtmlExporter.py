@@ -1488,8 +1488,8 @@ class HtmlExporter(AbstractExporter):
                 imgFile.close()
                 imgFile = BytesIO(imgData)
 
-            img = wx.EmptyImage(0, 0)
-            img.LoadStream(imgFile)
+            img = wx.Image(0, 0)
+            img.LoadFile(imgFile)
             imgFile.close()
             
             if img.Ok():

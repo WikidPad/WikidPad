@@ -449,7 +449,7 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
             return  # no evt.Skip()?
 
         pos = evt.GetPosition()
-        hitsel = self.HitTest(pos)
+        hitsel = self.VirtualHitTest(pos.y)
         
         if hitsel == wx.NOT_FOUND:
             evt.Skip()
@@ -472,7 +472,7 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
         if pos == wx.DefaultPosition:
             hitsel = self.GetSelection()
 
-        hitsel = self.HitTest(pos)
+        hitsel = self.VirtualHitTest(pos.y)
 
         if hitsel == wx.NOT_FOUND:
             evt.Skip()
@@ -540,7 +540,7 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
         if pos == wx.DefaultPosition:
             hitsel = self.GetSelection()
         else:
-            hitsel = self.HitTest(self.ScreenToClient(pos))
+            hitsel = self.VirtualHitTest(self.ScreenToClient(pos).y)
 
         if hitsel == wx.NOT_FOUND:
             evt.Skip()

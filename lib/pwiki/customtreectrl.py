@@ -628,7 +628,7 @@ class DragImage(wx.DragImage):
 
         memory = wx.MemoryDC()
 
-        bitmap = wx.EmptyBitmap(self._total_w, self._total_h)
+        bitmap = wx.Bitmap(self._total_w, self._total_h)
         memory.SelectObject(bitmap)
 
         memory.SetTextBackground(self._backgroundColour)
@@ -1884,7 +1884,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         self._hasFont = True
         self._normalFont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         self._boldFont = wx.Font(self._normalFont.GetPointSize(), self._normalFont.GetFamily(),
-                                 self._normalFont.GetStyle(), wx.BOLD, self._normalFont.GetUnderlined(),
+                                 self._normalFont.GetStyle(), wx.FONTWEIGHT_BOLD, self._normalFont.GetUnderlined(),
                                  self._normalFont.GetFaceName(), self._normalFont.GetEncoding())
 
 
@@ -2654,7 +2654,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
 
         self._normalFont = font 
         self._boldFont = wx.Font(self._normalFont.GetPointSize(), self._normalFont.GetFamily(),
-                                 self._normalFont.GetStyle(), wx.BOLD, self._normalFont.GetUnderlined(),
+                                 self._normalFont.GetStyle(), wx.FONTWEIGHT_BOLD, self._normalFont.GetUnderlined(),
                                  self._normalFont.GetFaceName(), self._normalFont.GetEncoding())
 
         return True
@@ -4414,10 +4414,10 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(outer))
-        dc.DrawRoundedRectangleRect(bdrRect, 3)
+        dc.DrawRoundedRectangle(bdrRect, 3)
         bdrRect.Deflate(1, 1)
         dc.SetPen(wx.Pen(inner))
-        dc.DrawRoundedRectangleRect(bdrRect, 2)
+        dc.DrawRoundedRectangle(bdrRect, 2)
 
         dc.SetPen(oldpen)
         dc.SetBrush(oldbrush)
@@ -4913,7 +4913,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             if not dc:
                 dc = wx.ClientDC(self)
                 rect = self.GetUpdateRegion().GetBox()
-                dc.SetClippingRect(rect)
+                dc.SetClippingRegion(rect)
 
             self.TileBackground(dc)
 

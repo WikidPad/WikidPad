@@ -584,7 +584,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         icon = wx.GetApp().getIconCache().lookupIcon(iconname)
         if icon is None:
-            icon = wx.EmptyBitmap(16, 16)
+            icon = wx.Bitmap(16, 16)
             self.displayErrorMessage(_('Error, icon "%s" missing.' % iconname))
 
         return icon
