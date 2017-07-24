@@ -1,9 +1,22 @@
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------
+# Name:         tabart.py
+# Purpose:
+#
+# Author:       Andrea Gavana <andrea.gavana@gmail.com>
+#
+# Created:
+# Version:
+# Date:         31 March 2009
+# Licence:      wxWindows license
+# Tags:         phoenix-port, unittest, documented, py3-port
+#----------------------------------------------------------------------------
 """
 Tab art provider code - a tab provider provides all drawing functionality to
-the :class:`~lib.agw.aui.auibook.AuiNotebook`. This allows the
-:class:`~lib.agw.aui.auibook.AuiNotebook` to have a plugable look-and-feel.
+the :class:`~wx.lib.agw.aui.auibook.AuiNotebook`. This allows the
+:class:`~wx.lib.agw.aui.auibook.AuiNotebook` to have a plugable look-and-feel.
 
-By default, a :class:`~lib.agw.aui.auibook.AuiNotebook` uses an instance of this class
+By default, a :class:`~wx.lib.agw.aui.auibook.AuiNotebook` uses an instance of this class
 called :class:`AuiDefaultTabArt` which provides bitmap art and a colour scheme that is
 adapted to the major platforms' look. You can either derive from that class to alter its
 behaviour or write a completely new tab art class.
@@ -18,7 +31,12 @@ __date__ = "31 March 2009"
 import wx
 
 if wx.Platform == '__WXMAC__':
-    import Carbon.Appearance
+    try:
+        import Carbon.Appearance
+    except ImportError:
+        CARBON = False
+    else:
+        CARBON = True
 
 from .aui_utilities import BitmapFromBits, StepColour, IndentPressedBitmap, ChopText
 from .aui_utilities import GetBaseColour, DrawMACCloseButton, LightColour, TakeScreenShot
@@ -34,14 +52,14 @@ class AuiCommandCapture(wx.EvtHandler):
     def __init__(self):
         """ Default class constructor. """
 
-        wx.EvtHandler.__init__(self)        
+        wx.EvtHandler.__init__(self)
         self._last_id = 0
 
 
     def GetCommandId(self):
         """ Returns the event command identifier. """
 
-        return self._last_id 
+        return self._last_id
 
 
     def ProcessEvent(self, event):
@@ -63,47 +81,47 @@ class AuiCommandCapture(wx.EvtHandler):
          wxPython. For example, in the document/view architecture, documents and views
          are potential event handlers. When an event reaches a frame, :meth:`ProcessEvent` will
          need to be called on the associated document and view in case event handler
-         functions are associated with these objects. 
+         functions are associated with these objects.
 
          The normal order of event table searching is as follows:
 
          1. If the object is disabled (via a call to :meth:`EvtHandler.SetEvtHandlerEnabled`) the function
             skips to step (6).
-         2. If the object is a :class:`Window`, :meth:`ProcessEvent` is recursively called on the window's 
-            :class:`Validator`. If this returns ``True``, the function exits.
+         2. If the object is a :class:`wx.Window`, :meth:`ProcessEvent` is recursively called on the window's
+            :class:`wx.Validator`. If this returns ``True``, the function exits.
          3. wxWidgets `SearchEventTable` is called for this event handler. If this fails, the
             base class table is tried, and so on until no more tables exist or an appropriate
             function was found, in which case the function exits.
          4. The search is applied down the entire chain of event handlers (usually the chain
             has a length of one). If this succeeds, the function exits.
-         5. If the object is a :class:`Window` and the event is a :class:`CommandEvent`, :meth:`ProcessEvent` is
+         5. If the object is a :class:`wx.Window` and the event is a :class:`CommandEvent`, :meth:`ProcessEvent` is
             recursively applied to the parent window's event handler. If this returns ``True``,
             the function exits.
          6. Finally, :meth:`ProcessEvent` is called on the :class:`App` object.
         """
-        
+
         if event.GetEventType() == wx.wxEVT_COMMAND_MENU_SELECTED:
             self._last_id = event.GetId()
             return True
-        
+
         if self.GetNextHandler():
             return self.GetNextHandler().ProcessEvent(event)
 
         return False
-    
+
 
 class AuiDefaultTabArt:
     """
-    Tab art provider code - a tab provider provides all drawing functionality to the :class:`~lib.agw.aui.auibook.AuiNotebook`.
-    This allows the :class:`~lib.agw.aui.auibook.AuiNotebook` to have a plugable look-and-feel.
+    Tab art provider code - a tab provider provides all drawing functionality to the :class:`~wx.lib.agw.aui.auibook.AuiNotebook`.
+    This allows the :class:`~wx.lib.agw.aui.auibook.AuiNotebook` to have a plugable look-and-feel.
 
-    By default, a :class:`~lib.agw.aui.auibook.AuiNotebook` uses an instance of this class called
+    By default, a :class:`~wx.lib.agw.aui.auibook.AuiNotebook` uses an instance of this class called
     :class:`AuiDefaultTabArt` which provides bitmap art and a colour scheme that is adapted to the major platforms'
     look. You can either derive from that class to alter its behaviour or write a
     completely new tab art class. Call :meth:`AuiNotebook.SetArtProvider() <lib.agw.aui.auibook.AuiNotebook.SetArtProvider>` to make use this
     new tab art.
     """
-    
+
     def __init__(self):
         """ Default class constructor. """
 
@@ -139,29 +157,30 @@ class AuiDefaultTabArt:
         self._disabled_windowlist_bmp = BitmapFromBits(nb_list_bits, 16, 16, wx.Colour(128, 128, 128))
 
         if wx.Platform == "__WXMAC__":
+            k = Carbon.Appearance.kThemeBrushFocusHighlight if CARBON else 19
             # Get proper highlight colour for focus rectangle from the
             # current Mac theme.  kThemeBrushFocusHighlight is
             # available on Mac OS 8.5 and higher
             if hasattr(wx, 'MacThemeColour'):
-                c = wx.MacThemeColour(Carbon.Appearance.kThemeBrushFocusHighlight)
+                c = wx.MacThemeColour(k)
             else:
                 brush = wx.Brush(wx.BLACK)
-                brush.MacSetTheme(Carbon.Appearance.kThemeBrushFocusHighlight)
+                brush.MacSetTheme(k)
                 c = brush.GetColour()
-            self._focusPen = wx.Pen(c, 2, wx.SOLID)
+            self._focusPen = wx.Pen(c, 2, wx.PENSTYLE_SOLID)
         else:
-            self._focusPen = wx.Pen(wx.BLACK, 1, wx.USER_DASH)
+            self._focusPen = wx.Pen(wx.BLACK, 1, wx.PENSTYLE_USER_DASH)
             self._focusPen.SetDashes([1, 1])
             self._focusPen.SetCap(wx.CAP_BUTT)
-            
-            
+
+
     def SetBaseColour(self, base_colour):
         """
         Sets a new base colour.
 
-        :param `base_colour`: an instance of :class:`Colour`.
+        :param `base_colour`: an instance of :class:`wx.Colour`.
         """
-        
+
         self._base_colour = base_colour
         self._base_colour_pen = wx.Pen(self._base_colour)
         self._base_colour_brush = wx.Brush(self._base_colour)
@@ -171,7 +190,7 @@ class AuiDefaultTabArt:
         """
         Sets the default colours, which are calculated from the given base colour.
 
-        :param `base_colour`: an instance of :class:`Colour`. If defaulted to ``None``, a colour
+        :param `base_colour`: an instance of :class:`wx.Colour`. If defaulted to ``None``, a colour
          is generated accordingly to the platform and theme.
         """
 
@@ -184,14 +203,14 @@ class AuiDefaultTabArt:
 
         self._background_top_colour = StepColour(self._base_colour, 90)
         self._background_bottom_colour = StepColour(self._base_colour, 170)
-        
+
         self._tab_top_colour = self._base_colour
         self._tab_bottom_colour = wx.WHITE
         self._tab_gradient_highlight_colour = wx.WHITE
 
         self._tab_inactive_top_colour = self._base_colour
         self._tab_inactive_bottom_colour = StepColour(self._tab_inactive_top_colour, 160)
-        
+
         self._tab_text_colour = lambda page: page.text_colour
         self._tab_disabled_text_colour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT)
 
@@ -230,8 +249,8 @@ class AuiDefaultTabArt:
          ``AUI_NB_CLOSE_BUTTON``              With this style, a close button is available on the tab bar
          ``AUI_NB_CLOSE_ON_ACTIVE_TAB``       With this style, a close button is available on the active tab
          ``AUI_NB_CLOSE_ON_ALL_TABS``         With this style, a close button is available on all tabs
-         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
-         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
+         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~wx.lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
+         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~wx.lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
          ``AUI_NB_HIDE_ON_SINGLE_TAB``        Hides the tab window if only one tab is present
          ``AUI_NB_SMART_TABS``                Use Smart Tabbing, like ``Alt`` + ``Tab`` on Windows
          ``AUI_NB_USE_IMAGES_DROPDOWN``       Uses images on dropdown window list menu instead of check items
@@ -242,7 +261,7 @@ class AuiDefaultTabArt:
          ``AUI_NB_ORDER_BY_ACCESS``           Tab navigation order by last access time for the tabs
          ``AUI_NB_NO_TAB_FOCUS``              Don't draw tab focus rectangle
          ==================================== ==================================
-        
+
         """
 
         self._agwFlags = agwFlags
@@ -256,24 +275,24 @@ class AuiDefaultTabArt:
         """
 
         return self._agwFlags
-    
-            
+
+
     def SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth):
         """
         Sets the tab sizing information.
-        
-        :param Size `tab_ctrl_size`: the size of the tab control area;
+
+        :param wx.Size `tab_ctrl_size`: the size of the tab control area;
         :param integer `tab_count`: the number of tabs;
         :param tuple `minMaxTabWidth`: a tuple containing the minimum and maximum tab widths
          to be used when the ``AUI_NB_TAB_FIXED_WIDTH`` style is active.
         """
-        
+
         self._fixed_tab_width = 100
         minTabWidth, maxTabWidth = minMaxTabWidth
 
         tot_width = tab_ctrl_size.x - self.GetIndentSize() - 4
         agwFlags = self.GetAGWFlags()
-        
+
         if agwFlags & AUI_NB_CLOSE_BUTTON:
             tot_width -= self._active_close_bmp.GetWidth()
         if agwFlags & AUI_NB_WINDOWLIST_BUTTON:
@@ -297,15 +316,15 @@ class AuiDefaultTabArt:
             self._fixed_tab_width = min(self._fixed_tab_width, maxTabWidth)
 
         self._tab_ctrl_height = tab_ctrl_size.y
-    
+
 
     def DrawBackground(self, dc, wnd, rect):
         """
         Draws the tab area background.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
-        :param Rect `rect`: the tab control rectangle.
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
+        :param wx.Rect `rect`: the tab control rectangle.
         """
 
         self._buttonRect = wx.Rect()
@@ -315,8 +334,8 @@ class AuiDefaultTabArt:
         if agwFlags & AUI_NB_BOTTOM:
             r = wx.Rect(rect.x, rect.y, rect.width+2, rect.height)
 
-        # TODO: else if (agwFlags & AUI_NB_LEFT) 
-        # TODO: else if (agwFlags & AUI_NB_RIGHT) 
+        # TODO: else if (agwFlags & AUI_NB_LEFT)
+        # TODO: else if (agwFlags & AUI_NB_RIGHT)
         else: #for AUI_NB_TOP
             r = wx.Rect(rect.x, rect.y, rect.width+2, rect.height-3)
 
@@ -332,9 +351,9 @@ class AuiDefaultTabArt:
             dc.SetBrush(wx.Brush(self._background_bottom_colour))
             dc.DrawRectangle(-1, 0, w+2, 4)
 
-        # TODO: else if (agwFlags & AUI_NB_LEFT) 
+        # TODO: else if (agwFlags & AUI_NB_LEFT)
         # TODO: else if (agwFlags & AUI_NB_RIGHT)
-        
+
         else: # for AUI_NB_TOP
             dc.SetBrush(self._base_colour_brush)
             dc.DrawRectangle(-1, y-4, w+2, 4)
@@ -344,10 +363,10 @@ class AuiDefaultTabArt:
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
@@ -358,10 +377,10 @@ class AuiDefaultTabArt:
             caption = "Xj"
 
         dc.SetFont(self._selected_font)
-        selected_textx, selected_texty = dc.GetMultiLineTextExtent(caption)
+        selected_textx, selected_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         dc.SetFont(self._normal_font)
-        normal_textx, normal_texty = dc.GetMultiLineTextExtent(caption)
+        normal_textx, normal_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         control = page.control
 
@@ -379,12 +398,12 @@ class AuiDefaultTabArt:
         # select pen, brush and font for the tab to be drawn
 
         if page.active:
-        
+
             dc.SetFont(self._selected_font)
             textx, texty = selected_textx, selected_texty
-        
+
         else:
-        
+
             dc.SetFont(self._normal_font)
             textx, texty = normal_textx, normal_texty
 
@@ -394,7 +413,7 @@ class AuiDefaultTabArt:
         else:
             dc.SetTextForeground(self._tab_text_colour(page))
             pagebitmap = page.bitmap
-            
+
         # create points that will make the tab outline
 
         clip_width = tab_width
@@ -407,33 +426,33 @@ class AuiDefaultTabArt:
 
         border_points = [wx.Point() for i in range(6)]
         agwFlags = self.GetAGWFlags()
-        
+
         if agwFlags & AUI_NB_BOTTOM:
-        
+
             border_points[0] = wx.Point(tab_x,             tab_y)
             border_points[1] = wx.Point(tab_x,             tab_y+tab_height-6)
             border_points[2] = wx.Point(tab_x+2,           tab_y+tab_height-4)
             border_points[3] = wx.Point(tab_x+tab_width-2, tab_y+tab_height-4)
             border_points[4] = wx.Point(tab_x+tab_width,   tab_y+tab_height-6)
             border_points[5] = wx.Point(tab_x+tab_width,   tab_y)
-        
-        else: #if (agwFlags & AUI_NB_TOP) 
-        
+
+        else: #if (agwFlags & AUI_NB_TOP)
+
             border_points[0] = wx.Point(tab_x,             tab_y+tab_height-4)
             border_points[1] = wx.Point(tab_x,             tab_y+2)
             border_points[2] = wx.Point(tab_x+2,           tab_y)
             border_points[3] = wx.Point(tab_x+tab_width-2, tab_y)
             border_points[4] = wx.Point(tab_x+tab_width,   tab_y+2)
             border_points[5] = wx.Point(tab_x+tab_width,   tab_y+tab_height-4)
-        
-        # TODO: else if (agwFlags & AUI_NB_LEFT) 
-        # TODO: else if (agwFlags & AUI_NB_RIGHT) 
+
+        # TODO: else if (agwFlags & AUI_NB_LEFT)
+        # TODO: else if (agwFlags & AUI_NB_RIGHT)
 
         drawn_tab_yoff = border_points[1].y
         drawn_tab_height = border_points[0].y - border_points[1].y
 
         if page.active:
-        
+
             # draw active tab
 
             # draw base background colour
@@ -463,9 +482,9 @@ class AuiDefaultTabArt:
             top_colour = self._tab_bottom_colour
             bottom_colour = self._tab_top_colour
             dc.GradientFillLinear(r, bottom_colour, top_colour, wx.NORTH)
-        
+
         else:
-        
+
             # draw inactive tab
 
             r = wx.Rect(tab_x, tab_y+1, tab_width, tab_height-3)
@@ -491,7 +510,7 @@ class AuiDefaultTabArt:
             top_colour = self._tab_inactive_bottom_colour
             bottom_colour = self._tab_inactive_bottom_colour
             dc.GradientFillLinear(r, top_colour, bottom_colour, wx.SOUTH)
-        
+
         # draw tab outline
         dc.SetPen(self._border_pen)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
@@ -500,20 +519,20 @@ class AuiDefaultTabArt:
         # there are two horizontal grey lines at the bottom of the tab control,
         # this gets rid of the top one of those lines in the tab control
         if page.active:
-        
+
             if agwFlags & AUI_NB_BOTTOM:
                 dc.SetPen(wx.Pen(self._background_bottom_colour))
-                
-            # TODO: else if (agwFlags & AUI_NB_LEFT) 
-            # TODO: else if (agwFlags & AUI_NB_RIGHT) 
+
+            # TODO: else if (agwFlags & AUI_NB_LEFT)
+            # TODO: else if (agwFlags & AUI_NB_RIGHT)
             else: # for AUI_NB_TOP
                 dc.SetPen(self._base_colour_pen)
-                
+
             dc.DrawLine(border_points[0].x+1,
                         border_points[0].y,
                         border_points[5].x,
                         border_points[5].y)
-        
+
         text_offset = tab_x + 8
         close_button_width = 0
 
@@ -522,11 +541,11 @@ class AuiDefaultTabArt:
 
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
                 text_offset += close_button_width - 5
-                
+
         bitmap_offset = 0
-        
+
         if pagebitmap.IsOk():
-        
+
             bitmap_offset = tab_x + 8
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT and close_button_width:
                 bitmap_offset += close_button_width - 5
@@ -544,13 +563,13 @@ class AuiDefaultTabArt:
 
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT == 0 or not close_button_width:
                 text_offset = tab_x + 8
-        
+
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
         ypos = drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1
 
-        offset_focus = text_offset     
-        if control is not None:
+        offset_focus = text_offset
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -560,24 +579,24 @@ class AuiDefaultTabArt:
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
             textx += controlW + 4
-            
+
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
         if (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
             self.DrawFocusRectangle(dc, page, wnd, draw_text, offset_focus, bitmap_offset, drawn_tab_yoff, drawn_tab_height, rectx, recty)
-        
+
         out_button_rect = wx.Rect()
-        
+
         # draw close button if necessary
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             bmp = self._disabled_close_bmp
 
             if close_button_state == AUI_BUTTON_STATE_HOVER:
@@ -599,21 +618,21 @@ class AuiDefaultTabArt:
             dc.DrawBitmap(bmp, rect.x, rect.y, True)
 
             out_button_rect = rect
-        
+
         out_tab_rect = wx.Rect(tab_x, tab_y, tab_width, tab_height)
 
         dc.DestroyClippingRegion()
 
         return out_tab_rect, out_button_rect, x_extent
-    
+
 
     def SetCustomButton(self, bitmap_id, button_state, bmp):
         """
         Sets a custom bitmap for the close, left, right and window list buttons.
-        
+
         :param integer `bitmap_id`: the button identifier;
         :param integer `button_state`: the button state;
-        :param Bitmap `bmp`: the custom bitmap to use for the button.
+        :param wx.Bitmap `bmp`: the custom bitmap to use for the button.
         """
 
         if bitmap_id == AUI_BUTTON_CLOSE:
@@ -622,7 +641,7 @@ class AuiDefaultTabArt:
                 self._hover_close_bmp = self._active_close_bmp
                 self._pressed_close_bmp = self._active_close_bmp
                 self._disabled_close_bmp = self._active_close_bmp
-                    
+
             elif button_state == AUI_BUTTON_STATE_HOVER:
                 self._hover_close_bmp = bmp
             elif button_state == AUI_BUTTON_STATE_PRESSED:
@@ -647,7 +666,7 @@ class AuiDefaultTabArt:
                 self._disabled_windowlist_bmp = bmp
             else:
                 self._active_windowlist_bmp = bmp
-        
+
 
     def GetIndentSize(self):
         """ Returns the tabs indent size. """
@@ -659,17 +678,17 @@ class AuiDefaultTabArt:
         """
         Returns the tab size for the given caption, bitmap and button state.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `caption`: the tab text caption;
-        :param Bitmap `bitmap`: the bitmap displayed on the tab;
+        :param wx.Bitmap `bitmap`: the bitmap displayed on the tab;
         :param bool `active`: whether the tab is selected or not;
         :param integer `close_button_state`: the state of the close button on the tab;
-        :param Window `control`: a :class:`Window` instance inside a tab (or ``None``).
+        :param wx.Window `control`: a :class:`wx.Window` instance inside a tab (or ``None``).
         """
 
         dc.SetFont(self._measuring_font)
-        measured_textx, measured_texty = dc.GetMultiLineTextExtent(caption)
+        measured_textx, measured_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         # add padding around the text
         tab_width = measured_textx
@@ -684,7 +703,7 @@ class AuiDefaultTabArt:
             tab_width += bitmap.GetWidth()
             tab_width += 3 # right side bitmap padding
             tab_height = max(tab_height, bitmap.GetHeight())
-        
+
         # add padding
         tab_width += 16
         tab_height += 10
@@ -693,9 +712,9 @@ class AuiDefaultTabArt:
         if agwFlags & AUI_NB_TAB_FIXED_WIDTH:
             tab_width = self._fixed_tab_width
 
-        if control is not None:
+        if control:
             tab_width += control.GetSize().GetWidth() + 4
-            
+
         x_extent = tab_width
 
         return (tab_width, tab_height), x_extent
@@ -703,17 +722,17 @@ class AuiDefaultTabArt:
 
     def DrawButton(self, dc, wnd, in_rect, button, orientation):
         """
-        Draws a button on the tab or on the tab area, depending on the button identifier. 
+        Draws a button on the tab or on the tab area, depending on the button identifier.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param `button`: an instance of the button class;
         :param integer `orientation`: the tab orientation.
         """
 
         bitmap_id, button_state = button.id, button.cur_state
-        
+
         if bitmap_id == AUI_BUTTON_CLOSE:
             if button_state & AUI_BUTTON_STATE_DISABLED:
                 bmp = self._disabled_close_bmp
@@ -747,25 +766,25 @@ class AuiDefaultTabArt:
                 bmp = button.dis_bitmap
             else:
                 bmp = button.bitmap
-                
+
         if not bmp.IsOk():
             return
 
         rect = wx.Rect(*in_rect)
 
         if orientation == wx.LEFT:
-        
+
             rect.SetX(in_rect.x)
             rect.SetY(((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2))
             rect.SetWidth(bmp.GetWidth())
             rect.SetHeight(bmp.GetHeight())
-        
+
         else:
-        
+
             rect = wx.Rect(in_rect.x + in_rect.width - bmp.GetWidth(),
                            ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
                            bmp.GetWidth(), bmp.GetHeight())
-        
+
         rect = IndentPressedBitmap(rect, button_state)
         dc.DrawBitmap(bmp, rect.x, rect.y, True)
 
@@ -773,7 +792,7 @@ class AuiDefaultTabArt:
 
         if bitmap_id == AUI_BUTTON_RIGHT:
             self._buttonRect = wx.Rect(rect.x, rect.y, 30, rect.height)
-        
+
         return out_rect
 
 
@@ -781,9 +800,9 @@ class AuiDefaultTabArt:
         """
         Draws the focus rectangle on a tab.
 
-        :param `dc`: a :class:`DC` device context;
+        :param `dc`: a :class:`wx.DC` device context;
         :param `page`: the page associated with the tab;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `draw_text`: the text that has been drawn on the tab;
         :param integer `text_offset`: the text offset on the tab;
         :param integer `bitmap_offset`: the bitmap offset on the tab;
@@ -795,9 +814,9 @@ class AuiDefaultTabArt:
 
         if self.GetAGWFlags() & AUI_NB_NO_TAB_FOCUS:
             return
-        
+
         if page.active and wx.Window.FindFocus() == wnd:
-        
+
             focusRectText = wx.Rect(text_offset, (drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2)),
                                     textx, texty)
 
@@ -817,15 +836,15 @@ class AuiDefaultTabArt:
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
             dc.SetPen(self._focusPen)
             dc.DrawRoundedRectangle(focusRect, 2)
-        
+
 
     def GetBestTabCtrlSize(self, wnd, pages, required_bmp_size):
         """
         Returns the best tab control size.
 
-        :param `wnd`: a :class:`Window` instance object;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param list `pages`: the pages associated with the tabs;
-        :param Size `required_bmp_size`: the size of the bitmap on the tabs.
+        :param wx.Size `required_bmp_size`: the size of the bitmap on the tabs.
         """
 
         dc = wx.ClientDC(wnd)
@@ -836,15 +855,15 @@ class AuiDefaultTabArt:
         # it prevents the tab control from resizing when tabs are added.
 
         measure_bmp = wx.NullBitmap
-        
+
         if required_bmp_size.IsFullySpecified():
             measure_bmp = wx.Bitmap(required_bmp_size.x,
                                          required_bmp_size.y)
-        
+
         max_y = 0
-        
+
         for page in pages:
-        
+
             if measure_bmp.IsOk():
                 bmp = measure_bmp
             else:
@@ -868,7 +887,7 @@ class AuiDefaultTabArt:
         """
         Sets the normal font for drawing tab labels.
 
-        :param Font `font`: the new font to use to draw tab labels in their normal, un-selected state.
+        :param wx.Font `font`: the new font to use to draw tab labels in their normal, un-selected state.
         """
 
         self._normal_font = font
@@ -878,7 +897,7 @@ class AuiDefaultTabArt:
         """
         Sets the selected tab font for drawing tab labels.
 
-        :param Font `font`: the new font to use to draw tab labels in their selected state.
+        :param wx.Font `font`: the new font to use to draw tab labels in their selected state.
         """
 
         self._selected_font = font
@@ -888,7 +907,7 @@ class AuiDefaultTabArt:
         """
         Sets the font for calculating text measurements.
 
-        :param Font `font`: the new font to use to measure tab labels text extents.
+        :param wx.Font `font`: the new font to use to measure tab labels text extents.
         """
 
         self._measuring_font = font
@@ -910,23 +929,23 @@ class AuiDefaultTabArt:
         """ Returns the font for calculating text measurements. """
 
         return self._measuring_font
-    
+
 
     def ShowDropDown(self, wnd, pages, active_idx):
         """
         Shows the drop-down window menu on the tab area.
 
-        :param `wnd`: a :class:`Window` derived window instance;
+        :param `wnd`: a :class:`wx.Window` derived window instance;
         :param list `pages`: the pages associated with the tabs;
         :param integer `active_idx`: the active tab index.
         """
-        
+
         useImages = self.GetAGWFlags() & AUI_NB_USE_IMAGES_DROPDOWN
         menuPopup = wx.Menu()
 
         longest = 0
         for i, page in enumerate(pages):
-        
+
             caption = page.caption
 
             # if there is no caption, make it a space.  This will prevent
@@ -945,17 +964,17 @@ class AuiDefaultTabArt:
                     menuItem.SetBitmap(page.bitmap)
 
                 menuPopup.Append(menuItem)
-                
+
             else:
-                
+
                 menuPopup.AppendCheckItem(1000+i, caption)
-                
+
             menuPopup.Enable(1000+i, page.enabled)
 
         if active_idx != -1 and not useImages:
-        
+
             menuPopup.Check(1000+active_idx, True)
-        
+
         # find out the screen coordinate at the bottom of the tab ctrl
         cli_rect = wnd.GetClientRect()
 
@@ -1059,8 +1078,8 @@ class AuiSimpleTabArt:
          ``AUI_NB_CLOSE_BUTTON``              With this style, a close button is available on the tab bar
          ``AUI_NB_CLOSE_ON_ACTIVE_TAB``       With this style, a close button is available on the active tab
          ``AUI_NB_CLOSE_ON_ALL_TABS``         With this style, a close button is available on all tabs
-         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
-         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
+         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~wx.lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
+         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~wx.lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
          ``AUI_NB_HIDE_ON_SINGLE_TAB``        Hides the tab window if only one tab is present
          ``AUI_NB_SMART_TABS``                Use Smart Tabbing, like ``Alt`` + ``Tab`` on Windows
          ``AUI_NB_USE_IMAGES_DROPDOWN``       Uses images on dropdown window list menu instead of check items
@@ -1071,7 +1090,7 @@ class AuiSimpleTabArt:
          ``AUI_NB_ORDER_BY_ACCESS``           Tab navigation order by last access time for the tabs
          ``AUI_NB_NO_TAB_FOCUS``              Don't draw tab focus rectangle
          ==================================== ==================================
-        
+
         """
 
         self._agwFlags = agwFlags
@@ -1085,18 +1104,18 @@ class AuiSimpleTabArt:
         """
 
         return self._agwFlags
-    
+
 
     def SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth):
         """
         Sets the tab sizing information.
-        
-        :param Size `tab_ctrl_size`: the size of the tab control area;
+
+        :param wx.Size `tab_ctrl_size`: the size of the tab control area;
         :param integer `tab_count`: the number of tabs;
         :param tuple `minMaxTabWidth`: a tuple containing the minimum and maximum tab widths
          to be used when the ``AUI_NB_TAB_FIXED_WIDTH`` style is active.
         """
-        
+
         self._fixed_tab_width = 100
         minTabWidth, maxTabWidth = minMaxTabWidth
 
@@ -1109,7 +1128,7 @@ class AuiSimpleTabArt:
 
         if tab_count > 0:
             self._fixed_tab_width = tot_width/tab_count
-        
+
         if self._fixed_tab_width < 100:
             self._fixed_tab_width = 100
 
@@ -1125,17 +1144,17 @@ class AuiSimpleTabArt:
             self._fixed_tab_width = min(self._fixed_tab_width, maxTabWidth)
 
         self._tab_ctrl_height = tab_ctrl_size.y
-        
+
 
     def DrawBackground(self, dc, wnd, rect):
         """
         Draws the tab area background.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
-        :param Rect `rect`: the tab control rectangle.
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
+        :param wx.Rect `rect`: the tab control rectangle.
         """
-        
+
         # draw background
         dc.SetBrush(self._bkbrush)
         dc.SetPen(wx.TRANSPARENT_PEN)
@@ -1150,26 +1169,26 @@ class AuiSimpleTabArt:
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
-        
+
         # if the caption is empty, measure some temporary text
         caption = page.caption
         if caption == "":
             caption = "Xj"
 
         agwFlags = self.GetAGWFlags()
-        
+
         dc.SetFont(self._selected_font)
-        selected_textx, selected_texty = dc.GetMultiLineTextExtent(caption)
+        selected_textx, selected_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         dc.SetFont(self._normal_font)
-        normal_textx, normal_texty = dc.GetMultiLineTextExtent(caption)
+        normal_textx, normal_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         control = page.control
 
@@ -1186,15 +1205,15 @@ class AuiSimpleTabArt:
         # select pen, brush and font for the tab to be drawn
 
         if page.active:
-        
+
             dc.SetPen(self._selected_bkpen)
             dc.SetBrush(self._selected_bkbrush)
             dc.SetFont(self._selected_font)
             textx = selected_textx
             texty = selected_texty
-        
+
         else:
-        
+
             dc.SetPen(self._normal_bkpen)
             dc.SetBrush(self._normal_bkbrush)
             dc.SetFont(self._normal_font)
@@ -1205,7 +1224,7 @@ class AuiSimpleTabArt:
             dc.SetTextForeground(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
         else:
             dc.SetTextForeground(page.text_colour)
-        
+
         # -- draw line --
 
         points = [wx.Point() for i in range(7)]
@@ -1230,9 +1249,9 @@ class AuiSimpleTabArt:
         dc.DrawLines(points)
 
         close_button_width = 0
-        
+
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             close_button_width = self._active_close_bmp.GetWidth()
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
                 if control:
@@ -1244,16 +1263,16 @@ class AuiSimpleTabArt:
                     text_offset = tab_x + (tab_height/2) + close_button_width - (textx/2)
                 else:
                     text_offset = tab_x + (tab_height/2) + ((tab_width-close_button_width)/2) - (textx/2)
-        
+
         else:
-        
+
             text_offset = tab_x + (tab_height/3) + (tab_width/2) - (textx/2)
             if control:
                 if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
                     text_offset = tab_x + (tab_height/3) - (textx/2) + close_button_width + 2
                 else:
                     text_offset = tab_x + (tab_height/3) - (textx/2)
-        
+
         # set minimum text offset
         if text_offset < tab_x + tab_height:
             text_offset = tab_x + tab_height
@@ -1267,7 +1286,7 @@ class AuiSimpleTabArt:
 
         ypos = (tab_y + tab_height)/2 - (texty/2) + 1
 
-        if control is not None:
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -1277,17 +1296,17 @@ class AuiSimpleTabArt:
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
 
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
         if page.active and wx.Window.FindFocus() == wnd and (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
-        
+
             focusRect = wx.Rect(text_offset, ((tab_y + tab_height)/2 - (texty/2) + 1),
                                 selected_textx, selected_texty)
 
@@ -1297,10 +1316,10 @@ class AuiSimpleTabArt:
             # available in wxPython
             # wx.RendererNative.Get().DrawFocusRect(wnd, dc, focusRect, 0)
 
-        out_button_rect = wx.Rect()        
+        out_button_rect = wx.Rect()
         # draw close button if necessary
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             if page.active:
                 bmp = self._active_close_bmp
             else:
@@ -1310,28 +1329,28 @@ class AuiSimpleTabArt:
                 rect = wx.Rect(tab_x + tab_height - 2,
                                tab_y + (tab_height/2) - (bmp.GetHeight()/2) + 1,
                                close_button_width, tab_height - 1)
-            else:                
+            else:
                 rect = wx.Rect(tab_x + tab_width - close_button_width - 1,
                                tab_y + (tab_height/2) - (bmp.GetHeight()/2) + 1,
                                close_button_width, tab_height - 1)
-            
+
             self.DrawButtons(dc, rect, bmp, wx.WHITE, close_button_state)
             out_button_rect = wx.Rect(*rect)
-        
+
         out_tab_rect = wx.Rect(tab_x, tab_y, tab_width, tab_height)
         dc.DestroyClippingRegion()
 
-        return out_tab_rect, out_button_rect, x_extent  
+        return out_tab_rect, out_button_rect, x_extent
 
 
     def DrawButtons(self, dc, _rect, bmp, bkcolour, button_state):
         """
         Convenience method to draw tab buttons.
 
-        :param `dc`: a :class:`DC` device context;
-        :param Rect `_rect`: the tab rectangle;
-        :param Bitmap `bmp`: the tab bitmap;
-        :param Colour `bkcolour`: the tab background colour;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param wx.Rect `_rect`: the tab rectangle;
+        :param wx.Bitmap `bmp`: the tab bitmap;
+        :param wx.Colour `bkcolour`: the tab background colour;
         :param integer `button_state`: the state of the tab button.
         """
 
@@ -1351,10 +1370,10 @@ class AuiSimpleTabArt:
         # draw the button itself
         dc.DrawBitmap(bmp, rect.x, rect.y, True)
 
-    
+
     def GetIndentSize(self):
         """ Returns the tabs indent size. """
-        
+
         return 0
 
 
@@ -1362,17 +1381,17 @@ class AuiSimpleTabArt:
         """
         Returns the tab size for the given caption, bitmap and button state.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `caption`: the tab text caption;
-        :param Bitmap `bitmap`: the bitmap displayed on the tab;
+        :param wx.Bitmap `bitmap`: the bitmap displayed on the tab;
         :param bool `active`: whether the tab is selected or not;
         :param integer `close_button_state`: the state of the close button on the tab;
-        :param Window `control`: a :class:`Window` instance inside a tab (or ``None``).
+        :param wx.Window `control`: a :class:`wx.Window` instance inside a tab (or ``None``).
         """
-        
+
         dc.SetFont(self._measuring_font)
-        measured_textx, measured_texty = dc.GetMultiLineTextExtent(caption)
+        measured_textx, measured_texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         tab_height = measured_texty + 4
         tab_width = measured_textx + tab_height + 5
@@ -1383,7 +1402,7 @@ class AuiSimpleTabArt:
         if self._agwFlags & AUI_NB_TAB_FIXED_WIDTH:
             tab_width = self._fixed_tab_width
 
-        if control is not None:
+        if control:
             controlW, controlH = control.GetSize()
             tab_width += controlW + 4
 
@@ -1394,17 +1413,17 @@ class AuiSimpleTabArt:
 
     def DrawButton(self, dc, wnd, in_rect, button, orientation):
         """
-        Draws a button on the tab or on the tab area, depending on the button identifier. 
+        Draws a button on the tab or on the tab area, depending on the button identifier.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param `button`: an instance of the button class;
         :param integer `orientation`: the tab orientation.
         """
 
         bitmap_id, button_state = button.id, button.cur_state
-        
+
         if bitmap_id == AUI_BUTTON_CLOSE:
             if button_state & AUI_BUTTON_STATE_DISABLED:
                 bmp = self._disabled_close_bmp
@@ -1434,21 +1453,21 @@ class AuiSimpleTabArt:
                 bmp = button.dis_bitmap
             else:
                 bmp = button.bitmap
-            
+
         if not bmp.IsOk():
             return
 
         rect = wx.Rect(*in_rect)
 
         if orientation == wx.LEFT:
-        
+
             rect.SetX(in_rect.x)
             rect.SetY(((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2))
             rect.SetWidth(bmp.GetWidth())
             rect.SetHeight(bmp.GetHeight())
-        
+
         else:
-        
+
             rect = wx.Rect(in_rect.x + in_rect.width - bmp.GetWidth(),
                            ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
                            bmp.GetWidth(), bmp.GetHeight())
@@ -1463,14 +1482,14 @@ class AuiSimpleTabArt:
         """
         Shows the drop-down window menu on the tab area.
 
-        :param `wnd`: a :class:`Window` derived window instance;
+        :param `wnd`: a :class:`wx.Window` derived window instance;
         :param list `pages`: the pages associated with the tabs;
         :param integer `active_idx`: the active tab index.
         """
-        
+
         menuPopup = wx.Menu()
         useImages = self.GetAGWFlags() & AUI_NB_USE_IMAGES_DROPDOWN
-        
+
         for i, page in enumerate(pages):
 
             if useImages:
@@ -1479,22 +1498,22 @@ class AuiSimpleTabArt:
                     menuItem.SetBitmap(page.bitmap)
 
                 menuPopup.Append(menuItem)
-                
+
             else:
-                
+
                 menuPopup.AppendCheckItem(1000+i, page.caption)
-                
+
             menuPopup.Enable(1000+i, page.enabled)
-        
+
         if active_idx != -1 and not useImages:
             menuPopup.Check(1000+active_idx, True)
-        
+
         # find out where to put the popup menu of window
         # items.  Subtract 100 for now to center the menu
         # a bit, until a better mechanism can be implemented
         pt = wx.GetMousePosition()
         pt = wnd.ScreenToClient(pt)
-        
+
         if pt.x < 100:
             pt.x = 0
         else:
@@ -1520,11 +1539,11 @@ class AuiSimpleTabArt:
         """
         Returns the best tab control size.
 
-        :param `wnd`: a :class:`Window` instance object;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param list `pages`: the pages associated with the tabs;
-        :param Size `required_bmp_size`: the size of the bitmap on the tabs.
+        :param wx.Size `required_bmp_size`: the size of the bitmap on the tabs.
         """
-        
+
         dc = wx.ClientDC(wnd)
         dc.SetFont(self._measuring_font)
         s, x_extent = self.GetTabSize(dc, wnd, "ABCDEFGHIj", wx.NullBitmap, True,
@@ -1536,10 +1555,10 @@ class AuiSimpleTabArt:
             if page.control:
                 controlW, controlH = page.control.GetSize()
                 max_y = max(max_y, controlH+4)
-                
-            textx, texty = dc.GetMultiLineTextExtent(page.caption)
+
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(page.caption)
             max_y = max(max_y, texty)
-        
+
         return max_y + 3
 
 
@@ -1547,9 +1566,9 @@ class AuiSimpleTabArt:
         """
         Sets the normal font for drawing tab labels.
 
-        :param Font `font`: the new font to use to draw tab labels in their normal, un-selected state.
+        :param wx.Font `font`: the new font to use to draw tab labels in their normal, un-selected state.
         """
-        
+
         self._normal_font = font
 
 
@@ -1557,9 +1576,9 @@ class AuiSimpleTabArt:
         """
         Sets the selected tab font for drawing tab labels.
 
-        :param Font `font`: the new font to use to draw tab labels in their selected state.
+        :param wx.Font `font`: the new font to use to draw tab labels in their selected state.
         """
-        
+
         self._selected_font = font
 
 
@@ -1567,9 +1586,9 @@ class AuiSimpleTabArt:
         """
         Sets the font for calculating text measurements.
 
-        :param Font `font`: the new font to use to measure tab labels text extents.
+        :param wx.Font `font`: the new font to use to measure tab labels text extents.
         """
-        
+
         self._measuring_font = font
 
 
@@ -1594,19 +1613,19 @@ class AuiSimpleTabArt:
     def SetCustomButton(self, bitmap_id, button_state, bmp):
         """
         Sets a custom bitmap for the close, left, right and window list buttons.
-        
+
         :param integer `bitmap_id`: the button identifier;
         :param integer `button_state`: the button state;
-        :param Bitmap `bmp`: the custom bitmap to use for the button.
+        :param wx.Bitmap `bmp`: the custom bitmap to use for the button.
         """
-        
+
         if bitmap_id == AUI_BUTTON_CLOSE:
             if button_state == AUI_BUTTON_STATE_NORMAL:
                 self._active_close_bmp = bmp
                 self._hover_close_bmp = self._active_close_bmp
                 self._pressed_close_bmp = self._active_close_bmp
                 self._disabled_close_bmp = self._active_close_bmp
-                    
+
             elif button_state == AUI_BUTTON_STATE_HOVER:
                 self._hover_close_bmp = bmp
             elif button_state == AUI_BUTTON_STATE_PRESSED:
@@ -1631,7 +1650,7 @@ class AuiSimpleTabArt:
                 self._disabled_windowlist_bmp = bmp
             else:
                 self._active_windowlist_bmp = bmp
-    
+
 
 class VC71TabArt(AuiDefaultTabArt):
     """ A class to draw tabs using the Visual Studio 2003 (VC71) style. """
@@ -1658,14 +1677,14 @@ class VC71TabArt(AuiDefaultTabArt):
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
-        
+
         # Visual studio 7.1 style
         # This code is based on the renderer included in FlatNotebook
 
@@ -1683,7 +1702,7 @@ class VC71TabArt(AuiDefaultTabArt):
 
         if tab_x + clip_width > in_rect.x + in_rect.width - 4:
             clip_width = (in_rect.x + in_rect.width) - tab_x - 4
-            
+
         dc.SetClippingRegion(tab_x, tab_y, clip_width + 1, tab_height - 3)
         agwFlags = self.GetAGWFlags()
 
@@ -1705,34 +1724,34 @@ class VC71TabArt(AuiDefaultTabArt):
             rightLineY2 = tabH + 3
             dc.SetPen(wx.Pen(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DSHADOW)))
             dc.DrawLine(tab_x + tab_width - 1, rightLineY1 + 1, tab_x + tab_width - 1, rightLineY2)
-            
+
             if agwFlags & AUI_NB_BOTTOM:
                 dc.DrawLine(tab_x + 1, rightLineY2 - 3 , tab_x + tab_width - 1, rightLineY2 - 3)
-                
+
             dc.SetPen(wx.Pen(wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DDKSHADOW)))
             dc.DrawLine(tab_x + tab_width, rightLineY1, tab_x + tab_width, rightLineY2)
-            
+
             if agwFlags & AUI_NB_BOTTOM:
                 dc.DrawLine(tab_x, rightLineY2 - 2, tab_x + tab_width, rightLineY2 - 2)
 
         else:
-        
+
             # We dont draw a rectangle for non selected tabs, but only
             # vertical line on the right
             blackLineY1 = (agwFlags & AUI_NB_BOTTOM and [vertical_border_padding + 2] or \
                            [vertical_border_padding + 1])[0]
             blackLineY2 = tab_height - 5
             dc.DrawLine(tab_x + tab_width, blackLineY1, tab_x + tab_width, blackLineY2)
-        
+
         border_points = [0, 0]
-        
+
         if agwFlags & AUI_NB_BOTTOM:
-        
+
             border_points[0] = wx.Point(tab_x, tab_y)
             border_points[1] = wx.Point(tab_x, tab_y + tab_height - 6)
-        
+
         else: # if (agwFlags & AUI_NB_TOP)
-        
+
             border_points[0] = wx.Point(tab_x, tab_y + tab_height - 4)
             border_points[1] = wx.Point(tab_x, tab_y + 2)
 
@@ -1757,7 +1776,7 @@ class VC71TabArt(AuiDefaultTabArt):
         shift = 0
         if agwFlags & AUI_NB_BOTTOM:
             shift = (page.active and [1] or [2])[0]
-            
+
         bitmap_offset = 0
         if pagebitmap.IsOk():
             bitmap_offset = tab_x + 8
@@ -1771,11 +1790,11 @@ class VC71TabArt(AuiDefaultTabArt):
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
             text_offset += 3 # bitmap padding
-        
+
         else:
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT == 0 or not close_button_width:
                 text_offset = tab_x + 8
-        
+
         # if the caption is empty, measure some temporary text
         caption = page.caption
 
@@ -1784,18 +1803,18 @@ class VC71TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
         ypos = drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1 + shift
 
         offset_focus = text_offset
-        
-        if control is not None:
+
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -1805,13 +1824,13 @@ class VC71TabArt(AuiDefaultTabArt):
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
             textx += controlW + 4
 
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         out_button_rect = wx.Rect()
@@ -1820,7 +1839,7 @@ class VC71TabArt(AuiDefaultTabArt):
         if (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
             self.DrawFocusRectangle(dc, page, wnd, draw_text, offset_focus, bitmap_offset, drawn_tab_yoff+shift,
                                     drawn_tab_height+shift, rectx, recty)
-                
+
         # draw 'x' on tab (if enabled)
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
             close_button_width = self._active_close_bmp.GetWidth()
@@ -1845,7 +1864,7 @@ class VC71TabArt(AuiDefaultTabArt):
             rect = IndentPressedBitmap(rect, close_button_state)
             dc.DrawBitmap(bmp, rect.x, rect.y, True)
 
-            out_button_rect = rect        
+            out_button_rect = rect
 
         out_tab_rect = wx.Rect(tab_x, tab_y, tab_width, tab_height)
         dc.DestroyClippingRegion()
@@ -1878,23 +1897,23 @@ class FF2TabArt(AuiDefaultTabArt):
         """
         Returns the tab size for the given caption, bitmap and button state.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `caption`: the tab text caption;
-        :param Bitmap `bitmap`: the bitmap displayed on the tab;
+        :param wx.Bitmap `bitmap`: the bitmap displayed on the tab;
         :param bool `active`: whether the tab is selected or not;
         :param integer `close_button_state`: the state of the close button on the tab;
-        :param Window `control`: a :class:`Window` instance inside a tab (or ``None``).
+        :param wx.Window `control`: a :class:`wx.Window` instance inside a tab (or ``None``).
         """
-        
+
         tab_size, x_extent = AuiDefaultTabArt.GetTabSize(self, dc, wnd, caption, bitmap,
                                                          active, close_button_state, control)
 
-        tab_width, tab_height = tab_size        
+        tab_width, tab_height = tab_size
 
         # add some vertical padding
         tab_height += 2
-        
+
         return (tab_width, tab_height), x_extent
 
 
@@ -1902,14 +1921,14 @@ class FF2TabArt(AuiDefaultTabArt):
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
-        
+
         # Firefox 2 style
 
         control = page.control
@@ -1926,17 +1945,17 @@ class FF2TabArt(AuiDefaultTabArt):
         clip_width = tab_width
         if tab_x + clip_width > in_rect.x + in_rect.width - 4:
             clip_width = (in_rect.x + in_rect.width) - tab_x - 4
-            
+
         dc.SetClippingRegion(tab_x, tab_y, clip_width + 1, tab_height - 3)
 
         tabPoints = [wx.Point() for i in range(7)]
-        
+
         adjust = 0
         if not page.active:
             adjust = 1
 
         agwFlags = self.GetAGWFlags()
-        
+
         tabPoints[0].x = tab_x + 3
         tabPoints[0].y = (agwFlags & AUI_NB_BOTTOM and [3] or [tab_height - 2])[0]
 
@@ -1971,7 +1990,7 @@ class FF2TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.DrawLine(tabPoints[0].x + 1, tabPoints[0].y, tabPoints[5].x , tabPoints[0].y)
-        
+
         drawn_tab_yoff = tabPoints[1].y
         drawn_tab_height = tabPoints[0].y - tabPoints[2].y
 
@@ -1992,7 +2011,7 @@ class FF2TabArt(AuiDefaultTabArt):
         shift = -1
         if agwFlags & AUI_NB_BOTTOM:
             shift = 2
-        
+
         bitmap_offset = 0
         if pagebitmap.IsOk():
             bitmap_offset = tab_x + 8
@@ -2006,12 +2025,12 @@ class FF2TabArt(AuiDefaultTabArt):
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
             text_offset += 3 # bitmap padding
-        
+
         else:
-        
+
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT == 0 or not close_button_width:
                 text_offset = tab_x + 8
-        
+
         # if the caption is empty, measure some temporary text
         caption = page.caption
         if caption == "":
@@ -2019,10 +2038,10 @@ class FF2TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width + 1)
@@ -2032,8 +2051,8 @@ class FF2TabArt(AuiDefaultTabArt):
         ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1 + shift
 
         offset_focus = text_offset
-        
-        if control is not None:
+
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -2043,24 +2062,24 @@ class FF2TabArt(AuiDefaultTabArt):
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
             textx += controlW + 4
-        
+
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
 
         # draw focus rectangle
         if (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
             self.DrawFocusRectangle(dc, page, wnd, draw_text, offset_focus, bitmap_offset, drawn_tab_yoff+shift,
                                     drawn_tab_height, rectx, recty)
-        
+
         out_button_rect = wx.Rect()
         # draw 'x' on tab (if enabled)
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             close_button_width = self._active_close_bmp.GetWidth()
             bmp = self._disabled_close_bmp
 
@@ -2082,20 +2101,20 @@ class FF2TabArt(AuiDefaultTabArt):
             rect = IndentPressedBitmap(rect, close_button_state)
             dc.DrawBitmap(bmp, rect.x, rect.y, True)
             out_button_rect = rect
-        
+
         out_tab_rect = wx.Rect(tab_x, tab_y, tab_width, tab_height)
         dc.DestroyClippingRegion()
-    
+
         return out_tab_rect, out_button_rect, x_extent
 
 
     def DrawTabBackground(self, dc, rect, focus, upperTabs):
         """
         Draws the tab background for the Firefox 2 style.
-        This is more consistent with :class:`~lib.agw.flatnotebook.FlatNotebook` than before.
+        This is more consistent with :class:`~wx.lib.agw.flatnotebook.FlatNotebook` than before.
 
-        :param `dc`: a :class:`DC` device context;
-        :param Rect `rect`: rectangle the tab should be confined to;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param wx.Rect `rect`: rectangle the tab should be confined to;
         :param bool `focus`: whether the tab has focus or not;
         :param bool `upperTabs`: whether the style is ``AUI_NB_TOP`` or ``AUI_NB_BOTTOM``.
         """
@@ -2144,7 +2163,7 @@ class FF2TabArt(AuiDefaultTabArt):
             else:
                 dc.GradientFillLinear(bottom, bottomStartColour, bottomEndColour, wx.SOUTH)
                 dc.GradientFillLinear(top, topEndColour, topStartColour, wx.SOUTH)
-        
+
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
 
@@ -2172,13 +2191,13 @@ class VC8TabArt(AuiDefaultTabArt):
     def SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth):
         """
         Sets the tab sizing information.
-        
-        :param Size `tab_ctrl_size`: the size of the tab control area;
+
+        :param wx.Size `tab_ctrl_size`: the size of the tab control area;
         :param integer `tab_count`: the number of tabs;
         :param tuple `minMaxTabWidth`: a tuple containing the minimum and maximum tab widths
          to be used when the ``AUI_NB_TAB_FIXED_WIDTH`` style is active.
         """
-        
+
         AuiDefaultTabArt.SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth)
 
         minTabWidth, maxTabWidth = minMaxTabWidth
@@ -2186,7 +2205,7 @@ class VC8TabArt(AuiDefaultTabArt):
             self._fixed_tab_width = max(self._fixed_tab_width, minTabWidth)
         if maxTabWidth > -1:
             self._fixed_tab_width = min(self._fixed_tab_width, maxTabWidth)
-        
+
         self._fixed_tab_width -= 5
 
 
@@ -2194,26 +2213,26 @@ class VC8TabArt(AuiDefaultTabArt):
         """
         Returns the tab size for the given caption, bitmap and button state.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `caption`: the tab text caption;
-        :param Bitmap `bitmap`: the bitmap displayed on the tab;
+        :param wx.Bitmap `bitmap`: the bitmap displayed on the tab;
         :param bool `active`: whether the tab is selected or not;
         :param integer `close_button_state`: the state of the close button on the tab;
-        :param Window `control`: a :class:`Window` instance inside a tab (or ``None``).
+        :param wx.Window `control`: a :class:`wx.Window` instance inside a tab (or ``None``).
         """
-        
+
         tab_size, x_extent = AuiDefaultTabArt.GetTabSize(self, dc, wnd, caption, bitmap,
                                                          active, close_button_state, control)
 
-        tab_width, tab_height = tab_size        
+        tab_width, tab_height = tab_size
 
         # add some padding
         tab_width += 10
 
         if not bitmap.IsOk():
             tab_width += 5
-            
+
         tab_height += 2
 
         return (tab_width, tab_height), x_extent
@@ -2223,14 +2242,14 @@ class VC8TabArt(AuiDefaultTabArt):
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
-        
+
         # Visual Studio 8 style
 
         control = page.control
@@ -2247,17 +2266,17 @@ class VC8TabArt(AuiDefaultTabArt):
         clip_width = tab_width + 3
         if tab_x + clip_width > in_rect.x + in_rect.width - 4:
             clip_width = (in_rect.x + in_rect.width) - tab_x - 4
-        
+
         tabPoints = [wx.Point() for i in range(8)]
 
-        # If we draw the first tab or the active tab, 
+        # If we draw the first tab or the active tab,
         # we draw a full tab, else we draw a truncated tab
         #
         #             X(2)                  X(3)
         #        X(1)                            X(4)
-        #                                          
+        #
         #                                           X(5)
-        #                                           
+        #
         # X(0),(7)                                  X(6)
         #
         #
@@ -2294,7 +2313,7 @@ class VC8TabArt(AuiDefaultTabArt):
         tabPoints[7].x = tabPoints[0].x
         tabPoints[7].y = tabPoints[0].y
 
-        self.FillVC8GradientColour(dc, tabPoints, page.active)        
+        self.FillVC8GradientColour(dc, tabPoints, page.active)
 
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
@@ -2302,11 +2321,11 @@ class VC8TabArt(AuiDefaultTabArt):
         dc.DrawPolygon(tabPoints)
 
         if page.active:
-            # Delete the bottom line (or the upper one, incase we use wxBOTTOM) 
+            # Delete the bottom line (or the upper one, incase we use wxBOTTOM)
             dc.SetPen(wx.WHITE_PEN)
             dc.DrawLine(tabPoints[0].x, tabPoints[0].y, tabPoints[6].x, tabPoints[6].y)
 
-        dc.SetClippingRegion(tab_x, tab_y, clip_width + 2, tab_height - 3)            
+        dc.SetClippingRegion(tab_x, tab_y, clip_width + 2, tab_height - 3)
 
         drawn_tab_yoff = tabPoints[1].y
         drawn_tab_height = tabPoints[0].y - tabPoints[2].y
@@ -2328,7 +2347,7 @@ class VC8TabArt(AuiDefaultTabArt):
         shift = 0
         if agwFlags & AUI_NB_BOTTOM:
             shift = (page.active and [1] or [2])[0]
-        
+
         bitmap_offset = 0
         if pagebitmap.IsOk():
             bitmap_offset = tab_x + 20
@@ -2342,11 +2361,11 @@ class VC8TabArt(AuiDefaultTabArt):
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
             text_offset += 3 # bitmap padding
-        
+
         else:
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT == 0 or not close_button_width:
                 text_offset = tab_x + tab_height
-        
+
         # if the caption is empty, measure some temporary text
         caption = page.caption
         if caption == "":
@@ -2354,10 +2373,10 @@ class VC8TabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x))
@@ -2367,8 +2386,8 @@ class VC8TabArt(AuiDefaultTabArt):
         ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1 + shift
 
         offset_focus = text_offset
-        
-        if control is not None:
+
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -2378,24 +2397,24 @@ class VC8TabArt(AuiDefaultTabArt):
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
             textx += controlW + 4
 
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
-        
+
         # draw focus rectangle
         if (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
             self.DrawFocusRectangle(dc, page, wnd, draw_text, offset_focus, bitmap_offset, drawn_tab_yoff+shift,
                                     drawn_tab_height+shift, rectx, recty)
-        
+
         out_button_rect = wx.Rect()
         # draw 'x' on tab (if enabled)
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             close_button_width = self._active_close_bmp.GetWidth()
             bmp = self._disabled_close_bmp
 
@@ -2403,7 +2422,7 @@ class VC8TabArt(AuiDefaultTabArt):
                 bmp = self._hover_close_bmp
             elif close_button_state == AUI_BUTTON_STATE_PRESSED:
                 bmp = self._pressed_close_bmp
-                
+
             if page.active:
                 xpos = tab_x + tab_width - close_button_width + 3
             else:
@@ -2422,36 +2441,36 @@ class VC8TabArt(AuiDefaultTabArt):
             rect = IndentPressedBitmap(rect, close_button_state)
             dc.DrawBitmap(bmp, rect.x, rect.y, True)
             out_button_rect = rect
-        
+
         out_tab_rect = wx.Rect(tab_x, tab_y, x_extent, tab_height)
         dc.DestroyClippingRegion()
 
         return out_tab_rect, out_button_rect, x_extent
-        
+
 
     def FillVC8GradientColour(self, dc, tabPoints, active):
         """
         Fills the tab with the Visual Studio 2005 gradient background.
 
-        :param `dc`: a :class:`DC` device context;
-        :param list `tabPoints`: a list of :class:`Point` objects describing the tab shape;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param list `tabPoints`: a list of :class:`wx.Point` objects describing the tab shape;
         :param bool `active`: whether the tab is selected or not.
         """
 
         xList = [pt.x for pt in tabPoints]
         yList = [pt.y for pt in tabPoints]
-        
+
         minx, maxx = min(xList), max(xList)
         miny, maxy = min(yList), max(yList)
 
-        rect = wx.Rect(minx, maxy, maxx-minx, miny-maxy+1)        
+        rect = wx.Rect(minx, maxy, maxx-minx, miny-maxy+1)
         region = wx.Region(tabPoints)
 
         if self._buttonRect.width > 0:
             buttonRegion = wx.Region(*self._buttonRect)
             region.Xor(buttonRegion)
-        
-        dc.SetClippingRegionAsRegion(region)
+
+        dc.SetDeviceClippingRegion(region)
 
         if active:
             bottom_colour = top_colour = wx.WHITE
@@ -2461,7 +2480,7 @@ class VC8TabArt(AuiDefaultTabArt):
 
         dc.GradientFillLinear(rect, top_colour, bottom_colour, wx.SOUTH)
         dc.DestroyClippingRegion()
-        
+
 
 class ChromeTabArt(AuiDefaultTabArt):
     """
@@ -2476,7 +2495,7 @@ class ChromeTabArt(AuiDefaultTabArt):
         AuiDefaultTabArt.__init__(self)
 
         self.SetBitmaps(mirror=False)
-        
+
         closeBmp = tab_close.GetBitmap()
         closeHBmp = tab_close_h.GetBitmap()
         closePBmp = tab_close_p.GetBitmap()
@@ -2484,7 +2503,7 @@ class ChromeTabArt(AuiDefaultTabArt):
         self.SetCustomButton(AUI_BUTTON_CLOSE, AUI_BUTTON_STATE_NORMAL, closeBmp)
         self.SetCustomButton(AUI_BUTTON_CLOSE, AUI_BUTTON_STATE_HOVER, closeHBmp)
         self.SetCustomButton(AUI_BUTTON_CLOSE, AUI_BUTTON_STATE_PRESSED, closePBmp)
-        
+
 
     def SetAGWFlags(self, agwFlags):
         """
@@ -2508,8 +2527,8 @@ class ChromeTabArt(AuiDefaultTabArt):
          ``AUI_NB_CLOSE_BUTTON``              With this style, a close button is available on the tab bar
          ``AUI_NB_CLOSE_ON_ACTIVE_TAB``       With this style, a close button is available on the active tab
          ``AUI_NB_CLOSE_ON_ALL_TABS``         With this style, a close button is available on all tabs
-         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
-         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
+         ``AUI_NB_MIDDLE_CLICK_CLOSE``        Allows to close :class:`~wx.lib.agw.aui.auibook.AuiNotebook` tabs by mouse middle button click
+         ``AUI_NB_SUB_NOTEBOOK``              This style is used by :class:`~wx.lib.agw.aui.framemanager.AuiManager` to create automatic AuiNotebooks
          ``AUI_NB_HIDE_ON_SINGLE_TAB``        Hides the tab window if only one tab is present
          ``AUI_NB_SMART_TABS``                Use Smart Tabbing, like ``Alt`` + ``Tab`` on Windows
          ``AUI_NB_USE_IMAGES_DROPDOWN``       Uses images on dropdown window list menu instead of check items
@@ -2529,7 +2548,7 @@ class ChromeTabArt(AuiDefaultTabArt):
         elif agwFlags & AUI_NB_BOTTOM:
             self.SetBitmaps(mirror=True)
 
-        AuiDefaultTabArt.SetAGWFlags(self, agwFlags)            
+        AuiDefaultTabArt.SetAGWFlags(self, agwFlags)
 
 
     def SetBitmaps(self, mirror):
@@ -2548,14 +2567,14 @@ class ChromeTabArt(AuiDefaultTabArt):
                 img = bmp.ConvertToImage()
                 img = img.Mirror(horizontally=False)
                 bmps[indx] = img.ConvertToBitmap()
-                
+
         self._leftActiveBmp = bmps[0]
         self._centerActiveBmp = bmps[1]
         self._rightActiveBmp = bmps[2]
         self._leftInactiveBmp = bmps[3]
         self._centerInactiveBmp = bmps[4]
         self._rightInactiveBmp = bmps[5]
-            
+
 
     def Clone(self):
         """ Clones the art object. """
@@ -2572,13 +2591,13 @@ class ChromeTabArt(AuiDefaultTabArt):
     def SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth):
         """
         Sets the tab sizing information.
-        
-        :param Size `tab_ctrl_size`: the size of the tab control area;
+
+        :param wx.Size `tab_ctrl_size`: the size of the tab control area;
         :param integer `tab_count`: the number of tabs;
         :param tuple `minMaxTabWidth`: a tuple containing the minimum and maximum tab widths
          to be used when the ``AUI_NB_TAB_FIXED_WIDTH`` style is active.
         """
-        
+
         AuiDefaultTabArt.SetSizingInfo(self, tab_ctrl_size, tab_count, minMaxTabWidth)
 
         minTabWidth, maxTabWidth = minMaxTabWidth
@@ -2594,25 +2613,25 @@ class ChromeTabArt(AuiDefaultTabArt):
         """
         Returns the tab size for the given caption, bitmap and button state.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param string `caption`: the tab text caption;
-        :param Bitmap `bitmap`: the bitmap displayed on the tab;
+        :param wx.Bitmap `bitmap`: the bitmap displayed on the tab;
         :param bool `active`: whether the tab is selected or not;
         :param integer `close_button_state`: the state of the close button on the tab;
-        :param Window `control`: a :class:`Window` instance inside a tab (or ``None``).
+        :param wx.Window `control`: a :class:`wx.Window` instance inside a tab (or ``None``).
         """
-        
+
         tab_size, x_extent = AuiDefaultTabArt.GetTabSize(self, dc, wnd, caption, bitmap,
                                                          active, close_button_state, control)
 
-        tab_width, tab_height = tab_size        
+        tab_width, tab_height = tab_size
 
         # add some padding
         tab_width += self._leftActiveBmp.GetWidth()
         tab_height += 2
 
-        tab_height = max(tab_height, self._centerActiveBmp.GetHeight())        
+        tab_height = max(tab_height, self._centerActiveBmp.GetHeight())
 
         return (tab_width, tab_height), x_extent
 
@@ -2621,14 +2640,14 @@ class ChromeTabArt(AuiDefaultTabArt):
         """
         Draws a single tab.
 
-        :param `dc`: a :class:`DC` device context;
-        :param `wnd`: a :class:`Window` instance object;
+        :param `dc`: a :class:`wx.DC` device context;
+        :param `wnd`: a :class:`wx.Window` instance object;
         :param `page`: the tab control page associated with the tab;
-        :param Rect `in_rect`: rectangle the tab should be confined to;
+        :param wx.Rect `in_rect`: rectangle the tab should be confined to;
         :param integer `close_button_state`: the state of the close button on the tab;
         :param bool `paint_control`: whether to draw the control inside a tab (if any) on a :class:`MemoryDC`.
         """
-        
+
         # Chrome tab style
 
         control = page.control
@@ -2637,7 +2656,7 @@ class ChromeTabArt(AuiDefaultTabArt):
                                              close_button_state, control)
 
         agwFlags = self.GetAGWFlags()
-        
+
         tab_height = self._tab_ctrl_height - 1
         tab_width = tab_size[0]
         tab_x = in_rect.x
@@ -2646,7 +2665,7 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         if tab_x + clip_width > in_rect.x + in_rect.width - 4:
             clip_width = (in_rect.x + in_rect.width) - tab_x - 4
-            
+
         dc.SetClippingRegion(tab_x, tab_y, clip_width + 1, tab_height - 3)
         drawn_tab_yoff = 1
 
@@ -2666,7 +2685,7 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         available = tab_x + tab_width - rightw
         posx = tab_x + leftw
-        
+
         while 1:
             if posx >= available:
                 break
@@ -2677,7 +2696,7 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         drawn_tab_height = center.GetHeight()
         text_offset = tab_x + leftw
-        
+
         close_button_width = 0
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
             close_button_width = self._active_close_bmp.GetWidth()
@@ -2690,7 +2709,7 @@ class ChromeTabArt(AuiDefaultTabArt):
         else:
             dc.SetTextForeground(page.text_colour)
             pagebitmap = page.bitmap
-        
+
         bitmap_offset = 0
         if pagebitmap.IsOk():
             bitmap_offset = tab_x + leftw
@@ -2704,12 +2723,12 @@ class ChromeTabArt(AuiDefaultTabArt):
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
             text_offset += 3 # bitmap padding
-        
+
         else:
-        
+
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT == 0 or not close_button_width:
                 text_offset = tab_x + leftw
-        
+
         # if the caption is empty, measure some temporary text
         caption = page.caption
         if caption == "":
@@ -2717,10 +2736,10 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         if page.active:
             dc.SetFont(self._selected_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
         else:
             dc.SetFont(self._normal_font)
-            textx, texty = dc.GetMultiLineTextExtent(caption)
+            textx, texty, dummy = dc.GetFullMultiLineTextExtent(caption)
 
         if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - leftw)
@@ -2729,7 +2748,7 @@ class ChromeTabArt(AuiDefaultTabArt):
 
         ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1
 
-        if control is not None:
+        if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
                 control.SetPosition(wx.Point(text_offset+1, ypos))
 
@@ -2739,18 +2758,18 @@ class ChromeTabArt(AuiDefaultTabArt):
             if paint_control:
                 bmp = TakeScreenShot(control.GetScreenRect())
                 dc.DrawBitmap(bmp, text_offset+1, ypos, True)
-                
+
             controlW, controlH = control.GetSize()
             text_offset += controlW + 4
 
         # draw tab text
-        rectx, recty = dc.GetMultiLineTextExtent(draw_text)
+        rectx, recty, dummy = dc.GetFullMultiLineTextExtent(draw_text)
         dc.DrawLabel(draw_text, wx.Rect(text_offset, ypos, rectx, recty))
-                
+
         out_button_rect = wx.Rect()
         # draw 'x' on tab (if enabled)
         if close_button_state != AUI_BUTTON_STATE_HIDDEN:
-        
+
             close_button_width = self._active_close_bmp.GetWidth()
             bmp = self._disabled_close_bmp
 
@@ -2770,15 +2789,15 @@ class ChromeTabArt(AuiDefaultTabArt):
 
             if agwFlags & AUI_NB_BOTTOM:
                 rect.y -= 1
-                
+
             # Indent the button if it is pressed down:
             rect = IndentPressedBitmap(rect, close_button_state)
             dc.DrawBitmap(bmp, rect.x, rect.y, True)
             out_button_rect = rect
-            
+
         out_tab_rect = wx.Rect(tab_x, tab_y, tab_width, tab_height)
         dc.DestroyClippingRegion()
 
-        return out_tab_rect, out_button_rect, x_extent        
+        return out_tab_rect, out_button_rect, x_extent
 
 

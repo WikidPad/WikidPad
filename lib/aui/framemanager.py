@@ -2195,6 +2195,9 @@ class AuiDockingGuideWindow(wx.Window):
         :param `pos`: a :class:`wx.Point` mouse position.
         """
 
+        if not self.GetTopLevelParent().IsShownOnScreen() and self.IsShownOnScreen():
+            return
+
         inside = self.GetScreenRect().Contains(pos)
 
         if inside:
@@ -3033,7 +3036,7 @@ class AuiFloatingFrame(wx.MiniFrame):
             self.SetMinSize(min_size)
 
         self._mgr.AddPane(self._pane_window, contained_pane)
-        self._mgr.Update()
+        self._mgr.DoUpdate()
 
         if pane.min_size.IsFullySpecified():
             # because SetSizeHints() calls Fit() too (which sets the window
@@ -3090,7 +3093,7 @@ class AuiFloatingFrame(wx.MiniFrame):
         :param `event`: a :class:`wx.SizeEvent` to be processed.
         """
 
-        if self._owner_mgr and self._send_size:
+        if self._owner_mgr and self._send_size and self.IsShownOnScreen():
             self._owner_mgr.OnFloatingPaneResized(self._pane_window, event.GetSize())
 
 
@@ -3100,7 +3103,6 @@ class AuiFloatingFrame(wx.MiniFrame):
 
         :param `event`: a :class:`CloseEvent` to be processed.
         """
-
         if self._owner_mgr:
             self._owner_mgr.OnFloatingPaneClosed(self._pane_window, event)
 
@@ -4219,6 +4221,9 @@ class AuiManager(wx.EvtHandler):
         self.Bind(wx.EVT_TIMER, self.OnHintFadeTimer, self._hint_fadetimer)
         self.Bind(wx.EVT_TIMER, self.SlideIn, self._preview_timer)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        if '__WXGTK__' in wx.PlatformInfo:
+            self.Bind(wx.EVT_WINDOW_CREATE, self.DoUpdateEvt)
 
         self.Bind(wx.EVT_MOVE, self.OnMove)
         self.Bind(wx.EVT_SYS_COLOUR_CHANGED, self.OnSysColourChanged)
@@ -4553,11 +4558,9 @@ class AuiManager(wx.EvtHandler):
 
     def DestroyGuideWindows(self):
         """ Destroys the VS2005 HUD guide windows. """
-
         for guide in self._guides:
             if guide.host:
                 guide.host.Destroy()
-
         self._guides = []
 
 
@@ -4574,7 +4577,6 @@ class AuiManager(wx.EvtHandler):
         """ Destroys the standard wxAUI hint window. """
 
         if self._hint_window:
-
             self._hint_window.Destroy()
             self._hint_window = None
 
@@ -4600,10 +4602,23 @@ class AuiManager(wx.EvtHandler):
                     klass.RemoveEventHandler(handler)
 
 
+    def OnClose(self, ev):
+        """Called when the managed window is closed. Makes sure that :meth:`UnInit`
+        is called.
+        """
+
+        ev.Skip()
+        if ev.GetEventObject() == self._frame:
+            wx.CallAfter(self.UnInit)
+
+
     def OnDestroy(self, event) :
+        """Called when the managed window is destroyed. Makes sure that :meth:`UnInit`
+        is called.
+        """
 
         if self._frame == event.GetEventObject():
-            self.UnInit();
+            self.UnInit()
 
 
     def GetArtProvider(self):
@@ -4970,13 +4985,14 @@ class AuiManager(wx.EvtHandler):
                     # reparent to self._frame and destroy the pane
                     p.window.Reparent(self._frame)
                     p.frame.SetSizer(None)
+                    p.frame._mgr.UnInit()
                     p.frame.Destroy()
                     p.frame = None
 
                 elif p.IsNotebookPage():
                     notebook = self._notebooks[p.notebook_id]
                     id = notebook.GetPageIndex(p.window)
-                    notebook.RemovePageByIdx(id)
+                    notebook.RemovePage(id)
                     p.window.Reparent(self._frame)
 
                 # make sure there are no references to this pane in our uiparts,
@@ -5039,7 +5055,7 @@ class AuiManager(wx.EvtHandler):
                     notebook = self._notebooks[nid]
                     page_idx = notebook.GetPageIndex(pane_info.window)
                     if page_idx >= 0:
-                        notebook.RemovePageByIdx(page_idx)
+                        notebook.RemovePage(page_idx)
 
         # now we need to either destroy or hide the pane
         to_destroy = 0
@@ -5059,7 +5075,7 @@ class AuiManager(wx.EvtHandler):
             notebook = self._notebooks[pane_info.notebook_id]
             while notebook.GetPageCount():
                 window = notebook.GetPage(0)
-                notebook.RemovePageByIdx(0)
+                notebook.RemovePage(0)
                 info = self.GetPane(window)
                 if info.IsOk():
                     info.notebook_id = -1
@@ -6343,11 +6359,12 @@ class AuiManager(wx.EvtHandler):
 
     def Update(self):
         if '__WXGTK__' in wx.PlatformInfo:
-            self.Bind(wx.EVT_WINDOW_CREATE, self.DoUpdateEvt)
+            wx.CallAfter(self.DoUpdate)
         else:
             self.DoUpdate()
 
     def DoUpdateEvt(self, evt):
+        self.Unbind(wx.EVT_WINDOW_CREATE)
         wx.CallAfter(self.DoUpdate)
 
     def DoUpdate(self):
@@ -6361,6 +6378,10 @@ class AuiManager(wx.EvtHandler):
         must be called. This construction allows pane flicker to be avoided by updating
         the whole layout at one time.
         """
+
+        if not self.GetManagedWindow():
+            return
+
         if '__WXGTK__' in wx.PlatformInfo:
             self.GetManagedWindow().Freeze()
         self._hover_button = None
@@ -6403,6 +6424,8 @@ class AuiManager(wx.EvtHandler):
 
             if p.frame:
                 p.frame.SetSizer(None)
+                while p.frame.GetEventHandler() is not p.frame:
+                    p.frame.PopEventHandler()
                 p.frame.Destroy()
             p.frame = None
 
@@ -6576,7 +6599,7 @@ class AuiManager(wx.EvtHandler):
                 window = notebook.GetPage(pageCounter)
                 paneInfo = self.GetPane(window)
                 if paneInfo.IsOk() and paneInfo.notebook_id != nb:
-                    notebook.RemovePageByIdx(pageCounter)
+                    notebook.RemovePage(pageCounter)
                     window.Hide()
                     window.Reparent(self._frame)
                     pageCounter -= 1
@@ -6636,7 +6659,7 @@ class AuiManager(wx.EvtHandler):
 
                     self.DetachPane(notebook)
 
-                    notebook.RemovePageByIdx(0)
+                    notebook.RemovePage(0)
                     notebook.Destroy()
 
                 else:
@@ -6666,7 +6689,7 @@ class AuiManager(wx.EvtHandler):
                     page = notebook.GetPage(idx)
                     pane = self.GetPane(page)
                     pages_and_panes.append((page, pane))
-                    notebook.RemovePageByIdx(idx)
+                    notebook.RemovePage(idx)
                 sorted_pnp = sorted(pages_and_panes, key=lambda tup: tup[1].dock_pos)
 
                 # Grab the attributes from the panes which are ordered
@@ -6868,7 +6891,8 @@ class AuiManager(wx.EvtHandler):
             if guide.dock_direction == AUI_DOCK_CENTER:
                 guide.host.ValidateNotebookDocking(paneInfo.IsNotebookDockable())
 
-            guide.host.UpdateDockGuide(mousePos)
+            if guide.host.IsShownOnScreen():
+                guide.host.UpdateDockGuide(mousePos)
 
         paneInfo.window.Lower()
 
@@ -7320,7 +7344,7 @@ class AuiManager(wx.EvtHandler):
 
         if obj and isinstance(obj, auibook.AuiTabCtrl):
 
-            page_idx = obj.GetActivePageIdx()
+            page_idx = obj.GetActivePage()
 
             if page_idx >= 0:
                 page = obj.GetPage(page_idx)
@@ -7377,7 +7401,12 @@ class AuiManager(wx.EvtHandler):
                 if paneInfo.IsMaximized():
                     self.RestorePane(paneInfo)
                 paneInfo.Float()
-                self.Update()
+
+                # The call to Update may result in
+                # the notebook that generated this
+                # event being deleted, so we have
+                # to do the call asynchronously.
+                wx.CallAfter(self.Update)
 
                 self._action_window = paneInfo.window
 
@@ -7405,7 +7434,7 @@ class AuiManager(wx.EvtHandler):
             p = self.PaneFromTabEvent(event)
             if p.IsOk():
 
-                # veto it because we will call "RemovePageByIdx" ourselves
+                # veto it because we will call "RemovePage" ourselves
                 event.Veto()
 
                 # Now ask the app if they really want to close...
@@ -7418,8 +7447,15 @@ class AuiManager(wx.EvtHandler):
                 if e.GetVeto():
                     return
 
-                self.ClosePane(p)
-                self.Update()
+                # Close/update asynchronously, because
+                # the notebook which generated the event
+                # (and triggered this method call) will
+                # be deleted. 
+                def close():
+                    self.ClosePane(p)
+                    self.Update()
+
+                wx.CallAfter(close)
             else:
                 event.Skip()
 
@@ -8669,6 +8705,9 @@ class AuiManager(wx.EvtHandler):
         if not self._frame.GetSizer():
             return
 
+        if not self._frame.IsShownOnScreen():
+            return
+
         mouse = wx.GetMouseState()
         mousePos = wx.Point(mouse.GetX(), mouse.GetY())
         point = self._frame.ScreenToClient(mousePos)
@@ -9406,7 +9445,7 @@ class AuiManager(wx.EvtHandler):
             e = self.FireEvent(wxEVT_AUI_PANE_FLOATED, self._action_pane, canVeto=False)
 
             if not self._action_pane.frame:
-                self.Update()
+                self.DoUpdate()
 
             self._action_window = self._action_pane.window
 
@@ -9657,7 +9696,7 @@ class AuiManager(wx.EvtHandler):
                 ShowDockingGuides(self._guides, True)
                 break
 
-        self.DrawHintRect(pane.window, clientPt, action_offset)
+        wx.CallAfter(self.DrawHintRect, pane.window, clientPt, action_offset)
 
 
     def OnMotion_DragMovablePane(self, eventOrPt):
@@ -9928,7 +9967,7 @@ class AuiManager(wx.EvtHandler):
         if not pane.IsOk():
             raise Exception("Pane window not found")
 
-        if pane.IsFloating():
+        if pane.IsFloating() and pane.frame is not None:
             pane.floating_pos = pane.frame.GetPosition()
             if pane.frame._transparent != pane.transparent or self._agwFlags & AUI_MGR_TRANSPARENT_DRAG:
                 pane.frame.SetTransparent(pane.transparent)

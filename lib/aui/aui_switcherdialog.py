@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------
+# Name:         aui_switcherdialog.py
+# Purpose:
+#
+# Author:
+#
+# Created:
+# Version:
+# Date:
+# Licence:      wxWindows license
+# Tags:         phoenix-port, documented, py3-port
+#----------------------------------------------------------------------------
 """
 Description
 ===========
@@ -40,11 +53,11 @@ Have created the dialog, you call :meth:`~Dialog.ShowModal`, and if the return v
 ``wx.ID_OK``, retrieve the selection from the dialog and activate the pane.
 
 The sample code below shows a generic method of finding panes and notebook
-tabs within the current :class:`~lib.agw.aui.framemanager.AuiManager`, and using the pane name or notebook
+tabs within the current :class:`~wx.lib.agw.aui.framemanager.AuiManager`, and using the pane name or notebook
 tab position to display the pane.
 
 The only other code to add is a menu item with the desired accelerator,
-whose modifier matches the one you pass to :meth:`SwitcherDialog.SetModifierKey` 
+whose modifier matches the one you pass to :meth:`SwitcherDialog.SetModifierKey`
 (the default being ``wx.WXK_CONTROL``).
 
 
@@ -109,7 +122,7 @@ Event handler::
 
         if wx.Platform == "__WXMAC__":
             items.SetBackgroundColour(wx.WHITE)
-        
+
         # Show the switcher dialog
 
         dlg = SwitcherDialog(items, wx.GetApp().GetTopWindow())
@@ -158,7 +171,7 @@ _ = wx.GetTranslation
     
 class SwitcherItem:
     """ An object containing information about one item. """
-    
+
     def __init__(self, item=None):
         """ Default class constructor. """
 
@@ -173,7 +186,7 @@ class SwitcherItem:
         self._textColour = wx.NullColour
         self._bitmap = wx.NullBitmap
         self._font = wx.NullFont
-        
+
         if item:
             self.Copy(item)
 
@@ -204,10 +217,10 @@ class SwitcherItem:
 
         self._title = title
         return self
-    
+
 
     def GetTitle(self):
-        
+
         return self._title
 
 
@@ -216,7 +229,7 @@ class SwitcherItem:
         self._name = name
         return self
 
-    
+
     def GetName(self):
 
         return self._name
@@ -231,14 +244,14 @@ class SwitcherItem:
     def GetDescription(self):
 
         return self._description
-    
+
 
     def SetId(self, id):
 
         self._id = id
         return self
 
-    
+
     def GetId(self):
 
         return self._id
@@ -249,18 +262,18 @@ class SwitcherItem:
         self._isGroup = isGroup
         return self
 
-    
+
     def GetIsGroup(self):
 
         return self._isGroup
-    
+
 
     def BreakColumn(self, breakCol=True):
 
         self._breakColumn = breakCol
         return self
 
-    
+
     def GetBreakColumn(self):
 
         return self._breakColumn
@@ -271,9 +284,9 @@ class SwitcherItem:
         self._rect = rect
         return self
 
-    
+
     def GetRect(self):
-        
+
         return self._rect
 
 
@@ -282,29 +295,29 @@ class SwitcherItem:
         self._textColour = colour
         return self
 
-    
+
     def GetTextColour(self):
 
         return self._textColour
-    
+
 
     def SetFont(self, font):
 
         self._font = font
         return self
 
-    
+
     def GetFont(self):
 
         return self._font
-    
+
 
     def SetBitmap(self, bitmap):
 
         self._bitmap = bitmap
         return self
 
-    
+
     def GetBitmap(self):
 
         return self._bitmap
@@ -315,28 +328,28 @@ class SwitcherItem:
         self._rowPos = pos
         return self
 
-    
+
     def GetRowPos(self):
 
         return self._rowPos
-    
+
 
     def SetColPos(self, pos):
 
         self._colPos = pos
         return self
 
-    
+
     def GetColPos(self):
 
         return self._colPos
-    
+
 
     def SetWindow(self, win):
 
         self._window = win
         return self
-    
+
 
     def GetWindow(self):
 
@@ -359,8 +372,8 @@ class SwitcherItems:
         self._selectionOutlineColour = wx.NullColour
         self._itemFont = wx.NullFont
 
-        self._items = []        
-        
+        self._items = []
+
         if wx.Platform == "__WXMSW__":
             # If on Windows XP/Vista, use more appropriate colours
             self.SetSelectionOutlineColour(wx.Colour(49, 106, 197))
@@ -368,7 +381,7 @@ class SwitcherItems:
 
         if items:
             self.Copy(items)
-            
+
 
     def Copy(self, items):
         """
@@ -376,12 +389,12 @@ class SwitcherItems:
 
         :param `items`: another instance of :class:`SwitcherItems`.
         """
-        
+
         self.Clear()
 
         for item in items._items:
             self._items.append(item)
-        
+
         self._selection = items._selection
         self._rowCount = items._rowCount
         self._columnCount = items._columnCount
@@ -398,7 +411,7 @@ class SwitcherItems:
         if isinstance(titleOrItem, SwitcherItem):
             self._items.append(titleOrItem)
             return self._items[-1]
-        
+
         item = SwitcherItem()
         item.SetTitle(titleOrItem)
         item.SetName(name)
@@ -427,7 +440,7 @@ class SwitcherItems:
         for i in range(len(self._items)):
             if self._items[i].GetName() == name:
                 return i
-        
+
         return wx.NOT_FOUND
 
 
@@ -436,7 +449,7 @@ class SwitcherItems:
         for i in range(len(self._items)):
             if self._items[i].GetId() == id:
                 return i
-        
+
         return wx.NOT_FOUND
 
 
@@ -455,7 +468,7 @@ class SwitcherItems:
     def GetSelection(self):
 
         return self._selection
-    
+
 
     def GetItem(self, i):
 
@@ -465,13 +478,13 @@ class SwitcherItems:
     def GetItemCount(self):
 
         return len(self._items)
-    
+
 
     def SetRowCount(self, rows):
 
         self._rowCount = rows
 
-        
+
     def GetRowCount(self):
 
         return self._rowCount
@@ -481,61 +494,61 @@ class SwitcherItems:
 
         self._columnCount = cols
 
-        
+
     def GetColumnCount(self):
 
         return self._columnCount
-    
+
 
     def SetBackgroundColour(self, colour):
 
         self._backgroundColour = colour
 
-        
+
     def GetBackgroundColour(self):
 
         return self._backgroundColour
-    
+
 
     def SetTextColour(self, colour):
 
         self._textColour = colour
 
-        
+
     def GetTextColour(self):
 
         return self._textColour
-    
+
 
     def SetSelectionColour(self, colour):
 
         self._selectionColour = colour
 
-        
+
     def GetSelectionColour(self):
 
         return self._selectionColour
-    
+
 
     def SetSelectionOutlineColour(self, colour):
 
         self._selectionOutlineColour = colour
 
-        
+
     def GetSelectionOutlineColour(self):
 
         return self._selectionOutlineColour
-    
+
 
     def SetItemFont(self, font):
 
         self._itemFont = font
 
-        
+
     def GetItemFont(self):
 
-        return self._itemFont 
-    
+        return self._itemFont
+
 
     def PaintItems(self, dc, win):
 
@@ -560,11 +573,11 @@ class SwitcherItems:
             selectionOutlineColour = self.GetSelectionOutlineColour()
 
         if self.GetItemFont().IsOk():
-        
-            standardFont = self.GetItemFont()   
+
+            standardFont = self.GetItemFont()
             groupFont = wx.Font(standardFont.GetPointSize(), standardFont.GetFamily(), standardFont.GetStyle(),
                                 wx.FONTWEIGHT_BOLD, standardFont.GetUnderlined(), standardFont.GetFaceName())
-        
+
         textMarginX = SWITCHER_TEXT_MARGIN_X
 
         dc.SetLogicalFunction(wx.COPY)
@@ -579,7 +592,7 @@ class SwitcherItems:
                 dc.SetPen(wx.Pen(selectionOutlineColour))
                 dc.SetBrush(wx.Brush(selectionColour))
                 dc.DrawRectangle(item.GetRect())
-            
+
             clippingRect = wx.Rect(*item.GetRect())
             clippingRect.Deflate(1, 1)
 
@@ -589,7 +602,7 @@ class SwitcherItems:
                 dc.SetTextForeground(item.GetTextColour())
             else:
                 dc.SetTextForeground(standardTextColour)
-            
+
             if item.GetFont().IsOk():
                 dc.SetFont(item.GetFont())
             else:
@@ -597,7 +610,7 @@ class SwitcherItems:
                     dc.SetFont(groupFont)
                 else:
                     dc.SetFont(standardFont)
-            
+
             w, h = dc.GetTextExtent(item.GetTitle())
             x = item.GetRect().x
 
@@ -612,11 +625,11 @@ class SwitcherItems:
                                   True)
                     x += 16 + textMarginX
                 #x += textMarginX
-            
+
             y = item.GetRect().y + (item.GetRect().height - h)/2
             dc.DrawText(item.GetTitle(), x, y)
             dc.DestroyClippingRegion()
-    
+
 
     def CalculateItemSize(self, dc):
 
@@ -632,7 +645,7 @@ class SwitcherItems:
         maxHeight = 40
 
         if self.GetItemFont().IsOk():
-            standardFont = self.GetItemFont()   
+            standardFont = self.GetItemFont()
 
         for item in self._items:
             if item.GetFont().IsOk():
@@ -650,24 +663,24 @@ class SwitcherItems:
                 sz.x = min(w, maxWidth)
             if h > sz.y:
                 sz.y = min(h, maxHeight)
-        
+
         if sz == wx.Size(16, 16):
             sz = wx.Size(100, 25)
         else:
             sz.x += textMarginX*2
             sz.y += textMarginY*2
-        
+
         return sz
 
 
     def GetIndexForFocus(self):
 
-        for i, item in enumerate(self._items):        
+        for i, item in enumerate(self._items):
             if item.GetWindow():
-            
+
                 if FindFocusDescendant(item.GetWindow()):
                     return i
-            
+
         return wx.NOT_FOUND
 
 
@@ -683,7 +696,7 @@ class MultiColumnListCtrl(wx.Control):
         self._modifierKey = wx.WXK_CONTROL
         self._extraNavigationKey = 0
         self._aui_manager = aui_manager
-        
+
         self.SetInitialSize(size)
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
 
@@ -699,14 +712,14 @@ class MultiColumnListCtrl(wx.Control):
 
         self._aui_manager.HideHint()
 
-        
+
     def DoGetBestSize(self):
 
         return self._overallSize
 
 
     def OnEraseBackground(self, event):
-        
+
         pass
 
 
@@ -728,11 +741,11 @@ class MultiColumnListCtrl(wx.Control):
 
         if event.LeftDown():
             self.SetFocus()
-    
+
 
     def OnChar(self, event):
 
-        event.Skip()        
+        event.Skip()
 
 
     def OnKey(self, event):
@@ -743,15 +756,15 @@ class MultiColumnListCtrl(wx.Control):
                 closeEvent = wx.CloseEvent(wx.wxEVT_CLOSE_WINDOW, topLevel.GetId())
                 closeEvent.SetEventObject(topLevel)
                 closeEvent.SetCanVeto(False)
-                
+
                 topLevel.GetEventHandler().ProcessEvent(closeEvent)
                 return
-                
+
             event.Skip()
             return
 
         keyCode = event.GetKeyCode()
-        
+
         if keyCode in [wx.WXK_ESCAPE, wx.WXK_RETURN]:
             if keyCode == wx.WXK_ESCAPE:
                 self._items.SetSelection(-1)
@@ -760,60 +773,60 @@ class MultiColumnListCtrl(wx.Control):
             closeEvent = wx.CloseEvent(wx.wxEVT_CLOSE_WINDOW, topLevel.GetId())
             closeEvent.SetEventObject(topLevel)
             closeEvent.SetCanVeto(False)
-            
+
             topLevel.GetEventHandler().ProcessEvent(closeEvent)
             return
-        
+
         elif keyCode in [wx.WXK_TAB, self.GetExtraNavigationKey()]:
             if event.ShiftDown():
-            
+
                 self._items.SetSelection(self._items.GetSelection() - 1)
                 if self._items.GetSelection() < 0:
                     self._items.SetSelection(self._items.GetItemCount() - 1)
 
                 self.AdvanceToNextSelectableItem(-1)
-            
+
             else:
-            
+
                 self._items.SetSelection(self._items.GetSelection() + 1)
                 if self._items.GetSelection() >= self._items.GetItemCount():
                     self._items.SetSelection(0)
 
                 self.AdvanceToNextSelectableItem(1)
-            
+
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_DOWN, wx.WXK_NUMPAD_DOWN]:
             self._items.SetSelection(self._items.GetSelection() + 1)
             if self._items.GetSelection() >= self._items.GetItemCount():
                 self._items.SetSelection(0)
-            
+
             self.AdvanceToNextSelectableItem(1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_UP, wx.WXK_NUMPAD_UP]:
             self._items.SetSelection(self._items.GetSelection() - 1)
             if self._items.GetSelection() < 0:
                 self._items.SetSelection(self._items.GetItemCount() - 1)
-            
+
             self.AdvanceToNextSelectableItem(-1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_HOME, wx.WXK_NUMPAD_HOME]:
             self._items.SetSelection(0)
             self.AdvanceToNextSelectableItem(1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_END, wx.WXK_NUMPAD_END]:
             self._items.SetSelection(self._items.GetItemCount() - 1)
             self.AdvanceToNextSelectableItem(-1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_LEFT, wx.WXK_NUMPAD_LEFT]:
             item = self._items.GetItem(self._items.GetSelection())
 
@@ -832,7 +845,7 @@ class MultiColumnListCtrl(wx.Control):
             self.AdvanceToNextSelectableItem(-1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         elif keyCode in [wx.WXK_RIGHT, wx.WXK_NUMPAD_RIGHT]:
             item = self._items.GetItem(self._items.GetSelection())
 
@@ -851,7 +864,7 @@ class MultiColumnListCtrl(wx.Control):
             self.AdvanceToNextSelectableItem(1)
             self.GenerateSelectionEvent()
             self.Refresh()
-        
+
         else:
             event.Skip()
 
@@ -867,9 +880,9 @@ class MultiColumnListCtrl(wx.Control):
         oldSel = self._items.GetSelection()
 
         while 1:
-        
+
             if self._items.GetItem(self._items.GetSelection()).GetIsGroup():
-            
+
                 self._items.SetSelection(self._items.GetSelection() + direction)
                 if self._items.GetSelection() == -1:
                     self._items.SetSelection(self._items.GetItemCount()-1)
@@ -877,7 +890,7 @@ class MultiColumnListCtrl(wx.Control):
                     self._items.SetSelection(0)
                 if self._items.GetSelection() == oldSel:
                     break
-            
+
             else:
                 break
 
@@ -904,14 +917,14 @@ class MultiColumnListCtrl(wx.Control):
         # NOTE: this is odd but it is the only way for the focus to
         #       work correctly on wxMac...
         wx.CallAfter(self.SetFocus)
-        self.SetFocus()        
-    
+        self.SetFocus()
+
 
     def SetTransparency(self, selection=None):
 
         if not self.GetParent().CanSetTransparent():
             return
-        
+
         if selection is not None:
             intersects = False
             if selection.GetScreenRect().Intersects(self.GetParent().GetScreenRect()):
@@ -956,12 +969,12 @@ class MultiColumnListCtrl(wx.Control):
 
         breaking = False
         i = 0
-        
+
         while 1:
-        
+
             oldOverallSize = self._overallSize
             item = self._items.GetItem(i)
-            
+
             item.SetRect(wx.Rect(x, y, itemSize.x, itemSize.y))
             item.SetColPos(columnCount-1)
             item.SetRowPos(currentRow)
@@ -992,29 +1005,29 @@ class MultiColumnListCtrl(wx.Control):
 
                     # Repeat the last item, in the next column
                     i -= 1
-                
+
             if stopBreaking:
                 breaking = False
 
             i += 1
-            
+
             if i >= self._items.GetItemCount():
                 break
-            
+
         self._items.SetColumnCount(columnCount)
         self.InvalidateBestSize()
 
 
     def SetItems(self, items):
-        
+
         self._items = items
 
-        
+
     def GetItems(self):
 
         return self._items
 
- 
+
     def SetExtraNavigationKey(self, keyCode):
         """
         Set an extra key that can be used to cycle through items,
@@ -1036,12 +1049,12 @@ class MultiColumnListCtrl(wx.Control):
 
         self._modifierKey = modifierKey
 
-        
+
     def GetModifierKey(self):
 
         return self._modifierKey
 
-    
+
 
 class SwitcherDialog(wx.Dialog):
     """
@@ -1052,7 +1065,7 @@ class SwitcherDialog(wx.Dialog):
     def __init__(self, items, parent, aui_manager, id=wx.ID_ANY, title=_("Pane Switcher"), pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.STAY_ON_TOP|wx.DIALOG_NO_PARENT|wx.BORDER_SIMPLE):
         """ Default class constructor. """
-        
+
         self._switcherBorderStyle = (style & wx.BORDER_MASK)
         if self._switcherBorderStyle == wx.BORDER_NONE:
             self._switcherBorderStyle = wx.BORDER_SIMPLE
@@ -1104,7 +1117,7 @@ class SwitcherDialog(wx.Dialog):
             self._borderColour = wx.BLACK
 
         self._aui_manager = aui_manager
-        
+
 
     def OnCloseWindow(self, event):
 
@@ -1118,7 +1131,7 @@ class SwitcherDialog(wx.Dialog):
                 self.EndModal(wx.ID_CANCEL)
             else:
                 self.EndModal(wx.ID_OK)
-    
+
         self._aui_manager.HideHint()
 
 
@@ -1133,14 +1146,14 @@ class SwitcherDialog(wx.Dialog):
             if not self._closing:
                 self._closing = True
                 self.EndModal(wx.ID_CANCEL)
-            
+
 
     def OnPaint(self, event):
 
         dc = wx.PaintDC(self)
 
         if self._switcherBorderStyle == wx.BORDER_SIMPLE:
-        
+
             dc.SetPen(wx.Pen(self._borderColour))
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
@@ -1152,16 +1165,16 @@ class SwitcherDialog(wx.Dialog):
             rect.Inflate(1, 1)
             dc.DrawRectangle(rect)
 
-    
+
     def OnSelectItem(self, event):
 
         self.ShowDescription(event.GetSelection())
 
 
-    # Convert a colour to a 6-digit hex string
+    # Convert a colour to a 8-digit hex string
     def ColourToHexString(self, col):
 
-        hx = '%02x%02x%02x' % tuple([int(c) for c in col])
+        hx = '%02x%02x%02x%02x' % tuple([int(c) for c in col])
         return hx
 
 
@@ -1169,7 +1182,7 @@ class SwitcherDialog(wx.Dialog):
 
         item = self._listCtrl.GetItems().GetItem(i)
         colour = self._listCtrl.GetItems().GetBackgroundColour()
-        
+
         if not colour.IsOk():
             colour = self.GetBackgroundColour()
 
@@ -1179,7 +1192,7 @@ class SwitcherDialog(wx.Dialog):
         if item.GetDescription():
             html += _("<p>")
             html += item.GetDescription()
-        
+
         html += _("</body>")
         self._descriptionCtrl.SetPage(html)
 
@@ -1194,8 +1207,8 @@ class SwitcherDialog(wx.Dialog):
     def GetExtraNavigationKey(self):
 
         return self._extraNavigationKey
-    
-        
+
+
     def SetModifierKey(self, modifierKey):
 
         self._modifierKey = modifierKey
@@ -1205,11 +1218,10 @@ class SwitcherDialog(wx.Dialog):
 
     def GetModifierKey(self):
 
-        return self._modifierKey        
+        return self._modifierKey
 
 
     def SetBorderColour(self, colour):
 
         self._borderColour = colour
 
-        

@@ -32,8 +32,7 @@ __date__ = "31 March 2009"
 
 
 import wx
-import types
-import datetime, traceback
+import datetime
 
 from wx.lib.expando import ExpandoTextCtrl
 
@@ -55,11 +54,13 @@ wxEVT_COMMAND_AUINOTEBOOK_END_DRAG = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_DRAG_MOTION = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_ALLOW_DND = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_DRAG_DONE = wx.NewEventType()
+wxEVT_COMMAND_AUINOTEBOOK_TAB_LEFT_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_DOWN = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_TAB_DCLICK = wx.NewEventType()
+wxEVT_COMMAND_AUINOTEBOOK_BG_LEFT_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_MIDDLE_DOWN = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_MIDDLE_UP = wx.NewEventType()
 wxEVT_COMMAND_AUINOTEBOOK_BG_RIGHT_DOWN = wx.NewEventType()
@@ -97,6 +98,8 @@ EVT_AUINOTEBOOK_ALLOW_DND = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_ALLOW_DND
 """ Fires an event asking if it is OK to drag and drop a tab. """
 EVT_AUINOTEBOOK_DRAG_DONE = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_DRAG_DONE, 1)
 """ A drag-and-drop operation on a notebook tab has finished. """
+EVT_AUINOTEBOOK_TAB_LEFT_UP = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_TAB_LEFT_UP, 1)
+""" The user clicked with the left mouse button on a tab. """
 EVT_AUINOTEBOOK_TAB_MIDDLE_DOWN = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN, 1)
 """ The user clicked with the middle mouse button on a tab. """
 EVT_AUINOTEBOOK_TAB_MIDDLE_UP = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_UP, 1)
@@ -105,6 +108,8 @@ EVT_AUINOTEBOOK_TAB_RIGHT_DOWN = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_TAB_
 """ The user clicked with the right mouse button on a tab. """
 EVT_AUINOTEBOOK_TAB_RIGHT_UP = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_UP, 1)
 """ The user clicked with the right mouse button on a tab. """
+EVT_AUINOTEBOOK_BG_LEFT_UP = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_BG_LEFT_UP, 1)
+""" The user left-clicked in the tab area but not over a tab or a button. """
 EVT_AUINOTEBOOK_BG_MIDDLE_DOWN = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_BG_MIDDLE_DOWN, 1)
 """ The user middle-clicked in the tab area but not over a tab or a button. """
 EVT_AUINOTEBOOK_BG_MIDDLE_UP = wx.PyEventBinder(wxEVT_COMMAND_AUINOTEBOOK_BG_MIDDLE_UP, 1)
@@ -340,6 +345,7 @@ class AuiNotebookPage:
         self.caption = ""               # caption displayed on the tab
         self.bitmap = wx.NullBitmap     # tab's bitmap
         self.dis_bitmap = wx.NullBitmap # tab's disabled bitmap
+        self.tooltip = ""               # tab's tooltip
         self.rect = wx.Rect()           # tab's hit rectangle
         self.active = False             # True if the page is currently active
         self.enabled = True             # True if the page is currently enabled
@@ -373,6 +379,7 @@ class AuiTabContainerButton:
         """
 
         self.id = -1                                      # button's id
+        self.name = ""
         self.cur_state = AUI_BUTTON_STATE_NORMAL          # current state (normal, hover, pressed, etc.)
         self.location = wx.LEFT                           # buttons location (wxLEFT, wxRIGHT, or wxCENTER)
         self.bitmap = wx.NullBitmap                       # button's hover bitmap
@@ -899,14 +906,15 @@ class AuiTabContainer:
         self._buttons = []
         self._pages = []
         self._tab_close_buttons = []
+        self._click_tab = None
 
         self._rect = wx.Rect()
         self._auiNotebook = auiNotebook
 
-        self.AddButton(AUI_BUTTON_LEFT, wx.LEFT)
-        self.AddButton(AUI_BUTTON_RIGHT, wx.RIGHT)
-        self.AddButton(AUI_BUTTON_WINDOWLIST, wx.RIGHT)
-        self.AddButton(AUI_BUTTON_CLOSE, wx.RIGHT)
+        self.AddButton(AUI_BUTTON_LEFT, wx.LEFT, name="Scroll Left")
+        self.AddButton(AUI_BUTTON_RIGHT, wx.RIGHT, name="Scroll Right")
+        self.AddButton(AUI_BUTTON_WINDOWLIST, wx.RIGHT, name="Window List")
+        self.AddButton(AUI_BUTTON_CLOSE, wx.RIGHT, name="Close")
 
 
     def SetArtProvider(self, art):
@@ -980,14 +988,14 @@ class AuiTabContainer:
         self.RemoveButton(AUI_BUTTON_CLOSE)
 
         if agwFlags & AUI_NB_SCROLL_BUTTONS:
-            self.AddButton(AUI_BUTTON_LEFT, wx.LEFT)
-            self.AddButton(AUI_BUTTON_RIGHT, wx.RIGHT)
+            self.AddButton(AUI_BUTTON_LEFT, wx.LEFT, name="Scroll Left")
+            self.AddButton(AUI_BUTTON_RIGHT, wx.RIGHT, name="Scroll Right")
 
         if agwFlags & AUI_NB_WINDOWLIST_BUTTON:
-            self.AddButton(AUI_BUTTON_WINDOWLIST, wx.RIGHT)
+            self.AddButton(AUI_BUTTON_WINDOWLIST, wx.RIGHT, name="Window List")
 
         if agwFlags & AUI_NB_CLOSE_BUTTON:
-            self.AddButton(AUI_BUTTON_CLOSE, wx.RIGHT)
+            self.AddButton(AUI_BUTTON_CLOSE, wx.RIGHT, name="Close")
 
         if self._art:
             self._art.SetAGWFlags(self._agwFlags)
@@ -1299,7 +1307,7 @@ class AuiTabContainer:
         wnd.Enable(enable)
 
 
-    def AddButton(self, id, location, normal_bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap):
+    def AddButton(self, id, location, normal_bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap, name=""):
         """
         Adds a button in the tab area.
 
@@ -1317,10 +1325,12 @@ class AuiTabContainer:
         :param integer `location`: the button location. Can be ``wx.LEFT`` or ``wx.RIGHT``;
         :param wx.Bitmap `normal_bitmap`: the bitmap for an enabled tab;
         :param wx.Bitmap `disabled_bitmap`: the bitmap for a disabled tab;
+        :param string `name`: the button name.
         """
 
         button = AuiTabContainerButton()
         button.id = id
+        button.name = name
         button.bitmap = normal_bitmap
         button.dis_bitmap = disabled_bitmap
         button.location = location
@@ -1699,8 +1709,6 @@ class AuiTabContainer:
         left_buttons_width = 0
         right_buttons_width = 0
 
-        offset = 0
-
         # calculate size of the buttons on the right side
         offset = self._rect.x + self._rect.width
 
@@ -1810,12 +1818,13 @@ class AuiTabContainer:
         return None
 
 
-    def ButtonHitTest(self, x, y):
+    def ButtonHitTest(self, x, y, state_flags=AUI_BUTTON_STATE_HIDDEN|AUI_BUTTON_STATE_DISABLED):
         """
         Tests if a button was hit.
 
         :param integer `x`: the mouse `x` position;
-        :param integer `y`: the mouse `y` position.
+        :param integer `y`: the mouse `y` position;
+        :param integer `state_flags`: the current button state (hidden, disabled, etc...). (???)
 
         :returns: and instance of :class:`AuiTabContainerButton` if a button was hit, ``None`` otherwise.
         """
@@ -1825,12 +1834,12 @@ class AuiTabContainer:
 
         for button in self._buttons:
             if button.rect.Contains((x,y)) and \
-               (button.cur_state & (AUI_BUTTON_STATE_HIDDEN|AUI_BUTTON_STATE_DISABLED)) == 0:
+               (button.cur_state & state_flags) == 0:
                 return button
 
         for button in self._tab_close_buttons:
             if button.rect.Contains((x,y)) and \
-               (button.cur_state & (AUI_BUTTON_STATE_HIDDEN|AUI_BUTTON_STATE_DISABLED)) == 0:
+               (button.cur_state & state_flags) == 0:
                 return button
 
         return None
@@ -1889,6 +1898,8 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         self._drag_image = None
         self._drag_img_offset = (0, 0)
         self._on_button = False
+        self._tooltip_timer = None
+        self._tooltip_wnd = None
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
@@ -1907,6 +1918,7 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         self.Bind(wx.EVT_CHAR, self.PropagateEventToNotebook)
         self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.OnCaptureLost)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
+        self.Bind(wx.EVT_ENTER_WINDOW, self.OnEnterWindow)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)
         self.Bind(EVT_AUINOTEBOOK_BUTTON, self.OnButton)
 
@@ -1979,6 +1991,8 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         :param `event`: a :class:`MouseEvent` event to be processed.
         """
 
+        self.StopTooltipTimer()
+
         if not self.HasCapture():
             self.CaptureMouse()
 
@@ -2031,6 +2045,12 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         :param `event`: a :class:`MouseCaptureLostEvent` event to be processed.
         """
 
+        if self._click_tab:
+            e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_LEFT_UP, self.GetId())
+            e.SetEventObject(self)
+            e.SetSelection(self.GetIdxFromWindow(self._click_tab))
+            self.GetEventHandler().ProcessEvent(e)
+
         if self._is_dragging:
             self._is_dragging = False
             self._on_button = False
@@ -2046,6 +2066,13 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
             event.SetEventObject(self)
             self.GetEventHandler().ProcessEvent(event)
 
+        if self._hover_button:
+            self._hover_button.cur_state = AUI_BUTTON_STATE_NORMAL
+            self._hover_button = None
+
+        self.Refresh()
+        self.Update()
+
 
     def OnLeftUp(self, event):
         """
@@ -2054,12 +2081,19 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         :param `event`: a :class:`MouseEvent` event to be processed.
         """
 
+        if self._click_tab:
+            e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_LEFT_UP, self.GetId())
+            e.SetEventObject(self)
+            e.SetSelection(self.GetIdxFromWindow(self._click_tab))
+            self.GetEventHandler().ProcessEvent(e)
+        elif not self.ButtonHitTest(event.GetX(), event.GetY()):
+            e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_BG_LEFT_UP, self.GetId())
+            e.SetEventObject(self)
+            self.GetEventHandler().ProcessEvent(e)
+
         self._on_button = False
 
         if self._is_dragging:
-
-            if self.HasCapture():
-                self.ReleaseMouse()
 
             self._is_dragging = False
             if self._drag_image:
@@ -2067,6 +2101,9 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
                 del self._drag_image
                 self._drag_image = None
                 self.GetParent().Refresh()
+
+            if self.HasCapture():
+                self.ReleaseMouse()
 
             evt = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_END_DRAG, self.GetId())
             evt.SetSelection(self.GetIdxFromWindow(self._click_tab))
@@ -2152,6 +2189,8 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         :param `event`: a :class:`MouseEvent` event to be processed.
         """
 
+        self.StopTooltipTimer()
+
         eventHandler = self.GetEventHandler()
         if not isinstance(eventHandler, AuiTabCtrl):
             event.Skip()
@@ -2201,6 +2240,8 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         :param `event`: a :class:`MouseEvent` event to be processed.
         """
 
+        self.StopTooltipTimer()
+
         x, y = event.GetX(), event.GetY()
         wnd = self.TabHitTest(x, y)
 
@@ -2232,7 +2273,7 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
             e.SetSelection(self.GetIdxFromWindow(wnd))
             e.SetPageWindow(wnd)
             self.GetEventHandler().ProcessEvent(e)
-        elif not self.ButtonHitTest(x, y):
+        elif not self.ButtonHitTest(x, y, state_flags=AUI_BUTTON_STATE_HIDDEN):
             e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_BG_DCLICK, self.GetId())
             e.SetEventObject(self)
             self.GetEventHandler().ProcessEvent(e)
@@ -2285,6 +2326,12 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
                 self.Update()
 
         if not event.LeftIsDown() or self._click_pt == wx.Point(-1, -1):
+
+            # if the mouse has moved from one tab to another then restart the
+            # tooltip timer.
+            if wnd != self._tooltip_wnd or (wnd is None and self._hover_button is not None):
+                self.RestartTooltipTimer(wnd)
+
             return
 
         if not self.HasCapture():
@@ -2313,6 +2360,9 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
                     page = self._pages[mouse_tab]
                     tab_button = self._tab_close_buttons[mouse_tab]
                     self._drag_image = TabDragImage(self, page, tab_button.cur_state, self._art)
+
+                    if self.HasCapture():
+                        self.ReleaseMouse()
 
                     if self._agwFlags & AUI_NB_TAB_FLOAT:
                         self._drag_image.BeginDrag(wx.Point(0,0), self, fullScreen=True)
@@ -2358,13 +2408,75 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
         client_pt = self.ScreenToClient(screen_pt)
         return self.TabHitTest(client_pt.x, client_pt.y)
 
-        
+
+    def RestartTooltipTimer(self, wnd):
+        """
+        Starts a timer: when it fires, a tooltip will be shown on the notebook tab
+        the mouse is pointing at.
+
+        :param wx.Window `wnd`: the window pointed by the mouse.
+        """
+
+        self._tooltip_wnd = wnd
+        if (wnd is None and self._hover_button is None) or not wx.GetApp().IsActive():
+            self.StopTooltipTimer()
+        elif self._tooltip_timer:
+            self._tooltip_timer.Start()
+        else:
+            self._tooltip_timer = wx.CallLater(1000, self.ShowTooltip)
+
+
+    def StopTooltipTimer(self):
+        """ Stops the timer keeping track of tooltips and mouse movements on the tab area. """
+
+        if self._tooltip_timer:
+            self._tooltip_timer.Stop()
+            self._tooltip_timer = None
+
+
+    def OnEnterWindow(self, event):
+        """
+        Handles the ``wx.EVT_ENTER_WINDOW`` event fof :class:`AuiTabCtrl`.
+
+        :param `event`: a :class:`MouseEvent` event to be processed.
+        """
+
+        self.RestartTooltipTimer(self.GetPointedToTab())
+
+
+    def ShowTooltip(self):
+        """ Shows the tooltip on the tab. """
+
+        wnd = self.GetPointedToTab()
+        if wnd != self._tooltip_wnd:
+            self.RestartTooltipTimer(wnd)
+        else:
+            idx = self.GetIdxFromWindow(wnd)
+            if idx >= 0 and idx < len(self._pages):
+                page = self._pages[idx]
+                if page.tooltip:
+                    pos = self.ClientToScreen(page.rect.GetPosition())
+                    rect = wx.Rect(pos, page.rect.GetSize())
+                    tooltip = wx.TipWindow(self, page.tooltip)
+                    tooltip.SetBoundingRect(rect)
+            else:
+                pos = self.ScreenToClient(wx.GetMousePosition())
+                button = self.ButtonHitTest(pos.x, pos.y)
+                if button:
+                    pos = self.ClientToScreen(button.rect.GetPosition())
+                    rect = wx.Rect(pos, button.rect.GetSize())
+                    tooltip = wx.TipWindow(self, button.name)
+                    tooltip.SetBoundingRect(rect)
+
+
     def OnLeaveWindow(self, event):
         """
         Handles the ``wx.EVT_LEAVE_WINDOW`` event for :class:`AuiTabCtrl`.
 
         :param `event`: a :class:`MouseEvent` event to be processed.
         """
+
+        self.StopTooltipTimer()
 
         if self._hover_button:
             self._hover_button.cur_state = AUI_BUTTON_STATE_NORMAL
@@ -2682,7 +2794,23 @@ class TabFrame(wx.Window):
         self._tab_rect = wx.Rect()
         self._parent = parent
 
-        self.Create(parent, size=(0, 0))
+        self.Create(parent, size=(0,0))
+
+        #wx.CallAfter(self.Hide)
+
+        #self.Bind(wx.EVT_MOUSEWHEEL, lambda evt: evt.Skip())
+
+        # This hack should not be necessary
+        self.Bind(wx.EVT_MOUSEWHEEL, self.PassEvent)
+
+    def PassEvent(self, evt):
+        evt.Skip()
+        #self.GetEventHandler().ProcessEvent(evt)
+
+        tabCtrl = self._tabs
+        activePage = tabCtrl.GetWindowFromIdx(tabCtrl.GetActivePage())
+        activePage.GetEventHandler().ProcessEvent(evt)
+#        wx.PostEvent(activePage.getCurrentSubControl(), evt)
 
 
     def SetTabCtrlHeight(self, h):
@@ -2921,7 +3049,7 @@ class AuiNotebook(wx.Panel):
         self._tabBounds = (-1, -1)
         self._click_tab = None
 
-        wx.Panel.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE, name=name)
+        wx.Panel.__init__(self, parent, id, pos, size, style|wx.BORDER_NONE|wx.TAB_TRAVERSAL, name=name)
         from . import framemanager
         self._mgr = framemanager.AuiManager()
         self._tabs = AuiTabContainer(self)
@@ -3444,7 +3572,7 @@ class AuiNotebook(wx.Panel):
         return self._agwFlags
 
 
-    def AddPage(self, page, caption, select=False, bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap, control=None):
+    def AddPage(self, page, caption, select=False, bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap, control=None, tooltip=""):
         """
         Adds a page. If the `select` parameter is ``True``, calling this will generate a
         page change event.
@@ -3456,13 +3584,14 @@ class AuiNotebook(wx.Panel):
         :param wx.Bitmap `disabled_bitmap`: the bitmap to display in the disabled tab;
         :param wx.Window `control`: almost any :class:`wx.Window` -derived instance to be located
          inside a tab;
+        :param string `tooltip`: the tooltip to display when the mouse hovers over the tab.
         """
 
-        return self.InsertPage(self.GetPageCount(), page, caption, select, bitmap, disabled_bitmap, control)
+        return self.InsertPage(self.GetPageCount(), page, caption, select, bitmap, disabled_bitmap, control, tooltip)
 
 
     def InsertPage(self, page_idx, page, caption, select=False, bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap,
-                   control=None):
+                   control=None, tooltip=""):
         """
         This is similar to :meth:`AddPage`, but allows the ability to specify the insert location.
 
@@ -3474,6 +3603,7 @@ class AuiNotebook(wx.Panel):
         :param wx.Bitmap `disabled_bitmap`: the bitmap to display in the disabled tab;
         :param wx.Window `control`: almost any :class:`wx.Window` -derived instance to be located
          inside a ;
+        :param string `tooltip`: the tooltip to display when the mouse hovers over the tab.
         """
         from . import framemanager
 
@@ -3487,6 +3617,7 @@ class AuiNotebook(wx.Panel):
         info.bitmap = bitmap
         info.active = False
         info.control = control
+        info.tooltip = tooltip
 
         originalPaneMgr = framemanager.GetManager(page)
         if originalPaneMgr:
@@ -3872,6 +4003,41 @@ class AuiNotebook(wx.Panel):
         return page_info.bitmap
 
 
+    def SetPageTooltip(self, page_idx, tooltip):
+        """
+        Sets the tab tooltip for the page.
+
+        :param integer `page_idx`: the page index;
+        :param string `tooltip`: the new tooltip.
+
+        :returns: ``True`` if the page tooltip has been set, ``False`` otherwise
+         (for example when the input `page_idx` is greater than the number of
+         pages in the notebook.
+        """
+
+        if page_idx >= self._tabs.GetPageCount():
+            return False
+
+        # update our own tab catalog
+        page_info = self._tabs.GetPage(page_idx)
+        page_info.tooltip = tooltip
+        return True
+
+
+    def GetPageTooltip(self, page_idx):
+        """
+        Returns the tab tooltip for the page.
+
+        :param integer `page_idx`: the page index.
+        """
+
+        if page_idx >= self._tabs.GetPageCount():
+            return ""
+
+        page_info = self._tabs.GetPage(page_idx)
+        return page_info.tooltip
+
+
     def SetImageList(self, imageList):
         """
         Sets the image list for the :class:`AuiNotebook` control.
@@ -4179,9 +4345,11 @@ class AuiNotebook(wx.Panel):
             self._curpage = new_page
 
             # program allows the page change
+            evt.SetEventType(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED)
+            self.GetEventHandler().ProcessEvent(evt)
 
-#             if not evt.IsAllowed(): # event is no longer allowed after handler
-#                 return self._curpage
+            if not evt.IsAllowed(): # event is no longer allowed after handler
+                return self._curpage
 
             ctrl, ctrl_idx = self.FindTab(wnd)
 
@@ -4759,7 +4927,6 @@ class AuiNotebook(wx.Panel):
 
         :param `event`: a :class:`AuiNotebookEvent` event to be processed.
         """
-
         ctrl = event.GetEventObject()
         assert ctrl != None
 
@@ -5148,8 +5315,7 @@ class AuiNotebook(wx.Panel):
 
             if src_tabs.GetPageCount() > 0:
                 src_tabs.SetActivePage(0)
-#                 print "--enddrag32"
-#                 src_tabs.DoShowHide()
+                src_tabs.DoShowHide()   # Disable???
                 src_tabs.Refresh()
 
             # add the page to the destination tabs
@@ -5164,7 +5330,6 @@ class AuiNotebook(wx.Panel):
                 self.RemoveEmptyTabFrames()
 
             self.DoSizing()
-
             dest_tabs.DoShowHide()
             dest_tabs.Refresh()
 
@@ -5424,11 +5589,12 @@ class AuiNotebook(wx.Panel):
                 continue
 
             tab_frame = pane.window
-            if tab_frame._tabs.GetPageCount() == 0:
+            if tab_frame._tabs is None or tab_frame._tabs.GetPageCount() == 0:
                 self._mgr.DetachPane(tab_frame)
                 tab_frame._tabs.Destroy()
                 tab_frame._tabs = None
-                del tab_frame
+                #del tab_frame
+                tab_frame.Destroy()
 
         # check to see if there is still a center pane
         # if there isn't, make a frame the center pane
@@ -5502,7 +5668,6 @@ class AuiNotebook(wx.Panel):
             raise TypeError("SetNavigatorIcon requires a valid bitmap")
 
 
-    # TODO
     def OnNavigationKeyNotebook(self, event):
         """
         Handles the ``wx.EVT_NAVIGATION_KEY`` event for :class:`AuiNotebook`.
@@ -5576,6 +5741,7 @@ class AuiNotebook(wx.Panel):
                     #else: page manages focus inside it itself
 
                 else: # otherwise set the focus to the notebook itself
+
                     self.SetFocus()
 
             else:
@@ -5661,7 +5827,7 @@ class AuiNotebook(wx.Panel):
 
                 else:
                     main_idx = self._tabs.GetIdxFromWindow(close_wnd)
-                    self.DeletePage(main_idx)
+                    wx.CallAfter(self.DeletePage, main_idx)
 
                 # notify owner that the tab has been closed
                 e2 = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSED, self.GetId())
@@ -5690,6 +5856,7 @@ class AuiNotebook(wx.Panel):
         wnd = tabs.GetWindowFromIdx(event.GetSelection())
 
         e = AuiNotebookEvent(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN, self.GetId())
+        e.SetPageWindow(wnd)
         e.SetSelection(self._tabs.GetIdxFromWindow(wnd))
         e.SetEventObject(self)
         self.GetEventHandler().ProcessEvent(e)
@@ -5935,7 +6102,7 @@ class AuiNotebook(wx.Panel):
             return False
 
 
-    def AddTabAreaButton(self, id, location, normal_bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap):
+    def AddTabAreaButton(self, id, location, normal_bitmap=wx.NullBitmap, disabled_bitmap=wx.NullBitmap, name=""):
         """
         Adds a button in the tab area.
 
@@ -5953,10 +6120,11 @@ class AuiNotebook(wx.Panel):
         :param integer `location`: the button location. Can be ``wx.LEFT`` or ``wx.RIGHT``;
         :param wx.Bitmap `normal_bitmap`: the bitmap for an enabled tab;
         :param wx.Bitmap `disabled_bitmap`: the bitmap for a disabled tab;
+        :param string `name`: the button name.
         """
 
         active_tabctrl = self.GetActiveTabCtrl()
-        active_tabctrl.AddButton(id, location, normal_bitmap, disabled_bitmap)
+        active_tabctrl.AddButton(id, location, normal_bitmap, disabled_bitmap, name=name)
 
 
     def RemoveTabAreaButton(self, id):
