@@ -2621,7 +2621,7 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
            This implementation is now deprecated. Refer to :meth:`OnKeyDown` for the correct one.
         """
 
-        if self.GetActivePage() == -1:
+        if self.GetActivePageIdx() == -1:
             event.Skip()
             return
 
@@ -2668,7 +2668,7 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
             if not nb.GetEventHandler().ProcessEvent(keyEvent):
 
                 # Not processed? Do an explicit tab into the page.
-                win = self.GetWindowFromIdx(self.GetActivePage())
+                win = self.GetWindowFromIdx(self.GetActivePageIdx())
                 if win:
                     win.SetFocus()
 
@@ -2688,16 +2688,16 @@ class AuiTabCtrl(wx.Control, AuiTabContainer):
             backwardKey = wx.WXK_LEFT
 
         if key == forwardKey:
-            if self.GetActivePage() == -1:
+            if self.GetActivePageIdx() == -1:
                 newPage = 0
-            elif self.GetActivePage() < len(self._pages) - 1:
-                newPage = self.GetActivePage() + 1
+            elif self.GetActivePageIdx() < len(self._pages) - 1:
+                newPage = self.GetActivePageIdx() + 1
 
         elif key == backwardKey:
-            if self.GetActivePage() == -1:
+            if self.GetActivePageIdx() == -1:
                 newPage = len(self._pages) - 1
-            elif self.GetActivePage() > 0:
-                newPage = self.GetActivePage() - 1
+            elif self.GetActivePageIdx() > 0:
+                newPage = self.GetActivePageIdx() - 1
 
         elif key == wx.WXK_HOME:
             newPage = 0
@@ -2808,7 +2808,7 @@ class TabFrame(wx.Window):
         #self.GetEventHandler().ProcessEvent(evt)
 
         tabCtrl = self._tabs
-        activePage = tabCtrl.GetWindowFromIdx(tabCtrl.GetActivePage())
+        activePage = tabCtrl.GetWindowFromIdx(tabCtrl.GetActivePageIdx())
         activePage.GetEventHandler().ProcessEvent(evt)
 #        wx.PostEvent(activePage.getCurrentSubControl(), evt)
 
