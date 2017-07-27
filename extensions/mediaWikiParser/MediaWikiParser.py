@@ -2207,7 +2207,7 @@ class _TheHelper(object):
         if not word:
             raise ValueError(u'Target can not be empty.')
 
-        relPath = _WikiLinkPath.getRelativePathByAbsPaths(_WikiLinkPath(
+        relPath = _WikiLinkPath.getRelativePathByAbsPaths(
                 _WikiLinkPath(pageName=word),
                 _WikiLinkPath(pageName=baseWord),
                 downwardOnly=downwardOnly)
