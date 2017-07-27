@@ -179,6 +179,7 @@ class UserActionCoord(object):
 
     USER_EVENTS_IN_CONFIG = (
             "mouse/leftdoubleclick/preview/body",
+            "mouse/leftdoubleclick/pagetab",
             "mouse/middleclick/pagetab",
             "mouse/leftdrop/editor/files",
             "mouse/leftdrop/editor/files/modkeys/shift",

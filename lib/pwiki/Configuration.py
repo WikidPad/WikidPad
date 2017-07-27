@@ -765,6 +765,9 @@ GLOBALDEFAULTS = {
             # "action/none": Do nothing; "action/presenter/this/subcontrol/textedit": Switch current subcontrol to textedit mode;
             # "action/presenter/new/foreground/end/page/this/subcontrol/textedit": New tab with same wikiword in edit mode
 
+    ("main", "userEvent_mouse/leftdoubleclick/pagetab"): u"action/none",  # How to react on left double click on tab?
+            # "action/none": Do nothing; "action/presenter/this/close" close this tab
+
     ("main", "userEvent_mouse/middleclick/pagetab"): u"action/none",  # How to react on middle click on tab?
             # "action/none": Do nothing; "action/presenter/this/close" close this tab
 

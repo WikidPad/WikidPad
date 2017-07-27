@@ -554,6 +554,13 @@ class OptionsDialog(wx.Dialog):
                     u"action/presenter/this/clone"
                     ]),
 
+            ("userEvent_mouse/leftdoubleclick/pagetab", "chMouseLeftDClickPageTab", "selt",
+                    [
+                    u"action/none",
+                    u"action/presenter/this/close",
+                    u"action/presenter/this/clone"
+                    ]),
+
             ("userEvent_mouse/leftdrop/editor/files", "chMouseLeftDropEditor", "selt",
                     [
                     u"action/none",
