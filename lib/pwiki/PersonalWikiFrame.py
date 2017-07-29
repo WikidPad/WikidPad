@@ -2091,7 +2091,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Create the toolbar
         # ------------------------------------------------------------------------------------
 
-        tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
+        tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT)
         
         def addSimpleTool(tId, icon, longHelp, shortHelp):
             """
@@ -4237,9 +4237,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if onOrOff:
             self.buildToolbar()
         else:
-            self.fastSearchField = None    
-            self.GetToolBar().Destroy()
+            self.fastSearchField = None
+            tb = self.GetToolBar()
             self.SetToolBar(None)
+            tb.Destroy()
 
 
     def setShowDocStructure(self, onOrOff):
