@@ -619,6 +619,11 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
                         info.occPos[0], info.occPos[1])
 
 
+    def GetSelectedTextColour(self, colFg):
+        return wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
+
+
+
 class SearchPageDialog(wx.Dialog):
     def __init__(self, mainControl, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
