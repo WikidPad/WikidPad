@@ -319,7 +319,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 color = dlg.GetColourData().GetColour()
-                if color.Ok():
+                if color.IsOk():
                     tfield.SetValue(
                             rgbToHtmlColor(color.Red(), color.Green(),
                             color.Blue()))
@@ -1380,7 +1380,7 @@ class OptionsDialog(wx.Dialog):
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 color = dlg.GetColourData().GetColour()
-                if color.Ok():
+                if color.IsOk():
                     tfield.SetValue(
                             rgbToHtmlColor(color.Red(), color.Green(),
                             color.Blue()))

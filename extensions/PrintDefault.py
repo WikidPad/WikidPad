@@ -708,7 +708,7 @@ class HtmlWKPrint(HtmlPrint):
         exporterInstance.styleSheet = ""
 
         htpath = self.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
 
 #         realfp = StringIO.StringIO()
         with open(htpath, "wb") as realfp:

@@ -344,9 +344,9 @@ class WikiHtmlView2(wx.Panel):
         # injection)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]

@@ -180,8 +180,8 @@ class FileStorage:
 
         # End of fast tests, now the whole content must be compared
         
-        file1 = file(path1, "rb")    
-        file2 = file(path2, "rb")
+        file1 = open(path1, "rb")    
+        file2 = open(path2, "rb")
         
         try:
             while True:
