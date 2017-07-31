@@ -20,7 +20,7 @@ from .TempFileSet import TempFileSet
 from . import PluginManager
 
 import threading
-from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
+from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, between
 
 from .ViHelper import ViHintDialog, ViHelper
 
@@ -443,8 +443,17 @@ class WikiHtmlView2(wx.Panel):
         
         # Set zoom factor
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-        zoomFact = max(0.1, zoom * 0.1 + 1.0)
-        self.html.SetZoom(int(zoomFact))
+        
+        # Restrict it to range -2...2
+        zoom = between(-2, zoom, 2)
+                
+        # Adjust range to 0..4
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+        
 
         self.jquery = False
 
@@ -938,7 +947,13 @@ if ((typeof jQuery !== 'undefined')) {
     def GetViewStart(self):
         """
         """
-        return tuple([int(i) for i in self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a").split(",")])
+        scriptRet = self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a")
+        
+        if scriptRet == "" or scriptRet == "undefined,undefined":
+            # Happens with IE
+            return (0, 0)
+            
+        return tuple([int(i) for i in scriptRet.split(",")])
 
     def Scroll(self, x, y):
         """
@@ -1125,8 +1140,8 @@ if ((typeof jQuery !== 'undefined')) {
                 self.currentHtpath = 1 - self.currentHtpath
                 htpath = self.htpaths[self.currentHtpath]
                 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -1308,12 +1323,25 @@ if ((typeof jQuery !== 'undefined')) {
         """
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
         zoom += step
+        
+        # Restrict to allowed range.
+        # In the internal configuration the value 0 means the default size
+        # This should be kept consistent between different WikiHtmlView
+        # implementations.
+        # So it is restricted to range -2...2
+        zoom = between(-2, zoom, 2)
 
         self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
         self.outOfSync = True
         self.refresh()
         
-        self.html.SetZoom(zoom)
+        # The parameter must be in range 0...4 where 2 is default value
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+
 
         
     def OnMiddleDown(self, controlDown=False):
