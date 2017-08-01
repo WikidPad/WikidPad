@@ -41,13 +41,8 @@ LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 # ---------- Encoding conversion ----------
 
 
-# Python 3 shouldn't need any of this - YAY!!!!
-# For now just make them dummy funtions
-
-utf8Enc = lambda x, y=None: [x, len(x)]
-utf8Dec = lambda x: [x, len(x)]
-#utf8Enc = codecs.getencoder("utf-8")
-#utf8Dec = codecs.getdecoder("utf-8")
+utf8Enc = codecs.getencoder("utf-8")
+utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
 utf8Writer = codecs.getwriter("utf-8")
 

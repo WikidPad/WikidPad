@@ -262,8 +262,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     "openedWiki", "openWikiWord", "newWikiWord",
                     "openedWikiWord", "savingWikiWord", "savedWikiWord",
                     "renamedWikiWord", "deletedWikiWord", "exit",
-                    "closingWiki", "droppingWiki", "closedWiki", 
-                    "previewPageNavigation", "previewPageLoaded",
+                    "closingWiki", "droppingWiki", "closedWiki"
                     ] ),
 
                 plm.registerWrappedPluginAPI(("hooks", 1),
