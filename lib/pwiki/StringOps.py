@@ -969,6 +969,8 @@ def formatWxDate(frmStr, date):
                 # Sunday has number 7
                 wd = 7
             resParts.append("%i" % wd)
+        elif part == "%":
+            resParts.append("%%")
         else:
             resParts.append(part)
 
