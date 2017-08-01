@@ -259,8 +259,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
                 htpath = self.htpaths[self.currentHtpath]
 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -277,8 +277,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 self.currentHtpath = 1 - self.currentHtpath
                 htpath = self.htpaths[self.currentHtpath]
                 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
