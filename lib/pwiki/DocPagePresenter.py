@@ -21,7 +21,7 @@ from .WindowLayout import LayeredControlPresenter, LayerSizer, StorablePerspecti
 
 from .PageHistory import PageHistory
 
-from . import pygauge as PG
+from wx.lib.agw.pygauge import PyGauge
 
 
 
@@ -600,7 +600,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
                 return
 
             if self.tabProgressBar is None:
-                self.tabProgressBar = PG.PyGauge(self.getAUITabCtrl(), -1, size=(40, 15), style=wx.GA_HORIZONTAL) 
+                self.tabProgressBar = PyGauge(self.getAUITabCtrl(), -1, size=(40, 15), style=wx.GA_HORIZONTAL) 
                 # Use EVT_CHILD_FOCUS to detect when the progress bar is 
                 # clicked on as no click event seems to be emitted
                 self.tabProgressBar.Bind(wx.EVT_CHILD_FOCUS, 
