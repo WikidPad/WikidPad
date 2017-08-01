@@ -27,7 +27,7 @@ else:
 #     except:
 #         pass
 
-if False:
+if not True:
     # Generate dependencies for py2exe
     import comtypes.gen._99AB80C4_5E19_4FD5_B3CA_5EF62FC3F765_0_1_0 as _dummy
     import comtypes.gen.myole4ax as _dummy

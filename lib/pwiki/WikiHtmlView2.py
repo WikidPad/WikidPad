@@ -1568,7 +1568,7 @@ if ((typeof jQuery !== 'undefined')) {
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Activate")
     N_("Activate New Tab")
     N_("Activate New Tab Backgrd.")

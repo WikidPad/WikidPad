@@ -375,7 +375,7 @@ Clear history;CMD_WIKI_WIDE_HISTORY_DELETE_ALL;Clear history
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Clear history")
 
 

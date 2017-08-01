@@ -790,7 +790,7 @@ _CONTEXT_MENU_TIMELINE = \
 """
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Show empty days")
     N_("Show dates without associated wiki words")
     N_("Sort dates ascending")

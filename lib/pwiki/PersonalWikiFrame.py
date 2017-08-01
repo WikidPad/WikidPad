@@ -6004,7 +6004,7 @@ Exit;TBMENU_EXIT
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Restore")
     N_("Save")
     N_("Exit")
