@@ -267,21 +267,17 @@ class MockWikiDataManager(object):
 
         renameDict = {oldPageName: newPageName}
         """
-        # 1. rename all pages
-        for oldPageName, newPageName in renameDict.iteritems():
-            self.renameWikiWord(oldPageName, newPageName)
-
-        if modifyText == ModifyText.off:
-            return
-
-        # 2. modify text of all affected pages, i.e., pages with links to
-        #    old page names etc.
+        # 1. update text of all affected pages, i.e., all pages with
+        #    references to the old page names
 
         # to simulate, simply run over *all* pages instead of figuring out
         # which pages need updating...
         to_update = self.getWikiData().getAllDefinedWikiPageNames()
 
-        if modifyText == ModifyText.advanced:
+        if modifyText == ModifyText.off:
+            pass
+
+        elif modifyText == ModifyText.advanced:
             langHelper = getApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
             for wikiword in to_update:
@@ -298,6 +294,10 @@ class MockWikiDataManager(object):
                         page, oldPageName, newPageName)
                     if text is not None:
                         page.replaceLiveText(text)
+
+        # 2. rename all pages in database
+        for oldPageName, newPageName in renameDict.iteritems():
+            self.renameWikiWord(oldPageName, newPageName)
 
     def renameWikiWord(self, oldPageName, newPageName):
         """Mimic WikiDataManager.renameWikiWord."""
