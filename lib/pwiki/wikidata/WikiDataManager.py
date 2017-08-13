@@ -1882,14 +1882,18 @@ class WikiDataManager(MiscEventSourceMixin):
         """
 #         print u'WikiDataManager.renameWikiWords renameDict = %r' % renameDict
 
-        # 1. update text of all affected pages, i.e., all pages with
+        # 1. rename all pages
+        for oldPageName, newPageName in renameDict.iteritems():
+            self.renameWikiWord(oldPageName, newPageName)
+
+        if modifyText == ModifyText.off:
+            return
+
+        # 2. update text of all affected pages, i.e., all pages with
         #    references to the old page names
 
 #         print u"(Candidate) pages with text to update = %r" % to_update
 
-
-        if modifyText == ModifyText.off:
-            pass
         if modifyText == ModifyText.advanced:
             to_update = set()
             for oldPageName in renameDict:
@@ -1919,13 +1923,6 @@ class WikiDataManager(MiscEventSourceMixin):
                         page, oldPageName, newPageName)
                     if text is not None:
                         page.replaceLiveText(text)
-
-
-        # 2. rename all pages in database
-        for oldPageName, newPageName in renameDict.iteritems():
-            self.renameWikiWord(oldPageName, newPageName)
-
-
 
 
     def _findPagesThatReferenceWord(self, word):
