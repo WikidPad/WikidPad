@@ -904,9 +904,9 @@ def test_generate_WikidPadHelp():
     langHelper = getApp().createWikiLanguageHelper(LANGUAGE_NAME)
     wikidoc = MockWikiDocument(None, LANGUAGE_NAME)
     paths = glob.glob(os.path.join(WIKIDPADHELP_DATA_DIR, u'*.wiki'))
-    skip = {
+    skip = set(
         u'MediaWiki%2FTextFormatting',  # Media Wiki syntax, not WikidPadParser
-    }
+    )
     nof_known_differences = 0
     nof_unknown_differences = 0
     for nr, path in enumerate(sorted(paths), 1):

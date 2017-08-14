@@ -183,8 +183,8 @@ def test_renameWikiWords():
                 wikidoc, renameSeq, wikidoc_after = test
                 after = wikidoc_after.getWikiData().wiki_content
 
-                renameDict = {oldPageName: newPageName
-                              for oldPageName, newPageName in renameSeq}
+                renameDict = dict((oldPageName, newPageName)
+                              for oldPageName, newPageName in renameSeq)
                 wikidoc.renameWikiWords(renameDict, modifyText)
 
                 result = wikidoc.getWikiData().wiki_content

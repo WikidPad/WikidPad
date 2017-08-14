@@ -15,6 +15,7 @@ from itertools import chain
 import os
 import re
 import sys
+import imp
 import wx
 
 __builtin__._ = __builtin__.N_ = lambda s: s  # see WikidPadStarter
@@ -26,7 +27,11 @@ if not hasattr(wx, "NO_3D"):  # cmore addition
 wikidpad_dir = os.path.abspath(u'.')
 sys.path.append(wikidpad_dir)
 sys.path.append(os.path.join(wikidpad_dir, u'lib'))
-sys.path.append(os.path.join(wikidpad_dir, u'extensions'))
+
+EXTENSIONDIR = os.path.join(wikidpad_dir, u'extensions')
+sys.path.append(EXTENSIONDIR)
+
+
 
 from pwiki.ParseUtilities import WikiPageFormatDetails
 from pwiki.Utilities import DUMBTHREADSTOP
@@ -35,7 +40,11 @@ from pwiki.StringOps import LOWERCASE, UPPERCASE
 
 from wikidPadParser import WikidPadParser
 from mediaWikiParser import MediaWikiParser
-import OverlayParser
+
+OverlayParser = imp.load_source('OverlayParser', os.path.join(EXTENSIONDIR,
+        u"OverlayParser.pyf"))
+
+# import OverlayParser
 
 from Consts import ModifyText
 

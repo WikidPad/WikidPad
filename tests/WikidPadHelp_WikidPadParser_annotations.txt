@@ -1,3 +1,9 @@
+MediaWiki%2FTextFormatting
+# !!! BAD:
+-- [[TextFormatting]]s
+!= [TextFormatting]s
+-- [[attributes:as usual but with double brackets]]
+== [[attributes: as usual but with double brackets]]
 AutoCompletion
 -- For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
 == For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See [OptionsDialog#*Append closing bracket on auto-complete*]
@@ -284,9 +290,9 @@ Insertions
 -- [:rel: children;existingonly;columns 2;coldir down]
 == [:rel: children; existingonly; columns 2; coldir down]
 -- [:search:"todo:todo"]
-== [:search: "todo:todo"]
+== [:search: todo:todo]
 -- [:search:"todo:todo";showtext]
-== [:search: "todo:todo"; showtext]
+== [:search: todo:todo; showtext]
 -- [:eval:"5+6"]
 == [:eval: "5+6"]
 LinkTitle
@@ -405,8 +411,3 @@ WikiDocumentAttributes
 WikidPadOnUSB
 -- For technical details how this all works, see [ApplicationConfigurationFiles].
 == For technical details how this all works, see ApplicationConfigurationFiles.
-Insertions
--- [:search:"todo:todo"]
-== [:search: todo:todo]
--- [:search:"todo:todo";showtext]
-== [:search: todo:todo; showtext]
