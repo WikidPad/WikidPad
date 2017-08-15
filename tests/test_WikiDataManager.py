@@ -200,7 +200,7 @@ def test_renameWikiWords():
         else:
             print u"Method '%s' passed all tests" % method_name
 
-    assert no_method_failed  # no one method failed?
+    assert no_method_failed, "Failures: " + repr(method_failures)  # no one method failed?
 
 
 if __name__ == '__main__':

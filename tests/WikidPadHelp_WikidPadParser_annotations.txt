@@ -1,55 +1,14 @@
-MediaWiki%2FTextFormatting
-# !!! BAD:
--- [[TextFormatting]]s
-!= [TextFormatting]s
--- [[attributes:as usual but with double brackets]]
-== [[attributes: as usual but with double brackets]]
 AutoCompletion
 -- For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
 == For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See [OptionsDialog#*Append closing bracket on auto-complete*]
 -- [bookmarked=true]
 == [bookmarked: true]
-ChangeLog
---       code character "r" and [UrlLinking#*upright*]
-==       code character "r" and UrlLinking#*upright*
---       when opening wiki. See [OptionsDialog#*Rebuild*]
-==       when opening wiki. See OptionsDialog#*Rebuild*
---       opening wiki. See [CommandLineSupport#*--update-ext*]
-==       opening wiki. See CommandLineSupport#*--update-ext*
--- [ChangeLog2011]
-== ChangeLog2011
--- [ChangeLog2010]
-== ChangeLog2010
--- [ChangeLog2009]
-== ChangeLog2009
--- [ChangeLog2008]
-== ChangeLog2008
--- [ChangeLog2007]
-== ChangeLog2007
--- [ChangeLog2006]
-== ChangeLog2006
--- [ChangeLog2005]
-== ChangeLog2005
--- [ChangeLog2004]
-== ChangeLog2004
--- [ChangeLog2003]
-== ChangeLog2003
 ChangeLog2005
---     * Option to forbid cycles in trees (see [OptionsDialog])
-==     * Option to forbid cycles in trees (see OptionsDialog)
---     * Option to filter properties to show in HTML preview and export (see [OptionsDialog])
-==     * Option to filter properties to show in HTML preview and export (see OptionsDialog)
---            (=non-modal dialog). For details see [SearchingTheWiki].
-==            (=non-modal dialog). For details see SearchingTheWiki.
---         1. *WikiWord and [WikiWord]* were different words
-==         1. *WikiWord and WikiWord* were different words
 --            WikiDocumentAttributes#creating# a# new# wiki .
 ==            [WikiDocumentAttributes#creating a new wiki] .
 ChangeLog2006
 --       See [Options HTML preview_export]#*Preview# renderer*
 ==       See [Options HTML preview_export#*Preview renderer*]
---       See [ExternalGraphicalApplications].
-==       See ExternalGraphicalApplications.
 --       attributes in tree. See OptionsDialog#*Sort# order*
 ==       attributes in tree. See [OptionsDialog#*Sort order*]
 --       "As Tree" order used in PageListDialog#"As# Tree" .
@@ -77,63 +36,9 @@ ChangeLog2006
 --       See [Options HTML preview_export]#+++# HTML# page# settings
 ==       See [Options HTML preview_export#+++ HTML page settings]
 --       See [ApiDocs]#stdDialog
-==       See ApiDocs#stdDialog
---     * Support for relative URLS with rel: protocol, see [UrlLinking]
-==     * Support for relative URLS with rel: protocol, see UrlLinking
---       own "Log Window" for error messages, see [WikiDocumentAttributes].
-==       own "Log Window" for error messages, see WikiDocumentAttributes.
---     * Support for spell checking, see [SpellChecking].
-==     * Support for spell checking, see SpellChecking.
---       See ([WikiExport], [WikiImport], [Multipage text format])
-==       See (WikiExport, WikiImport, [Multipage text format])
---       and auto-indent (see [BulletedLists])
-==       and auto-indent (see BulletedLists)
---       if user have problems with this (see [TodoItems]).
-==       if user have problems with this (see TodoItems).
---       line (customizable date format, see [OptionsDialog])
-==       line (customizable date format, see OptionsDialog)
---       config file (not part of options GUI) (see [ChangeFileSuffix])
-==       config file (not part of options GUI) (see ChangeFileSuffix)
---       See [WhereIsTheDataStored] and [MigrationBetweenDbTypes].
-==       See WhereIsTheDataStored and MigrationBetweenDbTypes.
---       either as images or as normal links (see [OptionsDialog])
-==       either as images or as normal links (see OptionsDialog)
---       behavior of the editor for form-like pages. (see [FormPages])
-==       behavior of the editor for form-like pages. (see FormPages)
---       stable). See [WikiDocumentAttributes].
-==       stable). See WikiDocumentAttributes.
---     * See [WikiDocumentAttributes].
-==     * See WikiDocumentAttributes.
---       deletion of personal configuration (see [CommandLineSupport])
-==       deletion of personal configuration (see CommandLineSupport)
---     * Support for wiki specific text blocks (see [TextBlocks])
-==     * Support for wiki specific text blocks (see TextBlocks)
---       [InlinePythonEval])
-==       InlinePythonEval)
---       (see [InlinePythonEval])
-==       (see InlinePythonEval)
---       [WikiDocumentAttributes]).
-==       WikiDocumentAttributes).
---       presentation of the tree nodes (see [WikiDocumentAttributes]).
-==       presentation of the tree nodes (see WikiDocumentAttributes).
---     * In ".WikidPadGlobals" a file "[TextBlocks].wiki" will be
-==     * In ".WikidPadGlobals" a file "TextBlocks.wiki" will be
---       (see [TextBlocks]).
-==       (see TextBlocks).
---       interpreted as normal text (see [TextFormatting])
-==       interpreted as normal text (see TextFormatting)
---       or to print (see [PageListDialog], [Printing], [WikiExport],
-==       or to print (see PageListDialog, [Printing], WikiExport,
---       [SearchingTheWiki])
-==       SearchingTheWiki)
---       (see [OptionsDialog])
-==       (see OptionsDialog)
---       (therefore the new version number) (see [DatabaseTypes])
-==       (therefore the new version number) (see DatabaseTypes)
+==       See [ApiDocs#stdDialog]
 --       [ScratchPad |This text is shown in preview and HTML export] )
 ==       [ScratchPad|This text is shown in preview and HTML export] )
---       [OptionsDialog])
-==       OptionsDialog)
 ChangeLog2007
 --       See OptionsDialog#*Prepend# before# clipboard# snippet*
 ==       See [OptionsDialog#*Prepend before clipboard snippet*]
@@ -166,9 +71,9 @@ ChangeLog2007
 --       for main window icon). See OptionsDialog#*Wiki# icon*
 ==       for main window icon). See [OptionsDialog#*Wiki icon*]
 --       See [WikiDocumentAttributes]#*auto_link*
-==       See WikiDocumentAttributes#*auto_link*
+==       See [WikiDocumentAttributes#*auto_link*]
 --       See [WikiDocumentAttributes]#*view_pane*
-==       See WikiDocumentAttributes#*view_pane*
+==       See [WikiDocumentAttributes#*view_pane*]
 --       See OptionsDialog#*App-bound# hotkey*
 ==       See [OptionsDialog#*App-bound hotkey*]
 --       a particular wiki. See OptionsDialog#*App-bound# hotkey*
@@ -220,27 +125,10 @@ ChangeLog2008
 ==       See [UrlLinking#++ Wiki: URLs]
 --       See OptionsDialog#*Remember# expanded# tree# nodes*
 ==       See [OptionsDialog#*Remember expanded tree nodes*]
-ChangeLog2010
---       See [ApiDocs#stdDialog(]
-==       See ApiDocs#stdDialog(
---       See [RenamingWikiWords]
-==       See RenamingWikiWords
 ChangeLog2011
---       to front. See [FavoriteWikis]
-==       to front. See FavoriteWikis
---       See [WikiDocumentAttributes#*parent*]
-==       See WikiDocumentAttributes#*parent*
 --       See [WordLinking!exclude_from_linking]
-==       See WordLinking!exclude_from_linking
---       missing files (aka dead links). See [FileCleanupDialog]
-==       missing files (aka dead links). See FileCleanupDialog
---       logical lines one line up or down. See [ChangingKeyBindings]
-==       logical lines one line up or down. See ChangingKeyBindings
+==       See [WordLinking]!exclude_from_linking
 DatabaseTypes
--- WikidPad supports different database backends to store the wiki pages (see [WhereIsTheDataStored] for the differences).
-== WikidPad supports different database backends to store the wiki pages (see WhereIsTheDataStored for the differences).
--- See [MigrationBetweenDbTypes] if you want to change the type of an existing wiki.
-== See MigrationBetweenDbTypes if you want to change the type of an existing wiki.
 -- [camelCaseWordsEnabled=false]
 == [camelCaseWordsEnabled: false]
 ExternalGraphicalApplications
@@ -257,9 +145,6 @@ ExternalGraphicalApplications
 Footnotes
 -- As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See OptionsDialog#*Footnotes# as# wiki# words*
 == As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See [OptionsDialog#*Footnotes as wiki words*]
-FormPages
--- Create a template with the attribute on it: [SystemInfoTemplate]
-== Create a template with the attribute on it: SystemInfoTemplate
 Icon airbrush
 -- [icon:airbrush]
 == [icon: airbrush]
@@ -295,105 +180,28 @@ Insertions
 == [:search: todo:todo; showtext]
 -- [:eval:"5+6"]
 == [:eval: "5+6"]
-LinkTitle
--- [UrlLinking]  (no title, shows default text)
-== UrlLinking  (no title, shows default text)
-Menu Edit
--- Select an item from the submenu to add a textblock to the current page. See [TextBlocks].
-== Select an item from the submenu to add a textblock to the current page. See TextBlocks.
--- Allows to catch arbitrary text from clipboard regardless which application has sent it. See [ClipboardCatcher].
-== Allows to catch arbitrary text from clipboard regardless which application has sent it. See ClipboardCatcher.
--- Run spell checker for one or multiple pages. See [SpellChecking].
-== Run spell checker for one or multiple pages. See SpellChecking.
--- Switch the spell check while typing on or off. See [SpellChecking].
-== Switch the spell check while typing on or off. See SpellChecking.
--- Clear the ignore list for the spell check while type. See [SpellChecking].
-== Clear the ignore list for the spell check while type. See SpellChecking.
-Menu Extra
--- Shows a dialog to set precisely what to export, whereto and in which format. See [WikiExport].
-== Shows a dialog to set precisely what to export, whereto and in which format. See WikiExport.
--- Shows a dialog to import wiki pages into wiki. See [WikiImport].
-== Shows a dialog to import wiki pages into wiki. See WikiImport.
--- Allows execution of Python scripts. See [InlinePythonEval].
-== Allows execution of Python scripts. See InlinePythonEval.
--- Starts the options dialog. See [OptionsDialog].
-== Starts the options dialog. See OptionsDialog.
-Menu Format
--- Rewraps text (adds/removes newlines) to make each line contain no more characters as defined in "wrap" attribute. See [TextFormatting].
-== Rewraps text (adds/removes newlines) to make each line contain no more characters as defined in "wrap" attribute. See TextFormatting.
-Menu Navigate
--- If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
-== If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to SearchingTheWiki.
-Menu View
--- Show a chronological timeline when which pages changed last. See [TimeViewWindow].
-== Show a chronological timeline when which pages changed last. See TimeViewWindow.
--- Show the headings of a page in a hierarchical manner. See [PageStructureWindow].
-== Show the headings of a page in a hierarchical manner. See PageStructureWindow.
-Menu Wiki
--- Favorite wikis to open, see [FavoriteWikis].
-== Favorite wikis to open, see FavoriteWikis.
--- You can also use "Other Export" to show a dialog to set more precisely what to export, whereto and in which format. See [WikiExport].
-== You can also use "Other Export" to show a dialog to set more precisely what to export, whereto and in which format. See WikiExport.
--- These items are only needed in rare cases. They allow to update the whole wiki in the foreground or as background task and to cope with some errors which may happen. See [WikiMaintenance].
-== These items are only needed in rare cases. They allow to update the whole wiki in the foreground or as background task and to cope with some errors which may happen. See WikiMaintenance.
+MediaWiki%2FTextFormatting
+-- [[attributes:as usual but with double brackets]]
+== [[attributes: as usual but with double brackets]]
 Options HTML preview_export
 -- Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
 == Choose if you want a table of contents in tree form, list form or not at all, see [WikiExport#*Additional options*]
 OptionsDialog
 -- There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 == There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See [OptionsDialog#*Wiki-bound hotkey*] below in "Current wiki" options.
--- See [RenamingWikiWords] for the meaning.
-== See RenamingWikiWords for the meaning.
---     * Config. dir.: Place in the "WikidPadGlobals" subdirectory of the current configuration directory (useful for [WikidPadOnUSB])
-==     * Config. dir.: Place in the "WikidPadGlobals" subdirectory of the current configuration directory (useful for WikidPadOnUSB)
 -- Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
 == Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking] ).
 -- [.#*Force editor to write platform dependent files*| Force editor to write platform dependent files]
 == [.#*Force editor to write platform dependent files*|Force editor to write platform dependent files]
 -- [.#*Page file names ASCII only*| Page file names ASCII only]
 == [.#*Page file names ASCII only*|Page file names ASCII only]
--- Change these settings only if you know what you are doing! See [WikiLockFile].
-== Change these settings only if you know what you are doing! See WikiLockFile.
--- Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
-== Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See WikiDocumentAttributes#*short_hint* for details.
 -- Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
 == Wiki-bound hotkey to show/hide wiki. See [OptionsDialog#*App-bound hotkey*]
 -- If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
 == If you came to a not yet created page through a titled link (e.g. [WikiWord|This is the title]) and this option is checked, the link title will be used as title of the page.
--- See [FileStorage].
-== See FileStorage.
--- When using one of the "Original" [DatabaseTypes] each wiki page is stored as a file. For each page file a "signature" is stored in the overview database to detect changes to the file from outside of WikidPad.
-== When using one of the "Original" DatabaseTypes each wiki page is stored as a file. For each page file a "signature" is stored in the overview database to detect changes to the file from outside of WikidPad.
--- Modifying this setting does not change already recorded file signatures (until associated wiki page is modified). You can either [RebuildTheWiki] or just let WikidPad change it when it thinks it is necessary.
-== Modifying this setting does not change already recorded file signatures (until associated wiki page is modified). You can either RebuildTheWiki or just let WikidPad change it when it thinks it is necessary.
-SearchingTheWiki%2FIndex
--- The index search uses the whoosh library (https://bitbucket.org/mchaput/whoosh/wiki/Home) and at the moment its default search syntax which is slightly different from the one for [BooleanRegex] searches.
-== The index search uses the whoosh library (https://bitbucket.org/mchaput/whoosh/wiki/Home) and at the moment its default search syntax which is slightly different from the one for BooleanRegex searches.
 SearchingTheWiki
 -- To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see OptionsDialog#*Sort# order* ).
 == To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see [OptionsDialog#*Sort order*] ).
-SpellChecking
--- Spell checking requires at first to find the words in the content. The regular expression used to find words is located in the "WikidPadParser.py" file (in the directory "extensions\\wikidPadParser" or "user_extensions", see [WikiSyntax]) and looks about like:
-== Spell checking requires at first to find the words in the content. The regular expression used to find words is located in the "WikidPadParser.py" file (in the directory "extensions\\wikidPadParser" or "user_extensions", see WikiSyntax) and looks about like:
---     * The dialog can't be used to check functional pages like e.g. the text blocks pages (see [TextBlocks]).
-==     * The dialog can't be used to check functional pages like e.g. the text blocks pages (see TextBlocks).
-Templates
--- You can enhance this example using [FormPages].
-== You can enhance this example using FormPages.
-TextBlocks
--- The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
-== The file is named "TextBlocks.wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
--- A complete example with one submenu (add these lines to one of the pages or one of the "[TextBlocks].wiki" files to see the effect of it):
-== A complete example with one submenu (add these lines to one of the pages or one of the "TextBlocks.wiki" files to see the effect of it):
-TextFormatting
--- See [TableFormatting]
-== See TableFormatting
-UrlLinking
--- You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
-== You can also copy files into a subdirectory of the wiki directory from within WikidPad. See FileStorage for details.
-Webkit
--- Moreover it supports [IncrementalSearch] and some vi like shortcut keys for navigation (optional).
-== Moreover it supports IncrementalSearch and some vi like shortcut keys for navigation (optional).
 WikiBookmarks
 -- [bookmarked=true]
 == [bookmarked: true]
@@ -402,12 +210,3 @@ WikiDocumentAttributes
 == The precise quoting syntax is the same as for [Insertions#+++ Syntax]
 -- [global.importance.high.bold=true]
 == [global.importance.high.bold: true]
--- Bracketed words (e.g. [CamelCaseWords] are always seen as links).
-== Bracketed words (e.g. CamelCaseWords are always seen as links).
--- Currently only type "form" is supported (see [FormPages] for details).
-== Currently only type "form" is supported (see FormPages for details).
--- Controls language of a page or the wiki (with "global." prepended) for [SpellChecking].
-== Controls language of a page or the wiki (with "global." prepended) for SpellChecking.
-WikidPadOnUSB
--- For technical details how this all works, see [ApplicationConfigurationFiles].
-== For technical details how this all works, see ApplicationConfigurationFiles.

@@ -4,7 +4,7 @@
 - PageName ---------------------------------------------------------------------
 + Pagename
 
-See [toWikiWord] on PageNameBis.
+See [toWikiWord] on [PageNameBis].
 --------------------------------------------------------------------------------
 
 
@@ -87,7 +87,7 @@ My parent: [..].
 - PageName ---------------------------------------------------------------------
 + Heading
 
-PythonFOSDEM
+[PythonFOSDEM]
 --------------------------------------------------------------------------------
 
 
@@ -284,7 +284,7 @@ anchor:Help
 ++ Help
 
 A complete online documentation for beginners and advanced users is here:
-GettingStarted.
+[GettingStarted].
 --------------------------------------------------------------------------------
 
 
@@ -359,7 +359,7 @@ command. You will now see a dialog asking you the new name of the wiki word.
 
 - Super/SubPage2 ---------------------------------------------------------------
 
-SubPage
+[SubPage]
 
 --------------------------------------------------------------------------------
 
@@ -390,10 +390,10 @@ Links to my parent: [..] (relative) and [//Bar] (absolute).
 
 - Bar/SubPage2 -----------------------------------------------------------------
 
-Link to my sibling: SubPage.
+Link to my sibling: [SubPage].
 
 Links to myself: [.] (self) and [//Bar/SubPage2] (absolute)
-and SubPage2 (relative).
+and [SubPage2] (relative).
 
 --------------------------------------------------------------------------------
 

@@ -904,9 +904,13 @@ def test_generate_WikidPadHelp():
     langHelper = getApp().createWikiLanguageHelper(LANGUAGE_NAME)
     wikidoc = MockWikiDocument(None, LANGUAGE_NAME)
     paths = glob.glob(os.path.join(WIKIDPADHELP_DATA_DIR, u'*.wiki'))
-    skip = set(
-        u'MediaWiki%2FTextFormatting',  # Media Wiki syntax, not WikidPadParser
-    )
+    skip = set()
+
+# Page itself is in WikidPad syntax so it has to work as well
+
+#     skip = set(
+#         u'MediaWiki%2FTextFormatting',  # Media Wiki syntax, not WikidPadParser
+#     )
     nof_known_differences = 0
     nof_unknown_differences = 0
     for nr, path in enumerate(sorted(paths), 1):
@@ -969,7 +973,7 @@ def test_generate_WikidPadHelp_selection():
         (u'PageName', u'PageName',
          'wikiWord',  u'PageName'),
         (u'PageName', u'[PageName]',
-         'wikiWord',  u'PageName'),
+         'wikiWord',  u'[PageName]'),
         (u'PageName', u'[contact: "Carl [Home]"]',
          'attribute', u'[contact: "Carl [Home]"]'),
         (u'PageName', u'[//OptionsDialog]',
@@ -1007,7 +1011,7 @@ def test_generate_WikidPadHelp_selection():
         (u'AutoCompletion', u'[bookmarked=true]',
          'attribute',       u'[bookmarked: true]'),
         (u'ChangeLog', u'[ChangeLog2011]',
-         'wikiWord',   u'ChangeLog2011'),
+         'wikiWord',   u'[ChangeLog2011]'),
         (u'ChronViewWindow', u'[OptionsDialog#+++ Chron. view]',
          'wikiWord',         u'[OptionsDialog#+++ Chron. view]'),
         (u'ChronViewWindow', u'[OptionsDialog#+++ Chronological]',

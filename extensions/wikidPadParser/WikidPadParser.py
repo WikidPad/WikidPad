@@ -846,6 +846,9 @@ def actionWikiWordNcc(s, l, st, t):
     if t.wikiWord in wikiFormatDetails.wikiDocument.getNccWordBlacklist():
         raise ParseException(s, l, "Non-CamelCase word is in blacklist")
 
+    # Format type is used for TextFormatter to better reconstruct content
+    t.formatType = "ncc"
+
     t.titleNode = t.findFlatByName("title")
 
     t.fragmentNode = t.findFlatByName("searchFragment")
@@ -888,6 +891,9 @@ def actionWikiWordCc(s, l, st, t):
                 raise ParseException(s, l, "CamelCase word is in blacklist")
         except KeyError:
             pass
+
+    # Format type is used for TextFormatter to better reconstruct content
+    t.formatType = "cc"
 
     t.titleNode = None
 
@@ -2872,7 +2878,16 @@ class TextFormatter(object):
         has_anchor = node.anchorLink is not None
         has_title = node.titleNode is not None
         has_search = node.fragmentNode is not None
-        is_camelcase = self.is_camelcase(node.wikiWord, link_core)
+        
+        # If node was non-camelcase then keep it that way. Otherwise
+        # wiki words with additional brackets meant as text (e.g. '[[FooBar]]'
+        # meant to be shown in preview/export as "[FooBar]")
+        # are incorrectly changed (to '[FooBar]').
+
+        if getattr(node, "formatType", "") == "ncc":
+            is_camelcase = False
+        else:
+            is_camelcase = self.is_camelcase(node.wikiWord, link_core)
 
         search_fragment = node.searchFragment if has_search else None
         anchor = node.anchorLink
