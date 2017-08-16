@@ -1648,12 +1648,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wxHelper.appendToMenuByMenuDesc(tabsMenu, FOLD_MENU, self.keyBindings)
 
-        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowFolding, id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateShowFolding, id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowFolding,
+                id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateShowFolding,
+                id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().toggleCurrentFolding(), id=GUI_ID.CMD_TOGGLE_CURRENT_FOLDING)
-        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().unfoldAll(), id=GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().foldAll(), id=GUI_ID.CMD_FOLD_ALL_IN_CURRENT)
+        self.Bind(wx.EVT_MENU,
+                lambda evt: self.getActiveEditor().toggleCurrentFolding(),
+                id=GUI_ID.CMD_TOGGLE_CURRENT_FOLDING)
+        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().unfoldAll(),
+                id=GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().foldAll(),
+                id=GUI_ID.CMD_FOLD_ALL_IN_CURRENT)
         
 
 
@@ -2609,8 +2615,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.HOTKEY_ID_HIDESHOW_BYWIKI,
                     self.configuration.get("main",
                     "hotKey_showHide_byWiki", ""))
-        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey, id=self.HOTKEY_ID_HIDESHOW_BYAPP)
-        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey, id=self.HOTKEY_ID_HIDESHOW_BYWIKI)
+        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey,
+                id=self.HOTKEY_ID_HIDESHOW_BYAPP)
+        self.hotKeyDummyWindow.Bind(wx.EVT_HOTKEY, self.OnShowHideHotkey,
+                id=self.HOTKEY_ID_HIDESHOW_BYWIKI)
 
 
     def createWindow(self, winProps, parent):
@@ -5908,11 +5916,15 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.EVT_MENU, self.OnCmdExit, id=GUI_ID.TBMENU_EXIT)
 
         if self.pWiki.clipboardInterceptor is not None:
-            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherAtCursor, id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
-            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherOff, id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
+            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherAtCursor,
+                    id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
+            self.Bind(wx.EVT_MENU, self.pWiki.OnClipboardCatcherOff,
+                    id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
 
-            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
-            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher, id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
+            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher,
+                    id=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR)
+            self.Bind(wx.EVT_UPDATE_UI, self.pWiki.OnUpdateClipboardCatcher,
+                    id=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF)
 
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_UP, self.OnLeftUp)
 

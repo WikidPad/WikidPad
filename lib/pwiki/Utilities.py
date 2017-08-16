@@ -510,7 +510,7 @@ if __debug__:
                 format = format % args
                 format = "%s: %s\n" % (
                     current_thread().name, format)
-                _sys.stderr.write(format)
+                sys.stderr.write(format)
 
 else:
     # Disable this when using "python -O"
