@@ -1151,6 +1151,9 @@ def urlQuote(s, safe='/'):
     The characters u"{", u"}", u"|", u"\", u"^", u"~", u"[", u"]", u"`"
     are considered unsafe and should be quoted as well.
     """
+    return urllib.parse.quote(s)
+    # This custom function appears to break with python3
+    # Can it not just be removed entirely?
     result = []
     
     for c in s:
