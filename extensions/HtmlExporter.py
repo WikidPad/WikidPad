@@ -1082,12 +1082,19 @@ class HtmlExporter(AbstractExporter):
                     '        <link type="text/css" rel="stylesheet" href="%(url)s">' %
                     locals())
         
-        styleSheets = "\n".join(styleSheets)
 
 #         styleSheet = self.styleSheet
         config = self.mainControl.getConfig()
         docType = config.get("main", "html_header_doctype",
                 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"')
+
+        # TODO: load javascript from plugins
+        javascriptHeader = ""
+
+        if self.exportType == "html_previewWK":
+            javascriptHeader = '\n<script type="text/javascript" src="{0}"></script>'.format(os.path.join(self.mainControl.wikiAppDir, "lib", "js", "jquery", "jquery-2.0.2.min.js"))
+
+        styleSheets = "\n".join(styleSheets)
 
         return """<!%(docType)s>
 <html>
@@ -1095,6 +1102,7 @@ class HtmlExporter(AbstractExporter):
         <meta http-equiv="content-type" content="text/html%(charSet)s">
         <title>%(title)s</title>
 %(styleSheets)s
+%(javascriptHeader)s
     </head>
 """ % locals()
 
