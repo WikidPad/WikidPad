@@ -797,7 +797,7 @@ Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions o
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Diff inline")
     N_("Show the difference between two versions inline")
 

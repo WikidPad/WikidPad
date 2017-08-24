@@ -1592,8 +1592,7 @@ class ViHintDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.viCtrl.executeFollowHint(searchString)
 
         elif matchesAccelPair("ActivateLink", accP):

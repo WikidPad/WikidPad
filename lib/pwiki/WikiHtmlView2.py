@@ -20,7 +20,7 @@ from .TempFileSet import TempFileSet
 from . import PluginManager
 
 import threading
-from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
+from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, between
 
 from .ViHelper import ViHintDialog, ViHelper
 
@@ -173,16 +173,14 @@ class WebviewSearchDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.webviewCtrl.executeIncrementalSearch(searchString)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.webviewCtrl.executeIncrementalSearchBackward(searchString)
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP)):
             foundPos = self.webviewCtrl.executeIncrementalSearchBackward(searchString)
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \
@@ -346,9 +344,10 @@ class WikiHtmlView2(wx.Panel):
         # injection)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
+
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
@@ -379,33 +378,33 @@ class WikiHtmlView2(wx.Panel):
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "left"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
+            evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "right"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
+            evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
+            evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"), 
                 id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"),
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"), 
                 id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
-        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, 
+            "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
 
 
@@ -442,8 +441,17 @@ class WikiHtmlView2(wx.Panel):
         
         # Set zoom factor
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-        zoomFact = max(0.1, zoom * 0.1 + 1.0)
-        self.html.SetZoom(int(zoomFact))
+        
+        # Restrict it to range -2...2
+        zoom = between(-2, zoom, 2)
+                
+        # Adjust range to 0..4
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+        
 
         self.jquery = False
 
@@ -578,17 +586,26 @@ class WikiHtmlView2(wx.Panel):
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
-        # Run the event through the previewPageNavigation hook
 
-        if self.presenter.getMainControl().hooks.previewPageNavigation(
-                self, evt, uri) is True:
+        # (TODO: Add and document hook in extensions/WikidPadHooks.py)  
+#         # Run the event through the previewPageNavigation hook
+# 
+#         if self.presenter.getMainControl().hooks.previewPageNavigation(
+#                 self, evt, uri) is True:
+#             return True
+# 
+#         return False
+
+        if "PROXY_EVENT" in uri:
+            # unmanged event, veto it
+            evt.Veto()
             return True
         elif "PROXY_EVENT" in uri:
             # unmanged event, veto it
             evt.Veto()
             return True
 
-        return False
+        return True
 
 
     def OnContextMenu(self):
@@ -800,8 +817,9 @@ if ((typeof jQuery !== 'undefined')) {
 
             self.scrollDeferred(lx, ly)
             
-        # Run hooks
-        self.presenter.getMainControl().hooks.previewPageLoaded(self)
+          # (TODO: Add and document hook in extensions/WikidPadHooks.py)
+#         # Run hooks
+#         self.presenter.getMainControl().hooks.previewPageLoaded(self)
 
 
     def OnMouseWheelScrollEvent(self, evt):
@@ -931,7 +949,13 @@ if ((typeof jQuery !== 'undefined')) {
     def GetViewStart(self):
         """
         """
-        return tuple([int(i) for i in self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a").split(",")])
+        scriptRet = self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a")
+        
+        if scriptRet == "" or scriptRet == "undefined,undefined":
+            # Happens with IE
+            return (0, 0)
+            
+        return tuple([int(i) for i in scriptRet.split(",")])
 
     def Scroll(self, x, y):
         """
@@ -1096,8 +1120,8 @@ if ((typeof jQuery !== 'undefined')) {
 
                 htpath = self.htpaths[self.currentHtpath]
 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -1118,8 +1142,8 @@ if ((typeof jQuery !== 'undefined')) {
                 self.currentHtpath = 1 - self.currentHtpath
                 htpath = self.htpaths[self.currentHtpath]
                 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -1301,12 +1325,25 @@ if ((typeof jQuery !== 'undefined')) {
         """
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
         zoom += step
+        
+        # Restrict to allowed range.
+        # In the internal configuration the value 0 means the default size
+        # This should be kept consistent between different WikiHtmlView
+        # implementations.
+        # So it is restricted to range -2...2
+        zoom = between(-2, zoom, 2)
 
         self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
         self.outOfSync = True
         self.refresh()
         
-        self.html.SetZoom(zoom)
+        # The parameter must be in range 0...4 where 2 is default value
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+
 
         
     def OnMiddleDown(self, controlDown=False):
@@ -1533,7 +1570,7 @@ if ((typeof jQuery !== 'undefined')) {
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Activate")
     N_("Activate New Tab")
     N_("Activate New Tab Backgrd.")

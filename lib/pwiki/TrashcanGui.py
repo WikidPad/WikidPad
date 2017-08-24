@@ -434,7 +434,7 @@ class TrashBagMptImporter(MultiPageTextImporter):
 # """
 # 
 # # Entries to support i18n of context menus
-# if False:
+# if not True:
 #     N_(u"Restore")
 #     N_(u"Restore from trashcan back to wiki")
 

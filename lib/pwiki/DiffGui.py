@@ -501,7 +501,7 @@ Close Tab;CMD_CLOSE_CURRENT_TAB
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Copy")
     N_("Select All")
 

@@ -7,7 +7,7 @@ import wx
 
 from .WikiExceptions import *
 
-from .Utilities import AttrContainer
+from .Utilities import AttrContainer, seqSupportWithTemplate
 from .MiscEvent import KeyFunctionSink
 from . import SystemInfo, StringOps
 
@@ -721,17 +721,102 @@ def clearMenu(menu):
         menu.DestroyItem(item)
 
 
+def appendItemToMenuByDescComponents(menu, namePath, idStr, longHelp="",
+        shortcut="", keyBindings=None):
+    """
+    Appends a single menu item described in one line string desc to menu.
+    keyBindings -- a KeyBindingsCache object or None
+     
+    menu -- already created wx-menu where items should be appended
+    desc -- consists of lines, each line represents an item. A line only
+    containing '-' is a separator. Other lines consist of multiple
+    parts separated by ';'. The first part is the display name of the
+    item, it may be preceded by '*' for a radio item or '+' for a checkbox
+    item.
+    
+    To place an item in a submenu use '|' to delimit submenu and menu display
+    name, like e.g. "submenu|menu item". It is also possible to nest this, e.g.
+    "submenu|subsubmenu|menu item". For special items (radio/checkbox) only the
+    last part must be preceded with '*' or '+', e.g.
+    "submenu|subsub|+check me".
+    
+    The second part is the command id as it can be retrieved by GUI_ID,
+    third part (optional) is the long help text for status line.
+    
+    Fourth part (optional) is the shortcut, either written as e.g.
+    "Ctrl-A" or preceded with '*' and followed by a key to lookup
+    in the KeyBindings, e.g. "*ShowFolding". If keyBindings
+    parameter is None, all shortcuts (with or without *) are ignored.
+    """
+    if namePath == "-":
+        ic = menu.GetMenuItemCount()
+        if ic > 0 and not menu.FindItemByPosition(ic - 1).IsSeparator():
+            # Separator
+            menu.AppendSeparator()
+    else:
+        if "|" in namePath:
+            # Submenu(s) involved
+            submenu_name, remainPath = namePath.split("|", 1)
+            
+            # Menu ID's are always negative. -1 is returned if not found
+            submenu_id = menu.FindItem(submenu_name)
+            if submenu_id != -1:
+                submenu = menu.FindItemById(submenu_id).SubMenu
+            # If we can't find the submenu create it
+            else:
+                submenu = wx.Menu()
+                menu.Append(wx.ID_ANY, submenu_name, submenu)
+            
+            # Recursive call to handle the rest
+            return appendItemToMenuByDescComponents(submenu, remainPath, idStr,
+                    longHelp, shortcut, keyBindings=keyBindings)
+
+        # Check for radio or checkbox items
+        kind = wx.ITEM_NORMAL
+        title = _unescapeWithRe(namePath)
+        if title[0] == "*":
+            # Radio item
+            title = title[1:]
+            kind = wx.ITEM_RADIO
+        elif title[0] == "+":
+            # Checkbox item
+            title = title[1:]
+            kind = wx.ITEM_CHECK
+
+        # Check for shortcut
+        if shortcut != "" and keyBindings is not None:
+            if shortcut[0] == "*":
+                shortcut = getattr(keyBindings, shortcut[1:], "")
+            
+            if shortcut != "":
+                title += "\t" + shortcut
+            
+        menuID = getattr(GUI_ID, idStr, -1)
+        if menuID == -1:
+            return None
+        longHelp = _unescapeWithRe(longHelp)
+
+        return menu.Append(menuID, _(title), _(longHelp), kind)
+
+
+
 def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     """
     Appends the menu items described in unistring desc to menu.
     keyBindings -- a KeyBindingsCache object or None
      
     menu -- already created wx-menu where items should be appended
-    desc consists of lines, each line represents an item. A line only
+    desc -- consists of lines, each line represents an item. A line only
     containing '-' is a separator. Other lines consist of multiple
     parts separated by ';'. The first part is the display name of the
     item, it may be preceded by '*' for a radio item or '+' for a checkbox
     item.
+    
+    To place an item in a submenu use '|' to delimit submenu and menu display
+    name, like e.g. "submenu|menu item". It is also possible to nest this, e.g.
+    "submenu|subsubmenu|menu item". For special items (radio/checkbox) only the
+    last part must be preceded with '*' or '+', e.g.
+    "submenu|subsub|+check me".
     
     The second part is the command id as it can be retrieved by GUI_ID,
     third part (optional) is the long help text for status line.
@@ -746,40 +831,9 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
             continue
 
         parts = [p.strip() for p in line.split(";")]
-        if len(parts) < 4:
-            parts += [""] * (4 - len(parts))
-
-        if parts[0] == "-":
-            ic = menu.GetMenuItemCount()
-            if ic > 0 and not menu.FindItemByPosition(ic - 1).IsSeparator():
-                # Separator
-                menu.AppendSeparator()
-        else:
-            # First check for radio or checkbox items
-            kind = wx.ITEM_NORMAL
-            title = _unescapeWithRe(parts[0])
-            if title[0] == "*":
-                # Radio item
-                title = title[1:]
-                kind = wx.ITEM_RADIO
-            elif title[0] == "+":
-                # Checkbox item
-                title = title[1:]
-                kind = wx.ITEM_CHECK
-
-            # Check for shortcut
-            if parts[3] != "" and keyBindings is not None:
-                if parts[3][0] == "*":
-                    parts[3] = getattr(keyBindings, parts[3][1:], "")
-                
-                if parts[3] != "":
-                    title += "\t" + parts[3]
-                
-            menuID = getattr(GUI_ID, parts[1], -1)
-            if menuID == -1:
-                continue
-            parts[2] = _unescapeWithRe(parts[2])
-            menu.Append(menuID, _(title), _(parts[2]), kind)
+        parts = seqSupportWithTemplate(parts, ("",) * 4)
+        
+        appendItemToMenuByDescComponents(menu, *parts, keyBindings=keyBindings)
 
 
 

@@ -27,7 +27,7 @@ else:
 #     except:
 #         pass
 
-if False:
+if not True:
     # Generate dependencies for py2exe
     import comtypes.gen._99AB80C4_5E19_4FD5_B3CA_5EF62FC3F765_0_1_0 as _dummy
     import comtypes.gen.myole4ax as _dummy
@@ -158,9 +158,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         # Create two temporary html files (IE 7 needs two to work)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    "", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
@@ -259,8 +259,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
                 htpath = self.htpaths[self.currentHtpath]
 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -277,8 +277,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 self.currentHtpath = 1 - self.currentHtpath
                 htpath = self.htpaths[self.currentHtpath]
                 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url

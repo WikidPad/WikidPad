@@ -135,16 +135,14 @@ class IncrementalSearchDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP)):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \

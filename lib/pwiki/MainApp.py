@@ -5,7 +5,7 @@ import sys, os, traceback, os.path, socket
 from functools import reduce
 
 # To generate dependency for py2exe
-if False:
+if not True:
     import subprocess, CustomListBox
 
 import ExceptionLogger

@@ -78,7 +78,7 @@ import wx
 #------------
 
 
-if wx.version() < "2.9":
+if wx.version() < "2.9" or "gtk2" in wx.version():
     import gtk
 else:
     import gi

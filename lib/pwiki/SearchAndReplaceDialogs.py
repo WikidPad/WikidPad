@@ -619,6 +619,11 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
                         info.occPos[0], info.occPos[1])
 
 
+    def GetSelectedTextColour(self, colFg):
+        return wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHTTEXT)
+
+
+
 class SearchPageDialog(wx.Dialog):
     def __init__(self, mainControl, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
@@ -2620,7 +2625,7 @@ Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 """
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Activate")
     N_("Activate New Tab")
     N_("Activate New Tab Backgrd.")

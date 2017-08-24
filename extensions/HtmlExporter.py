@@ -1489,7 +1489,7 @@ class HtmlExporter(AbstractExporter):
         try:
             if absUrl.startswith("file:"):
                 absLink = pathnameFromUrl(absUrl)
-                imgFile = file(absLink, "rb")
+                imgFile = open(absLink, "rb")
             else:
                 imgFile = urllib.request.urlopen(absUrl)
                 imgData = imgFile.read()
@@ -1500,7 +1500,7 @@ class HtmlExporter(AbstractExporter):
             img.LoadFile(imgFile)
             imgFile.close()
             
-            if img.Ok():
+            if img.IsOk():
                 return img.GetWidth(), img.GetHeight()
 
             return None, None

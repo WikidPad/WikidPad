@@ -4187,7 +4187,7 @@ FOLD_MENU = \
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Ignore")
     N_("Add Globally")
     N_("Add Locally")

@@ -30,7 +30,7 @@ from . import PluginManager
 # Try and load the html2 webview renderer
 try:
     WikiHtmlViewWK = None
-    if wx.version().startswith(("2.9", "3")):
+    if wx.version().startswith("2.9") or wx.version() >= "3":
         from . import WikiHtmlView2
     else:
         WikiHtmlView2 = None
@@ -729,7 +729,7 @@ Activate New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 
 
 # Entries to support i18n of context menus
-if False:
+if not True:
     N_("Activate")
     N_("Activate New Tab")
     N_("Activate New Tab Backgrd.")
