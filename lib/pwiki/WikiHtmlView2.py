@@ -250,6 +250,8 @@ class WikiHtmlView2(wx.Panel):
         self.vi = None # Contains ViFunctions instance if vi key handling enabled
         self.keyEventConn = None
 
+        self.page_loaded = False
+
 
         try:
             self.Bind(wx.html2.EVT_WEB_VIEW_NAVIGATING, self.OnPageNavigation, 
@@ -357,15 +359,23 @@ class WikiHtmlView2(wx.Panel):
         #wx.EVT_KEY_UP(self, self.OnKeyUp)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
-        self.Bind(wx.EVT_MENU, self.OnSelectAll, id=GUI_ID.CMD_SELECT_ALL)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), id=GUI_ID.CMD_ZOOM_IN)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), id=GUI_ID.CMD_ZOOM_OUT)
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, 
+                id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, self.OnSelectAll, 
+                id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), 
+                id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), 
+                id=GUI_ID.CMD_ZOOM_OUT)
 
-        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)        
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)        
-        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)        
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, 
+                id=GUI_ID.CMD_ACTIVATE_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
@@ -399,9 +409,12 @@ class WikiHtmlView2(wx.Panel):
 
 
 
-        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
-        self.Bind(wx.EVT_MENU, self.OnGoBackInHistory, id=GUI_ID.CMD_HISTORY_BACK)
-        self.Bind(wx.EVT_MENU, self.OnGoForwardInHistory, id=GUI_ID.CMD_HISTORY_FORWARD)
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, 
+                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
+        self.Bind(wx.EVT_MENU, self.OnGoBackInHistory, 
+                id=GUI_ID.CMD_HISTORY_BACK)
+        self.Bind(wx.EVT_MENU, self.OnGoForwardInHistory, 
+                id=GUI_ID.CMD_HISTORY_FORWARD)
 
         #wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
         #wx.EVT_MIDDLE_DOWN(self.html, self.OnMiddleDown)
@@ -430,7 +443,7 @@ class WikiHtmlView2(wx.Panel):
         # Set zoom factor
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
         zoomFact = max(0.1, zoom * 0.1 + 1.0)
-        self.html.SetZoom(zoomFact)
+        self.html.SetZoom(int(zoomFact))
 
         self.jquery = False
 
@@ -478,7 +491,12 @@ class WikiHtmlView2(wx.Panel):
         # TODO: make extendable - for plugins + VI mode
         uri = flexibleUrlUnquote(evt.GetURL())
 
-        self.html.RunScript(r"""event_str = false;""")
+        # Run script segfaults if WikidPad started with a page in preview
+        # quick hack to prevent this
+        if self.page_loaded:
+            self.html.RunScript(r"""event_str = false;""")
+
+        self.page_loaded = True
 
         # This can lead to an event being vetoed multiple times
         # (which should not be an issue)
@@ -556,6 +574,7 @@ class WikiHtmlView2(wx.Panel):
             self.updateStatus(None)
             evt.Veto()
             return True
+        # This breaks if not in VI mode
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
@@ -563,6 +582,10 @@ class WikiHtmlView2(wx.Panel):
 
         if self.presenter.getMainControl().hooks.previewPageNavigation(
                 self, evt, uri) is True:
+            return True
+        elif "PROXY_EVENT" in uri:
+            # unmanged event, veto it
+            evt.Veto()
             return True
 
         return False
@@ -876,7 +899,7 @@ if ((typeof jQuery !== 'undefined')) {
                 wikiWord = self.currentLoadedWikiWord
                 try:
                     anchor = status.split("#", 1)[1]
-                except ValueError:
+                except IndexError:
                     anchor = None
     
             if wikiWord is not None:
