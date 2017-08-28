@@ -3437,6 +3437,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         self.getMainAreaPanel().showPresenter(targetPresenter)
                         
                 else:
+                    # Try and rebuild broken perspective
+                    # occurs on non clean shutdowns
+                    if "=@layout" in mainAreaPerspective:
+                        a, b = mainAreaPerspective.split("=", 1)
+
+                        mainAreaPerspective = "".join([
+                            a, 
+                            r"=*DocPagePresenter={0}=0=textedit\x7cwikipage/{0}".format( 
+                                self.getWikiDocument().getWikiName()), 
+                            b])
+
+
                     self.getMainAreaPanel().setByStoredPerspective(
                             "MainAreaPanel", mainAreaPerspective,
                             self.perspectiveTypeFactory)
@@ -3785,6 +3797,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     forceReopen, **evtprops)
 
             self.getMainAreaPanel().showPresenter(dpp)
+
+            self.getMainAreaPanel().updateConfig()
             ## _prof.stop()
         except (WikiFileNotFoundException, IOError, OSError, DbAccessError) as e:
             self.lostAccess(e)
@@ -3834,6 +3848,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not tabMode & 1:
             # Show in foreground (if presenter is in other window, this does nothing)
             self.getMainAreaPanel().showPresenter(presenter)
+
+        self.getMainAreaPanel().updateConfig()
 
         return presenter
 
@@ -4498,6 +4514,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showWikiWordRenameDialog(self, wikiWord=None):
         if wikiWord is None:
             wikiWord = self.getCurrentWikiWord()
+            # Save all open pages (so new pages are created)
+            self.saveAllDocPages()
 
         if wikiWord is not None:
             wikiWord = self.getWikiDocument().getWikiPageNameForLinkTerm(wikiWord)
