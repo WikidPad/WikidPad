@@ -586,26 +586,17 @@ class WikiHtmlView2(wx.Panel):
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
+        # Run the event through the previewPageNavigation hook
 
-        # (TODO: Add and document hook in extensions/WikidPadHooks.py)  
-#         # Run the event through the previewPageNavigation hook
-# 
-#         if self.presenter.getMainControl().hooks.previewPageNavigation(
-#                 self, evt, uri) is True:
-#             return True
-# 
-#         return False
-
-        if "PROXY_EVENT" in uri:
-            # unmanged event, veto it
-            evt.Veto()
+        if self.presenter.getMainControl().hooks.previewPageNavigation(
+                self, evt, uri) is True:
             return True
         elif "PROXY_EVENT" in uri:
             # unmanged event, veto it
             evt.Veto()
             return True
 
-        return True
+        return False
 
 
     def OnContextMenu(self):
@@ -817,9 +808,8 @@ if ((typeof jQuery !== 'undefined')) {
 
             self.scrollDeferred(lx, ly)
             
-          # (TODO: Add and document hook in extensions/WikidPadHooks.py)
-#         # Run hooks
-#         self.presenter.getMainControl().hooks.previewPageLoaded(self)
+        # Run hooks
+        self.presenter.getMainControl().hooks.previewPageLoaded(self)
 
 
     def OnMouseWheelScrollEvent(self, evt):
