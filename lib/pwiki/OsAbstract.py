@@ -25,7 +25,7 @@ else:
 
 
 try:
-    import LinuxHacks
+    from . import LinuxHacks
 except:
     if SystemInfo.isLinux():
         traceback.print_exc()
