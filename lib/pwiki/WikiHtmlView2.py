@@ -1364,6 +1364,11 @@ if ((typeof jQuery !== 'undefined')) {
 
         internaljumpPrefix = "http://internaljump/"
 
+        # It appears webkit urls sometimes need cleaning up
+        if internaljumpPrefix in href:
+            href = "{}{}".format(internaljumpPrefix, 
+                    href.split(internaljumpPrefix)[1])
+
         if href.startswith(internaljumpPrefix + "wikipage/"):  # len("wikipage/") == 9
 
             # Jump to another wiki page
