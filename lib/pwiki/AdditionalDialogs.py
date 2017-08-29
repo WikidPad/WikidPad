@@ -632,13 +632,14 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
     Used to display list of similarly named wikiwords
     and allows easy creation of aliases
     """
-    def __init__(self, pWiki, ID, search_word, motionType, title=None,
+    def __init__(self, docPage, ID, search_word, motionType, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         wx.Dialog.__init__(self)
         
-        self.pWiki = pWiki
+        self.docPage = docPage
+        print (dir(docPage))
         res = wx.xrc.XmlResource.Get()
-        res.LoadDialog(self, self.pWiki, "FindSimilarNamedWikiWordDialog")
+        res.LoadDialog(self, self.docPage, "FindSimilarNamedWikiWordDialog")
         
         self.ctrls = XrcControls(self)
         
@@ -651,7 +652,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
         
         self.motionType = motionType
 
-        matchtermsDict = self.pWiki.getWikiDocument() \
+        matchtermsDict = self.docPage.getWikiDocument() \
                 .getAllDefinedWikiMatchTermsNormcase()
 
         similar = difflib.get_close_matches(search_word.lower(), 
@@ -684,12 +685,15 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
         matchterm = self.similarWords[sel]
 
         answer = wx.MessageBox(
-                _("Do you want to add {0} as an alias to {1}?".format(matchterm,
+                _("Do you want to add {0} as an alias to {1}?".format(self.search_word,
                     word)), ("Add alias"), wx.YES_NO | wx.NO_DEFAULT, self)
 
         if answer == wx.YES:
-            page = self.pWiki.getWikiDocument().getWikiPage(word)
+            page = self.docPage.getWikiDocument().getWikiPage(word)
             page.addAttributeToPage("alias", self.search_word, 2)
+            # Saving pages here may not be strictly necessary
+            # and may be better done in addAttributeToPage
+            self.docPage.getMainControl().saveAllDocPages()
 
         return
 
@@ -713,7 +717,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
         try:
             if not allNewTabs:
-                self.pWiki.openWikiPage(self.words[selIdxs[0]],
+                self.docPage.openWikiPage(self.words[selIdxs[0]],
                         forceTreeSyncFromRoot=True, motionType=self.motionType)
 
                 selWords = [self.words[idx] for idx in selIdxs[1:]]
@@ -721,7 +725,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
                 selWords = [self.words[idx] for idx in selIdxs]
 
             for word in selWords:
-                if self.pWiki.activatePageByUnifiedName("wikipage/" + word,
+                if self.docPage.getMainControl().activatePageByUnifiedName("wikipage/" + word,
                         2) is None:
                     break
         finally:
