@@ -878,6 +878,11 @@ if ((typeof jQuery !== 'undefined')) {
 
             internaljumpPrefix = "http://internaljump/"
 
+            # It appears webkit urls sometimes need cleaning up
+            if internaljumpPrefix in status:
+                status = "{}{}".format(internaljumpPrefix, 
+                        status.split(internaljumpPrefix)[1])
+
             wikiWord = None
             if status.startswith(internaljumpPrefix):
                 # First check for an anchor. In URLs, anchors are always
