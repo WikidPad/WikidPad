@@ -4079,8 +4079,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Read information from page and present it in the field 1 of the
         status bar and in the title bar.
         """
-        fmt = mbcsEnc(self.getConfig().get("main", "pagestatus_timeformat"),
-                "replace")[0]
+        # I'm not sure what the logic behind mbcsEnc is but it breaks
+        # the following in python3(and it works without)
+
+        #fmt = mbcsEnc(self.getConfig().get("main", "pagestatus_timeformat"),
+        #        "replace")[0]
+
+        fmt = self.getConfig().get("main", "pagestatus_timeformat")
 
         if docPage is None:
             docPage = self.getCurrentDocPage()
