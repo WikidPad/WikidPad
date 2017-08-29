@@ -826,15 +826,21 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     in the KeyBindings, e.g. "*ShowFolding". If keyBindings
     parameter is None, all shortcuts (with or without *) are ignored.
     """
+    menu_returns = []
+
     for line in desc.split("\n"):
         if line.strip() == "":
             continue
 
         parts = [p.strip() for p in line.split(";")]
         parts = seqSupportWithTemplate(parts, ("",) * 4)
-        
-        appendItemToMenuByDescComponents(menu, *parts, keyBindings=keyBindings)
 
+        menu_return = appendItemToMenuByDescComponents(menu, *parts, 
+                keyBindings=keyBindings)
+        
+        menu_returns.append(menu_return)
+
+    return menu_returns
 
 
 # TODO: 2.4: Remove
