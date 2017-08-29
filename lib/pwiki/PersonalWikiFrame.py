@@ -1732,6 +1732,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnCmdClipboardCopyUrlToCurrentWikiWord,
                 updatefct=(self.OnUpdateDisNotWikiPage,))
 
+        self.addMenuItem(wikiPageMenu, _(u'Find Similar WikiWords'),
+                _(u'Find similary named WikiWords to the highlighted link'),
+                lambda evt: self.getActiveEditor().findSimilarWords(),
+                updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
+                )
+
         wikiPageMenu.AppendSeparator()
 
         self.addMenuItem(wikiPageMenu, _('&Add version') + '\t' +

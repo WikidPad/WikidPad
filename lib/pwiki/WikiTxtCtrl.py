@@ -2512,6 +2512,34 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return self.activateTokens(tokens, tabMode)
 
 
+    def findSimilarWords(self, mousePosition=None):
+        """
+        Finds similar words to an undefined link
+
+        TODO: make an activateLink option?
+        """
+        nodeList = self.getTokensForMousePos(mousePosition)
+
+        if len(nodeList) == 0:
+            return False
+
+        for node in nodeList:
+            if node.name == "wikiWord":
+
+                if self.presenter.getWikiDocument().isDefinedWikiLinkTerm(
+                        node.wikiWord):
+                    return False
+
+                dlg = AdditionalDialogs.FindSimilarNamedWikiWordDialog(
+                        self.presenter, -1, node.wikiWord, 0)
+                dlg.CenterOnParent(wx.BOTH)
+                dlg.ShowModal()
+                dlg.Destroy()
+                return
+               
+
+
+
 
     def OnReplaceThisSpellingWithSuggestion(self, evt):
         if self.contextMenuTokens and self.contextMenuSpellCheckSuggestions:
@@ -2603,6 +2631,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if self.contextMenuTokens:
             ed.activateTokens(self.contextMenuTokens, 6)
 
+    def OnFindSimilarWikiWords(self, evt, direction=None):
+        self.findSimilarWords()
 
     def OnOpenContainingFolderThis(self, evt):
         if self.contextMenuTokens:
@@ -4701,6 +4731,7 @@ class ViHandler(ViHelper):
     # these navigation commands have been prefixed by "g".
     # TODO: different repeat command for these?
     (k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0, 0), # gf
+    (k["\\"], k["g"], k["f"])  : (0, (self.ctrl.findSimilarWords, None), 0, 0), # \gf
     (k["g"], k["c"])  : (0, (self.PseudoActivateLink, 0), 0, 0), # gc
     (k["g"], k["C"])  : (0, (self.PseudoActivateLink, 2), 0, 0), # gC
 
