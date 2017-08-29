@@ -114,6 +114,19 @@ class ConnectWrapBase:
             pass
 
 
+    def execSqlInsert(self, table, fields, values, tableDefault=None):
+        """
+        Helper to build sql insert code.
+
+        To maintain compatibility with Gadfly, insert statements can
+        be called using the same format.
+        """
+        fieldStr = ", ".join(fields)
+        qmStr = ", ".join(["?"] * len(fields))
+        self.execSql("insert into %s(%s) values (%s)" % (table, fieldStr, qmStr),
+                values)
+
+
     def getLastRowid(self):
         return self.dbCursor.lastrowid
 
@@ -352,9 +365,9 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
 
 
 
-VERSION_DB = 9
-VERSION_WRITECOMPAT = 9
-VERSION_READCOMPAT = 9
+VERSION_DB = 10
+VERSION_WRITECOMPAT = 10
+VERSION_READCOMPAT = 10
 
 
 # Helper for the following definitions
@@ -366,6 +379,7 @@ t.i = "integer not null default 0"
 t.pi = "integer primary key not null"
 t.imo = "integer not null default -1"
 t.t = "text not null default ''"
+t.tu = "text not null unique default ''"
 t.pt = "text primary key not null"
 t.b = "blob not null default x''"
 
@@ -404,7 +418,7 @@ TABLE_DEFINITIONS = {
         ),
 
 
-    "wikiwordcontent": (     # Essential
+    "wikiwords": (     # Essential
         ("word", t.t),
         ("content", t.b),
         ("compression", t.i),
@@ -492,7 +506,9 @@ del t
 
 
 MAIN_TABLES = (
-    "wikiwordcontent",
+    # # rename to wikiwords to maintain consistency with other db backends
+    #"wikiwordeontent", 
+    "wikiwords",
     "wikirelations",
     "wikiwordattrs",
     "todos",
@@ -532,7 +548,7 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("drop index wikiwordprops_word")
     connwrap.execSqlNoError("drop index wikiwordprops_keyvalue")
 
-    connwrap.execSqlNoError("drop index wikiwordcontent_pkey")
+    connwrap.execSqlNoError("drop index wikiwords_pkey")
     connwrap.execSqlNoError("drop index wikiwords_wordnormcase")
     connwrap.execSqlNoError("drop index wikiwords_modified")
     connwrap.execSqlNoError("drop index wikiwords_created")
@@ -547,9 +563,9 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("drop index headversion_pkey")
     connwrap.execSqlNoError("drop index datablocks_unifiedname")
 
-    connwrap.execSqlNoError("create unique index wikiwordcontent_pkey on wikiwordcontent(word)")
-    connwrap.execSqlNoError("create index wikiwords_modified on wikiwordcontent(modified)")
-    connwrap.execSqlNoError("create index wikiwords_created on wikiwordcontent(created)")
+    connwrap.execSqlNoError("create unique index wikiwords_pkey on wikiwords(word)")
+    connwrap.execSqlNoError("create index wikiwords_modified on wikiwords(modified)")
+    connwrap.execSqlNoError("create index wikiwords_created on wikiwords(created)")
     connwrap.execSqlNoError("create index wikiwordmatchterms_matchterm on wikiwordmatchterms(matchterm)")
     connwrap.execSqlNoError("create index wikiwordmatchterms_matchtermnormcase on wikiwordmatchterms(matchtermnormcase)")
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
@@ -1263,6 +1279,13 @@ def updateDatabase(connwrap, dataDir):
         connwrap.execSql("update wikiwordcontent set metadataprocessed=0;")
 
         formatver = 9
+
+    if formatver == 9:
+        # Rename "wikiwordcontent" to "wikiwords"
+        # As we are only changing this backend the following should work?
+        connwrap.execSql("alter table wikiwordcontent rename to wikiwords;")
+
+        formatver = 10
 
     # --- WikiPad 2.1alpha.1 reached (formatver=9, writecompatver=9,
     #         readcompatver=9) ---

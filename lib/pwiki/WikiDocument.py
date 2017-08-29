@@ -1041,6 +1041,13 @@ class WikiDocument(MiscEventSourceMixin):
         return self.wikiData.getAllDefinedWikiPageNames()
 
 
+    def getAllDefinedWikiMatchTermsNormcase(self):
+        """
+
+        """
+        return self.wikiData.getAllDefinedWikiMatchTermsNormcase()
+
+
     def getWikiPage(self, wikiWord):
         """
         Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
