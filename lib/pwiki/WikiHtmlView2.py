@@ -2051,7 +2051,8 @@ document.title = links_selected.length;
         self.ctrl.html.RunScript('document.title=links_selected[0];')
 
         if link_number > 0:
-            primary_link = self.ctrl.html.GetCurrentTitle()
+            primary_link = urllib.parse.unquote(
+                    self.ctrl.html.GetCurrentTitle())
         else:
             primary_link = None
             
@@ -2074,6 +2075,7 @@ document.title = links_selected.length;
         # If only a single link is present we can launch that and finish
         if link_number == 1:
             self.ctrl._activateLink(link, tabMode=tabMode)
+            self.clearHints()
             return
         # Or if no links visible on page
         elif link_number < 1:
