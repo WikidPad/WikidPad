@@ -637,7 +637,6 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
         wx.Dialog.__init__(self)
         
         self.docPage = docPage
-        print (dir(docPage))
         res = wx.xrc.XmlResource.Get()
         res.LoadDialog(self, self.docPage, "FindSimilarNamedWikiWordDialog")
         
@@ -652,7 +651,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
         
         self.motionType = motionType
 
-        matchtermsDict = self.docPage.getWikiDocument() \
+        matchtermsDict = self.docPage.getWikiDocument().getWikiData() \
                 .getAllDefinedWikiMatchTermsNormcase()
 
         similar = difflib.get_close_matches(search_word.lower(), 
