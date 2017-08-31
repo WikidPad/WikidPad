@@ -115,19 +115,6 @@ class ConnectWrapBase:
             pass
 
 
-    def execSqlInsert(self, table, fields, values, tableDefault=None):
-        """
-        Helper to build sql insert code.
-
-        To maintain compatibility with Gadfly, insert statements can
-        be called using the same format.
-        """
-        fieldStr = ", ".join(fields)
-        qmStr = ", ".join(["?"] * len(fields))
-        self.execSql("insert into %s(%s) values (%s)" % (table, fieldStr, qmStr),
-                values)
-
-
     def getLastRowid(self):
         return self.dbCursor.lastrowid
 
@@ -380,7 +367,6 @@ t.i = "integer not null default 0"
 t.pi = "integer primary key not null"
 t.imo = "integer not null default -1"
 t.t = "text not null default ''"
-t.tu = "text not null unique default ''"
 t.pt = "text primary key not null"
 t.b = "blob not null default x''"
 
