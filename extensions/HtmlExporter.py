@@ -876,7 +876,8 @@ class HtmlExporter(AbstractExporter):
         else:
             outputFile = None
 
-        filePointer = utf8Writer(realfp, "replace")
+        #filePointer = utf8Writer(realfp, "replace")
+        filePointer = realfp
 
         filePointer.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
@@ -949,7 +950,7 @@ class HtmlExporter(AbstractExporter):
 
         filePointer.write(self.getFileFooter())
         
-        filePointer.reset()
+        #filePointer.reset()
 
         if outputFile is not None:
             realfp.close()
@@ -972,7 +973,8 @@ class HtmlExporter(AbstractExporter):
                     os.unlink(pathEnc(outputFile))
     
                 realfp = open(pathEnc(outputFile), "w")
-                fp = utf8Writer(realfp, "replace")
+                #fp = utf8Writer(realfp, "replace")
+                fp = realfp
 
                 # TODO Factor out HTML header generation                
                 fp.write(self._getGenericHtmlHeader(self.addOpt[2]) + 
@@ -998,7 +1000,7 @@ class HtmlExporter(AbstractExporter):
 
                 fp.write(self.getFileFooter())
 
-                fp.reset()        
+                #fp.reset()        
                 realfp.close()
             except Exception as e:
                 traceback.print_exc()
@@ -1037,12 +1039,13 @@ class HtmlExporter(AbstractExporter):
                 os.unlink(pathEnc(outputFile))
 
             realfp = open(pathEnc(outputFile), "w")
-            fp = utf8Writer(realfp, "replace")
+            #fp = utf8Writer(realfp, "replace")
+            fp = realfp
             
             wikiPage = self.wikiDocument.getWikiPage(word)
             fp.write(self.exportWikiPageToHtmlString(wikiPage,
                     startFile, onlyInclude))
-            fp.reset()        
+            #fp.reset()        
             realfp.close()
         except Exception as e:
             sys.stderr.write("Error while exporting word %s" % repr(word))

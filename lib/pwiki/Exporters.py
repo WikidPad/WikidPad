@@ -444,41 +444,41 @@ class MultiPageTextAddOptPanel(wx.Panel):
 
 class _SeparatorFoundException(Exception): pass
 
-class _SeparatorWatchUtf8Writer(utf8Writer):
-    def __init__(self, stream, separator, errors="strict"):
-        utf8Writer.__init__(self, stream, errors)
-        self.separator = separator
-#         self.separatorRe = re.compile(u"^" + re.escape(separator) + u"$",
-#                 re.MULTILINE | re.UNICODE)
-        self.buffer = []
-        self.firstSeparatorCallDone = False
-
-    def write(self, obj):
-        self.buffer.append(obj)
-        utf8Writer.write(self, obj)
-
-    def writelines(self, list):
-        self.buffer += list
-        utf8Writer.writelines(self, list)
-
-    def clearBuffer(self):
-        self.buffer = []
-    
-    def checkAndClearBuffer(self):
-#         if self.separatorRe.search(u"".join(self.buffer)):
-        if "".join(self.buffer).find("\n%s\n" % self.separator) > -1:
-            raise _SeparatorFoundException()
-
-        self.clearBuffer()
-
-
-    def writeSeparator(self):
-        self.checkAndClearBuffer()
-
-        if self.firstSeparatorCallDone:
-            utf8Writer.write(self, "\n%s\n" % self.separator)
-        else:
-            self.firstSeparatorCallDone = True
+#class _SeparatorWatchUtf8Writer(utf8Writer):
+#    def __init__(self, stream, separator, errors="strict"):
+#        utf8Writer.__init__(self, stream, errors)
+#        self.separator = separator
+##         self.separatorRe = re.compile(u"^" + re.escape(separator) + u"$",
+##                 re.MULTILINE | re.UNICODE)
+#        self.buffer = []
+#        self.firstSeparatorCallDone = False
+#
+#    def write(self, obj):
+#        self.buffer.append(obj)
+#        utf8Writer.write(self, obj)
+#
+#    def writelines(self, list):
+#        self.buffer += list
+#        utf8Writer.writelines(self, list)
+#
+#    def clearBuffer(self):
+#        self.buffer = []
+#    
+#    def checkAndClearBuffer(self):
+##         if self.separatorRe.search(u"".join(self.buffer)):
+#        if "".join(self.buffer).find("\n%s\n" % self.separator) > -1:
+#            raise _SeparatorFoundException()
+#
+#        self.clearBuffer()
+#
+#
+#    def writeSeparator(self):
+#        self.checkAndClearBuffer()
+#
+#        if self.firstSeparatorCallDone:
+#            utf8Writer.write(self, "\n%s\n" % self.separator)
+#        else:
+#            self.firstSeparatorCallDone = True
 
 
 

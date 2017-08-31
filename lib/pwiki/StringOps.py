@@ -44,7 +44,10 @@ LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 utf8Enc = codecs.getencoder("utf-8")
 utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
-utf8Writer = codecs.getwriter("utf-8")
+#utf8Writer = codecs.getwriter("utf-8")
+
+def utf8Writer(t):
+    return codecs.getwriter("utf-8")(t).decode("utf8")
 
 def convertLineEndings(text, newLe):
     """
