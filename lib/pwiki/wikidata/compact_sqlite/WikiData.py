@@ -42,77 +42,26 @@ from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, longPathEnc, 
         longPathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
         uniWithNone, loadEntireTxtFile, Conjunction, lineendToInternal
 
+from ..BaseWikiData import BasicWikiData
 
 import Consts
 
-class WikiData:
+class WikiData(BasicWikiData):
     "Interface to wiki data."
     def __init__(self, wikiDocument, dataDir, tempDir):
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.cachedWikiPageLinkTermDict = None
 
-        dbPath = self.wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
-                "").strip()
-                
-        if (dbPath == ""):
-            dbPath = "wiki.sli"
+        self.dbFilename = "wiki.sli"
 
-        dbfile = join(dataDir, dbPath)
 
-        try:
-            if (not exists(longPathEnc(dbfile))):
-                DbStructure.createWikiDB(None, dataDir,
-                        wikiDocument=self.wikiDocument)
-        except (IOError, OSError, sqlite.Error) as e:
-            traceback.print_exc()
-            raise DbWriteAccessError(e)
+        self.CreateAndConnectToDb(DbStructure)
 
-        dbfile = longPathDec(dbfile)
+        app = GetApp()
 
-        try:
-            self.connWrap = DbStructure.ConnectWrapSyncCommit(
-                    sqlite.connect(dbfile))
-        except (IOError, OSError, sqlite.Error) as e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-
-        # Set temporary directory if this is first sqlite use after prog. start
-        if not GetApp().sqliteInitFlag:
-            globalConfig = GetApp().getGlobalConfig()
-            if globalConfig.getboolean("main", "tempHandling_preferMemory",
-                    False):
-                tempMode = "memory"
-            else:
-                tempMode = globalConfig.get("main", "tempHandling_tempMode",
-                        "system")
-
-            if tempMode == "auto":
-                if GetApp().isInPortableMode():
-                    tempMode = "config"
-                else:
-                    tempMode = "system"
-            
-            if tempMode == "memory":
-                self.connWrap.execSql("pragma temp_store = 2")
-            elif tempMode == "given":
-                tempDir = globalConfig.get("main", "tempHandling_tempDir", "")
-                try:
-                    self.connWrap.execSql("pragma temp_store_directory = '%s'" %
-                            utf8Enc(tempDir)[0])
-                except sqlite.Error:
-                    self.connWrap.execSql("pragma temp_store_directory = ''")
-
-                self.connWrap.execSql("pragma temp_store = 1")
-            elif tempMode == "config":
-                self.connWrap.execSql("pragma temp_store_directory = '%s'" %
-                        utf8Enc(GetApp().getGlobalConfigSubDir())[0])
-                self.connWrap.execSql("pragma temp_store = 1")
-            else:   # tempMode == u"system"
-                self.connWrap.execSql("pragma temp_store_directory = ''")
-                self.connWrap.execSql("pragma temp_store = 1")
-
-            GetApp().sqliteInitFlag = True
+        if app is not None:
+            self.initSqlite(app)
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
