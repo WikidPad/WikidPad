@@ -675,7 +675,7 @@ class BasicWikiData:
         Function must work for read-only wiki (should hold although function
         writes to temporary table).
         """
-        # TODO Aliases supported?
+        # TODO Optimise? nocase support
         
         if word == toWord:
             return [word]
@@ -683,9 +683,14 @@ class BasicWikiData:
             # Clear temporary table
             self.connWrap.execSql("delete from temppathfindparents")
     
-            self.connWrap.execSql("insert into temppathfindparents "+
-                    "(word, child, steps) select word, relation, 1 from wikirelations "+
-                    "where relation = ?", (word,))
+            self.connWrap.execSql("""insert or ignore into temppathfindparents 
+                    (word, child, steps) select word, relation, 1 from 
+                    wikirelations where relation in (select 
+                    wikiwordmatchterms.matchterm from wikiwordmatchterms 
+                    where word = ?)""", (word,))
+
+            # temppathfindparents should now contain a list of all the
+            # words/aliases that link to our desired word
 
             step = 1
             while True:
@@ -695,17 +700,38 @@ class BasicWikiData:
                     # No more (grand-)parents
                     return []
 
-                if self.connWrap.execSqlQuerySingleItem("select word from "+
-                        "temppathfindparents where word=?", (toWord,)) is not None:
+                if self.connWrap.execSqlQuerySingleItem("select word from "
+                        "temppathfindparents where word=?", (toWord,)
+                        ) is not None:
+
                     # Path found
                     result = [toWord]
                     crumb = toWord
     
                     while crumb != word:
+
+                        self.connWrap.execSqlQuerySingleItem(
+                                "select child from temppathfindparents")
+
                         crumb = self.connWrap.execSqlQuerySingleItem(
-                                "select child from temppathfindparents where "+
-                                "word=?", (crumb,))
+                                "select child from temppathfindparents where "
+                                "word in (select wikiwordmatchterms.matchterm "
+                                "from wikiwordmatchterms where "
+                                "wikiwordmatchterms.matchterm = ?)", (crumb,))
+
                         result.append(crumb)
+
+                        if self.connWrap.execSqlQuerySingleItem(
+                                """select matchterm from wikiwordmatchterms 
+                                where word = ? and matchterm = ?""", 
+                                (word, crumb)) is not None:
+                            # result[-1] is not necessarily == word
+                            # it could be an alias
+                            break
+
+                        if crumb is None:
+                            # Somethings gone wrong (this shouldn't happen)
+                            return []
 
                     # print "findBestPathFromWordToWord result", word, toWord, repr(result)
     
@@ -713,6 +739,18 @@ class BasicWikiData:
                     self.connWrap.execSql("delete from temppathfindparents")
 
                     return result
+
+                # To handle aliases we add all matchterms to the list to search
+                self.connWrap.execSql("""
+                    insert or ignore into temppathfindparents (word, child, 
+                    steps) select wikiwordmatchterms.matchterm, 
+                    temppathfindparents.child, temppathfindparents.steps 
+                    from temppathfindparents inner join wikiwordmatchterms 
+                    where (wikiwordmatchterms.word = temppathfindparents.word 
+                    and wikiwordmatchterms.matchterm != 
+                    temppathfindparents.word and (wikiwordmatchterms.type & 2) 
+                    != 0)
+                    """)
     
                 self.connWrap.execSql("""
                     insert or ignore into temppathfindparents (word, child, steps)
@@ -724,7 +762,7 @@ class BasicWikiData:
     
                 step += 1
         
-        except (IOError, OSError, sqlite.Error) as e:
+        except (IOError, OSError, sqlite.Error, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
@@ -1831,111 +1869,4 @@ class BasicWikiData:
         except (IOError, OSError, sqlite.Error, ValueError) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
-
-
-
-
-
-
-
-    def findBestPathFromWordToWord(self, word, toWord):
-        """
-        finds the shortest path from word to toWord going through the parents.
-        word and toWord are included as first/last element. If word == toWord,
-        it is included only once as the single element of the list.
-        If there is no path from word to toWord, [] is returned
-        Function must work for read-only wiki (should hold although function
-        writes to temporary table).
-        """
-        # TODO Optimise? nocase support
-        
-        if word == toWord:
-            return [word]
-        try:
-            # Clear temporary table
-            self.connWrap.execSql("delete from temppathfindparents")
-    
-            self.connWrap.execSql("""insert or ignore into temppathfindparents 
-                    (word, child, steps) select word, relation, 1 from 
-                    wikirelations where relation in (select 
-                    wikiwordmatchterms.matchterm from wikiwordmatchterms 
-                    where word = ?)""", (word,))
-
-            # temppathfindparents should now contain a list of all the
-            # words/aliases that link to our desired word
-
-            step = 1
-            while True:
-                changes = self.connWrap.rowcount
-    
-                if changes == 0:
-                    # No more (grand-)parents
-                    return []
-
-                if self.connWrap.execSqlQuerySingleItem("select word from "
-                        "temppathfindparents where word=?", (toWord,)
-                        ) is not None:
-
-                    # Path found
-                    result = [toWord]
-                    crumb = toWord
-    
-                    while crumb != word:
-
-                        self.connWrap.execSqlQuerySingleItem(
-                                "select child from temppathfindparents")
-
-                        crumb = self.connWrap.execSqlQuerySingleItem(
-                                "select child from temppathfindparents where "
-                                "word in (select wikiwordmatchterms.matchterm "
-                                "from wikiwordmatchterms where "
-                                "wikiwordmatchterms.matchterm = ?)", (crumb,))
-
-                        result.append(crumb)
-
-                        if self.connWrap.execSqlQuerySingleItem(
-                                """select matchterm from wikiwordmatchterms 
-                                where word = ? and matchterm = ?""", 
-                                (word, crumb)) is not None:
-                            # result[-1] is not necessarily == word
-                            # it could be an alias
-                            break
-
-                        if crumb is None:
-                            # Somethings gone wrong (this shouldn't happen)
-                            return []
-
-                    # print "findBestPathFromWordToWord result", word, toWord, repr(result)
-    
-                    # Clear temporary table
-                    self.connWrap.execSql("delete from temppathfindparents")
-
-                    return result
-
-                # To handle aliases we add all matchterms to the list to search
-                self.connWrap.execSql("""
-                    insert or ignore into temppathfindparents (word, child, 
-                    steps) select wikiwordmatchterms.matchterm, 
-                    temppathfindparents.child, temppathfindparents.steps 
-                    from temppathfindparents inner join wikiwordmatchterms 
-                    where (wikiwordmatchterms.word = temppathfindparents.word 
-                    and wikiwordmatchterms.matchterm != 
-                    temppathfindparents.word and (wikiwordmatchterms.type & 2) 
-                    != 0)
-                    """)
-    
-                self.connWrap.execSql("""
-                    insert or ignore into temppathfindparents (word, child, steps)
-                    select wikirelations.word, temppathfindparents.word, ? from
-                        temppathfindparents inner join wikirelations on
-                        temppathfindparents.word == wikirelations.relation where
-                        temppathfindparents.steps == ?
-                    """, (step+1, step))
-    
-                step += 1
-        
-        except (IOError, OSError, sqlite.Error, ValueError) as e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-
 
