@@ -226,7 +226,8 @@ class WikiData(BasicWikiData):
 
         # if not content: content = ""
         
-        assert type(content) is str
+        # Fails with python3
+        #assert type(content) is str
 
         try:
             if self.connWrap.execSqlQuerySingleItem("select word from "+\
