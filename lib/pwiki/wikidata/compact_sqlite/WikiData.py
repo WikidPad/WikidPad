@@ -225,7 +225,7 @@ class WikiData:
         """
         try:
             result = self.connWrap.execSqlQuerySingleItem("select content from "+\
-                "wikiwordcontent where word = ?", (word,), None)
+                "wikiwords where word = ?", (word,), None)
 
             if result is None:
                 raise WikiFileNotFoundException(_("Wiki page not found: %s") % word)
@@ -244,7 +244,7 @@ class WikiData:
         """
         try:
             result = self.connWrap.execSqlQuery("select content, modified from "+\
-                "wikiwordcontent where word = ?", (word,))
+                "wikiwords where word = ?", (word,))
             if len(result) == 0:
                 raise WikiFileNotFoundException("wiki page not found: %s" % word)
     
@@ -263,7 +263,7 @@ class WikiData:
         This is only part of public API if "recovery mode" is supported.
         """
         return self.connWrap.execSqlQueryIter(
-                "select word, content, modified, created, visited from wikiwordcontent")
+                "select word, content, modified, created, visited from wikiwords")
 
 
     def setContent(self, word, content, moddate = None, creadate = None):
@@ -301,13 +301,13 @@ class WikiData:
 
         try:
             if self.connWrap.execSqlQuerySingleItem("select word from "+\
-                    "wikiwordcontent where word=?", (word,), None) is not None:
+                    "wikiwords where word=?", (word,), None) is not None:
     
                 # Word exists already
-    #             self.connWrap.execSql("insert or replace into wikiwordcontent"+\
+    #             self.connWrap.execSql("insert or replace into wikiwords"+\
     #                 "(word, content, modified) values (?,?,?)",
     #                 (word, sqlite.Binary(content), moddate))
-                self.connWrap.execSql("update wikiwordcontent set "
+                self.connWrap.execSql("update wikiwords set "
                     "content=?, modified=? where word=?",
                     (sqlite.Binary(content), moddate, word))
             else:
@@ -315,7 +315,7 @@ class WikiData:
                     creadate = ti
     
                 # Word does not exist -> record creation date
-                self.connWrap.execSql("insert or replace into wikiwordcontent"
+                self.connWrap.execSql("insert or replace into wikiwords"
                     "(word, content, modified, created) "
                     "values (?,?,?,?)",
                     (word, sqlite.Binary(content), moddate, creadate))
@@ -331,7 +331,7 @@ class WikiData:
         dictionary is updated, other caches won't be updated.
         """
         try:
-            self.connWrap.execSql("update wikiwordcontent set word = ? "
+            self.connWrap.execSql("update wikiwords set word = ? "
                     "where word = ?", (newWord, oldWord))
     
             self.cachedWikiPageLinkTermDict = None
@@ -342,7 +342,7 @@ class WikiData:
 
     def _deleteContent(self, word):
         try:
-            self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
+            self.connWrap.execSql("delete from wikiwords where word = ?", (word,))
             self.cachedWikiPageLinkTermDict = None
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -358,7 +358,7 @@ class WikiData:
         """
         try:
             dates = self.connWrap.execSqlQuery(
-                    "select modified, created, visited from wikiwordcontent where word = ?",
+                    "select modified, created, visited from wikiwords where word = ?",
                     (word,))
 
             if len(dates) > 0:
@@ -378,7 +378,7 @@ class WikiData:
         moddate, creadate, visitdate = timestamps[:3]
 
         try:
-            data = self.connWrap.execSqlQuery("select word from wikiwordcontent "
+            data = self.connWrap.execSqlQuery("select word from wikiwords "
                     "where word = ?", (word,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -388,7 +388,7 @@ class WikiData:
             if len(data) < 1:
                 raise WikiFileNotFoundException
             else:
-                self.connWrap.execSql("update wikiwordcontent set modified = ?, "
+                self.connWrap.execSql("update wikiwords set modified = ?, "
                         "created = ?, visited = ? where word = ?",
                         (moddate, creadate, visitdate, word))
         except (IOError, OSError, sqlite.Error) as e:
@@ -405,7 +405,7 @@ class WikiData:
         flag -- integer value. 0: Readwrite; &1: Readonly
         """
         try:
-            data = self.connWrap.execSqlQuery("select word from wikiwordcontent "
+            data = self.connWrap.execSqlQuery("select word from wikiwords "
                     "where word = ?", (word,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -415,7 +415,7 @@ class WikiData:
             if len(data) < 1:
                 raise WikiFileNotFoundException
             else:
-                self.connWrap.execSql("update wikiwordcontent set readonly = ? "
+                self.connWrap.execSql("update wikiwords set readonly = ? "
                         "where word = ?", (flag, word))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -429,7 +429,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
-                    "select readonly from wikiwordcontent where word = ?",
+                    "select readonly from wikiwords where word = ?",
                     (word,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -478,7 +478,7 @@ class WikiData:
                 converters.append(lambda s: 2000000000)
 
 
-        sql = "select word%s from wikiwordcontent where word = ?" % addFields
+        sql = "select word%s from wikiwords where word = ?" % addFields
 
         try:
             if len(withFields) > 0:
@@ -562,7 +562,7 @@ class WikiData:
         See Consts.WIKIWORDMETADATA_STATE_*
         """
         try:
-            self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ? "
+            self.connWrap.execSql("update wikiwords set metadataprocessed = ? "
                     "where word = ?", (state, word))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -575,7 +575,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleItem("select metadataprocessed "
-                    "from wikiwordcontent where word = ?", (word,))
+                    "from wikiwords where word = ?", (word,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -585,7 +585,7 @@ class WikiData:
         """
         Reset state of all wikiwords.
         """
-        self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ?",
+        self.connWrap.execSql("update wikiwords set metadataprocessed = ?",
                 (state,))
 
 
@@ -604,7 +604,7 @@ class WikiData:
 
         try:
             return self.connWrap.execSqlQuerySingleColumn("select word "
-                    "from wikiwordcontent where metadataprocessed " + sqlCompare +
+                    "from wikiwords where metadataprocessed " + sqlCompare +
                     " ?", (state,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -661,9 +661,9 @@ class WikiData:
             elif field == "modified":
                 # "modified" isn't a field of wikirelations. We need
                 # some SQL magic to retrieve the modification date
-                addFields += (", ifnull((select modified from wikiwordcontent "
-                        "where wikiwordcontent.word = relation or "
-                        "wikiwordcontent.word = (select word from wikiwordmatchterms "
+                addFields += (", ifnull((select modified from wikiwords "
+                        "where wikiwords.word = relation or "
+                        "wikiwords.word = (select word from wikiwordmatchterms "
                         "where wikiwordmatchterms.matchterm = relation and "
                         "(wikiwordmatchterms.type & 2) != 0 limit 1)), 0.0)")
 
@@ -677,11 +677,11 @@ class WikiData:
 
         if existingonly:
             # filter to only words in wikiwords or aliases
-#             sql += " and (exists (select word from wikiwordcontent "+\
+#             sql += " and (exists (select word from wikiwords "+\
 #                     "where word = relation) or exists "+\
 #                     "(select value from wikiwordattrs "+\
 #                     "where value = relation and key = 'alias'))"
-            sql += (" and (exists (select 1 from wikiwordcontent "
+            sql += (" and (exists (select 1 from wikiwords "
                     "where word = relation) or exists "
                     "(select 1 from wikiwordmatchterms "
                     "where wikiwordmatchterms.matchterm = relation and "
@@ -733,7 +733,7 @@ class WikiData:
         try:
             # Also working but slower:
 #             return self.connWrap.execSqlQuerySingleColumn(
-#                     "select word from wikiwordcontent except "
+#                     "select word from wikiwords except "
 #                     "select wikiwordmatchterms.word "
 #                     "from wikiwordmatchterms inner join wikirelations "
 #                     "on matchterm == relation where "
@@ -742,7 +742,7 @@ class WikiData:
 
 
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent except "
+                    "select word from wikiwords except "
                     "select wikiwordmatchterms.word from wikiwordmatchterms "
                     "where exists (select 1 from wikirelations where "
                     "wikiwordmatchterms.matchterm == wikirelations.relation and "
@@ -763,7 +763,7 @@ class WikiData:
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select relation from wikirelations "
-                    "except select word from wikiwordcontent "
+                    "except select word from wikiwords "
                     "except select matchterm from wikiwordmatchterms "
                     "where (type & 2) != 0")
             # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
@@ -911,7 +911,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent")
+                    "select word from wikiwords")
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -926,7 +926,7 @@ class WikiData:
             thisStr = sqlite.escapeForGlob(thisStr)
 
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent where word glob (? || '*')", 
+                    "select word from wikiwords where word glob (? || '*')", 
                     (thisStr,))
 
         except (IOError, OSError, sqlite.Error) as e:
@@ -937,7 +937,7 @@ class WikiData:
     def isDefinedWikiPageName(self, word):
         try:
             return bool(self.connWrap.execSqlQuerySingleItem(
-                    "select 1 from wikiwordcontent where word = ?", (word,)))
+                    "select 1 from wikiwords where word = ?", (word,)))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1012,10 +1012,10 @@ class WikiData:
             def keys(self):
                 if not self.cacheComplete:
                     self.cache = dict(self.outer.connWrap.execSqlQuery(
-                            "select word, word from wikiwordcontent union "
+                            "select word, word from wikiwords union "
                             "select matchterm, word from wikiwordmatchterms "
                             "where (type & 2) != 0 and not matchterm in "
-                            "(select word from wikiwordcontent)"))
+                            "(select word from wikiwords)"))
                     # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
                     self.cacheComplete = True
                     self.cacheNonExistent = set()
@@ -1040,10 +1040,10 @@ class WikiData:
 #         try:
 #             if self.cachedWikiPageLinkTermDict is None:
 #                 self.cachedWikiPageLinkTermDict = dict(self.connWrap.execSqlQuery(
-#                         "select word, word from wikiwordcontent union "
+#                         "select word, word from wikiwords union "
 #                         "select matchterm, word from wikiwordmatchterms "
 #                         "where (type & 2) != 0 and not matchterm in "
-#                         "(select word from wikiwordcontent)"))
+#                         "(select word from wikiwords)"))
 #                 # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 # 
 #             return self.cachedWikiPageLinkTermDict
@@ -1101,7 +1101,7 @@ class WikiData:
                         "select matchterm from wikiwordmatchterms "
                         "where matchterm glob (? || '*') and "
                         "(type & 2) != 0 union "
-                        "select word from wikiwordcontent where word glob (? || '*')", 
+                        "select word from wikiwords where word glob (? || '*')", 
                         (thisStr,thisStr))
                 # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 
@@ -1118,7 +1118,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent where modified >= ? and "
+                    "select word from wikiwords where modified >= ? and "
                     "modified < ?",
                     (startTime, endTime))
         except (IOError, OSError, sqlite.Error) as e:
@@ -1148,7 +1148,7 @@ class WikiData:
 
         try:
             result = self.connWrap.execSqlQuery(
-                    ("select min(%s), max(%s) from wikiwordcontent where %s > 0") %
+                    ("select min(%s), max(%s) from wikiwords where %s > 0") %
                     (field, field, field))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -1179,7 +1179,7 @@ class WikiData:
             
         try:
             return self.connWrap.execSqlQuery(
-                    ("select word, %s from wikiwordcontent where %s > 0 and %s < ? "
+                    ("select word, %s from wikiwords where %s > 0 and %s < ? "
                     "order by %s desc limit ?") %
                     (field, field, field, field), (stamp, limit))
         except (IOError, OSError, sqlite.Error) as e:
@@ -1205,7 +1205,7 @@ class WikiData:
 
         try:
             return self.connWrap.execSqlQuery(
-                    ("select word, %s from wikiwordcontent where %s > ? "
+                    ("select word, %s from wikiwords where %s > ? "
                     "order by %s asc limit ?") %
                     (field, field, field), (stamp, limit))
         except (IOError, OSError, sqlite.Error) as e:
@@ -1221,7 +1221,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
-                    "select word from wikiwordcontent "
+                    "select word from wikiwords "
                     "order by word limit 1")
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -1242,7 +1242,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
-                    "select word from wikiwordcontent where "
+                    "select word from wikiwords where "
                     "word > ? order by word limit 1", (currWord,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -1545,15 +1545,15 @@ class WikiData:
                 result1 = self.connWrap.execSqlQuery(
                         "select matchterm, type, wikiwordmatchterms.word, "
                         "firstcharpos, charlength, visited "
-                        "from wikiwordmatchterms inner join wikiwordcontent "
-                        "on wikiwordmatchterms.word = wikiwordcontent.word where "
+                        "from wikiwordmatchterms inner join wikiwords "
+                        "on wikiwordmatchterms.word = wikiwords.word where "
                         "matchtermnormcase glob (? || '*')", (thisStr,))
     
                 result2 = self.connWrap.execSqlQuery(
                         "select matchterm, type, wikiwordmatchterms.word, "
                         "firstcharpos, charlength, visited "
-                        "from wikiwordmatchterms inner join wikiwordcontent "
-                        "on wikiwordmatchterms.word = wikiwordcontent.word where "
+                        "from wikiwordmatchterms inner join wikiwords "
+                        "on wikiwordmatchterms.word = wikiwords.word where "
                         "not matchtermnormcase glob (? || '*') "
                         "and matchtermnormcase glob ('*' || ? || '*')",
                         (thisStr, thisStr))
@@ -1761,7 +1761,7 @@ class WikiData:
         if sarOp.isTextNeededForTest():
             try:
                 result = self.connWrap.execSqlQuerySingleColumn(
-                        "select word from wikiwordcontent where "
+                        "select word from wikiwords where "
                         "testMatch(word, content, ?)",
                         (sqlite.addTransObject(sarOp),))
             except (IOError, OSError, sqlite.Error) as e:
@@ -1777,7 +1777,7 @@ class WikiData:
         else:
             try:
                 result = self.connWrap.execSqlQuerySingleColumn(
-                        "select word from wikiwordcontent where "
+                        "select word from wikiwords where "
                         "testMatch(word, '', ?)",
                         (sqlite.addTransObject(sarOp),))
             except (IOError, OSError, sqlite.Error) as e:
@@ -1848,7 +1848,7 @@ class WikiData:
         """
         try:
             self.connWrap.execSql(
-                    "update wikiwordcontent set presentationdatablock = ? where "
+                    "update wikiwords set presentationdatablock = ? where "
                     "word = ?", (sqlite.Binary(datablock), word))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -1862,7 +1862,7 @@ class WikiData:
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
-                    "select presentationdatablock from wikiwordcontent where word = ?",
+                    "select presentationdatablock from wikiwords where word = ?",
                     (word,))
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -1956,8 +1956,8 @@ class WikiData:
 
                 # Find modified words
                 modwords = self.connWrap.execSqlQuerySingleColumn("select headversion.word from headversion inner join "+\
-                        "wikiwordcontent on headversion.word = wikiwordcontent.word where "+\
-                        "headversion.modified != wikiwordcontent.modified")
+                        "wikiwords on headversion.word = wikiwords.word where "+\
+                        "headversion.modified != wikiwords.modified")
 
                 for w in modwords:
                     self.storeModification(w)
@@ -1966,11 +1966,11 @@ class WikiData:
                 # Store changes for deleted words
                 self.connWrap.execSql("insert into changelog (word, op, content, moddate) "+\
                         "select word, 2, content, modified from headversion where "+\
-                        "word not in (select word from wikiwordcontent)")
+                        "word not in (select word from wikiwords)")
 
                 # Store changes for inserted words
                 self.connWrap.execSql("insert into changelog (word, op, content, moddate) "+\
-                        "select word, 3, x'', modified from wikiwordcontent where "+\
+                        "select word, 3, x'', modified from wikiwords where "+\
                         "word not in (select word from headversion)")
 
                 if firstchangeid == (self.connWrap.execSqlQuerySingleItem("select id from changelog order by id desc limit 1 ",
@@ -1985,9 +1985,9 @@ class WikiData:
             self.connWrap.execSql("insert or replace into versions(id, description, firstchangeid, created) "+\
                     "values(?, ?, ?, ?)", (0, description, -1, time()))
 
-            # Copy from wikiwordcontent everything to headversion
+            # Copy from wikiwords everything to headversion
             self.connWrap.execSql("delete from headversion")
-            self.connWrap.execSql("insert into headversion select * from wikiwordcontent")
+            self.connWrap.execSql("insert into headversion select * from wikiwords")
 
             self.connWrap.commit()
         except:
@@ -2012,7 +2012,7 @@ class WikiData:
     # TODO: Wrong moddate?
     def applyChange(self, word, op, content, moddate):
         """
-        Apply a single change to wikiwordcontent. word, op, content and modified have the
+        Apply a single change to wikiwords. word, op, content and modified have the
         same meaning as in the changelog table
         """
         if op == 0:
@@ -2029,14 +2029,14 @@ class WikiData:
     def applyStoredVersion(self, id):
         """
         Set the content back to the version identified by id (retrieved by getStoredVersions).
-        Only wikiwordcontent is modified, the cache information must be updated separately
+        Only wikiwords is modified, the cache information must be updated separately
         """
 
         self.connWrap.syncCommit()
         try:
             # Start with head version
-            self.connWrap.execSql("delete from wikiwordcontent") #delete all rows
-            self.connWrap.execSql("insert into wikiwordcontent select * from headversion") # copy from headversion
+            self.connWrap.execSql("delete from wikiwords") #delete all rows
+            self.connWrap.execSql("insert into wikiwords select * from headversion") # copy from headversion
 
             if id != 0:
                 lowestchangeid = self.connWrap.execSqlQuerySingleColumn("select firstchangeid from versions where id == ?",
@@ -2098,15 +2098,15 @@ class WikiData:
                 # Maybe we have multiple pages with the same name in the database
                 
                 # Copy valid creation date to all pages
-                self.connWrap.execSql("update wikiwordcontent set "
-                        "created=(select max(created) from wikiwordcontent as "
-                        "inner where inner.word=wikiwordcontent.word)")
+                self.connWrap.execSql("update wikiwords set "
+                        "created=(select max(created) from wikiwords as "
+                        "inner where inner.word=wikiwords.word)")
     
                 # Delete all but the newest page
-                self.connWrap.execSql("delete from wikiwordcontent where "
-                        "ROWID not in (select max(ROWID) from wikiwordcontent as "
+                self.connWrap.execSql("delete from wikiwords where "
+                        "ROWID not in (select max(ROWID) from wikiwords as "
                         "outer where modified=(select max(modified) from "
-                        "wikiwordcontent as inner where inner.word=outer.word) "
+                        "wikiwords as inner where inner.word=outer.word) "
                         "group by outer.word)")
     
                 DbStructure.rebuildIndices(self.connWrap)
