@@ -4875,17 +4875,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     EXPORT_PARAMS = {
-            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE:
+            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE.GetId():
                     ("html_multi", None),
-            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES:
+            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES.GetId():
                     ("html_single", None),
-            GUI_ID.MENU_EXPORT_WORD_AS_PAGE:
+            GUI_ID.MENU_EXPORT_WORD_AS_PAGE.GetId():
                     ("html_multi", None),
-            GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGE.GetId():
                     ("html_multi", None),
-            GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGES.GetId():
                     ("html_single", None),
-            GUI_ID.MENU_EXPORT_WHOLE_AS_RAW:
+            GUI_ID.MENU_EXPORT_WHOLE_AS_RAW.GetId():
                     ("raw_files", (1,))
             }
 
