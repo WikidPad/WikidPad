@@ -14,6 +14,8 @@ from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote, longPathEnc
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
+from . import OsAbstract
+
 from . import DocPages
 from .TempFileSet import TempFileSet
 
