@@ -11,7 +11,7 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from .MiscEvent import KeyFunctionSink
 
 from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
-        urlQuote, pathnameFromUrl, flexibleUrlUnquote
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote, longPathEnc
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
 from . import DocPages
@@ -1548,8 +1548,8 @@ if ((typeof jQuery !== 'undefined')) {
 
         if link.startswith("file:"):
             try:
-                path = os.path.dirname(StringOps.pathnameFromUrl(link))
-                if not os.path.exists(StringOps.longPathEnc(path)):
+                path = os.path.dirname(pathnameFromUrl(link))
+                if not os.path.exists(longPathEnc(path)):
                     self.presenter.displayErrorMessage(
                             _("Folder does not exist"))
                     return
