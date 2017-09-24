@@ -1946,9 +1946,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def _setPageListRadioButton(self, selectedBtn):
-        refocus = False
         focused = self.panelPageListLastFocused
-        
+
+        if focused is None:
+            refocus = True
+        else:
+            refocus = False
+
         for btn in self.pageListRadioButtons:
             if btn is selectedBtn:
                 btn.SetValue(True)
