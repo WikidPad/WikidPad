@@ -655,24 +655,24 @@ def seqEnforceContained(seq, allowedSeq):
 
 
 
-def supportSeqWithTemplate(tupleOrList, templateSeq):
+def seqSupportWithTemplate(tupleOrList, templateSeq):
     """
     If tupleOrList has same length as templateSeq
     (must support index access protocol), tupleOrList is returned.
     If tupleOrList is longer, only the first len(templateSeq) items are returned.
     
-    If tupleOrList (which should be a tuple or list) is shorter than
-    templateSeq then a new list or tuple (depending on tupleOrList's type)
+    If tupleOrList (which should be tuple, list or derived from it) is shorter
+    than templateSeq then a new list or tuple (depending on tupleOrList's type)
     is returned with same length as templateSeq where the missing items were
     taken from the appropriate places in templateSeq
     
-    >>> supportSeqWithTemplate([7, 8, 9], [1, 2, 3, 4, 5])
+    >>> seqSupportWithTemplate([7, 8, 9], [1, 2, 3, 4, 5])
     [7, 8, 9, 4, 5]
-    >>> supportSeqWithTemplate((7, 8, 9), [1, 2, 3, 4, 5])
+    >>> seqSupportWithTemplate((7, 8, 9), [1, 2, 3, 4, 5])
     (7, 8, 9, 4, 5)
-    >>> supportSeqWithTemplate((7, 8, 9, 10, 11, 12), [1, 2, 3, 4, 5])
+    >>> seqSupportWithTemplate((7, 8, 9, 10, 11, 12), [1, 2, 3, 4, 5])
     (7, 8, 9, 10, 11)
-    >>> supportSeqWithTemplate([7, 8, 9, 10, 11], [1, 2, 3, 4, 5])
+    >>> seqSupportWithTemplate([7, 8, 9, 10, 11], [1, 2, 3, 4, 5])
     [7, 8, 9, 10, 11]
     """
     n = len(tupleOrList)
@@ -683,10 +683,7 @@ def supportSeqWithTemplate(tupleOrList, templateSeq):
     if n == len(templateSeq):
         return tupleOrList
     
-    if isinstance(tupleOrList, tuple):
-        return tupleOrList + tuple(templateSeq[n:])
-    elif isinstance(tupleOrList, list):
-        return tupleOrList + list(templateSeq[n:])
+    return tupleOrList + type(tupleOrList)(templateSeq[n:])
 
 
 
