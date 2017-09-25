@@ -1319,6 +1319,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             elif item.CLASS_PERSID == "ListItemWithSubtreePages":
                 self._setPageListRadioButton(self.ctrls.rbPagesInList)
                 self.pageListData = item.rootWords[:]
+                self.ctrls.lbPageList.Clear()
                 self.ctrls.lbPageList.AppendItems(self.pageListData)
                 if item.level == -1:
                     self.ctrls.tfSubtreeLevels.SetValue("")
@@ -1697,7 +1698,6 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
 
-    # TODO Store search mode
     def OnSaveSearch(self, evt):
         sarOp = self._buildSearchReplaceOperation()
         try:

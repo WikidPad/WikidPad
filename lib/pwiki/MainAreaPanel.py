@@ -81,6 +81,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 #         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGING, self.OnNotebookPageChanging)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_DOWN, self.OnTabContextMenu, self)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_MIDDLE_DOWN, self.OnTabMiddleDown, self)
+        self.Bind(aui.EVT_AUINOTEBOOK_TAB_DCLICK, self.OnTabDoubleClick, self)
         self.Bind(aui.EVT_AUINOTEBOOK_PAGE_VISIBILITY_CHANGED,
                 self.OnNotebookPageVisibilityChanged)
         self.Bind(aui.EVT_AUINOTEBOOK_SET_FOCUS,
@@ -767,6 +768,15 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         paramDict = {"presenter": pres, "main control": mc}
         mc.getUserActionCoord().reactOnUserEvent(
                 "mouse/middleclick/pagetab", paramDict)
+
+
+    def OnTabDoubleClick(self, evt):
+        pres = evt.Page
+        mc = self.mainControl
+
+        paramDict = {"presenter": pres, "main control": mc}
+        mc.getUserActionCoord().reactOnUserEvent(
+                u"mouse/leftdoubleclick/pagetab", paramDict)
 
 
     def miscEventHappened(self, miscevt):

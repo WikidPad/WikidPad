@@ -19,7 +19,7 @@ import Consts
 from pwiki.WikiExceptions import WikiWordNotFoundException, ExportException, \
         InternalError
 from pwiki.ParseUtilities import getFootnoteAnchorDict
-from pwiki.Utilities import calcResizeArIntoBoundingBox
+from pwiki.Utilities import calcResizeArIntoBoundingBox, seqSupportWithTemplate
 from pwiki.StringOps import *
 from pwiki import StringOps, Serialization
 from pwiki.WikiPyparsing import StackedCopyDict, SyntaxNode, buildSyntaxNode
@@ -419,6 +419,14 @@ class TableCell:
 # TODO UTF-8 support for HTML? Other encodings?
 
 class HtmlExporter(AbstractExporter):
+    
+    ADDOPT_IDX_PICS_AS_LINKS = 0
+    ADDOPT_IDX_TABLE_OF_CONTENTS = 1
+    ADDOPT_IDX_TOC_TITLE = 2
+    ADDOPT_IDX_VOLATILE_DIRECTORY = 3
+    ADDOPT_IDX_LIST_PARENTS = 4
+
+
     def __init__(self, mainControl):
         """
         mainControl -- PersonalWikiFrame object. Part of "Exporters" plugin API
@@ -565,16 +573,19 @@ class HtmlExporter(AbstractExporter):
                     "html_export_pics_as_links")),
                     config.getint("main", "export_table_of_contents"),
                     config.get("main", "html_toc_title"),
-                    "volatile"
-                     )
+                    "volatile",
+                    boolToInt(True),
+                    )
         else:
             ctrls = XrcControls(addoptpanel)
 
             picsAsLinks = boolToInt(ctrls.cbPicsAsLinks.GetValue())
             tableOfContents = ctrls.chTableOfContents.GetSelection()
             tocTitle = ctrls.tfHtmlTocTitle.GetValue()
-
-            return (picsAsLinks, tableOfContents, tocTitle, "volatile")
+            listParents = boolToInt(ctrls.cbListParents.GetValue())
+            
+            return (picsAsLinks, tableOfContents, tocTitle, "volatile",
+                    listParents,)
 
 
     def setAddOpt(self, addOpt, addoptpanel):
@@ -583,9 +594,9 @@ class HtmlExporter(AbstractExporter):
         Shows content of addOpt in the addoptpanel (must not be None).
         This function is only called if getAddOptVersion() != -1.
         """
-        picsAsLinks, tableOfContents, tocTitle, volatileDir = \
-                addOpt[:4]
-
+        picsAsLinks, tableOfContents, tocTitle, volatileDir, listParents = \
+                seqSupportWithTemplate(addOpt, self.getAddOpt(None))
+                
         # volatileDir is currently ignored
 
         ctrls = XrcControls(addoptpanel)
@@ -593,7 +604,7 @@ class HtmlExporter(AbstractExporter):
         ctrls.cbPicsAsLinks.SetValue(picsAsLinks != 0)
         ctrls.chTableOfContents.SetSelection(tableOfContents)
         ctrls.tfHtmlTocTitle.SetValue(tocTitle)
-
+        ctrls.cbListParents.SetValue(listParents != 0)
         
 
     def setJobData(self, wikiDocument, wordList, exportType, exportDest,
@@ -652,7 +663,7 @@ class HtmlExporter(AbstractExporter):
             return
             
         if exportType in ("html_single", "html_multi"):
-            volatileDir = self.addOpt[3]
+            volatileDir = self.addOpt[self.ADDOPT_IDX_VOLATILE_DIRECTORY]
 
             volatileDir = join(self.exportDest, volatileDir)
 
@@ -880,10 +891,10 @@ class HtmlExporter(AbstractExporter):
 
         filePointer.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
-        tocTitle = self.addOpt[2]
+        tocTitle = self.addOpt[self.ADDOPT_IDX_TOC_TITLE]
         
         if tocMode is None:
-            tocMode = self.addOpt[1]
+            tocMode = self.addOpt[self.ADDOPT_IDX_TABLE_OF_CONTENTS]
 
         if tocMode == 1:
             # Write a content tree at beginning
@@ -927,19 +938,26 @@ class HtmlExporter(AbstractExporter):
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(wikiPage)
                 
-                if self.avoidDeadWikiLinks:
-                    parentLinks = self.getParentLinks(wikiPage, False,
-                            self.wordList)
+                if self.addOpt[self.ADDOPT_IDX_LIST_PARENTS] != 0:
+                    if self.avoidDeadWikiLinks:
+                        parentLinks = self.getParentLinks(wikiPage, False,
+                                self.wordList)
+                    else:
+                        parentLinks = self.getParentLinks(wikiPage, False)
+                    
+                    parentLinks = ('<span class="wikidpad parent-nodes">parent nodes: {0}'
+                            '<br class="wikidpad" /><br class="wikidpad" /></span>')\
+                            .format(parentLinks)
+                    
                 else:
-                    parentLinks = self.getParentLinks(wikiPage, False)
+                    parentLinks = u""
+                    
 
                 filePointer.write(('<span class="wikidpad wiki-name-ref">'
-                        '[<a name="%s" class="wikidpad">%s</a>]<br class="wikidpad" />'
+                        '[<a name="{0}" class="wikidpad">{1}</a>]<br class="wikidpad" />'
                         '<br class="wikidpad" /></span>'
-                        '<span class="wikidpad parent-nodes">parent nodes: %s'
-                        '<br class="wikidpad" /></span>%s%s<hr class="wikidpad" />') %
-                        (self.wordAnchor, word,
-                        parentLinks,
+                        '{2}{3}{4}<hr class="wikidpad" />')\
+                        .format(self.wordAnchor, word, parentLinks,
                         formattedContent,
                         '<br class="wikidpad" />\n' * sepLineCount))
             except Exception as e:
@@ -964,7 +982,7 @@ class HtmlExporter(AbstractExporter):
         self.buildStyleSheetList()
 
 
-        if self.addOpt[1] in (1, 2):
+        if self.addOpt[self.ADDOPT_IDX_TABLE_OF_CONTENTS] in (1, 2):
             # TODO Configurable name
             outputFile = join(self.exportDest, pathEnc("index.html"))
             try:
@@ -975,9 +993,10 @@ class HtmlExporter(AbstractExporter):
                 fp = utf8Writer(realfp, "replace")
 
                 # TODO Factor out HTML header generation                
-                fp.write(self._getGenericHtmlHeader(self.addOpt[2]) + 
+                fp.write(self._getGenericHtmlHeader(
+                        self.addOpt[self.ADDOPT_IDX_TOC_TITLE]) + 
                         '    <body class="wikidpad">\n')
-                if self.addOpt[1] == 1:
+                if self.addOpt[self.ADDOPT_IDX_TABLE_OF_CONTENTS] == 1:
                     # Write a content tree
                     rootPage = self.mainControl.getWikiDocument().getWikiPage(
                                 self.mainControl.getWikiDocument().getWikiName())
@@ -985,14 +1004,14 @@ class HtmlExporter(AbstractExporter):
     
                     fp.write(('<h2 class="wikidpad">%s</h2>\n'
                             '%s') %
-                            (self.addOpt[2],  # = "Table of Contents"
+                            (self.addOpt[self.ADDOPT_IDX_TOC_TITLE],  # = "Table of Contents"
                             self.getContentTreeBody(flatTree, linkAsFragments=False)
                             ))
-                elif self.addOpt[1] == 2:
+                elif self.addOpt[self.ADDOPT_IDX_TABLE_OF_CONTENTS] == 2:
                     # Write a content list
                     fp.write(('<h2 class="wikidpad">%s</h2>\n'
                             '%s') %
-                            (self.addOpt[2],  # = "Table of Contents"
+                            (self.addOpt[self.ADDOPT_IDX_TOC_TITLE],  # = "Table of Contents"
                             self.getContentListBody(linkAsFragments=False)
                             ))
 
@@ -1064,7 +1083,7 @@ class HtmlExporter(AbstractExporter):
 
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
-        if not startFile:
+        if not startFile and self.addOpt[self.ADDOPT_IDX_LIST_PARENTS] != 0:
             result.append(('<span class="wikidpad parent-nodes">parent nodes: %s'
                     '<br class="wikidpad" /><br class="wikidpad" /></span>\n')
                     % self.getParentLinks(wikiPage, True, onlyInclude))
@@ -2338,7 +2357,8 @@ class HtmlExporter(AbstractExporter):
                 self.mainControl.getConfig().getboolean(
                 "main", "html_preview_pics_as_links"):
             urlAsImage = False
-        elif not self.asHtmlPreview and self.addOpt[0]:
+        elif not self.asHtmlPreview and \
+                self.addOpt[self.ADDOPT_IDX_PICS_AS_LINKS]:
             urlAsImage = False
         elif lowerLink.split(".")[-1] in ("jpg", "jpeg", "gif", "png", "tif",
                 "bmp"):
