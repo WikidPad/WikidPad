@@ -1,0 +1,212 @@
+AutoCompletion
+-- For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+== For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See [OptionsDialog#*Append closing bracket on auto-complete*]
+-- [bookmarked=true]
+== [bookmarked: true]
+ChangeLog2005
+--            WikiDocumentAttributes#creating# a# new# wiki .
+==            [WikiDocumentAttributes#creating a new wiki] .
+ChangeLog2006
+--       See [Options HTML preview_export]#*Preview# renderer*
+==       See [Options HTML preview_export#*Preview renderer*]
+--       attributes in tree. See OptionsDialog#*Sort# order*
+==       attributes in tree. See [OptionsDialog#*Sort order*]
+--       "As Tree" order used in PageListDialog#"As# Tree" .
+==       "As Tree" order used in [PageListDialog#"As Tree"] .
+--       for HTML exports, see WikiExport#*Additional# options* ,
+==       for HTML exports, see [WikiExport#*Additional options*] ,
+--       [Options HTML preview_export]#*Table# of# contents*
+==       [Options HTML preview_export#*Table of contents*]
+--       See UrlLinking#++# URL# Appendix
+==       See [UrlLinking#++ URL Appendix]
+--       See OptionsDialog#*Single# process# per# user*
+==       See [OptionsDialog#*Single process per user*]
+--       wiki db over a network). See WikiMaintenance#++# Reconnect
+==       wiki db over a network). See [WikiMaintenance#++ Reconnect]
+--       See OptionsDialog#*Minimize# on# close# button*
+==       See [OptionsDialog#*Minimize on close button*]
+--       See OptionsDialog#*New# page# title# prefix*
+==       See [OptionsDialog#*New page title prefix*]
+--       See OptionsDialog#*Position# main# tree* .
+==       See [OptionsDialog#*Position main tree*] .
+--       See RenamingWikiWords#*Title# auto-rename*
+==       See [RenamingWikiWords#*Title auto-rename*]
+--       OptionsDialog#*Plain# text# color* and following.
+==       [OptionsDialog#*Plain text color*] and following.
+--       See [Options HTML preview_export]#+++# HTML# page# settings
+==       See [Options HTML preview_export#+++ HTML page settings]
+--       See [ApiDocs]#stdDialog
+==       See [ApiDocs#stdDialog]
+--       [ScratchPad |This text is shown in preview and HTML export] )
+==       [ScratchPad|This text is shown in preview and HTML export] )
+ChangeLog2007
+--       See OptionsDialog#*Prepend# before# clipboard# snippet*
+==       See [OptionsDialog#*Prepend before clipboard snippet*]
+--       See OptionsDialog#*Path# to# file# launcher*
+==       See [OptionsDialog#*Path to file launcher*]
+--       dates descending. See OptionsDialog#++++# Time# view
+==       dates descending. See [OptionsDialog#++++ Time view]
+--       on it is possible. See OptionsDialog#++++# Time# view
+==       on it is possible. See [OptionsDialog#++++ Time view]
+--       See [Options HTML preview_export]#*Single# page# separator# lines*
+==       See [Options HTML preview_export#*Single page separator lines*]
+--       See UrlLinking#++# URL# Appendix
+==       See [UrlLinking#++ URL Appendix]
+--       See [Templates]#+++# Automatic# heading# replacement
+==       See [Templates#+++ Automatic heading replacement]
+--       See OptionsDialog#*Wikiword# to# title*
+==       See [OptionsDialog#*Wikiword to title*]
+--       See OptionsDialog#+++++# Image# pasting
+==       See [OptionsDialog#+++++ Image pasting]
+--       See [Options HTML preview_export]#*Title# of# toc*
+==       See [Options HTML preview_export#*Title of toc*]
+--       See UrlLinking#++# Wiki:# URLs
+==       See [UrlLinking#++ Wiki: URLs]
+--       See TextFormatting#+++# Tables
+==       See [TextFormatting#+++ Tables]
+--       See OptionsDialog#*Rename# links# when# renaming# wiki# word*
+==       See [OptionsDialog#*Rename links when renaming wiki word*]
+--       an entry in it. See OptionsDialog#*Tree# auto-hide*
+==       an entry in it. See [OptionsDialog#*Tree auto-hide*]
+--       for main window icon). See OptionsDialog#*Wiki# icon*
+==       for main window icon). See [OptionsDialog#*Wiki icon*]
+--       See [WikiDocumentAttributes]#*auto_link*
+==       See [WikiDocumentAttributes#*auto_link*]
+--       See [WikiDocumentAttributes]#*view_pane*
+==       See [WikiDocumentAttributes#*view_pane*]
+--       See OptionsDialog#*App-bound# hotkey*
+==       See [OptionsDialog#*App-bound hotkey*]
+--       a particular wiki. See OptionsDialog#*App-bound# hotkey*
+==       a particular wiki. See [OptionsDialog#*App-bound hotkey*]
+--       See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+==       See [OptionsDialog#*Append closing bracket on auto-complete*]
+--       text. See OptionsDialog#++++# Clipboard# catcher
+==       text. See [OptionsDialog#++++ Clipboard catcher]
+--       (see OptionsDialog#*Middle# button# without# CTRL* )
+==       (see [OptionsDialog#*Middle button without CTRL*] )
+--       operations (see OptionsDialog#*Default# export# dir.* )
+==       operations (see [OptionsDialog#*Default export dir.*] )
+--       See OptionsDialog#*Text# cursor# color*
+==       See [OptionsDialog#*Text cursor color*]
+--       See OptionsDialog#*Selection# fg.# color*
+==       See [OptionsDialog#*Selection fg. color*]
+ChangeLog2008
+--       See OptionsDialog#*Synchronize# editor# by# preview# selection*
+==       See [OptionsDialog#*Synchronize editor by preview selection*]
+--       See WikiStructureGraphs#+++# Options
+==       See [WikiStructureGraphs#+++ Options]
+--      See OptionsDialog#*Read-only# wiki*
+==      See [OptionsDialog#*Read-only wiki*]
+--      See [TextBlocks]#Submenu# title=
+==      See [TextBlocks#Submenu title=]
+--     * Insertion [:rel:back] introduced to go back in history.
+==     * Insertion [:rel: back] introduced to go back in history.
+--       For all three see OptionsDialog#++++# Mouse
+==       For all three see [OptionsDialog#++++ Mouse]
+--       See FileStorage#+++# On# HTML# export
+==       See [FileStorage#+++ On HTML export]
+--       See ExternalGraphicalApplications#When# exporting# HTML
+==       See [ExternalGraphicalApplications#When exporting HTML]
+--       See UrlLinking#++# URL# Appendix
+==       See [UrlLinking#++ URL Appendix]
+--       See OptionsDialog#*Force# ScratchPad# visibility# in# tree*
+==       See [OptionsDialog#*Force ScratchPad visibility in tree*]
+--     * Attribute values ending with semicolon (e.g. [test:foo; ])
+==     * Attribute values ending with semicolon (e.g. [test: foo])
+--       See OptionsDialog#*Margin# color*
+==       See [OptionsDialog#*Margin color*]
+--       See OptionsDialog#++++# Tree# options
+==       See [OptionsDialog#++++ Tree options]
+--       See OptionsDialog#*Recent# wikis# list# length*
+==       See [OptionsDialog#*Recent wikis list length*]
+--       See OptionsDialog#*Store# relative# pathes# to# wikis*
+==       See [OptionsDialog#*Store relative pathes to wikis*]
+--       See UrlLinking#++# Wiki:# URLs
+==       See [UrlLinking#++ Wiki: URLs]
+--       See OptionsDialog#*Remember# expanded# tree# nodes*
+==       See [OptionsDialog#*Remember expanded tree nodes*]
+ChangeLog2011
+--       See [WordLinking!exclude_from_linking]
+==       See [WordLinking]!exclude_from_linking
+DatabaseTypes
+-- [camelCaseWordsEnabled=false]
+== [camelCaseWordsEnabled: false]
+ExternalGraphicalApplications
+-- *MimeTeX*: You should know that [:eqn:"a^2 + b^2 = c^2"] is important!
+== *MimeTeX*: You should know that [:eqn: "a^2 + b^2 = c^2"] is important!
+-- [:dot:"
+== [:dot: "
+-- [:ploticus:"
+== [:ploticus: "
+-- [:gnuplot:"
+== [:gnuplot: "
+-- [:testexample:"this";is;//a simple//;test]
+== [:testexample: this; is; a simple; test]
+Footnotes
+-- As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See OptionsDialog#*Footnotes# as# wiki# words*
+== As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See [OptionsDialog#*Footnotes as wiki words*]
+Icon airbrush
+-- [icon:airbrush]
+== [icon: airbrush]
+Icon cd_audio
+-- [icon:cd_audio ]
+== [icon: cd_audio]
+Icon clip
+-- [icon:clip ]
+== [icon: clip]
+Icon colour selection
+-- [icon:colour selection ]
+== [icon: colour selection]
+Icon controller
+-- [icon:controller ]
+== [icon: controller]
+Icon explorer
+-- [icon:explorer]
+== [icon: explorer]
+Icon find
+-- [icon:find]
+== [icon: find]
+Icon home
+-- [icon:home]
+== [icon: home]
+Insertions
+-- [:rel: children;existingonly;columns 2]
+== [:rel: children; existingonly; columns 2]
+-- [:rel: children;existingonly;columns 2;coldir down]
+== [:rel: children; existingonly; columns 2; coldir down]
+-- [:search:"todo:todo"]
+== [:search: todo:todo]
+-- [:search:"todo:todo";showtext]
+== [:search: todo:todo; showtext]
+-- [:eval:"5+6"]
+== [:eval: "5+6"]
+MediaWiki%2FTextFormatting
+-- [[attributes:as usual but with double brackets]]
+== [[attributes: as usual but with double brackets]]
+Options HTML preview_export
+-- Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
+== Choose if you want a table of contents in tree form, list form or not at all, see [WikiExport#*Additional options*]
+OptionsDialog
+-- There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
+== There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See [OptionsDialog#*Wiki-bound hotkey*] below in "Current wiki" options.
+-- Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+== Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking] ).
+-- [.#*Force editor to write platform dependent files*| Force editor to write platform dependent files]
+== [.#*Force editor to write platform dependent files*|Force editor to write platform dependent files]
+-- [.#*Page file names ASCII only*| Page file names ASCII only]
+== [.#*Page file names ASCII only*|Page file names ASCII only]
+-- Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
+== Wiki-bound hotkey to show/hide wiki. See [OptionsDialog#*App-bound hotkey*]
+-- If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
+== If you came to a not yet created page through a titled link (e.g. [WikiWord|This is the title]) and this option is checked, the link title will be used as title of the page.
+SearchingTheWiki
+-- To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see OptionsDialog#*Sort# order* ).
+== To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see [OptionsDialog#*Sort order*] ).
+WikiBookmarks
+-- [bookmarked=true]
+== [bookmarked: true]
+WikiDocumentAttributes
+-- The precise quoting syntax is the same as for [Insertions]#+++# Syntax
+== The precise quoting syntax is the same as for [Insertions#+++ Syntax]
+-- [global.importance.high.bold=true]
+== [global.importance.high.bold: true]
