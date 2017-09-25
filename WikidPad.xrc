@@ -5675,6 +5675,15 @@
             </object>
           </object>
           <object class="sizeritem">
+            <object class="wxCheckBox" name="cbListParents">
+              <label>List parents of page</label>
+              <checked>1</checked>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
             <object class="wxBoxSizer">
               <orient>wxHORIZONTAL</orient>
               <object class="sizeritem">
