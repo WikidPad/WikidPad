@@ -11,8 +11,8 @@ import os
 import sys
 
 # run from WikidPad directory
-wikidpad_dir = os.path.abspath(u'.')
-sys.path.append(os.path.join(wikidpad_dir, u'lib'))
+wikidpad_dir = os.path.abspath('.')
+sys.path.append(os.path.join(wikidpad_dir, 'lib'))
 sys.path.append(wikidpad_dir)
 
 from tests.helper import MockWikiDocument, getApp, parse, NodeFinder
@@ -22,23 +22,23 @@ LANGUAGE_NAME = 'wikidpad_overlaid_2_0'
 
 
 def test_parse_wikiwords():
-    page_name = u'PageName'
+    page_name = 'PageName'
     text_fragments = [  # (text, wikiword)
-        (u'WikiWord', u'WikiWord'),
-        (u'[[wikiword]]', u'wikiword'),
-        (u'WikiWord!anchor', u'WikiWord'),
-        (u'[[WikiWord|title]]', u'WikiWord'),
-        (u'[[WikiWord|title]]!anchor', u'WikiWord'),
-        (u'[[WikiWord#search_fragment]]', u'WikiWord'),
-        (u'[[WikiWord#search_fragment|title]]', u'WikiWord'),
-        (u'[[WikiWord#search_fragment|title]]!anchor', u'WikiWord'),
-        (u'[[.]]', page_name),
-        (u'Is sentence [WikiWord].', u'WikiWord'),
+        ('WikiWord', 'WikiWord'),
+        ('[[wikiword]]', 'wikiword'),
+        ('WikiWord!anchor', 'WikiWord'),
+        ('[[WikiWord|title]]', 'WikiWord'),
+        ('[[WikiWord|title]]!anchor', 'WikiWord'),
+        ('[[WikiWord#search_fragment]]', 'WikiWord'),
+        ('[[WikiWord#search_fragment|title]]', 'WikiWord'),
+        ('[[WikiWord#search_fragment|title]]!anchor', 'WikiWord'),
+        ('[[.]]', page_name),
+        ('Is sentence [WikiWord].', 'WikiWord'),
         # recognizes WikiWord, but square brackets are not part of it...
-        (u'+ Heading\nThis is a sentence.', None),
+        ('+ Heading\nThis is a sentence.', None),
     ]
     for text_fragment, wikiword in text_fragments:
-        text = u'\n%s\n\n' % text_fragment
+        text = '\n%s\n\n' % text_fragment
         ast = parse(text, page_name, LANGUAGE_NAME)
         nf = NodeFinder(ast)
         if wikiword is not None:
@@ -50,8 +50,8 @@ def test_parse_wikiwords():
 
 def test_generate_text_1():
     langHelper = getApp().createWikiLanguageHelper(LANGUAGE_NAME)
-    pageName = u'PageName'
-    text = u"""
+    pageName = 'PageName'
+    text = """
     [[test]]
     """
     wiki_content = {pageName: text}
@@ -63,36 +63,36 @@ def test_generate_text_1():
 
 
 def test_generate_text_2():
-    pageName = u'PageName'
-    wikidoc = MockWikiDocument({pageName: u''}, LANGUAGE_NAME)
+    pageName = 'PageName'
+    wikidoc = MockWikiDocument({pageName: ''}, LANGUAGE_NAME)
     page = wikidoc.getWikiPage(pageName)
     langHelper = getApp().createWikiLanguageHelper(LANGUAGE_NAME)
     text_fragments = [
-        (u'[[wikiword]]', 'wikiWord'),
-        (u'[[wikiword]]!anchor', 'wikiWord'),
-        (u'[[wikiword|title]]', 'wikiWord'),
-        (u'[[WikiWord|title]]', 'wikiWord'),
-        (u'[[wikiword|title]]!anchor', 'wikiWord'),
-        (u'[[WikiWord|title]]!anchor', 'wikiWord'),
-        (u'[[wikiword#search_fragment]]', 'wikiWord'),
-        (u'[[wikiword#search fragment]]', 'wikiWord'),
-        (u'[[WikiWord#search# fragment]]', 'wikiWord'),
-        (u'[[wikiword#search_fragment]]!anchor', 'wikiWord'),
-        (u'[[WikiWord#search_fragment]]!anchor', 'wikiWord'),
-        (u'[[wikiword#search_fragment|title]]', 'wikiWord'),
-        (u'[[WikiWord#search_fragment|title]]', 'wikiWord'),
-        (u'[[wikiword#search_fragment|title]]!anchor', 'wikiWord'),
-        (u'[[WikiWord#search-fragment|title]]!anchor', 'wikiWord'),
-        (u'WikiWord', 'wikiWord'),
-        (u'WikiWord!anchor', 'wikiWord'),
-        (u'WikiWord#searchfragment', 'wikiWord'),
-        (u'[[key: value]]', 'attribute'),
-        (u'[[test: ok; nok]]', 'attribute'),
-        (u'[[:page: wikiword]]', 'insertion'),
-        (u'this is a sentence', None),
+        ('[[wikiword]]', 'wikiWord'),
+        ('[[wikiword]]!anchor', 'wikiWord'),
+        ('[[wikiword|title]]', 'wikiWord'),
+        ('[[WikiWord|title]]', 'wikiWord'),
+        ('[[wikiword|title]]!anchor', 'wikiWord'),
+        ('[[WikiWord|title]]!anchor', 'wikiWord'),
+        ('[[wikiword#search_fragment]]', 'wikiWord'),
+        ('[[wikiword#search fragment]]', 'wikiWord'),
+        ('[[WikiWord#search# fragment]]', 'wikiWord'),
+        ('[[wikiword#search_fragment]]!anchor', 'wikiWord'),
+        ('[[WikiWord#search_fragment]]!anchor', 'wikiWord'),
+        ('[[wikiword#search_fragment|title]]', 'wikiWord'),
+        ('[[WikiWord#search_fragment|title]]', 'wikiWord'),
+        ('[[wikiword#search_fragment|title]]!anchor', 'wikiWord'),
+        ('[[WikiWord#search-fragment|title]]!anchor', 'wikiWord'),
+        ('WikiWord', 'wikiWord'),
+        ('WikiWord!anchor', 'wikiWord'),
+        ('WikiWord#searchfragment', 'wikiWord'),
+        ('[[key: value]]', 'attribute'),
+        ('[[test: ok; nok]]', 'attribute'),
+        ('[[:page: wikiword]]', 'insertion'),
+        ('this is a sentence', None),
     ]
     for text_fragment, node_name in text_fragments:
-        text = u'\n%s\n\n' % text_fragment
+        text = '\n%s\n\n' % text_fragment
         page.setContent(text)
         ast = page.getLivePageAst()
         nf = NodeFinder(ast)

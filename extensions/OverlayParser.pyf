@@ -36,7 +36,7 @@ import re
 WIKIDPAD_PLUGIN = (("WikiParser", 1),)
 
 WIKI_LANGUAGE_NAME = "wikidpad_overlaid_2_0"
-WIKI_HR_LANGUAGE_NAME = u"WikidPad overlaid 2.0"
+WIKI_HR_LANGUAGE_NAME = "WikidPad overlaid 2.0"
 
 
 def describeWikiLanguage(ver, app):
@@ -87,38 +87,38 @@ def describeWikiLanguage(ver, app):
 # Comments are not allowed
 
 PAYLOAD = """
-BracketStart = u"[["
-BracketStartPAT = ur"\[\["
+BracketStart = "[["
+BracketStartPAT = r"\[\["
 
-BracketEnd = u"]]"
-BracketEndPAT = ur"\]\]"
+BracketEnd = "]]"
+BracketEndPAT = r"\]\]"
 
-BracketStartRevPAT = ur"\[\["
-BracketEndRevPAT = ur"\]\]"
+BracketStartRevPAT = r"\[\["
+BracketEndRevPAT = r"\]\]"
 """
 
 # add payload for text generator:
 payload = {
-    u'ATTRIBUTE_FMT': u'[[{key}: {values}]]',
-    u'INSERTION_FMT': u'[[:{key}:{space}{value}{appendices}]]',
-    u'WIKI_WORD_FMT': {
-        0: u'[[{link_core}]]',
-        1: u'[[{link_core}]]!{anchor}',
-        2: u'[[{link_core}|{title}]]',
-        3: u'[[{link_core}|{title}]]!{anchor}',
-        4: u'[[{link_core}#{search_fragment}]]',
-        5: u'[[{link_core}#{search_fragment}]]!{anchor}',
-        6: u'[[{link_core}#{search_fragment}|{title}]]',
-        7: u'[[{link_core}#{search_fragment}|{title}]]!{anchor}',
+    'ATTRIBUTE_FMT': '[[{key}: {values}]]',
+    'INSERTION_FMT': '[[:{key}:{space}{value}{appendices}]]',
+    'WIKI_WORD_FMT': {
+        0: '[[{link_core}]]',
+        1: '[[{link_core}]]!{anchor}',
+        2: '[[{link_core}|{title}]]',
+        3: '[[{link_core}|{title}]]!{anchor}',
+        4: '[[{link_core}#{search_fragment}]]',
+        5: '[[{link_core}#{search_fragment}]]!{anchor}',
+        6: '[[{link_core}#{search_fragment}|{title}]]',
+        7: '[[{link_core}#{search_fragment}|{title}]]!{anchor}',
         # CamelCase
-        8: u'{link_core}',
-        9: u'{link_core}!{anchor}',
-        10: u'{link_core}#{search_fragment}',
+        8: '{link_core}',
+        9: '{link_core}!{anchor}',
+        10: '{link_core}#{search_fragment}',
         # CamelCase and space in search fragment
-        11: u'[[{link_core}#{search_fragment}]]',
+        11: '[[{link_core}#{search_fragment}]]',
     }}
-lines = [u'%s = %r' % (k, v) for k, v in payload.iteritems()]
-PAYLOAD += u'\n' + u'\n'.join(lines) + u'\n'
+lines = ['%s = %r' % (k, v) for k, v in payload.items()]
+PAYLOAD += '\n' + '\n'.join(lines) + '\n'
 
 
 
@@ -143,7 +143,7 @@ class _ReplacementDictWrapper(dict):
         self.replaceExprDict = replaceExprDict
 
     def __setitem__(self, key, value):
-        if self.replaceExprDict.has_key(key):
+        if key in self.replaceExprDict:
             value = eval(self.replaceExprDict[key][0], self)
 
         self.realDict[key] = value
@@ -174,8 +174,9 @@ _realLanguageHelperFactory = None
 def _loadWorkerModule():
     global _realParserFactory, _realLanguageHelperFactory
     from os.path import join
-    from imp import new_module
+    from types import ModuleType
     from pwiki.StringOps import loadEntireTxtFile
+    import builtins
 
     # Find original "WikidPadParser.py" file
     try:
@@ -194,13 +195,14 @@ def _loadWorkerModule():
 
     original = loadEntireTxtFile(targetPath)
 
-    module = new_module("")
+    module = ModuleType("")
+    module.__dict__.update(builtins.__dict__)
 
     glSpace = _ReplacementDictWrapper(
         module.__dict__,
         _ReplacementDictWrapper.overlayToReplaceExprDict(PAYLOAD))
 
-    exec original in glSpace
+    exec(original, glSpace)
 
     _realParserFactory = module.parserFactory
     _realLanguageHelperFactory = module.languageHelperFactory

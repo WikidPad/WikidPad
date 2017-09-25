@@ -8,8 +8,8 @@ WikidPad directory:
     ..\WikidPad> python tests\helper.py
 
 """
-import __builtin__
-from pwiki.Utilities import Counter
+import builtins
+from collections import Counter
 import io
 from itertools import chain
 import os
@@ -18,37 +18,37 @@ import sys
 import imp
 import wx
 
-__builtin__._ = __builtin__.N_ = lambda s: s  # see WikidPadStarter
+builtins._ = builtins.N_ = lambda s: s  # see WikidPadStarter
 if not hasattr(wx, "NO_3D"):  # cmore addition
     wx.NO_3D = 0
 
 # run test from WikidPad directory, fix path
 # todo (pvh): ? fix imports in WikidPad, turn it into a package
-wikidpad_dir = os.path.abspath(u'.')
+wikidpad_dir = os.path.abspath('.')
 sys.path.append(wikidpad_dir)
-sys.path.append(os.path.join(wikidpad_dir, u'lib'))
+sys.path.append(os.path.join(wikidpad_dir, 'lib'))
 
-EXTENSIONDIR = os.path.join(wikidpad_dir, u'extensions')
+EXTENSIONDIR = os.path.join(wikidpad_dir, 'extensions')
 sys.path.append(EXTENSIONDIR)
 
 
 
 from pwiki.ParseUtilities import WikiPageFormatDetails
 from pwiki.Utilities import DUMBTHREADSTOP
-from pwiki.wikidata.WikiDataManager import WikiDataManager
+from pwiki.WikiDocument import WikiDocument
 from pwiki.StringOps import LOWERCASE, UPPERCASE
 
 from wikidPadParser import WikidPadParser
 from mediaWikiParser import MediaWikiParser
 
 OverlayParser = imp.load_source('OverlayParser', os.path.join(EXTENSIONDIR,
-        u"OverlayParser.pyf"))
+        "OverlayParser.pyf"))
 
 # import OverlayParser
 
 from Consts import ModifyText
 
-TESTS_DIR = os.path.abspath(u'tests/')
+TESTS_DIR = os.path.abspath('tests/')
 PARSER_MODULES = [WikidPadParser, MediaWikiParser, OverlayParser]
 
 DEFAULT_WIKI_LANGUAGE = 'wikidpad_default_2_0'
@@ -155,16 +155,16 @@ class MockWikiData(object):
             self.wiki_content = dict()
 
     def __str__(self):
-        ans = [u'=' * 80 + u'\n']
-        for page_name, content in self.wiki_content.iteritems():
+        ans = ['=' * 80 + '\n']
+        for page_name, content in self.wiki_content.items():
             lines = []
-            header = u'- ' + page_name + u' ' + u'-' * 80
-            lines.append(header[:80] + u'\n')
+            header = '- ' + page_name + ' ' + '-' * 80
+            lines.append(header[:80] + '\n')
             lines.append(content)
-            lines.append(u'-' * 80 + u'\n')
-            ans.append(u''.join(lines))
-        ans.append(u'=' * 80 + u'\n')
-        return u'\n'.join(ans)
+            lines.append('-' * 80 + '\n')
+            ans.append(''.join(lines))
+        ans.append('=' * 80 + '\n')
+        return '\n'.join(ans)
 
     def getContent(self, word):
         try:
@@ -184,18 +184,18 @@ class MockWikiData(object):
         del self.wiki_content[word]
 
     def getAllDefinedWikiPageNames(self):
-        return self.wiki_content.keys()
+        return list(self.wiki_content.keys())
 
 
-class MockWikiDataManager(object):
+class MockWikiDocument(object):
     """
     a.k.a. WikiDocument
     """
     _TITLE_SPLIT_RE1 = re.compile(
-        ur"([" + UPPERCASE + ur"]+)" +
-        ur"([" + UPPERCASE + ur"][" + LOWERCASE + ur"])")
+        r"([" + UPPERCASE + r"]+)" +
+        r"([" + UPPERCASE + r"][" + LOWERCASE + r"])")
     _TITLE_SPLIT_RE2 = re.compile(
-        ur"([" + LOWERCASE + ur"])" + ur"([" + UPPERCASE + ur"])")
+        r"([" + LOWERCASE + r"])" + r"([" + UPPERCASE + r"])")
 
     def __init__(self, wiki_content=None, wiki_language_name=None):
         """
@@ -229,7 +229,7 @@ class MockWikiDataManager(object):
             self.wikiPageDict[word] = page
         return page
 
-    def createWikiPage(self, pageName, content=u''):
+    def createWikiPage(self, pageName, content=''):
         assert not self.isDefinedWikiPageName(pageName)
         self.baseWikiData.setContent(pageName, content)
         page = MockWikiPage(self, pageName)
@@ -243,21 +243,21 @@ class MockWikiDataManager(object):
         return self.baseWikiData.isDefinedWikiPageName(pageName)
 
     def getWikiWordSubpages(self, word):
-        return [ww for ww in self.wikiPageDict if ww.startwith(word + u'/')]
+        return [ww for ww in self.wikiPageDict if ww.startwith(word + '/')]
 
     def getWikiData(self):
         return self.baseWikiData
 
     @staticmethod
     def _updateWikiWordReferences(*args, **kwargs):
-        return WikiDataManager._updateWikiWordReferences(*args, **kwargs)
+        return WikiDocument._updateWikiWordReferences(*args, **kwargs)
 
     @staticmethod
     def _searchAndReplaceWikiWordReferences(*args, **kwargs):
-        return WikiDataManager._searchAndReplaceWikiWordReferences(*args, **kwargs)
+        return WikiDocument._searchAndReplaceWikiWordReferences(*args, **kwargs)
 
     def formatPageTitle(self, rawTitle, basePage=None):
-        return u'+ ' + rawTitle
+        return '+ ' + rawTitle
 
     def getWikiPageTitle(self, word):
         creation_mode = self.getWikiConfig().getint(
@@ -265,19 +265,19 @@ class MockWikiDataManager(object):
         if creation_mode == 0:  # leave untouched
             return word
         elif creation_mode == 1:  # add spaces before uppercase letters
-            title = self._TITLE_SPLIT_RE1.sub(ur'\1 \2', word)
-            title = self._TITLE_SPLIT_RE2.sub(ur'\1 \2', title)
+            title = self._TITLE_SPLIT_RE1.sub(r'\1 \2', word)
+            title = self._TITLE_SPLIT_RE2.sub(r'\1 \2', title)
             return title
         else:  # no title at all
             return None
 
     def renameWikiWords(self, renameDict, modifyText):
-        """Mimic WikiDataManager.renameWikiWords.
+        """Mimic WikiDocument.renameWikiWords.
 
         renameDict = {oldPageName: newPageName}
         """
         # 1. rename all pages
-        for oldPageName, newPageName in renameDict.iteritems():
+        for oldPageName, newPageName in renameDict.items():
             self.renameWikiWord(oldPageName, newPageName)
 
         if modifyText == ModifyText.off:
@@ -295,29 +295,29 @@ class MockWikiDataManager(object):
                 self.getWikiDefaultWikiLanguage())
             for wikiword in to_update:
                 page = self.getWikiPage(wikiword)
-                text = MockWikiDataManager._updateWikiWordReferences(
+                text = MockWikiDocument._updateWikiWordReferences(
                     page, renameDict, langHelper)
                 page.replaceLiveText(text)
 
         elif modifyText == ModifyText.simple:
             for wikiword in to_update:
                 page = self.getWikiPage(wikiword)
-                for oldPageName, newPageName in renameDict.iteritems():
-                    text = MockWikiDataManager._searchAndReplaceWikiWordReferences(
+                for oldPageName, newPageName in renameDict.items():
+                    text = MockWikiDocument._searchAndReplaceWikiWordReferences(
                         page, oldPageName, newPageName)
                     if text is not None:
                         page.replaceLiveText(text)
 
     def renameWikiWord(self, oldPageName, newPageName):
-        """Mimic WikiDataManager.renameWikiWord."""
+        """Mimic WikiDocument.renameWikiWord."""
 
-        print u'renameWikiWord(%r, %r)' % (oldPageName, newPageName)
+        print('renameWikiWord(%r, %r)' % (oldPageName, newPageName))
 
         page = self.getWikiPage(oldPageName)  # load in wikiPageDict
 
         oldPageTitle = self.getWikiPageTitle(oldPageName)
         if oldPageTitle is not None:
-            oldPageTitle = self.formatPageTitle(oldPageTitle) + u"\n"
+            oldPageTitle = self.formatPageTitle(oldPageTitle) + "\n"
 
         self.getWikiData().renameWord(oldPageName, newPageName)
         del self.wikiPageDict[oldPageName]
@@ -329,13 +329,12 @@ class MockWikiDataManager(object):
             # replace previous title with new one
             new_title = self.formatPageTitle(self.getWikiPageTitle(newPageName))
 
-            print u'title: "%r" -> %r' % (oldPageTitle, new_title)
+            print('title: "%r" -> %r' % (oldPageTitle, new_title))
 
-            content = new_title + u"\n" + content[len(oldPageTitle):]
+            content = new_title + "\n" + content[len(oldPageTitle):]
             page.replaceLiveText(content)
 
 
-MockWikiDocument = MockWikiDataManager
 
 
 class MockAliasWikiPage(object):
@@ -389,7 +388,7 @@ class MockWikiPage(object):
             wikiLanguageDetails=wikiLanguageDetails,
             noFormat=False,
             withCamelCase=True,  # camelCaseWordsEnabled
-            autoLinkMode=u"off",
+            autoLinkMode="off",
             paragraphMode=False,
         )
         return format_details
@@ -431,11 +430,11 @@ class MockWikiPage(object):
         return self
 
 
-_rank = {1: u'1st', 2: u'2nd', 3: u'3rd'}
+_rank = {1: '1st', 2: '2nd', 3: '3rd'}
 
 
 def rank(n):
-    return _rank.get(n, u'%dth' % n)
+    return _rank.get(n, '%dth' % n)
 
 
 class NodeFinder(object):
@@ -497,16 +496,16 @@ class NodeFinder(object):
     def __str__(self):
         lines = []
         for node_nr, node in enumerate(self._nodes['nodelist'], 0):
-            line = u'%d %s %d' % (node_nr, node.name, node.pos)
+            line = '%d %s %d' % (node_nr, node.name, node.pos)
             if node_nr == self.cur_node_nr:
-                line += u' <---'
+                line += ' <---'
             lines.append(line)
-        return u'\n'.join(lines)
+        return '\n'.join(lines)
 
     def __getattr__(self, node_name_n):
         """Go to the n-th named node *after* the current node."""
         try:
-            node_name, n_str = node_name_n.split(u'_', 1)
+            node_name, n_str = node_name_n.split('_', 1)
         except ValueError:
             node_name, n = node_name_n, 1  # no postfix -> first/next node
         else:
@@ -517,13 +516,13 @@ class NodeFinder(object):
         try:
             return self._nodes['pos'][node_pos]
         except KeyError:
-            return KeyError(u'No node found at text position %d.' % node_pos)
+            return KeyError('No node found at text position %d.' % node_pos)
 
     def __call__(self, *args, **kwargs):
         return self._nodes['nodelist'][self.cur_node_nr]
 
     def find_nth_named_node_after_current_node(self, node_name, n):
-        msg = u'%s node %r after node %d' % (
+        msg = '%s node %r after node %d' % (
             rank(n), node_name, self.cur_node_nr)
         nodes = self._nodes['nodelist']
         i = 0
@@ -533,14 +532,14 @@ class NodeFinder(object):
                 i += 1
                 if i == n:
                     return NodeFinder(self.ast, node_nr, self._nodes)
-        raise KeyError(u'%s node %r after node %d not found.' % (
+        raise KeyError('%s node %r after node %d not found.' % (
             rank(n), node_name, self.cur_node_nr))
 
     def count(self, node_name):
         return self._nodes['count'][node_name]
 
 
-def parse(text, page_name=u'_', language_name=DEFAULT_WIKI_LANGUAGE):
+def parse(text, page_name='_', language_name=DEFAULT_WIKI_LANGUAGE):
     """Return AST."""
     wikidoc = MockWikiDocument({page_name: text}, language_name)
     return wikidoc.getWikiPage(page_name).getLivePageAst()
@@ -564,30 +563,30 @@ def ast_eq(ast, ast_):
 
 
 if __name__ == '__main__':
-    text = u"""+ Heading
+    text = """+ Heading
 
 WikiWord
 
 This is a line of text.
 
 """
-    wiki_content = {u'PageName': text}
+    wiki_content = {'PageName': text}
     wikidoc = MockWikiDocument(wiki_content)
-    page = wikidoc.getWikiPage(u'PageName')
+    page = wikidoc.getWikiPage('PageName')
     ast = page.getLivePageAst()
     # print u'AST of %s:' % page.getWikiWord()
     # print ast.pprint()
     # print wikidoc
 
-    page = wikidoc.createWikiPage(u'NewPage')
-    page.setContent(u'This is the first sentence on NewPage.\n')
+    page = wikidoc.createWikiPage('NewPage')
+    page.setContent('This is the first sentence on NewPage.\n')
     ast = page.getLivePageAst()
     # print u'AST of %s:' % page.getWikiWord()
     # print ast.pprint()
     # print wikidoc
 
-    page = wikidoc.createWikiPage(u'TestPage')
-    text = u"""+ Heading 1
+    page = wikidoc.createWikiPage('TestPage')
+    text = """+ Heading 1
 
 TestPage
 
@@ -604,5 +603,5 @@ WikiWordBis
     ast = page.getLivePageAst()
 
     nf = NodeFinder(ast)
-    print nf.heading_3().getString()
-    print nf.heading_3
+    print(nf.heading_3().getString())
+    print(nf.heading_3)
