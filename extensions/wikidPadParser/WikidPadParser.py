@@ -2143,7 +2143,7 @@ class _TheHelper(object):
             if protocol == "wiki":
                 url = u"wiki:" + StringOps.urlFromPathname(path, addSafe=addSafe)
             else:
-                url = u"file:" + StringOps.urlFromPathname(path, addSafe=addSafe)
+                url = u"file:" + unicode(StringOps.urlFromPathname(path, addSafe=addSafe), "utf-8")
 
         if bracketed:
             url = BracketStart + url + BracketEnd
