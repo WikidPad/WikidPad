@@ -837,6 +837,16 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
 
 
 
+def buildChainedUpdateEventFct(*chain):
+    def evtFct(evt):
+        evt.Enable(True)
+        for fct in chain:
+            fct(evt)
+        
+    return evtFct
+
+
+
 # TODO: 2.4: Remove
 def runDialogModalFactory(clazz):
     def runModal(*args, **kwargs):

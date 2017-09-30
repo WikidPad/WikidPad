@@ -18,7 +18,7 @@ import wx, wx.adv, wx.html
 # import urllib
 
 from .wxHelper import GUI_ID, clearMenu, ProgressHandler, TopLevelLocker, \
-        WindowUpdateLocker
+        WindowUpdateLocker, buildChainedUpdateEventFct
 from . import wxHelper
 
 from . import TextTree
@@ -110,26 +110,6 @@ class LossyWikiCloseDeniedException(Exception):
     """
     pass
 
-
-
-def _buildChainedUpdateEventFct(chain):
-    def evtFct(evt):
-        evt.Enable(True)
-        for fct in chain:
-            fct(evt)
-        
-    return evtFct
-
-
-# def _buildUpdateEventFctByEnableExpress(expr):
-#     def evtFct(evt):
-#         
-#         
-#         evt.Enable(True)
-#         for fct in chain:
-#             fct(evt)
-#         
-#     return evtFct
 
 
 _StatusBarStackEntry = collections.namedtuple("_StatusBarStackEntry",
@@ -713,7 +693,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if updatefct is not None:
             if isinstance(updatefct, tuple):
-                updatefct = _buildChainedUpdateEventFct(updatefct)
+                updatefct = buildChainedUpdateEventFct(*updatefct)
             self.Bind(wx.EVT_UPDATE_UI, updatefct, id=menuID)
 
         return menuitem
@@ -1388,7 +1368,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         editMenu.AppendSubMenu(self.textBlocksMenu, _('Paste T&extblock'))
         self.Bind(wx.EVT_UPDATE_UI,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_TEXT_BLOCKS)
 
 
@@ -1818,7 +1798,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.Append(GUI_ID.MENU_ADD_ICON_NAME,
                 _('&Icon Name'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_ADD_ICON_NAME)
 
         self.cmdIdToInsertString = cmdIdToIconName
@@ -1831,7 +1811,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.Append(GUI_ID.MENU_ADD_STRING_NAME,
                 _('&Color Name'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_ADD_STRING_NAME)
 
         self.cmdIdToInsertString.update(cmdIdToColorName)
@@ -1849,7 +1829,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         addAttributeMenu.Append(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
                 _('&Icon Attribute'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_ADD_ICON_ATTRIBUTE)
 
         # Build submenu for color attributes
@@ -1860,7 +1840,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         addAttributeMenu.Append(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
                 _('&Color Attribute'))
         self.Bind(wx.EVT_UPDATE_UI,
-                _buildChainedUpdateEventFct((self.OnUpdateDisReadOnlyPage,)),
+                buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_ADD_COLOR_ATTRIBUTE)
 
         # TODO: Bold attribute
@@ -5691,7 +5671,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     # All OnUpdateDis* methods only disable a menu/toolbar item, they
     # never enable. This allows to build chains of them where each
     # condition is checked which may disable the item (before running the
-    # chain the item is enabled by _buildChainedUpdateEventFct()
+    # chain the item is enabled by buildChainedUpdateEventFct()
 
     def OnUpdateDisNoWiki(self, evt):
         """
