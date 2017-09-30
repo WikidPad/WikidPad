@@ -1,7 +1,7 @@
 
 
 import sys, threading, traceback, collections, heapq, logging
-from _thread import allocate_lock as _allocate_lock
+# from _thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep
 
 import wx
@@ -494,155 +494,198 @@ def callInMainThreadAsync(fct, *args, **kwargs):
 
 
 
-if __debug__:
+# if __debug__:
+#     
+#     _VERBOSE = False
+# 
+#     class _Verbose:
+# 
+#         def __init__(self, verbose=None):
+#             if verbose is None:
+#                 verbose = _VERBOSE
+#             self.__verbose = verbose
+# 
+#         def _note(self, format, *args):
+#             if self.__verbose:
+#                 format = format % args
+#                 format = "%s: %s\n" % (
+#                     current_thread().name, format)
+#                 sys.stderr.write(format)
+# 
+# else:
+#     # Disable this when using "python -O"
+#     class _Verbose:
+#         def __init__(self, verbose=None):
+#             pass
+#         def _note(self, *args):
+#             pass
+
+
+class TimeoutRLock:
+    """
+    Wrapper class for threading.RLock where the timeout is given in constructor
+    in addition to acquire(). This is especially helpful when using context protocol.
     
-    _VERBOSE = False
-
-    class _Verbose:
-
-        def __init__(self, verbose=None):
-            if verbose is None:
-                verbose = _VERBOSE
-            self.__verbose = verbose
-
-        def _note(self, format, *args):
-            if self.__verbose:
-                format = format % args
-                format = "%s: %s\n" % (
-                    current_thread().name, format)
-                sys.stderr.write(format)
-
-else:
-    # Disable this when using "python -O"
-    class _Verbose:
-        def __init__(self, verbose=None):
-            pass
-        def _note(self, *args):
-            pass
-
-
-def TimeoutRLock(*args, **kwargs):
-    return _TimeoutRLock(*args, **kwargs)
-
-class _TimeoutRLock(_Verbose):
     """
-    Modified version of threading._RLock from standard library
-    """
-    def __init__(self, timeout=None, verbose=None):
-        _Verbose.__init__(self, verbose)
-        self.__block = _allocate_lock()
-        self.__owner = None
-        self.__count = 0
-        self.__timeout = timeout
-#         self.__acquiredStackTrace = None
-
+    def __init__(self, timeout=-1):
+        self.realLock = threading.RLock()
+        self.timeout = timeout if timeout is not None else -1
+        
     def __repr__(self):
-        owner = self.__owner
-        return "<%s(%s, %d)>" % (
-                self.__class__.__name__,
-                owner and owner.getName(),
-                self.__count)
-
-    def acquire(self, blocking=1):
-        me = threading.currentThread()
-        if self.__owner is me:
-            self.__count = self.__count + 1
-            if __debug__:
-                self._note("%s.acquire(%s): recursive success", self, blocking)
-            return 1
-
-        if not blocking or not self.__timeout:
-            rc = self.__block.acquire(blocking)
-            if rc:
-                self.__owner = me
-                self.__count = 1
-#                 self.__acquiredStackTrace = traceback.extract_stack()
-                if __debug__:
-                    self._note("%s.acquire(%s): initial success", self, blocking)
-            else:
-                if __debug__:
-                    self._note("%s.acquire(%s): failure", self, blocking)
-            return rc
+        return "<%s(timeout=%s, %s)>" % (self.__class__.__name__, self.timeout,
+                repr(self.realLock))
+    
+    def acquire(self, blocking=True, timeout=None):
+        """
+        Slightly different behavior as RLock.acquire(): If no timeout is
+        given in acquire() call (or timeout is None) and the timeout
+        given in constructor runs out, a DeadBlockPreventionTimeOutError
+        is raised.
+        """
+        
+        if not blocking:
+            return self.realLock.acquire(False)
         else:
-            # This comes from threading._Condition.wait()
-
-            # Balancing act:  We can't afford a pure busy loop, so we
-            # have to sleep; but if we sleep the whole timeout time,
-            # we'll be unresponsive.  The scheme here sleeps very
-            # little at first, longer as time goes on, but never longer
-            # than 20 times per second (or the timeout time remaining).
-            endtime = _time() + self.__timeout
-            delay = 0.0005 # 500 us -> initial delay of 1 ms
-
-            while True:
-                gotit = self.__block.acquire(0)
-                if gotit:
-                    break
-                remaining = endtime - _time()
-                if remaining <= 0:
-                    break
-#                 delay = min(delay * 2, remaining, .05)
-                delay = min(delay * 2, remaining, .02)
-                _sleep(delay)
-            if not gotit:
-                if __debug__:
-                    self._note("%s.wait(%s): timed out", self, self.__timeout)
+            if timeout is None:
+                timeout = self.timeout
                 
-#                 print "----Lock acquired by"
-#                 print "".join(traceback.format_list(self.__acquiredStackTrace))
-
-                raise DeadBlockPreventionTimeOutError()
+                if self.realLock.acquire(True, timeout=timeout):
+                    return True
+                else:
+                    raise DeadBlockPreventionTimeOutError()
             else:
-                if __debug__:
-                    self._note("%s.wait(%s): got it", self, self.__timeout)
-                
-                self.__owner = me
-                self.__count = 1
-#                 self.__acquiredStackTrace = traceback.extract_stack()
-                
-                return gotit
+                return self.realLock.acquire(True, timeout=timeout)
+
 
     __enter__ = acquire
-
+    
     def release(self):
-        if self.__owner is not threading.currentThread():
-            raise RuntimeError("cannot release un-aquired lock")
-        self.__count = count = self.__count - 1
-        if not count:
-            self.__owner = None
-#             self.__acquiredStackTrace = None
-            self.__block.release()
-            if __debug__:
-                self._note("%s.release(): final release", self)
-        else:
-            if __debug__:
-                self._note("%s.release(): non-final release", self)
+        self.realLock.release()
+    
 
     def __exit__(self, t, v, tb):
         self.release()
 
-    # Internal methods used by condition variables
 
-    def _acquire_restore(self, xxx_todo_changeme):
-        (count, owner) = xxx_todo_changeme
-        self.__block.acquire()
-        self.__count = count
-        self.__owner = owner
-        if __debug__:
-            self._note("%s._acquire_restore()", self)
-
-    def _release_save(self):
-        if __debug__:
-            self._note("%s._release_save()", self)
-        count = self.__count
-        self.__count = 0
-        owner = self.__owner
-        self.__owner = None
-        self.__block.release()
-        return (count, owner)
-
-    def _is_owned(self):
-        return self.__owner is threading.currentThread()
+# class _TimeoutRLock(_Verbose):
+#     """
+#     Modified version of threading._RLock from standard library
+#     """
+#     def __init__(self, timeout=None, verbose=None):
+#         _Verbose.__init__(self, verbose)
+#         self.__block = _allocate_lock()
+#         self.__owner = None
+#         self.__count = 0
+#         self.__timeout = timeout
+# #         self.__acquiredStackTrace = None
+# 
+#     def __repr__(self):
+#         owner = self.__owner
+#         return "<%s(%s, %d)>" % (
+#                 self.__class__.__name__,
+#                 owner and owner.getName(),
+#                 self.__count)
+# 
+#     def acquire(self, blocking=1):
+#         me = threading.currentThread()
+#         if self.__owner is me:
+#             self.__count = self.__count + 1
+#             if __debug__:
+#                 self._note("%s.acquire(%s): recursive success", self, blocking)
+#             return 1
+# 
+#         if not blocking or not self.__timeout:
+#             rc = self.__block.acquire(blocking)
+#             if rc:
+#                 self.__owner = me
+#                 self.__count = 1
+# #                 self.__acquiredStackTrace = traceback.extract_stack()
+#                 if __debug__:
+#                     self._note("%s.acquire(%s): initial success", self, blocking)
+#             else:
+#                 if __debug__:
+#                     self._note("%s.acquire(%s): failure", self, blocking)
+#             return rc
+#         else:
+#             # This comes from threading._Condition.wait()
+# 
+#             # Balancing act:  We can't afford a pure busy loop, so we
+#             # have to sleep; but if we sleep the whole timeout time,
+#             # we'll be unresponsive.  The scheme here sleeps very
+#             # little at first, longer as time goes on, but never longer
+#             # than 20 times per second (or the timeout time remaining).
+#             endtime = _time() + self.__timeout
+#             delay = 0.0005 # 500 us -> initial delay of 1 ms
+# 
+#             while True:
+#                 gotit = self.__block.acquire(0)
+#                 if gotit:
+#                     break
+#                 remaining = endtime - _time()
+#                 if remaining <= 0:
+#                     break
+# #                 delay = min(delay * 2, remaining, .05)
+#                 delay = min(delay * 2, remaining, .02)
+#                 _sleep(delay)
+#             if not gotit:
+#                 if __debug__:
+#                     self._note("%s.wait(%s): timed out", self, self.__timeout)
+#                 
+# #                 print "----Lock acquired by"
+# #                 print "".join(traceback.format_list(self.__acquiredStackTrace))
+# 
+#                 raise DeadBlockPreventionTimeOutError()
+#             else:
+#                 if __debug__:
+#                     self._note("%s.wait(%s): got it", self, self.__timeout)
+#                 
+#                 self.__owner = me
+#                 self.__count = 1
+# #                 self.__acquiredStackTrace = traceback.extract_stack()
+#                 
+#                 return gotit
+# 
+#     __enter__ = acquire
+# 
+#     def release(self):
+#         if self.__owner is not threading.currentThread():
+#             raise RuntimeError("cannot release un-aquired lock")
+#         self.__count = count = self.__count - 1
+#         if not count:
+#             self.__owner = None
+# #             self.__acquiredStackTrace = None
+#             self.__block.release()
+#             if __debug__:
+#                 self._note("%s.release(): final release", self)
+#         else:
+#             if __debug__:
+#                 self._note("%s.release(): non-final release", self)
+# 
+#     def __exit__(self, t, v, tb):
+#         self.release()
+# 
+#     # Internal methods used by condition variables
+# 
+#     def _acquire_restore(self, xxx_todo_changeme):
+#         (count, owner) = xxx_todo_changeme
+#         self.__block.acquire()
+#         self.__count = count
+#         self.__owner = owner
+#         if __debug__:
+#             self._note("%s._acquire_restore()", self)
+# 
+#     def _release_save(self):
+#         if __debug__:
+#             self._note("%s._release_save()", self)
+#         count = self.__count
+#         self.__count = 0
+#         owner = self.__owner
+#         self.__owner = None
+#         self.__block.release()
+#         return (count, owner)
+# 
+#     def _is_owned(self):
+#         return self.__owner is threading.currentThread()
 
 
 
