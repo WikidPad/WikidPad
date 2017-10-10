@@ -847,22 +847,6 @@ def buildChainedUpdateEventFct(*chain):
 
 
 
-# TODO: 2.4: Remove
-def runDialogModalFactory(clazz):
-    def runModal(*args, **kwargs):
-        dlg = clazz(*args, **kwargs)
-        try:
-            dlg.CenterOnParent(wx.BOTH)
-            if dlg.ShowModal() == wx.ID_OK:
-                return dlg.GetValue()
-            else:
-                return None
-    
-        finally:
-            dlg.Destroy()
-    
-    return runModal
-
 
 class ModalDialogMixin:
     @classmethod
