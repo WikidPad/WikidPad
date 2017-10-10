@@ -25,23 +25,25 @@ class BasicThreadStop:
     During the operation the function isValidThread() or testValidThread() should be
     called from time to time to check if op. should be stopped.
 
-    This class is used for synchronous operations where no thread stop
+    This class itself is used for synchronous operations where no thread stop
     condition is necessary.
     """
     __slots__ = ()
 
     def isValidThread(self):
         """
-        Returns True if operation should continue.
+        Returns True if operation should continue (calling thread is the
+        desired thread which should perform the operation).
         """
         return True
 
     def testValidThread(self):
         """
-        Throws a NotCurrentThreadException if op. should stop, does nothing
-        otherwise.
+        Throws a NotCurrentThreadException if operation should stop, does nothing
+        otherwise. Convenience variant of isValidThread()
         """
-        pass
+        if not self.isValidThread():
+            raise NotCurrentThreadException()
 
 
 DUMBTHREADSTOP = BasicThreadStop()
@@ -55,10 +57,6 @@ class FunctionThreadStop(BasicThreadStop):
 
     def isValidThread(self):
         return self.fct()
-        
-    def testValidThread(self):
-        if not self.fct():
-            raise NotCurrentThreadException()
 
 
 
@@ -78,14 +76,6 @@ class ThreadHolder(BasicThreadStop):
     def setThread(self, thread):
         self.thread = thread
         
-    def testValidThread(self):
-        """
-        Throws NotCurrentThreadException if self.thread is not equal to
-        current thread
-        """
-        if threading.currentThread() is not self.thread:
-            raise NotCurrentThreadException()
-
     def isValidThread(self):
         """
         Return True if current thread is thread in holder
