@@ -1838,7 +1838,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
         addAttributeMenu.Append(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
-                _('&Color Attribute'))
+                _('&Color Attribute'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
                 id=GUI_ID.MENU_ADD_COLOR_ATTRIBUTE)
