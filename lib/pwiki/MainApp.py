@@ -1,7 +1,7 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import sys, os, traceback, os.path, socket
+import sys, os, traceback, os.path, socket, locale
 from functools import reduce
 
 # To generate dependency for py2exe
@@ -24,7 +24,7 @@ from . import Configuration
 from .StringOps import mbcsDec, createRandomString, pathEnc, \
         writeEntireFile, loadEntireFile
 
-from . import SystemInfo
+from . import SystemInfo, Utilities, Localization
 from . import WindowLayout
 from .CmdLineAction import CmdLineAction
 
@@ -128,6 +128,7 @@ class App(wx.App, MiscEventSourceMixin):
         WindowLayout.initiateAfterWxApp()
         self.removeAppLockOnExit = False
         self.Bind(wx.EVT_END_SESSION, self.OnEndSession)
+        Localization.setLocale("C")
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
         self.mainFrameSet = set()
@@ -662,6 +663,8 @@ class App(wx.App, MiscEventSourceMixin):
         # Loop over copy of set as original set is modified during loop
         for wikiFrame in frozenset(self.mainFrameSet):
             wikiFrame.exitWiki()
+            
+        evt.Skip()
 
 
     def OnExit(self):
@@ -788,6 +791,7 @@ class App(wx.App, MiscEventSourceMixin):
 
     def getCollator(self):
         return self.collator
+
 
     def getInsertionPluginManager(self):
         return self.insertionPluginManager

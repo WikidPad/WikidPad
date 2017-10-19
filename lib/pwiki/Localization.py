@@ -5,8 +5,11 @@ import locale, codecs, os, sys, os.path, traceback, functools
 import Consts
 
 from .rtlibRepl import minidom
+# from xml.dom import minidom
 
 from .StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
+
+from . import Utilities
 
 import wx
 
@@ -27,13 +30,51 @@ def tt_noop(s):
     return s
 
 
+_wx_locale = None # Store the last created wxLocale here to prevent destruction
+_localeSetLock = Utilities.TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
+_lastLocStr = None
+
+
+
+def setLocale(locStr):
+    """
+    Sets locale simultaneously in Python/C-runtime and wxPython/wxWidgets
+    """
+    global _wx_locale, _lastLocStr
+    
+    with _localeSetLock:
+        if locStr == _lastLocStr:
+            return None
+            
+        @Utilities.mainThreadFunc
+        def setIt():
+            if locStr == "":
+                oldPyLoc = locale.setlocale(locale.LC_ALL)
+        
+                wx_locale = wx.Locale(wx.LANGUAGE_DEFAULT)
+                locale.setlocale(locale.LC_ALL, "")
+            else:
+                oldPyLoc = locale.setlocale(locale.LC_ALL)
+        
+                langInfo = wx.Locale.FindLanguageInfo(locStr)
+                if langInfo is not None:
+                    wx_locale = wx.Locale(langInfo.Language)
+        
+                locale.setlocale(locale.LC_ALL, locStr)
+                    
+            return oldPyLoc
+        
+        return setIt()
+
+
+
 # Factory functions for collators. Classes shouldn't be called directly
 
 def getCollatorByString(locStr, caseMode=None):
     """
     locStr -- String describing the locale of the Collator
-    caseMode --  (the flag isn't
-            guaranteed to be respected
+    caseMode -- True iff collator should be case sensitive (the flag isn't
+            guaranteed to be respected)
     """
     if locStr.lower() == "c":
         return _CCollator(caseMode)
@@ -52,7 +93,7 @@ def getCCollator(caseMode=None):
     Returns a basic collator for 'C' locale. The only collator guaranteed to
     exist.
     caseMode -- True iff collator should be case sensitive (the flag isn't
-            guaranteed to be respected
+            guaranteed to be respected)
     """
     return _CCollator(caseMode)
 
@@ -151,7 +192,12 @@ class _CCollator(AbstractCollator):
         Compare left and right and return integer value smaller, greater or
         equal 0
         """
-        return cmp(left, right)
+        if left < right:
+            return -1
+        elif left > right:
+            return 1
+        else:
+            return 0
 
     def strxfrm(self, s):
         """
@@ -174,11 +220,7 @@ class _PythonCollator(AbstractCollator):
         """
         """
         self.locStr = locStr
-        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
-
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        setLocale(self.locStr)
 
     def strcoll(self, left, right):
         return locale.strcoll(left, right)
@@ -198,11 +240,7 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
         """
         """
         self.locStr = locStr
-        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
-
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        setLocale(self.locStr)
 
     def strcoll(self, left, right):
         ml = min(len(left), len(right))
@@ -233,9 +271,25 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
 
         
     def strxfrm(self, s):
-        assert 0 # Not properly implemented. TODO Needed for Python 3.0
+        assert 0 # Not properly implemented. TODO
 
         return locale.strxfrm(s)
+
+
+# Experimental to implement above _PythonCollatorUppercaseFirst.strxfrm()
+# Doesn't work
+
+# def myStrxfrm(s):
+#     
+#     sortKey = [("\x02" if c.islower() else "\x01") + c for c in s]
+# #     sortKey.append("\x04")
+# 
+# #     # Add one to ensure that no zero-byte appears
+# #     chr(len(s) + 1).encode("utf-8")
+#     
+#     return locale.strxfrm("".join(sortKey))
+
+
 
 
 
@@ -303,7 +357,7 @@ def buildMessageDict(filename):
         # XXX: Does this always follow Python escape semantics?
 #         print "eval", repr(l)
         l = eval(l)
-        if type(l) is str:
+        if isinstance(l, Consts.BYTETYPES):
             l = l.decode("utf-8")
 
         if section == ID:
@@ -585,7 +639,7 @@ def _stripI18nXrcCache(content):
     Check if content contains the right tag at beginning and either
     return None if cache is invalid or return actual cache data.
     """
-    parts = content.split("\n", 1)
+    parts = content.split(b"\n", 1)
     if len(parts) != 2 or parts[0] != Consts.VERSION_STRING:
         return None
 
@@ -595,7 +649,7 @@ def _stripI18nXrcCache(content):
 
 def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     """
-    Returns the XML data of translated XRC file.
+    Returns the XML data of translated XRC file as bytes.
     This function assumes that loadI18nDict() was previously
     called with same appDir.
     """
@@ -669,6 +723,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     xmlDoc.unlink()
 
 
+# TODO Check if needed yet for Python 3.4:
+
     # The following conversion is only needed when running a Windows
     # binary created by py2exe with wxPython 2.6.
     # Otherwise some mysterious unicode error may ocurr.
@@ -695,7 +751,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         
         writeEntireFile(cachePath, toCache, True)
         
-        return translated
+        return translated.encode("utf-8")
     except:
         pass
     
@@ -706,14 +762,14 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         
         writeEntireFile(cachePath, toCache, True)
 
-        return translated
+        return translated.encode("utf-8")
     except:
         pass
     
     
     # Cache saving failed
 
-    return translated
+    return translated.encode("utf-8")
 
 
 

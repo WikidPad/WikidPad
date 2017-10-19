@@ -4,7 +4,7 @@
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 # from Enum import Enumeration
-import sys, os, re, traceback, locale, time, urllib.request, urllib.parse, urllib.error
+import sys, os, re, traceback, time, urllib.request, urllib.parse, urllib.error
 from os.path import join, exists, splitext, abspath
 from io import BytesIO
 import shutil
@@ -21,7 +21,7 @@ import Consts
 from .WikiExceptions import WikiWordNotFoundException, ExportException
 from .ParseUtilities import getFootnoteAnchorDict
 from .StringOps import *
-from . import StringOps
+from . import StringOps, Localization
 from . import Serialization
 from .WikiPyparsing import StackedCopyDict, SyntaxNode
 from .TempFileSet import TempFileSet
@@ -843,9 +843,10 @@ class MultiPageTextExporter(AbstractExporter):
                             self.exportFile.writeSeparator()
                             self._writeHintedDatablock(un, False)
 
-                    locale.setlocale(locale.LC_ALL, '')
-                    
-                    wx.Locale(wx.LANGUAGE_DEFAULT)
+#                     locale.setlocale(locale.LC_ALL, '')
+#                     
+#                     wx.Locale(wx.LANGUAGE_DEFAULT)
+                    Localization.setLocale("")
     
                     # Write actual wiki words
                     for word in self.wordList:

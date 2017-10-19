@@ -1,6 +1,6 @@
 
 
-import sys, threading, traceback, collections, heapq, logging
+import sys, threading, traceback, collections, heapq, functools, logging
 # from _thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep
 
@@ -461,6 +461,15 @@ def callInMainThread(fct, *args, **kwargs):
     return returnOb.result
 
 
+def mainThreadFunc(fct):
+    """
+    Decorator to ensure that function only runs in main thread.
+    Do not use for unbound methods!
+    """
+    result = functools.partial(callInMainThread, fct)
+    functools.update_wrapper(result, fct)
+
+    return result
 
 
 def callInMainThreadAsync(fct, *args, **kwargs):

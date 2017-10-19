@@ -2,10 +2,10 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for MediaWiki language "MediaWiki 1"
-# Last modified (format YYYY-MM-DD): 2017-06-08
+# Last modified (format YYYY-MM-DD): 2017-10-18
 
 
-import locale, sys, traceback
+import sys, traceback
 
 from textwrap import fill
 
@@ -13,12 +13,14 @@ import wx
 
 import re
 from pwiki.WikiExceptions import *
-from pwiki import StringOps
+from pwiki import StringOps, Localization
 from pwiki.StringOps import revStr, HtmlStartTag, HtmlEmptyTag, HtmlEndTag
 
 sys.stderr = sys.stdout
 
-locale.setlocale(locale.LC_ALL, '')
+# locale.setlocale(locale.LC_ALL, '')
+# wx.Locale(wx.LANGUAGE_DEFAULT)
+Localization.setLocale("")
 
 from pwiki.WikiPyparsing import *
 
