@@ -13,7 +13,7 @@ from pwiki.wxHelper import copyTextToClipboard, GUI_ID
 
 
 from pwiki.TempFileSet import createTempFile, TempFileSet
-from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs, \
+from pwiki.StringOps import mbcsDec, utf8Enc, lineendToOs, \
         joinRegexes, rgbToHtmlColor, escapeHtmlNoBreaks
 from pwiki.AdditionalDialogs import FontFaceDialog
 from pwiki.OptionsDialog import PluginOptionsPanel

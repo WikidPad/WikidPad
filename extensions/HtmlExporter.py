@@ -453,7 +453,7 @@ class HtmlExporter(AbstractExporter):
         self.tempFileSet = None
         self.copiedTempFileCache = None  # Dictionary {<original path>: <target URL>}
         self.filenameConverter = FilenameConverter(False)
-#         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
+#         self.convertFilename = removeBracketsFilename
 
         self.result = None
         
@@ -636,7 +636,7 @@ class HtmlExporter(AbstractExporter):
 #             self.convertFilename = removeBracketsToCompFilename
         self.filenameConverter = FilenameConverter(bool(compatFilenames))
 #         else:
-#             self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
+#             self.convertFilename = removeBracketsFilename
 
         self.referencedStorageFiles = None
         

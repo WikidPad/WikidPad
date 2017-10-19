@@ -12,7 +12,7 @@ from os.path import exists, join
 
 import Consts
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
+from pwiki.StringOps import mbcsDec, utf8Enc, utf8Dec, applyBinCompact, \
         removeBracketsFilename, pathEnc, getFileSignatureBlock, \
         iterCompatibleFilename
 from pwiki.SearchAndReplace import SearchReplaceOperation

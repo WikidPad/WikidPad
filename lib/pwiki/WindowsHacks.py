@@ -13,7 +13,7 @@ import wx
 from .wxHelper import getTextFromClipboard
 from .WikiExceptions import InternalError
 
-from .StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
+from .StringOps import strftimeUB, pathEnc, mbcsDec   # unescapeWithRe
 from . import SystemInfo
 from . import DocPages
 

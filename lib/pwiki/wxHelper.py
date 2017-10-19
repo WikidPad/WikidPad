@@ -455,7 +455,7 @@ def textToDataObject(text=None):
     """
     Create data object for an unicode string
     """
-    from .StringOps import lineendToOs, mbcsEnc, utf8Enc
+    from .StringOps import lineendToOs, utf8Enc
     
     if text is None:
         text = ""

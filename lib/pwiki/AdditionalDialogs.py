@@ -20,7 +20,7 @@ except:
 
 from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN, ModifyText
 
-from .StringOps import mbcsEnc, mbcsDec, \
+from .StringOps import mbcsDec, \
         escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
 from .wikidata import DbBackendUtils
 

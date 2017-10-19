@@ -59,7 +59,7 @@ from . import AdditionalDialogs
 
 
 from . import StringOps
-from .StringOps import mbcsDec, mbcsEnc, \
+from .StringOps import mbcsDec, \
         unescapeForIni, urlFromPathname, \
         strftimeUB, pathEnc, loadEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
@@ -4042,8 +4042,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Read information from page and present it in the field 1 of the
         status bar and in the title bar.
         """
-        fmt = mbcsEnc(self.getConfig().get("main", "pagestatus_timeformat"),
-                "replace")[0]
+        fmt = self.getConfig().get("main", "pagestatus_timeformat")
 
         if docPage is None:
             docPage = self.getCurrentDocPage()

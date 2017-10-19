@@ -25,7 +25,7 @@ from . import AttributeHandling
 from . import DocPages
 from .SearchAndReplace import SearchReplaceOperation
 
-from .StringOps import mbcsEnc, strToBool, \
+from .StringOps import strToBool, \
         pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni, \
         colorDescToRgbTuple
 

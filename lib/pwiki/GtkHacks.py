@@ -87,7 +87,7 @@ else:
 
 from .wxHelper import getTextFromClipboard
 
-from .StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
+from .StringOps import strftimeUB, pathEnc, mbcsDec   # unescapeWithRe
 from . import DocPages
 
 

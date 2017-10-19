@@ -106,12 +106,6 @@ else:
 utf8Encode = codecs.getencoder("UTF8")
 utf8Decode = codecs.getdecoder("UTF8")
 
-# try:
-#     mbcsEncode = codecs.getencoder("mbcs")
-# except:
-#     mbcsEncode = codecs.getencoder("iso-8859-1")
-
-
 isoLatin1Decoder = codecs.getdecoder("iso-8859-1")
 
 
@@ -122,13 +116,6 @@ def stdToUtf8(s):
     else:
         return utf8Encode(isoLatin1Decoder(s, "surrogateescape")[0],
                 "surrogateescape")[0]
-
-
-# def mbcsEnc(s):
-#     if type(s) is unicode:
-#         return mbcsEncode(s)[0]
-#     else:
-#         return s
 
 
 def utf8Enc(s):
