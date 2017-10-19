@@ -119,7 +119,7 @@ class EqnHandler:
         
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
-            response = response[(response.index("\n\n") + 2):]
+            response = response[(response.index(b"\n\n") + 2):]
         except ValueError:
             return '<pre>' + _('[Invalid response from MimeTeX]') + \
                     '</pre>'

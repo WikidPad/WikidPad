@@ -127,7 +127,7 @@ class GptHandler:
 
             if "noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
-                errResponse = ""
+                errResponse = b""
             else:
                 errResponse = childErr.read()
             
@@ -135,7 +135,7 @@ class GptHandler:
         finally:
             os.unlink(srcfilepath)
             
-        if errResponse != "":
+        if errResponse != b"":
             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Gnuplot error: %s]') % errResponse +\
                     '</pre>'

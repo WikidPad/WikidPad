@@ -138,7 +138,7 @@ class PltHandler:
 
             if "noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
-                errResponse = ""
+                errResponse = b""
             else:
                 errResponse = childErr.read()
             
@@ -146,9 +146,9 @@ class PltHandler:
         finally:
             os.unlink(srcfilepath)
             
-        if errResponse != "":
-            errResponse = mbcsDec(errResponse, "replace")[0]
-            return '<pre>' + _('[Ploticus error: %s]') % errResponse + \
+        if errResponse != b"":
+#             errResponse = mbcsDec(errResponse, "replace")[0]
+            return '<pre>' + _('[Ploticus error: %s]') % repr(errResponse) + \
                     '</pre>'
 
         # Return appropriate HTML code for the image
