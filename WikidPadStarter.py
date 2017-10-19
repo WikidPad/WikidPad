@@ -235,6 +235,7 @@ def main():
     try:
         app = App(0)
         app.MainLoop()
+        del app
     #     srePersistent.saveCodeCache()
         
     except Exception as e:
@@ -242,6 +243,15 @@ def main():
         exception = e
         error = Error(0)
         error.MainLoop()
-       
-    sys.exit()
+        del error
+        
+
+    # Ugly hack but prevents mysterious application crashes on Windows
+    for m in tuple(m2 for m2 in sys.modules if m2.startswith("wx")):
+        del sys.modules[m]
+        
+    import gc
+    
+    gc.collect()
+    gc.disable()
 
