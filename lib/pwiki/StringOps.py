@@ -270,6 +270,20 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "surrogateescape")[0]
 
 
+# More pythonic
+def bytesToUnicode(content):
+    if type(content) == str:
+        return content
+    else:
+        try:
+            return content.decode()
+        except UnicodeDecodeError:
+            try:
+                return content.decode("utf-16")
+            except:
+                raise Exception("Unable to decode bytes")
+
+
 
 
 def loadEntireTxtFile(filename):
