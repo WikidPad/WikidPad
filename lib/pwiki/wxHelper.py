@@ -39,6 +39,12 @@ class wxSourceId:
     def __int__(self):
         return self._value
     
+    def __eq__(self, other):
+        return self._value == int(other)
+        
+    def __hash__(self):
+        return hash(self._value)
+    
     GetId = __int__
 
 
