@@ -371,79 +371,80 @@ class WikiData(BasicWikiData):
 
     # ---------- Handling of relationships cache ----------
 
-    def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True, withFields=()):
-        """
-        get the child relations of this word
-        Function must work for read-only wiki.
-        existingonly -- List only existing wiki words
-        selfreference -- List also wikiWord if it references itself
-        withFields -- Seq. of names of fields which should be included in
-            the output. If this is not empty, tuples are returned
-            (relation, ...) with ... as further fields in the order mentioned
-            in withfields.
-
-            Possible field names:
-                "firstcharpos": position of link in page (may be -1 to represent
-                    unknown)
-                "modified": Modification date of child
-        """
-        if withFields is None:
-            withFields = ()
-
-        addFields = ""
-        converters = [lambda s: s]
-        for field in withFields:
-            if field == "firstcharpos":
-                addFields += ", firstcharpos"
-                converters.append(lambda s: s)
-            elif field == "modified":
-#                 addFields += (", ifnull((select modified from wikiwords "
-#                         "where wikiwords.word = relation), 0.0)")
-#                 addFields += (", ifnull((select modified from wikiwords "
-#                         "where wikiwords.word = relation or "
-#                         "wikiwords.word = (select word from wikiwordattrs "
-#                         "where key = 'alias' and value = relation)), 0.0)")
-
-                # "modified" isn't a field of wikirelations. We need
-                # some SQL magic to retrieve the modification date
-                addFields += (", ifnull((select modified from wikiwords "
-                        "where wikiwords.word = relation or "
-                        "wikiwords.word = (select word from wikiwordmatchterms "
-                        "where wikiwordmatchterms.matchterm = relation and "
-                        "(wikiwordmatchterms.type & 2) != 0 limit 1)), 0.0)")
-                # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
-
-                converters.append(float)
-
-
-        sql = "select relation%s from wikirelations where word = ?" % addFields
-
-        if existingonly:
-            # filter to only words in wikiwords or aliases
-#             sql += " and (exists (select word from wikiwords "+\
-#                     "where word = relation) or exists "+\
-#                     "(select value from wikiwordattrs "+\
-#                     "where value = relation and key = 'alias'))"
-            sql += (" and (exists (select 1 from wikiwords "
-                    "where word = relation) or exists "
-                    "(select 1 from wikiwordmatchterms "
-                    "where wikiwordmatchterms.matchterm = relation and "
-                    "(wikiwordmatchterms.type & 2) != 0))")
-            # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
-
-        if not selfreference:
-            sql += " and relation != word"
-
-        try:
-            if len(withFields) > 0:
-                return [tuple(c(item) for c, item in zip(converters, row))
-                        for row in self.connWrap.execSqlQuery(sql, (wikiWord,))]
-            else:
-                return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
-        except (IOError, OSError, sqlite.Error) as e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
+#    # Moved to BaseWikiData
+#    def getChildRelationships(self, wikiWord, existingonly=False,
+#            selfreference=True, withFields=()):
+#        """
+#        get the child relations of this word
+#        Function must work for read-only wiki.
+#        existingonly -- List only existing wiki words
+#        selfreference -- List also wikiWord if it references itself
+#        withFields -- Seq. of names of fields which should be included in
+#            the output. If this is not empty, tuples are returned
+#            (relation, ...) with ... as further fields in the order mentioned
+#            in withfields.
+#
+#            Possible field names:
+#                "firstcharpos": position of link in page (may be -1 to represent
+#                    unknown)
+#                "modified": Modification date of child
+#        """
+#        if withFields is None:
+#            withFields = ()
+#
+#        addFields = ""
+#        converters = [lambda s: s]
+#        for field in withFields:
+#            if field == "firstcharpos":
+#                addFields += ", firstcharpos"
+#                converters.append(lambda s: s)
+#            elif field == "modified":
+##                 addFields += (", ifnull((select modified from wikiwords "
+##                         "where wikiwords.word = relation), 0.0)")
+##                 addFields += (", ifnull((select modified from wikiwords "
+##                         "where wikiwords.word = relation or "
+##                         "wikiwords.word = (select word from wikiwordattrs "
+##                         "where key = 'alias' and value = relation)), 0.0)")
+#
+#                # "modified" isn't a field of wikirelations. We need
+#                # some SQL magic to retrieve the modification date
+#                addFields += (", ifnull((select modified from wikiwords "
+#                        "where wikiwords.word = relation or "
+#                        "wikiwords.word = (select word from wikiwordmatchterms "
+#                        "where wikiwordmatchterms.matchterm = relation and "
+#                        "(wikiwordmatchterms.type & 2) != 0 limit 1)), 0.0)")
+#                # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+#
+#                converters.append(float)
+#
+#
+#        sql = "select relation%s from wikirelations where word = ?" % addFields
+#
+#        if existingonly:
+#            # filter to only words in wikiwords or aliases
+##             sql += " and (exists (select word from wikiwords "+\
+##                     "where word = relation) or exists "+\
+##                     "(select value from wikiwordattrs "+\
+##                     "where value = relation and key = 'alias'))"
+#            sql += (" and (exists (select 1 from wikiwords "
+#                    "where word = relation) or exists "
+#                    "(select 1 from wikiwordmatchterms "
+#                    "where wikiwordmatchterms.matchterm = relation and "
+#                    "(wikiwordmatchterms.type & 2) != 0))")
+#            # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+#
+#        if not selfreference:
+#            sql += " and relation != word"
+#
+#        try:
+#            if len(withFields) > 0:
+#                return [tuple(c(item) for c, item in zip(converters, row))
+#                        for row in self.connWrap.execSqlQuery(sql, (wikiWord,))]
+#            else:
+#                return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+#        except (IOError, OSError, sqlite.Error) as e:
+#            traceback.print_exc()
+#            raise DbReadAccessError(e)
 
 
 #     def getChildRelationshipsAndChildNumber(self, wikiWord, existingonly=False,

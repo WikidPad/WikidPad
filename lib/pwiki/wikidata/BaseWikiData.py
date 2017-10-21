@@ -168,6 +168,11 @@ class BasicWikiData:
             app.sqliteInitFlag = True
 
 
+        self.caseInsensitiveWikiWords = self.wikiDocument.getWikiConfig().\
+                getboolean("main", "caseInsensitiveWikiWords", False)
+
+
+
     def _reinit(self):
         """
         Actual initialization or reinitialization after rebuildWiki()
@@ -510,12 +515,68 @@ class BasicWikiData:
 
             Possible field names:
                 "firstcharpos": position of link in page (may be -1 to represent
-                    unknown). The Gadfly implementation always returns -1
-                "modified": Modification date
-
+                    unknown)
+                "modified": Modification date of child
         """
-        # TODO: write a wrapper so this can be here
-        raise NotImplementedError
+        if withFields is None:
+            withFields = ()
+
+        addFields = ""
+        converters = [lambda s: s]
+        for field in withFields:
+            if field == "firstcharpos":
+                addFields += ", firstcharpos"
+                converters.append(lambda s: s)
+            elif field == "modified":
+                # "modified" isn't a field of wikirelations. We need
+                # some SQL magic to retrieve the modification date
+                addFields += (", ifnull((select modified from wikiwords "
+                        "where wikiwords.word = relation or "
+                        "wikiwords.word = (select word from wikiwordmatchterms "
+                        "where wikiwordmatchterms.matchterm = relation and "
+                        "(wikiwordmatchterms.type & 2) != 0 limit 1)), 0.0)")
+
+                converters.append(float)
+
+
+        sql = "select relation{0} from wikirelations where word = ?".format(
+                addFields)
+
+        if not selfreference:
+            if self.caseInsensitiveWikiWords:
+                sql += " and utf8Normcase(relation) != utf8Normcase(word)"
+            else:
+                sql += " and relation != word"
+
+        if existingonly:
+            # filter to only words in wikiwords or aliases
+#             sql += " and (exists (select word from wikiwords "+\
+#                     "where word = relation) or exists "+\
+#                     "(select value from wikiwordattrs "+\
+#                     "where value = relation and key = 'alias'))"
+            if self.caseInsensitiveWikiWords:
+                sql += (" and (exists (select 1 from wikiwords "
+                        "where utf8Normcase(word) = utf8Normcase(relation)) or exists "
+                        "(select 1 from wikiwordmatchterms "
+                        "where wikiwordmatchterms.matchtermnormcase = utf8Normcase(relation) and "
+                        "(wikiwordmatchterms.type & 2) != 0))")
+            else:
+                sql += (" and (exists (select 1 from wikiwords "
+                        "where word = relation) or exists "
+                        "(select 1 from wikiwordmatchterms "
+                        "where wikiwordmatchterms.matchterm = relation and "
+                        "(wikiwordmatchterms.type & 2) != 0))")
+            # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+
+
+        try:
+            if len(withFields) > 0:
+                return self.connWrap.execSqlQuery(sql, (wikiWord,))
+            else:
+                return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+        except (IOError, OSError, sqlite.Error, ValueError) as e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def getParentRelationships(self, wikiWord):
@@ -528,11 +589,18 @@ class BasicWikiData:
         if realWord is None:
             realWord = wikiWord
         try:
-            return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikirelations where relation = ? or "
-                    "relation in (select matchterm from wikiwordmatchterms "
-                    "where word = ? and "
-                    "(wikiwordmatchterms.type & 2) != 0)", (realWord, realWord))
+            if self.caseInsensitiveWikiWords:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikirelations where relation = ? or "
+                        "relation in (select matchtermnormcase from wikiwordmatchterms "
+                        "where utf8Normcase(word) = ? and "
+                        "(wikiwordmatchterms.type & 2) != 0)", (realWord, realWord.lower()))
+            else:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikirelations where relation = ? or "
+                        "relation in (select matchterm from wikiwordmatchterms "
+                        "where word = ? and "
+                        "(wikiwordmatchterms.type & 2) != 0)", (realWord, realWord))
             # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 
 
@@ -569,13 +637,22 @@ class BasicWikiData:
 #                     "(type & 2) != 0")
 
 
-            return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwords except "
-                    "select wikiwordmatchterms.word from wikiwordmatchterms "
-                    "where exists (select 1 from wikirelations where "
-                    "wikiwordmatchterms.matchterm == wikirelations.relation and "
-                    "wikirelations.word != wikiwordmatchterms.word) and "
-                    "(type & 2) != 0")
+            if self.caseInsensitiveWikiWords:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikiwords except "
+                        "select wikiwordmatchterms.word from wikiwordmatchterms "
+                        "where exists (select 1 from wikirelations where "
+                        "wikiwordmatchterms.matchtermnormcase == utf8Normcase(wikirelations.relation) and "
+                        "wikirelations.word != wikiwordmatchterms.word) and "
+                        "(type & 2) != 0")
+            else:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        "select word from wikiwords except "
+                        "select wikiwordmatchterms.word from wikiwordmatchterms "
+                        "where exists (select 1 from wikirelations where "
+                        "wikiwordmatchterms.matchterm == wikirelations.relation and "
+                        "wikirelations.word != wikiwordmatchterms.word) and "
+                        "(type & 2) != 0")
 
         except (IOError, OSError, sqlite.Error) as e:
             traceback.print_exc()
@@ -589,11 +666,21 @@ class BasicWikiData:
         Function must work for read-only wiki.
         """
         try:
-            return self.connWrap.execSqlQuerySingleColumn(
-                    "select relation from wikirelations "
-                    "except select word from wikiwords "
-                    "except select matchterm from wikiwordmatchterms "
-                    "where (type & 2) != 0")
+
+            if self.caseInsensitiveWikiWords:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        # ? more efficient
+                        "select relation from wikirelations where "
+                        "lower(relation) not in (select lower(word) "
+                        "from wikiwords) and lower(relation) not in "
+                        "(select matchtermnormcase from wikiwordmatchterms "
+                        "where (type & 2) != 0)")
+            else:
+                return self.connWrap.execSqlQuerySingleColumn(
+                        "select relation from wikirelations "
+                        "except select word from wikiwords "
+                        "except select matchterm from wikiwordmatchterms "
+                        "where (type & 2) != 0")
             # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 
         except (IOError, OSError, sqlite.Error) as e:
@@ -861,7 +948,6 @@ class BasicWikiData:
                 
                 return value
 
-
             def keys(self):
                 if not self.cacheComplete:
                     self.cache = dict(self.outer.connWrap.execSqlQuery(
@@ -875,10 +961,111 @@ class BasicWikiData:
 
                 return list(self.cache.keys())
 
+        # A note about case insensitivity
+
+        # The current implementation is not truly "insensitive". It allows
+        # (for example) both wikiWord and WikiWord to exist side by side if
+        # the pages are created by a method that doesn't use
+        # Cachedwikipagelinktermdict. It would probably be simpler (code wise),
+        # and perhaps make more sense to make it truly insensitive, which
+        # would probably be best achieved by creating another column in the
+        # wikiwords table - much like already exists in wikiwordmatchterms.
+        class CachedWikiPageLinkTermDictNoCase(object):
+            def __init__(self, outer):
+                self.outer = outer
+                self.cache = {}
+                self.cacheLower = {}
+                self.cacheNonExistent = set()
+                self.cacheComplete = False
+                
+            def get(self, key, default=None):
+                if self.cacheComplete:
+                    retrievedKey = self.cache.get(key, default)
+
+                    if retrievedKey is default:
+                        return self.cacheLower.get(key, default)
+
+                    return retrievedKey
+                
+                if key in self.cache:
+                    return self.cache.get(key, default)
+                elif key in self.cacheLower:
+                    return self.cacheLower.get(key, default)
+                    
+                if key in self.cacheNonExistent:
+                    return default
+                
+                try:
+                    value = self.lookup(key)
+                    self.cache[key] = value
+                    return value
+                except KeyError:
+                    self.cacheNonExistent.add(key)
+                    return default
+            
+            def lookup(self, key):
+                if self.outer.isDefinedWikiPageName(key):
+                    return key
+                
+                # First check for the word normally
+                try:
+                    value = self.outer.connWrap.execSqlQuerySingleItem(
+                            "select word from wikiwordmatchterms "
+                            "where matchterm = ? and (type & 2) != 0 ", (key,))
+                    # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                except (IOError, OSError, sqlite.Error, ValueError) as e:
+                    traceback.print_exc()
+                    raise DbReadAccessError(e)
+
+                # If not found check the lowercase wikiwordmatchterms
+                if value is None:
+                    try:
+                        value = self.outer.connWrap.execSqlQuerySingleItem(
+                                "select word from wikiwordmatchterms "
+                                "where matchtermnormcase = ? and "
+                                "(type & 2) != 0 ", (key.lower(),))
+                        # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                    except (IOError, OSError, sqlite.Error, ValueError) as e:
+                        traceback.print_exc()
+                        raise DbReadAccessError(e)
+                
+                if value is None:
+                    raise KeyError(key)
+                
+                return value
+
+            def keys(self):
+                if not self.cacheComplete:
+                    # Normal cache
+                    self.cache = dict(self.outer.connWrap.execSqlQuery(
+                            "select word, word from wikiwords union "
+                            "select matchterm, word from wikiwordmatchterms "
+                            "where (type & 2) != 0 and not matchterm in "
+                            "(select word from wikiwords)"))
+
+                    # Is the best way to get the lowercase names?
+                    self.cacheLower = dict(self.outer.connWrap.execSqlQuery(
+                            "select utf8Normcase(word), word from wikiwords union "
+                            "select matchtermnormcase, word from wikiwordmatchterms "
+                            "where (type & 2) != 0 and not matchtermnormcase in "
+                            "(select utf8Normcase(word) from wikiwords)"))
+
+
+                    # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                    self.cacheComplete = True
+                    self.cacheNonExistent = set()
+
+                return list(self.cache.keys())
+
 
         try:
             if self.cachedWikiPageLinkTermDict is None:
-                self.cachedWikiPageLinkTermDict = CachedWikiPageLinkTermDict(self)
+                if self.caseInsensitiveWikiWords:
+                    self.cachedWikiPageLinkTermDict = \
+                            CachedWikiPageLinkTermDictNoCase(self)
+                else:
+                    self.cachedWikiPageLinkTermDict = \
+                            CachedWikiPageLinkTermDict(self)
 
             return self.cachedWikiPageLinkTermDict
         except (IOError, OSError, sqlite.Error) as e:
