@@ -583,6 +583,12 @@ class App(wx.App, MiscEventSourceMixin):
                 evt.SetEventObject(wnd)
                 
                 scrollUnits = (evt.GetWheelRotation() // evt.GetWheelDelta()) * evt.GetLinesPerAction()
+
+                # This seems required in P3 port
+                if isinstance(wnd, wx.Window):
+                    #x, y = wnd.GetViewStart()
+                    result = wx.App.FilterEvent(self, evt)
+                    return result
                 
                 if isinstance(wnd, wx.ScrolledWindow):
                     x, y = wnd.GetViewStart()
@@ -595,7 +601,7 @@ class App(wx.App, MiscEventSourceMixin):
 #                     y = wnd.GetScrollPos(wx.VERTICAL)
 #                     wnd.SetScrollPos(wx.VERTICAL, y - scrollUnits)
                 else:
-#                     print "--FilterEvent45", repr(((evt.GetEventObject()), scrollUnits, wnd.HasScrollbar(wx.VERTICAL)))                    
+#                     print "--FilterEvent45", repr(((evt.GetEventObject()), scrollUnits, wnd.HasScrollbar(wx.VERTICAL)))
                     wnd.ProcessEvent(evt)
 
                 return 1
