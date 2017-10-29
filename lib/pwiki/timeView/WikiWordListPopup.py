@@ -120,7 +120,7 @@ class WikiWordListPopup(wx.Frame):
         Test if mousePos (screen coords) is inside the resultBox
         """
         pos = self.ScreenToClient(mousePos)
-        return self.resultBox.GetRect().Inside(pos)
+        return self.resultBox.GetRect().Contains(pos)
         
 
 

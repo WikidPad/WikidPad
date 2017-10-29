@@ -181,7 +181,7 @@ class TimePresentationBase:
 
         tlRect = self._getInsideTestRectangle()
 
-        if tlRect.Inside(pos):
+        if tlRect.Contains(pos):
             evt.Skip()
             return
 
