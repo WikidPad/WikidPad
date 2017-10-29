@@ -199,7 +199,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         massWordCounts = self.wikiWordFilter.getMassWikiWordCountForDays(date,
                 count)
 
-        step = wx.TimeSpan_Day()
+        step = wx.TimeSpan.Day()
         for i in range(count):
             dateKey = (date.GetDay(), date.GetMonth(), date.GetYear())
             self.dayToWordCountCache[dateKey] = massWordCounts[i]
@@ -376,7 +376,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
         # Actual day grid
         yPos += cellShiftY
-        dateShift = wx.TimeSpan_Day()
+        dateShift = wx.TimeSpan.Day()
         dayCount = wx.DateTime.GetNumberOfDaysInMonth(month.GetMonth(),
                 month.GetYear())
 
@@ -635,7 +635,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             # On an empty cell after the last day of month
             return (month, self.HITTEST_MONTH, None)
         
-        date = month + wx.TimeSpan_Days(dayShift)
+        date = month + wx.TimeSpan.Days(dayShift)
         
         return (date, self.HITTEST_DAY, wx.Rect(cellCol * cellShiftX,
                 cellRow * cellShiftY, self.cellWidth, self.cellHeight))

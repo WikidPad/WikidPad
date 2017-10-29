@@ -48,7 +48,7 @@ class VersionEntry:
 
 
     def getFormattedCreationDate(self, formatStr):
-        return formatWxDate(formatStr, wx.DateTimeFromTimeT(
+        return formatWxDate(formatStr, wx.DateTime.FromTimeT(
                 self.creationTimeStamp))
 
 

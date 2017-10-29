@@ -59,7 +59,7 @@ class TrashBag:
 
 
     def getFormattedTrashDate(self, formatStr):
-        return StringOps.formatWxDate(formatStr, wx.DateTimeFromTimeT(
+        return StringOps.formatWxDate(formatStr, wx.DateTime.FromTimeT(
                 self.trashTimeStamp))
 
 

@@ -62,7 +62,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         self.firstResize = True  # Hack
 
-#         self.topDay = None  # currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#         self.topDay = None  # currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 
         # Sets which day should be shown at which index
         self.fixedItemDay = None
@@ -95,7 +95,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 #         currTime = wx.DateTime.Now()
 #         currTime.ResetTime()
 #         
-#         self.topDay = currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#         self.topDay = currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 #         self.updateContent()
 
 
@@ -118,7 +118,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             currTime = wx.DateTime.Now()
             currTime.ResetTime()
             
-#             self.topDay = currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#             self.topDay = currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 
             self.fixedItemDay = currTime
 
@@ -225,14 +225,14 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
 
     def _updateContentWithEmptyDays(self, ascendTime):
-        stepDateSpan = wx.TimeSpan_Days(self.stepDays)
+        stepDateSpan = wx.TimeSpan.Days(self.stepDays)
 
         # Collect data
         if ascendTime:
-            currTime = self.fixedItemDay - wx.TimeSpan_Days(
+            currTime = self.fixedItemDay - wx.TimeSpan.Days(
                     self.fixedItemIndex)
         else:
-            currTime = self.fixedItemDay - wx.TimeSpan_Days(
+            currTime = self.fixedItemDay - wx.TimeSpan.Days(
                     self.visibleItemCount - self.fixedItemIndex - 1)
 
         content = []
@@ -764,7 +764,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 return
 
             newDate.ResetTime()
-#             self.topDay = newDate - wx.TimeSpan_Days(evt.GetIndex())
+#             self.topDay = newDate - wx.TimeSpan.Days(evt.GetIndex())
             self.fixedItemDay = newDate
             self.fixedItemIndex = evt.GetIndex()
             
