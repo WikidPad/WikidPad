@@ -17,9 +17,6 @@ from . import Exporters, Serialization
 
 from . import StringOps
 
-# from ..StringOps import applyBinCompact, getBinCompactForDiff, \
-#         fileContentToUnicode, BOM_UTF8, formatWxDate
-# 
 # from ..Serialization import serToXmlUnicode, serFromXmlUnicode, serToXmlInt, \
 #         serFromXmlInt, iterXmlElementFlat
 # 
@@ -59,8 +56,7 @@ class TrashBag:
 
 
     def getFormattedTrashDate(self, formatStr):
-        return StringOps.formatWxDate(formatStr, wx.DateTime.FromTimeT(
-                self.trashTimeStamp))
+        return StringOps.formatTimeT(formatStr, self.trashTimeStamp)
 
 
     def serializeOverviewToXmlProd(self, xmlDoc):

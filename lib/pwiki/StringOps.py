@@ -9,7 +9,8 @@ import os, traceback
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile, math
+import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile, \
+        math, time
 
 # import urllib_red as urllib
 import urllib.request, urllib.parse, urllib.error, urllib.parse, cgi
@@ -957,17 +958,48 @@ def formatWxDate(frmStr, date):
     return date.Format(unescapeWithRe(frmStr))
 
 
+def formatTimeT(frmStr, timet=None):
+    """
+    Format a time_t (seconds since epoch) according to frmStr similar to strftime.
+    If time_t is None, current time is used
+    """
+    if frmStr == "":
+        return frmStr
+    
+    resParts = []
+    
+    if timet is None:
+        locTime = time.localtime()
+    else:
+        locTime = time.localtime(timet)
+    
+    for part in EXTENDED_STRFTIME_RE.split(frmStr):
+        if not part:
+            continue
+            
+        if part == "%u":
+            # Create weekday following ISO-8601 (1=Monday, ..., 7=Sunday)
+            resParts.append("%i" % (locTime.tm_wday + 1))
+        elif part == "%":
+            resParts.append("%%")
+        else:
+            resParts.append(part)
+
+    frmStr = "".join(resParts)
+
+    return time.strftime(unescapeWithRe(frmStr), locTime)
+    
+
+
+
 def strftimeUB(frmStr, timet=None):
     """
     Similar to time.strftime, but uses a time_t number as time (no structure),
     also unescapes some backslash codes, supports unicode and shows local time
     if timet is GMT.
     """
-    if timet is None:
-        return formatWxDate(frmStr, wx.DateTime.Now())
-
     try:
-        return formatWxDate(frmStr, wx.DateTime.FromTimeT(timet))
+        return formatTimeT(frmStr, timet)
     except TypeError:
         return _("Inval. timestamp")  #  TODO Better errorhandling?
 

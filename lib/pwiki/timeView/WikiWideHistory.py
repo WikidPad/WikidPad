@@ -9,7 +9,7 @@ import Consts
 
 from ..MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
-from ..StringOps import formatWxDate
+from ..StringOps import formatTimeT
 
 from ..Serialization import serToXmlUnicode, serFromXmlUnicode, serToXmlInt, \
         serFromXmlInt, iterXmlElementFlat
@@ -31,8 +31,7 @@ class HistoryEntry:
 
 
     def getFormattedVisitedDate(self, formatStr):
-        return formatWxDate(formatStr, wx.DateTimeFromTimeT(
-                self.visitedTimeStamp))
+        return formatTimeT(formatStr, self.visitedTimeStamp)
 
 
     def serializeToXmlProd(self, xmlDoc):

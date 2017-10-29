@@ -15,7 +15,7 @@ import Consts
 from ..MiscEvent import MiscEventSourceMixin
 
 from ..StringOps import applyBinCompact, getBinCompactForDiff, \
-        fileContentToUnicode, BOM_UTF8, formatWxDate
+        fileContentToUnicode, BOM_UTF8, formatTimeT
 
 from ..Serialization import serToXmlUnicode, serFromXmlUnicode, serToXmlInt, \
         serFromXmlInt, iterXmlElementFlat
@@ -48,8 +48,7 @@ class VersionEntry:
 
 
     def getFormattedCreationDate(self, formatStr):
-        return formatWxDate(formatStr, wx.DateTime.FromTimeT(
-                self.creationTimeStamp))
+        return formatTimeT(formatStr, self.creationTimeStamp)
 
 
     def serializeOverviewToXmlProd(self, xmlDoc):
