@@ -179,7 +179,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
     def _calcProcTokensCharWise(self, fromText, toText):
-        sm = difflib.SequenceMatcher(None, fromText, toText)
+        sm = difflib.SequenceMatcher(None, fromText, toText, autojunk=False)
         ops = sm.get_opcodes()
 
         procList = []
@@ -244,7 +244,7 @@ class InlineDiffControl(SearchableScintillaControl):
         fromDivided, fromPosIdx = self._divideToWords(fromText)
         toDivided, toPosIdx = self._divideToWords(toText)
         
-        sm = difflib.SequenceMatcher(None, fromDivided, toDivided)
+        sm = difflib.SequenceMatcher(None, fromDivided, toDivided, autojunk=False)
         ops = sm.get_opcodes()
 
         procList = []

@@ -472,7 +472,7 @@ class VersionOverview(MiscEventSourceMixin):
         """
         if isinstance(content, str):
             content = BOM_UTF8 + content.encode("utf-8")
-        assert isinstance(content, str)
+        assert isinstance(content, Consts.BYTETYPES)
 
         completeStep = max(self.wikiDocument.getWikiConfig().getint("main",
                 "versioning_completeSteps", 10), 0)

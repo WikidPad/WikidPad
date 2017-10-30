@@ -297,7 +297,7 @@ class WikiData:
 
         # if not content: content = ""
         
-        assert type(content) is str
+        assert isinstance(content, Consts.BYTETYPES)
 
         try:
             if self.connWrap.execSqlQuerySingleItem("select word from "+\

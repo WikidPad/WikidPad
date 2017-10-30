@@ -1864,7 +1864,6 @@ def difflibToCompact(ops, b):
     b -- second string to match
     """
     result = []
-    # ops.reverse()
     for tag, i1, i2, j1, j2 in ops:
         if tag == "equal":
             continue
@@ -1886,7 +1885,7 @@ def compactToBinCompact(cops):
     result = []
     for op in cops:
         if op[0] == 0:
-            # Uses opposite endianness than the rest of WikidPad but it's
+            # Uses opposite endianness as the rest of WikidPad but it's
             # too late to change
             result.append( pack("<Biii", 0, op[1], op[2], len(op[3])) )
             result.append(op[3])
@@ -1896,7 +1895,7 @@ def compactToBinCompact(cops):
             result.append( pack("<Bii", 2, op[1], len(op[2])) )
             result.append(op[2])
 
-    return "".join(result)
+    return b"".join(result)
 
 
 
@@ -1907,7 +1906,7 @@ def binCompactToCompact(bops):
     pos = 0
     result = []
     while pos < len(bops):
-        t = ord(bops[pos])
+        t = bops[pos]
         pos += 1
         if t == 0:
             d = unpack("<iii", bops[pos:pos+12])
@@ -1934,7 +1933,7 @@ def binCompactToCompact(bops):
 
 def applyCompact(a, cops):
     """
-    Apply compact ops to string a to create and return string b
+    Apply compact ops to bytes a to create and return bytes b
     """
     result = []
     apos = 0
@@ -1954,7 +1953,7 @@ def applyCompact(a, cops):
     if apos < len(a):
         result.append(a[apos:])  # equal
 
-    return "".join(result)
+    return b"".join(result)
 
 
 def applyBinCompact(a, bops):
@@ -1966,12 +1965,12 @@ def applyBinCompact(a, bops):
 
 def getBinCompactForDiff(a, b):
     """
-    Return the binary compact codes to change binary string a to b.
-    For strings a and b (NOT unicode) it is always true that
+    Return the binary compact codes to change bytes a to b.
+    For bytes a and b (NOT strings) it is always true that
         applyBinCompact(a, getBinCompactForDiff(a, b)) == b
     """
 
-    sm = difflib.SequenceMatcher(None, a, b)
+    sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
     ops = sm.get_opcodes()
     return compactToBinCompact(difflibToCompact(ops, b))
 
