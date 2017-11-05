@@ -7,7 +7,7 @@ import wx
 
 # from MiscEvent import KeyFunctionSinkAR
 from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
-        getAccelPairFromKeyDown, appendToMenuByMenuDesc
+        getAccelPairFromKeyDown, appendToMenuByMenuDesc, getWxAddress
 
 from pwiki.SystemInfo import isWindows
 
@@ -97,11 +97,10 @@ class TimePresentationBase:
 
 
     def OnWikiWordListPopupDestroyed(self, evt):
-        if not self.wikiWordListPopup is evt.GetEventObject():
+        if self.wikiWordListPopup.wxAddress != getWxAddress(evt.GetEventObject()):
             evt.Skip()
             return
             
-        self.wikiWordListPopup.Unbind(wx.EVT_WINDOW_DESTROY)
         self.wikiWordListPopup = None
 
         evt.Skip()
@@ -115,7 +114,10 @@ class TimePresentationBase:
 
         self.wikiWordListPopup = popup
 
-        if self.wikiWordListPopup is not None:        
+        if self.wikiWordListPopup is not None:
+            self.wikiWordListPopup.wxAddress = getWxAddress(
+                    self.wikiWordListPopup)
+
             self.wikiWordListPopup.Bind(wx.EVT_WINDOW_DESTROY,
                     self.OnWikiWordListPopupDestroyed)
             self.wikiWordListPopup.Bind(wx.EVT_LEAVE_WINDOW,

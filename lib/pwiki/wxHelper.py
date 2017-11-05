@@ -4,6 +4,7 @@ import os, os.path, traceback, sys, re, importlib
 
 from wx.xrc import XRCCTRL, XRCID, XmlResource, XmlSubclassFactory
 import wx
+from wx.siplib import unwrapinstance
 
 from .WikiExceptions import *
 
@@ -277,6 +278,7 @@ class IdRecycler:
         self.assoc.clear()
 
 
+getWxAddress = unwrapinstance
 
 def getTextFromClipboard():
     """
