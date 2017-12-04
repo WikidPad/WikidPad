@@ -936,24 +936,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         return wikiMenu
 
-#         if wikiData is not None and wikiData.checkCapability("versioning") == 1:
-#             wikiMenu.AppendSeparator()
-#     
-# #             menuID=wx.NewId()
-# #             wikiMenu.Append(menuID, '&Store version', 'Store new version')
-# #             self.Bind(wx.EVT_MENU, lambda evt: self.showStoreVersionDialog(), id=menuID)
-#     
-#             menuID=wx.NewId()
-#             wikiMenu.Append(menuID, _(u'&Retrieve version'),
-#                     _(u'Retrieve previous version'))
-#             self.Bind(wx.EVT_MENU, lambda evt: self.showSavedVersionsDialog(), id=menuID)
-#     
-#             menuID=wx.NewId()
-#             wikiMenu.Append(menuID, _(u'Delete &All Versions'),
-#                     _(u'Delete all stored versions'))
-#             self.Bind(wx.EVT_MENU, lambda evt: self.showDeleteAllVersionsDialog(), id=menuID)
-
-
 
     def fillPluginsMenu(self, pluginMenu):
         """
@@ -4506,30 +4488,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # 
 #         finally:
 #             dlg.Destroy()
-
-    # TODO Unicode
-    def showStoreVersionDialog(self):
-        dlg = wx.TextEntryDialog (self, _("Description:"),
-                                 _("Store new version"), "",
-                                 wx.OK | wx.CANCEL)
-
-        description = None
-        if dlg.ShowModal() == wx.ID_OK:
-            description = dlg.GetValue()
-        dlg.Destroy()
-
-        if not description is None:
-            self.saveAllDocPages()
-            self.getWikiData().storeVersion(description)
-
-
-    def showDeleteAllVersionsDialog(self):
-        answer = wx.MessageBox(_("Do you want to delete all stored versions?"),
-                _("Delete All Versions"),
-                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
-
-        if answer == wx.YES:
-            self.getWikiData().deleteVersioningData()
 
 
     def showSearchDialog(self):

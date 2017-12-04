@@ -515,16 +515,6 @@ def hasVersioningData(connwrap):
     return not t1 is None
 
 
-def createVersioningTables(connwrap):
-    for tn in ("changelog", "headversion", "versions"):
-        changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
-
-
-def deleteVersioningTables(connwrap):
-    for tn in ("changelog", "headversion", "versions"):
-        connwrap.execSqlNoError("drop table %s" % tn)
-
-
 def rebuildIndices(connwrap):
     """
     Delete and recreate all necessary indices of the database

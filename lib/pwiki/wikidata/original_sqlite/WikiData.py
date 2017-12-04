@@ -37,8 +37,8 @@ except:
 # finally:
 #     pass
 
-from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, longPathEnc, \
-        longPathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
+from pwiki.StringOps import longPathEnc, \
+        longPathDec, fileContentToUnicode, utf8Enc, utf8Dec, \
         uniWithNone, loadEntireTxtFile, Conjunction, lineendToInternal
 from pwiki.StringOps import loadEntireFile, writeEntireFile, \
         iterCompatibleFilename, getFileSignatureBlock, guessBaseNameByFilename, \
