@@ -38,9 +38,10 @@ except:
 # finally:
 #     pass
 
-from pwiki.StringOps import longPathEnc, \
-        longPathDec, fileContentToUnicode, utf8Enc, utf8Dec, \
-        uniWithNone, loadEntireTxtFile, Conjunction, lineendToInternal
+from ... import StringOps
+
+from ...StringOps import longPathEnc, \
+        longPathDec, fileContentToUnicode, utf8Enc, utf8Dec
 
 
 import Consts
@@ -1329,7 +1330,7 @@ class WikiData:
         
         colTxt = ", ".join(cols)
         
-        conjunction = Conjunction("where ", "and ")
+        conjunction = StringOps.Conjunction("where ", "and ")
 
         query = "select distinct " + colTxt + " from wikiwordattrs "
         parameters = []
@@ -1671,7 +1672,7 @@ class WikiData:
         if datablock is None:
             return None
 
-        return fileContentToUnicode(lineendToInternal(datablock))
+        return fileContentToUnicode(StringOps.lineendToInternal(datablock))
 
 
     def iterAllDataBlocks(self):
@@ -2007,7 +2008,7 @@ class WikiData:
         for fn in fnames:
             word = basename(fn).replace('.wiki', '')
 
-            content = fileContentToUnicode(loadEntireTxtFile(fn))
+            content = fileContentToUnicode(StringOps.loadEntireTxtFile(fn))
             langHelper = GetApp().createWikiLanguageHelper(
                     self.wikiDocument.getWikiDefaultWikiLanguage())
 

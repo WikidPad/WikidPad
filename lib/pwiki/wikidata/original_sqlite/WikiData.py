@@ -37,12 +37,11 @@ except:
 # finally:
 #     pass
 
-from pwiki.StringOps import longPathEnc, \
-        longPathDec, fileContentToUnicode, utf8Enc, utf8Dec, \
-        uniWithNone, loadEntireTxtFile, Conjunction, lineendToInternal
-from pwiki.StringOps import loadEntireFile, writeEntireFile, \
-        iterCompatibleFilename, getFileSignatureBlock, guessBaseNameByFilename, \
-        createRandomString, pathDec
+from ... import StringOps
+
+from ...StringOps import longPathEnc, \
+        longPathDec, fileContentToUnicode, utf8Enc, utf8Dec
+from ...StringOps import writeEntireFile, iterCompatibleFilename
 
 
 import Consts
@@ -242,7 +241,7 @@ class WikiData:
 #                         "wikiPageFiles_gracefulOutsideAddAndRemove", True):
 #                     return u""
 
-            content = loadEntireTxtFile(filePath)
+            content = StringOps.loadEntireTxtFile(filePath)
 
             return fileContentToUnicode(content)
         except (IOError, OSError, sqlite.Error) as e:
@@ -1054,12 +1053,12 @@ class WikiData:
 
 
     def _findNewWordForFile(self, path):
-        wikiWord = guessBaseNameByFilename(path, self.pagefileSuffix)
+        wikiWord = StringOps.guessBaseNameByFilename(path, self.pagefileSuffix)
         try:
             if self.connWrap.execSqlQuerySingleItem(
                     "select word from wikiwords where word = ?", (wikiWord,)):
                 for i in range(20):    # "while True" is too dangerous
-                    rand = createRandomString(10)
+                    rand = StringOps.createRandomString(10)
 
                     if self.connWrap.execSqlQuerySingleItem(
                             "select word from wikiwords where word = ?",
@@ -1284,7 +1283,7 @@ class WikiData:
         try:
             files = glob.glob(join(self.dataDir, '*' + self.pagefileSuffix))
 
-            return [pathDec(basename(fn)) for fn in files]
+            return [StringOps.pathDec(basename(fn)) for fn in files]
 
 #             result = []
 #             for file in files:
@@ -1724,7 +1723,7 @@ class WikiData:
         
         colTxt = ", ".join(cols)
         
-        conjunction = Conjunction("where ", "and ")
+        conjunction = StringOps.Conjunction("where ", "and ")
         
         query = "select distinct " + colTxt + " from wikiwordattrs "
         parameters = []
@@ -2072,7 +2071,7 @@ class WikiData:
             raise DbReadAccessError(e)
 
         try:
-            datablock = loadEntireFile(join(self.dataDir, filePath))
+            datablock = StringOps.loadEntireFile(join(self.dataDir, filePath))
             return datablock
 
         except (IOError, OSError, sqlite.Error) as e:
@@ -2095,7 +2094,7 @@ class WikiData:
         if datablock is None:
             return None
 
-        return fileContentToUnicode(lineendToInternal(datablock))
+        return fileContentToUnicode(StringOps.lineendToInternal(datablock))
 
 
 
