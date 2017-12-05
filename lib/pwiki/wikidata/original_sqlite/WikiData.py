@@ -2123,6 +2123,11 @@ class WikiData:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
 
+
+            if isinstance(newdata, str):
+                newdata = StringOps.BOM_UTF8 + newdata.encode("utf-8",
+                        "surrogateescape")
+
             try:
                 if datablock is not None:
                     # It is in internal data blocks

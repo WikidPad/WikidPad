@@ -1701,6 +1701,11 @@ class WikiData:
             in a file (using DATABLOCK_STOREHINT_* constants from Consts.py).
             storeHint is ignored in compact_sqlite
         """
+        
+        if isinstance(newdata, str):
+            newdata = StringOps.BOM_UTF8 + newdata.encode("utf-8",
+                    "surrogateescape")
+
         try:
             self.connWrap.execSql("insert or replace into "
                     "datablocks(unifiedname, data) values (?, ?)",
