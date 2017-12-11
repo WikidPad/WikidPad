@@ -1836,6 +1836,8 @@ class WikiPage(AbstractWikiPage):
 
             writer.delete_by_term("unifName", unifName)
             
+            assert isinstance(content, str)
+                                    
             writer.add_document(unifName=unifName,
                     modTimestamp=self.getTimestamps()[0],
                     content=content)
@@ -1858,6 +1860,35 @@ class WikiPage(AbstractWikiPage):
                 self.getWikiData().setMetaDataState(self.wikiPageName,
                         Consts.WIKIWORDMETADATA_STATE_INDEXED)
                 return True
+
+
+    def putIntoSearchIndexExtWriter(self, writer, threadstop=DUMBTHREADSTOP):
+        """
+        Add or update the index for the given docPage, use the writer
+        handed from outside, writing is not committed.
+        Mainly called when rebuilding wiki
+        """
+        with self.textOperationLock:
+            threadstop.testValidThread()
+
+            if self.isInvalid() or not self.getWikiDocument().isSearchIndexEnabled():
+                return True  # Or false?
+            
+            content = self.getLiveText()
+
+        unifName = self.getUnifiedPageName()
+
+        writer.delete_by_term("unifName", unifName)
+        
+        assert isinstance(content, str)
+                                
+        writer.add_document(unifName=unifName,
+                modTimestamp=self.getTimestamps()[0],
+                content=content)
+
+        self.getWikiData().setMetaDataState(self.wikiPageName,
+                Consts.WIKIWORDMETADATA_STATE_INDEXED)
+
 
     def removeFromSearchIndex(self):
         """

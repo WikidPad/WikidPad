@@ -1508,6 +1508,10 @@ class WikiDocument(MiscEventSourceMixin):
             
             if self.isSearchIndexEnabled():
                 # Step four: update index
+                
+                writer = self.getSearchIndex().writer(
+                        timeout=Consts.DEADBLOCKTIMEOUT)
+
                 for wikiWord in wikiWords:
                     progresshandler.update(step, _("Update index of %s") % wikiWord)
                     try:
@@ -1519,7 +1523,7 @@ class WikiDocument(MiscEventSourceMixin):
                             # the same name as an alias
                             wikiPage = WikiPage(self, wikiWord)
 
-                        wikiPage.putIntoSearchIndex()
+                        wikiPage.putIntoSearchIndexExtWriter(writer)
 
 #                         writer.add_document(unifName="wikipage/"+wikiWord,
 #                                 modTimestamp=wikiPage.getTimestamps()[0],
@@ -1528,6 +1532,9 @@ class WikiDocument(MiscEventSourceMixin):
                         traceback.print_exc()
  
                     step += 1
+                
+                writer.commit()
+                writer = None
 
             progresshandler.update(step - 1, _("Final cleanup"))
             # Give possibility to do further reorganisation
