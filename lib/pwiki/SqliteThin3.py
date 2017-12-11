@@ -652,9 +652,9 @@ class SqliteDb3:
     # TODO Support deletion
     def create_function(self, funcname, nArg, func, textRep=SQLITE_UTF8):
         _sqliteTransObjects[c_void_p(id(func)).value] = func
-        # TODO returns int
+
         self.errhandler(_dll.sqlite3_create_function(self._dbpointer, 
-                funcname, c_int(nArg), c_int(textRep), c_void_p(id(func)),
+                utf8Enc(funcname), c_int(nArg), c_int(textRep), c_void_p(id(func)),
                 _FUNC_CALLBACK, None, None))
 
 
