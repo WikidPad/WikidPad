@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: iso-8859-1 -*-
-# Originally written by Barry Warsaw <barry@zope.com>
+# Originally written by Barry Warsaw <barry@python.org>
 #
 # Minimally patched to make it even more xgettext compatible
 # by Peter Funk <pf@artcom-gmbh.de>
@@ -24,7 +24,7 @@
 # except ImportError:
 #     _ = lambda s: s
 
-__doc__ = """pygettext -- Python equivalent of xgettext(1)
+__doc__ = ("""pygettext -- Python equivalent of xgettext(1)
 
 Many systems (Solaris, Linux, Gnu) provide extensive tools that ease the
 internationalization of C programs. Most of these tools are independent of
@@ -165,7 +165,7 @@ Options:
         conjunction with the -D option above.
 
 If `inputfile' is -, standard input is read.
-"""
+""")
 
 import os
 import imp
@@ -177,7 +177,7 @@ import token
 import tokenize
 import operator
 import codecs
-from pwiki.rtlibRepl import minidom
+from xml.dom import minidom
 from codecs import BOM_UTF8
 
 
@@ -283,7 +283,7 @@ ESCAPES['\"'] = '\\"'
 
 
 
-def escape(s):
+def escape(s, dummy_encoding):
     s = list(s)
     for i in range(len(s)):
         s[i] = ESCAPES.get(s[i], s[i])
@@ -297,18 +297,18 @@ def safe_eval(s):
     return eval(s, {'__builtins__':{}}, {})
 
 
-def normalize(s):
+def normalize(s, encoding):
     # This converts the various Python string types into a format that is
     # appropriate for .po files, namely much closer to C style.
     lines = s.split('\n')
     if len(lines) == 1:
-        s = '"' + escape(s) + '"'
+        s = '"' + escape(s, encoding) + '"'
     else:
         if not lines[-1]:
             del lines[-1]
             lines[-1] = lines[-1] + '\n'
         for i in range(len(lines)):
-            lines[i] = escape(lines[i])
+            lines[i] = escape(lines[i], encoding)
         lineterm = '\\n"\n"'
 #         s = u'""\n"' + lineterm.join(lines) + '"'
         s = '"' + lineterm.join(lines) + '"'
@@ -320,23 +320,25 @@ def containsAny(str, set):
     return 1 in [c in str for c in set]
 
 
-def _visit_pyfiles(list, dirname, names):
-    """Helper for getFilesForName()."""
-    # get extension for python source files
-    if '_py_ext' not in globals():
-        global _py_ext
-        _py_ext = [triple[0] for triple in imp.get_suffixes()
-                   if triple[2] == imp.PY_SOURCE][0]
-
-    # don't recurse into CVS directories
-    if 'CVS' in names:
-        names.remove('CVS')
-
-    # add all *.py files to list
-    list.extend(
-        [os.path.join(dirname, file) for file in names
-         if os.path.splitext(file)[1] == _py_ext]
-        )
+# def _visit_pyfiles(list, dirname, names):
+#     """Helper for getFilesForName()."""
+#     # get extension for python source files
+#     if '_py_ext' not in globals():
+#         global _py_ext
+#         _py_ext = [triple[0] for triple in imp.get_suffixes()
+#                    if triple[2] == imp.PY_SOURCE][0]
+# 
+#     print("--_visit_pyfiles11", repr(_py_ext))
+# 
+#     # don't recurse into CVS directories
+#     if 'CVS' in names:
+#         names.remove('CVS')
+# 
+#     # add all *.py files to list
+#     list.extend(
+#         [os.path.join(dirname, file) for file in names
+#          if os.path.splitext(file)[1] == _py_ext]
+#         )
 
 
 def _get_modpkg_path(dotted_name, pathlist=None):
@@ -397,9 +399,25 @@ def getFilesForName(name):
             return []
 
     if os.path.isdir(name):
+        if '_py_ext' not in globals():
+            global _py_ext
+            _py_ext = [triple[0] for triple in imp.get_suffixes()
+                       if triple[2] == imp.PY_SOURCE][0]
+
         # find all python files in directory
         list = []
-        os.path.walk(name, _visit_pyfiles, list)
+        
+        for dirpath, dirnames, filenames in os.walk(name):
+            # don't recurse into CVS directories
+            if 'CVS' in dirnames:
+                dirnames.remove('CVS')
+
+            # add all *.py files to list
+            list.extend(
+                [os.path.join(dirpath, file) for file in filenames
+                 if os.path.splitext(file)[1] == _py_ext]
+                )
+        
         return list
     elif os.path.exists(name):
         # a single file
@@ -432,7 +450,7 @@ class MessageContainer:
         header = presetMessages.get("")
         if header:
             stwr.write('msgid ""\n')
-            stwr.write('msgstr %s\n\n' % normalize(header))
+            stwr.write('msgstr %s\n\n' % normalize(header, 'UTF-8'))
         else:
             stwr.write((pot_header + '\n') %
                     {'time': timestamp, 'version': __version__})
@@ -485,10 +503,10 @@ class MessageContainer:
                         stwr.write(locline + '\n')
                 if isdocstring:
                     stwr.write('#, docstring\n')
-                stwr.write('msgid %s\n' % normalize(k))
+                stwr.write('msgid %s\n' % normalize(k, 'UTF-8'))
 
                 if k in presetMessages:
-                    stwr.write('msgstr %s\n\n' % normalize(presetMessages[k]))
+                    stwr.write('msgstr %s\n\n' % normalize(presetMessages[k], 'UTF-8'))
                 else:
                     stwr.write('msgstr ""\n\n')
 
@@ -567,8 +585,9 @@ class TokenEater:
         elif ttype not in [tokenize.COMMENT, token.INDENT, token.DEDENT,
                            token.NEWLINE, tokenize.NL]:
             # warn if we see anything else than STRING or whitespace
-            print('*** %(file)s:%(lineno)s: Seen unexpected token "%(token)s"' % \
-                {
+            print((
+                '*** %(file)s:%(lineno)s: Seen unexpected token "%(token)s"'
+                ) % {
                 'token': tstring,
                 'file': self.__curfile,
                 'lineno': self.__lineno
@@ -776,7 +795,8 @@ def main(argv):
             options.toexclude = fp.readlines()
             fp.close()
         except IOError:
-            print("Can't read --exclude-file: %s" % options.excludefilename, file=sys.stderr)
+            print((
+                "Can't read --exclude-file: %s") % options.excludefilename, file=sys.stderr)
             sys.exit(1)
     else:
         options.toexclude = []
@@ -798,20 +818,23 @@ def main(argv):
         if filename == '-':
             if options.verbose:
                 print('Reading standard input')
-            fp = sys.stdin
+            fp = sys.stdin.buffer
             closep = 0
         else:
             if options.verbose:
                 print('Working on %s' % filename)
-            fp = open(filename)
+            fp = open(filename, 'rb')
             closep = 1
         try:
             eater.set_filename(filename)
             try:
-                tokenize.tokenize(fp.readline, eater)
+                tokens = tokenize.tokenize(fp.readline)
+                for _token in tokens:
+                    eater(*_token)
             except tokenize.TokenError as e:
                 print('%s: %s, line %d, column %d' % (
-                    e[0], filename, e[1][0], e[1][1]), file=sys.stderr)
+                    e.args[0], filename, e.args[1][0], e.args[1][1]),
+                    file=sys.stderr)
         finally:
             if closep:
                 fp.close()
@@ -851,7 +874,7 @@ def main(argv):
                 options.outfile = os.path.join(options.outpath, options.outfile)
             
             # Binary output as codec writer handles line-end conversion
-            fp = open(options.outfile, 'w')
+            fp = open(options.outfile, 'wb')
             closep = 1
         try:
             fp.write(BOM_UTF8)
@@ -875,7 +898,7 @@ def main(argv):
             presetMessages = {}
 
         # Binary output as codec writer handles line-end conversion
-        fp = open(updfile, 'w')
+        fp = open(updfile, 'wb')
         try:
             if utfMode:
                 fp.write(BOM_UTF8)
