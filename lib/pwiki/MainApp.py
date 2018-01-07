@@ -6,7 +6,8 @@ from functools import reduce
 
 # To generate dependency for py2exe
 if not True:
-    import subprocess, CustomListBox
+    import subprocess, wx._xml
+    from . import CustomListBox
 
 import ExceptionLogger
 

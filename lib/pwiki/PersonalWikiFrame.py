@@ -2066,7 +2066,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             Resemble deprecated wx.ToolBar.AddSimpleTool() function
             """
             return tb.AddTool(tId, shortHelp, icon, wx.NullBitmap,
-                    shortHelpString=shortHelp, longHelpString=longHelp)
+                    shortHelp=shortHelp, longHelp=longHelp)
         
         seperator = self.lookupSystemIcon("tb_seperator")
 
