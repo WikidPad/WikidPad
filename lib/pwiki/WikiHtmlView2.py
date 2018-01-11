@@ -600,6 +600,10 @@ class WikiHtmlView2(wx.Panel):
             # unmanged event, veto it
             evt.Veto()
             return True
+        elif "PROXY_EVENT" in uri:
+            # unmanged event, veto it
+            evt.Veto()
+            return True
 
         return True
 
