@@ -235,9 +235,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         plm = self.pluginManager # Make it shorter
 
         pluginDummyFct = lambda module, *args, **kwargs: None
+        pluginDummyFctFalse = lambda module, *args, **kwargs: False
 
         self.hooks = PluginManager.PluginAPIAggregation(
-                plm.registerSimplePluginAPI(("hooks", 2),
+                plm.registerSimplePluginAPI(("hooks", 3),
                     ["startup", "newWiki", "createdWiki", "openWiki",
                     "openedWiki", "openWikiWord", "newWikiWord",
                     "openedWikiWord", "savingWikiWord", "savedWikiWord",
@@ -246,6 +247,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     "previewPageNavigation", "previewPageLoaded",
                     ] ),
 
+                plm.registerWrappedPluginAPI(("hooks", 2),
+                    startup=None, newWiki=None, createdWiki=None,
+                    openWiki=None, openedWiki=None, openWikiWord=None,
+                    newWikiWord=None, openedWikiWord=None, savingWikiWor=None,
+                    savedWikiWord=None, renamedWikiWord=None,
+                    deletedWikiWord=None, exit=None,
+                    closingWiki=None, droppingWiki=None,
+                    closedWiki=None,
+                    previewPageNavigation=pluginDummyFctFalse,
+                    previewPageLoaded=pluginDummyFct
+                    ),
+
                 plm.registerWrappedPluginAPI(("hooks", 1),
                     startup=None, newWiki=None, createdWiki=None,
                     openWiki=None, openedWiki=None, openWikiWord=None,
@@ -253,7 +266,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     savedWikiWord=None, renamedWikiWord=None,
                     deletedWikiWord=None, exit=None,
                     closingWiki=pluginDummyFct, droppingWiki=pluginDummyFct,
-                    closedWiki=pluginDummyFct
+                    closedWiki=pluginDummyFct,
+                    previewPageNavigation=pluginDummyFctFalse,
+                    previewPageLoaded=pluginDummyFct
                     )
                 )
 
