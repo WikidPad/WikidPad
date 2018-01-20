@@ -256,34 +256,36 @@ def strToBool(s, default=False):
 
 
 # TODO More formats
-def fileContentToUnicode(content):
+def fileContentToUnicode(content, tryHard=False):
     """
-    Try to detect the text encoding of byte content
-    and return converted unicode
+    Try to detect the text encoding of byte content based on BOM
+    and, if tryHard is True, by guessing and return converted unicode
     """
-    if content.startswith(BOM_UTF8):
-        return content[len(BOM_UTF8):].decode("utf-8", "surrogateescape")
-    elif content.startswith(BOM_UTF16_BE):
-        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "surrogateescape")
-    elif content.startswith(BOM_UTF16_LE):
-        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
-    else:
-        return mbcsDec(content, "surrogateescape")[0]
-
-
-# More pythonic
-def bytesToUnicode(content):
-    if type(content) == str:
+    if isinstance(content, str):
         return content
-    else:
-        try:
-            return content.decode()
-        except UnicodeDecodeError:
-            try:
-                return content.decode("utf-16")
-            except:
-                raise Exception("Unable to decode bytes")
 
+    try:    
+        if content.startswith(BOM_UTF8):
+            return content[len(BOM_UTF8):].decode("utf-8", "surrogateescape")
+        elif content.startswith(BOM_UTF16_BE):
+            return content[len(BOM_UTF16_BE):].decode("utf-16-be", "surrogateescape")
+        elif content.startswith(BOM_UTF16_LE):
+            return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
+    except UnicodeDecodeError:
+        pass
+
+    if tryHard:
+        try:
+            return content.decode("utf-8", "surrogateescape")
+        except UnicodeDecodeError:
+            pass
+    
+        try:
+            return content.decode("utf-16", "surrogateescape")
+        except UnicodeDecodeError:
+            pass
+
+    return mbcsDec(content, "surrogateescape")[0]
 
 
 
