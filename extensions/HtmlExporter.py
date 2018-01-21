@@ -883,7 +883,8 @@ class HtmlExporter(AbstractExporter):
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
 
-            realfp = open(pathEnc(outputFile), "w")
+            realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                    errors="surrogateescape")
         else:
             outputFile = None
 
@@ -990,7 +991,8 @@ class HtmlExporter(AbstractExporter):
                 if exists(pathEnc(outputFile)):
                     os.unlink(pathEnc(outputFile))
     
-                realfp = open(pathEnc(outputFile), "w")
+                realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                        errors="surrogateescape")
                 #fp = utf8Writer(realfp, "replace")
                 fp = realfp
 
@@ -1057,7 +1059,8 @@ class HtmlExporter(AbstractExporter):
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
 
-            realfp = open(pathEnc(outputFile), "w")
+            realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                    errors="surrogateescape")
             #fp = utf8Writer(realfp, "replace")
             fp = realfp
             
