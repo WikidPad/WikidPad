@@ -5162,10 +5162,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def insertAttribute(self, key, value, wikiWord=None):
-        langHelper = wx.GetApp().createWikiLanguageHelper(
+        if wikiWord is None:
+            langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
 
-        if wikiWord is None:
             attr = langHelper.createAttributeFromComponents(key, value)
             self.getActiveEditor().AppendText(attr)
         else:
@@ -5173,9 +5173,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # self.saveCurrentDocPage()
                 if self.getWikiDocument().isDefinedWikiLinkTerm(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
-                    attr = langHelper.createAttributeFromComponents(key, value,
-                            page)
-                    page.appendLiveText(attr)
+                    page.addAttributeToPage(key, value)
             except (IOError, OSError, DbAccessError) as e:
                 self.lostAccess(e)
                 raise
