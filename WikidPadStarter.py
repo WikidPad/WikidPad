@@ -1,5 +1,3 @@
-#!/bin/python
-
 
 # try:
 #     import psyco
