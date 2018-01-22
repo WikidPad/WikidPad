@@ -45,7 +45,10 @@ LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 utf8Enc = codecs.getencoder("utf-8")
 utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
-utf8Writer = codecs.getwriter("utf-8")
+#utf8Writer = codecs.getwriter("utf-8")
+
+def utf8Writer(t):
+    return codecs.getwriter("utf-8")(t).decode("utf8")
 
 def convertLineEndings(text, newLe):
     """
@@ -266,6 +269,20 @@ def fileContentToUnicode(content):
         return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
     else:
         return mbcsDec(content, "surrogateescape")[0]
+
+
+# More pythonic
+def bytesToUnicode(content):
+    if type(content) == str:
+        return content
+    else:
+        try:
+            return content.decode()
+        except UnicodeDecodeError:
+            try:
+                return content.decode("utf-16")
+            except:
+                raise Exception("Unable to decode bytes")
 
 
 
@@ -1185,6 +1202,9 @@ def urlQuote(s, safe='/'):
     The characters u"{", u"}", u"|", u"\", u"^", u"~", u"[", u"]", u"`"
     are considered unsafe and should be quoted as well.
     """
+    return urllib.parse.quote(s)
+    # This custom function appears to break with python3
+    # Can it not just be removed entirely?
     result = []
     
     for c in s:

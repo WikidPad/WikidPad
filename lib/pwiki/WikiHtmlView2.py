@@ -11,8 +11,10 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from .MiscEvent import KeyFunctionSink
 
 from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
-        urlQuote, pathnameFromUrl, flexibleUrlUnquote
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote, longPathEnc
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+
+from . import OsAbstract
 
 from . import DocPages
 from .TempFileSet import TempFileSet
@@ -586,26 +588,17 @@ class WikiHtmlView2(wx.Panel):
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
+        # Run the event through the previewPageNavigation hook
 
-        # (TODO: Add and document hook in extensions/WikidPadHooks.py)  
-#         # Run the event through the previewPageNavigation hook
-# 
-#         if self.presenter.getMainControl().hooks.previewPageNavigation(
-#                 self, evt, uri) is True:
-#             return True
-# 
-#         return False
-
-        if "PROXY_EVENT" in uri:
-            # unmanged event, veto it
-            evt.Veto()
+        if self.presenter.getMainControl().hooks.previewPageNavigation(
+                self, evt, uri) is True:
             return True
         elif "PROXY_EVENT" in uri:
             # unmanged event, veto it
             evt.Veto()
             return True
 
-        return True
+        return False
 
 
     def OnContextMenu(self):
@@ -817,9 +810,8 @@ if ((typeof jQuery !== 'undefined')) {
 
             self.scrollDeferred(lx, ly)
             
-          # (TODO: Add and document hook in extensions/WikidPadHooks.py)
-#         # Run hooks
-#         self.presenter.getMainControl().hooks.previewPageLoaded(self)
+        # Run hooks
+        self.presenter.getMainControl().hooks.previewPageLoaded(self)
 
 
     def OnMouseWheelScrollEvent(self, evt):
@@ -887,6 +879,11 @@ if ((typeof jQuery !== 'undefined')) {
                 return
 
             internaljumpPrefix = "http://internaljump/"
+
+            # It appears webkit urls sometimes need cleaning up
+            if internaljumpPrefix in status:
+                status = "{}{}".format(internaljumpPrefix, 
+                        status.split(internaljumpPrefix)[1])
 
             wikiWord = None
             if status.startswith(internaljumpPrefix):
@@ -1374,6 +1371,11 @@ if ((typeof jQuery !== 'undefined')) {
 
         internaljumpPrefix = "http://internaljump/"
 
+        # It appears webkit urls sometimes need cleaning up
+        if internaljumpPrefix in href:
+            href = "{}{}".format(internaljumpPrefix, 
+                    href.split(internaljumpPrefix)[1])
+
         if href.startswith(internaljumpPrefix + "wikipage/"):  # len("wikipage/") == 9
 
             # Jump to another wiki page
@@ -1548,8 +1550,8 @@ if ((typeof jQuery !== 'undefined')) {
 
         if link.startswith("file:"):
             try:
-                path = os.path.dirname(StringOps.pathnameFromUrl(link))
-                if not os.path.exists(StringOps.longPathEnc(path)):
+                path = os.path.dirname(pathnameFromUrl(link))
+                if not os.path.exists(longPathEnc(path)):
                     self.presenter.displayErrorMessage(
                             _("Folder does not exist"))
                     return
@@ -2056,7 +2058,8 @@ document.title = links_selected.length;
         self.ctrl.html.RunScript('document.title=links_selected[0];')
 
         if link_number > 0:
-            primary_link = self.ctrl.html.GetCurrentTitle()
+            primary_link = urllib.parse.unquote(
+                    self.ctrl.html.GetCurrentTitle())
         else:
             primary_link = None
             
@@ -2079,6 +2082,7 @@ document.title = links_selected.length;
         # If only a single link is present we can launch that and finish
         if link_number == 1:
             self.ctrl._activateLink(link, tabMode=tabMode)
+            self.clearHints()
             return
         # Or if no links visible on page
         elif link_number < 1:

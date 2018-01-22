@@ -97,13 +97,17 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
 #         self.Bind(wx.EVT_SET_FOCUS, self.OnFocused)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
-        self.Bind(wx.EVT_MENU, self.OnCloseThisTab, id=GUI_ID.CMD_CLOSE_THIS_TAB)
-        self.Bind(wx.EVT_MENU, self.OnCloseCurrentTab, id=GUI_ID.CMD_CLOSE_CURRENT_TAB)
-        self.Bind(wx.EVT_MENU, self.OnCmdSwitchThisEditorPreview,
+        self.Bind(wx.EVT_MENU, self.OnCloseThisTab, 
+                id=GUI_ID.CMD_CLOSE_THIS_TAB)
+        self.Bind(wx.EVT_MENU, self.OnCloseCurrentTab, 
+                id=GUI_ID.CMD_CLOSE_CURRENT_TAB)
+        self.Bind(wx.EVT_MENU, self.OnCmdSwitchThisEditorPreview, 
                 id=GUI_ID.CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
-        self.Bind(wx.EVT_MENU, self.OnGoTab, id=GUI_ID.CMD_GO_NEXT_TAB)
-        self.Bind(wx.EVT_MENU, self.OnGoTab, id=GUI_ID.CMD_GO_PREVIOUS_TAB)
-        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord,
+        self.Bind(wx.EVT_MENU, self.OnGoTab, 
+                id=GUI_ID.CMD_GO_NEXT_TAB)
+        self.Bind(wx.EVT_MENU, self.OnGoTab, 
+                id=GUI_ID.CMD_GO_PREVIOUS_TAB)
+        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, 
                 id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
 
     def close(self):
@@ -205,7 +209,12 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         """
         Returns the TabCtrl which contains a giver presenter
         """
-        return self.GetTabFrameFromWindow(presenter)._tabs
+        tabFrame = self.GetTabFrameFromWindow(presenter)
+
+        if tabFrame is not None:
+            return self.GetTabFrameFromWindow(presenter)._tabs
+
+        return None
 
 
     def getTabCtrlTo(self, direction, presenter=None):
@@ -358,6 +367,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         config.set("main", "wiki_mainArea_auiPerspective",
                 self.getStoredPerspective())
 
+        config.save()
 
 
     #    # TODO What about WikidPadHooks?
@@ -585,8 +595,9 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         evt.GetPageWindow().setLayerVisible(evt.IsVisible())
 
 
-    def OnTabContextMenu(self, evt):
-        pres = self.GetPage(evt.GetSelection())
+    def OnTabContextMenu(self, evt, pres=None):
+        if pres is None:
+            pres = self.GetPage(evt.GetSelection())
 
         ctxMenu = pres.getTabContextMenu()
         if ctxMenu is not None:
@@ -927,7 +938,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             else:
                 tab_part = tabs[0:tabs.index('|')]
 
-            if "=" not in tab_part:
+            if "=" not in tab_part or tab_part[-1] == "=":
                 # No pages in this perspective...
                 return False
 
@@ -953,7 +964,7 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
             to_break2, active_found = False, False
 
             for tab in tab_list.split(","):
-                if tab == "":
+                if tab.strip() == "":
                     continue
 
 #                 if u"," not in tab_list:

@@ -1134,7 +1134,31 @@ class AbstractWikiPage(DataCarryingPage):
         except struct.error:
             return AbstractWikiPage._DEFAULT_PRESENTATION
 
+    def addAttributeToPage(self, key, value, line=None, replace=False):
+        # TODO: escape value
+        #       check if parser defines attributes
+        with self.textOperationLock:
+            text = self.getLiveText()
 
+            if replace and self.getAttribute(key) != value:
+                # TODO: finish
+                pass
+
+            if line is None:
+                text = "{0}\n[{1}:\"{2}\"]".format(text, key, value)
+            else:
+                splitlines = text.splitlines()
+
+                if "[{0}".format(key) in splitlines[line-1]:
+                    text = "{0}\n{1} [{2}:\"{3}\"]\n{4}".format(
+                            "\n".join(splitlines[:line-1]), splitlines[line-1], 
+                            key, value, "\n".join(splitlines[line:]))
+                else:
+                    text = "{0}\n[{1}:\"{2}\"]\n{3}".format(
+                            "\n".join(splitlines[:line]), key, value, 
+                            "\n".join(splitlines[line-1:]))
+
+            self.replaceLiveText(text)
 
 
 class WikiPage(AbstractWikiPage):
