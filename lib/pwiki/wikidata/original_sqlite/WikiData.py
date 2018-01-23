@@ -51,6 +51,7 @@ class WikiData:
     def __init__(self, wikiDocument, dataDir, tempDir):
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
+        self.resolveCaseNormed = False
         self.cachedWikiPageLinkTermDict = None
         
         dbPath = self.wikiDocument.getWikiConfig().get("wiki_db", "db_filename",
@@ -1198,31 +1199,38 @@ class WikiData:
                 self.cache = {}
                 self.cacheNonExistent = set()
                 self.cacheComplete = False
-                
+                self.resolveCaseNormed = self.outer.resolveCaseNormed
+                    
+
             def get(self, key, default=None):
                 if self.cacheComplete:
                     return self.cache.get(key, default)
-                
+
                 if key in self.cache:
                     return self.cache.get(key, default)
                     
                 if key in self.cacheNonExistent:
                     return default
                 
-                try:
-                    value = self.lookup(key)
+                value = self._lookup(key)
+                
+                if value is None and self.resolveCaseNormed:
+                    value = self._lookupCaseNormed(key)
+                
+                if value is not None:
                     self.cache[key] = value
                     return value
-                except KeyError:
-                    self.cacheNonExistent.add(key)
-                    return default
-            
-            def lookup(self, key):
+
+                self.cacheNonExistent.add(key)
+                return default
+
+
+            def _lookup(self, key):
                 if self.outer.isDefinedWikiPageName(key):
                     return key
                 
                 try:
-                    value = self.outer.connWrap.execSqlQuerySingleItem(
+                    return self.outer.connWrap.execSqlQuerySingleItem(
                             "select word from wikiwordmatchterms "
                             "where matchterm = ? and (type & 2) != 0 ", (key,))
                     # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
@@ -1230,25 +1238,41 @@ class WikiData:
                     traceback.print_exc()
                     raise DbReadAccessError(e)
                 
-                if value is None:
-                    raise KeyError(key)
-                
-                return value
+            def _lookupCaseNormed(self, key):
+                try:
+                    return self.outer.connWrap.execSqlQuerySingleItem(
+                            "select word from wikiwordmatchterms "
+                            "where matchtermnormcase = utf8Normcase(?) "
+                            "and (type & 2) != 0 ", (key,))
+                    # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
+                except (IOError, OSError, sqlite.Error) as e:
+                    traceback.print_exc()
+                    raise DbReadAccessError(e)
 
 
             def keys(self):
+                # This function is not affected by self.resolveCaseNormed
+                # because in theory it would have to return all possible
+                # lowercase-uppercase-combinations of a word to be
+                # accurate
                 if not self.cacheComplete:
-                    self.cache = dict(self.outer.connWrap.execSqlQuery(
+                    cacheDict = dict(self.outer.connWrap.execSqlQuery(
                             "select word, word from wikiwords union "
                             "select matchterm, word from wikiwordmatchterms "
                             "where (type & 2) != 0 and not matchterm in "
                             "(select word from wikiwords)"))
                     # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
-                    self.cacheComplete = True
-                    self.cacheNonExistent = set()
 
-                return list(self.cache.keys())
+                    if not self.resolveCaseNormed:
+                        # Cache can't be complete with case normed resolving
+                        # because above
+                        self.cacheComplete = True
+                        self.cache = cacheDict
 
+                else:
+                    cacheDict = self.cache
+
+                return list(cacheDict)
 
         try:
             if self.cachedWikiPageLinkTermDict is None:
@@ -1465,11 +1489,17 @@ class WikiData:
         return list(self._getCachedWikiPageLinkTermDict().keys())
 
 
-    def getWikiPageLinkTermsStartingWith(self, thisStr, caseNormed=False):
+    def getWikiPageLinkTermsStartingWith(self, thisStr, caseNormed=None):
         """
         Get the list of wiki page link terms (page names or aliases)
         starting with thisStr. Used for autocompletion.
+        caseNormed -- Iff True also terms with different case than given thisStr
+                are taken into account. If None (default) the parameter value
+                is taken from self.resolveCaseNormed
         """
+        if caseNormed is None:
+            caseNormed = self.resolveCaseNormed
+        
         if caseNormed:
             thisStr = sqlite.escapeForGlob(thisStr.lower())   # TODO More general normcase function
 
@@ -1840,6 +1870,22 @@ class WikiData:
 
 
     # ---------- Alias handling ----------
+
+    def setResolveCaseNormed(self, cn):
+        """
+        Set if non-existing wiki words should be resolved to an existing
+        word which only differs in case when calling getWikiPageNameForLinkTerm().
+        
+        Additionally the default setting of the "caseNormed" parameter
+        is set to this value for the functions getWikiPageLinkTermsStartingWith()
+        """
+        if cn == self.resolveCaseNormed:
+            return  # Nothing to change
+
+        self.resolveCaseNormed = cn
+        # Clear cache which must be rebuilt differently depending on the setting
+        self.cachedWikiPageLinkTermDict = None
+
 
     def getWikiPageNameForLinkTerm(self, alias):
         """

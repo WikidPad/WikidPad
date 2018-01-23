@@ -936,6 +936,8 @@ WIKIDEFAULTS = {
     ("main", "wiki_database_type"): "",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact
                                          # or "original_sqlite"
+    ("main", "wiki_linkResolve_caseInsensitive"): "False",   # Iff True case is ignored for wiki word links
+
 #     ("main", "footnotes_as_wikiwords"): "False",  # Interpret footnotes (e.g. [42]) as wiki words?
     ("main", "db_pagefile_suffix"): ".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
