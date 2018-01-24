@@ -571,7 +571,12 @@ class App(wx.App, MiscEventSourceMixin):
         pass
         
         
-    def FilterEvent(self, evt):
+    def _FilterEvent_scrollUnder(self, evt):
+        """
+        Variant of FilterEvent to scroll the window currently under the cursor
+        with the mouse wheel. Under Windows, normally the focused window is
+        scrolled
+        """
         if isinstance(evt, wx.MouseEvent) and \
                 wx.wxEVT_MOUSEWHEEL == evt.GetEventType():
                     
@@ -597,13 +602,20 @@ class App(wx.App, MiscEventSourceMixin):
 #                     y = wnd.GetScrollPos(wx.VERTICAL)
 #                     wnd.SetScrollPos(wx.VERTICAL, y - scrollUnits)
                 else:
-#                     print "--FilterEvent45", repr(((evt.GetEventObject()), scrollUnits, wnd.HasScrollbar(wx.VERTICAL)))                    
+#                     print "--FilterEvent45", repr(((evt.GetEventObject()), scrollUnits, wnd.HasScrollbar(wx.VERTICAL)))
                     wnd.ProcessEvent(evt)
 
-                return 1
+                return wx.EventFilter.Event_Processed
                 
         result = wx.App.FilterEvent(self, evt)
         return result
+        
+        
+    def _FilterEvent_nothing(self, evt):
+        """
+        Variant of FilterEvent to do nothing
+        """
+        return wx.EventFilter.Event_Skip
         
 
     def pauseBackgroundThreads(self):
@@ -642,12 +654,12 @@ class App(wx.App, MiscEventSourceMixin):
             except:
                 self.collator = Localization.getCollatorByString("C",
                         collationCaseMode)
-        try:
-            self.SetCallFilterEvent(self.globalConfig.getboolean("main",
-                    "mouse_scrollUnderPointer"))
-        except AttributeError:
-            pass  # Older wxPython versions didn't support this
-            
+
+        if self.globalConfig.getboolean("main", "mouse_scrollUnderPointer"):
+            self.FilterEvent = self._FilterEvent_scrollUnder
+        else:
+            self.FilterEvent = self._FilterEvent_nothing
+
         # Set CPU affinity
         
         if OsAbstract.getCpuCount() > 1:
