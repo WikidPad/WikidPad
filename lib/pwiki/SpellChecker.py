@@ -32,93 +32,6 @@ except (AttributeError, ImportError, WindowsError):
 
 from .DocPages import AliasWikiPage, WikiPage
 
-from .StringOps import uniToGui, guiToUni
-
-from collections import defaultdict
-
-
-class enchantDictionaries:
-    """
-    For efficiency we create a single enchant dictionary for each language
-    that is used (as and when they are needed).
-
-    All interfacing with said dictionaries should be done though this class
-    """
-    def __init__(self):
-
-        self.dicts = {}
-
-        self.addedGlobalWords = defaultdict(set)
-        self.addedLocalWords = defaultdict(set)
-
-        self.current_lang = None
-
-        self.block = False
-
-    def getDictByLanguage(self, lang):
-        """
-        Helper to get the required dictionary.
-
-        Will create it if required
-        """
-
-        if lang in self.dicts:
-            return self.dicts[lang]
-        else:
-            try:
-                self.dicts[lang] = Dict(lang)
-                return self.dicts[lang]
-
-            except EnchantDriver.DictNotFoundError:
-                self.dicts[lang] = None
-                # Error message?
-                ExceptionLogger.logOptionalComponentException(
-                        "Dictionary not found: {0} (spell checking)".format(lang))
-
-
-    def addPersonalWordListsToEnchantDict(self, lang, globalWords, localWords):
-        """
-        Adds words from spellChkAddedGlobal and spellChkAddedLocal to
-        the enchant Dict.
-        """
-        print("ADD PERS", self.block)
-        if lang is None:
-            return True# Should this ever happen? (it does during startup)
-
-        # HACK (which seems to work)
-        # If 2 instances try to access the aspell library at the same time
-        # we can end up with a segfault (on linux at least)
-        if self.block:
-            return False
-
-        print("ADD PERS2")
-        self.block = True
-
-        toAddGlobal = globalWords.difference(self.addedGlobalWords[lang])
-        toAddLocal = localWords.difference(self.addedLocalWords[lang])
-
-        toAddGlobal.discard("")
-        toAddLocal.discard("")
-
-        # We add the words to each of the currently active languages
-        # It may be worth creating an option to add words directly to the
-        # dictionary (as opposed to each time that it is loaded).
-        if self.dicts[lang] is not None:
-            add_word = self.dicts[lang].add_to_session
-            check = self.dicts[lang].check
-
-            [add_word(word) for word in toAddGlobal if not check(word)]
-            [add_word(word) for word in toAddLocal if not check(word)]
-
-            self.addedGlobalWords[lang] = globalWords
-            self.addedLocalWords[lang] = localWords
-        print("ADD PERS2")
-
-        self.block = False
-
-        return True
-
-
 
 
 class SpellCheckerDialog(wx.Dialog):
@@ -145,8 +58,7 @@ class SpellCheckerDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         self.ctrls.lbReplaceSuggestions.InsertColumn(0, "Suggestion")
 
-        self.session = SpellCheckerSession(self.mainControl.getWikiDocument(), 
-                self.mainControl.getWikiDocument().enchantDictionaries)
+        self.session = SpellCheckerSession(self.mainControl.getWikiDocument())
 
         self.currentCheckedWord = None
         self.currentStart = -1
@@ -421,10 +333,8 @@ class SpellCheckerDialog(wx.Dialog):
 
 
 class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
-    def __init__(self, wikiDocument, enchantDictionaries):
+    def __init__(self, wikiDocument):
         MiscEvent.MiscEventSourceMixin.__init__(self)
-
-        self.enchantDictionaries = enchantDictionaries
 
         self.wikiDocument = wikiDocument
         self.currentDocPage = None
@@ -470,7 +380,6 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         self.spellChkAddedGlobal = None
         self.spellChkAddedLocal = None
         self.localPwlPage = None
-        self.enchantDictionaries = None
         self.wikiDocument = None
         self.__sinkWikiDocument.disconnect()
         self.__sinkApp.disconnect()
@@ -481,8 +390,7 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         of other clones.
         
         """
-        result = SpellCheckerSession(self.wikiDocument, 
-                self.enchantDictionaries)
+        result = SpellCheckerSession(self.wikiDocument)
         result.currentDocPage = self.currentDocPage
         
         # For current session
@@ -523,14 +431,11 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
 
         lang = docPage.getAttributeOrGlobal("language", self.dictLanguage)
         try:
-            if lang == "" or lang == None:
-                # TODO: should raise an ?error message that spellchecking
-                #       won't work with no language defined
+            if lang == "":
                 raise EnchantDriver.DictNotFoundError()
 
             if lang != self.dictLanguage:
-                self.enchantDict = self.enchantDictionaries.getDictByLanguage(
-                        lang)
+                self.enchantDict = Dict(lang)
                 self.dictLanguage = lang
                 self.rereadPersonalWordLists()
         except (UnicodeEncodeError, EnchantDriver.DictNotFoundError):
@@ -554,29 +459,6 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         self.localPwlPage = self.wikiDocument.getFuncPage("wiki/PWL")
         self.spellChkAddedLocal = \
                 set(self.localPwlPage.getLiveText().split("\n"))
-
-
-        #words_added = self.enchantDictionaries.addPersonalWordListsToEnchantDict(
-        #        self.dictLanguage, self.spellChkAddedGlobal, 
-        #        self.spellChkAddedLocal)
-
-        if not self.addPersonalWordLists():
-            wx.CallAfter(self.addPersonalWordLists)
-
-    def addPersonalWordLists(self):
-        if self.enchantDictionaries is None:
-            return False
-
-        return self.enchantDictionaries.addPersonalWordListsToEnchantDict(
-                self.dictLanguage, self.spellChkAddedGlobal, 
-                self.spellChkAddedLocal)
-
-        # This is probably very bad practice
-        #while not words_added:
-        #    words_added = self.enchantDictionaries.addPersonalWordListsToEnchantDict(
-        #        self.dictLanguage, self.spellChkAddedGlobal, 
-        #        self.spellChkAddedLocal)
-
 
 
     def findAndLoadNextWikiPage(self, firstCheckedWikiWord, checkedWikiWord):
@@ -608,17 +490,11 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
 
 
     def checkWord(self, spWord):
-        # If no enchantDict we just use locally defined words
-        if self.enchantDict is None:
-            return spWord in self.spellChkIgnore or \
-                    spWord in self.spellChkAddedGlobal or \
-                    spWord in self.spellChkAddedLocal
-        # Otherwise we only care about the ignore list (the rest is
-        # handled by adding the words to the enchantDict, see
-        # addPersonalWordListsToEnchantDict)
-        else:
-            return spWord in self.spellChkIgnore or \
-                    self.enchantDict.check(spWord)
+        return spWord in self.spellChkIgnore or \
+                spWord in self.spellChkAddedGlobal or \
+                spWord in self.spellChkAddedLocal or \
+                (self.enchantDict is not None and \
+                self.enchantDict.check(spWord))
 
     def suggest(self, spWord):
         if self.enchantDict is None:
@@ -661,7 +537,6 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         words = list(self.spellChkAddedGlobal)
         self.wikiDocument.getCollator().sort(words)
         self.globalPwlPage.replaceLiveText("\n".join(words))
-        self.enchantDict.add_to_session(spWord)
 
 
     def addIgnoreWordLocal(self, spWord):
@@ -674,7 +549,6 @@ class SpellCheckerSession(MiscEvent.MiscEventSourceMixin):
         words = list(self.spellChkAddedLocal)
         self.wikiDocument.getCollator().sort(words)
         self.localPwlPage.replaceLiveText("\n".join(words))
-        self.enchantDict.add_to_session(spWord)
 
 
     def buildUnknownWordList(self, text, threadstop=DUMBTHREADSTOP):

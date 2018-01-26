@@ -432,8 +432,6 @@ class WikiDocument(MiscEventSourceMixin):
         self.dataDir = dataDir
         self.dbtype = wikidhName
 
-        self.enchantDictionaries = SpellChecker.enchantDictionaries()
-
         self.whooshIndex = None
 
         self.refCount = 1
@@ -469,8 +467,7 @@ class WikiDocument(MiscEventSourceMixin):
         if not self.recoveryMode:
             if SpellChecker.isSpellCheckSupported():
                 self.onlineSpellCheckerSession = \
-                        SpellChecker.SpellCheckerSession(self, 
-                                self.enchantDictionaries)
+                        SpellChecker.SpellCheckerSession(self)
                 self.onlineSpellCheckerSession.rereadPersonalWordLists()
 
         # Path to file storage
@@ -754,13 +751,11 @@ class WikiDocument(MiscEventSourceMixin):
         return self.onlineSpellCheckerSession
 
 
-    # The new spellchecker no longer needs cloning
-    #
-    #def createOnlineSpellCheckerSessionClone(self):
-    #    if self.onlineSpellCheckerSession is None:
-    #        return None
-    #    
-    #    return self.onlineSpellCheckerSession.cloneForThread()
+    def createOnlineSpellCheckerSessionClone(self):
+        if self.onlineSpellCheckerSession is None:
+            return None
+        
+        return self.onlineSpellCheckerSession.cloneForThread()
 
 
     def getNoAutoSaveFlag(self):

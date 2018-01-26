@@ -1621,12 +1621,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if unknownWord:
                 # Right click on a word not in spelling dictionary
                 spellCheckerSession = self.presenter.getWikiDocument()\
-                        .getOnlineSpellCheckerSession()
+                        .createOnlineSpellCheckerSessionClone()
                 spellCheckerSession.setCurrentDocPage(self.getLoadedDocPage())
                 if spellCheckerSession:
                     # Show suggestions if available (up to first 5)
                     suggestions = spellCheckerSession.suggest(unknownWord)[:5]
-                    #spellCheckerSession.close()
+                    spellCheckerSession.close()
 
                     if len(suggestions) > 0:
                         for s, mid in zip(suggestions, self.SUGGESTION_CMD_IDS):
