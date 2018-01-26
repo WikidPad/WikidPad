@@ -1024,19 +1024,19 @@ class AbstractWikiPage(DataCarryingPage):
                         lambda: origThreadstop.isValidThread() and 
                         liveTextPlaceHold is self.liveTextPlaceHold)
 
-        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
-        if spellSession is None:
-            return
-            
-        spellSession.setCurrentDocPage(self)
-
         if len(text) == 0:
             unknownWords = []
         else:
+            spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
+            if spellSession is None:
+                return
+                
+            spellSession.setCurrentDocPage(self)
+
             unknownWords = spellSession.buildUnknownWordList(text,
                     threadstop=threadstop)
 
-        spellSession.close()
+            spellSession.close()
 
         with self.textOperationLock:
             threadstop.testValidThread()
