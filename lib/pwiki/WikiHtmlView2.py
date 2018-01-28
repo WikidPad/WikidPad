@@ -11,8 +11,10 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from .MiscEvent import KeyFunctionSink
 
 from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
-        urlQuote, pathnameFromUrl, flexibleUrlUnquote
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote, longPathEnc
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+
+from . import OsAbstract
 
 from . import DocPages
 from .TempFileSet import TempFileSet
@@ -582,26 +584,31 @@ class WikiHtmlView2(wx.Panel):
             self.updateStatus(None)
             evt.Veto()
             return True
+        elif "PROXY_EVENT//ANCHOR/" in uri:
+            anchor = uri.split("PROXY_EVENT//ANCHOR/")[1]
+            self.html.RunScript("""
+                document.getElementsByName("{0}")[0].scrollIntoView()
+                // We don't use location.href as we get into a
+                // navigation loop hell
+                //location.href = "#{0}";
+                """.format(anchor))
+            evt.Veto()
+            return True
         # This breaks if not in VI mode
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
+        # Run the event through the previewPageNavigation hook
 
-        # (TODO: Add and document hook in extensions/WikidPadHooks.py)  
-#         # Run the event through the previewPageNavigation hook
-# 
-#         if self.presenter.getMainControl().hooks.previewPageNavigation(
-#                 self, evt, uri) is True:
-#             return True
-# 
-#         return False
-
-        if "PROXY_EVENT" in uri:
+        if self.presenter.getMainControl().hooks.previewPageNavigation(
+                self, evt, uri) is True:
+            return True
+        elif "PROXY_EVENT" in uri:
             # unmanged event, veto it
             evt.Veto()
             return True
 
-        return True
+        return False
 
 
     def OnContextMenu(self):
@@ -813,9 +820,8 @@ if ((typeof jQuery !== 'undefined')) {
 
             self.scrollDeferred(lx, ly)
             
-          # (TODO: Add and document hook in extensions/WikidPadHooks.py)
-#         # Run hooks
-#         self.presenter.getMainControl().hooks.previewPageLoaded(self)
+        # Run hooks
+        self.presenter.getMainControl().hooks.previewPageLoaded(self)
 
 
     def OnMouseWheelScrollEvent(self, evt):
@@ -883,6 +889,11 @@ if ((typeof jQuery !== 'undefined')) {
                 return
 
             internaljumpPrefix = "http://internaljump/"
+
+            # It appears webkit urls sometimes need cleaning up
+            if internaljumpPrefix in status:
+                status = "{}{}".format(internaljumpPrefix, 
+                        status.split(internaljumpPrefix)[1])
 
             wikiWord = None
             if status.startswith(internaljumpPrefix):
@@ -1058,7 +1069,8 @@ if ((typeof jQuery !== 'undefined')) {
             if self.anchor is not None:
 #                 self.passNavigate += 1
                 #self.html.LoadURL(self.currentLoadedUrl + u"#" + self.anchor)
-                wx.CallAfter(self.html.LoadURL, self.currentLoadedUrl + "#" + self.anchor)
+                wx.CallAfter(self.html.LoadURL, "PROXY_EVENT//ANCHOR/" + 
+                        self.anchor)
 
                 # Is this neccessary?
                 wx.CallAfter(self.postRefresh, self.anchor)
@@ -1068,7 +1080,7 @@ if ((typeof jQuery !== 'undefined')) {
             #    self.scrollDeferred(lx, ly)
 
 
-        self.anchor = None
+        #self.anchor = None
         self.outOfSync = False
 
     def generateExportHtml(self, wikiPage, threadstop=DUMBTHREADSTOP):
@@ -1156,7 +1168,7 @@ if ((typeof jQuery !== 'undefined')) {
                 #    self.scrollDeferred(lx, ly)
 
             self.outOfSync = False
-            self.anchor = None
+            #self.anchor = None
 
         except NotCurrentThreadException:
             return
@@ -1370,6 +1382,24 @@ if ((typeof jQuery !== 'undefined')) {
 
         internaljumpPrefix = "http://internaljump/"
 
+        # It appears webkit urls sometimes need cleaning up
+        if internaljumpPrefix in href:
+            href = "{}{}".format(internaljumpPrefix, 
+                    href.split(internaljumpPrefix)[1])
+
+
+        ## Webview uses the full url for links to anchors on the same page
+        #elif href[len("file://"):].startswith(
+        #        self.currentLoadedUrl[len("file:"):]):
+        #    wikiWord = self.currentLoadedWikiWord
+        #    print(self.currentLoadedUrl, wikiWord)
+        #    wikiWord = self.currentLoadedWikiWord
+        #    try:
+        #        href = "{}{}{}".format(internaljumpPrefix, wikiWord, 
+        #                href.split("#", 1)[1])
+        #    except IndexError:
+        #        anchor = None
+
         if href.startswith(internaljumpPrefix + "wikipage/"):  # len("wikipage/") == 9
 
             # Jump to another wiki page
@@ -1444,7 +1474,7 @@ if ((typeof jQuery !== 'undefined')) {
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
             normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
-            if len(hrefSplit) == 2 and normedPath in self.normHtpaths:
+            if len(hrefSplit) == 2 and normedPath.encode() in self.normHtpaths:
             #if len(hrefSplit) == 2 and normedPath in self.normHtpath:
                 self.gotoAnchor(hrefSplit[1])
                 #decision.ignore()
@@ -1544,8 +1574,8 @@ if ((typeof jQuery !== 'undefined')) {
 
         if link.startswith("file:"):
             try:
-                path = os.path.dirname(StringOps.pathnameFromUrl(link))
-                if not os.path.exists(StringOps.longPathEnc(path)):
+                path = os.path.dirname(pathnameFromUrl(link))
+                if not os.path.exists(longPathEnc(path)):
                     self.presenter.displayErrorMessage(
                             _("Folder does not exist"))
                     return
@@ -2052,7 +2082,8 @@ document.title = links_selected.length;
         self.ctrl.html.RunScript('document.title=links_selected[0];')
 
         if link_number > 0:
-            primary_link = self.ctrl.html.GetCurrentTitle()
+            primary_link = urllib.parse.unquote(
+                    self.ctrl.html.GetCurrentTitle())
         else:
             primary_link = None
             
@@ -2075,6 +2106,7 @@ document.title = links_selected.length;
         # If only a single link is present we can launch that and finish
         if link_number == 1:
             self.ctrl._activateLink(link, tabMode=tabMode)
+            self.clearHints()
             return
         # Or if no links visible on page
         elif link_number < 1:

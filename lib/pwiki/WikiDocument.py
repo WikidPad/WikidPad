@@ -417,6 +417,9 @@ class WikiDocument(MiscEventSourceMixin):
             self.wikiData.setEditorTextMode(self.getWikiConfig().getboolean("main",
                     "editor_text_mode", False))
 
+        wikiData.setResolveCaseNormed(wikiConfig.getboolean("main",
+                    "wiki_linkResolve_caseInsensitive", False))
+
         self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
         self.wikiWideHistory = WikiWideHistory(self)
@@ -2510,8 +2513,9 @@ class WikiDocument(MiscEventSourceMixin):
 
     def _handleWikiConfigurationChanged(self, miscevt):
         wikiData = self.getWikiData()
+        wikiConfig = self.getWikiConfig()
         
-        if self.getWikiConfig().getboolean("main",
+        if wikiConfig.getboolean("main",
                 "indexSearch_enabled", False):
             self.pushDirtyMetaDataUpdate()
         else:
@@ -2534,8 +2538,13 @@ class WikiDocument(MiscEventSourceMixin):
                 self.removeSearchIndex()
 
         if wikiData.checkCapability("filePerPage") is not None:
-            wikiData.setEditorTextMode(self.getWikiConfig().getboolean("main",
+            wikiData.setEditorTextMode(wikiConfig.getboolean("main",
                     "editor_text_mode", False))
+        
+        wikiData.setResolveCaseNormed(wikiConfig.getboolean("main",
+                    "wiki_linkResolve_caseInsensitive", False))
+        
+        
 
 
     def getFileSignatureBlock(self, filename):

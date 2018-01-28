@@ -45,7 +45,10 @@ LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 utf8Enc = codecs.getencoder("utf-8")
 utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
-utf8Writer = codecs.getwriter("utf-8")
+#utf8Writer = codecs.getwriter("utf-8")
+
+def utf8Writer(t):
+    return codecs.getwriter("utf-8")(t).decode("utf8")
 
 def convertLineEndings(text, newLe):
     """
@@ -253,20 +256,36 @@ def strToBool(s, default=False):
 
 
 # TODO More formats
-def fileContentToUnicode(content):
+def fileContentToUnicode(content, tryHard=False):
     """
-    Try to detect the text encoding of byte content
-    and return converted unicode
+    Try to detect the text encoding of byte content based on BOM
+    and, if tryHard is True, by guessing and return converted unicode
     """
-    if content.startswith(BOM_UTF8):
-        return content[len(BOM_UTF8):].decode("utf-8", "surrogateescape")
-    elif content.startswith(BOM_UTF16_BE):
-        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "surrogateescape")
-    elif content.startswith(BOM_UTF16_LE):
-        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
-    else:
-        return mbcsDec(content, "surrogateescape")[0]
+    if isinstance(content, str):
+        return content
 
+    try:    
+        if content.startswith(BOM_UTF8):
+            return content[len(BOM_UTF8):].decode("utf-8", "surrogateescape")
+        elif content.startswith(BOM_UTF16_BE):
+            return content[len(BOM_UTF16_BE):].decode("utf-16-be", "surrogateescape")
+        elif content.startswith(BOM_UTF16_LE):
+            return content[len(BOM_UTF16_LE):].decode("utf-16-le", "surrogateescape")
+    except UnicodeDecodeError:
+        pass
+
+    if tryHard:
+        try:
+            return content.decode("utf-8", "surrogateescape")
+        except UnicodeDecodeError:
+            pass
+    
+        try:
+            return content.decode("utf-16", "surrogateescape")
+        except UnicodeDecodeError:
+            pass
+
+    return mbcsDec(content, "surrogateescape")[0]
 
 
 

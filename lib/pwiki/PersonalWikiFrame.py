@@ -235,15 +235,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         plm = self.pluginManager # Make it shorter
 
         pluginDummyFct = lambda module, *args, **kwargs: None
+        pluginDummyFctFalse = lambda module, *args, **kwargs: False
 
         self.hooks = PluginManager.PluginAPIAggregation(
-                plm.registerSimplePluginAPI(("hooks", 2),
+                plm.registerSimplePluginAPI(("hooks", 3),
                     ["startup", "newWiki", "createdWiki", "openWiki",
                     "openedWiki", "openWikiWord", "newWikiWord",
                     "openedWikiWord", "savingWikiWord", "savedWikiWord",
                     "renamedWikiWord", "deletedWikiWord", "exit",
-                    "closingWiki", "droppingWiki", "closedWiki"
+                    "closingWiki", "droppingWiki", "closedWiki", 
+                    "previewPageNavigation", "previewPageLoaded",
                     ] ),
+
+                plm.registerWrappedPluginAPI(("hooks", 2),
+                    startup=None, newWiki=None, createdWiki=None,
+                    openWiki=None, openedWiki=None, openWikiWord=None,
+                    newWikiWord=None, openedWikiWord=None, savingWikiWor=None,
+                    savedWikiWord=None, renamedWikiWord=None,
+                    deletedWikiWord=None, exit=None,
+                    closingWiki=None, droppingWiki=None,
+                    closedWiki=None,
+                    previewPageNavigation=pluginDummyFctFalse,
+                    previewPageLoaded=pluginDummyFct
+                    ),
 
                 plm.registerWrappedPluginAPI(("hooks", 1),
                     startup=None, newWiki=None, createdWiki=None,
@@ -252,7 +266,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     savedWikiWord=None, renamedWikiWord=None,
                     deletedWikiWord=None, exit=None,
                     closingWiki=pluginDummyFct, droppingWiki=pluginDummyFct,
-                    closedWiki=pluginDummyFct
+                    closedWiki=pluginDummyFct,
+                    previewPageNavigation=pluginDummyFctFalse,
+                    previewPageLoaded=pluginDummyFct
                     )
                 )
 
@@ -1692,6 +1708,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('Copy full "wiki:" URL of the word to clipboard'),
                 self.OnCmdClipboardCopyUrlToCurrentWikiWord,
                 updatefct=(self.OnUpdateDisNotWikiPage,))
+
+        self.addMenuItem(wikiPageMenu, _(u'Find Similar WikiWords'),
+                _(u'Find similary named WikiWords to the highlighted link'),
+                lambda evt: self.getActiveEditor().findSimilarWords(),
+                updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
+                )
 
         wikiPageMenu.AppendSeparator()
 
@@ -3398,6 +3420,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         self.getMainAreaPanel().showPresenter(targetPresenter)
                         
                 else:
+                    # Try and rebuild broken perspective
+                    # occurs on non clean shutdowns
+                    if "=@layout" in mainAreaPerspective:
+                        a, b = mainAreaPerspective.split("=", 1)
+
+                        mainAreaPerspective = "".join([
+                            a, 
+                            r"=*DocPagePresenter={0}=0=textedit\x7cwikipage/{0}".format( 
+                                self.getWikiDocument().getWikiName()), 
+                            b])
+
+
                     self.getMainAreaPanel().setByStoredPerspective(
                             "MainAreaPanel", mainAreaPerspective,
                             self.perspectiveTypeFactory)
@@ -3746,6 +3780,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     forceReopen, **evtprops)
 
             self.getMainAreaPanel().showPresenter(dpp)
+
+            self.getMainAreaPanel().updateConfig()
             ## _prof.stop()
         except (WikiFileNotFoundException, IOError, OSError, DbAccessError) as e:
             self.lostAccess(e)
@@ -3795,6 +3831,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not tabMode & 1:
             # Show in foreground (if presenter is in other window, this does nothing)
             self.getMainAreaPanel().showPresenter(presenter)
+
+        self.getMainAreaPanel().updateConfig()
 
         return presenter
 
@@ -4458,6 +4496,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showWikiWordRenameDialog(self, wikiWord=None):
         if wikiWord is None:
             wikiWord = self.getCurrentWikiWord()
+            # Save all open pages (so new pages are created)
+            self.saveAllDocPages()
 
         if wikiWord is not None:
             wikiWord = self.getWikiDocument().getWikiPageNameForLinkTerm(wikiWord)
@@ -5122,10 +5162,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def insertAttribute(self, key, value, wikiWord=None):
-        langHelper = wx.GetApp().createWikiLanguageHelper(
+        if wikiWord is None:
+            langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
 
-        if wikiWord is None:
             attr = langHelper.createAttributeFromComponents(key, value)
             self.getActiveEditor().AppendText(attr)
         else:
@@ -5133,9 +5173,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # self.saveCurrentDocPage()
                 if self.getWikiDocument().isDefinedWikiLinkTerm(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
-                    attr = langHelper.createAttributeFromComponents(key, value,
-                            page)
-                    page.appendLiveText(attr)
+                    page.addAttributeToPage(key, value)
             except (IOError, OSError, DbAccessError) as e:
                 self.lostAccess(e)
                 raise

@@ -364,11 +364,25 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
                 evt, "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"), 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, "above"), 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
-        self.Bind(wx.EVT_MENU, self.OnConvertUrlAbsoluteRelativeThis,
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"), 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, "below"), 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
+
+
+        self.Bind(wx.EVT_MENU, self.OnConvertUrlAbsoluteRelativeThis, 
                 id=GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS)
 
-        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis,
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, 
                 id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
 
         self.Bind(wx.EVT_MENU, self.OnDeleteFile, id=GUI_ID.CMD_DELETE_FILE)
@@ -1822,8 +1836,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     threadstop.testValidThread()
 
                     # TODO: Faster? How?
-                    stylebytes = "".join([chr(ord(a) | ord(b))
-                            for a, b in zip(stylebytes, spellStyleBytes)])
+                    stylebytes = "".join([chr(a | b)
+                            for a, b in zip(stylebytes, spellStyleBytes)]
+                            ).encode("raw_unicode_escape")
 
                     self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
                 else:
@@ -2498,6 +2513,34 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return self.activateTokens(tokens, tabMode)
 
 
+    def findSimilarWords(self, mousePosition=None):
+        """
+        Finds similar words to an undefined link
+
+        TODO: make an activateLink option?
+        """
+        nodeList = self.getTokensForMousePos(mousePosition)
+
+        if len(nodeList) == 0:
+            return False
+
+        for node in nodeList:
+            if node.name == "wikiWord":
+
+                if self.presenter.getWikiDocument().isDefinedWikiLinkTerm(
+                        node.wikiWord):
+                    return False
+
+                dlg = AdditionalDialogs.FindSimilarNamedWikiWordDialog(
+                        self.presenter, -1, node.wikiWord, 0)
+                dlg.CenterOnParent(wx.BOTH)
+                dlg.ShowModal()
+                dlg.Destroy()
+                return
+               
+
+
+
 
     def OnReplaceThisSpellingWithSuggestion(self, evt):
         if self.contextMenuTokens and self.contextMenuSpellCheckSuggestions:
@@ -2589,6 +2632,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if self.contextMenuTokens:
             ed.activateTokens(self.contextMenuTokens, 6)
 
+    def OnFindSimilarWikiWords(self, evt, direction=None):
+        self.findSimilarWords()
 
     def OnOpenContainingFolderThis(self, evt):
         if self.contextMenuTokens:
@@ -3764,6 +3809,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def OnDwellStart(self, evt):
         if self.dwellLockCounter > 0:
             return
+        elif self.vi is not None and self.vi.KeyCommandInProgress():
+            # Otherwise calltips (etc..) will break a command input
+            return
 
         wikiDocument = self.presenter.getWikiDocument()
         if wikiDocument is None:
@@ -4684,6 +4732,7 @@ class ViHandler(ViHelper):
     # these navigation commands have been prefixed by "g".
     # TODO: different repeat command for these?
     (k["g"], k["f"])  : (0, (self.ctrl.activateLink, { "tabMode" : 0 }), 0, 0), # gf
+    (k["\\"], k["g"], k["f"])  : (0, (self.ctrl.findSimilarWords, None), 0, 0), # \gf
     (k["g"], k["c"])  : (0, (self.PseudoActivateLink, 0), 0, 0), # gc
     (k["g"], k["C"])  : (0, (self.PseudoActivateLink, 2), 0, 0), # gC
 
@@ -4720,11 +4769,7 @@ class ViHandler(ViHelper):
     (k["\\"], k["s"]) : (0, (self.CreateShortHint, None), 2, 0), # \s
 
     (("Alt", k["g"]),)    : (0, (self.GoogleSelection, None), 1, 0), # <a-g>
-
-    (("Ctrl", k["w"]), k["l"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "right"), 0, 0), # <c-w>l
-    (("Ctrl", k["w"]), k["h"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "left"), 0, 0), # <c-w>l
-    (("Ctrl", k["w"]), k["j"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "below"), 0, 0), # <c-w>l
-    (("Ctrl", k["w"]), k["k"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "above"), 0, 0), # <c-w>l
+    (("Alt", k["e"]),)    : (0, (self.ctrl.evalScriptBlocks, None), 1, 0), # <a-e>
 
     (("Ctrl", k["w"]), k["l"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "right"), 0, 0), # <c-w>l
     (("Ctrl", k["w"]), k["h"])  : (0, (self.ctrl.presenter.getMainControl().getMainAreaPanel().switchPresenterByPosition, "left"), 0, 0), # <c-w>l
@@ -4819,7 +4864,7 @@ class ViHandler(ViHelper):
             })
         # And delete a few so our key mods are correct
         # These are keys that who do not serve the same function in visual mode
-        # as in normal mode (and it most cases are replaced by other function)
+        # as in normal mode (in most cases they are replaced by other function)
         del self.keys[2][(k["d"], k["d"])] # dd
         del self.keys[2][(k["y"], k["y"])] # yy
         del self.keys[2][(k["i"],)] # i
@@ -5460,7 +5505,7 @@ class ViHandler(ViHelper):
                 text = self.ctrl.GetSelectedText()[1:-1]
                 self.ctrl.ReplaceSelection(text)
                 #self.ctrl.CharLeft()
-                self.ctrl.SetSelection(pos, pos + len(bytes(text)))
+                self.ctrl.SetSelection(pos, pos + len(text))
                 self.SurroundSelection(keycodes[1])
                 self.ctrl.GotoPos(pos)
                 self.EndUndo(force=True)
@@ -5484,11 +5529,21 @@ class ViHandler(ViHelper):
         self.SurroundSelection(code)
         self.EndUndo()
 
-    def GetUnichrAt(self, pos):
+    def GetUnichrAt(self, pos, checkstart=False):
         """
-        Returns the character under the caret.
-        Works with unicode characters.
+        Returns the character under the caret. 
         """
+        if checkstart:
+            return self.ctrl.GetTextRange(
+                    self.PositionBefore(self.PositionAfter(pos)), 
+                    self.ctrl.PositionAfter(pos))
+        else:
+            return self.ctrl.GetTextRange(pos, self.ctrl.PositionAfter(pos))
+
+        # Unfortunately we still can't use
+        return self.ctrl.GetCharAt(pos)
+
+        # Pre phoenix method
         return self.ctrl.GetTextRange(pos, self.ctrl.PositionAfter(pos))
 
     def SelectInTextObject(self, ob):
@@ -5672,14 +5727,14 @@ class ViHandler(ViHelper):
         if self.SearchBackwardsForChar(bracket, count):
             pos = self.ctrl.GetCurrentPos()
 
-            pre_text = self.ctrl.GetTextRange(pos, start_pos)
+            pre_text = self.ctrl.GetTextRangeRaw(pos, start_pos)
 
-            while pre_text.count(bracket) - \
-                    pre_text.count(self.BRACES[bracket]) != self.count:
+            while pre_text.count(bracket.encode()) - \
+                    pre_text.count(self.BRACES[bracket].encode()) != self.count:
                 self.ctrl.CharLeft()
                 if self.SearchBackwardsForChar(bracket, 1):
                     pos = self.ctrl.GetCurrentPos()
-                    pre_text = self.ctrl.GetTextRange(pos, start_pos)
+                    pre_text = self.ctrl.GetTextRangeRaw(pos, start_pos)
                 else:
                     break
 
@@ -5924,13 +5979,13 @@ class ViHandler(ViHelper):
 
     def CheckLineEnd(self):
         if self.mode not in [ViHelper.VISUAL, ViHelper.INSERT]:
-            line_text, line_pos = self.ctrl.GetCurLine()
+            line_text, line_pos = self.ctrl.GetCurLineRaw()
             if len(line_text) > 1 and line_text != self.ctrl.GetEOLChar():
                 if self.OnLastLine():
-                    if line_pos >= len(bytes(line_text)):
+                    if line_pos >= len(line_text):
                         self.ctrl.CharLeft()
                 else:
-                    if line_pos >= len(bytes(line_text)) - 1:
+                    if line_pos >= len(line_text) - 1:
                         self.ctrl.CharLeft()
 
     def OnLastLine(self):
@@ -6335,6 +6390,7 @@ class ViHandler(ViHelper):
         self.SelectCurrentLine()
 
         # Check if heading needs line padding above
+        # NOTE: fails if whitespace on line above
         extra = ""
         if self.settings["blank_line_above_headings"]:
             start = self.ctrl.GetSelectionStart()
@@ -6579,8 +6635,8 @@ class ViHandler(ViHelper):
 
         n = 0
         for i in range(count):
-            pos = text.find(search_char, pos + 1)
-
+            pos = text.find(search_char.encode(), pos + 1)
+            
         if pos > -1:
             if not wrap_lines:
 
@@ -6622,12 +6678,12 @@ class ViHandler(ViHelper):
         text = self.ctrl.GetTextRaw()
         text_to_search = text[:pos+1]
         for i in range(count):
-            pos = text_to_search.rfind(search_char)
+            pos = text_to_search.rfind(search_char.encode())
             text_to_search = text[:pos]
 
         if pos > -1:
             if not wrap_lines:
-                text_to_check = self.ctrl.GetTextRangeRaw(start_pos, pos)
+                text_to_check = self.ctrl.GetTextRange(start_pos, pos)
                 if self.ctrl.GetEOLChar() in text_to_check:
                     return False
             self.ctrl.GotoPos(pos)
@@ -6656,14 +6712,14 @@ class ViHandler(ViHelper):
 
         search_brace = b[brace]
 
-        brace_length = len(bytes(search_brace))
+        brace_length = len(search_brace)
 
         # It is probably unnecessary to convert to bytes, but it will
         # prevent any unicode warnings that may otherwise occur
-        brace_bytes = bytes(brace)
-        search_brace_bytes = bytes(search_brace)
+        brace_bytes = brace.encode()
+        search_brace_bytes = search_brace.encode()
         for j in range(len(text)-brace_length + 1):
-            i = bytes(text[j:j+brace_length])
+            i = text[j:j+brace_length]
             if i == brace_bytes:
                 brace_count += 1
             elif i == search_brace_bytes:
@@ -6707,7 +6763,7 @@ class ViHandler(ViHelper):
         if code is None:
             return False
         # Weird stuff happens when searching for a unicode string
-        char = bytes(self.GetCharFromCode(code))
+        char = self.GetCharFromCode(code)
         pos = self.ctrl.GetCurrentPos()
 
         if repeat:
@@ -7112,7 +7168,7 @@ class ViHandler(ViHelper):
             pos = self._GetSelectionRange()
             self.ctrl.ReplaceSelection(text)
             self.ctrl.GotoPos(pos[0])
-            return ((pos[0], pos[0]+len(bytes(text))))
+            return ((pos[0], pos[0]+len(text)))
         return False
 
     def EndDelete(self):
@@ -7271,7 +7327,7 @@ class ViHandler(ViHelper):
 
         n = -1
         for i in self.SENTENCE_ENDINGS:
-            index = text.rfind(i)
+            index = text.rfind(i.encode())
             if index != -1 and index > n:
                 n = index
         pos = n
@@ -7348,7 +7404,7 @@ class ViHandler(ViHelper):
 
         n = page_length
         for i in self.SENTENCE_ENDINGS:
-            index = text.find(i)
+            index = text.find(i.encode())
             if index != -1 and index < n:
                 n = index
         pos = pos + n
@@ -7452,6 +7508,8 @@ class ViHandler(ViHelper):
         line, line_pos = self.ctrl.GetCurLine()
         line_no = self.ctrl.GetCurrentLine()
 
+        rawline = line.encode()
+
         # Last line doesn't have an EOL char which the code below requires
         if self.OnLastLine():
             line = line + self.ctrl.GetEOLChar()
@@ -7459,17 +7517,16 @@ class ViHandler(ViHelper):
         end_offset = 1
 
         if not allow_last_char and len(line) > 2:
-            end_offset = end_offset + len(bytes(line[-2]))
+            end_offset = end_offset + len(line[-2].encode())
 
         if offset > 0:
-            if line_pos + end_offset == len(bytes(line)):
+            if line_pos + end_offset == len(rawline):
                 return
-            bytes_to_move = len(bytes(
-                        str(bytes(line)[line_pos:-end_offset])[:offset]))
+            bytes_to_move = len(line.encode()[line_pos:-end_offset].decode()[:offset].encode())
         elif offset < 0:
             if line_pos == 0:
                 return
-            bytes_to_move = -len(bytes(str(bytes(line)[:line_pos])[offset:]))
+            bytes_to_move = -len(line.encode()[:line_pos].decode()[offset:].encode())
         else:
             # Offset is 0, do nothing
             return
@@ -7630,18 +7687,23 @@ class ViHandler(ViHelper):
         char = self.GetUnichrAt(pos)
 
         # At the end of the file
+        # TODO: check what this does in p3
         if char is None:
             self.ctrl.CharLeft()
             self.SetLineColumnPos()
             return
 
-        text_length = self.ctrl.GetTextLength()
+        text_length = self.ctrl.GetTextLength() - 1
+
 
         if reverse:
             offset = -1
             move = self.ctrl.CharLeft
             move_extend = self.ctrl.CharLeftExtend
         else:
+            if pos >= text_length:
+                # Already at end of the text - nothing to do
+                return
             offset = 1
             move = self.ctrl.CharRight
             move_extend = self.ctrl.CharRightExtend
@@ -7651,8 +7713,9 @@ class ViHandler(ViHelper):
         if char in string.whitespace:
             char = self.GetUnichrAt(pos + offset)
             if char is not None:
-                while char is not None and char in string.whitespace:
-                    pos = pos + offset
+                while char is not None and char in string.whitespace \
+                        and pos < text_length:
+                    pos = pos + offset * len(char.encode())
                     char = self.GetUnichrAt(pos + offset)
             if not count_whitespace:
                 self.GotoPosAndSave(pos)
@@ -7667,8 +7730,9 @@ class ViHandler(ViHelper):
         elif not only_whitespace and char in self.WORD_BREAK:
             char = self.GetUnichrAt(pos + offset)
             if char is not None:
-                while char is not None and char in self.WORD_BREAK:
-                    pos = pos + offset
+                while char is not None and char in self.WORD_BREAK \
+                        and pos < text_length:
+                    pos = pos + offset * len(char.encode())
                     char = self.GetUnichrAt(pos + offset)
         # Else offset forwards to first punctuation or whitespace char
         # (or just whitespace char if only_whitespace = True)
@@ -7679,12 +7743,12 @@ class ViHandler(ViHelper):
                         (((only_whitespace or char not in self.WORD_BREAK) and \
                         char not in string.whitespace) \
                         or char in ("_")) \
-                        and pos <= text_length:
-                    pos = pos + offset
+                        and pos < text_length:
+                    pos = pos + offset * len(char.encode())
                     char = self.GetUnichrAt(pos + offset)
 
         # We need to correct the position if using a unicode character
-        if len(bytes(char)) > 2:
+        if len(char) > 2:
             pos = self.ctrl.PositionAfter(pos)
 
         if pos != start_pos or recursion:
@@ -7964,3 +8028,6 @@ class ViHandler(ViHelper):
             return link
 
         return None
+
+class PositionDoesNotExist(Exception):
+    """Raised when attempting to access an position out of range"""

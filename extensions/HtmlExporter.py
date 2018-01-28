@@ -883,11 +883,13 @@ class HtmlExporter(AbstractExporter):
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
 
-            realfp = open(pathEnc(outputFile), "w")
+            realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                    errors="surrogateescape")
         else:
             outputFile = None
 
-        filePointer = utf8Writer(realfp, "replace")
+        #filePointer = utf8Writer(realfp, "replace")
+        filePointer = realfp
 
         filePointer.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
@@ -967,7 +969,7 @@ class HtmlExporter(AbstractExporter):
 
         filePointer.write(self.getFileFooter())
         
-        filePointer.reset()
+        #filePointer.reset()
 
         if outputFile is not None:
             realfp.close()
@@ -989,8 +991,10 @@ class HtmlExporter(AbstractExporter):
                 if exists(pathEnc(outputFile)):
                     os.unlink(pathEnc(outputFile))
     
-                realfp = open(pathEnc(outputFile), "w")
-                fp = utf8Writer(realfp, "replace")
+                realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                        errors="surrogateescape")
+                #fp = utf8Writer(realfp, "replace")
+                fp = realfp
 
                 # TODO Factor out HTML header generation                
                 fp.write(self._getGenericHtmlHeader(
@@ -1017,7 +1021,7 @@ class HtmlExporter(AbstractExporter):
 
                 fp.write(self.getFileFooter())
 
-                fp.reset()        
+                #fp.reset()        
                 realfp.close()
             except Exception as e:
                 traceback.print_exc()
@@ -1055,13 +1059,15 @@ class HtmlExporter(AbstractExporter):
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
 
-            realfp = open(pathEnc(outputFile), "w")
-            fp = utf8Writer(realfp, "replace")
+            realfp = open(pathEnc(outputFile), "w", encoding="utf-8",
+                    errors="surrogateescape")
+            #fp = utf8Writer(realfp, "replace")
+            fp = realfp
             
             wikiPage = self.wikiDocument.getWikiPage(word)
             fp.write(self.exportWikiPageToHtmlString(wikiPage,
                     startFile, onlyInclude))
-            fp.reset()        
+            #fp.reset()        
             realfp.close()
         except Exception as e:
             sys.stderr.write("Error while exporting word %s" % repr(word))
@@ -1101,12 +1107,19 @@ class HtmlExporter(AbstractExporter):
                     '        <link type="text/css" rel="stylesheet" href="%(url)s">' %
                     locals())
         
-        styleSheets = "\n".join(styleSheets)
 
 #         styleSheet = self.styleSheet
         config = self.mainControl.getConfig()
         docType = config.get("main", "html_header_doctype",
                 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"')
+
+        # TODO: load javascript from plugins
+        javascriptHeader = ""
+
+        if self.exportType == "html_previewWK":
+            javascriptHeader = '\n<script type="text/javascript" src="{0}"></script>'.format(os.path.join(self.mainControl.wikiAppDir, "lib", "js", "jquery", "jquery-2.0.2.min.js"))
+
+        styleSheets = "\n".join(styleSheets)
 
         return """<!%(docType)s>
 <html>
@@ -1114,6 +1127,7 @@ class HtmlExporter(AbstractExporter):
         <meta http-equiv="content-type" content="text/html%(charSet)s">
         <title>%(title)s</title>
 %(styleSheets)s
+%(javascriptHeader)s
     </head>
 """ % locals()
 

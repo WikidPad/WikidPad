@@ -3,6 +3,8 @@ import sys, traceback
 # from time import strftime
 import re
 
+import difflib
+
 from os.path import exists, isdir, isfile
 
 from .rtlibRepl import minidom
@@ -623,6 +625,122 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
             self.pWiki.getCollator().sort(self.words)
         
         self.ctrls.lb.Set(self.words)
+
+
+class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
+    """
+    Used to display list of similarly named wikiwords
+    and allows easy creation of aliases
+    """
+    def __init__(self, docPage, ID, search_word, motionType, title=None,
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        wx.Dialog.__init__(self)
+        
+        self.docPage = docPage
+        res = wx.xrc.XmlResource.Get()
+        res.LoadDialog(self, self.docPage, "FindSimilarNamedWikiWordDialog")
+        
+        self.ctrls = XrcControls(self)
+        
+        if title is not None:
+            self.SetTitle(title)
+
+        #self.ctrls.staTitle.SetLabel(title)
+
+        self.search_word = search_word
+        
+        self.motionType = motionType
+
+        matchtermsDict = self.docPage.getWikiDocument().getWikiData() \
+                .getAllDefinedWikiMatchTermsNormcase()
+
+        similar = difflib.get_close_matches(search_word.lower(), 
+                matchtermsDict.keys(), n=100, cutoff=0.8)
+
+        self.similarWords = similar
+        self.words = [matchtermsDict[i] for i in similar]
+
+        self._fillWords()
+        
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+
+        if len(self.words) > 0:
+            self.ctrls.lb.SetSelection(0)
+
+        # Fixes focus bug under Linux
+        self.SetFocus()
+
+        self.Bind(wx.EVT_BUTTON, self.OnAddAlias, id=GUI_ID.btnAddAlias)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+
+
+    def OnAddAlias(self, evt):
+        # TODO: change to single list box
+        sel = self.ctrls.lb.GetSelections()[0]
+        word = self.words[sel]
+        matchterm = self.similarWords[sel]
+
+        answer = wx.MessageBox(
+                _("Do you want to add {0} as an alias to {1}?".format(self.search_word,
+                    word)), ("Add alias"), wx.YES_NO | wx.NO_DEFAULT, self)
+
+        if answer == wx.YES:
+            page = self.docPage.getWikiDocument().getWikiPage(word)
+            page.addAttributeToPage("alias", self.search_word, 2)
+            # Saving pages here may not be strictly necessary
+            # and may be better done in addAttributeToPage
+            self.docPage.getMainControl().saveAllDocPages()
+
+        return
+
+
+    def OnOk(self, evt):
+        self.activateSelected(False)
+
+
+    def OnNewTab(self, evt):
+        self.activateSelected(True)
+
+        
+    def activateSelected(self, allNewTabs):
+        """
+        allNewTabs -- True: All selected words go to newly created tabs,
+                False: The first selected word changes current tab
+        """
+        selIdxs = self.ctrls.lb.GetSelections()
+        if len(selIdxs) == 0:
+            return
+
+        try:
+            if not allNewTabs:
+                self.docPage.openWikiPage(self.words[selIdxs[0]],
+                        forceTreeSyncFromRoot=True, motionType=self.motionType)
+
+                selWords = [self.words[idx] for idx in selIdxs[1:]]
+            else:
+                selWords = [self.words[idx] for idx in selIdxs]
+
+            for word in selWords:
+                if self.docPage.getMainControl().activatePageByUnifiedName("wikipage/" + word,
+                        2) is None:
+                    break
+        finally:
+            self.EndModal(wx.ID_OK)
+
+    def _fillWords(self):
+        """
+        Sort words according to settings in dialog.
+        """
+
+        def formatWords(matchterm, word):
+            return "{0} ({1})".format(matchterm, word)
+            
+        formatted_words = list(map(formatWords, self.similarWords, self.words))
+        
+        self.ctrls.lb.Set(formatted_words)
 
 
 

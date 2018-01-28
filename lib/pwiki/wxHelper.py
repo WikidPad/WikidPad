@@ -434,9 +434,9 @@ else:
             dataob = wx.CustomDataObject(wx.DataFormat("text/html"))
             if cb.GetData(dataob):
                 if dataob.GetSize() > 0:
-                    raw = dataob.GetData()
                     return (lineendToInternal(StringOps.fileContentToUnicode(
-                            raw)), None)
+                            raw, tryHard=True)), None)
+                    raw = dataob.GetData().tobytes()
         finally:
             cb.Close()
 
@@ -834,15 +834,21 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     in the KeyBindings, e.g. "*ShowFolding". If keyBindings
     parameter is None, all shortcuts (with or without *) are ignored.
     """
+    menu_returns = []
+
     for line in desc.split("\n"):
         if line.strip() == "":
             continue
 
         parts = [p.strip() for p in line.split(";")]
         parts = seqSupportWithTemplate(parts, ("",) * 4)
-        
-        appendItemToMenuByDescComponents(menu, *parts, keyBindings=keyBindings)
 
+        menu_return = appendItemToMenuByDescComponents(menu, *parts, 
+                keyBindings=keyBindings)
+        
+        menu_returns.append(menu_return)
+
+    return menu_returns
 
 
 def buildChainedUpdateEventFct(*chain):

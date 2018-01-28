@@ -105,19 +105,6 @@ import wx
 
 #  -------------------- From utils module --------------------
 
-try:
-    str = str
-except NameError:
-    str = str
-    str = str
-    bytes = bytes
-    str = (str,bytes)
-else:
-    str = str
-    str = str
-    bytes = str
-    str = str
-
 
 def get_resource_filename(resname):
     """Get the absolute path to the named resource file.
@@ -175,20 +162,18 @@ class EnchantStr(str):
 
     def encode(self):
         """Encode this string into a form usable by the enchant C library."""
-        if str is str:
-          return str.encode(self,"utf-8")
-        else:
-          return self
+        return str.encode(self,"utf-8")
 
     def decode(self,value):
         """Decode a string returned by the enchant C library."""
         if self._was_unicode:
-          if str is str:
-            # TODO: why does ctypes convert c_char_p to str(),
-            #       rather than to bytes()?
-            return value.encode().decode("utf-8")
-          else:
-            return value.decode("utf-8")
+          return value.decode("utf-8")
+          #if str is str:
+          #  # TODO: why does ctypes convert c_char_p to str(),
+          #  #       rather than to bytes()?
+          #  return value.encode().decode("utf-8")
+          #else:
+          #  return value.decode("utf-8")
         else:
           return value
 

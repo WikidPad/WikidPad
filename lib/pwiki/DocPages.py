@@ -1024,19 +1024,19 @@ class AbstractWikiPage(DataCarryingPage):
                         lambda: origThreadstop.isValidThread() and 
                         liveTextPlaceHold is self.liveTextPlaceHold)
 
-        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
-        if spellSession is None:
-            return
-            
-        spellSession.setCurrentDocPage(self)
-
         if len(text) == 0:
             unknownWords = []
         else:
+            spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
+            if spellSession is None:
+                return
+                
+            spellSession.setCurrentDocPage(self)
+
             unknownWords = spellSession.buildUnknownWordList(text,
                     threadstop=threadstop)
 
-        spellSession.close()
+            spellSession.close()
 
         with self.textOperationLock:
             threadstop.testValidThread()
@@ -1133,7 +1133,6 @@ class AbstractWikiPage(DataCarryingPage):
                     return AbstractWikiPage._DEFAULT_PRESENTATION
         except struct.error:
             return AbstractWikiPage._DEFAULT_PRESENTATION
-
 
 
 
@@ -2354,6 +2353,27 @@ class WikiPage(AbstractWikiPage):
         
         return vo.getDependentDataBlocks()
 
+
+    def addAttributeToPage(self, key, value, line=None):
+        """
+        Add attribute with given key and value to page. If line is not None
+        it is placed on the line with the given number
+        """
+        if self.isReadOnlyEffect():
+            return
+
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                self.wikiDocument.getWikiDefaultWikiLanguage())
+        
+        attr = langHelper.createAttributeFromComponents(key, value, self)
+        
+        with self.textOperationLock:
+            if line is None:
+                self.appendLiveText(attr)
+            else:
+                tlines = self.getLiveText().splitlines(True)
+                self.replaceLiveText("".join(tlines[:line] + [attr] +
+                        tlines[line:]))
 
 
 
