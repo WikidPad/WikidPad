@@ -1621,12 +1621,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if unknownWord:
                 # Right click on a word not in spelling dictionary
                 spellCheckerSession = self.presenter.getWikiDocument()\
-                        .createOnlineSpellCheckerSessionClone()
+                        .getOnlineSpellCheckerSession()
                 spellCheckerSession.setCurrentDocPage(self.getLoadedDocPage())
                 if spellCheckerSession:
                     # Show suggestions if available (up to first 5)
                     suggestions = spellCheckerSession.suggest(unknownWord)[:5]
-                    spellCheckerSession.close()
+                    #spellCheckerSession.close()
 
                     if len(suggestions) > 0:
                         for s, mid in zip(suggestions, self.SUGGESTION_CMD_IDS):
@@ -1836,8 +1836,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     threadstop.testValidThread()
 
                     # TODO: Faster? How?
-                    stylebytes = "".join([chr(ord(a) | ord(b))
-                            for a, b in zip(stylebytes, spellStyleBytes)])
+                    stylebytes = "".join([chr(a | b)
+                            for a, b in zip(stylebytes, spellStyleBytes)]
+                            ).encode("raw_unicode_escape")
 
                     self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
                 else:
@@ -6389,6 +6390,7 @@ class ViHandler(ViHelper):
         self.SelectCurrentLine()
 
         # Check if heading needs line padding above
+        # NOTE: fails if whitespace on line above
         extra = ""
         if self.settings["blank_line_above_headings"]:
             start = self.ctrl.GetSelectionStart()

@@ -183,12 +183,13 @@ class EnchantStr(str):
     def decode(self,value):
         """Decode a string returned by the enchant C library."""
         if self._was_unicode:
-          if str is str:
-            # TODO: why does ctypes convert c_char_p to str(),
-            #       rather than to bytes()?
-            return value.encode().decode("utf-8")
-          else:
-            return value.decode("utf-8")
+          return value.decode("utf-8")
+          #if str is str:
+          #  # TODO: why does ctypes convert c_char_p to str(),
+          #  #       rather than to bytes()?
+          #  return value.encode().decode("utf-8")
+          #else:
+          #  return value.decode("utf-8")
         else:
           return value
 
