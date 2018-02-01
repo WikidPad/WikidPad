@@ -269,7 +269,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 plm.registerWrappedPluginAPI(("hooks", 1),
                     startup=None, newWiki=None, createdWiki=None,
                     openWiki=None, openedWiki=None, openWikiWord=None,
-                    newWikiWord=None, openedWikiWord=None, savingWikiWor=None,
+                    newWikiWord=None, openedWikiWord=None, savingWikiWord=None,
                     savedWikiWord=None, renamedWikiWord=None,
                     deletedWikiWord=None, exit=None,
                     closingWiki=pluginDummyFct, droppingWiki=pluginDummyFct,
