@@ -197,23 +197,25 @@ def buildIconsSubmenu(iconCache):
     iconsMenu.AppendMenu(wx.NewId(), u'T-Z', iconsMenu6)
 
     icons = iconCache.iconLookupCache.keys();  # TODO: Create function?
-    icons.sort()    # TODO sort with collator
+    icons.sort(key=lambda s: s.lower())    # TODO sort with collator
 
     for icname in icons:
-        if icname.startswith("tb_"):
+        icnameKey = icname.lower()
+
+        if icnameKey.startswith("tb_"):
             continue
         iconsSubMenu = None
-        if icname[0] <= u'c':
+        if icnameKey[0] <= u'c':
             iconsSubMenu = iconsMenu1
-        elif icname[0] <= u'f':
+        elif icnameKey[0] <= u'f':
             iconsSubMenu = iconsMenu2
-        elif icname[0] <= u'l':
+        elif icnameKey[0] <= u'l':
             iconsSubMenu = iconsMenu3
-        elif icname[0] <= u'p':
+        elif icnameKey[0] <= u'p':
             iconsSubMenu = iconsMenu4
-        elif icname[0] <= u's':
+        elif icnameKey[0] <= u's':
             iconsSubMenu = iconsMenu5
-        elif icname[0] <= u'z':
+        elif icnameKey[0] <= u'z':
             iconsSubMenu = iconsMenu6
 
         menuID = wx.NewId()

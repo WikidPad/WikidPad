@@ -880,20 +880,31 @@ class IconCache:
         Fills or refills the self.iconLookupCache (if createIconImageList is
         false, self.iconImageList must exist already)
         """
+        
+        # Maybe make configurable later
+        targetWidth = 16
+        targetHeight = 16
 
         # create the image icon list
-        self.iconImageList = wx.ImageList(16, 16)
+        self.iconImageList = wx.ImageList(targetWidth, targetHeight)
         self.iconLookupCache = {}
 
         for icon in self.iconFileList:
 #             iconFile = os.path.join(self.wikiAppDir, "icons", icon)
             iconFile = os.path.join(self.iconDir, icon)
             bitmap = wx.Bitmap(iconFile, wx.BITMAP_TYPE_GIF)
+            
+            if (bitmap.GetWidth() != targetWidth) or \
+                    (bitmap.GetHeight() != targetHeight):
+                # Rescale
+                image = wx.ImageFromBitmap(bitmap)
+                image.Rescale(targetWidth, targetHeight, wx.IMAGE_QUALITY_HIGH)
+                bitmapIl = wx.BitmapFromImage(image)
+            else:
+                bitmapIl = bitmap
+            
             try:
-                id = self.iconImageList.Add(bitmap, wx.NullBitmap)
-
-#                 if self.lowResources:   # and not icon.startswith("tb_"):
-#                     bitmap = None
+                id = self.iconImageList.Add(bitmapIl, wx.NullBitmap)
 
                 iconname = icon.replace('.gif', '')
                 if id == -1:
@@ -903,16 +914,6 @@ class IconCache:
             except Exception, e:
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
-
-
-#     # TODO !  Do not remove bitmaps which are in use
-#     def clearIconBitmaps(self):
-#         """
-#         Remove all bitmaps stored in the cache, needed by
-#         PersonalWiki.resourceSleep.
-#         """
-#         for k in self.iconLookupCache.keys():
-#             self.iconLookupCache[k] = self.iconLookupCache[k][0:2] + (None,)
 
 
     def lookupIcon(self, iconname):
