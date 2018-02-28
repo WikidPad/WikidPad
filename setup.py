@@ -52,6 +52,7 @@ setup(
 #                 ('lib', glob('sql_mar.*')),
           ('extensions', glob('extensions/*.*')),
           ('extensions/wikidPadParser', glob('extensions/wikidPadParser/*.*')),
+          ('extensions/mediaWikiParser', glob('extensions/mediaWikiParser/*.*')),
           ('', ['sqlite3.dll', 'WikidPad.xrc', 'langlist.txt',
               'appbase.css'] + glob('WikidPad_*.po')),
           ('WikidPadHelp', glob(os.path.join('WikidPadHelp', '*.wiki'))),
