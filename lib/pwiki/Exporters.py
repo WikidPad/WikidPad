@@ -10,7 +10,7 @@ from io import BytesIO
 import shutil
 ## from xml.sax.saxutils import escape
 
-from . import urllib_red as urllib
+# from . import urllib_red as urllib
 
 import wx
 from .rtlibRepl import minidom
@@ -61,25 +61,25 @@ def retrieveSavedExportsList(mainControl, wikiData, continuousExport):
     return result
 
 
-def contentToUnicode(content):
-    """
-    Try to detect the text encoding of byte content
-    and return converted unicode
-    """
-    if isinstance(content, str):
-        return content
-
-    if content.startswith(BOM_UTF8):
-        return content[len(BOM_UTF8):].decode("utf-8", "replace")
-    elif content.startswith(BOM_UTF16_BE):
-        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
-    elif content.startswith(BOM_UTF16_LE):
-        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
-    else:
-        try:
-            return content.decode("utf-8", "strict")
-        except UnicodeDecodeError:
-            return mbcsDec(content, "replace")[0]
+# def contentToUnicode(content):
+#     """
+#     Try to detect the text encoding of byte content
+#     and return converted unicode
+#     """
+#     if isinstance(content, str):
+#         return content
+# 
+#     if content.startswith(BOM_UTF8):
+#         return content[len(BOM_UTF8):].decode("utf-8", "replace")
+#     elif content.startswith(BOM_UTF16_BE):
+#         return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
+#     elif content.startswith(BOM_UTF16_LE):
+#         return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
+#     else:
+#         try:
+#             return content.decode("utf-8", "strict")
+#         except UnicodeDecodeError:
+#             return mbcsDec(content, "replace")[0]
 
 
 
@@ -444,41 +444,41 @@ class MultiPageTextAddOptPanel(wx.Panel):
 
 class _SeparatorFoundException(Exception): pass
 
-#class _SeparatorWatchUtf8Writer(utf8Writer):
-#    def __init__(self, stream, separator, errors="strict"):
-#        utf8Writer.__init__(self, stream, errors)
-#        self.separator = separator
-##         self.separatorRe = re.compile(u"^" + re.escape(separator) + u"$",
-##                 re.MULTILINE | re.UNICODE)
-#        self.buffer = []
-#        self.firstSeparatorCallDone = False
-#
-#    def write(self, obj):
-#        self.buffer.append(obj)
-#        utf8Writer.write(self, obj)
-#
-#    def writelines(self, list):
-#        self.buffer += list
-#        utf8Writer.writelines(self, list)
-#
-#    def clearBuffer(self):
-#        self.buffer = []
-#    
-#    def checkAndClearBuffer(self):
-##         if self.separatorRe.search(u"".join(self.buffer)):
-#        if "".join(self.buffer).find("\n%s\n" % self.separator) > -1:
-#            raise _SeparatorFoundException()
-#
-#        self.clearBuffer()
-#
-#
-#    def writeSeparator(self):
-#        self.checkAndClearBuffer()
-#
-#        if self.firstSeparatorCallDone:
-#            utf8Writer.write(self, "\n%s\n" % self.separator)
-#        else:
-#            self.firstSeparatorCallDone = True
+class _SeparatorWatchUtf8Writer(utf8Writer):
+    def __init__(self, stream, separator, errors="strict"):
+        utf8Writer.__init__(self, stream, errors)
+        self.separator = separator
+#         self.separatorRe = re.compile(u"^" + re.escape(separator) + u"$",
+#                 re.MULTILINE | re.UNICODE)
+        self.buffer = []
+        self.firstSeparatorCallDone = False
+
+    def write(self, obj):
+        self.buffer.append(obj)
+        utf8Writer.write(self, obj)
+
+    def writelines(self, list):
+        self.buffer += list
+        utf8Writer.writelines(self, list)
+
+    def clearBuffer(self):
+        self.buffer = []
+    
+    def checkAndClearBuffer(self):
+#         if self.separatorRe.search(u"".join(self.buffer)):
+        if "".join(self.buffer).find("\n%s\n" % self.separator) > -1:
+            raise _SeparatorFoundException()
+
+        self.clearBuffer()
+
+
+    def writeSeparator(self):
+        self.checkAndClearBuffer()
+
+        if self.firstSeparatorCallDone:
+            utf8Writer.write(self, "\n%s\n" % self.separator)
+        else:
+            self.firstSeparatorCallDone = True
 
 
 
@@ -790,7 +790,7 @@ class MultiPageTextExporter(AbstractExporter):
             for tryNumber in range(35):
                 self.separator = "-----%s-----" % createRandomString(25)
                 try:
-                    self.rawExportFile = open(pathEnc(self.exportDest), "w")
+                    self.rawExportFile = open(pathEnc(self.exportDest), "wb")
 
                     # Only UTF-8 mode currently
                     self.rawExportFile.write(BOM_UTF8)
@@ -993,7 +993,7 @@ class MultiPageTextExporter(AbstractExporter):
     def _recoveryExportWikiWords(self):
         def writeWord(word, content, modified, created, visited):
             if isinstance(content, Consts.BYTETYPES):
-                content = StringOps.contentToUnicode(content)
+                content = StringOps.fileContentToUnicode(content, tryHard=True)
 
             self.exportFile.writeSeparator()
 
@@ -1029,7 +1029,7 @@ class MultiPageTextExporter(AbstractExporter):
             for word, content, modified, created, visited in \
                     self.wikiDocument.getWikiData().iterAllWikiPages():
 
-                word = StringOps.contentToUnicode(word)
+                word = StringOps.fileContentToUnicode(word, tryHard=True)
 
                 if word in found:
                     continue

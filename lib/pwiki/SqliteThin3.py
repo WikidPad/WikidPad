@@ -750,7 +750,7 @@ class _Value:
         """
         length = _dll.sqlite3_value_bytes(self._valuepointer)
         if length == 0:
-            return ""
+            return b""
 
         _dll.sqlite3_value_blob.restype = POINTER(c_char * length)  # TODO: Thread safety
         
@@ -763,7 +763,7 @@ class _Value:
         """
         length = _dll.sqlite3_value_bytes(self._valuepointer)
         if length == 0:
-            return ""
+            return b""
    
         _dll.sqlite3_value_text.restype = POINTER(c_char * length)  # TODO: Thread safety
         

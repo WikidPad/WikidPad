@@ -3062,7 +3062,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return None
 
         # Ask for the data handler to use
-        index = wx.GetSingleChoiceIndex(_("Choose database type"),
+        index = wx.GetSingleChoice(_("Choose database type"),
                 _("Choose database type"), [wdh[1] for wdh in wdhandlers],
                 self)
         if index == -1:

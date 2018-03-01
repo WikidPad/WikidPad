@@ -45,10 +45,7 @@ LINEEND_SPLIT_RE_BYTES = _re.compile(br"\r\n?|\n")
 utf8Enc = codecs.getencoder("utf-8")
 utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
-#utf8Writer = codecs.getwriter("utf-8")
-
-def utf8Writer(t):
-    return codecs.getwriter("utf-8")(t).decode("utf8")
+utf8Writer = codecs.getwriter("utf-8")
 
 def convertLineEndings(text, newLe):
     """
@@ -924,6 +921,9 @@ def base64BlockEncode(data):
     """
     Cut a sequence of base64 characters into chunks of 70 characters
     and join them with newlines. Pythons base64 decoder can read this.
+    data -- bytes to encode
+    
+    returns string
     """
     b64 = base64.b64encode(data)
 
@@ -935,7 +935,7 @@ def base64BlockEncode(data):
     if len(b64) > 0:
         result.append(b64)
 
-    return "\n".join(result)
+    return b"\n".join(result).decode("ascii")
 
 
 # Just for completeness

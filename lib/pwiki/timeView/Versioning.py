@@ -113,7 +113,7 @@ class VersionEntry:
 
     def getUnifiedPageName(self):
         return "versioning/packet/versionNo/%s/%s" % (self.versionNumber,
-                unifiedPageName)
+                self.unifiedBasePageName)
 
 
 
