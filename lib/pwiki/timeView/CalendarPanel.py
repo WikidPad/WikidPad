@@ -128,7 +128,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             currMonth.ResetTime()
             currMonth.SetDay(1)
             
-            self.topMonth = currMonth - wx.DateSpan_Months(
+            self.topMonth = currMonth - wx.DateSpan.Months(
                     self.monthCols * self.monthRows - 1)
                     
             self.selectedDay = None
@@ -191,7 +191,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         self.wikiWordFilter.setDayResolution(1)
 
         date = self.topMonth
-        afterLastMonth = date + wx.DateSpan_Months(
+        afterLastMonth = date + wx.DateSpan.Months(
                 self.monthCols * self.monthRows)
         
         count = (afterLastMonth - date).GetDays()
@@ -403,7 +403,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         try:
             self.fillWordCountCache()
             month = self.topMonth
-            monthDateShift = wx.DateSpan_Month()
+            monthDateShift = wx.DateSpan.Month()
             self.today = wx.DateTime.Now()
             self.today.ResetTime()
     
@@ -433,7 +433,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
     def getXYForMonth(self, searchedMonth):
         # TODO More elegantly
         month = self.topMonth
-        monthDateShift = wx.DateSpan_Month()
+        monthDateShift = wx.DateSpan.Month()
         
         monthShiftX = self.monthWidth + self.monthDistHor
         monthShiftY = self.monthHeight + self.monthDistVert

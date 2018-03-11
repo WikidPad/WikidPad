@@ -434,9 +434,9 @@ else:
             dataob = wx.CustomDataObject(wx.DataFormat("text/html"))
             if cb.GetData(dataob):
                 if dataob.GetSize() > 0:
+                    raw = dataob.GetData().tobytes()
                     return (lineendToInternal(StringOps.fileContentToUnicode(
                             raw, tryHard=True)), None)
-                    raw = dataob.GetData().tobytes()
         finally:
             cb.Close()
 

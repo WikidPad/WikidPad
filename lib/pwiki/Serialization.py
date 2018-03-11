@@ -153,30 +153,30 @@ class SerializeStream:
         """
         Serialize array of unicode strings, encoded as UTF-8
         """
-        l = self.serUint32(len(abs)) # Length of array
+        l = self.serUint32(len(aus)) # Length of array
         
-        if self.isReadMode() and l != len(abs):
-            abs = [""] * l
+        if self.isReadMode() and l != len(aus):
+            aus = [""] * l
 
         for i in range(l):
-            abs[i] = self.serUniUtf8(abs[i])
+            aus[i] = self.serUniUtf8(aus[i])
             
-        return abs
+        return aus
 
 
     def serArrByteBlock(self, aus):
         """
         Serialize array of byte blocks
         """
-        l = self.serUint32(len(abs)) # Length of array
+        l = self.serUint32(len(aus)) # Length of array
         
-        if self.isReadMode() and l != len(abs):
-            abs = [b""] * l
+        if self.isReadMode() and l != len(aus):
+            aus = [b""] * l
 
         for i in range(l):
-            abs[i] = self.serByteBlock(abs[i])
+            aus[i] = self.serByteBlock(aus[i])
 
-        return abs
+        return aus
 
             
 #     def serArrString(self, abs):

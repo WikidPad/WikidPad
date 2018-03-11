@@ -5001,7 +5001,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         elif keyCode in [ord("*"), wx.WXK_MULTIPLY, wx.WXK_NUMPAD_MULTIPLY]:  # "*"
             if not self.IsExpanded(self._current) and self.IsItemEnabled(self._current):
                 # expand all
-                self.ExpandAll(self._current)
+                self.ExpandAllChildren(self._current)
 
         elif keyCode in [ord("-"), wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:  # "-"
             if self.IsExpanded(self._current):

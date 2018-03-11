@@ -717,7 +717,7 @@ class AbstractAndOrSearchNode(AbstractContentSearchNode):
         child = foundData[-1]
         foundData = foundData[:-1]
 
-        return self.child.replace(text, foundData, pattern)
+        return child.replace(text, foundData, pattern)
 
     def hasParticularTextPosition(self):
         """
