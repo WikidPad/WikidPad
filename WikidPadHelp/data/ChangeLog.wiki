@@ -1,6 +1,20 @@
 ﻿++ Change Log
 
 
+Mar. 14, 2018 (2.3rc01)
+
+    * Option to let left double click on editor tab either close tab,
+      clone tab or do nothing.
+      See [OptionsDialog#*Left double click on tab*]
+    * Added option to disable list of parents at top of exported
+      HTML pages
+
+    * More stable handling of additional user icons
+    
+    * Some bug fixes
+
+
+
 Jul. 07, 2017 (2.3beta16)
 
     * Advanced link modification when renaming wiki page, much more

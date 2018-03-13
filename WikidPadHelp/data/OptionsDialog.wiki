@@ -304,6 +304,7 @@ Same as before, but set reaction if CTRL is pressed while clicking the middle bu
 *Left double click in preview*
 When double clicking into preview (not on a link), this can either do nothing, switch the tab to editor or open a new tab with same page, but in editor mode.
 
+*Left double click on tab*
 *Middle click on tab*
 This can either do nothing, close the tab or clone it (open same page in a new tab).
 
