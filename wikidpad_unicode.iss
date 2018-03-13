@@ -58,8 +58,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.3beta16"
-#define verNo "002.003.116.000"
+#define verStr "2.4alpha01"
+#define verNo "002.004.001.000"
 
 SolidCompression=true
 AppName=WikidPad
@@ -75,7 +75,7 @@ ShowLanguageDialog=yes
 Compression=lzma/ultra
 OutputBaseFilename=WikidPad-{#verStr}
 InternalCompressLevel=ultra
-AppCopyright=© 2005-2017 Jason Horman, Michael Butscher, Gerhard Reitmayr
+AppCopyright=© 2005-2018 Michael Butscher, Jason Horman, Gerhard Reitmayr
 UsePreviousAppDir=true
 PrivilegesRequired=none
 CreateUninstallRegKey=not PortableInstall
@@ -134,6 +134,9 @@ Name: {app}\wxmsw28uh_core_vc.dll; Type: files
 Name: {app}\wxmsw28uh_html_vc.dll; Type: files
 Name: {app}\wxmsw28uh_stc_vc.dll; Type: files
 Name: {app}\wxmsw28uh_xrc_vc.dll; Type: files
+Name: {app}\WikidPadHelp\data\wikidb.gfd; Type: files
+Name: {app}\WikidPadHelp\data\*.grl; Type: files
+Name: {app}\WikidPadHelp\data\index; Type: filesandordirs
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
 Name: {app}\binInst.ini; Type: files
