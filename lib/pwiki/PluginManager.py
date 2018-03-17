@@ -401,6 +401,31 @@ class PluginManager:
 
 
 class LearningDispatcher:
+    """
+    A LearningDispatcher stores a Simple- or WrappedPluginAPI object which
+    contains API functions (usually all with the same name) scattered over
+    multiple plugins.
+    
+    Basically when its dispatch() function is called the dispatcher in turn
+    calls all functions in the API object. Because there can be many calls
+    to dispatch() and many functions to call the dispatcher "learns" which
+    functions to call and which not.
+    
+    The call to dispatch() receives a key (for a dictionary) as first
+    parameter (all following parameters are handed to the called plugin
+    functions unmodified). The key gives some kind of "context" in which
+    this call happens. The key itself is not transferred to the plugin
+    functions so the context must be repeated somehow in the following
+    parameters so that a plugin function can decide if it handles this context
+    or not.
+    
+    The rule is that every called plugin function must return None if
+    and only if it does not and never handle this context. For a given
+    context the function must return None either always or never. If the
+    plugin function returns None it is usually not called again by the
+    LearningDispatcher in this context.
+    """    
+    
     def __init__(self, apiFunc):
         self.apiFunc = apiFunc
         self.keyToHandlerList = {}
@@ -414,6 +439,9 @@ class LearningDispatcher:
         return len(self.keyToHandlerList[key]) > 0
     
     def clearLearning(self):
+        """
+        Forget the learned dispatching
+        """
         self.keyToHandlerList.clear()
         
         
@@ -444,11 +472,23 @@ class LearningDispatcher:
 
 
 class KeyInParamLearningDispatcher(LearningDispatcher):
+    """
+    While in a LearningDispatcher the context information contained in
+    a key must be repeated somehow in the other parameters, the constructor
+    here gets an index number keyIdx into the positional parameters of
+    the dispatch() call (which here doesn't take a separate key parameter) 
+    and uses the parameter with that number as key.
+    """
+    
     def __init__(self, apiFunc, keyIdx):
         LearningDispatcher.__init__(self, apiFunc)
         self.keyIdx = keyIdx
 
     def dispatch(self, *args, **kwargs):
+        """
+        All parameters are handed to the plugin functions, one of it is
+        also used as key.
+        """
         return LearningDispatcher.dispatch(self, args[self.keyIdx],
                 *args, **kwargs)
 
