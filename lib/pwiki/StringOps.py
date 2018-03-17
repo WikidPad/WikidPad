@@ -273,16 +273,21 @@ def fileContentToUnicode(content, tryHard=False):
 
     if tryHard:
         try:
-            return content.decode("utf-8", "surrogateescape")
+            return content.decode("utf-8", "strict")
         except UnicodeDecodeError:
             pass
     
         try:
-            return content.decode("utf-16", "surrogateescape")
+            return content.decode("utf-16", "strict")
         except UnicodeDecodeError:
             pass
 
-    return mbcsDec(content, "surrogateescape")[0]
+    try:
+        return mbcsDec(content, "strict")[0]
+    except UnicodeDecodeError:
+        pass
+
+    return content.decode("latin-1", "replace")
 
 
 
@@ -1306,8 +1311,8 @@ elif os.name == 'mac':
     urlFromPathname = macUrlFromPathname
 else:
     def urlFromPathname(fn, addSafe=''):
-        if isinstance(fn, str):
-            fn = utf8Enc(fn, "replace")[0]
+        if isinstance(fn, BYTETYPES):
+            fn = fileContentToUnicode(fn, tryHard=True)
             
         # riscos not supported
         url = urlQuote(fn, safe='/$' + addSafe)
