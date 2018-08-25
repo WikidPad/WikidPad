@@ -3001,7 +3001,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 
     # TODO  Reflect possible changes in WikidPadParser.py
-    AGACONTENTTABLERE = re.compile(r"^(\+{1,4})([^\n\+][^\n]*)", re.DOTALL | re.LOCALE | re.MULTILINE)
+    AGACONTENTTABLERE = re.compile(r"^(\+{1,4})([^\n\+][^\n]*)", re.DOTALL | re.MULTILINE)
 
     def agaContentTable(self, omitfirst = False):
         """

@@ -3837,7 +3837,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return presenter
 
 
-    def saveAllDocPages(self, force = False, async=False):
+    def saveAllDocPages(self, force = False):
         if not self.requireWriteAccess():
             return
 
