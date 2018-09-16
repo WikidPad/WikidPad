@@ -1773,7 +1773,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         try:        
             nodeObj = self.GetItemData(parentnodeid)
         except Exception:
-            raise StopIteration
+            return
 
         wikiData = self.pWiki.getWikiData()
 
@@ -1791,7 +1791,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     tuple(nodeObj.getNodePath()))
 
         if not self.IsExpanded(parentnodeid):
-            raise StopIteration
+            return
 
 #         if nodeObj.representsWikiWord():
 #             retObj = self.refreshExecutor.executeAsync(
@@ -1932,7 +1932,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
                 nodeid, cookie = self.GetNextChild(parentnodeid, cookie)
             
-        raise StopIteration
+        return
 
 
     def onRenamedWikiPage(self, miscevt):
