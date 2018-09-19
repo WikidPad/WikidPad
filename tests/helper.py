@@ -5,7 +5,7 @@
 If you want to run this module as main, run it from the main
 WikidPad directory:
 
-    ..\WikidPad> python tests\helper.py
+    ..\\WikidPad> python tests\\helper.py
 
 """
 import builtins
