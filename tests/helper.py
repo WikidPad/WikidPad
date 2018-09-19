@@ -18,6 +18,10 @@ import sys
 import imp
 import wx
 
+# Create a dummy app.
+dummyApp = wx.App(0)
+dummyApp.SetAppName("WikidPad")
+
 builtins._ = builtins.N_ = lambda s: s  # see WikidPadStarter
 if not hasattr(wx, "NO_3D"):  # cmore addition
     wx.NO_3D = 0
