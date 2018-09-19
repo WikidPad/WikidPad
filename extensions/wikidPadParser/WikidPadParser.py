@@ -2515,7 +2515,7 @@ class _TheHelper:
             indentedStartPos = startPos + editor.bytelenSct(indent)
             text = editor.GetTextRange(indentedStartPos, endPos)
             # remove spaces, newlines, etc
-            text = re.sub("[\s\r\n]+", " ", text)
+            text = re.sub(r"[\s\r\n]+", " ", text)
 
             # wrap the text
             wrapPosition = 70
