@@ -1332,7 +1332,7 @@ AutoLinkRelaxJoinFlags = re.IGNORECASE | re.UNICODE
 
 
 # For spell checking
-TextWordRE = re.compile(r"(?P<negative>[0-9]+|"+ UrlPAT + ")|\b[\w']+",
+TextWordRE = re.compile(r"(?P<negative>[0-9]+|" + UrlPAT + r")|\b[\w']+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -2563,7 +2563,7 @@ class _TheHelper:
             indentedStartPos = startPos + editor.bytelenSct(indent)
             text = editor.GetTextRange(indentedStartPos, endPos)
             # remove spaces, newlines, etc
-            text = re.sub("[\s\r\n]+", " ", text)
+            text = re.sub(r"[\s\r\n]+", " ", text)
 
             # wrap the text
             wrapPosition = 70

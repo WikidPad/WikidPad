@@ -2899,14 +2899,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             for node in scriptNodes:
                 script = node.findFlatByName("code").getString()
-                script = re.sub("^[\r\n\s]+", "", script)
-                script = re.sub("[\r\n\s]+$", "", script)
+                script = re.sub(r"^[\r\n\s]+", "", script)
+                script = re.sub(r"[\r\n\s]+$", "", script)
                 try:
                     if index == -1:
-                        script = re.sub("^\d:?\s?", "", script)
+                        script = re.sub(r"^\d:?\s?", "", script)
                         exec((script), self.evalScope)
                     elif index > -1 and script.startswith(str(index)):
-                        script = re.sub("^\d:?\s?", "", script)
+                        script = re.sub(r"^\d:?\s?", "", script)
                         exec((script), self.evalScope)
                         break # Execute only the first found script
 
@@ -2918,7 +2918,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # Evaluate selected text
             text = self.GetSelectedText()
             try:
-                compThunk = compile(re.sub("[\n\r]", "", text), "<string>",
+                compThunk = compile(re.sub(r"[\n\r]", "", text), "<string>",
                         "eval", CO_FUTURE_DIVISION)
                 result = eval(compThunk, self.evalScope)
             except Exception as e:

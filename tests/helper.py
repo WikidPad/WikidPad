@@ -5,7 +5,7 @@
 If you want to run this module as main, run it from the main
 WikidPad directory:
 
-    ..\WikidPad> python tests\helper.py
+    ..\\WikidPad> python tests\\helper.py
 
 """
 import builtins
@@ -17,6 +17,10 @@ import re
 import sys
 import imp
 import wx
+
+# Create a dummy app.
+dummyApp = wx.App(0)
+dummyApp.SetAppName("WikidPad")
 
 builtins._ = builtins.N_ = lambda s: s  # see WikidPadStarter
 if not hasattr(wx, "NO_3D"):  # cmore addition

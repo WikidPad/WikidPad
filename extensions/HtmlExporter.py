@@ -2104,7 +2104,7 @@ class HtmlExporter(AbstractExporter):
                 expr = astNode.value
                 # TODO Test security
                 try:
-                    content = str(eval(re.sub("[\n\r]", "", expr),
+                    content = str(eval(re.sub(r"[\n\r]", "", expr),
                             evalScope))
                 except Exception as e:
                     s = StringIO()
