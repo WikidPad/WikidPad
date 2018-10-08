@@ -2,13 +2,13 @@ import re, traceback
 
 import wx
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
-from Serialization import SerializeStream, findXmlElementFlat, \
+from .Serialization import SerializeStream, findXmlElementFlat, \
         iterXmlElementFlat, serToXmlUnicode, serFromXmlUnicode, \
         serToXmlBoolean, serFromXmlBoolean, serToXmlInt, serFromXmlInt
 
-import SearchAndReplaceBoolLang
+from . import SearchAndReplaceBoolLang
 
 
 
@@ -186,7 +186,7 @@ class NotSearchNode(AbstractSearchNode):
         """
         Modify XML node to contain all information about this object.
         """
-        subNode = xmlDoc.createElement(u"node")
+        subNode = xmlDoc.createElement("node")
         _serNodeToXml(subNode, xmlDoc, self.sub)
         xmlNode.appendChild(subNode)
 
@@ -195,7 +195,7 @@ class NotSearchNode(AbstractSearchNode):
         """
         Set object state from data in xmlNode)
         """
-        subNode = findXmlElementFlat(xmlNode, u"node")
+        subNode = findXmlElementFlat(xmlNode, "node")
         self.sub = _serNodeFromXml(subNode, self.sarOp)
 
 
@@ -279,7 +279,7 @@ class RegexWikiPageNode(AbstractSearchNode):
     
     CLASS_PERSID = "RegexPage"  # Class id for persistence storage
     
-    def __init__(self, sarOp, pattern=u""):
+    def __init__(self, sarOp, pattern=""):
         AbstractSearchNode.__init__(self, sarOp)
         self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
@@ -311,14 +311,14 @@ class RegexWikiPageNode(AbstractSearchNode):
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+        serToXmlUnicode(xmlNode, xmlDoc, "pattern", self.compPat.pattern)
 
 
     def serializeFromXml(self, xmlNode):
         """
         Set object state from data in xmlNode)
         """
-        pattern = serFromXmlUnicode(xmlNode, u"pattern")
+        pattern = serFromXmlUnicode(xmlNode, "pattern")
         if pattern != self.compPat.pattern:
             self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
@@ -388,7 +388,7 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
 
 
     def testWikiPage(self, word, text):
-        return self.wordSet.has_key(word)
+        return word in self.wordSet
 
     def isTextNeededForTest(self):
         return False
@@ -419,8 +419,8 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         if stream.isReadMode():
             rwl = stream.serUint32(0)
             lst = []
-            for i in xrange(rwl):
-                lst.append(stream.serUniUtf8(u""))
+            for i in range(rwl):
+                lst.append(stream.serUniUtf8(""))
                 
             self.rootWords = lst
         else:
@@ -436,10 +436,10 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlInt(xmlNode, xmlDoc, u"level", self.level)
+        serToXmlInt(xmlNode, xmlDoc, "level", self.level)
 
         for item in self.rootWords:
-            subNode = xmlDoc.createElement(u"wikiword")
+            subNode = xmlDoc.createElement("wikiword")
             subNode.appendChild(xmlDoc.createTextNode(item))
             xmlNode.appendChild(subNode)
 
@@ -450,11 +450,11 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         
         words = []
         
-        for subNode in iterXmlElementFlat(xmlNode, u"wikiword"):
+        for subNode in iterXmlElementFlat(xmlNode, "wikiword"):
             words.append(subNode.firstChild.data)
 
         self.rootWords = words
-        self.level = serFromXmlInt(xmlNode, u"level")
+        self.level = serFromXmlInt(xmlNode, "level")
 
 
     def getRootWords(self):
@@ -484,19 +484,19 @@ def _serNode(stream, sarOp, obj):
     global _PERSID_TO_CLASS_MAP
 
     if stream.isReadMode():
-        persId = stream.serString("")
+        persId = stream.serUniUtf8("")
         cl = _PERSID_TO_CLASS_MAP[persId]
         obj = cl(sarOp)
         obj.serializeBin(stream)
         return obj
     else:
-        stream.serString(obj.CLASS_PERSID)
+        stream.serUniUtf8(obj.CLASS_PERSID)
         obj.serializeBin(stream)
         return obj
 
 
 def _serNodeToXml(xmlNode, xmlDoc, obj):
-    xmlNode.setAttribute(u"persistenceClass", unicode(obj.CLASS_PERSID))
+    xmlNode.setAttribute("persistenceClass", str(obj.CLASS_PERSID))
     obj.serializeToXml(xmlNode, xmlDoc)
 #     xmlNode.appendChild(subNode)
     return obj
@@ -504,7 +504,7 @@ def _serNodeToXml(xmlNode, xmlDoc, obj):
 
 def _serNodeFromXml(xmlNode, sarOp):
     global _PERSID_TO_CLASS_MAP
-    persId = xmlNode.getAttribute(u"persistenceClass")
+    persId = xmlNode.getAttribute("persistenceClass")
     cl = _PERSID_TO_CLASS_MAP[persId]
     obj = cl(sarOp)
     obj.serializeFromXml(xmlNode)
@@ -717,7 +717,7 @@ class AbstractAndOrSearchNode(AbstractContentSearchNode):
         child = foundData[-1]
         foundData = foundData[:-1]
 
-        return self.child.replace(text, foundData, pattern)
+        return child.replace(text, foundData, pattern)
 
     def hasParticularTextPosition(self):
         """
@@ -1002,14 +1002,14 @@ class AttributeNode(AbstractContentSearchNode):
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+        serToXmlUnicode(xmlNode, xmlDoc, "pattern", self.compPat.pattern)
 
 
     def serializeFromXml(self, xmlNode):
         """
         Set object state from data in xmlNode)
         """
-        pattern = serFromXmlUnicode(xmlNode, u"pattern")
+        pattern = serFromXmlUnicode(xmlNode, "pattern")
         if pattern != self.compPat.pattern:
             self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
@@ -1132,14 +1132,14 @@ class TodoNode(AbstractContentSearchNode):
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+        serToXmlUnicode(xmlNode, xmlDoc, "pattern", self.compPat.pattern)
 
 
     def serializeFromXml(self, xmlNode):
         """
         Set object state from data in xmlNode)
         """
-        pattern = serFromXmlUnicode(xmlNode, u"pattern")
+        pattern = serFromXmlUnicode(xmlNode, "pattern")
         if pattern != self.compPat.pattern:
             self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
@@ -1166,11 +1166,11 @@ class TodoNode(AbstractContentSearchNode):
 
 
 # Special whoosh formatter class
-class SimpleHtmlFormatter(object):
+class SimpleHtmlFormatter:
     """Returns a string in which the matched terms are enclosed in <b></b>.
     """
     
-    def __init__(self, between=u"... "):
+    def __init__(self, between="... "):
         """
         :param between: the text to add between fragments.
         """
@@ -1199,7 +1199,7 @@ class SimpleHtmlFormatter(object):
             index = t.endchar
         
         output.append(htmlescape(text[index:fragment.endchar]))
-        return u"".join(output)
+        return "".join(output)
 
     def __call__(self, text, fragments):
         return self.between.join([self._format_fragment(text, fragment)
@@ -1240,7 +1240,7 @@ class ListWikiPagesOperation:
 
         stream -- StringOps.SerializeStream object
         """
-        self.ordering = stream.serString(self.ordering)
+        self.ordering = stream.serUniUtf8(self.ordering)
         self.searchOpTree = _serNode(stream, self, self.searchOpTree)
 
 
@@ -1248,10 +1248,10 @@ class ListWikiPagesOperation:
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"ordering", self.ordering)
+        serToXmlUnicode(xmlNode, xmlDoc, "ordering", self.ordering)
         
-        subNode = xmlDoc.createElement(u"optree")
-        subNode2 = xmlDoc.createElement(u"node")
+        subNode = xmlDoc.createElement("optree")
+        subNode2 = xmlDoc.createElement("node")
         _serNodeToXml(subNode2, xmlDoc, self.searchOpTree)
         subNode.appendChild(subNode2)
         xmlNode.appendChild(subNode)
@@ -1262,10 +1262,10 @@ class ListWikiPagesOperation:
         """
         Set object state from data in xmlNode)
         """
-        self.ordering = serFromXmlUnicode(xmlNode, u"ordering")
+        self.ordering = serFromXmlUnicode(xmlNode, "ordering")
 
-        subNode = findXmlElementFlat(xmlNode, u"optree")
-        subNode = findXmlElementFlat(subNode, u"node")
+        subNode = findXmlElementFlat(xmlNode, "optree")
+        subNode = findXmlElementFlat(subNode, "node")
 
         self.searchOpTree = _serNodeFromXml(subNode, self)
 
@@ -1290,7 +1290,7 @@ class ListWikiPagesOperation:
 
     def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
-        Called by WikiDataManager(=WikiDocument) to begin a wiki-wide search
+        Called by WikiDocument to begin a wiki-wide search
         """
         self.wikiDocument = wikiDocument
 
@@ -1545,7 +1545,7 @@ class SearchReplaceOperation:
         self.cycleToStart = stream.serBool(self.cycleToStart)
         self.booleanOp = stream.serBool(self.booleanOp)
 
-        self.wildCard = stream.serString(self.wildCard)
+        self.wildCard = stream.serUniUtf8(self.wildCard)
 
         if version > 0:
             self.listWikiPagesOp.serializeBin(stream)
@@ -1555,7 +1555,7 @@ class SearchReplaceOperation:
             self.listWikiPagesOp = ListWikiPagesOperation()
         
         if version > 1:
-            self.indexSearch = stream.serString(self.indexSearch)
+            self.indexSearch = stream.serUniUtf8(self.indexSearch)
         elif stream.isReadMode():
             self.indexSearch = 'no'
         
@@ -1565,19 +1565,19 @@ class SearchReplaceOperation:
         """
         Modify XML node to contain all information about this object.
         """
-        serToXmlUnicode(xmlNode, xmlDoc, u"searchPattern", self.searchStr)
-        serToXmlUnicode(xmlNode, xmlDoc, u"replacePattern", self.replaceStr)
+        serToXmlUnicode(xmlNode, xmlDoc, "searchPattern", self.searchStr)
+        serToXmlUnicode(xmlNode, xmlDoc, "replacePattern", self.replaceStr)
 
-        serToXmlBoolean(xmlNode, xmlDoc, u"replaceOperation", self.replaceOp)
-        serToXmlBoolean(xmlNode, xmlDoc, u"wholeWord", self.wholeWord)
-        serToXmlBoolean(xmlNode, xmlDoc, u"caseSensitive", self.caseSensitive)
-        serToXmlBoolean(xmlNode, xmlDoc, u"cycleToStart", self.cycleToStart)
-        serToXmlBoolean(xmlNode, xmlDoc, u"booleanOperation", self.booleanOp)
-        serToXmlUnicode(xmlNode, xmlDoc, u"indexSearch", unicode(self.indexSearch))
+        serToXmlBoolean(xmlNode, xmlDoc, "replaceOperation", self.replaceOp)
+        serToXmlBoolean(xmlNode, xmlDoc, "wholeWord", self.wholeWord)
+        serToXmlBoolean(xmlNode, xmlDoc, "caseSensitive", self.caseSensitive)
+        serToXmlBoolean(xmlNode, xmlDoc, "cycleToStart", self.cycleToStart)
+        serToXmlBoolean(xmlNode, xmlDoc, "booleanOperation", self.booleanOp)
+        serToXmlUnicode(xmlNode, xmlDoc, "indexSearch", str(self.indexSearch))
 
-        serToXmlUnicode(xmlNode, xmlDoc, u"wildCardMode", unicode(self.wildCard))
+        serToXmlUnicode(xmlNode, xmlDoc, "wildCardMode", str(self.wildCard))
 
-        subNode = xmlDoc.createElement(u"listWikiPagesOperation")
+        subNode = xmlDoc.createElement("listWikiPagesOperation")
         xmlNode.appendChild(subNode)
 
         self.listWikiPagesOp.serializeToXml(subNode, xmlDoc)
@@ -1587,34 +1587,34 @@ class SearchReplaceOperation:
         """
         Set object state from data in xmlNode)
         """
-        self.searchStr = serFromXmlUnicode(xmlNode, u"searchPattern")
-        self.replaceStr = serFromXmlUnicode(xmlNode, u"replacePattern")
+        self.searchStr = serFromXmlUnicode(xmlNode, "searchPattern")
+        self.replaceStr = serFromXmlUnicode(xmlNode, "replacePattern")
 
-        self.replaceOp = serFromXmlBoolean(xmlNode, u"replaceOperation")
-        self.wholeWord = serFromXmlBoolean(xmlNode, u"wholeWord")
-        self.caseSensitive = serFromXmlBoolean(xmlNode, u"caseSensitive")
-        self.cycleToStart = serFromXmlBoolean(xmlNode, u"cycleToStart")
-        self.booleanOp = serFromXmlBoolean(xmlNode, u"booleanOperation")
+        self.replaceOp = serFromXmlBoolean(xmlNode, "replaceOperation")
+        self.wholeWord = serFromXmlBoolean(xmlNode, "wholeWord")
+        self.caseSensitive = serFromXmlBoolean(xmlNode, "caseSensitive")
+        self.cycleToStart = serFromXmlBoolean(xmlNode, "cycleToStart")
+        self.booleanOp = serFromXmlBoolean(xmlNode, "booleanOperation")
 
-        self.wildCard = serFromXmlUnicode(xmlNode, u"wildCardMode")
+        self.wildCard = serFromXmlUnicode(xmlNode, "wildCardMode")
 
-        subNode = findXmlElementFlat(xmlNode, u"listWikiPagesOperation")
+        subNode = findXmlElementFlat(xmlNode, "listWikiPagesOperation")
 
         self.listWikiPagesOp = ListWikiPagesOperation()
         self.listWikiPagesOp.serializeFromXml(subNode)
 
-        self.indexSearch = serFromXmlUnicode(xmlNode, u"indexSearch", u"no")\
+        self.indexSearch = serFromXmlUnicode(xmlNode, "indexSearch", "no")\
                 .encode("ascii")
 
 
     def getPackedSettings(self):
         """
-        Returns a byte sequence (string) containing the current settings
+        Returns bytes containing the current settings
         of all data members (except title and cache info (searchOpTree)).
         This can be saved in the database and restored later with
         setPackedSettings()
         """
-        stream = SerializeStream(stringBuf="", readMode=False)
+        stream = SerializeStream(byteBuf=b"", readMode=False)
         self.serializeBin(stream)
 
         return stream.getBytes()
@@ -1622,10 +1622,10 @@ class SearchReplaceOperation:
 
     def setPackedSettings(self, data):
         """
-        Set member variables according to the byte sequence stored in
+        Set member variables according to the bytes stored in
         data by getPackedSettings()
         """
-        stream = SerializeStream(stringBuf=data, readMode=True)
+        stream = SerializeStream(byteBuf=data, readMode=True)
         self.serializeBin(stream)
 
         self.clearCache()
@@ -1649,7 +1649,7 @@ class SearchReplaceOperation:
         May throw RE exception or WikiPyparsing.ParseException if
         the search string has syntax errors.
         """
-        if self.searchStr == u"":
+        if self.searchStr == "":
             self.searchOpTree = AllWikiPagesNode(self)
             return
         
@@ -1678,7 +1678,7 @@ class SearchReplaceOperation:
                 searchStr = re.escape(searchStr)
 
             if self.wholeWord:
-                searchStr = ur"\b%s\b" % searchStr
+                searchStr = r"\b%s\b" % searchStr
 
             if self.caseSensitive:
                 reFlags = re.MULTILINE | re.UNICODE
@@ -1874,7 +1874,7 @@ class SearchReplaceOperation:
 
     def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
-        Called by WikiDocument(=WikiDataManager) to begin a wiki-wide search
+        Called by WikiDocument to begin a wiki-wide search
         """
         self.wikiDocument = wikiDocument
 
@@ -1988,7 +1988,7 @@ def stripSearchString(searchStr):
     """
     if wx.GetApp().getGlobalConfig().getboolean("main", "search_stripSpaces",
             True):
-        return searchStr.strip(u" ")
+        return searchStr.strip(" ")
     else:
         return searchStr
 

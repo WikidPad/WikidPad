@@ -2,7 +2,7 @@
 GUI support and error checking for handling attributes (=properties)
 """
 
-from __future__ import with_statement
+
 
 
 import traceback
@@ -11,12 +11,11 @@ import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as
 
 import wx
 
-from wxHelper import *
+from .wxHelper import *
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 from .Utilities import callInMainThreadAsync
-from .SystemInfo import isUnicode
 
 from . import StringOps
 
@@ -30,142 +29,142 @@ ATTRIBUTES_WITH_WIKIWORD_VALUES = [u'template', u'parent', u'import_scripts']
 wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 _COLORS = [
-    N_(u"AQUAMARINE"),
-    N_(u"BLACK"),
-    N_(u"BLUE VIOLET"),
-    N_(u"BLUE"),
-    N_(u"BROWN"),
-    N_(u"CADET BLUE"),
-    N_(u"CORAL"),
-    N_(u"CORNFLOWER BLUE"),
-    N_(u"CYAN"),
-    N_(u"DARK GREEN"),
-    N_(u"DARK GREY"),
-    N_(u"DARK OLIVE GREEN"),
-    N_(u"DARK ORCHID"),
-    N_(u"DARK SLATE BLUE"),
-    N_(u"DARK SLATE GREY"),
-    N_(u"DARK TURQUOISE"),
-    N_(u"DIM GREY"),
-    N_(u"FIREBRICK"),
-    N_(u"FOREST GREEN"),
-    N_(u"GOLD"),
-    N_(u"GOLDENROD"),
-    N_(u"GREEN YELLOW"),
-    N_(u"GREEN"),
-    N_(u"GREY"),
-    N_(u"INDIAN RED"),
-    N_(u"KHAKI"),
-    N_(u"LIGHT BLUE"),
-    N_(u"LIGHT GREY"),
-    N_(u"LIGHT STEEL BLUE"),
-    N_(u"LIME GREEN"),
-    N_(u"MAGENTA"),
-    N_(u"MAROON"),
-    N_(u"MEDIUM AQUAMARINE"),
-    N_(u"MEDIUM BLUE"),
-    N_(u"MEDIUM FOREST GREEN"),
-    N_(u"MEDIUM GOLDENROD"),
-    N_(u"MEDIUM ORCHID"),
-    N_(u"MEDIUM SEA GREEN"),
-    N_(u"MEDIUM SLATE BLUE"),
-    N_(u"MEDIUM SPRING GREEN"),
-    N_(u"MEDIUM TURQUOISE"),
-    N_(u"MEDIUM VIOLET RED"),
-    N_(u"MIDNIGHT BLUE"),
-    N_(u"NAVY"),
-    N_(u"ORANGE RED"),
-    N_(u"ORANGE"),
-    N_(u"ORCHID"),
-    N_(u"PALE GREEN"),
-    N_(u"PINK"),
-    N_(u"PLUM"),
-    N_(u"PURPLE"),
-    N_(u"RED"),
-    N_(u"SALMON"),
-    N_(u"SEA GREEN"),
-    N_(u"SIENNA"),
-    N_(u"SKY BLUE"),
-    N_(u"SLATE BLUE"),
-    N_(u"SPRING GREEN"),
-    N_(u"STEEL BLUE"),
-    N_(u"TAN"),
-    N_(u"THISTLE"),
-    N_(u"TURQUOISE"),
-    N_(u"VIOLET RED"),
-    N_(u"VIOLET"),
-    N_(u"WHEAT"),
-    N_(u"WHITE"),
-    N_(u"YELLOW GREEN"),
-    N_(u"YELLOW")
+    N_("AQUAMARINE"),
+    N_("BLACK"),
+    N_("BLUE VIOLET"),
+    N_("BLUE"),
+    N_("BROWN"),
+    N_("CADET BLUE"),
+    N_("CORAL"),
+    N_("CORNFLOWER BLUE"),
+    N_("CYAN"),
+    N_("DARK GREEN"),
+    N_("DARK GREY"),
+    N_("DARK OLIVE GREEN"),
+    N_("DARK ORCHID"),
+    N_("DARK SLATE BLUE"),
+    N_("DARK SLATE GREY"),
+    N_("DARK TURQUOISE"),
+    N_("DIM GREY"),
+    N_("FIREBRICK"),
+    N_("FOREST GREEN"),
+    N_("GOLD"),
+    N_("GOLDENROD"),
+    N_("GREEN YELLOW"),
+    N_("GREEN"),
+    N_("GREY"),
+    N_("INDIAN RED"),
+    N_("KHAKI"),
+    N_("LIGHT BLUE"),
+    N_("LIGHT GREY"),
+    N_("LIGHT STEEL BLUE"),
+    N_("LIME GREEN"),
+    N_("MAGENTA"),
+    N_("MAROON"),
+    N_("MEDIUM AQUAMARINE"),
+    N_("MEDIUM BLUE"),
+    N_("MEDIUM FOREST GREEN"),
+    N_("MEDIUM GOLDENROD"),
+    N_("MEDIUM ORCHID"),
+    N_("MEDIUM SEA GREEN"),
+    N_("MEDIUM SLATE BLUE"),
+    N_("MEDIUM SPRING GREEN"),
+    N_("MEDIUM TURQUOISE"),
+    N_("MEDIUM VIOLET RED"),
+    N_("MIDNIGHT BLUE"),
+    N_("NAVY"),
+    N_("ORANGE RED"),
+    N_("ORANGE"),
+    N_("ORCHID"),
+    N_("PALE GREEN"),
+    N_("PINK"),
+    N_("PLUM"),
+    N_("PURPLE"),
+    N_("RED"),
+    N_("SALMON"),
+    N_("SEA GREEN"),
+    N_("SIENNA"),
+    N_("SKY BLUE"),
+    N_("SLATE BLUE"),
+    N_("SPRING GREEN"),
+    N_("STEEL BLUE"),
+    N_("TAN"),
+    N_("THISTLE"),
+    N_("TURQUOISE"),
+    N_("VIOLET RED"),
+    N_("VIOLET"),
+    N_("WHEAT"),
+    N_("WHITE"),
+    N_("YELLOW GREEN"),
+    N_("YELLOW")
 ]
 
 
 _BUILTINS = {
-    u"alias": None,
-    u"auto_link": (u"off", u"relax"),
-    u"bgcolor": _COLORS,
-    u"bold": (u"true", u"false"),
-    u"camelCaseWordsEnabled": (u"false", u"true"),
-    u"child_sort_order": ("ascending", u"descending", u"mod_oldest",
-            u"mod_newest", u"unsorted", u"natural"),
-    u"color": _COLORS,
-    u"export": (u"false",),
-    u"font": None, # Special handling
+    "alias": None,
+    "auto_link": ("off", "relax"),
+    "bgcolor": _COLORS,
+    "bold": ("true", "false"),
+    "camelCaseWordsEnabled": ("false", "true"),
+    "child_sort_order": ("ascending", "descending", "mod_oldest",
+            "mod_newest", "unsorted", "natural"),
+    "color": _COLORS,
+    "export": ("false",),
+    "font": None, # Special handling
 
-    u"global.auto_link": (u"off", u"relax"),
-    u"global.camelCaseWordsEnabled": (u"false", u"true"),
-    u"global.child_sort_order": ("ascending", u"descending", u"mod_oldest",
-            u"mod_newest", u"unsorted", u"natural"),
-    u"global.font": None, # Special handling
-    u"global.html.linkcolor": None,
-    u"global.html.alinkcolor": None,
-    u"global.html.vlinkcolor": None,
-    u"global.html.textcolor": None,
-    u"global.html.bgcolor": None,
-    u"global.html.bgimage": None,
-    u"global.import_scripts": None,
-    u"global.language": None, # TODO: special handling
-    u"global.paragraph_mode": (u"true", u"false"),
-    u"global.template": None,
-    u"global.template_head": (u"auto", u"manual"),
-    u"global.view_pane": (u"off", u"editor", u"preview"),
-    u"global.wrap_type": (u"word", u"char"),
+    "global.auto_link": ("off", "relax"),
+    "global.camelCaseWordsEnabled": ("false", "true"),
+    "global.child_sort_order": ("ascending", "descending", "mod_oldest",
+            "mod_newest", "unsorted", "natural"),
+    "global.font": None, # Special handling
+    "global.html.linkcolor": None,
+    "global.html.alinkcolor": None,
+    "global.html.vlinkcolor": None,
+    "global.html.textcolor": None,
+    "global.html.bgcolor": None,
+    "global.html.bgimage": None,
+    "global.import_scripts": None,
+    "global.language": None, # TODO: special handling
+    "global.paragraph_mode": ("true", "false"),
+    "global.template": None,
+    "global.template_head": ("auto", "manual"),
+    "global.view_pane": ("off", "editor", "preview"),
+    "global.wrap_type": ("word", "char"),
 
 
-    u"html.linkcolor": None,
-    u"html.alinkcolor": None,
-    u"html.vlinkcolor": None,
-    u"html.textcolor": None,
-    u"html.bgcolor": None,
-    u"html.bgimage": None,
-    u"icon": None,   # Special handling
-    u"import_scripts": None,
-    u"importance": (u"high", u"low"),
-    u"language": None, # TODO: special handling
-    u"pagetype": (u"form",),
-    u"priority": (u"1", u"2", u"3", u"4", u"5"),
-    u"paragraph_mode": (u"true", u"false"),
-    u"short_hint": None,
-    u"template": None,
-    u"template_head": (u"auto", u"manual"),
-    u"tree_position": None,
-    u"view_pane": (u"off", u"editor", u"preview"),
-    u"wrap_type": (u"word", u"char"),
+    "html.linkcolor": None,
+    "html.alinkcolor": None,
+    "html.vlinkcolor": None,
+    "html.textcolor": None,
+    "html.bgcolor": None,
+    "html.bgimage": None,
+    "icon": None,   # Special handling
+    "import_scripts": None,
+    "importance": ("high", "low"),
+    "language": None, # TODO: special handling
+    "pagetype": ("form",),
+    "priority": ("1", "2", "3", "4", "5"),
+    "paragraph_mode": ("true", "false"),
+    "short_hint": None,
+    "template": None,
+    "template_head": ("auto", "manual"),
+    "tree_position": None,
+    "view_pane": ("off", "editor", "preview"),
+    "wrap_type": ("word", "char"),
 
-    u"parent": None,
+    "parent": None,
 }
 
 
 def getBuiltinKeys():
-    return _BUILTINS.keys()
+    return list(_BUILTINS.keys())
 
 
 def getBuiltinValuesForKey(attrKey):
     # Handle exceptions here
-    if attrKey == u"icon":
-        return wx.GetApp().getIconCache().iconLookupCache.keys()
-    elif attrKey == u"font" or attrKey == u"global.font":
+    if attrKey == "icon":
+        return list(wx.GetApp().getIconCache().iconLookupCache.keys())
+    elif attrKey == "font" or attrKey == "global.font":
         fenum = wx.FontEnumerator()
         fenum.EnumerateFacenames()
         return fenum.GetFacenames()
@@ -184,36 +183,38 @@ def buildIconsSubmenu(iconCache):
     iconsMenu = wx.Menu()
 
     iconsMenu1 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'A-C', iconsMenu1)
+    iconsMenu.AppendSubMenu(iconsMenu1, 'A-C')
     iconsMenu2 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'D-F', iconsMenu2)
+    iconsMenu.AppendSubMenu(iconsMenu2, 'D-F')
     iconsMenu3 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'G-L', iconsMenu3)
+    iconsMenu.AppendSubMenu(iconsMenu3, 'G-L')
     iconsMenu4 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'M-P', iconsMenu4)
+    iconsMenu.AppendSubMenu(iconsMenu4, 'M-P')
     iconsMenu5 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'Q-S', iconsMenu5)
+    iconsMenu.AppendSubMenu(iconsMenu5, 'Q-S')
     iconsMenu6 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), u'T-Z', iconsMenu6)
+    iconsMenu.AppendSubMenu(iconsMenu6, 'T-Z')
 
-    icons = iconCache.iconLookupCache.keys();  # TODO: Create function?
-    icons.sort()    # TODO sort with collator
+    icons = list(iconCache.iconLookupCache.keys());  # TODO: Create function?
+    icons.sort(key=lambda s: s.lower())    # TODO sort with collator
 
     for icname in icons:
-        if icname.startswith("tb_"):
+        icnameKey = icname.lower()
+
+        if icnameKey.startswith("tb_"):
             continue
         iconsSubMenu = None
-        if icname[0] <= u'c':
+        if icnameKey[0] <= 'c':
             iconsSubMenu = iconsMenu1
-        elif icname[0] <= u'f':
+        elif icnameKey[0] <= 'f':
             iconsSubMenu = iconsMenu2
-        elif icname[0] <= u'l':
+        elif icnameKey[0] <= 'l':
             iconsSubMenu = iconsMenu3
-        elif icname[0] <= u'p':
+        elif icnameKey[0] <= 'p':
             iconsSubMenu = iconsMenu4
-        elif icname[0] <= u's':
+        elif icnameKey[0] <= 's':
             iconsSubMenu = iconsMenu5
-        elif icname[0] <= u'z':
+        elif icnameKey[0] <= 'z':
             iconsSubMenu = iconsMenu6
 
         menuID = wx.NewId()
@@ -222,7 +223,7 @@ def buildIconsSubmenu(iconCache):
         menuItem = wx.MenuItem(iconsSubMenu, menuID, icname, icname)
         bitmap = iconCache.lookupIcon(icname)
         menuItem.SetBitmap(bitmap)
-        iconsSubMenu.AppendItem(menuItem)
+        iconsSubMenu.Append(menuItem)
 
     return (iconsMenu, iconMap)
 
@@ -236,14 +237,10 @@ def buildColorsSubmenu():
     colorsMenu = wx.Menu()
 
     colorsMenu1 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), u'A-L', colorsMenu1)
+    colorsMenu.AppendSubMenu(colorsMenu1, 'A-L')
     colorsMenu2 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), u'M-Z', colorsMenu2)
+    colorsMenu.AppendSubMenu(colorsMenu2, 'M-Z')
     
-    # Set showColored to False if we are on Win 95/98/ME and use an unicode build
-    #   of wxPython because it would crash then
-    showColored = not (wx.GetOsVersion()[0] == wxWIN95 and isUnicode())
-
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
         translatedColorName = _(cn)
@@ -258,17 +255,16 @@ def buildColorsSubmenu():
         menuItem = wx.MenuItem(colorsSubMenu, menuID, translatedColorName,
                 translatedColorName)
         
-        if showColored:
-            cl = wx.NamedColour(cn)
-    
-            menuItem.SetBackgroundColour(cl)
-    
-            # if color is dark, text should be white
-            #   (checking green component seems to be enough)
-            if cl.Green() < 128:
-                menuItem.SetTextColour(wx.WHITE)
+        cl = wx.Colour(cn)
 
-        colorsSubMenu.AppendItem(menuItem)
+        menuItem.SetBackgroundColour(cl)
+
+        # if color is dark, text should be white
+        #   (checking green component seems to be enough)
+        if cl.Green() < 128:
+            menuItem.SetTextColour(wx.WHITE)
+
+        colorsSubMenu.Append(menuItem)
 
     return (colorsMenu, colorMap)
 
@@ -339,7 +335,7 @@ class AttributeCheckParent(AbstractAttributeCheck):
         Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^parent$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+        return _re.compile(r"^parent$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
     def beginPageCheck(self, wikiPage, pageAst):
         AbstractAttributeCheck.beginPageCheck(self, wikiPage, pageAst)
@@ -372,8 +368,8 @@ class AttributeCheckParent(AbstractAttributeCheck):
             # Word does not exist
 #             print (attrName, attrValue), wikiWord, wikiWord, (start, end)
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"Parent wikiword does not exist: "
-                    u"[%s: %s]") %
+                    _("Parent wikiword does not exist: "
+                    "[%s: %s]") %
                     (attrName, attrValue), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
@@ -383,8 +379,8 @@ class AttributeCheckParent(AbstractAttributeCheck):
             wikiWord = self.wikiPage.getWikiWord()
             for attr in self.foundAttributes: 
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                        _(u"Multiple parent attributes found on page: "
-                        u"[%s: %s]") %
+                        _("Multiple parent attributes found on page: "
+                        "[%s: %s]") %
                         (attr[0], attr[1]), wikiWord, wikiWord, (attr[2], attr[3]))
                 self.attrChecker.appendLogMessage(msg)
                 return
@@ -402,7 +398,7 @@ class AttributeCheckAlias(AbstractAttributeCheck):
         Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^alias$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+        return _re.compile(r"^alias$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
     def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
@@ -419,7 +415,7 @@ class AttributeCheckAlias(AbstractAttributeCheck):
 
         if errMsg:
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"Alias value isn't a valid wikiword: [%s: %s], %s") %
+                    _("Alias value isn't a valid wikiword: [%s: %s], %s") %
                     (attrName, attrValue, errMsg), wikiWord, wikiWord,
                     (start, end))
             self.attrChecker.appendLogMessage(msg)
@@ -434,8 +430,8 @@ class AttributeCheckAlias(AbstractAttributeCheck):
         if wikiDocument.isDefinedWikiPageName(targetWikiWord):
             # Word exists and isn't an alias
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"A real wikiword with the alias name exists already: "
-                    u"[%s: %s]") %
+                    _("A real wikiword with the alias name exists already: "
+                    "[%s: %s]") %
                     (attrName, attrValue), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
@@ -469,7 +465,7 @@ class AttributeCheckTemplate(AbstractAttributeCheck):
         Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^(?:global\.)?template$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+        return _re.compile(r"^(?:global\.)?template$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
     def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
@@ -486,7 +482,7 @@ class AttributeCheckTemplate(AbstractAttributeCheck):
 
         if errMsg :
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"Template value isn't a valid wikiword: [%s: %s], %s") %
+                    _("Template value isn't a valid wikiword: [%s: %s], %s") %
                     (attrName, attrValue, errMsg), wikiWord, wikiWord,
                     (start, end))
             self.attrChecker.appendLogMessage(msg)
@@ -501,8 +497,8 @@ class AttributeCheckTemplate(AbstractAttributeCheck):
         if not wikiDocument.isDefinedWikiLinkTerm(targetWikiWord):
             # Word doesn't exist
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"Template value isn't an existing wikiword: "
-                    u"[%s: %s]") %
+                    _("Template value isn't an existing wikiword: "
+                    "[%s: %s]") %
                     (attrName, attrValue), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
@@ -523,7 +519,7 @@ class AttributeCheckPresentation(AbstractAttributeCheck):
         Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^(?:global\..*?\.)?(icon|color|bold)$",
+        return _re.compile(r"^(?:global\..*?\.)?(icon|color|bold)$",
                 _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
 
@@ -548,7 +544,7 @@ class AttributeCheckPresentation(AbstractAttributeCheck):
         # Check for double entries with different values on same page
         if attrName in self.foundEntryNames:
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"The attribute %s was already set differently on this page") %
+                    _("The attribute %s was already set differently on this page") %
                     (attrName,), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
         else:
@@ -556,27 +552,27 @@ class AttributeCheckPresentation(AbstractAttributeCheck):
             
         # Check for double entries on other pages for global.* attrs
         wikiData = self.mainControl.getWikiData()
-        if attrName.startswith(u"global"):
+        if attrName.startswith("global"):
             words = wikiData.getWordsForAttributeName(attrName)
             if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                        _(u"Attribute '%s' is already defined on the wiki page(s): %s") %
-                        (attrName, u"; ".join(words)), wikiWord, wikiWord,
+                        _("Attribute '%s' is already defined on the wiki page(s): %s") %
+                        (attrName, "; ".join(words)), wikiWord, wikiWord,
                         (start, end))
                 self.attrChecker.appendLogMessage(msg)
 
         # Check if value is a valid name for icon/color
-        if attrName.endswith(u"icon"):
+        if attrName.endswith("icon"):
             if self.mainControl.lookupIconIndex(attrValue) == -1:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                        _(u"Icon name doesn't exist: [%s: %s]") %
+                        _("Icon name doesn't exist: [%s: %s]") %
                         (attrName, attrValue), wikiWord, wikiWord, (start, end))
                 self.attrChecker.appendLogMessage(msg)
-        elif attrName.endswith(u"color"):
+        elif attrName.endswith("color"):
 #             if attrValue.upper() not in _COLORS:
             if StringOps.colorDescToRgbTuple(attrValue) is None:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                        _(u"Color name doesn't exist: [%s: %s]") %
+                        _("Color name doesn't exist: [%s: %s]") %
                         (attrName, attrValue), wikiWord, wikiWord, (start, end))
                 self.attrChecker.appendLogMessage(msg)
 
@@ -596,7 +592,7 @@ class AttributeCheckGlobalGraphInclude(AbstractAttributeCheck):
         Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^global\.graph\.relations\.include$",
+        return _re.compile(r"^global\.graph\.relations\.include$",
                 _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
 
@@ -623,7 +619,7 @@ class AttributeCheckGlobalGraphInclude(AbstractAttributeCheck):
         if len(attrs) > 0:
             # Check for double entries with different values on same page
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"The attribute 'global.graph.relations.exclude' (e.g. on page '%s') "
+                    _("The attribute 'global.graph.relations.exclude' (e.g. on page '%s') "
                         "overrides the '...include' attribute") %
                     (attrs[0][0],), wikiWord, wikiWord, (start, end))
             
@@ -690,8 +686,8 @@ class AttributeChecker:
 
     def appendLogMessage(self, msg):
         if self.msgCollector is None:
-            raise InternalError(u"Calling AttributeChecker.appendLogMessage "
-                    u"while outside of checkPage")
+            raise InternalError("Calling AttributeChecker.appendLogMessage "
+                    "while outside of checkPage")
         
         self.msgCollector.append(msg)
 
@@ -715,7 +711,7 @@ class AttributeChecker:
         src = miscevt.getSource()
         if isinstance(src, WikiPage):
             # Event from wiki document aka wiki data manager
-            if miscevt.has_key("updated wiki page"):
+            if "updated wiki page" in miscevt:
                 src.getMiscEvent().removeListener(self)
                 self.checkPage(src)
 
@@ -746,7 +742,7 @@ class AttributeChecker:
 
                     if attrTuple in foundAttrs:
                         msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                                _(u"Same attribute twice: [%s: %s]") % attrTuple,
+                                _("Same attribute twice: [%s: %s]") % attrTuple,
                                 wikiWord, wikiWord,
                                 (node.pos, node.pos + node.strLength))
                         self.appendLogMessage(msg)

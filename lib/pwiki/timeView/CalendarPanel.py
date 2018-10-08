@@ -15,7 +15,7 @@ from pwiki.StringOps import formatWxDate
 from pwiki.WindowLayout import setWindowPos, setWindowClientSize, LayeredControlPanel
 from pwiki.SystemInfo import isWindows
 
-from TimePresentationBase import TimePresentationBase
+from .TimePresentationBase import TimePresentationBase
 
 
 
@@ -109,15 +109,15 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
         self.SetBackgroundColour(wx.WHITE)
 
-        wx.EVT_PAINT(self, self.OnPaint)
-        wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
-        wx.EVT_SIZE(self, self.OnSize)
-        wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
 
-#         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
-#         wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
+#         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+#         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         
-#         wx.EVT_MOTION(self, self.OnMotion)
+#         self.Bind(wx.EVT_MOTION, self.OnMotion)
 
 
     def adjustToSize(self):
@@ -128,7 +128,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             currMonth.ResetTime()
             currMonth.SetDay(1)
             
-            self.topMonth = currMonth - wx.DateSpan_Months(
+            self.topMonth = currMonth - wx.DateSpan.Months(
                     self.monthCols * self.monthRows - 1)
                     
             self.selectedDay = None
@@ -191,7 +191,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         self.wikiWordFilter.setDayResolution(1)
 
         date = self.topMonth
-        afterLastMonth = date + wx.DateSpan_Months(
+        afterLastMonth = date + wx.DateSpan.Months(
                 self.monthCols * self.monthRows)
         
         count = (afterLastMonth - date).GetDays()
@@ -199,8 +199,8 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         massWordCounts = self.wikiWordFilter.getMassWikiWordCountForDays(date,
                 count)
 
-        step = wx.TimeSpan_Day()
-        for i in xrange(count):
+        step = wx.TimeSpan.Day()
+        for i in range(count):
             dateKey = (date.GetDay(), date.GetMonth(), date.GetYear())
             self.dayToWordCountCache[dateKey] = massWordCounts[i]
             date = date + step
@@ -220,11 +220,11 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         try:
             # Initialize dims
             dc.SetFont(self.boldFont)
-            cdw, cdh = dc.GetTextExtent(u"00")
+            cdw, cdh = dc.GetTextExtent("00")
             dc.SetFont(self.stdFont)
             
             # Expand cell width if a short weekday is broader
-            for i in xrange(7):
+            for i in range(7):
                 wd = wx.DateTime.GetWeekDayName(i, wx.DateTime.Name_Abbr)
                 cdw = max(cdw, dc.GetTextExtent(wd)[0])
 
@@ -252,7 +252,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         """
         Recalculate layout after a size change.
         """
-        pWidth, pHeight = self.GetSizeTuple()
+        pWidth, pHeight = self.GetSize()
 
         self.sizeVisible = pWidth >= 5 and pHeight >= 5
 
@@ -333,7 +333,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             dc.SetFont(self.boldFont)
             resetFont = True
             
-        drawTextRight(dc, u"%i" % date.GetDay(), startX, startY,
+        drawTextRight(dc, "%i" % date.GetDay(), startX, startY,
                 self.cellWidth)            
         
         if resetFont:
@@ -354,7 +354,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         yPos = startY
         dc.SetFont(self.boldFont)
 #         monthName = wx.DateTime.GetMonthName(month[0], wx.DateTime.Name_Abbr)
-        monthName = formatWxDate(u"%b %Y", date)
+        monthName = formatWxDate("%b %Y", date)
         drawTextCenter(dc, monthName, startX, yPos, self.monthWidth)
         
 #         dc.DrawText(monthName, startX, yPos)
@@ -365,9 +365,9 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         yPos += cellShiftY
         xPos = startX
         if self.firstWeekDay == self.Sunday_First:
-            wdOrder = range(7)
+            wdOrder = list(range(7))
         else:
-            wdOrder = range(1, 7) + [0]
+            wdOrder = list(range(1, 7)) + [0]
 
         for i in wdOrder:
             wd = wx.DateTime.GetWeekDayName(i, wx.DateTime.Name_Abbr)
@@ -376,14 +376,14 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
         # Actual day grid
         yPos += cellShiftY
-        dateShift = wx.TimeSpan_Day()
+        dateShift = wx.TimeSpan.Day()
         dayCount = wx.DateTime.GetNumberOfDaysInMonth(month.GetMonth(),
                 month.GetYear())
 
         wdCol = self.getColForWeekDay(date.GetWeekDay())
         xPos = startX + wdCol * cellShiftX
         
-        for d in xrange(dayCount):
+        for d in range(dayCount):
             self.paintDateCell(date, xPos, yPos, dc)
 #             dc.DrawText("%i" % d, )
 
@@ -403,7 +403,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         try:
             self.fillWordCountCache()
             month = self.topMonth
-            monthDateShift = wx.DateSpan_Month()
+            monthDateShift = wx.DateSpan.Month()
             self.today = wx.DateTime.Now()
             self.today.ResetTime()
     
@@ -412,9 +412,9 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             
             yPos = self.outerMarginTop
             
-            for mrow in xrange(self.monthRows):
+            for mrow in range(self.monthRows):
                 xPos = self.outerMarginLeft
-                for mcol in xrange(self.monthCols):
+                for mcol in range(self.monthCols):
                     if updateRegion is None or \
                             updateRegion.ContainsRectDim(xPos, yPos,
                             self.monthWidth, self.monthHeight) != wx.OutRegion:
@@ -433,16 +433,16 @@ class CalendarPanel(wx.Window, TimePresentationBase):
     def getXYForMonth(self, searchedMonth):
         # TODO More elegantly
         month = self.topMonth
-        monthDateShift = wx.DateSpan_Month()
+        monthDateShift = wx.DateSpan.Month()
         
         monthShiftX = self.monthWidth + self.monthDistHor
         monthShiftY = self.monthHeight + self.monthDistVert
         
         yPos = self.outerMarginTop
         
-        for mrow in xrange(self.monthRows):
+        for mrow in range(self.monthRows):
             xPos = self.outerMarginLeft
-            for mcol in xrange(self.monthCols):
+            for mcol in range(self.monthCols):
                 if month == searchedMonth:
                     return (xPos, yPos)
 
@@ -474,7 +474,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
     def OnPaint(self, evt):
         ## _prof.start()
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.AutoBufferedPaintDC(self)
         dc.SetBackground(wx.WHITE_BRUSH)
         dc.Clear()
         dc.SetBackground(wx.NullBrush)
@@ -635,7 +635,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             # On an empty cell after the last day of month
             return (month, self.HITTEST_MONTH, None)
         
-        date = month + wx.TimeSpan_Days(dayShift)
+        date = month + wx.TimeSpan.Days(dayShift)
         
         return (date, self.HITTEST_DAY, wx.Rect(cellCol * cellShiftX,
                 cellRow * cellShiftY, self.cellWidth, self.cellHeight))
@@ -703,7 +703,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 #         """
 #         Recalculate layout after a size change.
 #         """
-#         pWidth, pHeight = self.GetSizeTuple()
+#         pWidth, pHeight = self.GetSize()
 #         
 #         # How many months side by side
 #         self.monthCols = \

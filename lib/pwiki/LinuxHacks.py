@@ -117,7 +117,7 @@ def getCpuAffinity():
         return None
 
     for outer, mask in enumerate(cpuSet.bits):
-        for inner in xrange(_NCPUBITS):
+        for inner in range(_NCPUBITS):
             cpu = outer * _NCPUBITS + inner
             if cpu > cpuCount:
                 break

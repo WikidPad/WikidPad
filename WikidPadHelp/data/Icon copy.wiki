@@ -1,2 +1,2 @@
-++ Icon copy
+﻿++ Icon copy
 [icon: copy]

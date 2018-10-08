@@ -1,4 +1,4 @@
-from __future__ import absolute_import, with_statement
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -26,15 +26,12 @@ class TrashBagList(EnhancedListControl):
         self.dialog = dialog
         self.contextMenuItem = -1
 
-        self.InsertColumn(0, u"", width=1)  # wiki word
-        self.InsertColumn(1, u"", width=1)  # trash date
+        self.InsertColumn(0, "", width=1)  # wiki word
+        self.InsertColumn(1, "", width=1)  # trash date
 
-#         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(),
-                self.dialog.OnCmdRestoreSelected)
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#         wx.EVT_MENU(self, GUI_ID.CMD_TRASHBAG_RESTORE,
-#                 self.OnCmdTrashBagRestore)
+#         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.dialog.OnCmdRestoreSelected, id=self.GetId())
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         self.updateContent()
 
@@ -55,7 +52,7 @@ class TrashBagList(EnhancedListControl):
         # In trashcan the bags are listed from oldest to newest, we need
         # it the other way
         self.bagList = [bag for bag in reversed(trashcan.getTrashBags())
-                if bag.originalUnifiedName.startswith(u"wikipage/")]
+                if bag.originalUnifiedName.startswith("wikipage/")]
 
         self._updatePresentation()
 
@@ -65,12 +62,12 @@ class TrashBagList(EnhancedListControl):
             self.DeleteAllItems()
 
             formatStr = self.mainControl.getConfig().get("main",
-                    "pagestatus_timeformat", u"%Y %m %d")
+                    "pagestatus_timeformat", "%Y %m %d")
             # timeView_dateFormat
 
             for i, bag in enumerate(self.bagList):
-                self.InsertStringItem(i, bag.originalUnifiedName[9:])
-                self.SetStringItem(i, 1, bag.getFormattedTrashDate(formatStr))
+                self.InsertItem(i, bag.originalUnifiedName[9:])
+                self.SetItem(i, 1, bag.getFormattedTrashDate(formatStr))
             
             self.autosizeColumn(0)
             self.autosizeColumn(1)
@@ -136,13 +133,12 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
     """
     """
     def __init__(self, mainControl, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "TrashcanDialog")
+        res.LoadDialog(self, parent, "TrashcanDialog")
 
         self.ctrls = XrcControls(self)
         self.ctrls.btnClose.SetId(wx.ID_CANCEL)
@@ -150,9 +146,9 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
         listCtrl = TrashBagList(self.mainControl, self, self, GUI_ID.listDetails)
         res.AttachUnknownControl("listDetails", listCtrl, self)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnRestoreSelected, self.OnCmdRestoreSelected)
-        wx.EVT_BUTTON(self, GUI_ID.btnDeleteSelected, self.OnCmdDeleteSelected)
-        wx.EVT_BUTTON(self, GUI_ID.btnDeleteAll, self.OnCmdDeleteAll)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdRestoreSelected, id=GUI_ID.btnRestoreSelected)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdDeleteSelected, id=GUI_ID.btnDeleteSelected)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdDeleteAll, id=GUI_ID.btnDeleteAll)
 
 
     def GetValue(self):
@@ -177,7 +173,7 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             importer = TrashBagMptImporter(self, self.mainControl,
                     i < len(bags) - 1, initialRbChoice)
             # TODO: Catch ImportError
-            importer.doImport(wikiDoc, u"multipage_text", None,
+            importer.doImport(wikiDoc, "multipage_text", None,
                     False, importer.getAddOpt(None), importData=data)
             
             initialRbChoice = importer.initialRbChoice
@@ -198,8 +194,8 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             return
         
         answer = wx.MessageBox(
-                _(u"Delete %i elements from trashcan?") %
-                len(bags), _(u"Delete from trashcan"),
+                _("Delete %i elements from trashcan?") %
+                len(bags), _("Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
         if answer != wx.YES:
@@ -224,8 +220,8 @@ class TrashcanDialog(wx.Dialog, ModalDialogMixin):
             return
 
         answer = wx.MessageBox(
-                _(u"Delete all elements from trashcan?"),
-                _(u"Delete from trashcan"),
+                _("Delete all elements from trashcan?"),
+                _("Delete from trashcan"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
         if answer != wx.YES:
@@ -252,15 +248,14 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
     def __init__(self, mainControl, parent, unifName, allowSkip=False,
             initialRbChoice=None):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.value = self.RET_CANCEL, None
         self.unifName = unifName
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "TrashBagRenameDialog")
+        res.LoadDialog(self, parent, "TrashBagRenameDialog")
 
         self.ctrls = XrcControls(self)
         self.ctrls.btnOk.SetId(wx.ID_OK)
@@ -269,7 +264,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         self.ctrls.rbSkip.Enable(allowSkip)
         
-        if unifName.startswith(u"wikipage/"):
+        if unifName.startswith("wikipage/"):
             nameCollision = unifName[9:]
         else:
             nameCollision = unifName  # Should not happen
@@ -285,16 +280,14 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         self.updateValidToWikiWord()
         
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnCancel)
-        wx.EVT_TEXT(self, GUI_ID.tfTrashBagTo, self.OnTextTrashBagTo)
-        wx.EVT_TEXT(self, GUI_ID.tfWikiElementTo, self.OnTextWikiElementTo)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbOverwrite, self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbSkip, self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbRenameTrashBag,
-                self.OnRadioButtonChanged)
-        wx.EVT_RADIOBUTTON(self, GUI_ID.rbRenameWikiElement,
-                self.OnRadioButtonChanged)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnCancel, id=wx.ID_CANCEL)
+        self.Bind(wx.EVT_TEXT, self.OnTextTrashBagTo, id=GUI_ID.tfTrashBagTo)
+        self.Bind(wx.EVT_TEXT, self.OnTextWikiElementTo, id=GUI_ID.tfWikiElementTo)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbOverwrite)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbSkip)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbRenameTrashBag)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButtonChanged, id=GUI_ID.rbRenameWikiElement)
 
         # Fixes focus bug under Linux
         self.SetFocus()
@@ -348,7 +341,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 
         if msg is None:
             self.ctrls.btnOk.Enable(True)
-            self.ctrls.stErrorMessage.SetLabel(u"")
+            self.ctrls.stErrorMessage.SetLabel("")
         else:
             self.ctrls.btnOk.Enable(False)
             self.ctrls.stErrorMessage.SetLabel(msg)
@@ -357,7 +350,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
     def _checkValidToWikiWord(self, toWikiWord):
 
         if not toWikiWord or len(toWikiWord) == 0:
-            return u"" # No error message, but disable OK
+            return "" # No error message, but disable OK
             
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.mainControl.getWikiDefaultWikiLanguage())
@@ -372,7 +365,7 @@ class TrashBagRenameDialog(wx.Dialog, ModalDialogMixin):
 #             return _(u"Can't rename to itself")
 
         if not self.mainControl.getWikiDocument().isCreatableWikiWord(toWikiWord):
-            return _(u"Word already exists")
+            return _("Word already exists")
 
         # Word is OK
         return None
@@ -420,13 +413,13 @@ class TrashBagMptImporter(MultiPageTextImporter):
             self.tempDb.execSql("""
                     update entries set renameImportTo = ?
                     where unifName = ?;
-                    """, (u"wikipage/" + element, unifName))
+                    """, ("wikipage/" + element, unifName))
             return True
         elif ret == TrashBagRenameDialog.RET_RENAME_WIKIELEMENT:
             self.tempDb.execSql("""
                     update entries set renamePresentTo = ?
                     where unifName = ?;
-                    """, (u"wikipage/" + element, unifName))
+                    """, ("wikipage/" + element, unifName))
             return True
 
         return False
@@ -441,7 +434,7 @@ class TrashBagMptImporter(MultiPageTextImporter):
 # """
 # 
 # # Entries to support i18n of context menus
-# if False:
+# if not True:
 #     N_(u"Restore")
 #     N_(u"Restore from trashcan back to wiki")
 

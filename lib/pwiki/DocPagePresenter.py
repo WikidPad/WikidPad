@@ -7,21 +7,21 @@ import wx
 import wx.xrc as xrc
 
 
-from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
+from .WikiExceptions import *
+from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
 from .MiscEvent import ProxyMiscEvent  # , KeyFunctionSink
 from .WikiHtmlView import createWikiHtmlView
 from . import DocPages
 
 from . import SystemInfo
-from .StringOps import uniToGui, escapeForIni, unescapeForIni
+from .StringOps import escapeForIni, unescapeForIni
 
 from .WindowLayout import LayeredControlPresenter, LayerSizer, StorablePerspective
 
 from .PageHistory import PageHistory
 
-from . import pygauge as PG
+from wx.lib.agw.pygauge import PyGauge
 
 
 
@@ -72,7 +72,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         return self.getSubControl("textedit")
 
     def SetStatusText(self, text, field):
-        self.getStatusBar().SetStatusText(uniToGui(text), field)
+        self.getStatusBar().SetStatusText(text, field)
 
     def showStatusMessage(self, msg, duration=0, key=None):
         self.getMainControl().showStatusMessage(msg, duration, key)
@@ -156,7 +156,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 #                 self.fireMiscEventProps(miscevt.getProps())
 #             elif miscevt.has_key("deleted page"):
 #                 self.pageHistory.goAfterDeletion()
-            if miscevt.has_key("renamed wiki page"):
+            if "renamed wiki page" in miscevt:
 #                 oldWord = self.docPage.getWikiWord()
                 newWord = miscevt.get("newWord")
 
@@ -175,7 +175,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         if len(unifiedPageName) == 0:
             return
         
-        if unifiedPageName.startswith(u"wikipage/"):
+        if unifiedPageName.startswith("wikipage/"):
             self.openWikiPage(unifiedPageName[9:], *args, **kwargs)
         else:
             self.openFuncPage(unifiedPageName, *args, **kwargs)
@@ -192,7 +192,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             page = self.getMainControl().getWikiDocument().getFuncPage(funcTag)
     
             self.getSubControl("textedit").loadFuncPage(page, evtprops)
-        except (IOError, OSError, DbAccessError), e:
+        except (IOError, OSError, DbAccessError) as e:
             self.getMainControl().lostAccess(e)
             raise
             
@@ -235,7 +235,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
         if errMsg is not None:
             self.getMainControl().displayErrorMessage(
-                    _(u"'%s' is an invalid wiki word. %s.") % (wikiWord, errMsg))
+                    _("'%s' is an invalid wiki word. %s.") % (wikiWord, errMsg))
             return
             
         try:
@@ -263,14 +263,14 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 #                 self.getStatusBar().SetStatusText(uniToGui(_(u"Opened wiki word '%s'") %
 #                         wikiWord), 0)
 
-            except (WikiWordNotFoundException, WikiFileNotFoundException), e:
+            except (WikiWordNotFoundException, WikiFileNotFoundException) as e:
                 page = wikiDoc.createWikiPage(wikiWord,
                         suggNewPageTitle=suggNewPageTitle)
                 # trigger hooks
                 self.getMainControl().hooks.newWikiWord(self, wikiWord)
                 self.showStatusMessage(
-                        uniToGui(_(u"Wiki page not found, a new "
-                        u"page will be created")))
+                        _("Wiki page not found, a new "
+                        "page will be created"))
 #                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
 
             self.loadWikiPage(page, **evtprops)
@@ -279,7 +279,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             # sync the tree
             if forceTreeSyncFromRoot:
                 self.getMainControl().findCurrentWordInTree()  # TODO ?
-        except (IOError, OSError, DbAccessError), e:
+        except (IOError, OSError, DbAccessError) as e:
             self.getMainControl().lostAccess(e)
             raise
 
@@ -304,12 +304,12 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.getMainControl().getMainAreaPanel().updateConfig()
 
         # Should the page by default be presented in editor or preview mode?
-        pv = page.getAttributeOrGlobal(u"view_pane")
+        pv = page.getAttributeOrGlobal("view_pane")
         if pv is not None:
             pv = pv.lower()
-            if pv == u"preview":
+            if pv == "preview":
                 self.switchSubControl("preview")
-            elif pv == u"editor":
+            elif pv == "editor":
                 self.switchSubControl("textedit")
             # else: do nothing  (pv == u"off")
 
@@ -324,7 +324,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             try:
                 # this calls in turn saveDocPage() in PersonalWikiFrame
                 self.getSubControl("textedit").saveLoadedDocPage()
-            except (IOError, OSError, DbAccessError), e:
+            except (IOError, OSError, DbAccessError) as e:
                 self.getMainControl().lostAccess(e)
                 raise
 
@@ -348,7 +348,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.mainControl.displayMessage(title, str)
 
 
-    def displayErrorMessage(self, errorStr, e=u""):
+    def displayErrorMessage(self, errorStr, e=""):
         self.mainControl.displayErrorMessage(errorStr, e)
 
 
@@ -375,18 +375,18 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
 
         wx.GetApp().getMiscEvent().addListener(self)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
-                lambda evt: self.viewPageHistory())
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_UP,
-                lambda evt: self.viewPageHistory(-1))
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN,
-                lambda evt: self.viewPageHistory(1))
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_BACK,
-                lambda evt: self.pageHistory.goInHistory(-1))
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
-                lambda evt: self.pageHistory.goInHistory(1))
-        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE,
-                lambda evt: self.goUpwardFromSubpage())
+        self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(),
+                id=GUI_ID.CMD_PAGE_HISTORY_LIST)
+        self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(-1),
+                id=GUI_ID.CMD_PAGE_HISTORY_LIST_UP)
+        self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(1),
+                id=GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pageHistory.goInHistory(-1),
+                id=GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pageHistory.goInHistory(1),
+                id=GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
+        self.Bind(wx.EVT_MENU, lambda evt: self.goUpwardFromSubpage(),
+                id=GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE)
 
 
     def close(self):
@@ -425,7 +425,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         if gainFocus:
             subControl.SetFocus()
 
-        for n, c in self.subControls.iteritems():
+        for n, c in self.subControls.items():
 #             if n != scName:
             if c is not subControl:
                 if self.visible:
@@ -458,14 +458,14 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         try:
             hist = self.pageHistory.getHrHistoryList()
             histpos = self.pageHistory.getPosition()
-        except (IOError, OSError, DbAccessError), e:
+        except (IOError, OSError, DbAccessError) as e:
             self.getMainControl().lostAccess(e)
             raise
 
         historyLen = len(hist)
         dlg = wx.SingleChoiceDialog(self,
-                                   _(u"History"),
-                                   _(u"History"),
+                                   _("History"),
+                                   _("History"),
                                    hist,
                                    wx.CHOICEDLG_STYLE | wx.OK | wx.CANCEL)
 
@@ -516,7 +516,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         # Shorten title if too long
         maxLen = self.getConfig().getint("main", "tabs_maxCharacters", 0)
         if maxLen > 0 and len(shortTitle) > maxLen:
-            shortTitle = shortTitle[:(maxLen//2)] + u"..." + \
+            shortTitle = shortTitle[:(maxLen//2)] + "..." + \
                     shortTitle[-((maxLen+1)//2):]
 
         self.fireMiscEventProps({"changed presenter title": True,
@@ -526,7 +526,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
     def miscEventHappened(self, miscevt):
         if miscevt.getSource() is wx.GetApp():
             # The option "tabs_maxCharacters" may be changed, so set title again
-            if miscevt.has_key("options changed"):
+            if "options changed" in miscevt:
                 self.setTitle(self.shortTitle)
                 return
         
@@ -600,7 +600,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
                 return
 
             if self.tabProgressBar is None:
-                self.tabProgressBar = PG.PyGauge(self.getAUITabCtrl(), -1, size=(40, 15), style=wx.GA_HORIZONTAL) 
+                self.tabProgressBar = PyGauge(self.getAUITabCtrl(), -1, size=(40, 15), style=wx.GA_HORIZONTAL) 
                 # Use EVT_CHILD_FOCUS to detect when the progress bar is 
                 # clicked on as no click event seems to be emitted
                 self.tabProgressBar.Bind(wx.EVT_CHILD_FOCUS, 
@@ -627,7 +627,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
             self.tabProgressBar.SetBorderColour(wx.BLACK)
 
             self.getAUITabCtrl().Refresh()
-        except wx.PyDeadObjectError:
+        except RuntimeError:
             pass
 
 
@@ -640,15 +640,15 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
 
     @staticmethod
     def getPerspectiveType():
-        return u"DocPagePresenter"
+        return "DocPagePresenter"
         
     def getStoredPerspective(self):
         unifName = self.getUnifiedPageName()
         if unifName is None:
             return None
         
-        return escapeForIni(self.getCurrentSubControlName(), u"|") + u"|" + \
-                escapeForIni(unifName, u"|")
+        return escapeForIni(self.getCurrentSubControlName(), "|") + "|" + \
+                escapeForIni(unifName, "|")
 
 
 #     def setByStoredPerspective(self, perspectType, data, typeFactory):
@@ -666,7 +666,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         Not part of StorablePerspective, called by the type factory
         """
         # if more parts are available after a second '|' they are ignored
-        subControl, unifName = wndPerspective.split(u"|", 2)[:2]
+        subControl, unifName = wndPerspective.split("|", 2)[:2]
         
         # unescape
         subControl = unescapeForIni(subControl)

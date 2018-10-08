@@ -1,15 +1,16 @@
-from __future__ import with_statement
+
 
 from zipimport import zipimporter
-import os, sys, traceback, os.path, imp, new, collections
+import os, sys, traceback, os.path, imp, collections
 
 # sys.path.append(ur"C:\Daten\Projekte\Wikidpad\Next20\extensions")
 
 import wx
 
-import Utilities
+from . import Utilities
 
 from .StringOps import mbcsEnc, pathEnc
+from functools import reduce
 
 
 
@@ -59,7 +60,7 @@ from .StringOps import mbcsEnc, pathEnc
    """
 
 
-class SimplePluginAPI(object):
+class SimplePluginAPI:
     """encapsulates a single plugin api and stores the functions of various
        plugins implementing that api. It takes a unique descriptor and a list
        of function names at creation time. For each function name a member is
@@ -112,7 +113,7 @@ class SimplePluginAPI(object):
 #                 self._plugins[f].remove(getattr(module,f))
 
 
-class WrappedPluginAPI(object):
+class WrappedPluginAPI:
     """
     Constructor takes as keyword arguments after descriptor names.
     
@@ -127,7 +128,7 @@ class WrappedPluginAPI(object):
 
     def __init__(self, descriptor, **wrappedFunctions):
         self.descriptor = descriptor
-        self._functionNames = wrappedFunctions.keys()
+        self._functionNames = list(wrappedFunctions.keys())
         self._wrappedFunctions = wrappedFunctions
         self._plugins = {}
         for f in self._functionNames:
@@ -146,7 +147,7 @@ class WrappedPluginAPI(object):
 
     @staticmethod
     def _createHelper(wrapFct, list):
-        if wrapFct is None or isinstance(wrapFct, (str, unicode)):
+        if wrapFct is None or isinstance(wrapFct, str):
             f = lambda *args, **kwargs: [fun(*args, **kwargs) for fun in list]
             f.getCompounds = lambda: list
             
@@ -170,7 +171,7 @@ class WrappedPluginAPI(object):
                 if hasattr(module, f):
                     self._plugins[f].append(getattr(module,f))
                     registered = True
-            elif isinstance(self._wrappedFunctions[f], (str, unicode)):
+            elif isinstance(self._wrappedFunctions[f], str):
                 realF = self._wrappedFunctions[f]
                 if hasattr(module, realF):
                     self._plugins[f].append(getattr(module,realF))
@@ -189,7 +190,7 @@ class WrappedPluginAPI(object):
 
 
 
-class PluginAPIAggregation(object):
+class PluginAPIAggregation:
     def __init__(self, *apis):
         self._apis = apis
 
@@ -214,7 +215,7 @@ class PluginAPIAggregation(object):
 
 
 
-class PluginManager(object):
+class PluginManager:
     """manages all PluginAPIs and plugins."""
     def __init__(self, directories, systemDirIdx=-1):
         self.pluginAPIs = {}  # Dictionary {<type name>:<verReg dict>}
@@ -274,7 +275,7 @@ class PluginManager(object):
             if versionNo > found.get(name, 0):
                 found[name] = versionNo
         
-        return found.items()
+        return list(found.items())
 
 
     def registerPlugin(self, module):
@@ -338,7 +339,7 @@ class PluginManager(object):
                         if ext == '.py':
                             with open(fullname) as f:
                                 module = imp.load_module(packageName + "." + moduleName, f,
-                                        mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
+                                        fullname, (".py", "r", imp.PY_SOURCE))
                         elif ext == '.zip':
                             module = imp.new_module(
                                     packageName + "." + moduleName)
@@ -347,7 +348,7 @@ class PluginManager(object):
                             sys.modules[packageName + "." + moduleName] = module
                             zi = zipimporter(fullname)
                             co = zi.get_code("__init__")
-                            exec co in module.__dict__
+                            exec(co, module.__dict__)
 
                     if module:
                         setattr(package, moduleName, module)
@@ -405,7 +406,7 @@ class LearningDispatcher:
         self.keyToHandlerList = {}
         
     def hasHandlerForKey(self, key):
-        if not self.keyToHandlerList.has_key(key):
+        if key not in self.keyToHandlerList:
             # If the key is not in the dictionary this function wasn't called
             # yet therefore we have to assume that there may be handlers
             return True
@@ -419,7 +420,7 @@ class LearningDispatcher:
     def dispatch(self, key, *args, **kwargs):
         result = []
         
-        if self.keyToHandlerList.has_key(key):
+        if key in self.keyToHandlerList:
             # Function was called previously 
             for hdl in self.keyToHandlerList[key]:
                 result.append(hdl(*args, **kwargs))
@@ -556,7 +557,7 @@ class InsertionPluginManager:
         """
         Call taskEnd() of all created handlers.
         """
-        for handler in self.startedHandlers.values():
+        for handler in list(self.startedHandlers.values()):
             try:
                 handler.taskEnd()
             except:
@@ -567,7 +568,7 @@ class InsertionPluginManager:
 
 
 def getExporterClasses(mainControl):
-    import Exporters    # createExporters
+    from . import Exporters    # createExporters
     
     # TODO: Cache?
     return reduce(lambda a, b: a+list(b),
@@ -620,7 +621,7 @@ def groupOptPanelPlugins(mainControl, typeDict, guiParent=None):
     
     # First create an object of each exporter class and create list of 
     # objects with the respective exportType (and human readable export type)
-    for ctt in typeDict.values():
+    for ctt in list(typeDict.values()):
         ob = classIdToInstanceDict.get(id(ctt[0]))
         if ob is None:
             ob = ctt[0](mainControl)
@@ -652,7 +653,7 @@ def groupOptPanelPlugins(mainControl, typeDict, guiParent=None):
         # If we would ask the same object multiple times we may get multiple
         # equal panels where only one panel is necessary
         exportTypeToPanelDict = {}
-        for ob, expTypeSet in objIdToObjExporterTypes.values():
+        for ob, expTypeSet in list(objIdToObjExporterTypes.values()):
             expTypePanels = ob.getAddOptPanelsForTypes(guiParent, expTypeSet)
             for expType, panel in expTypePanels:
                 if expType in expTypeSet:

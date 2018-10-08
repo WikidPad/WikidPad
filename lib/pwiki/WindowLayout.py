@@ -1,6 +1,6 @@
 import traceback
 
-import wx
+import wx, wx.adv
 
 from .MiscEvent import MiscEventSourceMixin
 from .StringOps import escapeForIni, unescapeForIni
@@ -117,7 +117,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
     if pos is not None:
         currentX, currentY = pos
     else:
-        currentX, currentY = win.GetPositionTuple()
+        currentX, currentY = win.GetPosition()
         
 #     screenX, screenY = getOverallDisplaysSize()
     clRect = getOverallDisplaysClientRect()
@@ -136,7 +136,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
         currentY = clRectBottom - 100
 
     if fullVisible:
-        sizeX, sizeY = win.GetSizeTuple()
+        sizeX, sizeY = win.GetSize()
         if currentX + sizeX > clRectRight:
             currentX = clRectRight - sizeX
         if currentY + sizeY > clRectBottom:
@@ -153,7 +153,7 @@ def setWindowSize(win, size=None):
     if size is not None:
         sizeX, sizeY = size
     else:
-        sizeX, sizeY = win.GetSizeTuple()
+        sizeX, sizeY = win.GetSize()
 
 #     screenX, screenY = getOverallDisplaysSize()    
     clRect = getOverallDisplaysClientRect()
@@ -198,7 +198,7 @@ def getRelativePositionTupleToAncestor(win, ancestor):
     resultx = 0
     resulty = 0
     while win is not None and win is not ancestor:
-        x, y = win.GetPositionTuple()
+        x, y = win.GetPosition()
         resultx += x
         resulty += y
         
@@ -218,9 +218,9 @@ SASH_LEFT = 3
 SASH_NONE = 100
 
 
-class SmartSashLayoutWindow(wx.SashLayoutWindow):
+class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
     def __init__(self, *args, **kwargs):
-        wx.SashLayoutWindow.__init__(self, *args, **kwargs)
+        wx.adv.SashLayoutWindow.__init__(self, *args, **kwargs)
         
         self.effectiveSashPos = 0
         self.minimalEffectiveSashPos = 0
@@ -231,13 +231,13 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         self.SetMinimumSizeX(1)
         self.SetMinimumSizeY(1)
 
-        wx.EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+        self.Bind(wx.adv.EVT_SASH_DRAGGED, self.OnSashDragged) #self.GetId(), )
 
         if isLinux():
-            self._CURSOR_SIZEWE = wx.StockCursor(wx.CURSOR_SIZEWE)
-            self._CURSOR_SIZENS = wx.StockCursor(wx.CURSOR_SIZENS)
-            wx.EVT_MOTION(self, self.MouseMotion)
-            wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
+            self._CURSOR_SIZEWE = wx.Cursor(wx.CURSOR_SIZEWE)
+            self._CURSOR_SIZENS = wx.Cursor(wx.CURSOR_SIZENS)
+            self.Bind(wx.EVT_MOTION, self.MouseMotion)
+            self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         
     if isLinux():
 
@@ -265,26 +265,26 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
             return
 
         self.centerWindow = centerWindow
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
 
     def align(self, al):
-        if al == wx.LAYOUT_TOP:
-            self.SetOrientation(wx.LAYOUT_HORIZONTAL)
-            self.SetAlignment(wx.LAYOUT_TOP)
-            self.SetSashVisible(wx.SASH_BOTTOM, True)
-        elif al == wx.LAYOUT_BOTTOM:
-            self.SetOrientation(wx.LAYOUT_HORIZONTAL)
-            self.SetAlignment(wx.LAYOUT_BOTTOM)
-            self.SetSashVisible(wx.SASH_TOP, True)
-        elif al == wx.LAYOUT_LEFT:
-            self.SetOrientation(wx.LAYOUT_VERTICAL)
-            self.SetAlignment(wx.LAYOUT_LEFT)
-            self.SetSashVisible(wx.SASH_RIGHT, True)
-        elif al == wx.LAYOUT_RIGHT:
-            self.SetOrientation(wx.LAYOUT_VERTICAL)
-            self.SetAlignment(wx.LAYOUT_RIGHT)
-            self.SetSashVisible(wx.SASH_LEFT, True)
+        if al == wx.adv.LAYOUT_TOP:
+            self.SetOrientation(wx.adv.LAYOUT_HORIZONTAL)
+            self.SetAlignment(wx.adv.LAYOUT_TOP)
+            self.SetSashVisible(wx.adv.SASH_BOTTOM, True)
+        elif al == wx.adv.LAYOUT_BOTTOM:
+            self.SetOrientation(wx.adv.LAYOUT_HORIZONTAL)
+            self.SetAlignment(wx.adv.LAYOUT_BOTTOM)
+            self.SetSashVisible(wx.adv.SASH_TOP, True)
+        elif al == wx.adv.LAYOUT_LEFT:
+            self.SetOrientation(wx.adv.LAYOUT_VERTICAL)
+            self.SetAlignment(wx.adv.LAYOUT_LEFT)
+            self.SetSashVisible(wx.adv.SASH_RIGHT, True)
+        elif al == wx.adv.LAYOUT_RIGHT:
+            self.SetOrientation(wx.adv.LAYOUT_VERTICAL)
+            self.SetAlignment(wx.adv.LAYOUT_RIGHT)
+            self.SetSashVisible(wx.adv.SASH_LEFT, True)
 
 
     def setSashPosition(self, pos):
@@ -292,20 +292,20 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         if isinstance(parent, SmartSashLayoutWindow):
             ws = parent.layoutWorkSize
             if ws is None:
-                cwidth, cheight = parent.GetClientSizeTuple()
+                cwidth, cheight = parent.GetClientSize()
             else:
                 cwidth, cheight = ws
         else:
-            cwidth, cheight = parent.GetClientSizeTuple()
+            cwidth, cheight = parent.GetClientSize()
 
-        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
+        if self.GetOrientation() == wx.adv.LAYOUT_VERTICAL:
             if cwidth > 10:
                 pos = min(pos, cwidth - 5)
         else:
             if cheight > 10:
                 pos = min(pos, cheight - 5)
 
-        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
+        if self.GetOrientation() == wx.adv.LAYOUT_VERTICAL:
             self.SetDefaultSize((pos, 1000))
             self.layoutWorkSize = (pos, cheight)
         else:
@@ -355,7 +355,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
     def OnSashDragged(self, evt):
         # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
 
-        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
+        if self.GetOrientation() == wx.adv.LAYOUT_VERTICAL:
             self.setSashPosition(evt.GetDragRect().width)
         else:
             self.setSashPosition(evt.GetDragRect().height)
@@ -367,7 +367,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         if self.centerWindow is None:
             return
             
-        wx.LayoutAlgorithm().LayoutWindow(self, self.centerWindow)
+        wx.adv.LayoutAlgorithm().LayoutWindow(self, self.centerWindow)
 
 
 class WindowSashLayouter:
@@ -376,10 +376,10 @@ class WindowSashLayouter:
     """
     
     _RELATION_TO_ALIGNMENT = {
-            "above": wx.LAYOUT_TOP,
-            "below": wx.LAYOUT_BOTTOM,
-            "left": wx.LAYOUT_LEFT,
-            "right": wx.LAYOUT_RIGHT
+            "above": wx.adv.LAYOUT_TOP,
+            "below": wx.adv.LAYOUT_BOTTOM,
+            "left": wx.adv.LAYOUT_LEFT,
+            "right": wx.adv.LAYOUT_RIGHT
     }
 
     def __init__(self, mainWindow, createWindowFunc):
@@ -447,7 +447,7 @@ class WindowSashLayouter:
                     enclWin = self.mainWindow
 
             sashWin = SmartSashLayoutWindow(enclWin, -1,
-                wx.DefaultPosition, (30, 30), wx.SW_3DSASH)
+                wx.DefaultPosition, (30, 30), wx.adv.SW_3DSASH)
             
             proxyWin = proxiedCachedWindows.get(winName)
             if proxyWin is not None:
@@ -534,24 +534,24 @@ class WindowSashLayouter:
         self.preserveSashPositions()       
 
         proxiedCachedWindows = {}
-        for n, w in self.winNameToProxy.iteritems():
+        for n, w in self.winNameToProxy.items():
             proxiedCachedWindows[n] = w
             w.Reparent(self.mainWindow)    # TODO Reparent not available for all OS'
 
-        self.cleanMainWindow(proxiedCachedWindows.values())
+        self.cleanMainWindow(list(proxiedCachedWindows.values()))
 
 
         self.realize(proxiedCachedWindows)
 
         # Destroy windows which weren't reused
         # TODO Call close method of object window if present
-        for n, w in proxiedCachedWindows.iteritems():
+        for n, w in proxiedCachedWindows.items():
             w.close()
             w.Destroy()
 
 
     def close(self):
-        for w in self.winNameToObject.itervalues():
+        for w in self.winNameToObject.values():
             w.close()
 
 
@@ -583,7 +583,7 @@ class WindowSashLayouter:
 
 
     def containsWindow(self, winName):
-        return self.winNameToSashWindow.has_key(winName)
+        return winName in self.winNameToSashWindow
 
 
     def expandWindow(self, winName, flag=True):
@@ -638,7 +638,7 @@ class WindowSashLayouter:
         if len(self.windowPropsList) == 0:
             return
             
-        wx.LayoutAlgorithm().LayoutWindow(self.mainWindow,
+        wx.adv.LayoutAlgorithm().LayoutWindow(self.mainWindow,
                 self.winNameToProxy[self.windowPropsList[0]["name"]])
 
 
@@ -657,16 +657,16 @@ class WindowSashLayouter:
         relTo = winProps.get("layout relative to")
         if relTo is None:
             if len(self.windowPropsList) > 0:
-                raise WinLayoutException(u"All except first window must relate "
-                        u"to another window. %s is not first window" %
+                raise WinLayoutException("All except first window must relate "
+                        "to another window. %s is not first window" %
                         winProps["name"])
 
             self.windowPropsList.append(winProps)
         else:
             relation = winProps.get("layout relation")
             if relation not in ("above", "below", "left", "right"):
-                raise WinLayoutException((u"Window %s must relate to previously "
-                            u"entered window") % winProps["name"])
+                raise WinLayoutException(("Window %s must relate to previously "
+                            "entered window") % winProps["name"])
             # Check if relTo relates to already entered window
             for pr in self.windowPropsList:
                 if pr["name"] == relTo:
@@ -674,8 +674,8 @@ class WindowSashLayouter:
                     self.windowPropsList.append(winProps)
                     break
             else:
-                raise WinLayoutException((u"Window %s must relate to previously "
-                            u"entered window") % winProps["name"])
+                raise WinLayoutException(("Window %s must relate to previously "
+                            "entered window") % winProps["name"])
         
 
     def preserveSashPositions(self):
@@ -693,13 +693,13 @@ class WindowSashLayouter:
 
             self.updateWindowProps(currProps)
         
-            if currProps.has_key("layout sash position") and \
-                    newProps.has_key("layout sash position"):
+            if "layout sash position" in currProps and \
+                    "layout sash position" in newProps:
                 newProps["layout sash position"] = \
                         currProps["layout sash position"]
 
-            if currProps.has_key("layout sash effective position") and \
-                    newProps.has_key("layout sash effective position"):
+            if "layout sash effective position" in currProps and \
+                    "layout sash effective position" in newProps:
                 newProps["layout sash effective position"] = \
                         currProps["layout sash effective position"]
 
@@ -730,11 +730,11 @@ class WindowSashLayouter:
 
 def winPropsToString(winProps):
     return "&".join([escapeForIni(k, ";:&") + ":" + escapeForIni(v, ";:&")
-            for k, v in winProps.iteritems()])
+            for k, v in winProps.items()])
 
 
 def stringToWinprops(s):
-    if type(s) is unicode:
+    if type(s) is str:
         s = str(s)
 
     items = [(unescapeForIni(item.split(":", 1)[0]),
@@ -804,7 +804,7 @@ def calculateMainWindowLayoutCfString(config):
 
 
 
-class LayeredControlPresenter(object, MiscEventSourceMixin):
+class LayeredControlPresenter(MiscEventSourceMixin):
     """
     Controls appearance of multiple controls laying over each other in
     one panel or notebook.
@@ -840,7 +840,7 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
             # First show subControl scName, then hide the others
             # to avoid flicker
             self.subControls[scName].setLayerVisible(True, scName)
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
 #                 if n != scName:
                 if c is not subControl:
                     c.setLayerVisible(False, n)
@@ -856,17 +856,17 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
         return self.subControls.get(self.lastVisibleCtrlName)
         
     def hasSubControl(self, scName):
-        return self.subControls.has_key(scName)
+        return scName in self.subControls
 
     def setLayerVisible(self, vis, scName=""):
         if self.visible == vis:
             return
 
         if vis:
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
                 c.setLayerVisible(n == self.lastVisibleCtrlName, n)
         else:
-            for n, c in self.subControls.iteritems():
+            for n, c in self.subControls.items():
                 c.setLayerVisible(False, n)
 
         self.visible = vis
@@ -875,7 +875,7 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
         return self.visible
         
     def close(self):
-        for c in frozenset(self.subControls.values()): # Same control may appear
+        for c in frozenset(list(self.subControls.values())): # Same control may appear
                             # multiple times
             c.close()
 
@@ -934,7 +934,7 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
 
         self.subControls[scName].Show(True)
 
-        for n, c in self.subControls.iteritems():
+        for n, c in self.subControls.items():
 #             if n != scName:
             if c is not subControl:
                 if self.visible:
@@ -967,7 +967,7 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
                 "title": shortTitle})
 
 
-class StorablePerspective(object):
+class StorablePerspective:
     """
     Interface for window objects which can save and restore their state
     """

@@ -1,11 +1,11 @@
-from __future__ import with_statement
+
 
 import traceback
 import difflib, re
 
 import wx, wx.stc, wx.xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker, \
+from .wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker, \
         appendToMenuByMenuDesc
 
 from Consts import FormatTypes
@@ -18,12 +18,10 @@ from .WikiPyparsing import TerminalNode, NonTerminalNode
 from .EnhancedScintillaControl import StyleCollector
 from .SearchableScintillaControl import SearchableScintillaControl
 
-from .SystemInfo import isUnicode
 
 
 
-
-def bytelenSct_utf8(us):
+def bytelenSct(us):
     """
     us -- unicode string
     returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
@@ -31,15 +29,9 @@ def bytelenSct_utf8(us):
     return len(StringOps.utf8Enc(us)[0])
 
 
-def bytelenSct_mbcs(us):
-    """
-    us -- unicode string
-    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
-    """
-    return len(StringOps.mbcsEnc(us)[0])
 
 
-_WORD_DIVIDER = re.compile(ur"(\b[\w']+)",
+_WORD_DIVIDER = re.compile(r"(\b[\w']+)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -63,34 +55,24 @@ class InlineDiffControl(SearchableScintillaControl):
         res = wx.xrc.XmlResource.Get()
         self.tabContextMenu = res.LoadMenu("MenuDiffTabPopup")
 
-        # Self-modify to ansi/unicode version
-        if isUnicode():
-            self.bytelenSct = bytelenSct_utf8
-        else:
-            self.bytelenSct = bytelenSct_mbcs
-
         config = self.mainControl.getConfig()
         self.defaultFont = config.get("main", "font",
                 self.mainControl.presentationExt.faces["mono"])
         self.setWrapMode(config.getboolean("main", "wrap_mode"))
 
+        self.Bind(wx.stc.EVT_STC_STYLENEEDED, self.OnStyleNeeded, id=ID)
 
-        wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdSwapFromTo, id=GUI_ID.CMD_DIFF_SWAP_FROM_TO)
 
-        wx.EVT_MENU(self.tabContextMenu, GUI_ID.CMD_DIFF_SWAP_FROM_TO,
-                self.OnCmdSwapFromTo)
-
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
-                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN), id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT), id=GUI_ID.CMD_ZOOM_OUT)
 
 
 
@@ -137,8 +119,8 @@ class InlineDiffControl(SearchableScintillaControl):
         if charWrap is None:
             docPage = self.baseDocPage
             if docPage is not None:
-                charWrap = docPage.getAttributeOrGlobal(u"wrap_type",
-                        u"word").lower().startswith(u"char")
+                charWrap = docPage.getAttributeOrGlobal("wrap_type",
+                        "word").lower().startswith("char")
             else:
                 charWrap = False
         if onOrOff:
@@ -182,7 +164,7 @@ class InlineDiffControl(SearchableScintillaControl):
         self.setTextScrollProtected(text)
         self.SetReadOnly(readOnly)
         
-        self.presenter.setTitle(_(u"<Diff from %s to %s>") % (fromVerNo, toVerNo))
+        self.presenter.setTitle(_("<Diff from %s to %s>") % (fromVerNo, toVerNo))
 
 
     def showDiffsNewFrom(self, baseDocPage, fromText, fromVerNo):
@@ -197,29 +179,29 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
     def _calcProcTokensCharWise(self, fromText, toText):
-        sm = difflib.SequenceMatcher(None, fromText, toText)
+        sm = difflib.SequenceMatcher(None, fromText, toText, autojunk=False)
         ops = sm.get_opcodes()
 
         procList = []
         charPos = 0
         for tag, i1, i2, j1, j2 in ops:
             if tag == "replace":
-                procText = fromText[i1:i2].replace("\n", u"\n ")
+                procText = fromText[i1:i2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
 
-                procText = toText[j1:j2].replace("\n", u"\n ")
+                procText = toText[j1:j2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "delete":
-                procText = fromText[i1:i2].replace("\n", u"\n ")
+                procText = fromText[i1:i2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "insert":
-                procText = toText[j1:j2].replace("\n", u"\n ")
+                procText = toText[j1:j2].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
@@ -236,12 +218,12 @@ class InlineDiffControl(SearchableScintillaControl):
         if len(divided) == 0:
             return [], []
         
-        if divided[0] == u"":
+        if divided[0] == "":
             del divided[0]
             if len(divided) == 0:
                 return [], []
         
-        if divided[-1] == u"":
+        if divided[-1] == "":
             del divided[-1]
             if len(divided) == 0:
                 return [], []
@@ -262,14 +244,14 @@ class InlineDiffControl(SearchableScintillaControl):
         fromDivided, fromPosIdx = self._divideToWords(fromText)
         toDivided, toPosIdx = self._divideToWords(toText)
         
-        sm = difflib.SequenceMatcher(None, fromDivided, toDivided)
+        sm = difflib.SequenceMatcher(None, fromDivided, toDivided, autojunk=False)
         ops = sm.get_opcodes()
 
         procList = []
         charPos = 0
         for tag, i1, i2, j1, j2 in ops:
             if tag == "replace":
-                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
@@ -278,17 +260,17 @@ class InlineDiffControl(SearchableScintillaControl):
                 toPosIdx[j2]
                 toText[toPosIdx[j1]:toPosIdx[j2]]
 
-                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "delete":
-                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", u"\n ")
+                procText = fromText[fromPosIdx[i1]:fromPosIdx[i2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "delete")
                 procList.append(node)
                 charPos += len(procText)
             elif tag == "insert":
-                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", u"\n ")
+                procText = toText[toPosIdx[j1]:toPosIdx[j2]].replace("\n", "\n ")
                 node = TerminalNode(procText, charPos, "insert")
                 procList.append(node)
                 charPos += len(procText)
@@ -301,7 +283,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
     def _buildViewText(self):
-        return u"".join([n.getText() for n in self.procTokens])
+        return "".join([n.getText() for n in self.procTokens])
 
 
 
@@ -313,7 +295,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
     def _calcViewStylebytes(self, text):
         stylebytes = StyleCollector(wx.stc.STC_STYLE_DEFAULT, text,
-                self.bytelenSct)
+                bytelenSct)
                 
         _NODENAME_TO_STYLEBYTE = self._NODENAME_TO_STYLEBYTE
         
@@ -510,7 +492,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
 _CONTEXT_MENU_INTEXT_BASE = \
-u"""
+"""
 Copy;CMD_CLIPBOARD_COPY
 Select All;CMD_SELECT_ALL
 -
@@ -519,8 +501,8 @@ Close Tab;CMD_CLOSE_CURRENT_TAB
 
 
 # Entries to support i18n of context menus
-if False:
-    N_(u"Copy")
-    N_(u"Select All")
+if not True:
+    N_("Copy")
+    N_("Select All")
 
-    N_(u"Close Tab")
+    N_("Close Tab")

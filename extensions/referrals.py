@@ -71,8 +71,8 @@ def describeMenuItems(wiki):
         wiki - Calling PersonalWikiFrame
         evt - wxUpdateUIEvent
     """
-    return ((referrals, _(u"Insert referring pages") + u"\tCtrl-Shift-P",
-            _(u"Insert referring pages"), None, None, referralsUpdate),)
+    return ((referrals, _("Insert referring pages") + "\tCtrl-Shift-P",
+            _("Insert referring pages"), None, None, referralsUpdate),)
 
 
 def describeToolbarItems(wiki):
@@ -106,7 +106,7 @@ def describeToolbarItems(wiki):
         evt - wxUpdateUIEvent
         
     """
-    return ((referrals, _(u"Referers"), _(u"Insert referring pages"),
+    return ((referrals, _("Referers"), _("Insert referring pages"),
             ("rename", "tb_rename"), None, referralsUpdate),)
 
 
@@ -126,7 +126,7 @@ def describeToolbarItemsV02(wiki):
         evt - wxCommandEvent
     """
 
-    return ((referrals, _(u"Referers"), _(u"Insert referring pages"),
+    return ((referrals, _("Referers"), _("Insert referring pages"),
             ("rename", "tb_rename"), None, referralsUpdate, referralsRightClick),)
 
 
@@ -140,30 +140,30 @@ def referrals(wiki, evt):
 
     bracketWords = langHelper.createAbsoluteLinksFromWikiWords
 
-    wiki.getActiveEditor().AddText(u"\n------------------------\n")
+    wiki.getActiveEditor().AddText("\n------------------------\n")
 
     parents = wiki.wikiData.getParentRelationships(wiki.getCurrentWikiWord())
     parents = [bracketWords((word,)) for word in parents]
-    wiki.getActiveEditor().AddText(_(u"*%s page(s) referring to* %s\n") %
+    wiki.getActiveEditor().AddText(_("*%s page(s) referring to* %s\n") %
             (len(parents), bracketWords((wiki.getCurrentWikiWord(),))))
 
     for word in parents:
-        wiki.getActiveEditor().AddText(u"%s\n" % word)
-    wiki.getActiveEditor().AddText(u"------------------------\n")
+        wiki.getActiveEditor().AddText("%s\n" % word)
+    wiki.getActiveEditor().AddText("------------------------\n")
 
     children = wiki.wikiData.getChildRelationships(wiki.getCurrentWikiWord())
     children = [bracketWords((word,)) for word in children]
-    wiki.getActiveEditor().AddText(_(u"*%s page(s) referred to by* %s\n") %
+    wiki.getActiveEditor().AddText(_("*%s page(s) referred to by* %s\n") %
             (len(children), bracketWords((wiki.getCurrentWikiWord(),))))
 
     for word in children:
-        wiki.getActiveEditor().AddText(u"%s\n" % word)
-    wiki.getActiveEditor().AddText(u"------------------------\n")
+        wiki.getActiveEditor().AddText("%s\n" % word)
+    wiki.getActiveEditor().AddText("------------------------\n")
 
 
 def referralsRightClick(wiki, evt):
     # Just for demo purposes
-    print "Rightclick"
+    print("Rightclick")
 
 
 def referralsUpdate(wiki, evt):

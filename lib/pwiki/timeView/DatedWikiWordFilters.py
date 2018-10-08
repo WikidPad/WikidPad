@@ -1,13 +1,13 @@
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
 
-import os, traceback
+import os, traceback, abc
 
 import wx
 
 
 
-class DatedWikiWordFilterBase:
+class DatedWikiWordFilterBase(metaclass=abc.ABCMeta):
     """
     Provides for a given date or list of dates a list of wiki words
     related to that date. Subclasses of this class define which
@@ -29,32 +29,34 @@ class DatedWikiWordFilterBase:
     def getDayResolution(self):
         return self.dayResolution
 
+    @abc.abstractmethod 
     def getDisplayName(self):
         """
         Return a short name describing what the date of the wiki word means.
         """
-        assert 0  # Abstract
+        raise NotImplementedError
         
+    @abc.abstractmethod 
     def getWikiWordsForDay(self, day):
         """
         Get a list of all wiki words related to a date beginning with day
         (a wx.DateTime) up to so many days as set in self.dayResolution
         """
-        assert 0  # Abstract
+        raise NotImplementedError
         
     def getMassWikiWordCountForDays(self, startDay, count):
         """
         Returns a list dayWordCounts where dayWordCounts[i] is the same as
-        len(self.getWikiWordsForDay(startDay + wx.TimeSpan_Days(self.dayResolution) * i))
+        len(self.getWikiWordsForDay(startDay + wx.TimeSpan.Days(self.dayResolution) * i))
         and len(dayWordCounts) == count.
         
         This base class contains a default implementation
         """
         day = startDay
-        step = wx.TimeSpan_Days(self.dayResolution)
+        step = wx.TimeSpan.Days(self.dayResolution)
 
         dayWordCounts = []
-        for i in xrange(count):
+        for i in range(count):
             dayWordCounts.append(len(self.getWikiWordsForDay(day)))
             day = day + step
         
@@ -63,15 +65,15 @@ class DatedWikiWordFilterBase:
 
         # The "float" fixes a problem with database engines
     def _getDayFromTimeT(self, timeT):
-        day = wx.DateTimeFromTimeT(float(timeT))
+        day = wx.DateTime.FromTimeT(float(timeT))
         day.ResetTime()
         
         return day
         
     def _getNextDayFromTimeT(self, timeT):
-        day = wx.DateTimeFromTimeT(float(timeT))
+        day = wx.DateTime.FromTimeT(float(timeT))
         day.ResetTime()
-        day += wx.TimeSpan_Day()
+        day += wx.TimeSpan.Day()
 
         return day
 
@@ -116,19 +118,20 @@ class DatedWikiWordFilterBase:
         """
         assert 0  # Abstract
 
-
+    @abc.abstractmethod
     def getDaysBefore(self, day, limit):
-        assert 0  # Abstract
+        raise NotImplementedError
    
+    @abc.abstractmethod
     def getDaysAfter(self, day, limit):
-        assert 0  # Abstract
+        raise NotImplementedError
 
 
 
 class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
 
     def getDisplayName(self):
-        return _(u"Modified")
+        return _("Modified")
         
     def getWikiWordsForDay(self, day):
         wikiDocument = self.getWikiDocument()
@@ -156,6 +159,6 @@ class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
 
     def getDaysAfter(self, day, limit=None):
         wtList = self.getWikiDocument().getWikiData().getWikiPageNamesAfter(
-                0, (day + wx.TimeSpan_Day()).GetTicks(), limit)
+                0, (day + wx.TimeSpan.Day()).GetTicks(), limit)
 
         return self._getDayListFromTimeList(wtList)

@@ -1,6 +1,6 @@
 import wx 
 
-from wxHelper import copyTextToClipboard
+from .wxHelper import copyTextToClipboard
 
 class CustomListBox(wx.ListBox):
     """
@@ -10,8 +10,7 @@ class CustomListBox(wx.ListBox):
         """
         As Xrc is used it needs to be initialized in a special way
         """
-        f=wx.PreListBox()
-        self.PostCreate(f)
+        wx.ListBox.__init__(self, *args, **kwargs)
         self.Bind( wx.EVT_WINDOW_CREATE , self.OnCreate)
 
     def OnCreate(self,evt):
@@ -29,7 +28,7 @@ class CustomListBox(wx.ListBox):
         self.menu = wx.Menu()
         copy_menu_item = wx.MenuItem(self.menu, wx.NewId(), '&Copy text')
         self.menu.Bind(wx.EVT_MENU, self.CopySelection, copy_menu_item)
-        self.menu.AppendItem(copy_menu_item)
+        self.menu.Append(copy_menu_item)
 
     def ShowPopupMenu(self, evt):
         position = self.ScreenToClient(wx.GetMousePosition())

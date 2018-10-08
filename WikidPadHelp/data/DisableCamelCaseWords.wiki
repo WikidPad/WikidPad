@@ -1,4 +1,4 @@
-++ Disable Camel Case Words
+﻿++ Disable Camel Case Words
 
 CamelCase WikiWords are not enable on this page b/c of the following
 option.

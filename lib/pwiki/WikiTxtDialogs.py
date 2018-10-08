@@ -1,7 +1,7 @@
-from __future__ import with_statement
+
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
-from __future__ import division
+
 
 import traceback
 
@@ -9,20 +9,20 @@ import wx, wx.xrc
 
 # from Utilities import *  # TODO Remove this
 
-from wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
+from .wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
         ModalDialogMixin, WindowUpdateLocker
 
 
-from StringOps import unescapeForIni
+from .StringOps import unescapeForIni
 
-import SystemInfo
+from . import SystemInfo
 
-import Utilities
+from . import Utilities
 
-from TempFileSet import TempFileSet
+from .TempFileSet import TempFileSet
 
 try:
-    import WindowsHacks
+    from . import WindowsHacks
 except:
     if SystemInfo.isWindows():
         traceback.print_exc()
@@ -38,14 +38,14 @@ class IncrementalSearchDialog(wx.Frame):
     def __init__(self, parent, id, txtCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
-        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+        wx.Frame.__init__(self, parent, id, "WikidPad i-search",
                 rect.GetPosition(), rect.GetSize(),
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.txtCtrl = txtCtrl
         self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Incremental search (ENTER/ESC to finish)"),
+                _("Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -63,12 +63,12 @@ class IncrementalSearchDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose, 
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
@@ -135,16 +135,14 @@ class IncrementalSearchDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP)):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \
@@ -188,10 +186,10 @@ class FilePasteParams:
     Helper class to store file paste settings
     """
     def __init__(self):
-        self.rawPrefix = u""  # Prefix before file links
+        self.rawPrefix = ""  # Prefix before file links
                 # (before calling StringOps.strftimeUB on it)
-        self.rawMiddle = u" "  # Middle text between links
-        self.rawSuffix = u""  # Suffix after links
+        self.rawMiddle = " "  # Middle text between links
+        self.rawSuffix = ""  # Suffix after links
         self.bracketedUrl = True
 
         self.unifActionName = None  # Unified name of the action to do
@@ -206,11 +204,11 @@ class FilePasteParams:
                 settings from into the object
         """
         self.rawPrefix = unescapeForIni(config.get("main",
-                "editor_filePaste_prefix", u""))
+                "editor_filePaste_prefix", ""))
         self.rawMiddle = unescapeForIni(config.get("main",
-                "editor_filePaste_middle", u" "))
+                "editor_filePaste_middle", " "))
         self.rawSuffix = unescapeForIni(config.get("main",
-                "editor_filePaste_suffix", u""))
+                "editor_filePaste_suffix", ""))
         self.bracketedUrl = config.getboolean("main",
                 "editor_filePaste_bracketedUrl", True)
         self.defaultUnifActionName = \
@@ -224,21 +222,20 @@ class FilePasteParams:
 class FilePasteDialog(wx.Dialog, ModalDialogMixin):
 
     _ACTIONSEL_TO_UNIFNAME = (
-            u"action/editor/this/paste/files/insert/url/absolute",
-            u"action/editor/this/paste/files/insert/url/relative",
-            u"action/editor/this/paste/files/insert/url/tostorage",
-            u"action/editor/this/paste/files/insert/url/movetostorage"
+            "action/editor/this/paste/files/insert/url/absolute",
+            "action/editor/this/paste/files/insert/url/relative",
+            "action/editor/this/paste/files/insert/url/tostorage",
+            "action/editor/this/paste/files/insert/url/movetostorage"
         )
 
 
     def __init__(self, pWiki, ID, filepastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "FilePasteDialog")
+        res.LoadDialog(self, self.pWiki, "FilePasteDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -264,7 +261,7 @@ class FilePasteDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
     def GetValue(self):
@@ -301,7 +298,7 @@ class ImagePasteSaver:
     perform saving on request.
     """
     def __init__(self):
-        self.prefix = u""  # Prefix before random numbers in filename
+        self.prefix = ""  # Prefix before random numbers in filename
         self.formatNo = 0  # Currently either 0:None, 1:PNG or 2:JPG
         self.quality = 75   # Quality for JPG image
 
@@ -311,9 +308,9 @@ class ImagePasteSaver:
         config -- SingleConfiguration or CombinedConfiguration to read default
                 settings from into the object
         """
-        self.prefix = config.get("main", "editor_imagePaste_filenamePrefix", u"")
+        self.prefix = config.get("main", "editor_imagePaste_filenamePrefix", "")
 
-        self.formatNo = config.getint("main", "editor_imagePaste_fileType", u"")
+        self.formatNo = config.getint("main", "editor_imagePaste_fileType", "")
 
         quality = config.getint("main", "editor_imagePaste_quality", 75)
         quality = min(100, quality)
@@ -352,19 +349,19 @@ class ImagePasteSaver:
         if self.formatNo < 1 or self.formatNo > 2:
             return None
 
-        img.SetOptionInt(u"quality", self.quality)
+        img.SetOptionInt("quality", self.quality)
 
         tempFileSet = TempFileSet()
 
         if self.formatNo == 1:   # PNG
-            file_suffix = u".png"
+            file_suffix = ".png"
             wx_image_type = wx.BITMAP_TYPE_PNG
         elif self.formatNo == 2:   # JPG
-            file_suffix = u".jpg"
+            file_suffix = ".jpg"
             wx_image_type = wx.BITMAP_TYPE_JPEG
 
         tempFilePath = tempFileSet.createTempFile(
-                u"", file_suffix, relativeTo="")
+                "", file_suffix, relativeTo="")
 
         img.SaveFile(tempFilePath, wx_image_type)
 
@@ -416,7 +413,7 @@ class ImagePasteSaver:
 
         Returns absolute path of saved image or None if not saved
         """
-        destPath = fs.findDestPathNoSource(u".wmf", self.prefix)
+        destPath = fs.findDestPathNoSource(".wmf", self.prefix)
 
         if destPath is None:
             # Couldn't find unused filename
@@ -436,12 +433,11 @@ class ImagePasteSaver:
 class ImagePasteDialog(wx.Dialog):
     def __init__(self, pWiki, ID, imgpastesaver, img, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.pWiki = pWiki
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "ImagePasteDialog")
+        res.LoadDialog(self, self.pWiki, "ImagePasteDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -450,7 +446,7 @@ class ImagePasteDialog(wx.Dialog):
 
         self.ctrls.tfEditorImagePasteFilenamePrefix.SetValue(imgpastesaver.prefix)
         self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
-        self.ctrls.tfEditorImagePasteQuality.SetValue(unicode(
+        self.ctrls.tfEditorImagePasteQuality.SetValue(str(
                 imgpastesaver.quality))
 
         self.origImage = img
@@ -470,11 +466,11 @@ class ImagePasteDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
-                self.OnFileTypeChoice)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_CHOICE, self.OnFileTypeChoice,
+                id=GUI_ID.chEditorImagePasteFileType)
 
-        wx.EVT_SIZE(self.ctrls.pnImagePreviewContainer,
+        self.ctrls.pnImagePreviewContainer.Bind(wx.EVT_SIZE,
                 self.OnSizePreviewBitmapContainer)
 
 
@@ -503,7 +499,7 @@ class ImagePasteDialog(wx.Dialog):
 
 
     def OnSizePreviewBitmapContainer(self, evt):
-        bbWidth, bbHeight = self.ctrls.pnImagePreviewContainer.GetSizeTuple()
+        bbWidth, bbHeight = self.ctrls.pnImagePreviewContainer.GetSize()
 
         newWidth, newHeight = Utilities.calcResizeArIntoBoundingBox(
                 self.origImgWidth, self.origImgHeight, bbWidth, bbHeight)
@@ -511,7 +507,7 @@ class ImagePasteDialog(wx.Dialog):
         img_resize = self.origImage.Scale(newWidth, newHeight,
                 quality = wx.IMAGE_QUALITY_HIGH)
 
-        bmp = wx.BitmapFromImage(img_resize)
+        bmp = wx.Bitmap(img_resize)
         with WindowUpdateLocker(self):
             self.bitmapControl.SetPosition((0,0))
             self.bitmapControl.SetBitmap(bmp)
@@ -537,7 +533,7 @@ class RenameFileDialog(wx.Dialog):
         self.SetSizerAndFit(sizer)
         self.text_ctrl = text_ctrl
 
-        wx.EVT_SET_FOCUS(self.text_ctrl, self.OnFocus)
+        self.text_ctrl.Bind(wx.EVT_SET_FOCUS, self.OnFocus)
         self.text_ctrl.SetFocus()
 
 
@@ -554,7 +550,7 @@ class RenameFileDialog(wx.Dialog):
     def RemoveExtensionFromSelection(self):
         # Remove selection from extension (if one exists)
         try:
-            name, extension = self.text_ctrl.GetValue().rsplit(u".", 1)
+            name, extension = self.text_ctrl.GetValue().rsplit(".", 1)
             self.text_ctrl.SetInsertionPoint(0)
             self.text_ctrl.SetSelection(0, len(name))
         except ValueError:

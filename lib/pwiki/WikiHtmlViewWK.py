@@ -1,21 +1,21 @@
-import cStringIO as StringIO
-import urllib, os, os.path, traceback
+import io as StringIO
+import urllib.request, urllib.parse, urllib.error, os, os.path, traceback
 
 import wx, wx.html
 
 
-from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+from .WikiExceptions import *
+from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
         wxKeyFunctionSink
 
-from MiscEvent import KeyFunctionSink
+from .MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
         urlQuote, pathnameFromUrl, flexibleUrlUnquote
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
-import DocPages
-from TempFileSet import TempFileSet
+from . import DocPages
+from .TempFileSet import TempFileSet
 
 from . import PluginManager
 
@@ -30,15 +30,15 @@ import gtk, gtk.gdk
 # pywebkitgtk (http://code.google.com/p/pywebkitgtk/)
 import webkit
 
-from ViHelper import ViHintDialog, ViHelper
+from .ViHelper import ViHintDialog, ViHelper
 
 # used in search
-import SystemInfo
+from . import SystemInfo
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 
 if wx.Platform == '__WXMSW__':
-    from WindowsHacks import getLongPath
+    from .WindowsHacks import getLongPath
 else:
     def getLongPath(s):
         """
@@ -65,14 +65,14 @@ class WebkitSearchDialog(wx.Frame):
     def __init__(self, parent, id, webkitCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
-        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+        wx.Frame.__init__(self, parent, id, "WikidPad i-search",
                 rect.GetPosition(), rect.GetSize(),
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.webkitCtrl = webkitCtrl
         self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Incremental search (ENTER/ESC to finish)"),
+                _("Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -90,12 +90,12 @@ class WebkitSearchDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose, 
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
@@ -164,16 +164,14 @@ class WebkitSearchDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.webkitCtrl.executeIncrementalSearch(searchString)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.webkitCtrl.executeIncrementalSearchBackward(searchString)
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP)):
             foundPos = self.webkitCtrl.executeIncrementalSearchBackward(searchString)
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \
@@ -221,7 +219,7 @@ class LinkConverterForPreviewWk:
         
     def getLinkForWikiWord(self, word, default = None):
         if self.wikiDocument.isDefinedWikiLinkTerm(word):
-            return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
+            return urlQuote("http://internaljump/wikipage/%s" % word, "/#:;@")
         else:
             return default
  
@@ -280,8 +278,8 @@ class WikiHtmlViewWK(wx.Panel):
         self.counterResizeIgnore = 0  # How often to ignore a size event
         self.deferredScrollPos = None  # Used by scrollDeferred()
         
-        self.selectedText = u""
-        self.selectedHTML = u""
+        self.selectedText = ""
+        self.selectedHTML = ""
 
         self.currentLoadedWikiWord = None
         self.currentLoadedUrl = None  # Contains the URL of the temporary HTML
@@ -295,13 +293,13 @@ class WikiHtmlViewWK(wx.Panel):
 
         # TODO Should be changed to presenter as controller
         self.exporterInstance = PluginManager.getExporterTypeDict(
-                self.presenter.getMainControl(), False)[u"html_single"][0]\
+                self.presenter.getMainControl(), False)["html_single"][0]\
                 (self.presenter.getMainControl())
 
         self._DEFAULT_FONT_SIZES = self.presenter.getMainControl().presentationExt.INTHTML_FONTSIZES
         
         # TODO More elegantly
-        self.exporterInstance.exportType = u"html_previewWK"
+        self.exporterInstance.exportType = "html_previewWK"
         #self.exporterInstance.styleSheet = u""
 
         self.exporterInstance.tempFileSet = TempFileSet()
@@ -320,9 +318,9 @@ class WikiHtmlViewWK(wx.Panel):
         # injection)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
@@ -333,10 +331,10 @@ class WikiHtmlViewWK(wx.Panel):
         #wx.EVT_KEY_UP(self, self.OnKeyUp)
         #wx.EVT_SIZE(self, self.OnSize)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, self.OnSelectAll)
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, self.OnSelectAll, id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), id=GUI_ID.CMD_ZOOM_OUT)
         #wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
         #wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
         #        self.OnActivateNewTabThis)
@@ -702,15 +700,15 @@ class WikiHtmlViewWK(wx.Panel):
             self.on_link = None
 
             # Prevent problem if we pass over 2 links quickly
-            if self.old_status.startswith(u"Link to page:"):
-                self.old_status = u""
+            if self.old_status.startswith("Link to page:"):
+                self.old_status = ""
             self.updateStatus(self.old_status)
         else:
             self.old_status = self.presenter.getMainControl().statusBar.GetStatusText()
             # flexibleUrlUnquote seems to fail on unicode links
             # unquote shouldn't happen here for self.on_link (MB 2011-04-15)
             self.on_link = status
-            self.updateStatus(unicode(urllib.unquote(status)))
+            self.updateStatus(str(urllib.parse.unquote(status)))
 
 
     def __on_selection_received(self, widget, selection_data, data):
@@ -718,12 +716,12 @@ class WikiHtmlViewWK(wx.Panel):
             if str(selection_data.type) == "STRING":
                 self.selectedText = selection_data.get_text()
             else:
-                self.selectedText = u""
+                self.selectedText = ""
 
             if str(selection_data.type) == "text/html":
                 self.selectedHTML = selection_data.data
             else:
-                self.selectedHTML = u""
+                self.selectedHTML = ""
 
         return False
 
@@ -751,7 +749,7 @@ class WikiHtmlViewWK(wx.Panel):
         but i'm not sure how
         """
 
-        internaljumpPrefix = u"http://internaljump/"
+        internaljumpPrefix = "http://internaljump/"
         link = self.on_link
 
         for i in menu.get_children():
@@ -761,19 +759,19 @@ class WikiHtmlViewWK(wx.Panel):
             except:
                 continue
 
-            if action == u"_Back":
+            if action == "_Back":
                 menu.remove(i)
-            elif action == u"_Forward":
+            elif action == "_Forward":
                 menu.remove(i)
-            elif action == u"_Stop":
+            elif action == "_Stop":
                 menu.remove(i)
-            elif action == u"_Reload":
+            elif action == "_Reload":
                 menu.remove(i)
-            elif action == u"_Copy":
+            elif action == "_Copy":
                 pass
-            elif action == u"Cop_y Image":
+            elif action == "Cop_y Image":
                 pass
-            elif action == u"Copy Link Loc_ation":
+            elif action == "Copy Link Loc_ation":
                 # No point in copying internal links
                 if link and link.startswith(internaljumpPrefix):
                     menu.remove(i)
@@ -789,13 +787,13 @@ class WikiHtmlViewWK(wx.Panel):
                 #            wxToGtkLabel(_('Copy &Selected Text')))
                 #    copy_menu_item.connect("activate", self.OnClipboardCopy)
                 #    menu.append(copy_menu_item)
-            elif action == u"Open _Image in New Window":
+            elif action == "Open _Image in New Window":
                 menu.remove(i)
-            elif action == u"Sa_ve Image As":
+            elif action == "Sa_ve Image As":
                 menu.remove(i)
-            elif action == u"_Download Linked File":
+            elif action == "_Download Linked File":
                 menu.remove(i)
-            elif action == u"_Open Link":
+            elif action == "_Open Link":
                 if link:
                     if not link.startswith(internaljumpPrefix):
                         i.get_children()[0].set_label(
@@ -806,7 +804,7 @@ class WikiHtmlViewWK(wx.Panel):
                 else:
                     menu.remove(i)
 
-            elif action == u"Open Link in New _Window":
+            elif action == "Open Link in New _Window":
                 menu.remove(i)
 
                 # Only show for internal jumps
@@ -824,7 +822,7 @@ class WikiHtmlViewWK(wx.Panel):
                             wxToGtkLabel(_('Follow Link in New Back&ground Tab')))
                     open_new_tab_background_menu_item.connect("activate", self.OnOpenLinkInNewBackgroundTab)
                     menu.append(open_new_tab_background_menu_item)
-            elif action == u"_Download Linked File":
+            elif action == "_Download Linked File":
                 menu.remove(i)
             else:
                 # Remove unknown menu items
@@ -1002,10 +1000,10 @@ class WikiHtmlViewWK(wx.Panel):
             # Status None is sent on mouse off
             if status is None:
                 self.presenter.getMainControl().statusBar.SetStatusText(
-                        uniToGui(""), 0)
+                        "", 0)
                 return
 
-            internaljumpPrefix = u"http://internaljump/"
+            internaljumpPrefix = "http://internaljump/"
 
             if status.startswith(internaljumpPrefix):
                 # First check for an anchor. In URLs, anchors are always
@@ -1013,7 +1011,7 @@ class WikiHtmlViewWK(wx.Panel):
                 # in the wiki syntax (normally '!')
                 try:
                     wikiWord, anchor = status[len(internaljumpPrefix):].split(
-                            u"#", 1)
+                            "#", 1)
                 except ValueError:
                     wikiWord = status[len(internaljumpPrefix):]
                     anchor = None
@@ -1024,15 +1022,15 @@ class WikiHtmlViewWK(wx.Panel):
                     return
                 
                 # Add to internal jump prefix?
-                pagePrefix = u"wikipage/"
+                pagePrefix = "wikipage/"
                 wikiWord = wikiDocument.getWikiPageNameForLinkTerm(
                         wikiWord[len(pagePrefix):])
 
                 if wikiWord is not None:
-                    status = _(u"Link to page: %s") % wikiWord
+                    status = _("Link to page: %s") % wikiWord
 
             self.presenter.getMainControl().statusBar.SetStatusText(
-                    uniToGui(status), 0)
+                    status, 0)
 
 
     # GTK wx mapping
@@ -1112,7 +1110,7 @@ class WikiHtmlViewWK(wx.Panel):
                 vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
-            except WikiWordNotFoundException, e:
+            except WikiWordNotFoundException as e:
                 pass
 
         wikiPage = self.presenter.getDocPage()
@@ -1198,7 +1196,7 @@ class WikiHtmlViewWK(wx.Panel):
                 # Webkit seems not to send "navigation-policy-decision-requested"
                 # if only anchor changes
 #                 self.passNavigate += 1
-                self.html.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
+                self.html.LoadUrl(self.currentLoadedUrl + "#" + self.anchor)
                 self.lastAnchor = self.anchor
             #else:
             #    lx, ly = wikiPage.getPresentation()[3:5]
@@ -1283,7 +1281,7 @@ class WikiHtmlViewWK(wx.Panel):
                 vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
-            except WikiWordNotFoundException, e:
+            except WikiWordNotFoundException as e:
                 pass
 
     def onOptionsChanged(self, miscevt):
@@ -1400,9 +1398,9 @@ class WikiHtmlViewWK(wx.Panel):
             self.passNavigate -= 1
             return False
 
-        internaljumpPrefix = u"http://internaljump/"
+        internaljumpPrefix = "http://internaljump/"
 
-        if href.startswith(internaljumpPrefix + u"wikipage/"):  # len("wikipage/") == 9
+        if href.startswith(internaljumpPrefix + "wikipage/"):  # len("wikipage/") == 9
 
             # Jump to another wiki page
 
@@ -1416,9 +1414,9 @@ class WikiHtmlViewWK(wx.Panel):
                 anchor = None
 
             # unescape word
-            word = urllib.unquote(word) # utf8Dec(urllib.unquote(word))[0]
+            word = urllib.parse.unquote(word) # utf8Dec(urllib.unquote(word))[0]
             if anchor:
-                anchor = urllib.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
+                anchor = urllib.parse.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
 
             if tabMode & 2:
                 if tabMode == 6:
@@ -1447,13 +1445,13 @@ class WikiHtmlViewWK(wx.Panel):
             #decision.ignore()
             return True
 
-        elif href == (internaljumpPrefix + u"action/history/back"):
+        elif href == (internaljumpPrefix + "action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()
             #decision.ignore()
             return True
 
-        elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
+        elif href == (internaljumpPrefix + "mouse/leftdoubleclick/preview/body"):
             # None affect current tab so return false
             pres = self.presenter
             mc = pres.getMainControl()
@@ -1462,15 +1460,15 @@ class WikiHtmlViewWK(wx.Panel):
                     "main control": mc}
 
             mc.getUserActionCoord().reactOnUserEvent(
-                    u"mouse/leftdoubleclick/preview/body", paramDict)
+                    "mouse/leftdoubleclick/preview/body", paramDict)
             ##decision.ignore()
             return True
 
-        elif href == (internaljumpPrefix + u"event/pageBuilt"):
+        elif href == (internaljumpPrefix + "event/pageBuilt"):
             # Should we be doing anything here?
             return True
 
-        elif href.startswith(u"file:"):
+        elif href.startswith("file:"):
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
             normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
@@ -1482,7 +1480,7 @@ class WikiHtmlViewWK(wx.Panel):
                 # To lauch external urls we need to remove webkits preceeding
                 # "file:///", quote the url and add "file:/"
                 self.presenter.getMainControl().launchUrl(
-                        u"file:/{0}".format(urlQuote(href[len("file:///"):])))
+                        "file:/{0}".format(urlQuote(href[len("file:///"):])))
                 #decision.ignore()
             return True
         else:
@@ -1599,7 +1597,7 @@ class WKHtmlWindow(wx.Window):
 #     def SetEditable(self, editable=True):
 #         self.ctrl.set_editable(editable)
     def LoadHtmlString(self, html):
-        self.ctrl.load_string(html, "text/html", "UTF-8", u"file://")
+        self.ctrl.load_string(html, "text/html", "UTF-8", "file://")
 
     def LoadUrl(self, url):
         try:
@@ -1733,7 +1731,7 @@ class ViFunctions(ViHelper):
         }
         }
 
-        self.LoadPlugins(u"preview_wk")
+        self.LoadPlugins("preview_wk")
 
         # Generate possible key modifiers
         self.key_mods = self.GenerateKeyModifiers(self.keys)
@@ -1860,9 +1858,9 @@ class ViFunctions(ViHelper):
         # TODO: optimise
 
         if forward:
-            f = u"true" 
+            f = "true" 
         else:
-            f = u"false"
+            f = "false"
 
         self.ctrl.html.getWebkitWebView().execute_script(
         """
@@ -1965,13 +1963,13 @@ window.scrollTo(0, scroll_height + to_scroll)
         //END JAVASCRIPT CODE
         ''')
 
-    def highlightLinks(self, string=u"", number=u""):
+    def highlightLinks(self, string="", number=""):
         # TODO: Text based link selection
         self.clearHints()
 
         # Label hints
-        if string is None: string = u""
-        if number is None: number = u""
+        if string is None: string = ""
+        if number is None: number = ""
 
 
         # Hack to retrieve selected url from title
@@ -2145,7 +2143,7 @@ document.title = links_selected.length;
         s.reverse()
         n.reverse()
 
-        return self.highlightLinks(u"".join(s), u"".join(n))
+        return self.highlightLinks("".join(s), "".join(n))
 
     def forgetFollowHint(self):
         """
@@ -2228,7 +2226,7 @@ class KeyProcessWxWindow(wx.Panel):
 
         self.gtkMyself = self.pizza   # .get_children()[0]
         
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         self.realized = True
 

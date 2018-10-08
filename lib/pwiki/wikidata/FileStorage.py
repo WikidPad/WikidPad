@@ -15,7 +15,7 @@ class FSException(Exception):
 
 
 
-_FILESPLITPAT = re.compile(ur"^(?P<name>\.*[^.]+)(?P<suffix>.*)$",
+_FILESPLITPAT = re.compile(r"^(?P<name>\.*[^.]+)(?P<suffix>.*)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -27,14 +27,14 @@ class FileStorage:
     component, so it must be replaced by a new instance if a new wiki is loaded.
     """
     
-    def __init__(self, wikiDataManager, storagePath):
+    def __init__(self, wikiDocument, storagePath):
         """
         mainControl -- PersonalWikiFrame instance
-        wikiDataManager -- WikiDataManager instance of current wiki
+        wikiDocument -- WikiDocument instance of current wiki
         filePath -- directory path where new files should be stored
                 (doesn't have to exist already)
         """
-        self.wikiDataManager = wikiDataManager
+        self.wikiDocument = wikiDocument
         self.storagePath = storagePath
         
         # Conditions for identity test
@@ -180,8 +180,8 @@ class FileStorage:
 
         # End of fast tests, now the whole content must be compared
         
-        file1 = file(path1, "rb")    
-        file2 = file(path2, "rb")
+        file1 = open(path1, "rb")    
+        file2 = open(path2, "rb")
         
         try:
             while True:
@@ -191,8 +191,8 @@ class FileStorage:
                     # EOF
                     return True
                 if len(block1) != len(block2):
-                    raise FSException(_(u"File compare error, file not readable or "
-                            u"changed during compare"))
+                    raise FSException(_("File compare error, file not readable or "
+                            "changed during compare"))
 
                 if block1 != block2:
                     return False
@@ -213,7 +213,7 @@ class FileStorage:
         """
 
         if not (os.path.isfile(srcPath) or os.path.isdir(srcPath)):
-            raise FSException(_(u"Path '%s' must point to an existing file") %
+            raise FSException(_("Path '%s' must point to an existing file") %
                     srcPath)
 
         self._ensureStorage()
@@ -230,13 +230,13 @@ class FileStorage:
 
         mat = _FILESPLITPAT.match(fname)
         if mat is None:
-            raise FSException(_(u"Internal error: Bad source file name"))
+            raise FSException(_("Internal error: Bad source file name"))
 
         coreName = mat.group("name")
         suffix = mat.group("suffix")
 
-        for t in xrange(10):  # Number of tries
-            newName = u"%s_%s%s" % (coreName, createRandomString(10), suffix)
+        for t in range(10):  # Number of tries
+            newName = "%s_%s%s" % (coreName, createRandomString(10), suffix)
             
             if not os.path.exists(pathEnc(os.path.join(
                     self.storagePath, newName))):
@@ -246,7 +246,7 @@ class FileStorage:
         return (None, False)
     
     
-    def findDestPathNoSource(self, suffix, prefix=u""):
+    def findDestPathNoSource(self, suffix, prefix=""):
         """
         Find a path to a destination.
         """
@@ -259,7 +259,7 @@ class FileStorage:
             if not os.path.exists(pathEnc(destPath)):
                 return destPath
         else:
-            prefix = u""
+            prefix = ""
 
 
 #         mat = _FILESPLITPAT.match(fname)
@@ -269,8 +269,8 @@ class FileStorage:
 #         coreName = mat.group("name")
 #         suffix = mat.group("suffix")
 
-        for t in xrange(20):  # Number of tries
-            newName = u"%s_%s%s" % (prefix, createRandomString(20), suffix)
+        for t in range(20):  # Number of tries
+            newName = "%s_%s%s" % (prefix, createRandomString(20), suffix)
 
             destPath = os.path.join(self.storagePath, newName)
             if not os.path.exists(pathEnc(destPath)):
@@ -295,7 +295,7 @@ class FileStorage:
             return destpath
             
         if destpath is None:
-            raise FSException(_(u"Copy of file '%s' couldn't be created") %
+            raise FSException(_("Copy of file '%s' couldn't be created") %
                     srcPath)
 
         if move:

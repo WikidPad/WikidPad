@@ -1,4 +1,4 @@
-++ Color Test Page
+﻿++ Color Test Page
 
 [Color AQUAMARINE]
 [Color BLACK]

@@ -1,6 +1,23 @@
 ﻿++ Change Log
 
 
+Mar. 14, 2018 (2.4alpha01)
+
+    * Now based on Python 3.4 and wxPython 4.0 (Phoenix)
+
+    * Support for "Original Gadfly" database backend removed
+    * Option to let left double click on editor tab either close tab,
+      clone tab or do nothing.
+      See [OptionsDialog#*Left double click on tab*]
+    * Support for Webview renderer (better HTML renderer, depending
+      on operating system), thanks to Ross.
+      See [Options HTML preview_export#* Webview:]
+    * Added option to disable list of parents at top of exported
+      HTML pages
+
+    * More stable handling of additional user icons
+
+
 Jul. 07, 2017 (2.3beta16)
 
     * Advanced link modification when renaming wiki page, much more

@@ -1,7 +1,7 @@
-from __future__ import with_statement
 
-import threading, traceback, collections, heapq
-from thread import allocate_lock as _allocate_lock
+
+import sys, threading, traceback, collections, heapq, functools, logging
+# from _thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep
 
 import wx
@@ -13,13 +13,9 @@ from .WikiExceptions import NotCurrentThreadException, \
 from . import MiscEvent
 
 
-class Dummy(object):
-    pass
-
-
 # ---------- Thread handling and task execution ----------
 
-class BasicThreadStop(object):
+class BasicThreadStop:
     """
     An object of this or a derived class is handed over to long running
     operations which might run in a separate thread and maybe must be stopped
@@ -29,23 +25,25 @@ class BasicThreadStop(object):
     During the operation the function isValidThread() or testValidThread() should be
     called from time to time to check if op. should be stopped.
 
-    This class is used for synchronous operations where no thread stop
+    This class itself is used for synchronous operations where no thread stop
     condition is necessary.
     """
     __slots__ = ()
 
     def isValidThread(self):
         """
-        Returns True if operation should continue.
+        Returns True if operation should continue (calling thread is the
+        desired thread which should perform the operation).
         """
         return True
 
     def testValidThread(self):
         """
-        Throws a NotCurrentThreadException if op. should stop, does nothing
-        otherwise.
+        Throws a NotCurrentThreadException if operation should stop, does nothing
+        otherwise. Convenience variant of isValidThread()
         """
-        pass
+        if not self.isValidThread():
+            raise NotCurrentThreadException()
 
 
 DUMBTHREADSTOP = BasicThreadStop()
@@ -59,10 +57,6 @@ class FunctionThreadStop(BasicThreadStop):
 
     def isValidThread(self):
         return self.fct()
-        
-    def testValidThread(self):
-        if not self.fct():
-            raise NotCurrentThreadException()
 
 
 
@@ -82,14 +76,6 @@ class ThreadHolder(BasicThreadStop):
     def setThread(self, thread):
         self.thread = thread
         
-    def testValidThread(self):
-        """
-        Throws NotCurrentThreadException if self.thread is not equal to
-        current thread
-        """
-        if threading.currentThread() is not self.thread:
-            raise NotCurrentThreadException()
-
     def isValidThread(self):
         """
         Return True if current thread is thread in holder
@@ -99,7 +85,7 @@ class ThreadHolder(BasicThreadStop):
 
 
 
-class ExecutionResult(object):
+class ExecutionResult:
     __slots__ = ("result", "exception", "state")
 
     def __init__(self):
@@ -159,6 +145,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         for i in range(self.dequeCount))
 
     def start(self):
+        debuglog("SingleThreadExecutor starting")
         with self.dequeCondition:
             self.paused = False
             if self.thread is not None and self.thread.isAlive():
@@ -169,6 +156,8 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
             self.thread = threading.Thread(target=self._runQueue)
             self.thread.setDaemon(self.daemon)
             self.thread.start()
+            debuglog("SingleThreadExecutor thread created",
+                    self.thread, self.daemon)
             self._fireStateChange(True)
 
 
@@ -288,7 +277,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         self._fireStateChange(False)
                         return
 
-                except Exception, e:
+                except Exception as e:
                     traceback.print_exc() # ?
                     retObj.setException(e)
 
@@ -300,7 +289,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                 retObj.setResult(fct(*args, **kwargs))
                 self.incDoneJobCount()
 
-            except Exception, e:
+            except Exception as e:
                 traceback.print_exc() # ?
                 retObj.setException(e)
             finally:
@@ -314,7 +303,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
         and wait until it is finished.
         If the execution needs longer than 4 minutes,
         a DeadBlockPreventionTimeOutError is raised.
-        Returns result from fct(...) or throws execption thrown by fct()
+        Returns result from fct(...) or throws exception thrown by fct()
         """
         if threading.currentThread() is self.thread:
             return fct(*args, **kwargs)
@@ -400,10 +389,16 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
                         False))
             self.dequeCondition.notify()
 
+        debuglog("SingleThreadExecutor ending, joining thread",
+                self.thread, self.daemon)
+
         self.thread.join(120)  # TODO: Replace by constant
 
         if self.thread.isAlive():
             raise DeadBlockPreventionTimeOutError()
+
+        debuglog("SingleThreadExecutor ending, thread terminated",
+                thread=self.thread, daemon=self.daemon)
 
         self.thread = None
 
@@ -438,7 +433,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
 
 
 def callInMainThread(fct, *args, **kwargs):
-    if wx.Thread_IsMain() or not wx.GetApp().IsMainLoopRunning():
+    if wx.IsMainThread() or not wx.GetApp().IsMainLoopRunning():
         return fct(*args, **kwargs)
     
     returnOb = ExecutionResult()
@@ -448,7 +443,7 @@ def callInMainThread(fct, *args, **kwargs):
     def _mainRun(*args, **kwargs):
         try:
             returnOb.result = fct(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             returnOb.exception = e
         finally:
@@ -466,146 +461,77 @@ def callInMainThread(fct, *args, **kwargs):
     return returnOb.result
 
 
+def mainThreadFunc(fct):
+    """
+    Decorator to ensure that function only runs in main thread.
+    Do not use for unbound methods!
+    """
+    result = functools.partial(callInMainThread, fct)
+    functools.update_wrapper(result, fct)
+
+    return result
 
 
 def callInMainThreadAsync(fct, *args, **kwargs):
-    if wx.Thread_IsMain() or not wx.GetApp().IsMainLoopRunning():
+    if wx.IsMainThread() or not wx.GetApp().IsMainLoopRunning():
         return fct(*args, **kwargs)
     def _mainRun(*args, **kwargs):
         try:
             fct(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
 
     wx.CallAfter(_mainRun, *args, **kwargs)
-#     print "--callInMainThread7", repr(fct)
-#     wx.SafeYield()  # Good idea?
 
 
 
 
-
-def TimeoutRLock(*args, **kwargs):
-    return _TimeoutRLock(*args, **kwargs)
-
-class _TimeoutRLock(threading._Verbose):
+class TimeoutRLock:
     """
-    Modified version of threading._RLock from standard library
+    Wrapper class for threading.RLock where the timeout is given in constructor
+    in addition to acquire(). This is especially helpful when using context protocol.
+    
     """
-    def __init__(self, timeout=None, verbose=None):
-        threading._Verbose.__init__(self, verbose)
-        self.__block = _allocate_lock()
-        self.__owner = None
-        self.__count = 0
-        self.__timeout = timeout
-#         self.__acquiredStackTrace = None
-
+    def __init__(self, timeout=-1):
+        self.realLock = threading.RLock()
+        self.timeout = timeout if timeout is not None else -1
+        
     def __repr__(self):
-        owner = self.__owner
-        return "<%s(%s, %d)>" % (
-                self.__class__.__name__,
-                owner and owner.getName(),
-                self.__count)
-
-    def acquire(self, blocking=1):
-        me = threading.currentThread()
-        if self.__owner is me:
-            self.__count = self.__count + 1
-            if __debug__:
-                self._note("%s.acquire(%s): recursive success", self, blocking)
-            return 1
-
-        if not blocking or not self.__timeout:
-            rc = self.__block.acquire(blocking)
-            if rc:
-                self.__owner = me
-                self.__count = 1
-#                 self.__acquiredStackTrace = traceback.extract_stack()
-                if __debug__:
-                    self._note("%s.acquire(%s): initial success", self, blocking)
-            else:
-                if __debug__:
-                    self._note("%s.acquire(%s): failure", self, blocking)
-            return rc
+        return "<%s(timeout=%s, %s)>" % (self.__class__.__name__, self.timeout,
+                repr(self.realLock))
+    
+    def acquire(self, blocking=True, timeout=None):
+        """
+        Slightly different behavior as RLock.acquire(): If no timeout is
+        given in acquire() call (or timeout is None) and the timeout
+        given in constructor runs out, a DeadBlockPreventionTimeOutError
+        is raised.
+        """
+        
+        if not blocking:
+            return self.realLock.acquire(False)
         else:
-            # This comes from threading._Condition.wait()
-
-            # Balancing act:  We can't afford a pure busy loop, so we
-            # have to sleep; but if we sleep the whole timeout time,
-            # we'll be unresponsive.  The scheme here sleeps very
-            # little at first, longer as time goes on, but never longer
-            # than 20 times per second (or the timeout time remaining).
-            endtime = _time() + self.__timeout
-            delay = 0.0005 # 500 us -> initial delay of 1 ms
-
-            while True:
-                gotit = self.__block.acquire(0)
-                if gotit:
-                    break
-                remaining = endtime - _time()
-                if remaining <= 0:
-                    break
-#                 delay = min(delay * 2, remaining, .05)
-                delay = min(delay * 2, remaining, .02)
-                _sleep(delay)
-            if not gotit:
-                if __debug__:
-                    self._note("%s.wait(%s): timed out", self, self.__timeout)
+            if timeout is None:
+                timeout = self.timeout
                 
-#                 print "----Lock acquired by"
-#                 print "".join(traceback.format_list(self.__acquiredStackTrace))
-
-                raise DeadBlockPreventionTimeOutError()
+                if self.realLock.acquire(True, timeout=timeout):
+                    return True
+                else:
+                    raise DeadBlockPreventionTimeOutError()
             else:
-                if __debug__:
-                    self._note("%s.wait(%s): got it", self, self.__timeout)
-                
-                self.__owner = me
-                self.__count = 1
-#                 self.__acquiredStackTrace = traceback.extract_stack()
-                
-                return gotit
+                return self.realLock.acquire(True, timeout=timeout)
+
 
     __enter__ = acquire
-
+    
     def release(self):
-        if self.__owner is not threading.currentThread():
-            raise RuntimeError("cannot release un-aquired lock")
-        self.__count = count = self.__count - 1
-        if not count:
-            self.__owner = None
-#             self.__acquiredStackTrace = None
-            self.__block.release()
-            if __debug__:
-                self._note("%s.release(): final release", self)
-        else:
-            if __debug__:
-                self._note("%s.release(): non-final release", self)
+        self.realLock.release()
+    
 
     def __exit__(self, t, v, tb):
         self.release()
 
-    # Internal methods used by condition variables
 
-    def _acquire_restore(self, (count, owner)):
-        self.__block.acquire()
-        self.__count = count
-        self.__owner = owner
-        if __debug__:
-            self._note("%s._acquire_restore()", self)
-
-    def _release_save(self):
-        if __debug__:
-            self._note("%s._release_save()", self)
-        count = self.__count
-        self.__count = 0
-        owner = self.__owner
-        self.__owner = None
-        self.__block.release()
-        return (count, owner)
-
-    def _is_owned(self):
-        return self.__owner is threading.currentThread()
 
 
 
@@ -688,6 +614,7 @@ def seqSupportWithTemplate(tupleOrList, templateSeq):
 
 
 
+
 # class FlagHolder:
 #     __slots__ = ("__weakref__", "flag")
 #     
@@ -739,319 +666,14 @@ class DefaultDictParam(dict):
         return val
 
 
-class DictFromFields(object):
+class DictFromFields:
     """
     Helper to create dictionary. Create an object from it, set fields on it
     and retrieve all fields which do not start with double underscore.
     """
     def getDict(self):
-        return dict(((k, v) for k, v in self.__dict__.iteritems()
+        return dict(((k, v) for k, v in self.__dict__.items()
                 if not k.startswith("__")))
-
-
-
-
-# collections.Counter class from Python 2.7 standard library
-class Counter(dict):
-    '''Dict subclass for counting hashable items.  Sometimes called a bag
-    or multiset.  Elements are stored as dictionary keys and their counts
-    are stored as dictionary values.
-
-    >>> c = Counter('abcdeabcdabcaba')  # count elements from a string
-
-    >>> c.most_common(3)                # three most common elements
-    [('a', 5), ('b', 4), ('c', 3)]
-    >>> sorted(c)                       # list all unique elements
-    ['a', 'b', 'c', 'd', 'e']
-    >>> ''.join(sorted(c.elements()))   # list elements with repetitions
-    'aaaaabbbbcccdde'
-    >>> sum(c.values())                 # total of all counts
-    15
-
-    >>> c['a']                          # count of letter 'a'
-    5
-    >>> for elem in 'shazam':           # update counts from an iterable
-    ...     c[elem] += 1                # by adding 1 to each element's count
-    >>> c['a']                          # now there are seven 'a'
-    7
-    >>> del c['b']                      # remove all 'b'
-    >>> c['b']                          # now there are zero 'b'
-    0
-
-    >>> d = Counter('simsalabim')       # make another counter
-    >>> c.update(d)                     # add in the second counter
-    >>> c['a']                          # now there are nine 'a'
-    9
-
-    >>> c.clear()                       # empty the counter
-    >>> c
-    Counter()
-
-    Note:  If a count is set to zero or reduced to zero, it will remain
-    in the counter until the entry is deleted or the counter is cleared:
-
-    >>> c = Counter('aaabbc')
-    >>> c['b'] -= 2                     # reduce the count of 'b' by two
-    >>> c.most_common()                 # 'b' is still in, but its count is zero
-    [('a', 3), ('c', 1), ('b', 0)]
-
-    '''
-    # References:
-    #   http://en.wikipedia.org/wiki/Multiset
-    #   http://www.gnu.org/software/smalltalk/manual-base/html_node/Bag.html
-    #   http://www.demo2s.com/Tutorial/Cpp/0380__set-multiset/Catalog0380__set-multiset.htm
-    #   http://code.activestate.com/recipes/259174/
-    #   Knuth, TAOCP Vol. II section 4.6.3
-
-    def __init__(*args, **kwds):
-        '''Create a new, empty Counter object.  And if given, count elements
-        from an input iterable.  Or, initialize the count from another mapping
-        of elements to their counts.
-
-        >>> c = Counter()                           # a new, empty counter
-        >>> c = Counter('gallahad')                 # a new counter from an iterable
-        >>> c = Counter({'a': 4, 'b': 2})           # a new counter from a mapping
-        >>> c = Counter(a=4, b=2)                   # a new counter from keyword args
-
-        '''
-        if not args:
-            raise TypeError("descriptor '__init__' of 'Counter' object "
-                            "needs an argument")
-        self = args[0]
-        args = args[1:]
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
-        super(Counter, self).__init__()
-        self.update(*args, **kwds)
-
-    def __missing__(self, key):
-        'The count of elements not in the Counter is zero.'
-        # Needed so that self[missing_item] does not raise KeyError
-        return 0
-
-    def most_common(self, n=None):
-        '''List the n most common elements and their counts from the most
-        common to the least.  If n is None, then list all element counts.
-
-        >>> Counter('abcdeabcdabcaba').most_common(3)
-        [('a', 5), ('b', 4), ('c', 3)]
-
-        '''
-        # Emulate Bag.sortedByCount from Smalltalk
-        if n is None:
-            return sorted(self.iteritems(), key=_itemgetter(1), reverse=True)
-        return _heapq.nlargest(n, self.iteritems(), key=_itemgetter(1))
-
-    def elements(self):
-        '''Iterator over elements repeating each as many times as its count.
-
-        >>> c = Counter('ABCABC')
-        >>> sorted(c.elements())
-        ['A', 'A', 'B', 'B', 'C', 'C']
-
-        # Knuth's example for prime factors of 1836:  2**2 * 3**3 * 17**1
-        >>> prime_factors = Counter({2: 2, 3: 3, 17: 1})
-        >>> product = 1
-        >>> for factor in prime_factors.elements():     # loop over factors
-        ...     product *= factor                       # and multiply them
-        >>> product
-        1836
-
-        Note, if an element's count has been set to zero or is a negative
-        number, elements() will ignore it.
-
-        '''
-        # Emulate Bag.do from Smalltalk and Multiset.begin from C++.
-        return _chain.from_iterable(_starmap(_repeat, self.iteritems()))
-
-    # Override dict methods where necessary
-
-    @classmethod
-    def fromkeys(cls, iterable, v=None):
-        # There is no equivalent method for counters because setting v=1
-        # means that no element can have a count greater than one.
-        raise NotImplementedError(
-            'Counter.fromkeys() is undefined.  Use Counter(iterable) instead.')
-
-    def update(*args, **kwds):
-        '''Like dict.update() but add counts instead of replacing them.
-
-        Source can be an iterable, a dictionary, or another Counter instance.
-
-        >>> c = Counter('which')
-        >>> c.update('witch')           # add elements from another iterable
-        >>> d = Counter('watch')
-        >>> c.update(d)                 # add elements from another counter
-        >>> c['h']                      # four 'h' in which, witch, and watch
-        4
-
-        '''
-        # The regular dict.update() operation makes no sense here because the
-        # replace behavior results in the some of original untouched counts
-        # being mixed-in with all of the other counts for a mismash that
-        # doesn't have a straight-forward interpretation in most counting
-        # contexts.  Instead, we implement straight-addition.  Both the inputs
-        # and outputs are allowed to contain zero and negative counts.
-
-        if not args:
-            raise TypeError("descriptor 'update' of 'Counter' object "
-                            "needs an argument")
-        self = args[0]
-        args = args[1:]
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
-        iterable = args[0] if args else None
-        if iterable is not None:
-            if isinstance(iterable, Mapping):
-                if self:
-                    self_get = self.get
-                    for elem, count in iterable.iteritems():
-                        self[elem] = self_get(elem, 0) + count
-                else:
-                    super(Counter, self).update(iterable) # fast path when counter is empty
-            else:
-                self_get = self.get
-                for elem in iterable:
-                    self[elem] = self_get(elem, 0) + 1
-        if kwds:
-            self.update(kwds)
-
-    def subtract(*args, **kwds):
-        '''Like dict.update() but subtracts counts instead of replacing them.
-        Counts can be reduced below zero.  Both the inputs and outputs are
-        allowed to contain zero and negative counts.
-
-        Source can be an iterable, a dictionary, or another Counter instance.
-
-        >>> c = Counter('which')
-        >>> c.subtract('witch')             # subtract elements from another iterable
-        >>> c.subtract(Counter('watch'))    # subtract elements from another counter
-        >>> c['h']                          # 2 in which, minus 1 in witch, minus 1 in watch
-        0
-        >>> c['w']                          # 1 in which, minus 1 in witch, minus 1 in watch
-        -1
-
-        '''
-        if not args:
-            raise TypeError("descriptor 'subtract' of 'Counter' object "
-                            "needs an argument")
-        self = args[0]
-        args = args[1:]
-        if len(args) > 1:
-            raise TypeError('expected at most 1 arguments, got %d' % len(args))
-        iterable = args[0] if args else None
-        if iterable is not None:
-            self_get = self.get
-            if isinstance(iterable, Mapping):
-                for elem, count in iterable.items():
-                    self[elem] = self_get(elem, 0) - count
-            else:
-                for elem in iterable:
-                    self[elem] = self_get(elem, 0) - 1
-        if kwds:
-            self.subtract(kwds)
-
-    def copy(self):
-        'Return a shallow copy.'
-        return self.__class__(self)
-
-    def __reduce__(self):
-        return self.__class__, (dict(self),)
-
-    def __delitem__(self, elem):
-        'Like dict.__delitem__() but does not raise KeyError for missing values.'
-        if elem in self:
-            super(Counter, self).__delitem__(elem)
-
-    def __repr__(self):
-        if not self:
-            return '%s()' % self.__class__.__name__
-        items = ', '.join(map('%r: %r'.__mod__, self.most_common()))
-        return '%s({%s})' % (self.__class__.__name__, items)
-
-    # Multiset-style mathematical operations discussed in:
-    #       Knuth TAOCP Volume II section 4.6.3 exercise 19
-    #       and at http://en.wikipedia.org/wiki/Multiset
-    #
-    # Outputs guaranteed to only include positive counts.
-    #
-    # To strip negative and zero counts, add-in an empty counter:
-    #       c += Counter()
-
-    def __add__(self, other):
-        '''Add counts from two counters.
-
-        >>> Counter('abbb') + Counter('bcc')
-        Counter({'b': 4, 'c': 2, 'a': 1})
-
-        '''
-        if not isinstance(other, Counter):
-            return NotImplemented
-        result = Counter()
-        for elem, count in self.items():
-            newcount = count + other[elem]
-            if newcount > 0:
-                result[elem] = newcount
-        for elem, count in other.items():
-            if elem not in self and count > 0:
-                result[elem] = count
-        return result
-
-    def __sub__(self, other):
-        ''' Subtract count, but keep only results with positive counts.
-
-        >>> Counter('abbbc') - Counter('bccd')
-        Counter({'b': 2, 'a': 1})
-
-        '''
-        if not isinstance(other, Counter):
-            return NotImplemented
-        result = Counter()
-        for elem, count in self.items():
-            newcount = count - other[elem]
-            if newcount > 0:
-                result[elem] = newcount
-        for elem, count in other.items():
-            if elem not in self and count < 0:
-                result[elem] = 0 - count
-        return result
-
-    def __or__(self, other):
-        '''Union is the maximum of value in either of the input counters.
-
-        >>> Counter('abbb') | Counter('bcc')
-        Counter({'b': 3, 'c': 2, 'a': 1})
-
-        '''
-        if not isinstance(other, Counter):
-            return NotImplemented
-        result = Counter()
-        for elem, count in self.items():
-            other_count = other[elem]
-            newcount = other_count if count < other_count else count
-            if newcount > 0:
-                result[elem] = newcount
-        for elem, count in other.items():
-            if elem not in self and count > 0:
-                result[elem] = count
-        return result
-
-    def __and__(self, other):
-        ''' Intersection is the minimum of corresponding counts.
-
-        >>> Counter('abbb') & Counter('bcc')
-        Counter({'b': 1})
-
-        '''
-        if not isinstance(other, Counter):
-            return NotImplemented
-        result = Counter()
-        for elem, count in self.items():
-            other_count = other[elem]
-            newcount = count if count < other_count else other_count
-            if newcount > 0:
-                result[elem] = newcount
-        return result
 
 
 
@@ -1096,7 +718,7 @@ def iterMergesort(list_of_lists, key=None):
     heap = []
     for i, itr in enumerate(iter(pl) for pl in list_of_lists):
         try:
-            item = itr.next()
+            item = next(itr)
             toadd = (key(item), i, item, itr) if key else (item, i, itr)
             heap.append(toadd)
         except StopIteration:
@@ -1108,7 +730,7 @@ def iterMergesort(list_of_lists, key=None):
             _, idx, item, itr = heap[0]
             yield item  # , itr
             try:
-                item = itr.next()
+                item = next(itr)
                 heapq.heapreplace(heap, (key(item), idx, item, itr) )
             except StopIteration:
                 heapq.heappop(heap)
@@ -1118,7 +740,7 @@ def iterMergesort(list_of_lists, key=None):
             item, idx, itr = heap[0]
             yield item  # , itr
             try:
-                heapq.heapreplace(heap, (itr.next(), idx, itr))
+                heapq.heapreplace(heap, (next(itr), idx, itr))
             except StopIteration:
                 heapq.heappop(heap)
 
@@ -1163,6 +785,43 @@ class IdentityList(list):
         
     def clear(self):
         del self[0:len(self)]
+
+
+
+class AttrContainer:
+    """
+    Attribute container. Same objects can be retrieved by attribute or
+    item syntax (similar to JavaScript objects)
+    """
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+        
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+
+
+# ---------- Debug Logging ----------
+
+
+if False:
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
+    
+    def debuglog(msg, *args, **kwargs):
+        msg = msg + ", ".join(repr(arg) for arg in args) + "; " + \
+                ", ".join(k + "=" + repr(v) for k, v in kwargs.items())
+        
+        logging.debug(msg)
+
+else:
+
+    def debuglog(msg, *args, **kwargs):
+        pass
+
+
 
 
 # ---------- Misc ----------

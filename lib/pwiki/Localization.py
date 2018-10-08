@@ -1,12 +1,15 @@
 # -*- coding: iso-8859-1 -*-
 
-import string, locale, codecs, os, sys, os.path, traceback
+import locale, codecs, os, sys, os.path, traceback, functools
 
 import Consts
 
 from .rtlibRepl import minidom
+# from xml.dom import minidom
 
 from .StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
+
+from . import Utilities
 
 import wx
 
@@ -27,19 +30,57 @@ def tt_noop(s):
     return s
 
 
+_wx_locale = None # Store the last created wxLocale here to prevent destruction
+_localeSetLock = Utilities.TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
+_lastLocStr = None
+
+
+
+def setLocale(locStr):
+    """
+    Sets locale simultaneously in Python/C-runtime and wxPython/wxWidgets
+    """
+    global _wx_locale, _lastLocStr
+    
+    with _localeSetLock:
+        if locStr == _lastLocStr:
+            return None
+            
+        @Utilities.mainThreadFunc
+        def setIt():
+            if locStr == "":
+                oldPyLoc = locale.setlocale(locale.LC_ALL)
+        
+                wx_locale = wx.Locale(wx.LANGUAGE_DEFAULT)
+                locale.setlocale(locale.LC_ALL, "")
+            else:
+                oldPyLoc = locale.setlocale(locale.LC_ALL)
+        
+                langInfo = wx.Locale.FindLanguageInfo(locStr)
+                if langInfo is not None:
+                    wx_locale = wx.Locale(langInfo.Language)
+        
+                locale.setlocale(locale.LC_ALL, locStr)
+                    
+            return oldPyLoc
+        
+        return setIt()
+
+
+
 # Factory functions for collators. Classes shouldn't be called directly
 
 def getCollatorByString(locStr, caseMode=None):
     """
     locStr -- String describing the locale of the Collator
-    caseMode --  (the flag isn't
-            guaranteed to be respected
+    caseMode -- True iff collator should be case sensitive (the flag isn't
+            guaranteed to be respected)
     """
-    if locStr.lower() == u"c":
+    if locStr.lower() == "c":
         return _CCollator(caseMode)
     else:
-        if locStr.lower() == u"default":
-            locStr = u""
+        if locStr.lower() == "default":
+            locStr = ""
 
         if caseMode == CASEMODE_UPPER_FIRST:
             return _PythonCollatorUppercaseFirst(locStr)
@@ -52,7 +93,7 @@ def getCCollator(caseMode=None):
     Returns a basic collator for 'C' locale. The only collator guaranteed to
     exist.
     caseMode -- True iff collator should be case sensitive (the flag isn't
-            guaranteed to be respected
+            guaranteed to be respected)
     """
     return _CCollator(caseMode)
 
@@ -73,8 +114,7 @@ class AbstractCollator:
 
         ascend -- If True sort ascending, descending otherwise
         """
-        # TODO Python 3.0 will no longer support compare function in sort
-        lst.sort(self.strcoll, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(self.strcoll), reverse=not ascend)
 #         if not ascend:
 #             lst.reverse()
 
@@ -86,7 +126,7 @@ class AbstractCollator:
         def strcollByItem(left, right):
             return self.strcoll(left[i], right[i])
 
-        lst.sort(strcollByItem, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(strcollByItem), reverse=not ascend)
 
 
     def sortByFirst(self, lst, ascend=True):
@@ -94,7 +134,7 @@ class AbstractCollator:
         Similar to sort(), but lst items are sequences where only the first
         element is taken for sorting.
         """
-        lst.sort(self.strcollByFirst, reverse=not ascend)
+        lst.sort(key=functools.cmp_to_key(self.strcollByFirst), reverse=not ascend)
 #         if not ascend:
 #             lst.reverse()
 
@@ -152,7 +192,12 @@ class _CCollator(AbstractCollator):
         Compare left and right and return integer value smaller, greater or
         equal 0
         """
-        return cmp(left, right)
+        if left < right:
+            return -1
+        elif left > right:
+            return 1
+        else:
+            return 0
 
     def strxfrm(self, s):
         """
@@ -175,11 +220,7 @@ class _PythonCollator(AbstractCollator):
         """
         """
         self.locStr = locStr
-        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
-
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        setLocale(self.locStr)
 
     def strcoll(self, left, right):
         return locale.strcoll(left, right)
@@ -199,15 +240,11 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
         """
         """
         self.locStr = locStr
-        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
-
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        setLocale(self.locStr)
 
     def strcoll(self, left, right):
         ml = min(len(left), len(right))
-        for i in xrange(ml):
+        for i in range(ml):
             lv = 0
             if left[i].islower():
                 lv = 1
@@ -234,9 +271,25 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
 
         
     def strxfrm(self, s):
-        assert 0 # Not properly implemented. TODO Needed for Python 3.0
+        assert 0 # Not properly implemented. TODO
 
         return locale.strxfrm(s)
+
+
+# Experimental to implement above _PythonCollatorUppercaseFirst.strxfrm()
+# Doesn't work
+
+# def myStrxfrm(s):
+#     
+#     sortKey = [("\x02" if c.islower() else "\x01") + c for c in s]
+# #     sortKey.append("\x04")
+# 
+# #     # Add one to ensure that no zero-byte appears
+# #     chr(len(s) + 1).encode("utf-8")
+#     
+#     return locale.strxfrm("".join(sortKey))
+
+
 
 
 
@@ -257,12 +310,12 @@ def buildMessageDict(filename):
 
     try:
         lines = codecs.open(pathEnc(infile), "r", "utf-8").readlines()
-    except IOError, msg:
+    except IOError as msg:
 #         print >> sys.stderr, msg
         raise
 
     # Strip BOM
-    if len(lines) > 0 and lines[0].startswith(u"\ufeff"):
+    if len(lines) > 0 and lines[0].startswith("\ufeff"):
         lines[0] = lines[0][1:]
 
     ID = 1
@@ -276,25 +329,25 @@ def buildMessageDict(filename):
     for l in lines:
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
-        if l[0] == u'#' and section == STR:
+        if l[0] == '#' and section == STR:
             add(msgid, msgstr, fuzzy)
             section = None
             fuzzy = 0
         # Record a fuzzy mark
-        if l[:2] == u'#,' and u'fuzzy' in l:
+        if l[:2] == '#,' and 'fuzzy' in l:
             fuzzy = 1
         # Skip comments
-        if l[0] == u'#':
+        if l[0] == '#':
             continue
         # Now we are in a msgid section, output previous section
-        if l.startswith(u'msgid'):
+        if l.startswith('msgid'):
             if section == STR:
                 add(msgid, msgstr, fuzzy)
             section = ID
             l = l[5:]
-            msgid = msgstr = u''
+            msgid = msgstr = ''
         # Now we are in a msgstr section
-        elif l.startswith(u'msgstr'):
+        elif l.startswith('msgstr'):
             section = STR
             l = l[6:]
         # Skip empty lines
@@ -304,7 +357,7 @@ def buildMessageDict(filename):
         # XXX: Does this always follow Python escape semantics?
 #         print "eval", repr(l)
         l = eval(l)
-        if type(l) is str:
+        if isinstance(l, Consts.BYTETYPES):
             l = l.decode("utf-8")
 
         if section == ID:
@@ -313,9 +366,9 @@ def buildMessageDict(filename):
 #             print "code", repr((msgstr, l))
             msgstr += l
         else:
-            print >> sys.stderr, 'Syntax error on %s:%d' % (infile, lno), \
-                  'before:'
-            print >> sys.stderr, l
+            print('Syntax error on %s:%d' % (infile, lno), \
+                  'before:', file=sys.stderr)
+            print(l, file=sys.stderr)
             raise SyntaxError('Syntax error on %s:%d' % (infile, lno) + 
                     ' before: ' + l)
             # sys.exit(1)
@@ -328,7 +381,7 @@ def buildMessageDict(filename):
 
 
 
-i18nLangList = [("C", u"English")]
+i18nLangList = [("C", "English")]
 
 def loadLangList(appDir):
     global i18nLangList
@@ -340,14 +393,14 @@ def loadLangList(appDir):
         data = data.decode("utf-8")
         
         # Remove BOM if present
-        if data.startswith(u"\ufeff"):
+        if data.startswith("\ufeff"):
             data = data[1:]
         
         for line in data.split("\n"):
             line = line.strip()
             try:
-                localeStr, langTitle = line.split(u"\t", 1)
-                localeStr = localeStr.encode("ascii")
+                localeStr, langTitle = line.split("\t", 1)
+                # localeStr = localeStr.encode("ascii")
                 
                 result.append((localeStr, langTitle))
             except:
@@ -358,7 +411,7 @@ def loadLangList(appDir):
         return
 
     except:
-        i18nLangList = [("C", u"English")]
+        i18nLangList = [("C", "English")]
 
 
 def getLangList():
@@ -390,7 +443,7 @@ def getLangTitleForLocaleStr(localeStr):
 
     i = findLangListIndex(localeStr)
     if i == -1:
-        return u"<'%s'>" % localeStr
+        return "<'%s'>" % localeStr
     else:
         return i18nLangList[i][1]
 
@@ -400,6 +453,7 @@ def getLangTitleForLocaleStr(localeStr):
 # Function taken from Python 2.4 standard library module gettext.py
 def _expand_lang(locale):
     from locale import normalize
+    
     locale = normalize(locale)
     COMPONENT_CODESET   = 1 << 0
     COMPONENT_TERRITORY = 1 << 1
@@ -453,7 +507,7 @@ def getI18nEntryDummy(key):
     A double questionmark "??" (the so-called discriminator)
     stops reading and only returns the part before it.
     """
-    return key.split(u"??", 1)[0]
+    return key.split("??", 1)[0]
 
 
 def getI18nEntry(key):
@@ -463,12 +517,12 @@ def getI18nEntry(key):
     global i18nDict
     
     # Without this, the translation meta-data would be shown for the empty key
-    if key == u"":
-        return u""
+    if key == "":
+        return ""
 
     result = i18nDict.get(key)
-    if result is None or result == u"":
-        return key.split(u"??", 1)[0]
+    if result is None or result == "":
+        return key.split("??", 1)[0]
     else:
         return result
 
@@ -585,7 +639,7 @@ def _stripI18nXrcCache(content):
     Check if content contains the right tag at beginning and either
     return None if cache is invalid or return actual cache data.
     """
-    parts = content.split("\n", 1)
+    parts = content.split(b"\n", 1)
     if len(parts) != 2 or parts[0] != Consts.VERSION_STRING:
         return None
 
@@ -595,7 +649,7 @@ def _stripI18nXrcCache(content):
 
 def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     """
-    Returns the XML data of translated XRC file.
+    Returns the XML data of translated XRC file as bytes.
     This function assumes that loadI18nDict() was previously
     called with same appDir.
     """
@@ -669,6 +723,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     xmlDoc.unlink()
 
 
+# TODO Check if needed yet for Python 3.4:
+
     # The following conversion is only needed when running a Windows
     # binary created by py2exe with wxPython 2.6.
     # Otherwise some mysterious unicode error may ocurr.
@@ -695,7 +751,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         
         writeEntireFile(cachePath, toCache, True)
         
-        return translated
+        return translated.encode("utf-8")
     except:
         pass
     
@@ -706,14 +762,14 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         
         writeEntireFile(cachePath, toCache, True)
 
-        return translated
+        return translated.encode("utf-8")
     except:
         pass
     
     
     # Cache saving failed
 
-    return translated
+    return translated.encode("utf-8")
 
 
 

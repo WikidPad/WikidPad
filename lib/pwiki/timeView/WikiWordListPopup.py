@@ -58,14 +58,14 @@ class WikiWordListPopup(wx.Frame):
                 style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_NO_HEADER |
                 self.LIST_BORDER)
 
-        self.resultBox.InsertColumn(0, u"", width=10)
+        self.resultBox.InsertColumn(0, "", width=10)
         self.listContent = wikiWords
         
         # Calculate minimal width of list
         dc = wx.ClientDC(self)
         try:
             dc.SetFont(self.resultBox.GetFont())
-            self._listMinWidth = dc.GetTextExtent(u"MMMMMMMM")[0]
+            self._listMinWidth = dc.GetTextExtent("MMMMMMMM")[0]
             dc.SetFont(wx.NullFont)
         finally:
             dc = None
@@ -89,14 +89,14 @@ class WikiWordListPopup(wx.Frame):
         # self.Layout()
         setWindowPos(self, fullVisible=True)
         
-        wx.EVT_MIDDLE_DOWN(self.resultBox, self.OnListMiddleButtonDown)
-        wx.EVT_MOTION(self.resultBox, self.OnListMouseMotion)
-        wx.EVT_LEFT_DOWN(self.resultBox, self.OnListLeftButtonDown)
-        wx.EVT_LEAVE_WINDOW(self.resultBox, self.OnListMouseLeave)
+        self.resultBox.Bind(wx.EVT_MIDDLE_DOWN, self.OnListMiddleButtonDown)
+        self.resultBox.Bind(wx.EVT_MOTION, self.OnListMouseMotion)
+        self.resultBox.Bind(wx.EVT_LEFT_DOWN, self.OnListLeftButtonDown)
+        self.resultBox.Bind(wx.EVT_LEAVE_WINDOW, self.OnListMouseLeave)
         
 
-#         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
-#         wx.EVT_CLOSE(self, self.OnClose)
+#         self.resultBox.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+#         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 
     def updateList(self):
@@ -105,7 +105,7 @@ class WikiWordListPopup(wx.Frame):
             self.resultBox.DeleteAllItems()
 
             for i, w in enumerate(self.listContent):
-                self.resultBox.InsertStringItem(i, w)
+                self.resultBox.InsertItem(i, w)
                 
 #             self.resultBox.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.resultBox.autosizeColumn(0)
@@ -120,7 +120,7 @@ class WikiWordListPopup(wx.Frame):
         Test if mousePos (screen coords) is inside the resultBox
         """
         pos = self.ScreenToClient(mousePos)
-        return self.resultBox.GetRect().Inside(pos)
+        return self.resultBox.GetRect().Contains(pos)
         
 
 
@@ -150,7 +150,7 @@ class WikiWordListPopup(wx.Frame):
         wikiWord = self.wikiWords[item]
 #         self.mainControl.activateWikiWord(wikiWord, 0)
         if self.mainControl.activatePageByUnifiedName(
-                u"wikipage/" + wikiWord, 0) is None:
+                "wikipage/" + wikiWord, 0) is None:
             return
         
         if self.mainControl.getConfig().getboolean("main",
@@ -181,7 +181,7 @@ class WikiWordListPopup(wx.Frame):
 
 #         presenter = self.mainControl.activateWikiWord(wikiWord, tabMode)
         presenter = self.mainControl.activatePageByUnifiedName(
-                u"wikipage/" + wikiWord, tabMode)
+                "wikipage/" + wikiWord, tabMode)
 
         if presenter is None:
             return

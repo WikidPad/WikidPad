@@ -1,2 +1,2 @@
-++ Icon controls
+﻿++ Icon controls
 [icon: controls]

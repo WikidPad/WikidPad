@@ -1,4 +1,4 @@
-++ Wiki Word History
+﻿++ Wiki Word History
 
 Wiki Pad maintains a history of the words you have visited.
 You can view this history by typing CTRL-H.

@@ -1,10 +1,10 @@
 # from Enum import Enumeration
-import sys, os, string, re, traceback, time, sqlite3
+import sys, os, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext
 from calendar import timegm
-from cStringIO import StringIO
-import urllib_red as urllib
+from io import BytesIO, TextIOWrapper
+from . import urllib_red as urllib
 
 import wx, wx.xrc
 
@@ -12,15 +12,16 @@ from .wxHelper import XrcControls
 
 
 import Consts
-from StringOps import *
+from .StringOps import *
+from .StringOps import MBCS_ENCODING
 
-from ConnectWrapPysqlite import ConnectWrapSyncCommit
+from .ConnectWrapPysqlite import ConnectWrapSyncCommit
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
-import DocPages
+from . import DocPages
 
-from MptImporterGui import MultiPageTextImporterDialog
+from .MptImporterGui import MultiPageTextImporterDialog
 
 from .timeView import Versioning
 
@@ -59,7 +60,7 @@ class MultiPageTextImporter:
             mptPanel = None
 
         return (
-                (u"multipage_text", _(u"Multipage text"), mptPanel),
+                ("multipage_text", _("Multipage text"), mptPanel),
                 )
 
 
@@ -71,9 +72,9 @@ class MultiPageTextImporter:
         
         If an export type goes to a directory, None is returned
         """
-        if importType == u"multipage_text":
-            return ((_(u"Multipage files (*.mpt)"), "*.mpt"),
-                    (_(u"Text file (*.txt)"), "*.txt")) 
+        if importType == "multipage_text":
+            return ((_("Multipage files (*.mpt)"), "*.mpt"),
+                    (_("Text file (*.txt)"), "*.txt")) 
 
         return None
 
@@ -116,7 +117,7 @@ class MultiPageTextImporter:
         while True:
             # Read lines of wikiword
             line = self.importFile.readline()
-            if line == u"":
+            if line == "":
                 # The last page in mpt file without separator
                 # ends as the real wiki page
 #                 content = u"".join(content)
@@ -134,7 +135,7 @@ class MultiPageTextImporter:
 
             content.append(line)
             
-        return u"".join(content)
+        return "".join(content)
 
 
     def _skipContent(self):
@@ -144,7 +145,7 @@ class MultiPageTextImporter:
         while True:
             # Read lines of wikiword
             line = self.importFile.readline()
-            if line == u"":
+            if line == "":
                 # The last page in mpt file without separator
                 # ends as the real wiki page
                 break
@@ -159,7 +160,7 @@ class MultiPageTextImporter:
         """
         Run import operation.
         
-        wikiDocument -- WikiDataManager object
+        wikiDocument -- WikiDocument object
         importType -- string tag to identify how to import
         importSrc -- Path to source directory or file to import from
         compatFilenames -- Should the filenames be decoded from the lowest
@@ -170,13 +171,13 @@ class MultiPageTextImporter:
         returns True if import was done (needed for trashcan)
         """
         if importData is not None:
-            self.rawImportFile = StringIO(importData)
+            self.rawImportFile = BytesIO(importData)  # TODO bytes or string???
         else:
             try:
-                self.rawImportFile = open(pathEnc(importSrc), "rU")
+                self.rawImportFile = open(pathEnc(importSrc), "rb")
             except IOError:
-                raise ImportException(_(u"Opening import file failed"))
-            
+                raise ImportException(_("Opening import file failed"))
+
         self.wikiDocument = wikiDocument
         self.tempDb = None
         
@@ -193,20 +194,20 @@ class MultiPageTextImporter:
                 bom = self.rawImportFile.read(len(BOM_UTF8))
                 if bom != BOM_UTF8:
                     self.rawImportFile.seek(0)
-                    decodingReader = mbcsReader
-                    decode = mbcsDec
+                    self.importFile = TextIOWrapper(self.rawImportFile,
+                            MBCS_ENCODING, "replace")
                 else:
-                    decodingReader = utf8Reader
-                    decode = utf8Dec
+                    self.importFile = TextIOWrapper(self.rawImportFile,
+                            "utf-8", "replace")
 
-                line = decode(self.rawImportFile.readline())[0]
-                if line.startswith(u"#!"):
+                line = self.importFile.readline()
+                if line.startswith("#!"):
                     # Skip initial line with #! to allow execution as shell script
-                    line = decode(self.rawImportFile.readline())[0]
+                    line = self.importFile.readline()
 
-                if not line.startswith(u"Multipage text format "):
+                if not line.startswith("Multipage text format "):
                     raise ImportException(
-                            _(u"Bad file format, header not detected"))
+                            _("Bad file format, header not detected"))
 
                 # Following in the format identifier line is a version number
                 # of the file format
@@ -214,19 +215,18 @@ class MultiPageTextImporter:
                 
                 if self.formatVer > 1:
                     raise ImportException(
-                            _(u"File format number %i is not supported") %
+                            _("File format number %i is not supported") %
                             self.formatVer)
 
                 # Next is the separator line
-                line = decode(self.rawImportFile.readline())[0]
-                if not line.startswith(u"Separator: "):
+                line = self.importFile.readline()
+                if not line.startswith("Separator: "):
                     raise ImportException(
-                            _(u"Bad file format, header not detected"))
+                            _("Bad file format, header not detected"))
 
                 self.separator = line[11:]
                 
-                startPos = self.rawImportFile.tell()
-                self.importFile = decodingReader(self.rawImportFile, "replace")
+                startPos = self.importFile.tell()
 
                 if self.formatVer == 0:
                     self._doImportVer0()
@@ -293,8 +293,7 @@ class MultiPageTextImporter:
 
                         # Back to start of import file and import according to settings 
                         # in temp db
-                        self.rawImportFile.seek(startPos)
-                        self.importFile = decodingReader(self.rawImportFile, "replace")
+                        self.importFile.seek(startPos)
                         self._doImportVer1Pass2()
                         
                         return True
@@ -304,12 +303,12 @@ class MultiPageTextImporter:
 
             except ImportException:
                 raise
-            except Exception, e:
+            except Exception as e:
                 traceback.print_exc()
-                raise ImportException(unicode(e))
+                raise ImportException(str(e))
 
         finally:
-            self.rawImportFile.close()
+            self.importFile.close()
 
 
     def _markMissingDependencies(self):
@@ -454,7 +453,7 @@ class MultiPageTextImporter:
         
         if len(self.tempDb.execSqlQuerySingleItem("select collisionWithPresent "
                 "from entries where collisionWithPresent != '' limit 1",
-                default=u"")) > 0:
+                default="")) > 0:
             # Name collision
             return True
 
@@ -473,14 +472,14 @@ class MultiPageTextImporter:
         while True:
             # Read next wikiword
             line = self.importFile.readline()
-            if line == u"":
+            if line == "":
                 break
 
             wikiWord = line[:-1]
             errMsg = langHelper.checkForInvalidWikiWord(wikiWord,
                     self.wikiDocument)
             if errMsg:
-                raise ImportException(_(u"Bad wiki word: %s, %s") %
+                raise ImportException(_("Bad wiki word: %s, %s") %
                         (wikiWord, errMsg))
 
             content = self._collectContent()
@@ -492,21 +491,21 @@ class MultiPageTextImporter:
     def _doImportVer1Pass1(self):
         while True:
             tag = self.importFile.readline()
-            if tag == u"":
+            if tag == "":
                 # End of file
                 break
             tag = tag[:-1]
-            if tag.startswith(u"funcpage/"):
+            if tag.startswith("funcpage/"):
                 self._skipContent()
-            elif tag.startswith(u"savedsearch/"):
+            elif tag.startswith("savedsearch/"):
                 self._skipContent()
-            elif tag.startswith(u"savedpagesearch/"):
+            elif tag.startswith("savedpagesearch/"):
                 self._skipContent()
-            elif tag.startswith(u"wikipage/"):
+            elif tag.startswith("wikipage/"):
                 self._skipContent()
-            elif tag.startswith(u"versioning/overview/"):
+            elif tag.startswith("versioning/overview/"):
                 self._doImportItemVersioningOverviewVer1Pass1(tag[20:])
-            elif tag.startswith(u"versioning/packet/versionNo/"):
+            elif tag.startswith("versioning/packet/versionNo/"):
                 self._skipContent()
             else:
                 # Unknown tag -> Ignore until separator
@@ -531,7 +530,7 @@ class MultiPageTextImporter:
         was skipped already by the function.
         """
         hintLine = self.importFile.readline()[:-1]
-        hintStrings = hintLine.split(u"  ")
+        hintStrings = hintLine.split("  ")
         
         resultHintStrings = []
 
@@ -540,16 +539,16 @@ class MultiPageTextImporter:
 
         # Process hints
         for hint in hintStrings:
-            if hint.startswith(u"important/encoding/"):
-                if hint[19:] == u"text":
+            if hint.startswith("important/encoding/"):
+                if hint[19:] == "text":
                     useB64 = False
-                elif hint[19:] == u"base64":
+                elif hint[19:] == "base64":
                     useB64 = True
                 else:
                     # Unknown encoding: don't read further
                     self._skipContent()
                     return None, None
-            elif hint.startswith(u"important/"):
+            elif hint.startswith("important/"):
                 # There is something important we do not understand
                 self._skipContent()
                 return None, None
@@ -658,7 +657,7 @@ class MultiPageTextImporter:
 
         while True:
             tag = self.importFile.readline()
-            if tag == u"":
+            if tag == "":
                 # End of file
                 break
             tag = tag[:-1]  # Remove line end
@@ -678,18 +677,18 @@ class MultiPageTextImporter:
                 self._skipContent()
                 continue
             
-            if renameImportTo == u"":
+            if renameImportTo == "":
                 renameImportTo = tag
 
-            if tag.startswith(u"wikipage/"):
+            if tag.startswith("wikipage/"):
                 self._importItemWikiPageVer1Pass2(renameImportTo[9:])
-            elif tag.startswith(u"funcpage/"):
+            elif tag.startswith("funcpage/"):
                 self._importItemFuncPageVer1Pass2(tag[9:])
-            elif tag.startswith(u"savedsearch/"):
+            elif tag.startswith("savedsearch/"):
                 self._importB64DatablockVer1Pass2(renameImportTo)
-            elif tag.startswith(u"savedpagesearch/"):
+            elif tag.startswith("savedpagesearch/"):
                 self._importHintedDatablockVer1Pass2(renameImportTo)
-            elif tag.startswith(u"versioning/"):
+            elif tag.startswith("versioning/"):
                 self._importHintedDatablockVer1Pass2(renameImportTo)
             else:
                 # Unknown tag -> Ignore until separator
@@ -720,7 +719,7 @@ class MultiPageTextImporter:
 
     def _importItemWikiPageVer1Pass2(self, wikiWord):
         timeStampLine = self.importFile.readline()[:-1]
-        timeStrings = timeStampLine.split(u"  ")
+        timeStrings = timeStampLine.split("  ")
         if len(timeStrings) < 3:
             traceback.print_exc()
             self._skipContent()
@@ -814,15 +813,15 @@ class MultiPageTextImporter:
 
         # Process hints
         for hint in hintStrings:
-            if hint.startswith(u"storeHint/"):
-                if hint[10:] == u"extern":
+            if hint.startswith("storeHint/"):
+                if hint[10:] == "extern":
                     storeHint = Consts.DATABLOCK_STOREHINT_EXTERN
-                elif hint[10:] == u"intern":
+                elif hint[10:] == "intern":
                     storeHint = Consts.DATABLOCK_STOREHINT_INTERN
                 # No else. It is not vital to get the right storage hint
 
         try:
-            if isinstance(content, unicode):
+            if isinstance(content, str):
                 content = BOM_UTF8 + content.encode("utf-8")
 
             self.wikiDocument.getWikiData().storeDataBlock(unifName, content,

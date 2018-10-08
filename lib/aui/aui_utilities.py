@@ -1,7 +1,20 @@
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------
+# Name:         aui_utilities.py
+# Purpose:
+#
+# Author:       Andrea Gavana <andrea.gavana@gmail.com>
+#
+# Created:
+# Version:
+# Date:         31 March 2009
+# Licence:      wxWindows license
+# Tags:         phoenix-port, unittest, documented, py3-port
+#----------------------------------------------------------------------------
 """
 This module contains some common functions used by :mod:`lib.agw.aui` to
 manipulate colours, bitmaps, text, gradient shadings and custom dragging images
-for :class:`~lib.agw.aui.auibook.AuiNotebook` tabs.
+for :class:`~wx.lib.agw.aui.auibook.AuiNotebook` tabs.
 """
 
 __author__ = "Andrea Gavana <andrea.gavana@gmail.com>"
@@ -10,30 +23,35 @@ __date__ = "31 March 2009"
 
 import wx
 
-from aui_constants import *
+from .aui_constants import *
 
 
 if wx.Platform == "__WXMAC__":
-    import Carbon.Appearance
-    
-    
+    try:
+        import Carbon.Appearance
+    except ImportError:
+        CARBON = False
+    else:
+        CARBON = True
+
+
 def BlendColour(fg, bg, alpha):
     """
     Blends the two colour component `fg` and `bg` into one colour component, adding
     an optional alpha channel.
 
-    :param Colour `fg`: the first colour component;
-    :param Colour `bg`: the second colour component;
+    :param wx.Colour `fg`: the first colour component;
+    :param wx.Colour `bg`: the second colour component;
     :param integer `alpha`: an optional transparency value.
     """
-    
+
     result = bg + (alpha*(fg - bg))
-    
+
     if result < 0.0:
         result = 0.0
     if result > 255:
         result = 255
-        
+
     return result
 
 
@@ -41,14 +59,14 @@ def StepColour(c, ialpha):
     """
     Darken/lighten the input colour `c`.
 
-    :param Colour `c`: a colour to darken/lighten;
+    :param wx.Colour `c`: a colour to darken/lighten;
     :param integer `ialpha`: a transparency value.
     """
-    
+
     if ialpha == 100:
         return c
-        
-    r, g, b = c.Red(), c.Green(), c.Blue()
+
+    r, g, b, a = c.Red(), c.Green(), c.Blue(), c.Alpha()
 
     # ialpha is 0..200 where 0 is completely black
     # and 200 is completely white and 100 is the same
@@ -58,29 +76,29 @@ def StepColour(c, ialpha):
     alpha = (ialpha - 100.0)/100.0
 
     if ialpha > 100:
-    
+
         # blend with white
         bg = 255
         alpha = 1.0 - alpha  # 0 = transparent fg 1 = opaque fg
-    
+
     else:
-    
+
         # blend with black
         bg = 0
         alpha = 1.0 + alpha  # 0 = transparent fg 1 = opaque fg
-    
+
     r = BlendColour(r, bg, alpha)
     g = BlendColour(g, bg, alpha)
     b = BlendColour(b, bg, alpha)
 
-    return wx.Colour(r, g, b)
+    return wx.Colour(int(r), int(g), int(b), int(a))
 
 
 def LightContrastColour(c):
     """
     Creates a new, lighter colour based on the input colour `c`.
 
-    :param Colour `c`: the input colour to analyze.
+    :param wx.Colour `c`: the input colour to analyze.
     """
 
     amount = 120
@@ -98,31 +116,31 @@ def ChopText(dc, text, max_size):
     Chops the input `text` if its size does not fit in `max_size`, by cutting the
     text and adding ellipsis at the end.
 
-    :param `dc`: a :class:`DC` device context;
+    :param `dc`: a :class:`wx.DC` device context;
     :param string `text`: the text to chop;
     :param integer `max_size`: the maximum size in which the text should fit.
     """
-    
+
     # first check if the text fits with no problems
-    x, y, dummy = dc.GetMultiLineTextExtent(text)
-    
+    x, y, dummy = dc.GetFullMultiLineTextExtent(text)
+
     if x <= max_size:
         return text
 
     textLen = len(text)
     last_good_length = 0
-    
-    for i in xrange(textLen, -1, -1):
+
+    for i in range(textLen, -1, -1):
         s = text[0:i]
         s += "..."
 
         x, y = dc.GetTextExtent(s)
         last_good_length = i
-        
+
         if x < max_size:
             break
 
-    ret = text[0:last_good_length] + "..."    
+    ret = text[0:last_good_length] + "..."
     return ret
 
 
@@ -133,22 +151,22 @@ def BitmapFromBits(bits, w, h, colour):
     :param string `bits`: the raw bits of the bitmap;
     :param integer `w`: the bitmap width;
     :param integer `h`: the bitmap height;
-    :param Colour `colour`: the colour which will replace all white pixels in the
+    :param wx.Colour `colour`: the colour which will replace all white pixels in the
      raw bitmap.
     """
 
-    img = wx.BitmapFromBits(bits, w, h).ConvertToImage()
+    img = wx.Bitmap(bits, w, h).ConvertToImage()
     img.Replace(0, 0, 0, 123, 123, 123)
     img.Replace(255, 255, 255, colour.Red(), colour.Green(), colour.Blue())
     img.SetMaskColour(123, 123, 123)
-    return wx.BitmapFromImage(img)
+    return wx.Bitmap(img)
 
 
 def IndentPressedBitmap(rect, button_state):
     """
     Indents the input rectangle `rect` based on the value of `button_state`.
 
-    :param Rect `rect`: the button bitmap rectangle;
+    :param wx.Rect `rect`: the button bitmap rectangle;
     :param integer `button_state`: the button state.
     """
 
@@ -166,16 +184,16 @@ def GetBaseColour():
     """
 
     if wx.Platform == "__WXMAC__":
-
+        k = Carbon.Appearance.kThemeBrushToolbarBackground if CARBON else 52
         if hasattr(wx, 'MacThemeColour'):
-            base_colour = wx.MacThemeColour(Carbon.Appearance.kThemeBrushToolbarBackground)
+            base_colour = wx.MacThemeColour(k)
         else:
             brush = wx.Brush(wx.BLACK)
-            brush.MacSetTheme(Carbon.Appearance.kThemeBrushToolbarBackground)
+            brush.MacSetTheme(k)
             base_colour = brush.GetColour()
 
     else:
-        
+
         base_colour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_3DFACE)
 
     # the base_colour is too pale to use as our base colour,
@@ -183,9 +201,9 @@ def GetBaseColour():
     if ((255-base_colour.Red()) +
         (255-base_colour.Green()) +
         (255-base_colour.Blue()) < 60):
-    
+
         base_colour = StepColour(base_colour, 92)
-    
+
     return base_colour
 
 
@@ -193,48 +211,10 @@ def MakeDisabledBitmap(bitmap):
     """
     Convert the given image (in place) to a grayed-out version, appropriate for a 'disabled' appearance.
 
-    :param Bitmap `bitmap`: the bitmap to gray-out.
+    :param wx.Bitmap `bitmap`: the bitmap to gray-out.
     """
 
-    anImage = bitmap.ConvertToImage()    
-    factor = 0.7        # 0 < f < 1.  Higher Is Grayer
-    
-    if anImage.HasMask():
-        maskColour = (anImage.GetMaskRed(), anImage.GetMaskGreen(), anImage.GetMaskBlue())
-    else:
-        maskColour = None
-        
-    data = map(ord, list(anImage.GetData()))
-
-    for i in range(0, len(data), 3):
-        
-        pixel = (data[i], data[i+1], data[i+2])
-        pixel = MakeGray(pixel, factor, maskColour)
-
-        for x in range(3):
-            data[i+x] = pixel[x]
-
-    anImage.SetData(''.join(map(chr, data)))
-    
-    return anImage.ConvertToBitmap()
-
-
-def MakeGray(rgbTuple, factor, maskColour):
-    """
-    Make a pixel grayed-out.
-
-    If the pixel matches the `maskColour`, it won't be changed.
-
-    :param tuple `rgbTuple`: a tuple representing a pixel colour;
-    :param integer `factor`: a graying-out factor;
-    :param Colour `maskColour`: a colour mask.
-    """
-
-    if rgbTuple != maskColour:
-        r, g, b = rgbTuple
-        return map(lambda x: int((230 - x) * factor) + x, (r, g, b))
-    else:
-        return rgbTuple
+    return bitmap.ConvertToDisabled()
 
 
 def Clip(a, b, c):
@@ -253,12 +233,12 @@ def LightColour(colour, percent):
     """
     Brighten input `colour` by `percent`.
 
-    :param Colour `colour`: the colour to be brightened;
+    :param wx.Colour `colour`: the colour to be brightened;
     :param integer `percent`: brightening percentage.
     """
-    
+
     end_colour = wx.WHITE
-    
+
     rd = end_colour.Red() - colour.Red()
     gd = end_colour.Green() - colour.Green()
     bd = end_colour.Blue() - colour.Blue()
@@ -270,25 +250,26 @@ def LightColour(colour, percent):
     r = colour.Red() + ((i*rd*100)/high)/100
     g = colour.Green() + ((i*gd*100)/high)/100
     b = colour.Blue() + ((i*bd*100)/high)/100
-    return wx.Colour(r, g, b)
+    a = colour.Alpha()
+    return wx.Colour(int(r), int(g), int(b), int(a))
 
 
 def PaneCreateStippleBitmap():
     """
-    Creates a stipple bitmap to be used in a :class:`Brush`.
-    
+    Creates a stipple bitmap to be used in a :class:`wx.Brush`.
+
     This is used to draw sash resize hints.
     """
 
     data = [0, 0, 0, 192, 192, 192, 192, 192, 192, 0, 0, 0]
-    img = wx.EmptyImage(2, 2)
+    img = wx.Image(2, 2)
     counter = 0
-    
-    for ii in xrange(2):
-        for jj in xrange(2):
+
+    for ii in range(2):
+        for jj in range(2):
             img.SetRGB(ii, jj, data[counter], data[counter+1], data[counter+2])
             counter = counter + 3
-    
+
     return img.ConvertToBitmap()
 
 
@@ -296,27 +277,27 @@ def DrawMACCloseButton(colour, backColour=None):
     """
     Draws the wxMAC tab close button using :class:`GraphicsContext`.
 
-    :param Colour `colour`: the colour to use to draw the circle;
-    :param Colour `backColour`: the optional background colour for the circle.
+    :param wx.Colour `colour`: the colour to use to draw the circle;
+    :param wx.Colour `backColour`: the optional background colour for the circle.
     """
 
-    bmp = wx.EmptyBitmapRGBA(16, 16)
+    bmp = wx.Bitmap.FromRGBA(16, 16)
     dc = wx.MemoryDC()
     dc.SelectObject(bmp)
 
-    gc = wx.GraphicsContext.Create(dc)    
+    gc = wx.GraphicsContext.Create(dc)
     gc.SetBrush(wx.Brush(colour))
     path = gc.CreatePath()
     path.AddCircle(6.5, 7, 6.5)
     path.CloseSubpath()
     gc.FillPath(path)
-    
+
     path = gc.CreatePath()
     if backColour is not None:
         pen = wx.Pen(backColour, 2)
     else:
         pen = wx.Pen("white", 2)
-        
+
     pen.SetCap(wx.CAP_BUTT)
     pen.SetJoin(wx.JOIN_BEVEL)
     gc.SetPen(pen)
@@ -334,10 +315,10 @@ def DrawMACCloseButton(colour, backColour=None):
 def DarkenBitmap(bmp, caption_colour, new_colour):
     """
     Darkens the input bitmap on wxMAC using the input colour.
-    
-    :param Bitmap `bmp`: the bitmap to be manipulated;
-    :param Colour `caption_colour`: the colour of the pane caption;
-    :param Colour `new_colour`: the colour used to darken the bitmap.
+
+    :param wx.Bitmap `bmp`: the bitmap to be manipulated;
+    :param wx.Colour `caption_colour`: the colour of the pane caption;
+    :param wx.Colour `new_colour`: the colour used to darken the bitmap.
     """
 
     image = bmp.ConvertToImage()
@@ -347,30 +328,30 @@ def DarkenBitmap(bmp, caption_colour, new_colour):
     image = image.AdjustChannels(red, green, blue)
     return image.ConvertToBitmap()
 
-    
+
 def DrawGradientRectangle(dc, rect, start_colour, end_colour, direction, offset=0, length=0):
     """
     Draws a gradient-shaded rectangle.
 
-    :param `dc`: a :class:`DC` device context;
-    :param Rect `rect`: the rectangle in which to draw the gradient;
-    :param Colour `start_colour`: the first colour of the gradient;
-    :param Colour `end_colour`: the second colour of the gradient;
+    :param `dc`: a :class:`wx.DC` device context;
+    :param wx.Rect `rect`: the rectangle in which to draw the gradient;
+    :param wx.Colour `start_colour`: the first colour of the gradient;
+    :param wx.Colour `end_colour`: the second colour of the gradient;
     :param integer `direction`: the gradient direction (horizontal or vertical).
     """
-    
+
     if direction == AUI_GRADIENT_VERTICAL:
         dc.GradientFillLinear(rect, start_colour, end_colour, wx.SOUTH)
     else:
         dc.GradientFillLinear(rect, start_colour, end_colour, wx.EAST)
-        
+
 
 def FindFocusDescendant(ancestor):
     """
     Find a window with the focus, that is also a descendant of the given window.
     This is used to determine the window to initially send commands to.
 
-    :param Window `ancestor`: the window to check for ancestry.    
+    :param wx.Window `ancestor`: the window to check for ancestry.
     """
 
     # Process events starting with the window with the focus, if any.
@@ -393,7 +374,7 @@ def FindFocusDescendant(ancestor):
 
 def GetLabelSize(dc, label, vertical):
     """
-    Returns the :class:`~lib.agw.aui.auibar.AuiToolBar` item label size.
+    Returns the :class:`~wx.lib.agw.aui.auibar.AuiToolBar` item label size.
 
     :param string `label`: the toolbar tool label;
     :param bool `vertical`: whether the toolbar tool orientation is vertical or not.
@@ -429,16 +410,16 @@ class TabDragImage(wx.DragImage):
     def __init__(self, notebook, page, button_state, tabArt):
         """
         Default class constructor.
-        
+
         For internal use: do not call it in your code!
 
-        :param `notebook`: an instance of :class:`~lib.agw.aui.auibook.AuiNotebook`;
-        :param `page`: the dragged :class:`~lib.agw.aui.auibook.AuiNotebookPage` page;
+        :param `notebook`: an instance of :class:`~wx.lib.agw.aui.auibook.AuiNotebook`;
+        :param `page`: the dragged :class:`~wx.lib.agw.aui.auibook.AuiNotebookPage` page;
         :param integer `button_state`: the state of the close button on the tab;
-        :param `tabArt`: an instance of :class:`~lib.agw.aui.tabart.AuiDefaultTabArt` or one of its derivations.
+        :param `tabArt`: an instance of :class:`~wx.lib.agw.aui.tabart.AuiDefaultTabArt` or one of its derivations.
         """
 
-        self._backgroundColour = wx.NamedColour("pink")        
+        self._backgroundColour = wx.Colour("pink")
         self._bitmap = self.CreateBitmap(notebook, page, button_state, tabArt)
         wx.DragImage.__init__(self, self._bitmap)
 
@@ -447,41 +428,41 @@ class TabDragImage(wx.DragImage):
         """
         Actually creates the drag and drop bitmap.
 
-        :param `notebook`: an instance of :class:`~lib.agw.aui.auibook.AuiNotebook`;
-        :param `page`: the dragged :class:`~lib.agw.aui.auibook.AuiNotebookPage` page;
+        :param `notebook`: an instance of :class:`~wx.lib.agw.aui.auibook.AuiNotebook`;
+        :param `page`: the dragged :class:`~wx.lib.agw.aui.auibook.AuiNotebookPage` page;
         :param integer `button_state`: the state of the close button on the tab;
-        :param `tabArt`: an instance of :class:`~lib.agw.aui.tabart.AuiDefaultTabArt` or one of its derivations.
+        :param `tabArt`: an instance of :class:`~wx.lib.agw.aui.tabart.AuiDefaultTabArt` or one of its derivations.
         """
 
         control = page.control
-        memory = wx.MemoryDC(wx.EmptyBitmap(1, 1))
+        memory = wx.MemoryDC(wx.Bitmap(1, 1))
 
         tab_size, x_extent = tabArt.GetTabSize(memory, notebook, page.caption, page.bitmap, page.active,
                                                button_state, control)
-            
+
         tab_width, tab_height = tab_size
         rect = wx.Rect(0, 0, tab_width, tab_height)
 
-        bitmap = wx.EmptyBitmap(tab_width+1, tab_height+1)
+        bitmap = wx.Bitmap(tab_width+1, tab_height+1)
         memory.SelectObject(bitmap)
 
         if wx.Platform == "__WXMAC__":
             memory.SetBackground(wx.TRANSPARENT_BRUSH)
         else:
             memory.SetBackground(wx.Brush(self._backgroundColour))
-            
+
         memory.SetBackgroundMode(wx.TRANSPARENT)
         memory.Clear()
 
         paint_control = wx.Platform != "__WXMAC__"
         tabArt.DrawTab(memory, notebook, page, rect, button_state, paint_control=paint_control)
-        
+
         memory.SetBrush(wx.TRANSPARENT_BRUSH)
         memory.SetPen(wx.BLACK_PEN)
         memory.DrawRoundedRectangle(0, 0, tab_width+1, tab_height+1, 2)
 
         memory.SelectObject(wx.NullBitmap)
-        
+
         # Gtk and Windows unfortunatly don't do so well with transparent
         # drawing so this hack corrects the image to have a transparent
         # background.
@@ -489,24 +470,24 @@ class TabDragImage(wx.DragImage):
             timg = bitmap.ConvertToImage()
             if not timg.HasAlpha():
                 timg.InitAlpha()
-            for y in xrange(timg.GetHeight()):
-                for x in xrange(timg.GetWidth()):
+            for y in range(timg.GetHeight()):
+                for x in range(timg.GetWidth()):
                     pix = wx.Colour(timg.GetRed(x, y),
                                     timg.GetGreen(x, y),
                                     timg.GetBlue(x, y))
                     if pix == self._backgroundColour:
                         timg.SetAlpha(x, y, 0)
             bitmap = timg.ConvertToBitmap()
-        return bitmap        
+        return bitmap
 
 
 def GetDockingImage(direction, useAero, center):
     """
     Returns the correct name of the docking bitmap depending on the input parameters.
 
-    :param bool `useAero`: whether :class:`~lib.agw.aui.framemanager.AuiManager` is using
+    :param bool `useAero`: whether :class:`~wx.lib.agw.aui.framemanager.AuiManager` is using
      Aero-style or Whidbey-style docking images or not;
-    :param bool `center`: whether we are looking for the center diamond-shaped bitmap or not. 
+    :param bool `center`: whether we are looking for the center diamond-shaped bitmap or not.
     """
 
     suffix = (center and [""] or ["_single"])[0]
@@ -517,7 +498,7 @@ def GetDockingImage(direction, useAero, center):
     elif useAero == 1:
         # Aero docking style
         prefix = "aero_"
-        
+
     if direction == wx.TOP:
         bmp_unfocus = eval("%sup%s"%(prefix, suffix)).GetBitmap()
         bmp_focus = eval("%sup_focus%s"%(prefix, suffix)).GetBitmap()
@@ -541,7 +522,7 @@ def TakeScreenShot(rect):
     """
     Takes a screenshot of the screen at given position and size (`rect`).
 
-    :param Rect `rect`: the screen rectangle for which we want to take a screenshot.
+    :param wx.Rect `rect`: the screen rectangle for which we want to take a screenshot.
     """
 
     # Create a DC for the whole screen area
@@ -550,7 +531,7 @@ def TakeScreenShot(rect):
     # Create a Bitmap that will later on hold the screenshot image
     # Note that the Bitmap must have a size big enough to hold the screenshot
     # -1 means using the current default colour depth
-    bmp = wx.EmptyBitmap(rect.width, rect.height)
+    bmp = wx.Bitmap(rect.width, rect.height)
 
     # Create a memory DC that will be used for actually taking the screenshot
     memDC = wx.MemoryDC()
@@ -581,7 +562,7 @@ def RescaleScreenShot(bmp, thumbnail_size=200):
     """
     Rescales a bitmap to be `thumbnail_size` pixels wide (or tall) at maximum.
 
-    :param Bitmap `bmp`: the bitmap to rescale;
+    :param wx.Bitmap `bmp`: the bitmap to rescale;
     :param integer `thumbnail_size`: the maximum size of every page thumbnail.
     """
 
@@ -589,7 +570,7 @@ def RescaleScreenShot(bmp, thumbnail_size=200):
     img = bmp.ConvertToImage()
 
     newW, newH = bmpW, bmpH
-    
+
     if bmpW > bmpH:
         if bmpW > thumbnail_size:
             ratio = bmpW/float(thumbnail_size)
@@ -602,24 +583,24 @@ def RescaleScreenShot(bmp, thumbnail_size=200):
             img.Rescale(newW, newH, wx.IMAGE_QUALITY_HIGH)
 
     newBmp = img.ConvertToBitmap()
-    otherBmp = wx.EmptyBitmap(newW+5, newH+5)    
+    otherBmp = wx.Bitmap(newW+5, newH+5)
 
     memDC = wx.MemoryDC()
     memDC.SelectObject(otherBmp)
     memDC.SetBackground(wx.WHITE_BRUSH)
     memDC.Clear()
-    
+
     memDC.SetPen(wx.TRANSPARENT_PEN)
 
     pos = 0
-    for i in xrange(5, 0, -1):
+    for i in range(5, 0, -1):
         brush = wx.Brush(wx.Colour(50*i, 50*i, 50*i))
         memDC.SetBrush(brush)
         memDC.DrawRoundedRectangle(0, 0, newW+5-pos, newH+5-pos, 2)
         pos += 1
 
     memDC.DrawBitmap(newBmp, 0, 0, True)
-     
+
     # Select the Bitmap out of the memory DC by selecting a new
     # uninitialized Bitmap
     memDC.SelectObject(wx.NullBitmap)
@@ -631,8 +612,8 @@ def GetSlidingPoints(rect, size, direction):
     """
     Returns the point at which the sliding in and out of a minimized pane begins.
 
-    :param Rect `rect`: the :class:`~lib.agw.aui.auibar.AuiToolBar` tool screen rectangle;
-    :param Size `size`: the pane window size;
+    :param wx.Rect `rect`: the :class:`~wx.lib.agw.aui.auibar.AuiToolBar` tool screen rectangle;
+    :param wx.Size `size`: the pane window size;
     :param integer `direction`: the pane docking direction.
     """
 
@@ -650,10 +631,10 @@ def GetSlidingPoints(rect, size, direction):
     caption_height = wx.SystemSettings.GetMetric(wx.SYS_CAPTION_Y)
     frame_border_x = wx.SystemSettings.GetMetric(wx.SYS_FRAMESIZE_X)
     frame_border_y = wx.SystemSettings.GetMetric(wx.SYS_FRAMESIZE_Y)
-    
+
     stopX = size.x + caption_height + frame_border_x
     stopY = size.x + frame_border_y
-    
+
     return startX, startY, stopX, stopY
 
 
@@ -661,10 +642,10 @@ def CopyAttributes(newArt, oldArt):
     """
     Copies pens, brushes, colours and fonts from the old tab art to the new one.
 
-    :param `newArt`: the new instance of :class:`~lib.agw.aui.tabart.AuiDefaultTabArt`;
-    :param `oldArt`: the old instance of :class:`~lib.agw.aui.tabart.AuiDefaultTabArt`.
-    """    
-    
+    :param `newArt`: the new instance of :class:`~wx.lib.agw.aui.tabart.AuiDefaultTabArt`;
+    :param `oldArt`: the old instance of :class:`~wx.lib.agw.aui.tabart.AuiDefaultTabArt`.
+    """
+
     attrs = dir(oldArt)
 
     for attr in attrs:
@@ -673,5 +654,5 @@ def CopyAttributes(newArt, oldArt):
                                      attr.endswith("Pen") or attr.endswith("_pen")):
             setattr(newArt, attr, getattr(oldArt, attr))
 
-    return newArt            
+    return newArt
 

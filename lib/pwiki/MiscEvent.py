@@ -50,7 +50,7 @@ class MiscEventSourceMixin:
 
 
 
-class ListenerList(object):
+class ListenerList:
     __slots__ = ("__weakref__", "listeners", "userCount", "cleanupFlag",
             "parentList")
 
@@ -200,7 +200,7 @@ class ListenerList(object):
 
 
 
-class MiscEvent(object):
+class MiscEvent:
     __slots__ = ("__weakref__", "listenerList", "source", "properties", "parent",
             "activeListenerIndex")
 
@@ -241,14 +241,16 @@ class MiscEvent(object):
         """
         Has the event the specified key?
         """
-        return self.properties.has_key(key)
+        return key in self.properties
+        
+    __contains__ = has_key
 
     def has_key_in(self, keyseq):
         """
         Returns true iff it has at least one key in the sequence of keys keyseq
         """
         for key in keyseq:
-            if self.has_key(key):
+            if key in self:
                 return True
                 
         return False
@@ -309,7 +311,7 @@ class MiscEvent(object):
         @throws IllegalArgumentException   if this is not a clone
         """
         if self.getParent() is None:
-            raise StandardError("This must be a clone")  # TODO Create/Find a better exception
+            raise Exception("This must be a clone")  # TODO Create/Find a better exception
 
         self.properties[key] = value
         return self
@@ -338,7 +340,7 @@ class MiscEvent(object):
         @throws IllegalArgumentException   if this is not a clone
         """
         if self.getParent() is None:
-            raise StandardError("This must be a clone")  # TODO Create/Find a better exception
+            raise Exception("This must be a clone")  # TODO Create/Find a better exception
 
         if first is not None:
             first.miscEventHappened(self);
@@ -355,7 +357,7 @@ class MiscEvent(object):
                 self.activeListenerIndex = i
                 try:
                     l.miscEventHappened(self)
-                except wx.PyDeadObjectError:
+                except RuntimeError:
                     # The object is a wxPython object for which the C++ part was
                     # deleted already, so remove object from listener list.
                     self.listenerList.invalidateObjectAt(i)
@@ -508,11 +510,11 @@ class ProxyMiscEvent(MiscEvent):
 
 
 
-class KeyFunctionSink(object):
+class KeyFunctionSink:
     """
     A MiscEvent sink which dispatches events further to other functions
     """
-    __slots__ = ("__weakref__", "activationTable")
+#     __slots__ = ("__weakref__", "activationTable")
     
     def __init__(self, activationTable):
         """
@@ -522,7 +524,7 @@ class KeyFunctionSink(object):
     
     def miscEventHappened(self, evt):
         for k, f in self.activationTable:
-            if evt.has_key(k):
+            if k in evt:
                 f(evt)
 
 
@@ -608,7 +610,7 @@ class KeyFunctionSinkAR(KeyFunctionSink):
 
 
 
-class DebugSimple(object):
+class DebugSimple:
     """
     A MiscEvent sink which dispatches events further to other functions
     """
@@ -620,6 +622,6 @@ class DebugSimple(object):
         self.text = text
     
     def miscEventHappened(self, evt):
-        print self.text, repr(evt.properties)
+        print(self.text, repr(evt.properties))
 
 

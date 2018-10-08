@@ -11,9 +11,7 @@ import traceback, os.path
 
 import wx
 
-from . import wxHelper, StringOps, Exporters, DocPages
-
-from .wikidata import WikiDataManager
+from . import wxHelper, StringOps, Exporters, WikiDocument, DocPages
 
 from . import Trashcan
 
@@ -44,7 +42,7 @@ class PWikiNonCore:
             return
     
         with wxHelper.TopLevelLocker:
-            path = wx.FileSelector(_(u"Choose a file to create URL for"),
+            path = wx.FileSelector(_("Choose a file to create URL for"),
                     self.mainControl.getLastActiveDir(), wildcard="*.*",
                     flags=wx.FD_OPEN, parent=self.mainControl)
     
@@ -73,8 +71,8 @@ class PWikiNonCore:
         from . import FileCleanup
 
         progresshandler = wxHelper.ProgressHandler(
-                _(u"     Scanning     "),
-                _(u"     Scanning     "), 0, self.mainControl)
+                _("     Scanning     "),
+                _("     Scanning     "), 0, self.mainControl)
         
         FileCleanup.runFileCleanup(self.mainControl, self.dlgParent,
                 progresshandler)
@@ -116,22 +114,22 @@ class PWikiNonCore:
 #             return
         
         with wxHelper.TopLevelLocker:
-            wf = wx.FileSelector(_(u"Wiki file"),
-                    u"", wildcard=u"*.wiki",
+            wf = wx.FileSelector(_("Wiki file"),
+                    "", wildcard="*.wiki",
                     flags=wx.FD_OPEN, parent=self.mainControl)
 
             if not wf:
                 return
 
-            exportDest = wx.FileSelector(_(u"MPT export target file"),
-                    u"", wildcard=u"*.mpt",
+            exportDest = wx.FileSelector(_("MPT export target file"),
+                    "", wildcard="*.mpt",
                     flags=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                     parent=self.mainControl)
 
             if not exportDest:
                 return
 
-        wikiDoc = WikiDataManager.WikiDataManager(wf, None, None, ignoreLock=True,
+        wikiDoc = WikiDocument.WikiDocument(wf, None, None, ignoreLock=True,
             createLock=False, recoveryMode=True)
             
         wikiDoc.connect()
@@ -191,37 +189,37 @@ class PWikiNonCore:
         
         descriptorDict = {
             "showInsertFileUrlDialog": (self.OnShowInsertFileUrlDialog,
-                _(u'&File URL...'), _(u'Use file dialog to add URL'),
+                _('&File URL...'), _('Use file dialog to add URL'),
                 kb.AddFileUrl, None, None,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit)),
             "insertCurrentDate": (self.OnInsertCurrentDate,
-                _(u'Current &Date'), _(u'Insert current date'),
+                _('Current &Date'), _('Insert current date'),
                 kb.InsertDate, "date", None,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit,
                     mc.OnUpdateDisNotWikiPage)),
 
             "showFileCleanupDialog": (self.OnShowFileCleanup,
-                _(u'File cleanup...'), _(u'Remove orphaned files and dead links'),
+                _('File cleanup...'), _('Remove orphaned files and dead links'),
                 kb.FileCleanup, None, None,
                 None),
 
             "togglePageReadOnly": (self.OnTogglePageReadOnly,
-                _(u'Page read only'), _(u'Set current page read only'),
+                _('Page read only'), _('Set current page read only'),
                 kb.TogglePageReadOnly, None, None,
                 (mc.OnUpdateDisReadOnlyWiki, mc.OnUpdateDisNotWikiPage,
                 self.OnTogglePageReadOnlyUpdate),
                 wx.ITEM_CHECK),
 
-            "openTrashcan": (self.OnOpenTrashcan, _(u'Open trashcan'),
-                _(u'Open trashcan'),
+            "openTrashcan": (self.OnOpenTrashcan, _('Open trashcan'),
+                _('Open trashcan'),
                 kb.OpenTrashcan, None, None,
                 None),
                 
-            "recoverWikiDatabase": (self.OnRecoverWikiDatabase, _(u'Recover DB'),
-                _(u'Recover wiki database')),
+            "recoverWikiDatabase": (self.OnRecoverWikiDatabase, _('Recover DB'),
+                _('Recover wiki database')),
                 
-            "selectionToLink": (self.OnSelectionToLink, _(u'Selection to &Link'),
-                _(u'Remove non-allowed characters and make sel. a wiki word link'),
+            "selectionToLink": (self.OnSelectionToLink, _('Selection to &Link'),
+                _('Remove non-allowed characters and make sel. a wiki word link'),
                 kb.MakeWikiWord, "tb_wikize",
                 wxHelper.GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit)),

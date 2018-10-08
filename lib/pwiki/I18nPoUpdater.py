@@ -5,7 +5,7 @@
 
 import codecs
 
-import Localization
+from . import Localization
 
 
 # Similar to functions in StringOps, but copied here to reduce dependencies
@@ -34,19 +34,19 @@ def writeEntireTxtFile(filename, content):
 
 
 
-EMPTYSTRING = u''
+EMPTYSTRING = ''
 
 
 ESCAPES = {}
 
-for i in xrange(32):
-    ESCAPES[unichr(i)] = u"\\%03o" % i
+for i in range(32):
+    ESCAPES[chr(i)] = "\\%03o" % i
 
-ESCAPES[u'\\'] = u'\\\\'
-ESCAPES[u'\t'] = u'\\t'
-ESCAPES[u'\r'] = u'\\r'
-ESCAPES[u'\n'] = u'\\n'
-ESCAPES[u'\"'] = u'\\"'
+ESCAPES['\\'] = '\\\\'
+ESCAPES['\t'] = '\\t'
+ESCAPES['\r'] = '\\r'
+ESCAPES['\n'] = '\\n'
+ESCAPES['\"'] = '\\"'
 
 
 def _escape(s):
@@ -60,18 +60,18 @@ def _escape(s):
 def _normalize(s):
     # This converts the various Python string types into a format that is
     # appropriate for .po files, namely much closer to C style.
-    lines = s.split(u'\n')
+    lines = s.split('\n')
     if len(lines) == 1:
-        s = u'"' + _escape(s) + u'"'
+        s = '"' + _escape(s) + '"'
     else:
         if not lines[-1]:
             del lines[-1]
-            lines[-1] = lines[-1] + u'\n'
+            lines[-1] = lines[-1] + '\n'
         for i in range(len(lines)):
             lines[i] = _escape(lines[i])
-        lineterm = u'\\n"\n"'
+        lineterm = '\\n"\n"'
 #         s = u'""\n"' + lineterm.join(lines) + '"'
-        s = u'"' + lineterm.join(lines) + '"'
+        s = '"' + lineterm.join(lines) + '"'
     return s
 
 
@@ -85,12 +85,12 @@ def refreshPot(potFilename, presetMessages):
         ustr = presetMessages.get(id, ustr)
 
         if not fuzzy:
-            result.append(u'msgid %s' % _normalize(id))
+            result.append('msgid %s' % _normalize(id))
 
             if ustr:
-                result.append(u'msgstr %s\n' % _normalize(ustr))
+                result.append('msgstr %s\n' % _normalize(ustr))
             else:
-                result.append(u'msgstr ""\n')
+                result.append('msgstr ""\n')
 
 
     if potFilename.endswith('.po') or potFilename.endswith('.pot'):
@@ -101,15 +101,15 @@ def refreshPot(potFilename, presetMessages):
     try:
         content = loadEntireTxtFile(infile)
         content = content.decode("utf-8")
-        lines = content.split(u"\n")
+        lines = content.split("\n")
 
 #         lines = codecs.open(infile, "rt", "utf-8").readlines()
-    except IOError, msg:
+    except IOError as msg:
 #         print >> sys.stderr, msg
         raise
 
     # Strip BOM
-    if len(lines) > 0 and lines[0].startswith(u"\ufeff"):
+    if len(lines) > 0 and lines[0].startswith("\ufeff"):
         lines[0] = lines[0][1:]
 
     ID = 1
@@ -127,26 +127,26 @@ def refreshPot(potFilename, presetMessages):
         l = line
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
-        if l[:1] == u'#' and section == STR:
+        if l[:1] == '#' and section == STR:
             add(msgid, msgstr, fuzzy)
             section = None
             fuzzy = 0
         # Record a fuzzy mark
-        if l[:2] == u'#,' and u'fuzzy' in l:
+        if l[:2] == '#,' and 'fuzzy' in l:
             fuzzy = 1
         # Skip comments
-        if l[:1] == u'#':
+        if l[:1] == '#':
             result.append(line)
             continue
         # Now we are in a msgid section, output previous section
-        if l.startswith(u'msgid'):
+        if l.startswith('msgid'):
             if section == STR:
                 add(msgid, msgstr, fuzzy)
             section = ID
             l = l[5:]
-            msgid = msgstr = u''
+            msgid = msgstr = ''
         # Now we are in a msgstr section
-        elif l.startswith(u'msgstr'):
+        elif l.startswith('msgstr'):
             section = STR
             l = l[6:]
         # Skip empty lines
@@ -167,9 +167,9 @@ def refreshPot(potFilename, presetMessages):
 #             print "code", repr((msgstr, l))
             msgstr += l
         else:
-            print >> sys.stderr, 'Syntax error on %s:%d' % (infile, lno), \
-                  'before:'
-            print >> sys.stderr, l
+            print('Syntax error on %s:%d' % (infile, lno), \
+                  'before:', file=sys.stderr)
+            print(l, file=sys.stderr)
             raise SyntaxError('Syntax error on %s:%d' % (infile, lno) + 
                     ' before: ' + l)
             # sys.exit(1)
@@ -177,7 +177,7 @@ def refreshPot(potFilename, presetMessages):
     if section == STR:
         add(msgid, msgstr, fuzzy)
         
-    return u"\n".join(result) + u"\n"
+    return "\n".join(result) + "\n"
 
 
 

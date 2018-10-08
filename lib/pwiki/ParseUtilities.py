@@ -1,6 +1,6 @@
 import re
 
-class _DummmyWikiLanguageDetails(object):
+class _DummmyWikiLanguageDetails:
     """
     Dummy class for simpler comparing of wiki language format details if real
     details are not given.
@@ -19,7 +19,7 @@ DUMMY_WIKI_LANGUAGE_DETAILS = _DummmyWikiLanguageDetails()
 
 
 
-class WikiPageFormatDetails(object):
+class WikiPageFormatDetails:
     """
     Store some details of the formatting of a specific page
     """
@@ -28,7 +28,7 @@ class WikiPageFormatDetails(object):
             "paragraphMode", "wikiLanguageDetails")
     
     def __init__(self, withCamelCase=True,
-            wikiDocument=None, basePage=None, autoLinkMode=u"off", noFormat=False,
+            wikiDocument=None, basePage=None, autoLinkMode="off", noFormat=False,
             paragraphMode=False, wikiLanguageDetails=DUMMY_WIKI_LANGUAGE_DETAILS):
         self.wikiDocument = wikiDocument   # WikiDocument object (needed for autoLink)
         self.basePage = basePage    # Base for calculating relative links
@@ -116,9 +116,9 @@ def getFootnoteAnchorDict(pageAst):
 #     return result
 
 
-_RE_LINE_INDENT = re.compile(ur"^[ \t]*")
+_RE_LINE_INDENT = re.compile(r"^[ \t]*")
 
-class BasicLanguageHelper(object):
+class BasicLanguageHelper:
     @staticmethod
     def reset():
         pass
@@ -357,9 +357,9 @@ class BasicLanguageHelper(object):
     @staticmethod 
     def handlePasteRawHtml(editor, rawHtml, settings):
         # Remove possible body end tags
-        rawHtml = rawHtml.replace(u"</body>", u"")
+        rawHtml = rawHtml.replace("</body>", "")
         if rawHtml:
-            editor.ReplaceSelection(u"<body>" + rawHtml + u"</body>")
+            editor.ReplaceSelection("<body>" + rawHtml + "</body>")
             return True
 
         return False
@@ -395,7 +395,7 @@ class BasicLanguageHelper(object):
         """
         Return default text of the "WikiSettings" page for a new wiki.
         """
-        return u""
+        return ""
 
 
     @staticmethod

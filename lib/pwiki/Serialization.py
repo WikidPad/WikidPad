@@ -1,10 +1,12 @@
 from struct import pack, unpack
-import cStringIO as StringIO
+import io
 
-from StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
+import Consts
+
+from .StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
         base64BlockDecode
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 
 
@@ -12,22 +14,22 @@ from WikiExceptions import *
 # Especially used in SearchAndReplace.py, class SearchReplaceOperation
 
 class SerializeStream:
-    def __init__(self, fileObj=None, stringBuf=None, readMode=True):
+    def __init__(self, fileObj=None, byteBuf=None, readMode=True):
         """
         fileObj -- file-like object to wrap.
-        stringBuf -- if not None, ignore fileObj, read from stringBuf
-                instead or write to a new string buffer depending
+        byteBuf -- if not None, ignore fileObj, read from byteBuf
+                instead or write to a new byte buffer depending
                 on readMode. Use getBytes() to retrieve written bytes
         readMode -- True; read from fileobj, False: write to fileobj
         """
         self.fileObj = fileObj 
         self.readMode = readMode
 
-        if stringBuf is not None:
+        if byteBuf is not None:
             if self.readMode:
-                self.fileObj = StringIO.StringIO(stringBuf)
+                self.fileObj = io.BytesIO(byteBuf)
             else:
-                self.fileObj = StringIO.StringIO()
+                self.fileObj = io.BytesIO()
 
     def isReadMode(self):
         """
@@ -37,25 +39,24 @@ class SerializeStream:
         
     def setBytesToRead(self, b):
         """
-        Sets a string to read from via StringIO
+        Sets a byte object to read from via BytesIO
         """
-        self.fileObj = StringIO.StringIO(b)
+        self.fileObj = io.BytesIO(b)
         self.readMode = True
 
         
     def useBytesToWrite(self):
         """
-        Sets the stream to write mode writing to a byte buffer (=string)
-        via StringIO
+        Sets the stream to write mode writing to a byte buffer via BytesIO
         """
-        self.fileObj = StringIO.StringIO()
+        self.fileObj = io.BytesIO()
         self.readMode = False
 
         
     def getBytes(self):
         """
-        If fileObj is a StringIO object, call this to retrieve the stored
-        string after write operations are finished, but before close() is
+        If fileObj is a BytesIO object, call this to retrieve the stored
+        bytes after write operations are finished, but before close() is
         called
         """
         return self.fileObj.getvalue()
@@ -107,9 +108,9 @@ class SerializeStream:
             return val
 
 
-    def serString(self, s):
+    def serByteBlock(self, s):
         """
-        Serialize string s, including length. This means: if stream is in read
+        Serialize byte block s, including length. This means: if stream is in read
         mode, s is ignored and the string read from stream is returned,
         if in write mode, s is written and returned
         """
@@ -127,9 +128,9 @@ class SerializeStream:
         Serialize unicode string, encoded as UTF-8
         """
         if self.isReadMode():
-            return utf8Dec(self.serString(""), "replace")[0]
+            return utf8Dec(self.serByteBlock(b""), "replace")[0]
         else:
-            self.serString(utf8Enc(us)[0])
+            self.serByteBlock(utf8Enc(us)[0])
             return us
 
 
@@ -139,28 +140,58 @@ class SerializeStream:
         """
         if self.isReadMode():
             b = self.readBytes(1)
-            return b != "\0"
+            return b != b"\0"
         else:
             if tv:
-                self.writeBytes("1")
+                self.writeBytes(b"1")
             else:
-                self.writeBytes("\0")
+                self.writeBytes(b"\0")
             
             return tv
-            
-    def serArrString(self, abs):
-        """
-        Serialize array of byte strings
-        """
-        l = self.serUint32(len(abs)) # Length of array
 
-        if self.isReadMode() and l != len(abs):
-            abs = [""] * l
+    def serArrUniUtf8(self, aus):
+        """
+        Serialize array of unicode strings, encoded as UTF-8
+        """
+        l = self.serUint32(len(aus)) # Length of array
+        
+        if self.isReadMode() and l != len(aus):
+            aus = [""] * l
 
-        for i in xrange(l):
-            abs[i] = self.serString(abs[i])
+        for i in range(l):
+            aus[i] = self.serUniUtf8(aus[i])
             
-        return abs
+        return aus
+
+
+    def serArrByteBlock(self, aus):
+        """
+        Serialize array of byte blocks
+        """
+        l = self.serUint32(len(aus)) # Length of array
+        
+        if self.isReadMode() and l != len(aus):
+            aus = [b""] * l
+
+        for i in range(l):
+            aus[i] = self.serByteBlock(aus[i])
+
+        return aus
+
+            
+#     def serArrString(self, abs):
+#         """
+#         Serialize array of byte strings
+#         """
+#         l = self.serUint32(len(abs)) # Length of array
+# 
+#         if self.isReadMode() and l != len(abs):
+#             abs = [""] * l
+# 
+#         for i in range(l):
+#             abs[i] = self.serString(abs[i])
+#             
+#         return abs
         
     def serArrUint32(self, an):
         """
@@ -171,7 +202,7 @@ class SerializeStream:
         if self.isReadMode() and l != len(an):
             an = [0] * l
 
-        for i in xrange(l):
+        for i in range(l):
             an[i] = self.serUint32(an[i])
             
         return an
@@ -247,7 +278,7 @@ def serToXmlUnicode(xmlNode, xmlDoc, tag, data, replace=False):
     xmlNode.appendChild(subNode)
 
 
-def serFromXmlUnicode(xmlNode, tag, default=u""):
+def serFromXmlUnicode(xmlNode, tag, default=""):
     subNode = findXmlElementFlat(xmlNode, tag, False)
     if subNode is None:
         return default
@@ -259,7 +290,7 @@ def serFromXmlUnicode(xmlNode, tag, default=u""):
 
 
 def serToXmlBoolean(xmlNode, xmlDoc, tag, data, replace=False):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(bool(data))),
+    serToXmlUnicode(xmlNode, xmlDoc, tag, str(repr(bool(data))),
             replace=replace)
 
 
@@ -272,7 +303,7 @@ def serFromXmlBoolean(xmlNode, tag, default=None):
 
 
 def serToXmlInt(xmlNode, xmlDoc, tag, data, replace=False):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)),
+    serToXmlUnicode(xmlNode, xmlDoc, tag, str(repr(data)),
             replace=replace)
 
 def serFromXmlInt(xmlNode, tag, default=None):
@@ -287,23 +318,22 @@ def serFromXmlInt(xmlNode, tag, default=None):
 
 
 _TYPE_TO_TYPENAME = (
-        (bool, u"bool"),
-        (int, u"int"),
-        (long, u"long"),
-        (float, u"float"),
-        (unicode, u"unicode"),
-        (str, u"str")
+        (bool, "bool"),
+        (int, "int"),
+        (float, "float"),
+        (str, "unicode"),
+        (Consts.BYTETYPES, "str"),
     )
 
 
 
 _TYPENAME_TO_FACTORY = {
-        u"int": int,
-        u"long": long,
-        u"float": float,
-        u"unicode": unicode,
-        u"str": base64BlockDecode,
-        u"bool": strToBool
+        "int": int,
+        "long": int,
+        "float": float,
+        "unicode": str,
+        "str": base64BlockDecode,
+        "bool": strToBool,
     }
 
 
@@ -321,14 +351,14 @@ def convertTupleToXml(xmlNode, xmlDoc, addOpt):
             raise SerializationException(
                     "XML conversion: Unknown item type in tuple: " + repr(opt))
 
-        if dtype == u"str":
+        if dtype == "str":
             # Maybe binary data, so do base64 encoding
             opt = base64BlockEncode(opt)
 
-        subEl = xmlDoc.createElement(u"item")
-        subEl.setAttribute(u"type", dtype)
+        subEl = xmlDoc.createElement("item")
+        subEl.setAttribute("type", dtype)
 
-        subEl.appendChild(xmlDoc.createTextNode(unicode(opt)))
+        subEl.appendChild(xmlDoc.createTextNode(str(opt)))
 
         xmlNode.appendChild(subEl)
 
@@ -347,8 +377,8 @@ def convertTupleFromXml(xmlNode):
 #                 repr(mainEl.getAttribute("type")) +" instead")
 
     result = []
-    for subEl in iterXmlElementFlat(xmlNode, u"item"):
-        dtype = subEl.getAttribute(u"type")
+    for subEl in iterXmlElementFlat(xmlNode, "item"):
+        dtype = subEl.getAttribute("type")
         fact = _TYPENAME_TO_FACTORY.get(dtype)
         if fact is None:
             raise SerializationException(

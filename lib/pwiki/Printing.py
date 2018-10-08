@@ -4,13 +4,13 @@
 
 import wx, wx.xrc
 
-from wxHelper import *
+from .wxHelper import *
 
 from . import PluginManager
 
 
-from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
-from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
+from .SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
+from .SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
 
 
 
@@ -23,8 +23,7 @@ class PrintMainDialog(wx.Dialog):
     
     def __init__(self, mainControl, ID, title="Print",
                  pos=wx.DefaultPosition, size=wx.DefaultSize, exportTo=None):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.printer = self.mainControl.printer
@@ -32,7 +31,7 @@ class PrintMainDialog(wx.Dialog):
 #         self.plainTextFontDesc = self.printer.plainTextFontDesc
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.mainControl, "PrintMainDialog")
+        res.LoadDialog(self, self.mainControl, "PrintMainDialog")
         
         self.ctrls = XrcControls(self)
         
@@ -65,8 +64,8 @@ class PrintMainDialog(wx.Dialog):
 
         addOptSizer = LayerSizer()
 
-        for obtp in PluginManager.getSupportedPrintTypes(self.mainControl,
-                self.ctrls.additOptions).values():
+        for obtp in list(PluginManager.getSupportedPrintTypes(self.mainControl,
+                self.ctrls.additOptions).values()):
             panel = obtp[3]
             if panel is None:
                 if self.emptyPanel is None:
@@ -115,14 +114,13 @@ class PrintMainDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
-        wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+        self.Bind(wx.EVT_CHOICE, self.OnExportTo, id=GUI_ID.chExportTo)
+        self.Bind(wx.EVT_CHOICE, self.OnChSelectedSet, id=GUI_ID.chSelectedSet)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
-        wx.EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
-#         wx.EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
-#                 self.OnChoosePlainTextFont)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnPrint)
+        self.Bind(wx.EVT_BUTTON, self.OnPreview, id=GUI_ID.btnPreview)
+        self.Bind(wx.EVT_BUTTON, self.OnPageSetup, id=GUI_ID.btnPageSetup)
+#         self.Bind(wx.EVT_BUTTON, self.OnChoosePlainTextFont, id=GUI_ID.btnChoosePlainTextFont)
+        self.Bind(wx.EVT_BUTTON, self.OnPrint, id=wx.ID_OK)
 
 
     def _transferOptionsToPrinter(self):
@@ -240,7 +238,7 @@ class Printer:
             try:
                 margintext = self.pWiki.configuration.get(
                         "main", "print_margins")
-                margins = map(int, margintext.split(u","))
+                margins = list(map(int, margintext.split(",")))
             except:
                 margins = [0, 0, 0, 0]  # TODO Perhaps error message
                 
@@ -262,7 +260,7 @@ class Printer:
 
 
     def buildWordList(self):
-        import SearchAndReplace as Sar
+        from . import SearchAndReplace as Sar
 
         # Create wordList (what to export)
         selset = self.selectionSet
@@ -270,7 +268,7 @@ class Printer:
         
         if root is None and selset in (0, 1):
             self.pWiki.displayErrorMessage(
-                    _(u"No real wiki word selected as root"))
+                    _("No real wiki word selected as root"))
             return
 
         lpOp = Sar.ListWikiPagesOperation()
@@ -328,7 +326,7 @@ class Printer:
         br = self.psddata.GetMarginBottomRight()
 
         margins = [tl.x, tl.y, br.x, br.y]
-        margtext = u",".join(map(unicode, margins))
+        margtext = ",".join(map(str, margins))
         self.pWiki.configuration.set("main", "print_margins", margtext)
 
 

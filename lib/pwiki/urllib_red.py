@@ -3,7 +3,6 @@ Reduced urllib (derived from urllib.py in standard library)
 for Wikidpad to avoid unnecessary dependencies
 """
 
-import string
 import os
 import sys
 
@@ -13,9 +12,9 @@ __version__ = '1.15'    # XXX This version is not always updated :-(
 
 # Helper for non-unix systems
 if os.name == 'mac':
-    from macurl2path_red import url2pathname, pathname2url
+    from .macurl2path_red import url2pathname, pathname2url
 elif os.name == 'nt':
-    from nturl2path_red import url2pathname, pathname2url
+    from .nturl2path_red import url2pathname, pathname2url
 elif os.name == 'riscos':
     from rourl2path import url2pathname, pathname2url
 else:
@@ -49,13 +48,13 @@ else:
 # quote('abc def') -> 'abc%20def')
 
 try:
-    unicode
+    str
 except NameError:
     def _is_unicode(x):
         return 0
 else:
     def _is_unicode(x):
-        return isinstance(x, unicode)
+        return isinstance(x, str)
 
 
 _typeprog = None
@@ -93,7 +92,7 @@ def splituser(host):
         _userprog = re.compile('^(.*)@(.*)$')
 
     match = _userprog.match(host)
-    if match: return map(unquote, match.group(1, 2))
+    if match: return list(map(unquote, match.group(1, 2)))
     return None, host
 
 _passwdprog = None
@@ -136,7 +135,7 @@ def splitnport(host, defport=-1):
     if match:
         host, port = match.group(1, 2)
         try:
-            if not port: raise ValueError, "no digits"
+            if not port: raise ValueError("no digits")
             nport = int(port)
         except ValueError:
             nport = None
@@ -291,7 +290,7 @@ def urlencode(query,doseq=0):
 
     if hasattr(query,"items"):
         # mapping objects
-        query = query.items()
+        query = list(query.items())
     else:
         # it's a bother at times that strings and string-like objects are
         # sequences...
@@ -306,7 +305,7 @@ def urlencode(query,doseq=0):
             # preserved for consistency
         except TypeError:
             ty,va,tb = sys.exc_info()
-            raise TypeError, "not a valid non-string sequence or mapping object", tb
+            raise TypeError("not a valid non-string sequence or mapping object").with_traceback(tb)
 
     l = []
     if not doseq:
@@ -352,9 +351,9 @@ def test1():
     uqs = unquote(qs)
     t1 = time.time()
     if uqs != s:
-        print 'Wrong!'
-    print `s`
-    print `qs`
-    print `uqs`
-    print round(t1 - t0, 3), 'sec'
+        print('Wrong!')
+    print(repr(s))
+    print(repr(qs))
+    print(repr(uqs))
+    print(round(t1 - t0, 3), 'sec')
 

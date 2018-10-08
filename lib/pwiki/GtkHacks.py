@@ -78,17 +78,17 @@ import wx
 #------------
 
 
-if wx.version() < "2.9":
+if wx.version() < "2.9" or "gtk2" in wx.version():
     import gtk
 else:
     import gi
     gi.require_version('Gtk', '3.0')
     from gi.repository import Gtk, Gdk
 
-from wxHelper import getTextFromClipboard
+from .wxHelper import getTextFromClipboard
 
-from StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
-import DocPages
+from .StringOps import strftimeUB, pathEnc, mbcsDec   # unescapeWithRe
+from . import DocPages
 
 
 if wx.version() < "2.9":
@@ -369,7 +369,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
         if not isinstance(wikiPage,
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
             self.mainControl.displayErrorMessage(
-                    _(u"Only a real wiki page can be a clipboard catcher"))
+                    _("Only a real wiki page can be a clipboard catcher"))
             return
 
         self.lastText = None
@@ -466,8 +466,8 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
         config = self.mainControl.getConfig()
         notifMode = config.getint("main", "clipboardCatcher_userNotification", 0)
         if notifMode == 1:
-            soundPath = config.get("main", "clipboardCatcher_soundFile", u"")
-            if soundPath == u"":
+            soundPath = config.get("main", "clipboardCatcher_soundFile", "")
+            if soundPath == "":
                 wx.Bell()
             else:
                 try:
@@ -478,7 +478,7 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
                                 # (This shouldn't be needed, but there seems to be a bug...)
                     else:
                         wx.Bell()
-                except NotImplementedError, v:
+                except NotImplementedError as v:
                     wx.Bell()
 
 
@@ -495,14 +495,14 @@ class ClipboardCatchFakeIceptor(BaseFakeInterceptor):
                     "main", "clipboardCatcher_prefix", r""))
         except:
             traceback.print_exc()
-            prefix = u""   # TODO Error message?
+            prefix = ""   # TODO Error message?
 
         try:
             suffix = strftimeUB(self.mainControl.getConfig().get(
                     "main", "clipboardCatcher_suffix", r"\n"))
         except:
             traceback.print_exc()
-            suffix = u"\n"   # TODO Error message?
+            suffix = "\n"   # TODO Error message?
 
         if self.mode == ClipboardCatchFakeIceptor.MODE_OFF:
             return

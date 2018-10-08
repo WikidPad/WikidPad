@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -9,12 +9,12 @@ from time import sleep
 
 import wx
 
-import Utilities
-from Utilities import DUMBTHREADSTOP
+from . import Utilities
+from .Utilities import DUMBTHREADSTOP
 # from MiscEvent import KeyFunctionSinkAR
-from WikiExceptions import NotCurrentThreadException
+from .WikiExceptions import NotCurrentThreadException
 
-from wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
+from .wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
 
 
 class DocStructureCtrl(EnhancedListControl):
@@ -24,7 +24,7 @@ class DocStructureCtrl(EnhancedListControl):
 
         self.mainControl = mainControl
 
-        self.InsertColumn(0, u"", width=3000)
+        self.InsertColumn(0, "", width=3000)
 
         self.updatingThreadHolder = Utilities.ThreadHolder()
         self.tocList = [] # List of tuples (char. start in text, headLevel, heading text)
@@ -64,13 +64,13 @@ class DocStructureCtrl(EnhancedListControl):
 
         self.updateList()
 
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
-        wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         
-        wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
-#         wx.EVT_LEFT_UP(self, self.OnLeftUp)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+#         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
 
 
     def close(self):
@@ -132,7 +132,7 @@ class DocStructureCtrl(EnhancedListControl):
 #         """
 #         Now we can register idle handler.
 #         """
-#         wx.EVT_IDLE(self, self.OnIdle)
+#         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 
     def onIdleVisible(self, evt):
@@ -181,7 +181,7 @@ class DocStructureCtrl(EnhancedListControl):
         Handle misc events
         """
         if self.sizeVisible and miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("changed current presenter"):
+            if "changed current presenter" in miscevt:
                 presenter = self.mainControl.getCurrentDocPagePresenter()
                 if presenter is not None:
                     self.docPagePresenterSink.setEventSource(presenter.getMiscEvent())
@@ -252,8 +252,8 @@ class DocStructureCtrl(EnhancedListControl):
                 if node.level > depth:
                     continue
 
-                title = u"  " * (node.level - 1) + node.contentNode.getString()
-                while title.endswith(u"\n"):
+                title = "  " * (node.level - 1) + node.contentNode.getString()
+                while title.endswith("\n"):
                     title = title[:-1]
                 result.append((node.pos, node.level, title))
 
@@ -276,7 +276,7 @@ class DocStructureCtrl(EnhancedListControl):
         with WindowUpdateLocker(self):
             self.DeleteAllItems()
             for start, headLevel, text in self.tocList:
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
 #             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.autosizeColumn(0)
             self.checkSelectionChanged(callAlways=True)
@@ -316,7 +316,7 @@ class DocStructureCtrl(EnhancedListControl):
             subCtrl.gotoCharPos(start)
         elif scName == "preview": 
             # HTML preview
-            subCtrl.gotoAnchor(u".h%i" % start)
+            subCtrl.gotoAnchor(".h%i" % start)
 
 #         if focusToSubctrl:
 #             subCtrl.SetFocus()

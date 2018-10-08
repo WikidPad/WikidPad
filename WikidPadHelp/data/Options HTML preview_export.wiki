@@ -46,6 +46,8 @@ You can choose the renderer for the HTML preview (not all may be available):
       http://www.iol.ie/~locka/mozilla/control.htm
     * Webkit: Needs pyGtk and pyWebkitGtk libraries (probably Linux only).
       See [Webkit].
+    * Webview: Let wxWidgets/wxPython choose a renderer more advanced than
+      the internal one, usually IE for Windows and Webkit elsewhere
 
 Changes of this setting only have an effect for newly opened WikidPad windows.
 

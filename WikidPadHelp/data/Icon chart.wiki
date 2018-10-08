@@ -1,2 +1,2 @@
-++ Icon chart
+﻿++ Icon chart
 [icon: chart]

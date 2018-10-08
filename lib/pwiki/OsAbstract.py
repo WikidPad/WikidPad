@@ -13,7 +13,7 @@ from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, pathEnc
 
 if SystemInfo.isWindows():
     try:
-        import WindowsHacks
+        from . import WindowsHacks
     except:
         if SystemInfo.isWindows():
             traceback.print_exc()
@@ -25,7 +25,7 @@ else:
 
 
 try:
-    import LinuxHacks
+    from . import LinuxHacks
 except:
     if SystemInfo.isLinux():
         traceback.print_exc()
@@ -33,7 +33,7 @@ except:
 
 
 try:
-    import GtkHacks
+    from . import GtkHacks
 except:
     import ExceptionLogger
     ExceptionLogger.logOptionalComponentException(
@@ -45,7 +45,7 @@ except:
 
 # Define startFile
 if SystemInfo.isWindows():
-    if SystemInfo.isWinNT() and SystemInfo.isUnicode() and WindowsHacks:
+    if WindowsHacks:
         startFile = WindowsHacks.startFile
     else:
         def startFile(mainControl, link):
@@ -54,8 +54,8 @@ else:
     def startFile(mainControl, link):
         # We need mainControl only for this version of startFile()
 
-        startPath = mainControl.getConfig().get("main", "fileLauncher_path", u"")
-        if startPath == u"":
+        startPath = mainControl.getConfig().get("main", "fileLauncher_path", "")
+        if startPath == "":
             wx.LaunchDefaultBrowser(link)
             return
 

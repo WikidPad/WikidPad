@@ -55,25 +55,25 @@ def describeMenuItems(wiki):
     
     kb = wiki.getKeyBindings()
     
-    return ((autoNewNumbered, _(u"Create new page") + u"\t" +
-            kb.Plugin_AutoNew_Numbered, _(u"Create new page")),)
+    return ((autoNewNumbered, _("Create new page") + "\t" +
+            kb.Plugin_AutoNew_Numbered, _("Create new page")),)
 
 
-_testRE = re.compile(ur"^New[0-9]{6}$")
+_testRE = re.compile(r"^New[0-9]{6}$")
 
 
 def autoNewNumbered(wiki, evt):
     wiki.saveAllDocPages()
-    candidates = wiki.getWikiData().getWikiPageLinkTermsStartingWith(u"New")
+    candidates = wiki.getWikiData().getWikiPageLinkTermsStartingWith("New")
             
-    candidates = filter(lambda w: _testRE.match(w), candidates)
-    numbers = map(lambda w: int(w[3:]), candidates)
+    candidates = [w for w in candidates if _testRE.match(w)]
+    numbers = [int(w[3:]) for w in candidates]
 
     if len(numbers) == 0:
         nextNumber = 1
     else:
         nextNumber = max(numbers) + 1
-    wiki.openWikiPage(u"New%06i" % nextNumber)
+    wiki.openWikiPage("New%06i" % nextNumber)
     dpp = wiki.getCurrentDocPagePresenter()
     if dpp is None:
         return

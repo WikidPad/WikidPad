@@ -73,7 +73,7 @@ class PageHistory:
                 return
                 
             upname = page.getUnifiedPageName()
-            if not upname.startswith(u"wikipage/") and \
+            if not upname.startswith("wikipage/") and \
                     not DocPages.isFuncTag(upname):
                 # Page is neither a wiki page nor a standard functional page
                 return
@@ -107,7 +107,7 @@ class PageHistory:
         Remove deleted word from history
         """
         newhist = []
-        upname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord() # self.mainControl.getCurrentWikiWord()
+        upname = "wikipage/" + miscevt.get("wikiPage").getWikiWord() # self.mainControl.getCurrentWikiWord()
         
         # print "onDeletedWikiPage1",  self.pos, repr(self.history)
 
@@ -127,10 +127,10 @@ class PageHistory:
         """
         Rename word in history
         """
-        oldUpname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord()
-        newUpname = u"wikipage/" + miscevt.get("newWord")
+        oldUpname = "wikipage/" + miscevt.get("wikiPage").getWikiWord()
+        newUpname = "wikipage/" + miscevt.get("newWord")
         
-        for i in xrange(len(self.history)):
+        for i in range(len(self.history)):
             if self.history[i] == oldUpname:
                 self.history[i] = newUpname
 
@@ -176,7 +176,7 @@ class PageHistory:
                     self.docPagePresenter):
 
                 # If tab can't be deleted -> go to homepage of wiki
-                self.docPagePresenter.openDocPage(u"wikipage/" + 
+                self.docPagePresenter.openDocPage("wikipage/" + 
                         self.docPagePresenter.getWikiDocument().getWikiName(),
                         motionType="random")
 
@@ -193,7 +193,7 @@ class PageHistory:
             if upname.startswith("wikipage/"):
                 result.append(upname[9:])
             else:
-                result.append(u"<" + DocPages.getHrNameForFuncTag(upname) + u">")
+                result.append("<" + DocPages.getHrNameForFuncTag(upname) + ">")
                 
         return result
         

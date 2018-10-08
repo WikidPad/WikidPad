@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
@@ -26,11 +26,11 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         TimePresentationBase.__init__(self, mainControl, wikiWordFilter)
 
-        self.InsertColumn(0, u"", width=1)  # date
-        self.InsertColumn(1, u"", width=1)  # number of wiki words
+        self.InsertColumn(0, "", width=1)  # date
+        self.InsertColumn(1, "", width=1)  # number of wiki words
 
         # Now gather some information
-        self.InsertStringItem(0, u"1")
+        self.InsertItem(0, "1")
         self.itemHeight = self.GetItemRect(0).GetHeight()
         
         self.popupShiftX = 20
@@ -51,7 +51,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.stepDays = 1
         
         self.DeleteAllItems()
-        self.clientHeight = self.GetClientSizeTuple()[1]
+        self.clientHeight = self.GetClientSize()[1]
         
         self.visibleItemCount = (self.clientHeight - 6) // self.itemHeight
         
@@ -62,7 +62,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         self.firstResize = True  # Hack
 
-#         self.topDay = None  # currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#         self.topDay = None  # currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 
         # Sets which day should be shown at which index
         self.fixedItemDay = None
@@ -70,27 +70,23 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         self.minMaxDayCache = None
 
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-#         wx.EVT_SIZE(self, self.OnSize)
-#         wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBg)
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-#         wx.EVT_MOTION(self, self.OnMouseMotion)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
+#         self.Bind(wx.EVT_SIZE, self.OnSize)
+#         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBg)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+#         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
 
-        wx.EVT_LIST_BEGIN_LABEL_EDIT(self, self.GetId(), self.OnBeginLabelEdit)
-        wx.EVT_LIST_END_LABEL_EDIT(self, self.GetId(), self.OnEndLabelEdit)
+        self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit, id=self.GetId())
+        self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnEndLabelEdit, id=self.GetId())
         
-        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS,
-                self.OnCmdCheckShowEmptyDays)
-        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS,
-                self.OnCmdCheckUpdateEmptyDays)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
-                self.OnCmdCheckDateAscending)
-        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
-                self.OnCmdCheckUpdateDateAscending)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
 
 
 
@@ -99,7 +95,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 #         currTime = wx.DateTime.Now()
 #         currTime.ResetTime()
 #         
-#         self.topDay = currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#         self.topDay = currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 #         self.updateContent()
 
 
@@ -122,7 +118,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             currTime = wx.DateTime.Now()
             currTime.ResetTime()
             
-#             self.topDay = currTime - wx.TimeSpan_Days(self.visibleItemCount - 1)
+#             self.topDay = currTime - wx.TimeSpan.Days(self.visibleItemCount - 1)
 
             self.fixedItemDay = currTime
 
@@ -168,8 +164,8 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             self.updateContent()
 
 
-    def SetSize(self, size):
-        wx.ListCtrl.SetSize(self, size)
+    def SetSize(self, *size):
+        wx.ListCtrl.SetSize(self, *size)
 
         oldVisible = self.isVisibleEffect()
         self.adjustToSize()
@@ -229,14 +225,14 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
 
     def _updateContentWithEmptyDays(self, ascendTime):
-        stepDateSpan = wx.TimeSpan_Days(self.stepDays)
+        stepDateSpan = wx.TimeSpan.Days(self.stepDays)
 
         # Collect data
         if ascendTime:
-            currTime = self.fixedItemDay - wx.TimeSpan_Days(
+            currTime = self.fixedItemDay - wx.TimeSpan.Days(
                     self.fixedItemIndex)
         else:
-            currTime = self.fixedItemDay - wx.TimeSpan_Days(
+            currTime = self.fixedItemDay - wx.TimeSpan.Days(
                     self.visibleItemCount - self.fixedItemIndex - 1)
 
         content = []
@@ -244,7 +240,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         massWordCounts = self.wikiWordFilter.getMassWikiWordCountForDays(
                 currTime, self.visibleItemCount)
         
-        for i in xrange(self.visibleItemCount):
+        for i in range(self.visibleItemCount):
             wordCount = massWordCounts[i]
             content.append((currTime, wordCount))
             maxWordCount = max(maxWordCount, wordCount)
@@ -403,7 +399,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         precalculated elsewhere.
         """
         formatStr = self.mainControl.getConfig().get("main",
-                "timeView_dateFormat", u"%Y %m %d")
+                "timeView_dateFormat", "%Y %m %d")
                 
         today = wx.DateTime.Now()
         today.ResetTime()
@@ -543,17 +539,17 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 
                 if not reused:
                     # For a new id, an event must be set
-                    wx.EVT_MENU(self, menuID, self.OnWikiWordInMenu)
+                    self.Bind(wx.EVT_MENU, self.OnWikiWordInMenu, id=menuID)
 
 #                 if len(reusableIds) > 0:
 #                     menuId = reusableIds.pop()
 #                 else:
 #                     menuId = wx.NewId()
-#                     wx.EVT_MENU(self, menuId, self.OnWikiWordInMenu)
+#                     self.Bind(wx.EVT_MENU, self.OnWikiWordInMenu, id=menuId)
 # 
 #                 cmc[menuId] = word
                 menuItem = wx.MenuItem(menu, menuID, word)
-                menu.AppendItem(menuItem)
+                menu.Append(menuItem)
 
 #             # Add remaining ids to prevent them from getting lost
 #             for i in reusableIds:
@@ -562,7 +558,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 #             self.contextMenuWikiWords = cmc
 
 
-            appendToMenuByMenuDesc(menu, u"-\n" + _CONTEXT_MENU_TIMELINE)
+            appendToMenuByMenuDesc(menu, "-\n" + _CONTEXT_MENU_TIMELINE)
             
             self.PopupMenu(menu)
         finally:
@@ -628,7 +624,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         word = self.contextMenuWikiWords[evt.GetId()]
 #         self.mainControl.activateWikiWord(word, 0)
         self.mainControl.activatePageByUnifiedName(
-                u"wikipage/" + word, 0)
+                "wikipage/" + word, 0)
 
 
 
@@ -756,7 +752,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
     def OnEndLabelEdit(self, evt):
         formatStr = self.mainControl.getConfig().get("main",
-                "timeView_dateFormat", u"%Y %m %d")
+                "timeView_dateFormat", "%Y %m %d")
                 
         self.labelEdit = False
         
@@ -768,7 +764,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 return
 
             newDate.ResetTime()
-#             self.topDay = newDate - wx.TimeSpan_Days(evt.GetIndex())
+#             self.topDay = newDate - wx.TimeSpan.Days(evt.GetIndex())
             self.fixedItemDay = newDate
             self.fixedItemIndex = evt.GetIndex()
             
@@ -788,16 +784,16 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
 
 _CONTEXT_MENU_TIMELINE = \
-u"""
+"""
 +Show empty days;CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS;Show dates without associated wiki words
 +Sort dates ascending;CMD_CHECKBOX_TIMELINE_DATE_ASCENDING;List dates ascending or descending
 """
 
 # Entries to support i18n of context menus
-if False:
-    N_(u"Show empty days")
-    N_(u"Show dates without associated wiki words")
-    N_(u"Sort dates ascending")
-    N_(u"List dates ascending or descending")
+if not True:
+    N_("Show empty days")
+    N_("Show dates without associated wiki words")
+    N_("Sort dates ascending")
+    N_("List dates ascending or descending")
 
 

@@ -4,18 +4,18 @@ import wx, wx.grid, wx.xrc
 
 import Consts
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
-from wxHelper import ModalDialogMixin, XrcControls, GUI_ID
+from .wxHelper import ModalDialogMixin, XrcControls, GUI_ID
 
-import Utilities
+from . import Utilities
 
 from . import WindowLayout
 
 from . import EnhancedGrid
 
 # from EnhancedGrid import EnhancedGrid, ScrollPanel
-import DocPages
+from . import DocPages
 
 # from timeView import Versioning
 
@@ -68,7 +68,7 @@ import DocPages
 
 
 
-class RequestGridRow(object):
+class RequestGridRow:
     __slots__ = ("doImport", "importVersion", "collisionWithPresent", "renamable",
             "unifNamePrefix", "itemName", "renameImportTo", "renamePresentTo",
             "errorMessage")
@@ -93,8 +93,8 @@ class RequestGridRow(object):
         self.renamable = False 
         self.unifNamePrefix = None
         self.itemName = None
-        self.renameImportTo = u""
-        self.renamePresentTo = u""
+        self.renameImportTo = ""
+        self.renamePresentTo = ""
         self.errorMessage = None
         
         self.setByUnifName(unifName)
@@ -119,8 +119,8 @@ class RequestGridRow(object):
 
     def setByUnifName(self, unifName):
         # Check for renamable parts
-        m, r = self._splitOnMatchSeq(unifName, (u"wikipage/", u"savedsearch/",
-                u"savedpagesearch/"))
+        m, r = self._splitOnMatchSeq(unifName, ("wikipage/", "savedsearch/",
+                "savedpagesearch/"))
 
         if m is not None:
             self.renamable = True
@@ -128,7 +128,7 @@ class RequestGridRow(object):
             self.itemName = r
             return
         
-        m, r = self._splitOnMatch(unifName, u"funcpage/")
+        m, r = self._splitOnMatch(unifName, "funcpage/")
         if m is not None:
             self.unifNamePrefix = m
             self.itemName = "<%s>" % DocPages.getHrNameForFuncTag(r)
@@ -170,14 +170,14 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
         EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _RequestGrid.IMPORTCHOICELIST is None:
-            _RequestGrid.IMPORTCHOICELIST = [_(u"Default"), _(u"Yes"),
-                    _(u"No"), _(u"Overwrite")]
-            _RequestGrid.VERSIONCHOICELIST = [_(u"Default"), _(u"Yes"), _(u"No")]
+            _RequestGrid.IMPORTCHOICELIST = [_("Default"), _("Yes"),
+                    _("No"), _("Overwrite")]
+            _RequestGrid.VERSIONCHOICELIST = [_("Default"), _("Yes"), _("No")]
             _RequestGrid._UNIFPREFIX_TO_HR_NAME_MAP = {
-                    u"wikipage/": _(u"Wiki page"),
-                    u"funcpage/": _(u"Func. page"),
-                    u"savedsearch/": _(u"Saved search"),
-                    u"savedpagesearch/": _(u"Saved page search")
+                    "wikipage/": _("Wiki page"),
+                    "funcpage/": _("Func. page"),
+                    "savedsearch/": _("Saved search"),
+                    "savedpagesearch/": _("Saved page search")
             }
 
         self.inputPanel = parent
@@ -185,7 +185,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
         self.wikiDocument = wikiDocument
         self.collator = collator
         
-        self.requestGridData = self._buildInitialData().items()
+        self.requestGridData = list(self._buildInitialData().items())
 
         # TODO: Group by type of item
         self.collator.sortByFirst(self.requestGridData)
@@ -194,13 +194,13 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
 
         self.CreateGrid(len(self.requestGridData), self.COL_COUNT)
         
-        self.SetColLabelValue(self.COL_TYPE, _(u"Type"))
-        self.SetColLabelValue(self.COL_NAME, _(u"Name"))
-        self.SetColLabelValue(self.COL_DOIMPORT, _(u"Import"))
-        self.SetColLabelValue(self.COL_VERSIONS, _(u"Version\nImport"))
-        self.SetColLabelValue(self.COL_REN_IMPORTED, _(u"Rename\nimported"))
-        self.SetColLabelValue(self.COL_REN_PRESENT, _(u"Rename\npresent"))
-        self.SetColLabelValue(self.COL_ERROR, _(u"Error"))
+        self.SetColLabelValue(self.COL_TYPE, _("Type"))
+        self.SetColLabelValue(self.COL_NAME, _("Name"))
+        self.SetColLabelValue(self.COL_DOIMPORT, _("Import"))
+        self.SetColLabelValue(self.COL_VERSIONS, _("Version\nImport"))
+        self.SetColLabelValue(self.COL_REN_IMPORTED, _("Rename\nimported"))
+        self.SetColLabelValue(self.COL_REN_PRESENT, _("Rename\npresent"))
+        self.SetColLabelValue(self.COL_ERROR, _("Error"))
 
 #         self.SetColLabelSize(30)
 
@@ -244,7 +244,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             self.inputPanel.setGridErrorMessage(
                     self.requestGridData[0][1].errorMessage)
             
-            wx.grid.EVT_GRID_SELECT_CELL(self, self.OnGridSelectCell)
+            self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelectCell)
 
 
 
@@ -253,23 +253,23 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             unifNamePrefix = obj.unifNamePrefix
             typeHr = self._UNIFPREFIX_TO_HR_NAME_MAP[unifNamePrefix]
         else:
-            print "--_fillRowByData9", repr(unifName)
-            for k, v in self._UNIFPREFIX_TO_HR_NAME_MAP.iteritems():
+            print("--_fillRowByData9", repr(unifName))
+            for k, v in self._UNIFPREFIX_TO_HR_NAME_MAP.items():
                 if unifName.startswith(k):
                     typeHr = v
                     unifNamePrefix = k
                     break
             else:
-                typeHr = u""  # TODO Error? Message?
+                typeHr = ""  # TODO Error? Message?
                 unifNamePrefix = None
-            print "--_fillRowByData21", repr((unifName, typeHr, unifNamePrefix))
+            print("--_fillRowByData21", repr((unifName, typeHr, unifNamePrefix)))
 
         self.SetCellValue(rowNo, self.COL_TYPE, typeHr)
         
         if obj.itemName is not None:
             self.SetCellValue(rowNo, self.COL_NAME, obj.itemName)
         else:
-            self.SetCellValue(rowNo, self.COL_NAME, u"")  # TODO Error? Message?
+            self.SetCellValue(rowNo, self.COL_NAME, "")  # TODO Error? Message?
         
         self.SetCellValue(rowNo, self.COL_DOIMPORT, self.IMPORTCHOICELIST[obj.doImport])
 
@@ -380,7 +380,7 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
             renImportedUnifName = obj.unifNamePrefix + renImportedItem
             renPresentUnifName = obj.unifNamePrefix + renPresentItem
 
-            if renImportedItem != u"" and renPresentItem != u"":
+            if renImportedItem != "" and renPresentItem != "":
                 # This is forbidden to ensure that if item A is currently
                 # present in the database it will also be present after the import
                 # (either it was unchanged or replaced).
@@ -388,74 +388,74 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
                 # have to check if A will be present in database after import even
                 # if it was present before.
                 obj.errorMessage = _(
-                        u"You can't rename imported and present item at the same time")
+                        "You can't rename imported and present item at the same time")
                 isValid = False
                 continue
 
 
             # Check for invalid wiki words if processed item is a wikipage
-            if obj.unifNamePrefix == u"wikipage/":
-                if renImportedItem != u"":
+            if obj.unifNamePrefix == "wikipage/":
+                if renImportedItem != "":
                     errMsg = langHelper.checkForInvalidWikiWord(renImportedItem,
                             self.wikiDocument)
     
                     if errMsg is not None:
-                        obj.errorMessage = _(u"Rename imported") + u": " + errMsg
+                        obj.errorMessage = _("Rename imported") + ": " + errMsg
                         isValid = False
                         continue
 
-                if renPresentItem != u"":
+                if renPresentItem != "":
                     errMsg = langHelper.checkForInvalidWikiWord(renPresentItem,
                             self.wikiDocument)
     
                     if errMsg is not None:
-                        obj.errorMessage = _(u"Rename present") + u": " + errMsg
+                        obj.errorMessage = _("Rename present") + ": " + errMsg
                         isValid = False
                         continue
 
 
-            if renImportedItem == u"":
+            if renImportedItem == "":
                 renImportedItem = obj.itemName
                 renImportedUnifName = obj.unifNamePrefix + renImportedItem
 
             # Item was already imported in a previous entry
             if renImportedUnifName in importedUnifNames:
-                obj.errorMessage = _(u"Name collision: Item '%s' will be imported already") % renImportedItem
+                obj.errorMessage = _("Name collision: Item '%s' will be imported already") % renImportedItem
                 isValid = False
                 continue
 
             if renImportedUnifName in presentRenamedToFrom:
                 obj.errorMessage = \
-                        _(u"Name collision: Item '%s' will already be created by renaming '%s'") % \
+                        _("Name collision: Item '%s' will already be created by renaming '%s'") % \
                         (renImportedItem, presentRenamedToFrom[renImportedUnifName][1])
                 isValid = False
                 continue
 
 
             if self._resolveImportValue(rowNo) != RequestGridRow.IMPORT_OVERWRITE and \
-                    renPresentItem == u"" and \
+                    renPresentItem == "" and \
                     self.wikiDocument.hasDataBlock(renImportedUnifName):
-                obj.errorMessage = _(u"Name collision: Item '%s' exists already in database") % renImportedItem
+                obj.errorMessage = _("Name collision: Item '%s' exists already in database") % renImportedItem
                 isValid = False
                 continue
 
 
             importedUnifNames.add(renImportedUnifName)
 
-            if renPresentItem != u"":
+            if renPresentItem != "":
                 if renPresentUnifName in importedUnifNames:
-                    obj.errorMessage = _(u"Name collision: Item '%s' will be imported already") % renPresentItem
+                    obj.errorMessage = _("Name collision: Item '%s' will be imported already") % renPresentItem
                     isValid = False
                     continue
                 
                 if self.wikiDocument.hasDataBlock(renPresentUnifName):
-                    obj.errorMessage = _(u"Name collision: Item '%s' exists already in database") % renPresentItem
+                    obj.errorMessage = _("Name collision: Item '%s' exists already in database") % renPresentItem
                     isValid = False
                     continue
 
                 if renPresentUnifName in presentRenamedToFrom:
                     obj.errorMessage = \
-                            _(u"Name collision: Item '%s' will already be created by renaming '%s'") % \
+                            _("Name collision: Item '%s' will already be created by renaming '%s'") % \
                             (renImportedItem, presentRenamedToFrom[renPresentUnifName][1])
                     isValid = False
                     continue
@@ -495,17 +495,17 @@ class _RequestGrid(EnhancedGrid.EnhancedGrid):
                     """, (unifName,))
                 continue
 
-            renImportedUnifName = u""
-            renPresentUnifName = u""
+            renImportedUnifName = ""
+            renPresentUnifName = ""
 
             if obj.renamable:
                 renImportedItem = self.GetCellValue(rowNo, self.COL_REN_IMPORTED)
                 renPresentItem = self.GetCellValue(rowNo, self.COL_REN_PRESENT)
 
-                if renImportedItem != u"":
+                if renImportedItem != "":
                     renImportedUnifName = obj.unifNamePrefix + renImportedItem
 
-                if renPresentItem != u"":
+                if renPresentItem != "":
                     renPresentUnifName = obj.unifNamePrefix + renPresentItem
 
             if self._resolveVersionImportValue(rowNo) == RequestGridRow.IMPVERSION_YES:
@@ -525,15 +525,14 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
     """
 
     def __init__(self, mainControl, db, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.db = db
         self.value = False
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "MultiPageTextImporterDialog")
+        res.LoadDialog(self, parent, "MultiPageTextImporterDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -553,8 +552,8 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnTest, self.OnTest)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, id=GUI_ID.btnTest)
 
 
     def OnOk(self, evt):
@@ -580,7 +579,7 @@ class MultiPageTextImporterDialog(wx.Dialog, ModalDialogMixin):
 
     def setGridErrorMessage(self, errMsg):
         if errMsg is None:
-            errMsg = u""
+            errMsg = ""
         
         self.ctrls.stGridErrors.SetLabel(errMsg)
 

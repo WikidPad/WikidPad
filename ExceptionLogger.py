@@ -2,6 +2,8 @@ import sys, traceback, time, os, os.path
 
 EL = None
 
+_exceptionOccurred = False
+
 # Maximum file size of log file before it is thrown away
 FILE_CLEAR_LIMIT = 512 * 1024
 
@@ -33,6 +35,10 @@ class StdErrReplacement:
     def writelines(self, it):
         for l in it:
             self.write(l)
+            
+    
+    def flush(self):
+        pass
             
 # 
 

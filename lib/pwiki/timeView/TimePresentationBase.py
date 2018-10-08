@@ -7,11 +7,11 @@ import wx
 
 # from MiscEvent import KeyFunctionSinkAR
 from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
-        getAccelPairFromKeyDown, appendToMenuByMenuDesc
+        getAccelPairFromKeyDown, appendToMenuByMenuDesc, getWxAddress
 
 from pwiki.SystemInfo import isWindows
 
-from WikiWordListPopup import WikiWordListPopup
+from .WikiWordListPopup import WikiWordListPopup
 
 
 class TimePresentationBase:
@@ -36,8 +36,8 @@ class TimePresentationBase:
         self.layerVisible = True
         self.sizeVisible = True
 
-        wx.EVT_MOTION(self, self.OnMouseMotion)
-        wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
+        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
 
 
     def isVisibleEffect(self):
@@ -97,11 +97,10 @@ class TimePresentationBase:
 
 
     def OnWikiWordListPopupDestroyed(self, evt):
-        if not self.wikiWordListPopup is evt.GetEventObject():
+        if self.wikiWordListPopup.wxAddress != getWxAddress(evt.GetEventObject()):
             evt.Skip()
             return
             
-        self.wikiWordListPopup.Unbind(wx.EVT_WINDOW_DESTROY)
         self.wikiWordListPopup = None
 
         evt.Skip()
@@ -115,7 +114,10 @@ class TimePresentationBase:
 
         self.wikiWordListPopup = popup
 
-        if self.wikiWordListPopup is not None:        
+        if self.wikiWordListPopup is not None:
+            self.wikiWordListPopup.wxAddress = getWxAddress(
+                    self.wikiWordListPopup)
+
             self.wikiWordListPopup.Bind(wx.EVT_WINDOW_DESTROY,
                     self.OnWikiWordListPopupDestroyed)
             self.wikiWordListPopup.Bind(wx.EVT_LEAVE_WINDOW,
@@ -181,7 +183,7 @@ class TimePresentationBase:
 
         tlRect = self._getInsideTestRectangle()
 
-        if tlRect.Inside(pos):
+        if tlRect.Contains(pos):
             evt.Skip()
             return
 

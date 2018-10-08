@@ -23,7 +23,7 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"gnuplot", ("html_single", "html_previewWX", "html_preview", "html_multi"), GptHandler),
+            ("gnuplot", ("html_single", "html_previewWX", "html_preview", "html_multi"), GptHandler),
             )
 
 
@@ -84,12 +84,12 @@ class GptHandler:
         """
         if not insToken.value:
             # Nothing in, nothing out
-            return u""
+            return ""
         
         if self.extAppExe == "":
             # No path to Gnuplot executable -> show message
-            return u'<pre>' + _(u'[Please set path to Gnuplot executable]') +\
-                    u'</pre>'
+            return '<pre>' + _('[Please set path to Gnuplot executable]') +\
+                    '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -125,9 +125,9 @@ class GptHandler:
             popenObject.stdin.close()
             popenObject.stdout.close()
 
-            if u"noerror" in [a.strip() for a in insToken.appendices]:
+            if "noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
-                errResponse = ""
+                errResponse = b""
             else:
                 errResponse = childErr.read()
             
@@ -135,18 +135,18 @@ class GptHandler:
         finally:
             os.unlink(srcfilepath)
             
-        if errResponse != "":
+        if errResponse != b"":
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u'<pre>' + _(u'[Gnuplot error: %s]') % errResponse +\
-                    u'</pre>'
+            return '<pre>' + _('[Gnuplot error: %s]') % errResponse +\
+                    '</pre>'
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="gnuplot" />'
-                    u'&nbsp;') % url
+            return ('<img src="%s" border="0" align="bottom" alt="gnuplot" />'
+                    '&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="gnuplot" />' \
+            return '<img src="%s" border="0" align="bottom" alt="gnuplot" />' \
                     % url
 
 
@@ -166,9 +166,9 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_gnuplot_exePath")] = u""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_gnuplot_exePath")] = ""
     # Register panel in options dialog
-    app.addOptionsDlgPanel(GnuplotOptionsPanel, u"  Gnuplot")
+    app.addOptionsDlgPanel(GnuplotOptionsPanel, "  Gnuplot")
 
 
 class GnuplotOptionsPanel(wx.Panel):
@@ -188,7 +188,7 @@ class GnuplotOptionsPanel(wx.Panel):
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to Gnuplot:")), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _("Path to Gnuplot:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)

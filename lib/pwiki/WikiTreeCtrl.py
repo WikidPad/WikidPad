@@ -7,34 +7,34 @@ import sys, time, traceback
 
 import wx, wx.xrc
 
-import customtreectrl
+from . import customtreectrl
 
-from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \
+from .wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \
         appendToMenuByMenuDesc, copyTextToClipboard
-from MiscEvent import DebugSimple   # , KeyFunctionSink
+from .MiscEvent import DebugSimple   # , KeyFunctionSink
 
-from WikiExceptions import WikiWordNotFoundException, InternalError, \
+from .WikiExceptions import WikiWordNotFoundException, InternalError, \
         NoPageAstException
 
-import Utilities
-from Utilities import StringPathSet
+from . import Utilities
+from .Utilities import StringPathSet
 
 
-from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
-import AttributeHandling
-import DocPages
-from SearchAndReplace import SearchReplaceOperation
+from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from . import AttributeHandling
+from . import DocPages
+from .SearchAndReplace import SearchReplaceOperation
 
-from StringOps import mbcsEnc, guiToUni, uniToGui, strToBool, \
+from .StringOps import strToBool, \
         pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni, \
         colorDescToRgbTuple
 
-from DocPagePresenter import BasicDocPagePresenter
+from .DocPagePresenter import BasicDocPagePresenter
 
-from AdditionalDialogs import SelectWikiWordDialog
+from .AdditionalDialogs import SelectWikiWordDialog
 
 
-class NodeStyle(object):
+class NodeStyle:
     """
     A simple structure to hold all necessary information to present a tree node.
     """
@@ -42,30 +42,30 @@ class NodeStyle(object):
     __slots__ = ("__weakref__", "label", "bold", "icon", "color", "bgcolor",
             "hasChildren")
     def __init__(self):
-        self.label = u""
+        self.label = ""
         
-        self.bold = u"False"
-        self.icon = u"page"
-        self.color = u"null"
-        self.bgcolor = u"null"
+        self.bold = "False"
+        self.icon = "page"
+        self.color = "null"
+        self.bgcolor = "null"
         
         self.hasChildren = False
     
     def emptyFields(self):
-        self.label = u""
+        self.label = ""
         
-        self.bold = u""
-        self.icon = u""
-        self.color = u"null"
-        self.bgcolor = u"null"
+        self.bold = ""
+        self.icon = ""
+        self.color = "null"
+        self.bgcolor = "null"
 
 
 
-_SETTABLE_ATTRS = (u"bold", u"icon", u"color", u"bgcolor")
+_SETTABLE_ATTRS = ("bold", "icon", "color", "bgcolor")
 
 
 # New style class to allow __slots__ for efficiency
-class AbstractNode(object):
+class AbstractNode:
     """
     Especially for view nodes. An instance of a derived class
     is saved in funcData for such special nodes
@@ -202,7 +202,7 @@ class WikiWordNode(AbstractNode):
     def __init__(self, tree, parentNode, wikiWord):
         AbstractNode.__init__(self, tree, parentNode)
         self.wikiWord = wikiWord
-        self.unifiedName = u"wikipage/" + self.wikiWord
+        self.unifiedName = "wikipage/" + self.wikiWord
 
         self.flagRoot = False
         self.ancestors = None
@@ -298,11 +298,11 @@ class WikiWordNode(AbstractNode):
         """
         Splitted to support derived class WikiWordSearchNode
         """
-        assert isinstance(baselabel, unicode)
+        assert isinstance(baselabel, str)
 
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-        wikiData = wikiDataManager.getWikiData()
-        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+        wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+        wikiData = wikiDocument.getWikiData()
+        wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
 
         style = NodeStyle()
         
@@ -334,24 +334,24 @@ class WikiWordNode(AbstractNode):
         # priority is special. it can create an "importance" and it changes
         # the text of the node            
         if priority:
-            style.label += u" (%s)" % priority
+            style.label += " (%s)" % priority
             # set default importance based on priority
-            if not attrs.has_key(u'importance'):
+            if 'importance' not in attrs:
                 try:
                     priorNum = int(priority)    # TODO Error check
                     if (priorNum < 3):
-                        attrs[u'importance'] = [u'high']
+                        attrs['importance'] = ['high']
                     elif (priorNum > 3):
-                        attrs[u'importance'] = [u'low']
+                        attrs['importance'] = ['low']
                 except ValueError:
                     pass
 
-        attrsItems = attrs.items()
+        attrsItems = list(attrs.items())
 
         # apply the global attrs based on the attrs of this node
         for p in _SETTABLE_ATTRS:
             # Check per page attrs first
-            if attrs.has_key(p):
+            if p in attrs:
                 setattr(style, p, attrs[p][-1])
                 continue
 
@@ -370,10 +370,10 @@ class WikiWordNode(AbstractNode):
 
             for (key, values) in attrsItems:
                 newGPropVal = None
-                newDots = key.count(u".") + 1 # key dots plus one for value
+                newDots = key.count(".") + 1 # key dots plus one for value
                 if newDots > dots:
                     for val in values:
-                        newGPropVal = globalAttrs.get(u"global.%s.%s.%s" % (key, val, p))
+                        newGPropVal = globalAttrs.get("global.%s.%s.%s" % (key, val, p))
                         if newGPropVal is not None:
                             gPropVal = newGPropVal
                             dots = newDots
@@ -381,11 +381,11 @@ class WikiWordNode(AbstractNode):
 
                     newDots -= 1
                     while newDots > dots:
-                        newGPropVal = globalAttrs.get(u"global.%s.%s" % (key, p))
+                        newGPropVal = globalAttrs.get("global.%s.%s" % (key, p))
                         if newGPropVal is not None:
                             break
     
-                        dotpos = key.rfind(u".")
+                        dotpos = key.rfind(".")
                         if dotpos == -1:
                             break
                         key = key[:dotpos]
@@ -430,7 +430,7 @@ class WikiWordNode(AbstractNode):
         if self.treeCtrl.pWiki.getConfig().getboolean(
                 "main", "tree_force_scratchpad_visibility", False) and \
                 self.flagRoot:
-            includeSet = frozenset((u"ScratchPad",))
+            includeSet = frozenset(("ScratchPad",))
         else:
             includeSet = frozenset()
 
@@ -554,12 +554,12 @@ class MainViewNode(AbstractNode):
 
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/view"
+        self.unifiedName = "helpernode/main/view"
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"Views")
-        style.icon = u"orgchart"
+        style.label = _("Views")
+        style.icon = "orgchart"
         style.hasChildren = True
         return style
         
@@ -639,7 +639,7 @@ class TodoNode(AbstractNode):
         """
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
-        self.unifiedName = u"todo/" + u".".join(self.categories)
+        self.unifiedName = "todo/" + ".".join(self.categories)
 
 
     def getNodePresentation(self):
@@ -664,9 +664,9 @@ class TodoNode(AbstractNode):
                     if key in _SETTABLE_ATTRS:
                         setattr(style, key, value)
 
-        if style.label == u"":
+        if style.label == "":
             style.label = self.categories[-1]
-        if style.icon == u"":
+        if style.icon == "":
             style.icon = "pin"
 
         return style
@@ -690,6 +690,8 @@ class TodoNode(AbstractNode):
         Returns a sequence of Nodes for the children of this node.
         This is called before expanding the node
         """
+        from functools import cmp_to_key
+        
         wikiData = self.treeCtrl.pWiki.getWikiData()
         addedTodoSubCategories = []
         addedWords = []
@@ -702,7 +704,7 @@ class TodoNode(AbstractNode):
 #             node = langHelper.parseTodoEntry(todo, wikiDocument)
 #             if node is not None:
                 
-            keyComponents = todoKey.split(u".")  # TODO Language dependent: Remove
+            keyComponents = todoKey.split(".")  # TODO Language dependent: Remove
             entryCats = tuple(keyComponents + [todoValue])
 
             if len(entryCats) < len(self.categories):
@@ -736,7 +738,7 @@ class TodoNode(AbstractNode):
 
         collator.sort(addedTodoSubCategories)
 
-        addedWords.sort(cmpAddWords)  # TODO no compare function support in Python 3!
+        addedWords.sort(key=cmp_to_key(cmpAddWords))
 
         result = []
         # First list real categories, then right sides, then words
@@ -790,8 +792,8 @@ class WikiWordTodoSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+            wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+            wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
                 
             todoNodes = wikiPage.extractTodoNodesFromPageAst(pageAst)
             for node in todoNodes:
@@ -811,18 +813,18 @@ class AttrCategoryNode(AbstractNode):
 
     __slots__ = ("categories", "propIcon")
 
-    def __init__(self, tree, parentNode, cats, attributeIcon=u"page"):
+    def __init__(self, tree, parentNode, cats, attributeIcon="page"):
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
         self.propIcon = attributeIcon
-        self.unifiedName = u"helpernode/propcategory/" + \
-                u".".join(self.categories)
+        self.unifiedName = "helpernode/propcategory/" + \
+                ".".join(self.categories)
 
     def getNodePresentation(self):   # TODO Retrieve prop icon here
         style = NodeStyle()
         globalAttrs = self.treeCtrl.pWiki.getWikiData().getGlobalAttributes()
-        key = u".".join(self.categories)
-        attributeIcon = globalAttrs.get(u"global.%s.icon" % (key), u"page")
+        key = ".".join(self.categories)
+        attributeIcon = globalAttrs.get("global.%s.icon" % (key), "page")
 
         style.icon = attributeIcon   # u"page"  # self.propIcon
         style.label = self.categories[-1]
@@ -834,7 +836,7 @@ class AttrCategoryNode(AbstractNode):
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
 
         result = []
-        key = u".".join(self.categories + (u"",))
+        key = ".".join(self.categories + ("",))
         
         # Start with subcategories
         addedSubCategories = set()
@@ -842,16 +844,16 @@ class AttrCategoryNode(AbstractNode):
             # Cut off uninteresting
             name = name[len(key):]
 
-            nextcat = name.split(u".", 1)[0]
+            nextcat = name.split(".", 1)[0]
             addedSubCategories.add(nextcat)
             
         subCats = list(addedSubCategories)
         self.treeCtrl.pWiki.getCollator().sort(subCats)
-        result += map(lambda c: AttrCategoryNode(self.treeCtrl, self,
-                self.categories + (c,)), subCats)
+        result += [AttrCategoryNode(self.treeCtrl, self,
+                self.categories + (c,)) for c in subCats]
                 
         # Now the values:
-        vals = wikiDocument.getDistinctAttributeValuesByKey(u".".join(self.categories))
+        vals = wikiDocument.getDistinctAttributeValuesByKey(".".join(self.categories))
         self.treeCtrl.pWiki.getCollator().sort(vals)
 
         for v in vals:
@@ -867,7 +869,7 @@ class AttrCategoryNode(AbstractNode):
                 
         # Replace a single "true" value node by its children
         if len(result) == 1 and isinstance(result[0], AttrValueNode) and \
-                result[0].getValue().lower() == u"true":
+                result[0].getValue().lower() == "true":
             result = result[0].listChildren()
 
         return result
@@ -901,20 +903,20 @@ class AttrValueNode(AbstractNode):
     
     __slots__ = ("categories", "value", "propIcon")
             
-    def __init__(self, tree, parentNode, cats, value, attributeIcon=u"page"):
+    def __init__(self, tree, parentNode, cats, value, attributeIcon="page"):
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
         self.value = value
         self.propIcon = attributeIcon
-        self.unifiedName = u"helpernode/propvalue/" + \
-                u".".join(self.categories) + u"/" + self.value
+        self.unifiedName = "helpernode/propvalue/" + \
+                ".".join(self.categories) + "/" + self.value
 
     def getValue(self):
         return self.value
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.icon = u"page"
+        style.icon = "page"
         style.label = self.value
         style.hasChildren = True
         return style
@@ -922,7 +924,7 @@ class AttrValueNode(AbstractNode):
     def listChildren(self):
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
         result = []
-        key = u".".join(self.categories)
+        key = ".".join(self.categories)
 #         words = wikiData.getWordsWithAttributeValue(key, self.value)
         words = list(set(w for w,k,v in wikiDocument.getAttributeTriples(
                 None, key, self.value)))
@@ -972,8 +974,8 @@ class WikiWordAttributeSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
-            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+            wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+            wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
                 
             attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
             for node in attrNodes:
@@ -993,32 +995,32 @@ class MainSearchesNode(AbstractNode):
     
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/searches"
+        self.unifiedName = "helpernode/main/searches"
 
     def getNodePresentationFast(self):
         style = NodeStyle()
-        style.label = _(u"searches")
-        style.icon = u"lens"
+        style.label = _("searches")
+        style.icon = "lens"
         style.hasChildren = True
         return style
         
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"searches")
-        style.icon = u"lens"
+        style.label = _("searches")
+        style.icon = "lens"
         style.hasChildren = self.isVisible()
         return style
         
     def isVisible(self):
 #         return bool(self.treeCtrl.pWiki.getWikiData().getSavedSearchTitles())
         return bool(self.treeCtrl.pWiki.getWikiData()\
-                .getDataBlockUnifNamesStartingWith(u"savedsearch/"))
+                .getDataBlockUnifNamesStartingWith("savedsearch/"))
 
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
 
         unifNames = wikiData.getDataBlockUnifNamesStartingWith(
-                u"savedsearch/")
+                "savedsearch/")
 
 #         return map(lambda s: SearchNode(self.treeCtrl, self, s), searchTitles)
         return [SearchNode(self.treeCtrl, self, name[12:]) for name in unifNames]
@@ -1036,12 +1038,12 @@ class SearchNode(AbstractNode):
     def __init__(self, tree, parentNode, searchTitle):
         AbstractNode.__init__(self, tree, parentNode)
         self.searchTitle = searchTitle
-        self.unifiedName = u"savedsearch/" + self.searchTitle
+        self.unifiedName = "savedsearch/" + self.searchTitle
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.icon = u"lens"
-        style.label = unicode(self.searchTitle)
+        style.icon = "lens"
+        style.label = str(self.searchTitle)
         style.hasChildren = True
         return style
 
@@ -1049,7 +1051,7 @@ class SearchNode(AbstractNode):
         pWiki = self.treeCtrl.pWiki
 #         datablock = pWiki.getWikiData().getSearchDatablock(self.searchTitle)
         datablock = pWiki.getWikiData().retrieveDataBlock(
-                u"savedsearch/" + self.searchTitle)
+                "savedsearch/" + self.searchTitle)
 
         searchOp = SearchReplaceOperation()
         searchOp.setPackedSettings(datablock)
@@ -1082,18 +1084,17 @@ class MainModifiedWithinNode(AbstractNode):
 
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/modifiedwithin"
+        self.unifiedName = "helpernode/main/modifiedwithin"
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"modified-within")
-        style.icon = u"date"
+        style.label = _("modified-within")
+        style.icon = "date"
         style.hasChildren = True
         return style
         
     def listChildren(self):
-        return map(lambda d: ModifiedWithinNode(self.treeCtrl, self, d),
-                [1, 3, 7, 30])
+        return [ModifiedWithinNode(self.treeCtrl, self, d) for d in [1, 3, 7, 30]]
 
 
 
@@ -1107,16 +1108,16 @@ class ModifiedWithinNode(AbstractNode):
     def __init__(self, tree, parentNode, daySpan):
         AbstractNode.__init__(self, tree, parentNode)
         self.daySpan = daySpan
-        self.unifiedName = u"helpernode/modifiedwithin/days/" + \
-                unicode(self.daySpan)
+        self.unifiedName = "helpernode/modifiedwithin/days/" + \
+                str(self.daySpan)
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.icon = u"date"
+        style.icon = "date"
         if self.daySpan == 1:
-            style.label = _(u"1 day")
+            style.label = _("1 day")
         else:
-            style.label = _(u"%i days") % self.daySpan
+            style.label = _("%i days") % self.daySpan
         style.hasChildren = True   #?
         return style
 
@@ -1150,19 +1151,19 @@ class MainParentlessNode(AbstractNode):
     
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/parentless"
+        self.unifiedName = "helpernode/main/parentless"
 
     def getNodePresentationFast(self):
         style = NodeStyle()
-        style.label = _(u"parentless-nodes")
-        style.icon = u"link"
+        style.label = _("parentless-nodes")
+        style.icon = "link"
         style.hasChildren = True
         return style
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"parentless-nodes")
-        style.icon = u"link"
+        style.label = _("parentless-nodes")
+        style.icon = "link"
         
         wikiData = self.treeCtrl.pWiki.getWikiData()
         style.hasChildren = self.isVisible()
@@ -1190,19 +1191,19 @@ class MainUndefinedNode(AbstractNode):
     
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/undefined"
+        self.unifiedName = "helpernode/main/undefined"
 
     def getNodePresentationFast(self):
         style = NodeStyle()
-        style.label = _(u"undefined-nodes")
-        style.icon = u"question"
+        style.label = _("undefined-nodes")
+        style.icon = "question"
         style.hasChildren = True
         return style
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"undefined-nodes")
-        style.icon = u"question"
+        style.label = _("undefined-nodes")
+        style.icon = "question"
         style.hasChildren = self.isVisible()
         return style
 
@@ -1227,26 +1228,26 @@ class MainFuncPagesNode(AbstractNode):
 
     def __init__(self, tree, parentNode):
         AbstractNode.__init__(self, tree, parentNode)
-        self.unifiedName = u"helpernode/main/funcpages"
+        self.unifiedName = "helpernode/main/funcpages"
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = _(u"Func. pages")
-        style.icon = u"cog"
+        style.label = _("Func. pages")
+        style.icon = "cog"
         style.hasChildren = True
         return style
         
     def listChildren(self):
         return [
-                FuncPageNode(self.treeCtrl, self, u"global/TextBlocks"),
-                FuncPageNode(self.treeCtrl, self, u"wiki/TextBlocks"),
-                FuncPageNode(self.treeCtrl, self, u"global/PWL"),
-                FuncPageNode(self.treeCtrl, self, u"wiki/PWL"),
-                FuncPageNode(self.treeCtrl, self, u"global/CCBlacklist"),
-                FuncPageNode(self.treeCtrl, self, u"wiki/CCBlacklist"),
-                FuncPageNode(self.treeCtrl, self, u"global/NCCBlacklist"),
-                FuncPageNode(self.treeCtrl, self, u"wiki/NCCBlacklist"),
-                FuncPageNode(self.treeCtrl, self, u"global/FavoriteWikis")
+                FuncPageNode(self.treeCtrl, self, "global/TextBlocks"),
+                FuncPageNode(self.treeCtrl, self, "wiki/TextBlocks"),
+                FuncPageNode(self.treeCtrl, self, "global/PWL"),
+                FuncPageNode(self.treeCtrl, self, "wiki/PWL"),
+                FuncPageNode(self.treeCtrl, self, "global/CCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, "wiki/CCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, "global/NCCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, "wiki/NCCBlacklist"),
+                FuncPageNode(self.treeCtrl, self, "global/FavoriteWikis")
                 ]
 
 
@@ -1261,7 +1262,7 @@ class FuncPageNode(AbstractNode):
         AbstractNode.__init__(self, tree, parentNode)
         self.funcTag = funcTag
         self.label = DocPages.getHrNameForFuncTag(self.funcTag)
-        self.unifiedName = u"funcpage/" + self.funcTag
+        self.unifiedName = "funcpage/" + self.funcTag
 
     def getNodePresentation(self):
         """
@@ -1269,7 +1270,7 @@ class FuncPageNode(AbstractNode):
         """
         style = NodeStyle()
         style.label = self.label
-        style.icon = u"cog"
+        style.icon = "cog"
         style.hasChildren = False
 
         return style
@@ -1330,18 +1331,18 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         
         self.onOptionsChanged(None)
 
-        wx.EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
-        wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
-        wx.EVT_RIGHT_UP(self, self.OnRightButtonUp)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnTreeItemActivated, id=ID)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightButtonDown)
+        self.Bind(wx.EVT_RIGHT_UP, self.OnRightButtonUp)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self._bindSelection()
 
-#         wx.EVT_TREE_BEGIN_RDRAG(self, ID, self.OnTreeBeginRDrag)
-        wx.EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
-        wx.EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
-        wx.EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
+#         self.Bind(wx.EVT_TREE_BEGIN_RDRAG, self.OnTreeBeginRDrag, id=ID)
+        self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnTreeItemExpand, id=ID)
+        self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnTreeItemCollapse, id=ID)
+        self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnTreeBeginDrag, id=ID)
 
 #        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
@@ -1355,25 +1356,25 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         menuID = wx.NewId()
 #         self.contextMenuWikiWords.Append(menuID, _(u'Add icon attribute'),
 #                 _(u'Open icon select dialog'))
-#         wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showSelectIconDialog())
+#         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showSelectIconDialog(), id=menuID)
 
         # Build icon menu
         # Build full submenu for icons
         iconsMenu, self.cmdIdToIconName = \
                 AttributeHandling.buildIconsSubmenu(wx.GetApp().getIconCache())
-        for cmi in self.cmdIdToIconName.keys():
-            wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+        for cmi in list(self.cmdIdToIconName.keys()):
+            self.Bind(wx.EVT_MENU, self.OnInsertIconAttribute, id=cmi)
 
-        self.contextMenuWikiWords.AppendMenu(wx.NewId(),
-                _(u'Add icon attribute'), iconsMenu)
+        self.contextMenuWikiWords.AppendSubMenu(iconsMenu,
+                _('Add icon attribute'))
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = AttributeHandling.buildColorsSubmenu()
-        for cmi in self.cmdIdToColorName.keys():
-            wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+        for cmi in list(self.cmdIdToColorName.keys()):
+            self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
-        self.contextMenuWikiWords.AppendMenu(wx.NewId(), _(u'Add color attribute'),
-                colorsMenu)
+        self.contextMenuWikiWords.AppendSubMenu(colorsMenu,
+                _('Add color attribute'))
 
         self.contextMenuNode = None  # Tree node for which a context menu was shown
         self.selectedNodeWhileContext = None # Tree node which was selected
@@ -1381,30 +1382,27 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 # selection jumps normally back to this node
 
         # TODO Let PersonalWikiFrame handle this 
-        wx.EVT_MENU(self, GUI_ID.CMD_RENAME_THIS_WIKIWORD,
-                lambda evt: self.pWiki.showWikiWordRenameDialog(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
-        wx.EVT_MENU(self, GUI_ID.CMD_DELETE_THIS_WIKIWORD,
-                lambda evt: self.pWiki.showWikiWordDeleteDialog(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
-        wx.EVT_MENU(self, GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD,
-                lambda evt: self.pWiki.insertAttribute("bookmarked", "true",
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
-        wx.EVT_MENU(self, GUI_ID.CMD_SETASROOT_THIS_WIKIWORD,
-                lambda evt: self.pWiki.setWikiWordAsRoot(
-                    self.GetPyData(self.contextMenuNode).getWikiWord()))
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordRenameDialog(
+                self.GetItemData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordDeleteDialog(
+                self.GetItemData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.insertAttribute(
+                "bookmarked", "true",
+                self.GetItemData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.setWikiWordAsRoot(
+                self.GetItemData(self.contextMenuNode).getWikiWord()),
+                id=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_COLLAPSE_TREE,
-                lambda evt: self.collapseAll())
+        self.Bind(wx.EVT_MENU, lambda evt: self.collapseAll(),
+                id=GUI_ID.CMD_COLLAPSE_TREE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS,
-                self.OnAppendWikiWord)
-        wx.EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS,
-                self.OnPrependWikiWord)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD,
-                self.OnCmdClipboardCopyUrlToThisWikiWord)
+        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, id=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, id=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
                 
 
 
@@ -1465,7 +1463,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def collapseAll(self):
         self.UnselectAll()
         rootNode = self.GetRootItem()
-        rootOb = self.GetPyData(rootNode)
+        rootOb = self.GetItemData(rootNode)
         if self.expandedNodePathes is not None:
             self.expandedNodePathes = StringPathSet()
 
@@ -1524,7 +1522,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         currentDpp = self.pWiki.getCurrentDocPagePresenter()
         if currentNode is not None and currentNode.IsOk():
-            node = self.GetPyData(currentNode)
+            node = self.GetItemData(currentNode)
             if node.representsWikiWord():                    
                 if self.pWiki.getWikiDocument()\
                         .getWikiPageNameForLinkTermOrAsIs(node.getWikiWord()) ==\
@@ -1539,7 +1537,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if motionType == "parent":
                     parentnodeid = self.GetItemParent(currentNode)
                     if parentnodeid is not None and parentnodeid.IsOk():
-                        parentnode = self.GetPyData(parentnodeid)
+                        parentnode = self.GetItemData(parentnodeid)
                         if parentnode.representsWikiWord() and \
                                 (parentnode.getWikiWord() == \
                                 self.pWiki.getCurrentWikiWord()):
@@ -1607,7 +1605,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             docPagePresenter.mainTreePositionHint = None
             return
 
-        node = self.GetPyData(nodeId)
+        node = self.GetItemData(nodeId)
 
         docPagePresenter.mainTreePositionHint = tuple(node.getNodePath())
 
@@ -1621,7 +1619,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             return False
         
 
-        node = self.GetPyData(parentNodeId)
+        node = self.GetItemData(parentNodeId)
         if node.getUnifiedName() != nodePath[0]:
             return False
 
@@ -1641,7 +1639,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         nodeId, cookie = self.GetFirstChild(parentNodeId)
         while nodeId is not None and nodeId.IsOk():
-            node = self.GetPyData(nodeId)
+            node = self.GetItemData(nodeId)
             if node.getUnifiedName() == nodeUnifiedName:
                 if len(nodePath) == 1:
                     self.SelectItem(nodeId, send_events=False)
@@ -1656,7 +1654,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def joinItemIdToNode(self, treeItemId, nodeObj):
-        self.SetPyData(treeItemId, nodeObj)
+        self.SetItemData(treeItemId, nodeObj)
         nodeObj.setWxItemId(treeItemId)
 
     def _startBackgroundRefresh(self):
@@ -1710,7 +1708,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         nodeId, cookie = self.GetFirstChild(parentNodeId)
         while nodeId is not None and nodeId.IsOk():
             if self.IsExpanded(nodeId):
-                node = self.GetPyData(nodeId)
+                node = self.GetItemData(nodeId)
                 self.expandedNodePathes.add(tuple(node.getNodePath()))
                 # Recursively handle childs of expanded node
                 self._addExpandedNodesToPathSet(nodeId)
@@ -1727,10 +1725,10 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetBackgroundColour(wx.Colour(*coltuple))
 
-        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT, 
         font.SetNativeFontInfoUserDesc(config.get(
-                "main", "tree_font_nativeDesc", u""))
+                "main", "tree_font_nativeDesc", ""))
 
         self.SetFont(font)
         
@@ -1762,7 +1760,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             # Clear pathes stored in config
             config.set("main",
                     "tree_expandedNodes_descriptorPathes_" + self.treeType,
-                    u"")
+                    "")
 
     def _generatorRefreshNodeAndChildren(self, parentnodeid):
         """
@@ -1773,9 +1771,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         runs them in a different thread.
         """
         try:        
-            nodeObj = self.GetPyData(parentnodeid)
+            nodeObj = self.GetItemData(parentnodeid)
         except Exception:
-            raise StopIteration
+            return
 
         wikiData = self.pWiki.getWikiData()
 
@@ -1793,7 +1791,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     tuple(nodeObj.getNodePath()))
 
         if not self.IsExpanded(parentnodeid):
-            raise StopIteration
+            return
 
 #         if nodeObj.representsWikiWord():
 #             retObj = self.refreshExecutor.executeAsync(
@@ -1834,7 +1832,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             for c in children:
                 if idIdx < len(oldChildNodeIds):
                     nodeid = oldChildNodeIds[idIdx]
-                    nodeObj = self.GetPyData(nodeid)
+                    nodeObj = self.GetItemData(nodeid)
                     if c.nodeEquality(nodeObj):
                         # Previous child matches new child -> normal refreshing
                         if self.IsExpanded(nodeid):
@@ -1904,7 +1902,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 idIdx += 1
 
                 if self.expandedNodePathes is not None:
-                    nodeObj = self.GetPyData(nodeid)
+                    nodeObj = self.GetItemData(nodeid)
                     nodePath = tuple(nodeObj.getNodePath())
                     if nodePath not in childrenPathes:
                         self.expandedNodePathes.discardStartsWith(nodePath)
@@ -1921,7 +1919,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     for sg in self._generatorRefreshNodeAndChildren(nodeid):
                         yield sg
                 else:
-                    nodeObj = self.GetPyData(nodeid)
+                    nodeObj = self.GetItemData(nodeid)
                     retObj = self.refreshExecutor.executeAsync(0,
                             nodeObj.getNodePresentation)
                     while retObj.state == 0:  # Dangerous!
@@ -1934,11 +1932,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
                 nodeid, cookie = self.GetNextChild(parentnodeid, cookie)
             
-        raise StopIteration
+        return
 
 
     def onRenamedWikiPage(self, miscevt):
-        rootItem = self.GetPyData(self.GetRootItem())
+        rootItem = self.GetItemData(self.GetRootItem())
         if isinstance(rootItem, WikiWordNode) and \
                 miscevt.get("wikiPage").getWikiWord() == \
                 rootItem.getWikiWord():
@@ -1963,10 +1961,10 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if durat == 2 and self.expandedNodePathes is not None:
             pathStrs = []
             for path in self.expandedNodePathes:
-                pathStrs.append(u",".join(
-                        [escapeForIni(item, u";,") for item in path]))
+                pathStrs.append(",".join(
+                        [escapeForIni(item, ";,") for item in path]))
             
-            remString = u";".join(pathStrs)
+            remString = ";".join(pathStrs)
 
             config.set("main",
                     "tree_expandedNodes_descriptorPathes_" + self.treeType,
@@ -1974,7 +1972,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         else:
             config.set("main",
                     "tree_expandedNodes_descriptorPathes_" + self.treeType,
-                    u"")
+                    "")
 
         self._stopBackgroundRefresh()
         self.refreshExecutor.end(hardEnd=True)
@@ -1989,35 +1987,35 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
     def OnInsertIconAttribute(self, evt):
         self.pWiki.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()],
-                self.GetPyData(self.contextMenuNode).getWikiWord())
+                self.GetItemData(self.contextMenuNode).getWikiWord())
 
     def OnInsertColorAttribute(self, evt):
         self.pWiki.insertAttribute("color", self.cmdIdToColorName[evt.GetId()],
-                self.GetPyData(self.contextMenuNode).getWikiWord())
+                self.GetItemData(self.contextMenuNode).getWikiWord())
 
 #         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
 
     def OnAppendWikiWord(self, evt):
         toWikiWord = SelectWikiWordDialog.runModal(self.pWiki, self.pWiki, -1,
-                title=_(u"Append Wiki Word"))
+                title=_("Append Wiki Word"))
 
         if toWikiWord is not None:
-            parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+            parentWord = self.GetItemData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDocument().getWikiPageNoError(parentWord)
             
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     page.getWikiLanguageName())
 
-            page.appendLiveText(u"\n" +
+            page.appendLiveText("\n" +
                     langHelper.createAbsoluteLinksFromWikiWords((toWikiWord,)))
 
 
     def OnPrependWikiWord(self, evt):
         toWikiWord = SelectWikiWordDialog.runModal(self.pWiki, self.pWiki, -1,
-                title=_(u"Prepend Wiki Word"))
+                title=_("Prepend Wiki Word"))
 
         if toWikiWord is not None:
-            parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+            parentWord = self.GetItemData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDocument().getWikiPageNoError(parentWord)
             
             langHelper = wx.GetApp().createWikiLanguageHelper(
@@ -2026,11 +2024,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             text = page.getLiveText()
             page.replaceLiveText(
                     langHelper.createAbsoluteLinksFromWikiWords((toWikiWord,)) +
-                    u"\n" + text)
+                    "\n" + text)
 
 
     def OnActivateNewTabThis(self, evt):
-        wikiWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+        wikiWord = self.GetItemData(self.contextMenuNode).getWikiWord()
         presenter = self.pWiki.createNewDocPagePresenterTab()
         presenter.openWikiPage(wikiWord)
         presenter.getMainControl().getMainAreaPanel().\
@@ -2043,7 +2041,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def OnCmdClipboardCopyUrlToThisWikiWord(self, evt):
-        wikiWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+        wikiWord = self.GetItemData(self.contextMenuNode).getWikiWord()
         path = self.pWiki.getWikiDocument().getWikiConfigPath()
         copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
 
@@ -2072,7 +2070,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         # First check if word has canonical parent
         canonical_parent = self.pWiki.getWikiDocument().getAttributeTriples(
-                wikiWord, u"parent", None)
+                wikiWord, "parent", None)
 
         if canonical_parent:
             parentWikiWord = wikiDoc.getWikiPageNameForLinkCore(
@@ -2099,7 +2097,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 parent_list.append(newWikiWord)
                 newWikiWord = parentWikiWord
                 canonical_parent = self.pWiki.getWikiDocument()\
-                        .getAttributeTriples(newWikiWord, u"parent", None)
+                        .getAttributeTriples(newWikiWord, "parent", None)
 
                 if canonical_parent:
                     parentWikiWord = wikiDoc.getWikiPageNameForLinkCore(
@@ -2119,8 +2117,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             for i in parent_list:
                 rootNode = self.GetRootItem()
                 if rootNode is not None and rootNode.IsOk() and \
-                        self.GetPyData(rootNode).representsFamilyWikiWord():
-                    rootWikiWord = self.GetPyData(rootNode).getWikiWord()
+                        self.GetItemData(rootNode).representsFamilyWikiWord():
+                    rootWikiWord = self.GetItemData(rootNode).getWikiWord()
                     crumbs = wikiData.findBestPathFromWordToWord(
                                         parent_list.pop(), rootWikiWord)
 
@@ -2144,14 +2142,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         break
 
         elif currentNode is not None and currentNode.IsOk() and \
-                self.GetPyData(currentNode).representsFamilyWikiWord():
+                self.GetItemData(currentNode).representsFamilyWikiWord():
             # check for path from wikiWord to currently selected tree node            
-            currentWikiWord = self.GetPyData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
+            currentWikiWord = self.GetItemData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
             crumbs = wikiData.findBestPathFromWordToWord(wikiWord, currentWikiWord)
            
             if crumbs and self.pWiki.getConfig().getboolean("main",
                     "tree_no_cycles"):
-                ancestors = self.GetPyData(currentNode).getAncestors()
+                ancestors = self.GetItemData(currentNode).getAncestors()
                 # If an ancestor of the current node is in the crumbs, the
                 # crumbs path is invalid because it contains a cycle
                 for c in crumbs:
@@ -2164,8 +2162,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if not crumbs:
             currentNode = self.GetRootItem()
             if currentNode is not None and currentNode.IsOk() and \
-                    self.GetPyData(currentNode).representsFamilyWikiWord():
-                currentWikiWord = self.GetPyData(currentNode).getWikiWord()
+                    self.GetItemData(currentNode).representsFamilyWikiWord():
+                currentWikiWord = self.GetItemData(currentNode).getWikiWord()
                 crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                         currentWikiWord)
 
@@ -2188,13 +2186,13 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         self.Expand(currentNode)
                         currentNode = self.findChildTreeNodeByWikiWord(currentNode,
                                 crumbs[i+1])
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("error expanding tree node: %s\n" % e)
 
 
             # set the ItemHasChildren marker if the node is not expanded
             if currentNode:
-                currentWikiWord = self.GetPyData(currentNode).getWikiWord()
+                currentWikiWord = self.GetItemData(currentNode).getWikiWord()
 
                 # the only time this could be 0 really is if the expand above
                 # invalidated the root pointer
@@ -2226,7 +2224,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def findChildTreeNodeByWikiWord(self, fromNode, findWord):
         (child, cookie) = self.GetFirstChild(fromNode)    # , 0
         while child:
-            nodeobj = self.GetPyData(child)
+            nodeobj = self.GetItemData(child)
 #             if nodeobj.representsFamilyWikiWord() and nodeobj.getWikiWord() == findWord:
             if nodeobj.representsFamilyWikiWord() and \
                     self.pWiki.getWikiDocument().getWikiPageNameForLinkTerm(
@@ -2238,14 +2236,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def setRootByWord(self, rootword):
-        self.setRootByUnifiedName(u"wikipage/" + rootword)
+        self.setRootByUnifiedName("wikipage/" + rootword)
 
     def getMainTreeMode(self):
         return self.mainTreeMode
 
     def setViewsAsRoot(self):
         self.mainTreeMode = False
-        self.setRootByUnifiedName(u"helpernode/main/view")
+        self.setRootByUnifiedName("helpernode/main/view")
 
 
     def setRootByUnifiedName(self, unifName):
@@ -2256,7 +2254,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # add the root node to the tree
         nodeobj = self.createNodeObjectByUnifiedName(unifName)
         nodeobj.setRoot(True)
-        root = self.AddRoot(u"")
+        root = self.AddRoot("")
         self.joinItemIdToNode(root, nodeobj)
         
         nodeStyle = nodeobj.getNodePresentationFast()
@@ -2274,9 +2272,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         
     def createNodeObjectByUnifiedName(self, unifName):
         # TODO Support all node types
-        if unifName.startswith(u"wikipage/"):
+        if unifName.startswith("wikipage/"):
             return WikiWordNode(self, None, unifName[9:])
-        elif unifName == u"helpernode/main/view":
+        elif unifName == "helpernode/main/view":
             return MainViewNode(self, None)
         else:
             raise InternalError(
@@ -2298,16 +2296,16 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             pathSet = StringPathSet()
             remString = config.get("main",
                     "tree_expandedNodes_descriptorPathes_" + self.treeType,
-                    u"")
+                    "")
             
             # remString consists of node pathes delimited by ';'
             # the items of the paath are delimited by , and are
             # ini-escaped
             
-            if not remString == u"":
-                for pathStr in remString.split(u";"):
+            if not remString == "":
+                for pathStr in remString.split(";"):
                     path = tuple(unescapeForIni(item)
-                            for item in pathStr.split(u","))
+                            for item in pathStr.split(","))
                     pathSet.add(path)
                     
             self.expandedNodePathes = pathSet
@@ -2320,7 +2318,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         try:
             index = self.pWiki.lookupIconIndex(image)
             if index == -1:
-                index = self.pWiki.lookupIconIndex(u"page")
+                index = self.pWiki.lookupIconIndex("page")
             ## if icon:
                 ## self.SetItemImage(node, index, wx.TreeItemIcon_Selected)
                 ## self.SetItemImage(node, index, wx.TreeItemIcon_Expanded)
@@ -2354,7 +2352,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def setNodePresentation(self, node, style):
-        self.SetItemText(node, uniToGui(style.label), recalcSize=False)
+        self.SetItemText(node, style.label, recalcSize=False)
         self.setNodeImage(node, style.icon)
         self.SetItemBold(node, strToBool(style.bold, False))
         self.setNodeColor(node, style.color)
@@ -2377,7 +2375,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def OnTreeItemSelected(self, event):
         item = event.GetItem()
         if item is not None and item.IsOk():
-            node = self.GetPyData(item)
+            node = self.GetItemData(item)
             node.onSelected()
 
             self._storeMainTreePositionHint(
@@ -2394,7 +2392,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def OnTreeItemActivated(self, event):
         item = event.GetItem()
         if item is not None and item.IsOk():
-            node = self.GetPyData(item)
+            node = self.GetItemData(item)
             if not node.onActivated():
                 event.Skip()
 
@@ -2415,7 +2413,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if self.IsExpanded(item):   # TODO Check if a good idea
             return
 
-        itemobj = self.GetPyData(item)
+        itemobj = self.GetItemData(item)
         if self.expandedNodePathes is not None:
             self.expandedNodePathes.add(tuple(itemobj.getNodePath()))
 
@@ -2430,7 +2428,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.Freeze()
         try:
             for ch in childnodes:
-                newit = self.AppendItem(item, u"")
+                newit = self.AppendItem(item, "")
                 self.joinItemIdToNode(newit, ch)
                 
                 nodeStyle = ch.getNodePresentationFast()
@@ -2458,7 +2456,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def OnTreeItemCollapse(self, event):
-        itemobj = self.GetPyData(event.GetItem())
+        itemobj = self.GetItemData(event.GetItem())
 
         if self.expandedNodePathes is not None:
             self.expandedNodePathes.discard(tuple(itemobj.getNodePath()))
@@ -2476,16 +2474,16 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.pWiki.getWikiDocument().getWikiDefaultWikiLanguage())
 
-        itemobj = self.GetPyData(item)
+        itemobj = self.GetItemData(item)
         if isinstance(itemobj, WikiWordNode):
             textDataOb = textToDataObject(
                     langHelper.createAbsoluteLinksFromWikiWords(
                     (itemobj.getWikiWord(),)))
 
-            wikiWordDataOb = wx.DataObjectSimple(wx.CustomDataFormat(
+            wikiWordDataOb = wx.DataObjectSimple(wx.DataFormat(
                     "application/x-wikidpad-unifiedname"))
             wikiWordDataOb.SetData(
-                    (u"wikipage/" + itemobj.getWikiWord()).encode("utf-8"))
+                    ("wikipage/" + itemobj.getWikiWord()).encode("utf-8"))
 
             dataOb = wx.DataObjectComposite()
             dataOb.Add(textDataOb, True)
@@ -2525,7 +2523,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.contextMenuNode = item
 
         menu = wx.Menu()
-        menu = self.GetPyData(item).prepareContextMenu(menu)
+        menu = self.GetItemData(item).prepareContextMenu(menu)
 
         if menu is not None:
             self.selectedNodeWhileContext = selnode
@@ -2564,7 +2562,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if item is None or not item.IsOk():
             return
 
-        nodeObj = self.GetPyData(item)
+        nodeObj = self.GetItemData(item)
 
         if event.ControlDown():
             configCode = self.pWiki.getConfig().getint("main",
@@ -2579,7 +2577,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #             self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
             
             if self.pWiki.activatePageByUnifiedName(
-                    u"wikipage/" + nodeObj.getWikiWord(), tabMode) is None:
+                    "wikipage/" + nodeObj.getWikiWord(), tabMode) is None:
                 return
             
             if not (tabMode & 1) and self.pWiki.getConfig().getboolean("main",
@@ -2613,7 +2611,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 return
 
             try:
-                gen.next()
+                next(gen)
                 # Set time after generator run, so time needed by generator
                 # itself doesn't count
                 self.refreshGeneratorLastCallTime = time.clock()

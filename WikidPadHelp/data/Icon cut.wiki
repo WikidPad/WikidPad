@@ -1,2 +1,2 @@
-++ Icon cut
+﻿++ Icon cut
 [icon: cut]

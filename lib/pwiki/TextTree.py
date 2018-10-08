@@ -8,13 +8,13 @@ import traceback
 
 import wx
 
-from WikiExceptions import *
-from wxHelper import XrcControls, GUI_ID
+from .WikiExceptions import *
+from .wxHelper import XrcControls, GUI_ID
 
-from StringOps import splitIndentDeepness, unescapeWithRe, uniWithNone, \
+from .StringOps import splitIndentDeepness, unescapeWithRe, uniWithNone, \
         re_sub_escape, splitFill
 
-from AdditionalDialogs import SelectIconDialog
+from .AdditionalDialogs import SelectIconDialog
 
 
 # class MenuBuilder:
@@ -38,7 +38,7 @@ class Container(Item):
 
     def append(self, item):
         if item.isEntry():
-            if item.value != u"":
+            if item.value != "":
                 self.items.append(item)
             else:
                 if self.title is None:
@@ -68,16 +68,16 @@ class TextBlocksEntry(Item):
     @staticmethod        
     def factory(text):
         try:
-            entryPrefix, entryValue = text.split(u"=", 1)
+            entryPrefix, entryValue = text.split("=", 1)
         except:
             return None
             
-        entryPrefixes = entryPrefix.split(u";")
+        entryPrefixes = entryPrefix.split(";")
         entryTitle = entryPrefixes[0]
         if len(entryPrefixes) > 1:
             entryFlags = entryPrefixes[1]
         else:
-            entryFlags = u""
+            entryFlags = ""
             
         entryValue = unescapeWithRe(entryValue)
 
@@ -87,7 +87,7 @@ class TextBlocksEntry(Item):
 #             except:
 #                 return None
 
-        if entryTitle == u"":
+        if entryTitle == "":
             entryTitle = entryValue[:60]   # TODO Changeable
             entryTitle = entryTitle.split("\n", 1)[0]
         else:
@@ -134,29 +134,29 @@ class FavoriteWikisEntry(Item):
         Create text line (without ending \n) which contains the data in
         this entry.
         """
-        return re_sub_escape(uniWithNone(self.title)) + u";" + \
-                uniWithNone(self.flags) + u";" + uniWithNone(self.iconDesc) + \
-                u"=" + uniWithNone(self.value)
+        return re_sub_escape(uniWithNone(self.title)) + ";" + \
+                uniWithNone(self.flags) + ";" + uniWithNone(self.iconDesc) + \
+                "=" + uniWithNone(self.value)
 
 
     @staticmethod        
     def factory(text):
         try:
-            entryPrefix, entryValue = text.split(u"=", 1)
+            entryPrefix, entryValue = text.split("=", 1)
         except:
             return None
             
-        entryPrefixes = entryPrefix.split(u";")
+        entryPrefixes = entryPrefix.split(";")
         entryTitle = entryPrefixes[0]
-        entryFlags = u""
-        entryIconDesc = u""
+        entryFlags = ""
+        entryIconDesc = ""
 
         if len(entryPrefixes) > 1:
             entryFlags = entryPrefixes[1]
             if len(entryPrefixes) > 2:
                 entryIconDesc = entryPrefixes[2]
 
-        if entryTitle == u"":
+        if entryTitle == "":
             entryTitle = entryValue[-60:]   # TODO Changeable
             entryTitle = entryTitle.split("\n")[-1]
         else:
@@ -178,8 +178,8 @@ def buildTreeFromText(content, entryFactory):
     
     emptyLine = False
     lastTitle = None
-    for line in content.split(u"\n"):
-        if line.strip() == u"":
+    for line in content.split("\n"):
+        if line.strip() == "":
             emptyLine = True
             lastTitle = None
             continue
@@ -202,7 +202,7 @@ def buildTreeFromText(content, entryFactory):
             while stack[-1][0] > deep:
                 container = stack.pop()[1]
                 if container.title is None:
-                    container.title = _(u"<No title>")
+                    container.title = _("<No title>")
 
                 stack[-1][1].append(container)
 #         else:
@@ -226,7 +226,7 @@ def buildTreeFromText(content, entryFactory):
 
         stack[-1][1].append(entry)
 
-        if entry.value == u"" and entry.title != u"":
+        if entry.value == "" and entry.title != "":
             lastTitle = entry.title
         else:
             lastTitle = None
@@ -237,7 +237,7 @@ def buildTreeFromText(content, entryFactory):
     while len(stack) > 1:
         container = stack.pop()[1]
         if container.title is None:
-            container.title = _(u"<No title>")
+            container.title = _("<No title>")
 
         stack[-1][1].append(container)
     
@@ -260,15 +260,15 @@ def addTreeToMenu(container, menu, idRecycler, evtSender, evtRcvFunc):
 
             if not reused:
                 # For a new id, an event must be set
-                wx.EVT_MENU(evtSender, menuID, evtRcvFunc)
+                evtSender.Bind(wx.EVT_MENU, evtRcvFunc, id=menuID)
 
             menuItem = wx.MenuItem(menu, menuID, item.title)
-            menu.AppendItem(menuItem)
+            menu.Append(menuItem)
         elif isinstance(item, Container):
             # Handle subcontainer recursively
             submenu = wx.Menu()
             addTreeToMenu(item, submenu, idRecycler, evtSender, evtRcvFunc)
-            menu.AppendMenu(wx.NewId(), item.title, submenu)
+            menu.AppendSubMenu(submenu, item.title)
 
    
    
@@ -280,14 +280,13 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         """
         entry -- FavoriteWikisEntry
         """
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.parent = parent
         self.entry = entry
         self.value = None
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.parent, "AddWikiToFavoriteWikisDialog")
+        res.LoadDialog(self, self.parent, "AddWikiToFavoriteWikisDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -303,12 +302,12 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
                 
         toolbarPos = self.entry.getToolbarPosition()
 
-        title, shortcut = splitFill(uniWithNone(self.entry.title), u"\t", 1)
+        title, shortcut = splitFill(uniWithNone(self.entry.title), "\t", 1)
 
         self.ctrls.tfTitle.SetValue(title)
         self.ctrls.tfShortcut.SetValue(shortcut)
         self.ctrls.tfPathOrUrl.SetValue(uniWithNone(self.entry.value))
-        self.ctrls.cbOpenInNewWindow.SetValue(u"n" in self.entry.flags)
+        self.ctrls.cbOpenInNewWindow.SetValue("n" in self.entry.flags)
         self.ctrls.cbShowInToolbar.SetValue(toolbarPos != -1)
 
         self.ctrls.spinIconPosition.SetValue(toolbarPos)
@@ -322,12 +321,11 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectPath, self.OnSelectPath)
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectIcon, self.OnSelectIcon)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectPath, id=GUI_ID.btnSelectPath)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectIcon, id=GUI_ID.btnSelectIcon)
 
-        wx.EVT_CHECKBOX(self, GUI_ID.cbShowInToolbar,
-                self.OnShowInToolbar)
+        self.Bind(wx.EVT_CHECKBOX, self.OnShowInToolbar, id=GUI_ID.cbShowInToolbar)
 
 
     def getValue(self):
@@ -358,10 +356,10 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
 #         
 #         wcs = u"|".join(wcs)
             
-        selfile = wx.FileSelector(_(u"Select wiki for favorites"),
+        selfile = wx.FileSelector(_("Select wiki for favorites"),
                 self.ctrls.tfPathOrUrl.GetValue(),
                 default_filename = "", default_extension = "",
-                wildcard = u"*.wiki", flags=wx.OPEN, parent=self)
+                wildcard = "*.wiki", flags=wx.FD_OPEN, parent=self)
 
         if selfile:
             self.ctrls.tfPathOrUrl.SetValue(selfile)
@@ -385,21 +383,21 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
             entry.title = self.ctrls.tfTitle.GetValue()
 
             shortcut = self.ctrls.tfShortcut.GetValue()
-            if shortcut != u"":
-                entry.title += u"\t" + shortcut
+            if shortcut != "":
+                entry.title += "\t" + shortcut
 
             entry.value = self.ctrls.tfPathOrUrl.GetValue()
             entry.iconDesc = self.ctrls.tfIcon.GetValue()
             
-            flags = u""
+            flags = ""
             if self.ctrls.cbOpenInNewWindow.GetValue():
-                flags += u"n"
+                flags += "n"
                 
             if self.ctrls.cbBringToFront.GetValue():
-                flags += u"f"
+                flags += "f"
             
             if self.ctrls.cbShowInToolbar.GetValue():
-                flags += unicode(self.ctrls.spinIconPosition.GetValue())
+                flags += str(self.ctrls.spinIconPosition.GetValue())
                 
             entry.flags = flags
 

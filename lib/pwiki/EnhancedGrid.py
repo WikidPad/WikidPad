@@ -4,7 +4,7 @@ from os.path import *
 
 import wx, wx.grid
 
-from WikiExceptions import *
+from .WikiExceptions import *
 
 from . import SystemInfo
 

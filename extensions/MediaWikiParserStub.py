@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import traceback
 
 import wx
@@ -13,7 +13,7 @@ from pwiki.OptionsDialog import PluginOptionsPanel
 WIKIDPAD_PLUGIN = (("WikiParser", 1),)
 
 WIKI_LANGUAGE_NAME = "mediawiki_1"
-WIKI_HR_LANGUAGE_NAME = u"MediaWiki 1.0"
+WIKI_HR_LANGUAGE_NAME = "MediaWiki 1.0"
 
 
 def describeWikiLanguage(ver, app):

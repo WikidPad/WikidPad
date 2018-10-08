@@ -17,7 +17,7 @@ The mentioned applications are not part of the WikidPad release itself, you must
 <<|
     Appl.| Download| Documentation
     MimeTeX| http://www.forkosh.com/mimetex.html | http://www.forkosh.com/mimetex.html
-    GraphViz| http://graphviz.org/Download.php | http://graphviz.org/Documentation.php
+    GraphViz| http://graphviz.org/download/ | http://graphviz.org/documentation/
     Ploticus| http://ploticus.sourceforge.net/doc/download.html | http://prdownloads.sourceforge.net/ploticus/pl233site.tar.gz?download
     Gnuplot| http://www.gnuplot.info/download.html | http://www.gnuplot.info/documentation.html
 >>

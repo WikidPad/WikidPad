@@ -2,9 +2,9 @@
 """
 import os, os.path, traceback, sqlite3
 
-import wx, wx.xrc
+import wx, wx.html, wx.xrc
 
-from wxHelper import GUI_ID, wxKeyFunctionSink, XrcControls, \
+from .wxHelper import GUI_ID, wxKeyFunctionSink, XrcControls, \
         ModalDialogMixin
 
 # from .wxHelper import XrcControls
@@ -37,7 +37,7 @@ class InfoDatabase:
         """
 
 #         tempDb = ConnectWrapSyncCommit(sqlite3.connect(ur"C:\Daten\Projekte\Wikidpad\Current\fmtest.sli"))
-        tempDb = ConnectWrapSyncCommit(sqlite3.connect(ur""))
+        tempDb = ConnectWrapSyncCommit(sqlite3.connect(r""))
         # Items (files and directories) found in file storage
         tempDb.execSql("create table fStorItems("
                 "id integer primary key not null, "
@@ -109,7 +109,7 @@ class InfoDatabase:
         procCounter = 1
 
         # Using a stack instead of recursion to avoid hitting rec. limit
-        dirStack = [(self.fileStorDir, self.tempDb.lastrowid, u"", 0)]
+        dirStack = [(self.fileStorDir, self.tempDb.lastrowid, "", 0)]
 
         while dirStack:
             procDir, procDirId, relPath, dirDeepness = dirStack.pop()
@@ -149,13 +149,13 @@ class InfoDatabase:
         for urlNode in pageAst.iterDeepByName("urlLink"):
             url = urlNode.url
 
-            if url.startswith(u"rel://"):
+            if url.startswith("rel://"):
                 url = self.wikiDocument.makeRelUrlAbsolute(url)
                 isRel = 1
             else:
                 isRel = 0
 
-            if url.startswith(u"file:"):
+            if url.startswith("file:"):
                 path = StringOps.pathnameFromUrl(url)
                 npath = normalizePath(path)
                 pathId = self.tempDb.execSqlQuerySingleItem(
@@ -200,7 +200,7 @@ class InfoDatabase:
             step = 1
 
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Scan links in %s") % wikiWord)
+                progresshandler.update(step, _("Scan links in %s") % wikiWord)
 
                 wikiPage = self.wikiDocument._getWikiPageNoErrorNoCache(wikiWord)
                 if isinstance(wikiPage, AliasWikiPage):
@@ -455,24 +455,24 @@ class InfoDatabase:
 
         try:
             prefix = StringOps.strftimeUB(StringOps.unescapeForIni(config.get(
-                "main", "editor_filePaste_prefix", u"")))
+                "main", "editor_filePaste_prefix", "")))
         except:
             traceback.print_exc()
-            prefix = u""   # TODO Error message?
+            prefix = ""   # TODO Error message?
 
         try:
             middle = StringOps.strftimeUB(StringOps.unescapeForIni(config.get(
-                "main", "editor_filePaste_middle", u" ")))
+                "main", "editor_filePaste_middle", " ")))
         except:
             traceback.print_exc()
-            middle = u" "   # TODO Error message?
+            middle = " "   # TODO Error message?
 
         try:
             suffix = StringOps.strftimeUB(StringOps.unescapeForIni(config.get(
-                "main", "editor_filePaste_suffix", u"")))
+                "main", "editor_filePaste_suffix", "")))
         except:
             traceback.print_exc()
-            suffix = u""   # TODO Error message?
+            suffix = ""   # TODO Error message?
 
         bracketedUrl = config.getboolean("main",
                 "editor_filePaste_bracketedUrl", True)
@@ -525,10 +525,10 @@ class _OrphanedGrid(EnhancedGrid.EnhancedGrid):
         EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _OrphanedGrid.ACTIONCHOICELIST is None:
-            _OrphanedGrid.ACTIONCHOICELIST = [_(u"Default"), _(u"Keep"),
-                    _(u"Delete"), _(u"Collect")]
-            _OrphanedGrid.CALCACTIONNAMES = [_(u""), _(u"Keep"),
-                    _(u"Delete"), _(u"Collect")]
+            _OrphanedGrid.ACTIONCHOICELIST = [_("Default"), _("Keep"),
+                    _("Delete"), _("Collect")]
+            _OrphanedGrid.CALCACTIONNAMES = [_(""), _("Keep"),
+                    _("Delete"), _("Collect")]
 
         self.fileCleanupDialog = dialog
         self.db = db
@@ -551,10 +551,10 @@ class _OrphanedGrid(EnhancedGrid.EnhancedGrid):
 
         self.CreateGrid(0, self.COL_COUNT)
 
-        self.SetColLabelValue(self.COL_RELPATH, _(u"Path"))
-        self.SetColLabelValue(self.COL_TYPE, _(u"Type"))
-        self.SetColLabelValue(self.COL_ACTION, _(u"Action"))
-        self.SetColLabelValue(self.COL_CALCACTION, _(u"Calc. action"))
+        self.SetColLabelValue(self.COL_RELPATH, _("Path"))
+        self.SetColLabelValue(self.COL_TYPE, _("Type"))
+        self.SetColLabelValue(self.COL_ACTION, _("Action"))
+        self.SetColLabelValue(self.COL_CALCACTION, _("Calc. action"))
 #         self.SetColLabelValue(self.COL_ERROR, _(u"Error"))
 
         colWidthSum = sum(self.GetColSize(i) for i in range(self.COL_COUNT))
@@ -613,8 +613,8 @@ class _OrphanedGrid(EnhancedGrid.EnhancedGrid):
 
         self.collator.sortByFirst(dbData)
 
-        actDef = _(u"Default")
-        typStr = [_(u"File"), _(u"Directory")]
+        actDef = _("Default")
+        typStr = [_("File"), _("Directory")]
 
         if self.GetNumberRows() > 0:
             self.DeleteRows(0, self.GetNumberRows())
@@ -683,8 +683,8 @@ class _MissingGrid(EnhancedGrid.EnhancedGrid):
         EnhancedGrid.EnhancedGrid.__init__(self, parent, id)
 
         if _MissingGrid.ACTIONCHOICELIST is None:
-            _MissingGrid.ACTIONCHOICELIST = [_(u"Default"), _(u"Keep"),
-                    _(u"Delete")]
+            _MissingGrid.ACTIONCHOICELIST = [_("Default"), _("Keep"),
+                    _("Delete")]
 
         self.fileCleanupDialog = dialog
         self.db = db
@@ -707,7 +707,7 @@ class _MissingGrid(EnhancedGrid.EnhancedGrid):
 
         self.CreateGrid(0, self.COL_COUNT)
 
-        self.SetColLabelValue(self.COL_FULLPATH, _(u"Path"))
+        self.SetColLabelValue(self.COL_FULLPATH, _("Path"))
 #         self.SetColLabelValue(self.COL_ACTION, _(u"Action"))
 #         self.SetColLabelValue(self.COL_ERROR, _(u"Error"))
 
@@ -772,7 +772,7 @@ class _MissingGrid(EnhancedGrid.EnhancedGrid):
 
         self.collator.sortByFirst(dbData)
 
-        actDef = _(u"Default")
+        actDef = _("Default")
         
         row = self.GetGridCursorRow()
         col = self.GetGridCursorCol()
@@ -810,7 +810,7 @@ class _MissingGrid(EnhancedGrid.EnhancedGrid):
 
 
 
-class _MissingLinkingPagesItemInfo(object):
+class _MissingLinkingPagesItemInfo:
     __slots__ = ("__weakref__", "unifName", "wikiWord", "hitList",
             "fileCleanupDialog")
 
@@ -818,7 +818,7 @@ class _MissingLinkingPagesItemInfo(object):
         self.fileCleanupDialog = fileCleanupDialog
         
         self.unifName = unifName
-        if unifName.startswith(u"wikipage/"):
+        if unifName.startswith("wikipage/"):
             self.wikiWord = unifName[9:]
         else:
             self.wikiWord = unifName  # TODO: This should never happen
@@ -872,32 +872,32 @@ class _MissingLinkingPagesItemInfo(object):
         modified = self.fileCleanupDialog.isModifiedPage(self.unifName)
         
         if modified:
-            result = [u'<font color="GRAY"><b>%s</b>' % \
+            result = ['<font color="GRAY"><b>%s</b>' % \
                     StringOps.escapeHtml(self.wikiWord)]
         else:
-            result = [u'<font color="BLUE"><b>%s</b></font>' % \
+            result = ['<font color="BLUE"><b>%s</b></font>' % \
                     StringOps.escapeHtml(self.wikiWord)]
         
         if len(self.hitList) > 4:
             for hit in self.hitList[:3]:
-                result.append(u"<br />\n%s" % StringOps.escapeHtml(hit[2]))
+                result.append("<br />\n%s" % StringOps.escapeHtml(hit[2]))
 
-            result.append(u"<br />\n...")
+            result.append("<br />\n...")
         else:
             for hit in self.hitList:
-                result.append(u"<br />\n%s" % StringOps.escapeHtml(hit[2]))
+                result.append("<br />\n%s" % StringOps.escapeHtml(hit[2]))
 
         if modified:
-            result.append(u"</font>")
+            result.append("</font>")
 
-        return u"".join(result)
-
-
+        return "".join(result)
 
 
-class _MissingLinkingPagesListBox(wx.HtmlListBox):
+
+
+class _MissingLinkingPagesListBox(wx.html.HtmlListBox):
     def __init__(self, parent, db, mainControl, collator, ID):
-        wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
+        wx.html.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
 
         self.fileCleanupDialog = parent
         self.db = db
@@ -908,19 +908,19 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
         self.itemInfo = []
         self.SetItemCount(0)
         
-        wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
-        wx.EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnDClick, id=ID)
 
 #         self.contextMenuSelection = -2
 
-#         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
-#         wx.EVT_LEFT_DCLICK(self, self.OnLeftDown)
-#         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
-#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+#         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+#         self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
+#         self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
+#         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+#         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 # 
 # 
-#         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
+#         self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)
 #         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
 #                 self.OnActivateNewTabThis)
 #         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
@@ -940,7 +940,7 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
         try:
             return self.itemInfo[i].getHtml()
         except IndexError:
-            return u""
+            return ""
 
 
     def updateByRefedItemId(self, refedItemId):
@@ -960,7 +960,7 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
         for un, cp, cl, pu in dbData:
             groupDict.setdefault(un, []).append((cp, cl, pu))
 
-        finalData = groupDict.items()
+        finalData = list(groupDict.items())
 
         self.collator.sortByFirst(finalData)
 
@@ -1189,7 +1189,7 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
 #
 #
 #
-# class MissingGridRow(object):
+# class MissingGridRow:
 #     """
 #     One row in the grid of missing files (referenced but not present)
 #     """
@@ -1211,14 +1211,13 @@ class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
     """
 
     def __init__(self, mainControl, parent):
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.value = None
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "FileCleanupInitialDialog")
+        res.LoadDialog(self, parent, "FileCleanupInitialDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1233,7 +1232,7 @@ class FileCleanupInitialDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
     def GetValue(self):
@@ -1258,11 +1257,10 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, mainControl, db, parent):
 
         if FileCleanupDialog.ORPHANED_DEFAULTACTIONCHOICELIST is None:
-            FileCleanupDialog.ORPHANED_DEFAULTACTIONCHOICELIST = [_(u"Keep"),
-                    _(u"Delete"), _(u"Collect")]
+            FileCleanupDialog.ORPHANED_DEFAULTACTIONCHOICELIST = [_("Keep"),
+                    _("Delete"), _("Collect")]
 
-        d = wx.PreDialog()
-        self.PostCreate(d)
+        wx.Dialog.__init__(self)
 
         self.mainControl = mainControl
         self.db = db
@@ -1272,7 +1270,7 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
             # since dialog was opened
 
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "FileCleanupDialog")
+        res.LoadDialog(self, parent, "FileCleanupDialog")
 
         self.ctrls = XrcControls(self)
 
@@ -1314,8 +1312,8 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-        wx.EVT_BUTTON(self, GUI_ID.btnTest, self.OnTest)
+        self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, id=GUI_ID.btnTest)
         
 
         self.__sinkWikiDoc = wxKeyFunctionSink((
@@ -1327,11 +1325,11 @@ class FileCleanupDialog(wx.Dialog, ModalDialogMixin):
         
         
 
-#         wx.EVT_TEXT(self, ID, self.OnText)
-#         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-#         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
-#         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+#         self.Bind(wx.EVT_TEXT, self.OnText, id=ID)
+#         self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
+#         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
+#         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
+#         self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
 
     def GetValue(self):
         return self.value

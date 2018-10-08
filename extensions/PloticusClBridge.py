@@ -28,7 +28,7 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"ploticus", ("html_single", "html_previewWX", "html_preview", "html_multi"), PltHandler),
+            ("ploticus", ("html_single", "html_previewWX", "html_preview", "html_multi"), PltHandler),
             )
 
 
@@ -101,12 +101,12 @@ class PltHandler:
 
         if not bstr:
             # Nothing in, nothing out
-            return u""
+            return ""
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return u'<pre>' + _(u'[Please set path to Ploticus executable]') +\
-                    u'</pre>'
+            return '<pre>' + _('[Please set path to Ploticus executable]') +\
+                    '</pre>'
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
@@ -136,9 +136,9 @@ class PltHandler:
             popenObject.stdin.close()
             popenObject.stdout.close()
 
-            if u"noerror" in [a.strip() for a in insToken.appendices]:
+            if "noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
-                errResponse = ""
+                errResponse = b""
             else:
                 errResponse = childErr.read()
             
@@ -146,18 +146,18 @@ class PltHandler:
         finally:
             os.unlink(srcfilepath)
             
-        if errResponse != "":
-            errResponse = mbcsDec(errResponse, "replace")[0]
-            return u'<pre>' + _(u'[Ploticus error: %s]') % errResponse + \
-                    u'</pre>'
+        if errResponse != b"":
+#             errResponse = mbcsDec(errResponse, "replace")[0]
+            return '<pre>' + _('[Ploticus error: %s]') % repr(errResponse) + \
+                    '</pre>'
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
-                    u'&nbsp;') % url
+            return ('<img src="%s" border="0" align="bottom" alt="formula" />'
+                    '&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
+            return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 
@@ -178,10 +178,10 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_exePath")] = u""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_outputFormat")] = u"0"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_exePath")] = ""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_outputFormat")] = "0"
     # Register panel in options dialog
-    app.addOptionsDlgPanel(PloticusOptionsPanel, u"  Ploticus")
+    app.addOptionsDlgPanel(PloticusOptionsPanel, "  Ploticus")
 
 
 class PloticusOptionsPanel(wx.Panel):
@@ -201,20 +201,20 @@ class PloticusOptionsPanel(wx.Panel):
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
         self.chOutputFormat = wx.Choice(self, -1)
-        self.chOutputFormat.Append(u"GIF")
-        self.chOutputFormat.Append(u"PNG")
+        self.chOutputFormat.Append("GIF")
+        self.chOutputFormat.Append("PNG")
         self.chOutputFormat.SetSelection(outputFormat)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to Ploticus:")), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _("Path to Ploticus:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, _(u"Output format:")), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _("Output format:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.chOutputFormat, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
@@ -259,7 +259,7 @@ class PloticusOptionsPanel(wx.Panel):
         outputFormat = min(1, max(0, outputFormat))
         
         self.app.getGlobalConfig().set("main", "plugin_ploticus_outputFormat",
-                unicode(outputFormat))
+                str(outputFormat))
 
 
 

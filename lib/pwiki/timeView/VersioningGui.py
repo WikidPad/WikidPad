@@ -56,7 +56,7 @@ class VersionExplorerPanel(EnhancedListControl):
 
         self.mainControl = mainControl
 
-        self.InsertColumn(0, u"", width=3000)
+        self.InsertColumn(0, "", width=3000)
 
         self.updatingThreadHolder = Utilities.ThreadHolder()
         
@@ -103,26 +103,21 @@ class VersionExplorerPanel(EnhancedListControl):
 
         self.updateList()
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
-        wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_SIZE(self, self.OnSize)
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_INLINE,
-                self.OnCmdDiffInline)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffInline, id=GUI_ID.CMD_VERSIONING_DIFF_INLINE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_FROM,
-                self.OnCmdDiffSetFrom)
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_TO,
-                self.OnCmdDiffSetTo)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetFrom, id=GUI_ID.CMD_VERSIONING_DIFF_SET_FROM)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetTo, id=GUI_ID.CMD_VERSIONING_DIFF_SET_TO)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_VERSION,
-                self.OnCmdDeleteVersion)
-        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA,
-                self.OnCmdDeleteAllVersionData)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteVersion, id=GUI_ID.CMD_VERSIONING_DELETE_VERSION)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAllVersionData, id=GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA)
 
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
 #                 self.OnCmdCheckUpdateDateAscending)
@@ -222,11 +217,11 @@ class VersionExplorerPanel(EnhancedListControl):
 
         if selIdx != 0 and selIdx != (len(self.versionEntries) - 1):
             self.mainControl.displayErrorMessage(
-                    _(u"Deleting in-between versions is not supported yet"))
+                    _("Deleting in-between versions is not supported yet"))
             return
         
-        answer = wx.MessageBox(_(u"Do you want to delete this version?"),
-                _(u"Delete version"), wx.YES_NO | wx.ICON_QUESTION, self)
+        answer = wx.MessageBox(_("Do you want to delete this version?"),
+                _("Delete version"), wx.YES_NO | wx.ICON_QUESTION, self)
         
         if answer == wx.YES:
             entry = self.versionEntries[selIdx]
@@ -238,8 +233,8 @@ class VersionExplorerPanel(EnhancedListControl):
     def OnCmdDeleteAllVersionData(self, evt):
         if self.versionOverview is not None:
             answer = wx.MessageBox(
-                    _(u"Do you want to delete all version data of this page?"),
-                    _(u"Delete all versions"), wx.YES_NO | wx.ICON_QUESTION, self)
+                    _("Do you want to delete all version data of this page?"),
+                    _("Delete all versions"), wx.YES_NO | wx.ICON_QUESTION, self)
 
             if answer == wx.YES:
                 self.versionOverview.delete()
@@ -270,8 +265,8 @@ class VersionExplorerPanel(EnhancedListControl):
             # the broken parts of the version data
             
             answer = wx.MessageBox(
-                    _(u"Do you want to delete all version data of this page?"),
-                    _(u"Delete all versions"), wx.YES_NO | wx.ICON_QUESTION, self)
+                    _("Do you want to delete all version data of this page?"),
+                    _("Delete all versions"), wx.YES_NO | wx.ICON_QUESTION, self)
 
             if answer == wx.YES:
                 VersionOverview.deleteBrokenDataForDocPage(docPage)
@@ -283,9 +278,9 @@ class VersionExplorerPanel(EnhancedListControl):
         if selIdx < len(self.versionEntries):
             entry = self.versionEntries[selIdx]
             text = self.versionOverview.getVersionContent(entry.versionNumber)
-            verNoStr = u"%d" % entry.versionNumber
+            verNoStr = "%d" % entry.versionNumber
         else:
-            verNoStr = u"<" + _(u"Current") + u">"
+            verNoStr = "<" + _("Current") + ">"
 
             text = baseDocPage.getLiveText()
         
@@ -344,9 +339,9 @@ class VersionExplorerPanel(EnhancedListControl):
 
 
         if isinstance(docPage, WikiPageSnapshot):
-            toVerNo = u"%d" % docPage.getSnapshotVersionNumber()
+            toVerNo = "%d" % docPage.getSnapshotVersionNumber()
         else:
-            toVerNo = u"<" + _(u"Current") + u">"
+            toVerNo = "<" + _("Current") + ">"
 
         toText = docPage.getLiveText()
 
@@ -435,7 +430,7 @@ class VersionExplorerPanel(EnhancedListControl):
         Now we can register idle handler.
         """
         pass
-#         wx.EVT_IDLE(self, self.OnIdle)
+#         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 
 #     def OnIdle(self, evt):
@@ -484,7 +479,7 @@ class VersionExplorerPanel(EnhancedListControl):
         Handle misc events
         """
         if self.isVisibleEffect() and miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("changed current presenter"):
+            if "changed current presenter" in miscevt:
 #                 presenter = self.mainControl.getCurrentDocPagePresenter()
 #                 if presenter is not None:
 #                     self.docPagePresenterSink.setEventSource(presenter.getMiscEvent())
@@ -563,9 +558,9 @@ class VersionExplorerPanel(EnhancedListControl):
 
         except NotCurrentThreadException:
             return
-        except VersioningException, ve:
+        except VersioningException as ve:
             self.setVersionOverview(None)
-            self.applyTocList(unicode(ve))
+            self.applyTocList(str(ve))
 
 
 
@@ -574,12 +569,12 @@ class VersionExplorerPanel(EnhancedListControl):
         Show the content of self.tocList in the ListCtrl
         """
         if message is None:
-            message = u"<" + _(u"Current") + u">"
+            message = "<" + _("Current") + ">"
         else:
-            message = u"<" + message + u">"
+            message = "<" + message + ">"
 
         formatStr = self.mainControl.getConfig().get("main",
-                "versioning_dateFormat", u"%Y %m %d")
+                "versioning_dateFormat", "%Y %m %d")
 
         selected = -1
         
@@ -593,12 +588,12 @@ class VersionExplorerPanel(EnhancedListControl):
                 if entry.versionNumber == currVn:
                     selected = self.GetItemCount()
 
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
 
             if selected == -1 and currVn == 0:
                 selected = self.GetItemCount()
 
-            self.InsertStringItem(self.GetItemCount(), message)
+            self.InsertItem(self.GetItemCount(), message)
 #             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.autosizeColumn(0)
             self.SelectSingle(selected, scrollVisible=True)
@@ -758,7 +753,7 @@ class VersionExplorerPanel(EnhancedListControl):
 
 # Context menu on versioning tab
 _CONTEXT_MENU_VERSIONING_TAB = \
-u"""
+"""
 Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
 Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions of current page
 """
@@ -766,13 +761,13 @@ Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions o
 
 # Diff part on context menu if wiki page is currently active
 _CONTEXT_MENU_DIFF_ON_WIKI_PAGE = \
-u"""
+"""
 Diff inline;CMD_VERSIONING_DIFF_INLINE;Show the difference between two versions inline
 """
 
 # Diff part on context menu if a diff control is already active
 _CONTEXT_MENU_DIFF_ON_DIFF_CTRL = \
-u"""
+"""
 Set diff from;CMD_VERSIONING_DIFF_SET_FROM;Set the "from" version in diff
 Set diff to;CMD_VERSIONING_DIFF_SET_TO;Set the "to" version in diff
 """
@@ -780,7 +775,7 @@ Set diff to;CMD_VERSIONING_DIFF_SET_TO;Set the "to" version in diff
 
 # Context menu on versioning entry (except "<Current>")
 _CONTEXT_MENU_VERSIONING_ITEM = \
-u"""
+"""
 -
 Delete version;CMD_VERSIONING_DELETE_VERSION;Delete selected version
 Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
@@ -789,7 +784,7 @@ Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions o
 
 # Context menu on versioning entry "<Current>"
 _CONTEXT_MENU_VERSIONING_CURRENT_ITEM = \
-u"""
+"""
 -
 Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
 Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions of current page
@@ -802,22 +797,22 @@ Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions o
 
 
 # Entries to support i18n of context menus
-if False:
-    N_(u"Diff inline")
-    N_(u"Show the difference between two versions inline")
+if not True:
+    N_("Diff inline")
+    N_("Show the difference between two versions inline")
 
-    N_(u"Set diff from")
-    N_(u'Set the "from" version in diff')
-    N_(u"Set diff to")
-    N_(u'Set the "to" version in diff')
+    N_("Set diff from")
+    N_('Set the "from" version in diff')
+    N_("Set diff to")
+    N_('Set the "to" version in diff')
 
-    N_(u"Delete version")
-    N_(u"Delete selected version")
+    N_("Delete version")
+    N_("Delete selected version")
 
-    N_(u"Add version")
-    N_(u"Add a new version")
-    N_(u"Delete all versions")
-    N_(u"Delete all versions of current page")
+    N_("Add version")
+    N_("Add a new version")
+    N_("Delete all versions")
+    N_("Delete all versions of current page")
 
 
 

@@ -17,7 +17,7 @@ Todo:
 import xml.dom
 
 from xml.dom import EMPTY_NAMESPACE, EMPTY_PREFIX, XMLNS_NAMESPACE, domreg
-from minicompat import *
+from .minicompat import *
 from xml.dom.xmlbuilder import DOMImplementationLS, DocumentLS
 
 # This is used by the ID-cache invalidation checks; the list isn't
@@ -38,7 +38,7 @@ class Node(xml.dom.Node):
 
     prefix = EMPTY_PREFIX # non-null only for NS elements and attributes
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def toxml(self, encoding = None):
@@ -267,7 +267,7 @@ class Node(xml.dom.Node):
 
     def _call_user_data_handler(self, operation, src, dst):
         if hasattr(self, "_user_data"):
-            for key, (data, handler) in self._user_data.items():
+            for key, (data, handler) in list(self._user_data.items()):
                 if handler is not None:
                     handler.handle(operation, key, data, src, dst)
 
@@ -307,8 +307,8 @@ def _in_document(node):
 
 def _write_data(writer, data):
     "Writes datachars to writer."
-    data = data.replace(u"&", u"&amp;").replace(u"<", u"&lt;")
-    data = data.replace(u"\"", u"&quot;").replace(u">", u"&gt;")
+    data = data.replace("&", "&amp;").replace("<", "&lt;")
+    data = data.replace("\"", "&quot;").replace(">", "&gt;")
     writer.write(data)
 
 def _get_elements_by_tagName_helper(parent, name, rc):
@@ -355,7 +355,7 @@ class Attr(Node):
 
     _child_node_types = (Node.TEXT_NODE, Node.ENTITY_REFERENCE_NODE)
 
-    __slots__ = ("__dict__",)
+#     __slots__ = ("__dict__",)
 
     def __init__(self, qName, namespaceURI=EMPTY_NAMESPACE, localName=None,
                  prefix=None):
@@ -470,7 +470,7 @@ defproperty(Attr, "localName",  doc="Namespace-local name of this attribute.")
 defproperty(Attr, "schemaType", doc="Schema type for this attribute.")
 
 
-class NamedNodeMap(object):
+class NamedNodeMap:
     """The attribute list is a transient interface to the underlying
     dictionaries.  Mutations here will change the underlying element's
     dictionary.
@@ -497,30 +497,30 @@ class NamedNodeMap(object):
 
     def items(self):
         L = []
-        for node in self._attrs.values():
+        for node in list(self._attrs.values()):
             L.append((node.nodeName, node.value))
         return L
 
     def itemsNS(self):
         L = []
-        for node in self._attrs.values():
+        for node in list(self._attrs.values()):
             L.append(((node.namespaceURI, node.localName), node.value))
         return L
 
     def has_key(self, key):
         if isinstance(key, StringTypes):
-            return self._attrs.has_key(key)
+            return key in self._attrs
         else:
-            return self._attrsNS.has_key(key)
+            return key in self._attrsNS
 
     def keys(self):
-        return self._attrs.keys()
+        return list(self._attrs.keys())
 
     def keysNS(self):
-        return self._attrsNS.keys()
+        return list(self._attrsNS.keys())
 
     def values(self):
-        return self._attrs.values()
+        return list(self._attrs.values())
 
     def get(self, name, value=None):
         return self._attrs.get(name, value)
@@ -552,7 +552,7 @@ class NamedNodeMap(object):
             node.value = value
         else:
             if not isinstance(value, Attr):
-                raise TypeError, "value must be a string or Attr object"
+                raise TypeError("value must be a string or Attr object")
             node = value
             self.setNamedItem(node)
 
@@ -625,7 +625,7 @@ defproperty(NamedNodeMap, "length",
 AttributeList = NamedNodeMap
 
 
-class TypeInfo(object):
+class TypeInfo:
     __slots__ = 'namespace', 'name'
 
     def __init__(self, namespace, name):
@@ -685,7 +685,7 @@ class Element(Node):
         return self.tagName
 
     def unlink(self):
-        for attr in self._attrs.values():
+        for attr in list(self._attrs.values()):
             attr.unlink()
         self._attrs = None
         self._attrsNS = None
@@ -796,10 +796,10 @@ class Element(Node):
     removeAttributeNodeNS = removeAttributeNode
 
     def hasAttribute(self, name):
-        return self._attrs.has_key(name)
+        return name in self._attrs
 
     def hasAttributeNS(self, namespaceURI, localName):
-        return self._attrsNS.has_key((namespaceURI, localName))
+        return (namespaceURI, localName) in self._attrsNS
 
     def getElementsByTagName(self, name):
         return _get_elements_by_tagName_helper(self, name, NodeList())
@@ -836,24 +836,24 @@ class Element(Node):
 
 
     def writexmlNonPretty(self, writer):
-        writer.write(u"<" + self.tagName)
+        writer.write("<" + self.tagName)
 
 #         attrs = self._get_attributes()
         a_names = self._attrs     # attrs.keys()
 #         a_names.sort()
 
         for a_name in a_names:
-            writer.write(u" %s=\"" % a_name)
+            writer.write(" %s=\"" % a_name)
 #             _write_data(writer, attrs[a_name].value)
             _write_data(writer, self._attrs[a_name].value)
-            writer.write(u"\"")
+            writer.write("\"")
         if self.childNodes:
-            writer.write(u">")
+            writer.write(">")
             for node in self.childNodes:
                 node.writexmlNonPretty(writer)
-            writer.write(u"</%s>" % (self.tagName))
+            writer.write("</%s>" % (self.tagName))
         else:
-            writer.write(u"/>")
+            writer.write("/>")
 
 
     def _get_attributes(self):
@@ -903,7 +903,7 @@ def _set_attribute_node(element, attr):
     attr.__dict__['ownerElement'] = element
 
 
-class Childless(object):
+class Childless:
     """Mixin that makes childless-ness easy to implement and avoids
     the complexity of the Node methods that deal with children.
     """
@@ -1190,7 +1190,7 @@ class CDATASection(Text):
         writer.write("<![CDATA[%s]]>" % self.data)
 
 
-class ReadOnlySequentialNamedNodeMap(object):
+class ReadOnlySequentialNamedNodeMap:
     __slots__ = '_seq',
 
     def __init__(self, seq=()):
@@ -1219,7 +1219,7 @@ class ReadOnlySequentialNamedNodeMap(object):
         else:
             node = self.getNamedItem(name_or_tuple)
         if node is None:
-            raise KeyError, name_or_tuple
+            raise KeyError(name_or_tuple)
         return node
 
     def item(self, index):
@@ -1462,7 +1462,7 @@ class DOMImplementation(DOMImplementationLS):
     def _create_document(self):
         return Document()
 
-class ElementInfo(object):
+class ElementInfo:
     """Object that represents content-model information for an element.
 
     This implementation is not expected to be used in practice; DOM
@@ -1649,7 +1649,7 @@ class Document(Node, DocumentLS):
 
     def createTextNode(self, data):
         if not isinstance(data, StringTypes):
-            raise TypeError, "node contents must be a string"
+            raise TypeError("node contents must be a string")
         t = Text()
         t.data = data
         t.ownerDocument = self
@@ -1657,7 +1657,7 @@ class Document(Node, DocumentLS):
 
     def createCDATASection(self, data):
         if not isinstance(data, StringTypes):
-            raise TypeError, "node contents must be a string"
+            raise TypeError("node contents must be a string")
         c = CDATASection()
         c.data = data
         c.ownerDocument = self
@@ -1733,7 +1733,7 @@ class Document(Node, DocumentLS):
                 # We have to process all ID attributes before
                 # returning in order to get all the attributes set to
                 # be IDs using Element.setIdAttribute*().
-                for attr in node.attributes.values():
+                for attr in list(node.attributes.values()):
                     if attr.namespaceURI:
                         if info.isIdNS(attr.namespaceURI, attr.localName):
                             self._id_cache[attr.value] = node
@@ -1754,7 +1754,7 @@ class Document(Node, DocumentLS):
                         elif node._magic_id_nodes == 1:
                             break
             elif node._magic_id_nodes:
-                for attr in node.attributes.values():
+                for attr in list(node.attributes.values()):
                     if attr._is_id:
                         self._id_cache[attr.value] = node
                         if attr.value == id:
@@ -1867,7 +1867,7 @@ def _clone_node(node, deep, newOwnerDocument):
     if node.nodeType == Node.ELEMENT_NODE:
         clone = newOwnerDocument.createElementNS(node.namespaceURI,
                                                  node.nodeName)
-        for attr in node.attributes.values():
+        for attr in list(node.attributes.values()):
             clone.setAttributeNS(attr.namespaceURI, attr.nodeName, attr.value)
             a = clone.getAttributeNodeNS(attr.namespaceURI, attr.localName)
             a.specified = attr.specified
@@ -1947,13 +1947,13 @@ def _nssplit(qualifiedName):
 
 def _get_StringIO():
     # we can't use cStringIO since it doesn't support Unicode strings
-    from StringIO import StringIO
+    from io import StringIO
     return StringIO()
 
 def _get_cStringIO():
     # we don't need Unicode if we have an encoding
-    from cStringIO import StringIO
-    return StringIO()
+    from io import BytesIO
+    return BytesIO()
 
 
 def _do_pulldom_parse(func, args, kwargs):

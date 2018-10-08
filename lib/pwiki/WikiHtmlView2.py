@@ -1,26 +1,28 @@
-import cStringIO as StringIO
-import urllib, os, os.path, traceback
+import io as StringIO
+import urllib.request, urllib.parse, urllib.error, os, os.path, traceback
 
 import wx, wx.html2
 
 
-from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+from .WikiExceptions import *
+from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
         wxKeyFunctionSink, appendToMenuByMenuDesc
 
-from MiscEvent import KeyFunctionSink
+from .MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
-        urlQuote, pathnameFromUrl, flexibleUrlUnquote
+from .StringOps import utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote, longPathEnc
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
-import DocPages
-from TempFileSet import TempFileSet
+from . import OsAbstract
+
+from . import DocPages
+from .TempFileSet import TempFileSet
 
 from . import PluginManager
 
 import threading
-from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
+from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder, between
 
 from .ViHelper import ViHintDialog, ViHelper
 
@@ -30,9 +32,9 @@ from .ViHelper import ViHintDialog, ViHelper
 #from .WikiTxtCtrl import _CONTEXT_MENU_INTEXT_ACTIVATE_DIRECTION as _CONTEXT_MENU_INTERNAL_JUMP_DIRECTION
 
 # used in search
-import SystemInfo
+from . import SystemInfo
 
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 
 
 LOADING_JS = """
@@ -47,7 +49,7 @@ LOADING_JS = """
 
 
 if wx.Platform == '__WXMSW__':
-    from WindowsHacks import getLongPath
+    from .WindowsHacks import getLongPath
 else:
     def getLongPath(s):
         """
@@ -74,14 +76,14 @@ class WebviewSearchDialog(wx.Frame):
     def __init__(self, parent, id, webviewCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
-        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+        wx.Frame.__init__(self, parent, id, "WikidPad i-search",
                 rect.GetPosition(), rect.GetSize(),
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.webviewCtrl = webviewCtrl
         self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Incremental search (ENTER/ESC to finish)"),
+                _("Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -99,12 +101,12 @@ class WebviewSearchDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
+        self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
+        self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose, 
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+        self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
@@ -173,16 +175,14 @@ class WebviewSearchDialog(wx.Frame):
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN)):
             foundPos = self.webviewCtrl.executeIncrementalSearch(searchString)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.webviewCtrl.executeIncrementalSearchBackward(searchString)
         elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
                 (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP)):
             foundPos = self.webviewCtrl.executeIncrementalSearchBackward(searchString)
         elif matchesAccelPair("ActivateLink", accP) or \
                 matchesAccelPair("ActivateLinkNewTab", accP) or \
@@ -230,7 +230,7 @@ class LinkConverterForPreviewWk:
         
     def getLinkForWikiWord(self, word, default = None):
         if self.wikiDocument.isDefinedWikiLinkTerm(word):
-            return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
+            return urlQuote("http://internaljump/wikipage/%s" % word, "/#:;@")
         else:
             return default
  
@@ -249,6 +249,8 @@ class WikiHtmlView2(wx.Panel):
         
         self.vi = None # Contains ViFunctions instance if vi key handling enabled
         self.keyEventConn = None
+
+        self.page_loaded = False
 
 
         try:
@@ -304,8 +306,8 @@ class WikiHtmlView2(wx.Panel):
         self.counterResizeIgnore = 0  # How often to ignore a size event
         self.deferredScrollPos = None  # Used by scrollDeferred()
         
-        self.selectedText = u""
-        self.selectedHTML = u""
+        self.selectedText = ""
+        self.selectedHTML = ""
 
         self.currentLoadedWikiWord = None
         self.currentLoadedUrl = None  # Contains the URL of the temporary HTML
@@ -319,13 +321,13 @@ class WikiHtmlView2(wx.Panel):
 
         # TODO Should be changed to presenter as controller
         self.exporterInstance = PluginManager.getExporterTypeDict(
-                self.presenter.getMainControl(), False)[u"html_single"][0]\
+                self.presenter.getMainControl(), False)["html_single"][0]\
                 (self.presenter.getMainControl())
 
         self._DEFAULT_FONT_SIZES = self.presenter.getMainControl().presentationExt.INTHTML_FONTSIZES
         
         # TODO More elegantly
-        self.exporterInstance.exportType = u"html_previewWK"
+        self.exporterInstance.exportType = "html_previewWK"
         #self.exporterInstance.styleSheet = u""
 
         self.exporterInstance.tempFileSet = TempFileSet()
@@ -344,9 +346,10 @@ class WikiHtmlView2(wx.Panel):
         # injection)
         self.htpaths = [None, None]
         self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
-                    u"", ".html", relativeTo="").decode("latin-1")
+                    "", ".html", relativeTo="")
+
 
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
@@ -355,58 +358,64 @@ class WikiHtmlView2(wx.Panel):
 
         #wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         #wx.EVT_KEY_UP(self, self.OnKeyUp)
-        wx.EVT_SIZE(self, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, self.OnSelectAll)
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, 
+                id=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, self.OnSelectAll, 
+                id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), 
+                id=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), 
+                id=GUI_ID.CMD_ZOOM_OUT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
-                self.OnActivateNewTabBackgroundThis)        
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS,
-                self.OnActivateNewWindowThis)        
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, 
+                id=GUI_ID.CMD_ACTIVATE_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, 
+                id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_LEFT, 
-                lambda evt: self.OnActivateThis(evt, u"left"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT,
-                lambda evt: self.OnActivateNewTabThis(evt, u"left"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"left"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+            evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_RIGHT, 
-                lambda evt: self.OnActivateThis(evt, u"right"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT,
-                lambda evt: self.OnActivateNewTabThis(evt, u"right"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"right"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+            evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_ABOVE, 
-                lambda evt: self.OnActivateThis(evt, u"above"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE,
-                lambda evt: self.OnActivateNewTabThis(evt, u"above"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"above"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, 
+            "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
+            evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS_BELOW,
-                lambda evt: self.OnActivateThis(evt, u"below"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW,
-                lambda evt: self.OnActivateNewTabThis(evt, u"below"))
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW,
-                lambda evt: self.OnActivateNewTabBackgroundThis(evt, u"below"))
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"), 
+                id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"), 
+                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
+        self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, 
+            "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
 
 
-        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
-                self.OnOpenContainingFolderThis)
-        wx.EVT_MENU(self, GUI_ID.CMD_HISTORY_BACK, self.OnGoBackInHistory)
-        wx.EVT_MENU(self, GUI_ID.CMD_HISTORY_FORWARD, 
-                self.OnGoForwardInHistory)
+        self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, 
+                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
+        self.Bind(wx.EVT_MENU, self.OnGoBackInHistory, 
+                id=GUI_ID.CMD_HISTORY_BACK)
+        self.Bind(wx.EVT_MENU, self.OnGoForwardInHistory, 
+                id=GUI_ID.CMD_HISTORY_FORWARD)
 
         #wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
         #wx.EVT_MIDDLE_DOWN(self.html, self.OnMiddleDown)
@@ -434,8 +443,17 @@ class WikiHtmlView2(wx.Panel):
         
         # Set zoom factor
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-        zoomFact = max(0.1, zoom * 0.1 + 1.0)
-        self.html.SetZoom(zoomFact)
+        
+        # Restrict it to range -2...2
+        zoom = between(-2, zoom, 2)
+                
+        # Adjust range to 0..4
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+        
 
         self.jquery = False
 
@@ -483,7 +501,12 @@ class WikiHtmlView2(wx.Panel):
         # TODO: make extendable - for plugins + VI mode
         uri = flexibleUrlUnquote(evt.GetURL())
 
-        self.html.RunScript(r"""event_str = false;""")
+        # Run script segfaults if WikidPad started with a page in preview
+        # quick hack to prevent this
+        if self.page_loaded:
+            self.html.RunScript(r"""event_str = false;""")
+
+        self.page_loaded = True
 
         # This can lead to an event being vetoed multiple times
         # (which should not be an issue)
@@ -561,6 +584,17 @@ class WikiHtmlView2(wx.Panel):
             self.updateStatus(None)
             evt.Veto()
             return True
+        elif "PROXY_EVENT//ANCHOR/" in uri:
+            anchor = uri.split("PROXY_EVENT//ANCHOR/")[1]
+            self.html.RunScript("""
+                document.getElementsByName("{0}")[0].scrollIntoView()
+                // We don't use location.href as we get into a
+                // navigation loop hell
+                //location.href = "#{0}";
+                """.format(anchor))
+            evt.Veto()
+            return True
+        # This breaks if not in VI mode
         elif self.vi is not None:
             if self.vi.OnViPageNavigation(evt, uri):
                 return True
@@ -568,6 +602,10 @@ class WikiHtmlView2(wx.Panel):
 
         if self.presenter.getMainControl().hooks.previewPageNavigation(
                 self, evt, uri) is True:
+            return True
+        elif "PROXY_EVENT" in uri:
+            # unmanged event, veto it
+            evt.Veto()
             return True
 
         return False
@@ -582,15 +620,15 @@ class WikiHtmlView2(wx.Panel):
         menu = wx.Menu()
 
         if self.html.HasSelection():
-            appendToMenuByMenuDesc(menu, u"Copy;CMD_CLIPBOARD_COPY")
+            appendToMenuByMenuDesc(menu, "Copy;CMD_CLIPBOARD_COPY")
 
-        appendToMenuByMenuDesc(menu, u"Select All;CMD_SELECT_ALL")
+        appendToMenuByMenuDesc(menu, "Select All;CMD_SELECT_ALL")
 
-        appendToMenuByMenuDesc(menu, u"-")
+        appendToMenuByMenuDesc(menu, "-")
 
         href = self.contextHref
         if href is not None:
-            if href.startswith(u"http://internaljump/"):
+            if href.startswith("http://internaljump/"):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTERNAL_JUMP)
 
                 # Check if their are any surrounding viewports that we can use
@@ -603,22 +641,22 @@ class WikiHtmlView2(wx.Panel):
                                     _CONTEXT_MENU_INTERNAL_JUMP_DIRECTION[
                                             direction])
             else:
-                appendToMenuByMenuDesc(menu, u"Activate;CMD_ACTIVATE_THIS")
+                appendToMenuByMenuDesc(menu, "Activate;CMD_ACTIVATE_THIS")
                 
-                if href.startswith(u"file:") or \
-                        href.startswith(u"rel://"):
+                if href.startswith("file:") or \
+                        href.startswith("rel://"):
 
                     appendToMenuByMenuDesc(menu,
-                            u"Open Containing Folder;"
-                            u"CMD_OPEN_CONTAINING_FOLDER_THIS")
+                            "Open Containing Folder;"
+                            "CMD_OPEN_CONTAINING_FOLDER_THIS")
 
-        appendToMenuByMenuDesc(menu, u"-")
+        appendToMenuByMenuDesc(menu, "-")
 
         # Add the Forward and Back items
         backMenuItem = appendToMenuByMenuDesc(menu, 
-                u"Back;CMD_HISTORY_BACK")[0]
+                "Back;CMD_HISTORY_BACK")[0]
         forwardMenuItem = appendToMenuByMenuDesc(menu, 
-                u"Forward;CMD_HISTORY_FORWARD")[0]
+                "Forward;CMD_HISTORY_FORWARD")[0]
 
         # Disable Forward / Back items if there is no history
         pageHistDeepness = self.presenter.getPageHistory().getDeepness()
@@ -641,13 +679,13 @@ class WikiHtmlView2(wx.Panel):
         """
         js_path = os.path.join(self.presenter.getMainControl().wikiAppDir, "lib", "js", "onload_jquery.js")
 
-	if os.path.isfile(js_path):
+        if os.path.isfile(js_path):
             try:
                 with open(js_path) as f:
                     self.html.RunScript(f.read())
                 self.jquery = True
-            except IOError, e:
-                print "Unable to load '{0}'".format(js_path), e
+            except IOError as e:
+                print("Unable to load '{0}'".format(js_path), e)
 
     def OnPageLoaded(self, evt):
         """
@@ -847,10 +885,15 @@ if ((typeof jQuery !== 'undefined')) {
             # Status None is sent on mouse off
             if status is None:
                 self.presenter.getMainControl().statusBar.SetStatusText(
-                        uniToGui(""), 0)
+                        "", 0)
                 return
 
-            internaljumpPrefix = u"http://internaljump/"
+            internaljumpPrefix = "http://internaljump/"
+
+            # It appears webkit urls sometimes need cleaning up
+            if internaljumpPrefix in status:
+                status = "{}{}".format(internaljumpPrefix, 
+                        status.split(internaljumpPrefix)[1])
 
             wikiWord = None
             if status.startswith(internaljumpPrefix):
@@ -859,7 +902,7 @@ if ((typeof jQuery !== 'undefined')) {
                 # in the wiki syntax (normally '!')
                 try:
                     wikiWord, anchor = status[len(internaljumpPrefix):].split(
-                            u"#", 1)
+                            "#", 1)
                 except ValueError:
                     wikiWord = status[len(internaljumpPrefix):]
                     anchor = None
@@ -870,7 +913,7 @@ if ((typeof jQuery !== 'undefined')) {
                     return
                 
                 # Add to internal jump prefix?
-                pagePrefix = u"wikipage/"
+                pagePrefix = "wikipage/"
                 wikiWord = wikiDocument.getWikiPageNameForLinkTerm(
                         wikiWord[len(pagePrefix):])
 
@@ -880,19 +923,19 @@ if ((typeof jQuery !== 'undefined')) {
                     self.currentLoadedUrl[len("file:"):]):
                 wikiWord = self.currentLoadedWikiWord
                 try:
-                    anchor = status.split(u"#", 1)[1]
-                except ValueError:
+                    anchor = status.split("#", 1)[1]
+                except IndexError:
                     anchor = None
     
             if wikiWord is not None:
                 if anchor is not None:
-                    anchor = u"#{0}".format(anchor)
+                    anchor = "#{0}".format(anchor)
                 else:
-                    anchor = u""
-                status = _(u"Link to page: {0}{1}".format(wikiWord, anchor))
+                    anchor = ""
+                status = _("Link to page: {0}{1}".format(wikiWord, anchor))
 
             self.presenter.getMainControl().statusBar.SetStatusText(
-                    uniToGui(status), 0)
+                    status, 0)
 
     def GetScriptReturn(self, script, return_value):
         """
@@ -913,7 +956,13 @@ if ((typeof jQuery !== 'undefined')) {
     def GetViewStart(self):
         """
         """
-        return tuple([int(i) for i in self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a").split(",")])
+        scriptRet = self.GetScriptReturn("a = window.scrollX + ',' + window.scrollY;", "a")
+        
+        if scriptRet == "" or scriptRet == "undefined,undefined":
+            # Happens with IE
+            return (0, 0)
+            
+        return tuple([int(i) for i in scriptRet.split(",")])
 
     def Scroll(self, x, y):
         """
@@ -981,7 +1030,7 @@ if ((typeof jQuery !== 'undefined')) {
                 vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
-            except WikiWordNotFoundException, e:
+            except WikiWordNotFoundException as e:
                 pass
 
         wikiPage = self.presenter.getDocPage()
@@ -1001,7 +1050,7 @@ if ((typeof jQuery !== 'undefined')) {
             # currently open page will stay responsive
             if self.jquery:
                 self.html.RunScript(LOADING_JS)
-                print "LOADING"
+                print("LOADING")
 
             eth = self.exportingThreadHolder
 
@@ -1020,7 +1069,8 @@ if ((typeof jQuery !== 'undefined')) {
             if self.anchor is not None:
 #                 self.passNavigate += 1
                 #self.html.LoadURL(self.currentLoadedUrl + u"#" + self.anchor)
-                wx.CallAfter(self.html.LoadURL, self.currentLoadedUrl + u"#" + self.anchor)
+                wx.CallAfter(self.html.LoadURL, "PROXY_EVENT//ANCHOR/" + 
+                        self.anchor)
 
                 # Is this neccessary?
                 wx.CallAfter(self.postRefresh, self.anchor)
@@ -1030,7 +1080,7 @@ if ((typeof jQuery !== 'undefined')) {
             #    self.scrollDeferred(lx, ly)
 
 
-        self.anchor = None
+        #self.anchor = None
         self.outOfSync = False
 
     def generateExportHtml(self, wikiPage, threadstop=DUMBTHREADSTOP):
@@ -1078,8 +1128,8 @@ if ((typeof jQuery !== 'undefined')) {
 
                 htpath = self.htpaths[self.currentHtpath]
 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -1100,8 +1150,8 @@ if ((typeof jQuery !== 'undefined')) {
                 self.currentHtpath = 1 - self.currentHtpath
                 htpath = self.htpaths[self.currentHtpath]
                 
-                with open(htpath, "w") as f:
-                    f.write(utf8Enc(html)[0])
+                with open(htpath, "w", encoding="utf-8") as f:
+                    f.write(html)
 
                 url = "file:" + urlFromPathname(htpath)
                 self.currentLoadedUrl = url
@@ -1118,7 +1168,7 @@ if ((typeof jQuery !== 'undefined')) {
                 #    self.scrollDeferred(lx, ly)
 
             self.outOfSync = False
-            self.anchor = None
+            #self.anchor = None
 
         except NotCurrentThreadException:
             return
@@ -1195,7 +1245,7 @@ if ((typeof jQuery !== 'undefined')) {
                 vs = self.getIntendedViewStart()
                 if vs is not None:
                     prevPage.setPresentation(vs, 3)
-            except WikiWordNotFoundException, e:
+            except WikiWordNotFoundException as e:
                 pass
 
     def onOptionsChanged(self, miscevt):
@@ -1254,7 +1304,7 @@ if ((typeof jQuery !== 'undefined')) {
             self.Thaw()
             self.deferredScrollPos = None
             self.counterResizeIgnore = 0
-        except wx.PyDeadObjectError:
+        except RuntimeError:
             # There will be a better way to do this
             pass
 
@@ -1283,12 +1333,25 @@ if ((typeof jQuery !== 'undefined')) {
         """
         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
         zoom += step
+        
+        # Restrict to allowed range.
+        # In the internal configuration the value 0 means the default size
+        # This should be kept consistent between different WikiHtmlView
+        # implementations.
+        # So it is restricted to range -2...2
+        zoom = between(-2, zoom, 2)
 
         self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
         self.outOfSync = True
         self.refresh()
         
-        self.html.SetZoom(zoom)
+        # The parameter must be in range 0...4 where 2 is default value
+        try:
+            self.html.SetZoom(zoom + 2)
+        except wx._core.wxAssertionError:
+            # Fails for unknown reason with IE under Windows 7
+            pass
+
 
         
     def OnMiddleDown(self, controlDown=False):
@@ -1317,9 +1380,27 @@ if ((typeof jQuery !== 'undefined')) {
             self.passNavigate -= 1
             return False
 
-        internaljumpPrefix = u"http://internaljump/"
+        internaljumpPrefix = "http://internaljump/"
 
-        if href.startswith(internaljumpPrefix + u"wikipage/"):  # len("wikipage/") == 9
+        # It appears webkit urls sometimes need cleaning up
+        if internaljumpPrefix in href:
+            href = "{}{}".format(internaljumpPrefix, 
+                    href.split(internaljumpPrefix)[1])
+
+
+        ## Webview uses the full url for links to anchors on the same page
+        #elif href[len("file://"):].startswith(
+        #        self.currentLoadedUrl[len("file:"):]):
+        #    wikiWord = self.currentLoadedWikiWord
+        #    print(self.currentLoadedUrl, wikiWord)
+        #    wikiWord = self.currentLoadedWikiWord
+        #    try:
+        #        href = "{}{}{}".format(internaljumpPrefix, wikiWord, 
+        #                href.split("#", 1)[1])
+        #    except IndexError:
+        #        anchor = None
+
+        if href.startswith(internaljumpPrefix + "wikipage/"):  # len("wikipage/") == 9
 
             # Jump to another wiki page
 
@@ -1333,9 +1414,9 @@ if ((typeof jQuery !== 'undefined')) {
                 anchor = None
 
             # unescape word
-            word = urllib.unquote(word) # utf8Dec(urllib.unquote(word))[0]
+            word = urllib.parse.unquote(word) # utf8Dec(urllib.unquote(word))[0]
             if anchor:
-                anchor = urllib.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
+                anchor = urllib.parse.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
 
             if tabMode & 2:
                 if tabMode == 6:
@@ -1364,13 +1445,13 @@ if ((typeof jQuery !== 'undefined')) {
             #decision.ignore()
             return True
 
-        elif href == (internaljumpPrefix + u"action/history/back"):
+        elif href == (internaljumpPrefix + "action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()
             #decision.ignore()
             return True
 
-        elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
+        elif href == (internaljumpPrefix + "mouse/leftdoubleclick/preview/body"):
             # None affect current tab so return false
             pres = self.presenter
             mc = pres.getMainControl()
@@ -1379,21 +1460,21 @@ if ((typeof jQuery !== 'undefined')) {
                     "main control": mc}
 
             mc.getUserActionCoord().reactOnUserEvent(
-                    u"mouse/leftdoubleclick/preview/body", paramDict)
+                    "mouse/leftdoubleclick/preview/body", paramDict)
             ##decision.ignore()
 
             self.html.RunScript("checkSelection();")
             return True
 
-        elif href == (internaljumpPrefix + u"event/pageBuilt"):
+        elif href == (internaljumpPrefix + "event/pageBuilt"):
             # Should we be doing anything here?
             return True
 
-        elif href.startswith(u"file:"):
+        elif href.startswith("file:"):
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
             normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
-            if len(hrefSplit) == 2 and normedPath in self.normHtpaths:
+            if len(hrefSplit) == 2 and normedPath.encode() in self.normHtpaths:
             #if len(hrefSplit) == 2 and normedPath in self.normHtpath:
                 self.gotoAnchor(hrefSplit[1])
                 #decision.ignore()
@@ -1401,7 +1482,7 @@ if ((typeof jQuery !== 'undefined')) {
                 # To lauch external urls we need to remove webviews preceeding
                 # "file:///", quote the url and add "file:/"
                 self.presenter.getMainControl().launchUrl(
-                        u"file:/{0}".format(urlQuote(href[len("file:///"):])))
+                        "file:/{0}".format(urlQuote(href[len("file:///"):])))
                 #decision.ignore()
             return True
         else:
@@ -1488,15 +1569,15 @@ if ((typeof jQuery !== 'undefined')) {
 
         link = self.contextHref
 
-        if link.startswith(u"rel://"):
+        if link.startswith("rel://"):
             link = self.presenter.getWikiDocument().makeRelUrlAbsolute(link)
 
-        if link.startswith(u"file:"):
+        if link.startswith("file:"):
             try:
-                path = os.path.dirname(StringOps.pathnameFromUrl(link))
-                if not os.path.exists(StringOps.longPathEnc(path)):
+                path = os.path.dirname(pathnameFromUrl(link))
+                if not os.path.exists(longPathEnc(path)):
                     self.presenter.displayErrorMessage(
-                            _(u"Folder does not exist"))
+                            _("Folder does not exist"))
                     return
 
                 OsAbstract.startFile(self.presenter.getMainControl(),
@@ -1515,10 +1596,10 @@ if ((typeof jQuery !== 'undefined')) {
 
 
 # Entries to support i18n of context menus
-if False:
-    N_(u"Activate")
-    N_(u"Activate New Tab")
-    N_(u"Activate New Tab Backgrd.")
+if not True:
+    N_("Activate")
+    N_("Activate New Tab")
+    N_("Activate New Tab Backgrd.")
 
 class ExtractUrlFromHTML(HTMLParser):
     """HTML Parser designed to extract urls from html"""
@@ -1653,7 +1734,7 @@ class ViFunctions(ViHelper):
             # TODO: implement
         })
 
-        self.LoadPlugins(u"preview_wk")
+        self.LoadPlugins("preview_wk")
 
         # Generate possible key modifiers
         self.key_mods = self.GenerateKeyModifiers(self.keys)
@@ -1777,9 +1858,9 @@ class ViFunctions(ViHelper):
         # TODO: optimise
 
         if forward:
-            f = u"true" 
+            f = "true" 
         else:
-            f = u"false"
+            f = "false"
 
         self.ctrl.html.RunScript(
         """
@@ -1882,13 +1963,13 @@ window.scrollTo(0, scroll_height + to_scroll)
         //END JAVASCRIPT CODE
         ''')
 
-    def highlightLinks(self, string=u"", number=u""):
+    def highlightLinks(self, string="", number=""):
         # TODO: Text based link selection
         self.clearHints()
 
         # Label hints
-        if string is None: string = u""
-        if number is None: number = u""
+        if string is None: string = ""
+        if number is None: number = ""
 
 
         # Hack to retrieve selected url from title
@@ -2001,7 +2082,8 @@ document.title = links_selected.length;
         self.ctrl.html.RunScript('document.title=links_selected[0];')
 
         if link_number > 0:
-            primary_link = self.ctrl.html.GetCurrentTitle()
+            primary_link = urllib.parse.unquote(
+                    self.ctrl.html.GetCurrentTitle())
         else:
             primary_link = None
             
@@ -2024,6 +2106,7 @@ document.title = links_selected.length;
         # If only a single link is present we can launch that and finish
         if link_number == 1:
             self.ctrl._activateLink(link, tabMode=tabMode)
+            self.clearHints()
             return
         # Or if no links visible on page
         elif link_number < 1:
@@ -2060,7 +2143,7 @@ document.title = links_selected.length;
         s.reverse()
         n.reverse()
 
-        return self.highlightLinks(u"".join(s), u"".join(n))
+        return self.highlightLinks("".join(s), "".join(n))
 
     def forgetFollowHint(self):
         """
@@ -2138,7 +2221,7 @@ document.title = links_selected.length;
 
 # NOTE: duplicated from wikitxtctrl
 _CONTEXT_MENU_INTERNAL_JUMP = \
-u"""
+"""
 -
 Follow Link;CMD_ACTIVATE_THIS
 Follow Link New Tab;CMD_ACTIVATE_NEW_TAB_THIS
@@ -2147,25 +2230,25 @@ Follow Link New Window;CMD_ACTIVATE_NEW_WINDOW_THIS
 """
 
 _CONTEXT_MENU_INTERNAL_JUMP_DIRECTION = {
-    u"left" : u"""
+    "left" : """
 -
 Follow Link in pane|Left;CMD_ACTIVATE_THIS_LEFT
 Follow Link in pane|Left New Tab;CMD_ACTIVATE_NEW_TAB_THIS_LEFT
 Follow Link in pane|Left New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT
 """,
-    u"right" : u"""
+    "right" : """
 -
 Follow Link in pane|Right;CMD_ACTIVATE_THIS_RIGHT
 Follow Link in pane|Right New Tab;CMD_ACTIVATE_NEW_TAB_THIS_RIGHT
 Follow Link in pane|Right New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT
 """,
-    u"above" : u"""
+    "above" : """
 -
 Follow Link in pane|Above;CMD_ACTIVATE_THIS_ABOVE
 Follow Link in pane|Above New Tab;CMD_ACTIVATE_NEW_TAB_THIS_ABOVE
 Follow Link in pane|Above New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE
 """,
-    u"below" : u"""
+    "below" : """
 -
 Follow Link in pane|Below;CMD_ACTIVATE_THIS_BELOW
 Follow Link in pane|Below New Tab;CMD_ACTIVATE_NEW_TAB_THIS_BELOW

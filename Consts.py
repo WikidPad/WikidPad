@@ -23,9 +23,9 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 3, 116, 0)
-VERSION_STRING = "wikidPad 2.3beta16"
-HOMEPAGE = u"http://wikidpad.sourceforge.net"
+VERSION_TUPLE = ("wikidPad", 2, 4, 1, 0)
+VERSION_STRING = "wikidPad 2.4alpha01"
+HOMEPAGE = "http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
 CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"
@@ -33,6 +33,12 @@ CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"
 
 
 DEADBLOCKTIMEOUT = 1800
+
+
+# For use in isinstance(v, BYTETYPES)
+BYTETYPES = (bytes, bytearray) 
+
+
 
 
 # Scintilla known format types and numbers

@@ -53,7 +53,7 @@ class RenameWikiWordException(AppBaseException):
     """
     Raised on problems with renaming multiple wikiwords at once.
     Constructed in 
-    WikiDataManager.WikiDataManager.buildRenameSeqWithSubpages()
+    WikiDocument.WikiDocument.buildRenameSeqWithSubpages()
     """
     # Problems:
     # Multiple words should be renamed to same word
@@ -78,16 +78,16 @@ class RenameWikiWordException(AppBaseException):
         """
         # TODO Move definition outside (attn to i18n)
         PROBLEM_HR_DICT = {
-                self.PRB_RENAME_TO_SAME: _(u"Multiple words rename to same word"),
-                self.PRB_TO_ALREADY_EXISTS: _(u"Word already exists")
+                self.PRB_RENAME_TO_SAME: _("Multiple words rename to same word"),
+                self.PRB_TO_ALREADY_EXISTS: _("Word already exists")
             }
 
         result = []
         for fromWikiWord, toWikiWord, problem in self.affectedRenames:
-            result.append(u"%s -> %s: %s" % (fromWikiWord, toWikiWord,
+            result.append("%s -> %s: %s" % (fromWikiWord, toWikiWord,
                     PROBLEM_HR_DICT[problem]))
         
-        return u"\n".join(result)
+        return "\n".join(result)
 
 
 
@@ -102,7 +102,7 @@ class ImportException(AppBaseException): pass
 class SerializationException(AppBaseException): pass
 class VersioningException(AppBaseException): pass
 
-# See WikiDataManager.py. Thrown if requested handler for db backend isn't
+# See WikiDocument.py. Thrown if requested handler for db backend isn't
 #     available
 class NoDbHandlerException(AppBaseException): pass
 class WrongDbHandlerException(AppBaseException): pass
@@ -110,7 +110,7 @@ class DbHandlerNotAvailableException(AppBaseException): pass
 class UnknownDbHandlerException(AppBaseException): pass
 
 
-# See WikiDataManager.py. Thrown if requested handler for wiki language isn't
+# See WikiDocument.py. Thrown if requested handler for wiki language isn't
 #     available
 class UnknownWikiLanguageException(AppBaseException): pass
 class WrongWikiLanguageException(AppBaseException): pass

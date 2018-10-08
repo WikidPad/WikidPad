@@ -1,4 +1,4 @@
-++ Wiki Fonts
+﻿++ Wiki Fonts
 
 You can change the font of a single wiki page by adding a font
 attribute to that page. Example:

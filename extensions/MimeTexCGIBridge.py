@@ -1,4 +1,4 @@
-import os, urllib, os.path
+import os, urllib.request, urllib.parse, urllib.error, os.path
 import subprocess
 
 import wx
@@ -21,7 +21,7 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return ((u"eqn", ("html_single", "html_previewWX", "html_preview",
+    return (("eqn", ("html_single", "html_previewWX", "html_preview",
             "html_multi"), EqnHandler),)
 
 
@@ -81,15 +81,15 @@ class EqnHandler:
         For HtmlExporter a unistring is returned with the HTML code
         to insert instead of the insertion.        
         """
-        bstr = urllib.quote(mbcsEnc(insToken.value, "replace")[0])
+        bstr = urllib.parse.quote(mbcsEnc(insToken.value, "replace")[0])
 
         if not bstr:
             # Nothing in, nothing out
-            return u""
+            return ""
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return u'<pre>' + _(u'[Please set path to MimeTeX executable]') + \
+            return '<pre>' + _('[Please set path to MimeTeX executable]') + \
                     '</pre>'
 
         # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
@@ -119,9 +119,9 @@ class EqnHandler:
         
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
-            response = response[(response.index("\n\n") + 2):]
+            response = response[(response.index(b"\n\n") + 2):]
         except ValueError:
-            return u'<pre>' + _(u'[Invalid response from MimeTeX]') + \
+            return '<pre>' + _('[Invalid response from MimeTeX]') + \
                     '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
@@ -135,10 +135,10 @@ class EqnHandler:
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
-                    u'&nbsp;') % url
+            return ('<img src="%s" border="0" align="bottom" alt="formula" />'
+                    '&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
+            return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 
@@ -160,9 +160,9 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_mimeTex_exePath")] = u""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_mimeTex_exePath")] = ""
     # Register panel in options dialog
-    app.addOptionsDlgPanel(MimeTexOptionsPanel, u"  MimeTeX")
+    app.addOptionsDlgPanel(MimeTexOptionsPanel, "  MimeTeX")
 
 
 class MimeTexOptionsPanel(wx.Panel):
@@ -182,7 +182,7 @@ class MimeTexOptionsPanel(wx.Panel):
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to MimeTeX:")), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _("Path to MimeTeX:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)

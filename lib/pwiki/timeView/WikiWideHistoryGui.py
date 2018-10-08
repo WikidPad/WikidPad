@@ -17,11 +17,11 @@ class WikiWideHistoryPanel(EnhancedListControl):
 
         self.mainControl = mainControl
 
-        self.InsertColumn(0, _(u"Page Name"), width=100)
-        self.InsertColumn(1, _(u"Visited"), width=100)
+        self.InsertColumn(0, _("Page Name"), width=100)
+        self.InsertColumn(1, _("Visited"), width=100)
         
         colConfig = self.mainControl.getConfig().get("main",
-                "wikiWideHistory_columnWidths", u"100,100")
+                "wikiWideHistory_columnWidths", "100,100")
 
         self.setColWidthsByConfigString(colConfig)
 
@@ -50,17 +50,16 @@ class WikiWideHistoryPanel(EnhancedListControl):
         else:
             self.onConstructedMainWindow(None)
 
-        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
-#         wx.EVT_LIST_ITEM_SELECTED(self, self.GetId(), self.OnItemSelected)
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        wx.EVT_SIZE(self, self.OnSize)
-#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+#         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, id=self.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, id=self.GetId())
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+#         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
         
-        wx.EVT_MENU(self, GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL,
-                self.OnCmdDeleteAll)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAll, id=GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL)
 
         self.onWikiStateChanged(None)
 
@@ -197,9 +196,9 @@ class WikiWideHistoryPanel(EnhancedListControl):
         Handle misc events
         """
         if self.isVisibleEffect() and miscevt.getSource() is self.mainControl:
-            if miscevt.has_key("opened wiki"):
+            if "opened wiki" in miscevt:
                 self.onWikiStateChanged(miscevt)
-            elif miscevt.has_key("closed current wiki"):
+            elif "closed current wiki" in miscevt:
                 self.onWikiStateChanged(miscevt)
 
 
@@ -231,7 +230,7 @@ class WikiWideHistoryPanel(EnhancedListControl):
         
         # TODO: Own date/time format
         formatStr = self.mainControl.getConfig().get("main",
-                "wikiWideHistory_dateFormat", u"%x %I:%M %p")
+                "wikiWideHistory_dateFormat", "%x %I:%M %p")
 
         with WindowUpdateLocker(self):
             self.DeleteAllItems()
@@ -244,10 +243,10 @@ class WikiWideHistoryPanel(EnhancedListControl):
 #                 if entry.versionNumber == currVn:
 #                     selected = self.GetItemCount()
 
-                self.InsertStringItem(self.GetItemCount(), text)
+                self.InsertItem(self.GetItemCount(), text)
                 
                 text = entry.getFormattedVisitedDate(formatStr)
-                self.SetStringItem(self.GetItemCount() - 1, 1, text)
+                self.SetItem(self.GetItemCount() - 1, 1, text)
 
 #             if selected == -1 and currVn == 0:
 #                 selected = self.GetItemCount()
@@ -368,7 +367,7 @@ class WikiWideHistoryPanel(EnhancedListControl):
 
 # Context menu on history tab
 _CONTEXT_MENU_HISTORY_TAB = \
-u"""
+"""
 Clear history;CMD_WIKI_WIDE_HISTORY_DELETE_ALL;Clear history
 """
 
@@ -376,8 +375,8 @@ Clear history;CMD_WIKI_WIDE_HISTORY_DELETE_ALL;Clear history
 
 
 # Entries to support i18n of context menus
-if False:
-    N_(u"Clear history")
+if not True:
+    N_("Clear history")
 
 
 

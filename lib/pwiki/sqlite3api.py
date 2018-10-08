@@ -3,15 +3,15 @@
 # This module does currently not support date and time handling
 
 
-import exceptions, re
+import re
 
-import SqliteThin3
+from . import SqliteThin3
 
 
 # def def_bind_fctfinder(stmt, parno, data)
 # def_column_fctfinder(stmt, col)
 
-from SqliteThin3 import def_bind_fctfinder, def_column_fctfinder, \
+from .SqliteThin3 import def_bind_fctfinder, def_column_fctfinder, \
         SQLITE_UTF8, SQLITE_UTF16BE, \
         SQLITE_UTF16LE, SQLITE_UTF16, \
         SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, SQLITE_NULL, \
@@ -28,10 +28,10 @@ Binary = SqliteThin3.Binary
 
 # Exceptions
 
-class Warning(exceptions.StandardError):
+class Warning(Exception):
     pass
     
-class Error(exceptions.StandardError):
+class Error(Exception):
     pass
 
 class InterfaceError(Error):
@@ -102,7 +102,7 @@ class Connection:
                 return st
 
         except AttributeError:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
             
             
     def putStmtBack(self, sql, stmt):
@@ -127,13 +127,13 @@ class Connection:
             
     def clearStmtCache(self):
         try:
-            stmts = filter(lambda s: s is not None, self.statementCache.values())
+            stmts = [s for s in list(self.statementCache.values()) if s is not None]
             for s in stmts:
                 s[0].close()
                 
             self.statementCache = {}
         except AttributeError:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
 
 
     def close(self):
@@ -141,13 +141,13 @@ class Connection:
         try:
             self.clearStmtCache()
             self.statementCache = None
-        except Exception, e:
+        except Exception as e:
             error = e        
         
         try:
             self.thinConn.close()
             self.thinConn = None
-        except Exception, e:
+        except Exception as e:
             error = e        
 
         if error:
@@ -164,7 +164,7 @@ class Connection:
         try:
             self.thinConn.execute("begin")
         except AttributeError:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
         
 
     def commit(self):
@@ -172,19 +172,19 @@ class Connection:
             if not self.thinConn.get_autocommit():
                 self.thinConn.execute("commit")
         except AttributeError:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
 
     def rollback(self):
         try:
             if not self.thinConn.get_autocommit():
                 self.thinConn.execute("rollback")
         except AttributeError:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
 
             
     def cursor(self):
         if self.thinConn is None:
-            raise Error, "Trying to access a closed connection"
+            raise Error("Trying to access a closed connection")
             
         return self.cursorFactory(self)
         
@@ -197,9 +197,9 @@ class Connection:
                 raise ReadOnlyDbError("Sqlite DB read-only error [%i]" % err)
             elif self.thinConn:
                 msg = self.thinConn.errmsg()
-                raise Error, msg + " [%i]" % err
+                raise Error(msg + " [%i]" % err)
             else:
-                raise Error, "Sqlite open error %i" % err
+                raise Error("Sqlite open error %i" % err)
 
             
     # TODO Explain
@@ -289,7 +289,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
                 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
 
     def close(self):
@@ -382,7 +382,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
 
     def executemany(self, sql, seq_of_parameters, *params, **keywords):
@@ -431,7 +431,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
             
     def fetchmany(self, size=None):
@@ -442,7 +442,7 @@ class Cursor:
             size = self.arraysize
             
         result = []
-        for i in xrange(size):
+        for i in range(size):
             row = self.fetchone()
             if row is None:
                 break
@@ -467,7 +467,7 @@ class Cursor:
             
         return result
         
-    def next(self):
+    def __next__(self):
         row = self.fetchone()
         if row is None:
             raise StopIteration
@@ -506,7 +506,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
     def rollback(self):
         try:
@@ -516,7 +516,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
 
     def begin(self):
@@ -527,7 +527,7 @@ class Cursor:
                 self.stmt[0].close()  
                 self.stmt = None
 
-            raise Error, "Trying to access a closed cursor"
+            raise Error("Trying to access a closed cursor")
 
 
     def __getattr__(self, attr):
@@ -539,9 +539,9 @@ class Cursor:
                     self.stmt[0].close()  
                     self.stmt = None
 
-                raise Error, "Trying to access a closed cursor"
+                raise Error("Trying to access a closed cursor")
             
-        raise AttributeError, "No attribute %s in sqlite3api.Cursor" % attr
+        raise AttributeError("No attribute %s in sqlite3api.Cursor" % attr)
             
 
 _GLOB_ESCAPE_RE = re.compile(r"([\[\]\*\?])")

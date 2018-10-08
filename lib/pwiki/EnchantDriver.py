@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 # pyenchant
 #
@@ -105,19 +105,6 @@ import wx
 
 #  -------------------- From utils module --------------------
 
-try:
-    unicode = unicode
-except NameError:
-    str = str
-    unicode = str
-    bytes = bytes
-    basestring = (str,bytes)
-else:
-    str = str
-    unicode = unicode
-    bytes = str
-    basestring = basestring
-
 
 def get_resource_filename(resname):
     """Get the absolute path to the named resource file.
@@ -163,9 +150,9 @@ class EnchantStr(str):
         This method records whether the initial string was unicode, then
         simply passes it along to the default string constructor.
         """
-        if type(value) is unicode:
+        if type(value) is str:
           self._was_unicode = True
-          if str is not unicode:
+          if str is not str:
             value = value.encode("utf-8")
         else:
           self._was_unicode = False
@@ -175,20 +162,18 @@ class EnchantStr(str):
 
     def encode(self):
         """Encode this string into a form usable by the enchant C library."""
-        if str is unicode:
-          return str.encode(self,"utf-8")
-        else:
-          return self
+        return str.encode(self,"utf-8")
 
     def decode(self,value):
         """Decode a string returned by the enchant C library."""
         if self._was_unicode:
-          if str is unicode:
-            # TODO: why does ctypes convert c_char_p to str(),
-            #       rather than to bytes()?
-            return value.encode().decode("utf-8")
-          else:
-            return value.decode("utf-8")
+          return value.decode("utf-8")
+          #if str is str:
+          #  # TODO: why does ctypes convert c_char_p to str(),
+          #  #       rather than to bytes()?
+          #  return value.encode().decode("utf-8")
+          #else:
+          #  return value.decode("utf-8")
         else:
           return value
 
@@ -270,8 +255,8 @@ if sys.platform == "win32":
     if e_path is not None:
         # We need to use LoadLibraryEx with LOAD_WITH_ALTERED_SEARCH_PATH so
         # that we don't accidentally suck in other versions of e.g. glib.
-        if not isinstance(e_path,unicode):
-            e_path = unicode(e_path,sys.getfilesystemencoding())
+        if not isinstance(e_path,str):
+            e_path = str(e_path,sys.getfilesystemencoding())
         LoadLibraryEx = windll.kernel32.LoadLibraryExW
         LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
         e_handle = LoadLibraryEx(e_path,None,LOAD_WITH_ALTERED_SEARCH_PATH)
@@ -491,7 +476,7 @@ class DictNotFoundError(Error):
     """Exception raised when a requested dictionary could not be found."""
     pass
 
-class ProviderDesc(object):
+class ProviderDesc:
     """Simple class describing an Enchant provider.
     Each provider has the following information associated with it:
 
@@ -523,7 +508,7 @@ class ProviderDesc(object):
         return hash(self.name + self.desc + self.file)
 
 
-class _EnchantObject(object):
+class _EnchantObject:
     """Base class for enchant objects.
     
     This class implements some general functionality for interfacing with

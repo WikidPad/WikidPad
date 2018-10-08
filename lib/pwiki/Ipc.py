@@ -4,12 +4,12 @@ another WikidPad instance is already active, transfers commandline
 to it and closes the additional instance then.
 """
 
-import os, sys, string, re, traceback
-import threading, socket, SocketServer
+import os, sys, re, traceback
+import threading, socket, socketserver
 
 import wx
 
-from Serialization import SerializeStream
+from .Serialization import SerializeStream
 
 # TODO How to handle /x (exit) command on commandline?
 
@@ -32,9 +32,9 @@ class RemoteCommandEvent(wx.PyCommandEvent):
 
 
 
-class CommandServer(SocketServer.TCPServer):
+class CommandServer(socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
-        SocketServer.TCPServer.__init__(self, server_address,
+        socketserver.TCPServer.__init__(self, server_address,
                 RequestHandlerClass)
         
         self.cookie = None
@@ -67,13 +67,13 @@ class CommandServer(SocketServer.TCPServer):
 
 
 
-class RemoteCmdHandler(SocketServer.StreamRequestHandler):
+class RemoteCmdHandler(socketserver.StreamRequestHandler):
     def setup(self):
         self.request.settimeout(10.0)
-        SocketServer.StreamRequestHandler.setup(self)
+        socketserver.StreamRequestHandler.setup(self)
 
     def finish(self):
-        SocketServer.StreamRequestHandler.finish(self)
+        socketserver.StreamRequestHandler.finish(self)
         self.request.close()
 
     def _readLine(self):
@@ -81,8 +81,8 @@ class RemoteCmdHandler(SocketServer.StreamRequestHandler):
         read = 0
         while read < 300:
             c = self.rfile.read(1)
-            if c == "\n" or c == "":
-                return "".join(result)
+            if c == b"\n" or c == b"":
+                return (b"".join(result)).decode("latin-1")
 
             result.append(c)
             read += 1
@@ -101,7 +101,7 @@ class RemoteCmdHandler(SocketServer.StreamRequestHandler):
                     self.wfile.write("+App cookie ok\n")
                     # Authentication passed
                     sst = SerializeStream(fileObj=self.rfile, readMode=True)
-                    cmdline = sst.serArrString(())
+                    cmdline = sst.serArrUniUtf8(())
                     evt = RemoteCommandEvent(cmdline)
                     wx.GetApp().GetTopWindow().AddPendingEvent(evt)
                 else:
@@ -122,13 +122,13 @@ def createCommandServer(appCookie):
     global theServer
 
     # Search for an unused port
-    for port in xrange(2000,3000):   # TODO range option
+    for port in range(2000,3000):   # TODO range option
         try:
             server = CommandServer(("127.0.0.1", port), RemoteCmdHandler)
             server.setAppCookie(appCookie)
             theServer = server
             return port  # Free port found
-        except socket.error, e:
+        except socket.error as e:
             if not (e.args[0] == 10048 or e.args[0] == 98):
                 # Not "Address already in use" error, so reraise
                 raise
@@ -153,21 +153,5 @@ def stopCommandServer():
     
     if theServer is not None:
         theServer.close()
-
-
-
-
-#wxPython demo code ----------------------------------------------------------------------
-
-
-
-#----------------------------------------------------------------------
-
-# 
-#     evt = MyEvent(myEVT_BUTTON_CLICKPOS, self.GetId())
-#     evt.SetMyVal(pt)
-#     #print id(evt), sys.getrefcount(evt)
-#     self.GetEventHandler().ProcessEvent(evt)
-#     #print id(evt), sys.getrefcount(evt)
 
 

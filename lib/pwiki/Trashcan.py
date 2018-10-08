@@ -8,7 +8,7 @@ from .rtlibRepl import minidom
 
 import wx
 
-from WikiExceptions import *
+from .WikiExceptions import *
 import Consts
 
 from .MiscEvent import MiscEventSourceMixin, KeyFunctionSink
@@ -17,9 +17,6 @@ from . import Exporters, Serialization
 
 from . import StringOps
 
-# from ..StringOps import applyBinCompact, getBinCompactForDiff, \
-#         fileContentToUnicode, BOM_UTF8, formatWxDate
-# 
 # from ..Serialization import serToXmlUnicode, serFromXmlUnicode, serToXmlInt, \
 #         serFromXmlInt, iterXmlElementFlat
 # 
@@ -30,7 +27,7 @@ from . import StringOps
 DAMAGED = object()
 
 
-class TrashBag(object):
+class TrashBag:
     """
     A trash bag contains all parts of a wikiword, wikipage content itself and
     dependent datablocks (e.g. old versions). It provides also a small subset
@@ -59,8 +56,7 @@ class TrashBag(object):
 
 
     def getFormattedTrashDate(self, formatStr):
-        return StringOps.formatWxDate(formatStr, wx.DateTimeFromTimeT(
-                self.trashTimeStamp))
+        return StringOps.formatTimeT(formatStr, self.trashTimeStamp)
 
 
     def serializeOverviewToXmlProd(self, xmlDoc):
@@ -70,7 +66,7 @@ class TrashBag(object):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"trashBag")
+            xmlNode = xmlDoc.createElement("trashBag")
 
         self.serializeOverviewToXml(xmlNode, xmlDoc)
 
@@ -82,13 +78,13 @@ class TrashBag(object):
         Create XML node to contain all overview information (not content)
         about this object.
         """
-        Serialization.serToXmlInt(xmlNode, xmlDoc, u"bagId", self.bagId,
+        Serialization.serToXmlInt(xmlNode, xmlDoc, "bagId", self.bagId,
                 replace=True)
 
-        Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"originalUnifiedName",
+        Serialization.serToXmlUnicode(xmlNode, xmlDoc, "originalUnifiedName",
                 self.originalUnifiedName, replace=True)
 
-        Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"trashTime", unicode(time.strftime(
+        Serialization.serToXmlUnicode(xmlNode, xmlDoc, "trashTime", str(time.strftime(
                 "%Y-%m-%d/%H:%M:%S", time.gmtime(self.trashTimeStamp))),
                 replace=True)
 
@@ -103,12 +99,12 @@ class TrashBag(object):
         """
         self.xmlNode = xmlNode
 
-        self.bagId = Serialization.serFromXmlInt(xmlNode, u"bagId")
+        self.bagId = Serialization.serFromXmlInt(xmlNode, "bagId")
 
         self.originalUnifiedName = Serialization.serFromXmlUnicode(xmlNode,
-                u"originalUnifiedName")
+                "originalUnifiedName")
 
-        timeStr = Serialization.serFromXmlUnicode(xmlNode, u"trashTime")
+        timeStr = Serialization.serFromXmlUnicode(xmlNode, "trashTime")
         self.trashTimeStamp = timegm(time.strptime(timeStr,
                 "%Y-%m-%d/%H:%M:%S"))
 
@@ -117,7 +113,7 @@ class TrashBag(object):
         if self.bagId == 0:
             return None
         else:
-            return u"trashcan/trashBag/packet/bagId/%s" % self.bagId
+            return "trashcan/trashBag/packet/bagId/%s" % self.bagId
 
 
     def getPacketData(self):
@@ -170,7 +166,7 @@ class Trashcan(MiscEventSourceMixin):
         Can be called before readOverview() to check if the version overview
         is already in database.
         """
-        unifName = u"trashcan/overview"
+        unifName = "trashcan/overview"
         return self.wikiDocument.retrieveDataBlock(unifName) is not None
 
 
@@ -215,11 +211,11 @@ class Trashcan(MiscEventSourceMixin):
         """
         bag = TrashBag(self)
 
-        for bagId in xrange(1, len(self.trashBagIds) + 2):
+        for bagId in range(1, len(self.trashBagIds) + 2):
             if not bagId in self.trashBagIds:
                 break
         else:
-            raise InternalError(u"Trashcan: No free bagId???")
+            raise InternalError("Trashcan: No free bagId???")
 
         bag.bagId = bagId
 
@@ -227,7 +223,7 @@ class Trashcan(MiscEventSourceMixin):
         self.wikiDocument.storeDataBlock(bag.getPacketUnifiedName(),
                 data, storeHint=self.getStorageHint())
 
-        bag.originalUnifiedName = u"wikipage/" + word
+        bag.originalUnifiedName = "wikipage/" + word
         self._addTrashBag(bag)
 
         return bagId
@@ -255,11 +251,11 @@ class Trashcan(MiscEventSourceMixin):
         Read and decode overview from database. Most functions can be called
         only after this was called (exception: isInDatabase())
         """
-        unifName = u"trashcan/overview"
+        unifName = "trashcan/overview"
 
         content = self.wikiDocument.retrieveDataBlock(unifName, default=DAMAGED)
         if content is DAMAGED:
-            raise Exception(_(u"Trashcan data damaged"))   # TODO: Specific exception
+            raise Exception(_("Trashcan data damaged"))   # TODO: Specific exception
         elif content is None:
             self.trashBags = []
             self.trashBagIds = set()
@@ -294,14 +290,14 @@ class Trashcan(MiscEventSourceMixin):
         be deleted in regular ways.
         """
         dataBlocks = wikiDocument.getDataBlockUnifNamesStartingWith(
-                u"trashcan/")
+                "trashcan/")
 
         for db in dataBlocks:
             wikiDocument.deleteDataBlock(db)
 
 
     def writeOverview(self):
-        unifName = u"trashcan/overview"
+        unifName = "trashcan/overview"
 
         if len(self.trashBags) == 0:
             self.wikiDocument.deleteDataBlock(unifName)
@@ -364,7 +360,7 @@ class Trashcan(MiscEventSourceMixin):
         """
         xmlNode = self.xmlNode
         if xmlNode is None:
-            xmlNode = xmlDoc.createElement(u"trashcanOverview")
+            xmlNode = xmlDoc.createElement("trashcanOverview")
 
         self.serializeToXml(xmlNode, xmlDoc)
         
@@ -375,11 +371,11 @@ class Trashcan(MiscEventSourceMixin):
         """
         Modify XML node to contain all information about this object.
         """
-        xmlNode.setAttribute(u"formatVersion", u"0")
-        xmlNode.setAttribute(u"readCompatVersion", u"0")
-        xmlNode.setAttribute(u"writeCompatVersion", u"0")
+        xmlNode.setAttribute("formatVersion", "0")
+        xmlNode.setAttribute("readCompatVersion", "0")
+        xmlNode.setAttribute("writeCompatVersion", "0")
 
-        for xmlEntry in Serialization.iterXmlElementFlat(xmlNode, u"trashBag"):
+        for xmlEntry in Serialization.iterXmlElementFlat(xmlNode, "trashBag"):
             xmlNode.removeChild(xmlEntry)
 
         for entry in self.trashBags:
@@ -391,7 +387,7 @@ class Trashcan(MiscEventSourceMixin):
         """
         Set object state from data in xmlNode.
         """
-        formatVer = int(xmlNode.getAttribute(u"writeCompatVersion"))
+        formatVer = int(xmlNode.getAttribute("writeCompatVersion"))
         if formatVer > 0:
             SerializationException("Wrong version no. %s for trashcan overview" %
                     formatVer)
@@ -401,7 +397,7 @@ class Trashcan(MiscEventSourceMixin):
         trashBags = []
         trashBagIds = set()
 
-        for xmlEntry in Serialization.iterXmlElementFlat(xmlNode, u"trashBag"):
+        for xmlEntry in Serialization.iterXmlElementFlat(xmlNode, "trashBag"):
             entry = TrashBag(self)
             entry.serializeOverviewFromXml(xmlEntry)
 
@@ -425,7 +421,7 @@ class Trashcan(MiscEventSourceMixin):
 # 
 #         base = None
 #         workList = []
-#         for i in xrange(len(self.trashBags) - 1, -1, -1):
+#         for i in range(len(self.trashBags) - 1, -1, -1):
 #             entry = self.trashBags[i]
 #             if entry.contentDifferencing == u"complete":
 #                 workList = []

@@ -4,27 +4,27 @@ import pygettext
 
 def main():
 
-    updFiles = glob.glob(ur"WikidPad*.po")
+    updFiles = glob.glob(r"WikidPad*.po")
     
     updParams = []
 #     for uf in updFiles:
 #         updParams += [ur"-u", uf]
 
     pySrcParams = [
-            ur"Consts.py",
-            ur"ExceptionLogger.py",
-            ur"WikidPadStarter.py",
-            ur"extensions",
-            ur"lib\pwiki",
-            ur"lib\pwiki\rtlibRepl",
-            ur"lib\pwiki\timeView",
-            ur"lib\pwiki\wikidata",
-            ur"lib\pwiki\wikidata\compact_sqlite",
-            ur"lib\pwiki\wikidata\original_gadfly",
-            ur"lib\pwiki\wikidata\original_sqlite"
+            r"Consts.py",
+            r"ExceptionLogger.py",
+            r"WikidPadStarter.py",
+            r"extensions",
+            r"lib\pwiki",
+            r"lib\pwiki\rtlibRepl",
+            r"lib\pwiki\timeView",
+            r"lib\pwiki\wikidata",
+            r"lib\pwiki\wikidata\compact_sqlite",
+            r"lib\pwiki\wikidata\original_gadfly",
+            r"lib\pwiki\wikidata\original_sqlite"
             ]
     
-    params = [ur"-o", ur"WikidPad.pot", ur"--xrc=WikidPad.xrc"] + updParams + \
+    params = [r"-o", r"WikidPad.pot", r"--xrc=WikidPad.xrc"] + updParams + \
             pySrcParams
             
     pygettext.main(params)
