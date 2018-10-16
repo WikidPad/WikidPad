@@ -1,0 +1,162 @@
+# Example plugin for MenuModifier and MenuItemProvider type plugins.
+
+# This file has by default suffix ".pyf". To activate it, change it to ".py"
+# and (re-)start WikidPad.
+
+# The only function of a MenuModifier plugin is "modifyMenuV01". It takes
+# a menu before it is shown the first time and sends commands to it to
+# add provided menu items. It normally does not modify the menu directly
+# (but can if necessary)
+# 
+# The only function of a MenuItemProvider plugin is "provideMenuItemV01"
+# which takes the id string of a provided menu item, places it in a menu and
+# registers a handler which takes action if the menu item is clicked.
+
+
+# descriptor for plugin types
+WIKIDPAD_PLUGIN = (("MenuModifier", 1), ("MenuItemProvider", 1))
+
+
+# abbreviate unified name of our menu item as constant
+# The unified name should follow the form:
+# "menuItem/<parts of context menu name after 'contextMenu/'>/plugin/<plugin name>/<plugin and item specific parts>"
+ID_CMD_CHARCOUNT = "menuItem/editor/textArea/plugin/charcountContext/countChars"
+
+
+
+# This is the only function of the MenuModifier plugin type. It is called
+# after WikidPad internally constructed a particular menu and asks plugins
+# to add further menu items before menu is displayed the first (and probably
+# the last) time.
+# 
+# contextName -- string to identify the basic type of menu, e.g.
+# "contextMenu/editor/textArea" for the context menu in the text area of the editor
+# 
+# contextDict -- a dictionary with string keys and arbitrary objects as values.
+# These give more information about the situation in which the menu was
+# created. The content depends on the context name.
+# Detailed information is given in "docs/MenuHandling_contextInfo.txt".
+# 
+# menu -- the menu object to modify of type wxHelper.EnhancedPlgSuppMenu
+# (derived from wx.Menu).
+# 
+# Return value: If a menu with a given contextName is never processed
+# function returns None, if it could be processed (which doesn't
+# mean that menu must be modified in each case) return value is  False.
+# 
+# !IMPORTANT!: For each contextName the return value must be None either
+# always or never. When calling the function the first time, WikidPad decides
+# if it has to call it again for the same contextName
+
+def modifyMenuV01(contextName, contextDict, menu):
+    if contextName == "contextMenu/editor/textArea":
+        # We want to handle this menu
+
+        # Append a separator (if necessary)
+        menu.appendNecessarySeparator()
+        
+        # We wish to append an item (this in turn calls provideMenuItemV01()
+        menu.appendProvidedItem(ID_CMD_CHARCOUNT)
+        
+        # Return False to inform WikidPad that we handled the menu
+        return False
+    
+    # Default reaction to inform that we don't handle anything else
+    return None # Can be omitted here
+
+
+
+# This is the only function of the MenuItemProvider plugin type. It is called
+# when WikidPad or a plugin requests to insert or append a "provided menu item",
+# identified by a string, a so-called unified name (many objects in WikidPad
+# have a unified name).
+# 
+# Other than the name suggests the actual adding of menu items should be done
+# in this function and not in modifyMenuV01. Probably some time in the future
+# the order of items in menus will become user configurable. The two-step
+# approach will make this simpler.
+# 
+# menuItemUnifName -- string to identify the desired menu item
+# 
+# contextName -- string to identify the basic type of menu, e.g.
+# "contextMenu/editor/textArea" for the context menu in the text area of the editor
+# 
+# contextDict -- a dictionary with string keys and arbitrary objects as values.
+# These give more information about the situation in which the menu was
+# created. The content depends on the context name.
+# Detailed information is given in "docs/MenuHandling_contextInfo.txt".
+# 
+# menu -- the menu object to modify of type wxHelper.EnhancedPlgSuppMenu
+# (derived from wx.Menu).
+# 
+# insertIdx - position number where to insert the menu item. It can be in the
+# range of 0 (as first item) up to and including menu.GetMenuItemCount()
+# (append as last item). Meaning is same as  pos  in wxMenu.InsertItem
+# 
+# Return value: If a menu item with a given menuItemUnifName is never processed
+# function returns None, if it could be processed (which doesn't
+# mean that item must be inserted in each case) return value is  False.
+# 
+# !IMPORTANT!: For each menuItemUnifName the return value must be None either
+# always or never. When calling the function the first time, WikidPad decides
+# if it has to call it again for the same menuItemUnifName
+
+
+    
+def provideMenuItemV01(menuItemUnifName, contextName, contextDict, menu,
+        insertIdx):
+    if menuItemUnifName == ID_CMD_CHARCOUNT:
+        # We want to provide this menu item
+
+        # preparePlgMenuItem creates a menu item and returns it. Furthermore
+        # it registers event handlers to call  evtfct  and  updatefct  if given
+        theItem = menu.preparePlgMenuItem("Count chars",
+                "Well, it counts selected characters", evtfct=cmdCountChars,
+                menuID=ID_CMD_CHARCOUNT, updatefct=updCountChars)
+                
+        # Usual wxPython call to insert the item
+        menu.InsertItem(insertIdx, theItem)
+        
+        # Return False to inform WikidPad that we handled the item
+        return False
+
+    # Default reaction to inform that we don't handle anything else
+    return None # Can be omitted here
+
+
+
+# This function was entered as evtfct in menu.preparePlgMenuItem.
+# 
+# It is always called with following parameters:
+# evt -- Appropriate wx.CommandEvent
+# menuItemUnifName -- as above
+# contextName -- as above
+# contextDict -- as above
+# menu -- as above
+def cmdCountChars(evt, menuItemUnifName, contextName, contextDict, menu):
+    txtCtrl = contextDict["txtCtrl"]
+    
+    txtCtrl.getMainControl().stdDialog("o", u"Character count",
+    u"Counted {0} characters".format(countSel(txtCtrl)))
+
+
+
+# This function was entered as updatefct in menu.preparePlgMenuItem.
+# 
+# It uses the same parameters as the event function, except:
+# evt -- Appropriate wx.UpdateUIEvent
+def updCountChars(evt, menuItemUnifName, contextName, contextDict, menu):
+    # For this example the menu item is disabled if selection spans
+    # zero characters
+    txtCtrl = contextDict["txtCtrl"]
+
+    evt.Enable(countSel(txtCtrl) > 0)
+
+
+
+# Actual worker function
+def countSel(txtCtrl):
+    s, e = txtCtrl.GetSelectionCharPos()
+    return abs(e - s)
+
+

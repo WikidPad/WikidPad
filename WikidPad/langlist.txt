@@ -1,0 +1,6 @@
+﻿zh_CN	简体中文
+zh_TW	繁體中文
+C	English
+hu_HU	Hungarian
+ru_RU	Русский
+sv	Swedish

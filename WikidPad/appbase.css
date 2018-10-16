@@ -1,0 +1,166 @@
+BODY {
+	font-family: Verdana; font-size: 90%;
+}
+
+.wikidpad {
+    /* class used by all elements created from HTML preview/exporter.
+    Address specific elements e.g. with "br.wikidpad" */
+}
+
+
+img.wikidpad {
+    border-width: 0px;
+}
+
+.wiki-name-ref {
+	color: #888888; font-size: 75%;
+}
+
+.parent-nodes {
+	color: #888888; font-size: 75%;
+}
+
+.property {
+    /* Legacy definition, use ".attribute" instead  */
+}
+
+.attribute {
+	color: #888888; font-size: 75%;
+}
+
+.script {
+	color: #888888; font-size: 75%;
+}
+
+.todo {
+	font-weight: bold;
+}
+
+.url-link {
+}
+
+.wiki-link {
+}
+
+/* normal indentation */
+.normalindent {
+}
+
+/* list of bullets (unordered list) */
+.bulletlist {
+}
+
+/* default ordered list */
+.orderedlist {
+}
+
+.page-toc {
+}
+
+.page-toc-level1 {
+}
+
+.page-toc-level2 {
+    margin-left: 4mm;
+}
+
+.page-toc-level3 {
+    margin-left: 8mm;
+}
+
+.page-toc-level4 {
+    margin-left: 12mm;
+}
+
+.page-toc-level5 {
+    margin-left: 16mm;
+}
+
+.page-toc-level6 {
+    margin-left: 20mm;
+}
+
+.page-toc-level7 {
+    margin-left: 24mm;
+}
+
+.page-toc-level8 {
+    margin-left: 28mm;
+}
+
+.page-toc-level9 {
+    margin-left: 32mm;
+}
+
+.page-toc-level10 {
+    margin-left: 36mm;
+}
+
+.page-toc-level11 {
+    margin-left: 40mm;
+}
+
+.page-toc-level12 {
+    margin-left: 44mm;
+}
+
+.page-toc-level13 {
+    margin-left: 48mm;
+}
+
+.page-toc-level14 {
+    margin-left: 52mm;
+}
+
+.page-toc-level15 {
+    margin-left: 56mm;
+}
+
+
+.heading-level1 {
+}
+
+.heading-level2 {
+}
+
+.heading-level3 {
+}
+
+.heading-level4 {
+}
+
+.heading-level5 {
+}
+
+.heading-level6 {
+}
+
+.heading-level7 {
+}
+
+.heading-level8 {
+}
+
+.heading-level9 {
+}
+
+.heading-level10 {
+}
+
+.heading-level11 {
+}
+
+.heading-level12 {
+}
+
+.heading-level13 {
+}
+
+.heading-level14 {
+}
+
+.heading-level15 {
+}
+
+
+
