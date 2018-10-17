@@ -5472,8 +5472,8 @@ class ViHandler(ViHelper):
         return mid
 
 
-    def GotoSelectionStart(self):
-        self.ctrl.GotoPos(self.ctrl.GetSelectionStart())
+#     def GotoSelectionStart(self):
+#         self.ctrl.GotoPos(self.ctrl.GetSelectionStart())
 
     def InsertPreviousText(self):
         self.EmulateKeypresses(self.insert_action)

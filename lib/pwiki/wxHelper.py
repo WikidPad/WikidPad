@@ -1058,9 +1058,9 @@ class IconCache:
             if (bitmap.GetWidth() != targetWidth) or \
                     (bitmap.GetHeight() != targetHeight):
                 # Rescale
-                image = wx.ImageFromBitmap(bitmap)
+                image = bitmap.ConvertToImage()
                 image.Rescale(targetWidth, targetHeight, wx.IMAGE_QUALITY_HIGH)
-                bitmapIl = wx.BitmapFromImage(image)
+                bitmapIl = wx.Bitmap(image)
             else:
                 bitmapIl = bitmap
             
