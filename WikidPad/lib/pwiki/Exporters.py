@@ -3,7 +3,6 @@
 ## import profilehooks
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
-# from Enum import Enumeration
 import sys, os, re, traceback, time, urllib.request, urllib.parse, urllib.error
 from os.path import join, exists, splitext, abspath
 from io import BytesIO

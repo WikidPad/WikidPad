@@ -92,21 +92,12 @@ def _putPathPrepends():
 _putPathPrepends()
 
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-        "gadfly.zip"))
-# sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\gadfly.zip")
-# print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
-
-
 import wx
 
 # cmore addition
 if (not hasattr(wx, "NO_3D")):
     wx.NO_3D=0
 
-
-# from pwiki import srePersistent
-# srePersistent.loadCodeCache()
 
 from pwiki.MainApp import App, findDirs
 

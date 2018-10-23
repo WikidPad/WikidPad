@@ -1,4 +1,3 @@
-# from Enum import Enumeration
 import sys, os, re, traceback, time, sqlite3
 from codecs import BOM_UTF8
 from os.path import join, exists, splitext

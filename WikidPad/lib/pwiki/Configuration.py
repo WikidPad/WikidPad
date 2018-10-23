@@ -528,7 +528,7 @@ class CombinedConfiguration(_AbstractConfiguration):
 
 GLOBALDEFAULTS = {
     ("main", "wiki_history"): None,   # Should be overwritten with concrete value
-    ("main", "last_wiki"): "WikidPadHelp/WikidPadHelp.wiki",
+    ("main", "last_wiki"): "WikidPadHelp/WikidPadHelp.wiki",  # Path to last wiki. If relative then relative to wiki application dir.
     ("main", "size_x"): "500",
     ("main", "size_y"): "300",
 
@@ -870,7 +870,7 @@ GLOBALDEFAULTS = {
     ("main", "tempHandling_tempDir"): "", # Path to directory for temporary files. Only valid if
             # "tempHandling_tempMode" is set to "given".
     ("main", "wikiPathes_relative"): "False", # If True, pathes to last recently used wikis
-            # are stored relative to application dir.
+            # are stored relative to wiki application dir (useful for portable mode).
     ("main", "openWikiWordDialog_sortOrder"): "0", # Sort order in "Open Wiki Word" dialog
             # 0:Alphabetically; 1:By last visit, newest first; 2:By last visit, oldest first; 3:Alphabetically reverse
 
