@@ -3,6 +3,7 @@
 
 import sys, os, traceback, os.path, socket, locale
 from functools import reduce
+from inspect import getsourcefile
 
 # To generate dependency for py2exe
 if not True:
@@ -41,13 +42,23 @@ def findDirs():
     """
     Returns tuple (wikiAppDir, globalConfigDir)
     """
+    from os.path import dirname
+    
     wikiAppDir = None
     
+    if not wikiAppDir and not hasattr(sys, 'frozen'):
+        wikiAppDir = dirname(os.path.abspath(getsourcefile(lambda:0)))
+        # We are in WikidPad/lib/pwiki, go up two levels
+        wikiAppDir = dirname(dirname(wikiAppDir))
+        
+
     isWindows = (wx.GetOsVersion()[0] == wxWIN95) or \
             (wx.GetOsVersion()[0] == wxWINDOWS_NT)
 
 #     try:
-    wikiAppDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+    if not wikiAppDir:
+        wikiAppDir = dirname(os.path.abspath(sys.argv[0]))
+
     if not wikiAppDir:
         wikiAppDir = r"C:\Program Files\WikidPad"
         
@@ -130,7 +141,6 @@ class App(wx.App, MiscEventSourceMixin):
         self.removeAppLockOnExit = False
         self.Bind(wx.EVT_END_SESSION, self.OnEndSession)
         Localization.setLocale("C")
-        appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
         self.mainFrameSet = set()
 
@@ -206,7 +216,7 @@ class App(wx.App, MiscEventSourceMixin):
         cmdLine = CmdLineAction(sys.argv[1:])
         if not cmdLine.exitFinally and self.globalConfig.getboolean("main",
                 "startup_splashScreen_show", True):
-            bitmap = wx.Bitmap(os.path.join(appdir, "icons/pwiki.ico"))
+            bitmap = wx.Bitmap(os.path.join(self.wikiAppDir, "icons/pwiki.ico"))
             if bitmap:
                 splash = wx.adv.SplashScreen(bitmap,
                       wx.adv.SPLASH_CENTRE_ON_SCREEN|wx.adv.SPLASH_TIMEOUT, 15000, None,

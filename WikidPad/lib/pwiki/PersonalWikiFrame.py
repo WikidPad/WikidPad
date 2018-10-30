@@ -377,6 +377,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # if a wiki to open is set, open it
         if wikiToOpen:
+            # Resolve if relative
+            wikiToOpen = os.path.join(self.wikiAppDir, wikiToOpen)
+            
             if os.path.exists(pathEnc(wikiToOpen)):
 #                tracer.runctx('self.openWiki(wikiToOpen, wikiWordsToOpen, anchorToOpen=anchorToOpen)', globals(), locals())
                 self.openWiki(wikiToOpen, wikiWordsToOpen,

@@ -11,7 +11,17 @@
 import sys, os, traceback, os.path, glob, shutil, imp, warnings, configparser
 
 if not hasattr(sys, 'frozen'):
-    sys.path.insert(0, "lib")
+    origin = __spec__.origin
+    if origin is None:
+        origin = sys.argv[0]
+    
+    origin = os.path.dirname(os.path.abspath(origin))
+    
+    # Not the cleanest way to handle things
+    sys.path.insert(0, origin)
+    sys.path.insert(1, os.path.join(origin, "lib"))
+    
+    del origin
 #     sys.path.append("lib")
 #     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\lib")
 
