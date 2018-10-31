@@ -1,9 +1,9 @@
 [Files]
 Source: dist\WikidPad.exe; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\appbase.css; DestDir: {app}
-Source: extensions\*.py; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
-Source: extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
-Source: extensions\*.zipf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: WikidPad\extensions\*.py; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: WikidPad\extensions\*.pyf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
+Source: WikidPad\extensions\*.zipf; DestDir: {app}\extensions\; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Flags: onlyifdoesntexist
 Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Flags: recursesubdirs ignoreversion
@@ -46,7 +46,7 @@ Source: dist\WikidPad.xrc; DestDir: {app}
 Source: dist\WikidPad_*.po; DestDir: {app}; Flags: ignoreversion sortfilesbyextension
 Source: dist\langlist.txt; DestDir: {app}; Flags: replacesameversion ignoreversion
 Source: dist\library.zip; DestDir: {app}; Flags: nocompression
-Source: docs\MenuHandling_contextInfo.txt; DestDir: {app}\docs\; Flags: recursesubdirs ignoreversion
+Source: WikidPad\docs\MenuHandling_contextInfo.txt; DestDir: {app}\docs\; Flags: recursesubdirs ignoreversion
 Source: WikidPad-winport.config; DestDir: {app}; DestName: WikidPad.config; Flags: onlyifdoesntexist; Check: PortableInstall
 Source: winBinAdditions\msvcp100.dll; DestDir: {app}
 Source: winBinAdditions\msvcr100.dll; DestDir: {app}
@@ -69,7 +69,7 @@ DefaultGroupName=WikidPad
 AppID={{892B75BE-D97F-4F9B-8A15-F729D1FB672A}
 VersionInfoVersion={#verNo}
 VersionInfoTextVersion=WikidPad {#verStr}
-LicenseFile=license.txt
+LicenseFile=dist\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
