@@ -1929,7 +1929,8 @@ class NewWikiSettings(wx.Dialog, ModalDialogMixin):
 
         if errMsg:
             self.mainControl.displayErrorMessage(errMsg)
-            self.EndModal(wx.ID_CANCEL)
+            if self.IsModal():
+                self.EndModal(wx.ID_CANCEL)
             return
 
         if defDbHandler is not NewWikiSettings.DEFAULT_GREY:
