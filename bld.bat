@@ -1,3 +1,8 @@
+SET TEMP_PYPATH=
+if defined PYTHONPATH (
+    SET TEMP_PYPATH=%PYTHONPATH%
+)
+
 SET PYTHONPATH=WikidPad\lib;WikidPad
 del WikidPad\icons\Thumbs.db
 
@@ -21,3 +26,12 @@ xcopy WikidPad\WikidPadHelp dist\WikidPadHelp /i /s
 REM python WikidPad\updateI18N.py
 REM python setup.py py2exe
 REM copy WikidPad\license.txt ..\dist\license.txt
+
+
+if defined TEMP_PYPATH (
+    SET PYTHONPATH=%TEMP_PYPATH%
+) else (
+    SET PYTHONPATH=
+)
+
+SET TEMP_PYPATH=
