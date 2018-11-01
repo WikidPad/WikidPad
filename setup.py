@@ -2,11 +2,14 @@
 from setuptools import setup, find_packages
 import os
 from glob import glob
+
+from WikidPad import Consts
+
 try:
     from py2exe.runtime import Target
     wikidpadWinBin = Target(
         # used for the versioninfo resource
-        version = '2.4',
+        version = ".".join(str(v) for v in Consts.VERSION_TUPLE[1:]),  # '2.4',
         name = 'WikidPad',
         copyright = '(C) 2005-2018 Michael Butscher, Jason Horman, Gerhard Reitmayr',
         description = 'Single user wiki notepad',
@@ -21,6 +24,7 @@ except ImportError:
     wikidpadWinBin = None
 
 
+
 excludes = ["win32api", "win32con", "win32pipe", "gadfly"]
 
 setup(
@@ -31,7 +35,7 @@ setup(
                           "dll_excludes": ["msvcp90.dll"]}},
 
     name='WikidPad',
-    version = '2.4',
+    version = Consts.VERSION_STRING.split(" ")[1],
     author = 'Michael Butscher',
     author_email = 'mbutscher@gmx.de',
     url = 'http://www.mbutscher.de/software.html',
