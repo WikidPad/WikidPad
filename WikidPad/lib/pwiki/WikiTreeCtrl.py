@@ -359,14 +359,13 @@ class WikiWordNode(AbstractNode):
             # The dots in the key matter. The more dots the more specific
             # is the global prop and wins over less specific attrs
 
-#             newGPropVal = globalAttrs.get(u"global.%s" % p)
-#             if newGPropVal is not None:
-#                 gPropVal = newGPropVal
-#                 dots = 0
-#             else:
-
             gPropVal = None
             dots = -1
+
+            # Preset if something like e.g. [global.color: green] is available
+            newGPropVal = globalAttrs.get(u"global.%s" % p)
+            if newGPropVal is not None:
+                gPropVal = newGPropVal
 
             for (key, values) in attrsItems:
                 newGPropVal = None
@@ -379,6 +378,7 @@ class WikiWordNode(AbstractNode):
                             dots = newDots
                             break
 
+                    # Now check without value
                     newDots -= 1
                     while newDots > dots:
                         newGPropVal = globalAttrs.get("global.%s.%s" % (key, p))
