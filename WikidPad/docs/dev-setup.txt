@@ -1,0 +1,105 @@
+Sorry, these instructions are very Windows specific.
+
+--- Setup for dev ---
+
+Install Python (recommended: 2.6, may work: 2.7,
+        will not work: 2.5 or less, 3.0 or later)
+http://www.python.org/
+
+
+
+Install wxPython GUI framework
+http://www.wxpython.org/
+
+
+
+Windows only: comtypes (used version: 0.5.2, other versions may or may not work)
+http://pypi.python.org/pypi/comtypes
+
+To create all files necessary for building a WikidPad Windows binary you
+should run WikidPad, set as HTML preview viewer "IE", run WikidPad again and
+switch at least once between editor and preview of a page.
+
+If you run WikidPad from console window (aka DOS-Box, recommended) you should see
+some messages starting with "# Generating comtypes.gen.". The files generated
+are located below Python installation directory at
+"Lib\site-packages\comtypes-0.5.2\comtypes\gen" (version number "0.5.2" may vary).
+
+If you are unsure if all necessary files were generated, download the file
+http://sourceforge.net/projects/wikidpad/files/AdditionalForDevelopment/comtypes_gen_20101031.zip/download
+and place the contained files into "Lib\site-packages\comtypes-0.5.2\comtypes\gen"
+
+
+
+Windows only: py2exe
+Generates a windows ".exe" for Python code.
+Originally from http://www.py2exe.org/ but WikidPad uses a modified version from
+http://sourceforge.net/projects/wikidpad/files/AdditionalForDevelopment/py2exe-0.6.9-mod.zip/download
+
+
+
+Windows only, if you want to create Windows binary installers:
+Inno setup (5.4.1 or later)
+http://www.jrsoftware.org/isinfo.php
+ISTool (not absolutely necessary, but strongly recommended)
+http://www.istool.org/
+
+
+
+If you want spellchecking support:
+pyEnchant
+http://www.rfk.id.au/software/pyenchant/
+
+
+
+--- To run WikidPad from source ---
+
+python WikidPad.py
+
+
+--- To build and generate executable ---
+
+Modify the version number of wikidPad in:
+
+setup.py   (only if you open a new branch, e.g. changing from 2.1 to 2.2)
+Consts.py in "VERSION_TUPLE" and "VERSION_STRING"
+yes this could be better.
+
+
+bld.bat
+
+This will generate a "build" directory and a "dist" directory. It also updates
+"WikidPad.pot" a po template file needed for internationalization.
+Error messages like "Seen unexpected token ..." can be ignored.
+
+At the end of the build process there will also be a list of missing modules
+("The following modules appear to be missing").
+The following modules can be missing without harm:
+'email.Generator', 'email.Iterators', 'gobject' and 'gtk'.
+
+The "dist" directory contains the final product, "build" contains intermediate
+cache files and is not needed for the actual program.
+
+
+--- To create a WikidPad.exe Windows binary installer ---
+
+Modify version number and version string of WikidPad (additionally to above
+adjustments) in wikidpad_unicode.iss. Find
+
+#define verStr "2.2beta01"
+#define verNo "002.002.101.000"
+
+and change lines appropriately.
+
+
+Run wikidPad by double clicking on "WikidPad.exe" in "dist" directory. This
+should show the help wiki. Maybe perform some basic testing that everything is
+right, then close WikidPad.
+
+Double click on "wikidpad_unicode.iss" which should start up ISTool (if you
+installed it). Change version number if you didn't before (see above), let
+ISTool build the installer and test it.
+
+The installer can also be used to install a portable version (no entries in
+registry or start menu; no uninstaller, just delete installation directory
+instead).

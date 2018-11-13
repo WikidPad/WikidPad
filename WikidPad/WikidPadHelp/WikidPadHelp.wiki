@@ -1,0 +1,54 @@
+[main]
+trashcan_storagelocation = 0
+wiki_mainarea_auiperspective = v1/panel5968bb9f0000000000000002=*DocPagePresenter=WikidPadHelp=0=textedit\x7cwikipage/WikidPadHelp@layout2|name=dummy;caption=;state=67372030;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=429;besth=331;minw=429;minh=331;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|name=panel5968bb9f0000000000000002;caption=;state=67372028;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=0;besth=0;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1;notebookid=-1;transparent=255|dock_size(5,0,0)=10|
+wiki_database_type = original_sqlite
+editor_text_mode = False
+filestorage_identity_moddatemustmatch = False
+wikiwidehistory_maxentries = 100
+filesignature_timecoarsening = 0
+wikipagetitleprefix = 
+tabs_maxcharacters = 0
+filestorage_identity_filenamemustmatch = False
+tree_force_scratchpad_visibility = True
+tree_expandednodes_descriptorpathes_main = wikipage/WikidPadHelp;wikipage/WikidPadHelp,wikipage/OptionsDialog
+headingsasaliases_depth = 0
+wikipagefiles_maxnamelength = 120
+wiki_lasttabssubctrls = textedit
+wikipagefiles_gracefuloutsideaddandremove = True
+tree_expandednodes_rememberduration = 2
+footnotes_as_wikiwords = False
+db_pagefile_suffix = .wiki
+tree_expandednodes_descriptorpathes_views = helpernode/main/view,helpernode/main/funcpages;helpernode/main/view
+log_window_autoshow = Gray
+export_default_dir = 
+wikipagefiles_writefilemode = 0
+indexsearch_formatno = 0
+hotkey_showhide_bywiki = 
+indexsearch_enabled = False
+wikipagefiles_asciionly = True
+template_pagenamesre = ^template/
+tabhistory_maxentries = 25
+wiki_onopen_rebuild = 0
+versioning_completesteps = 10
+wiki_icon = 
+wiki_onopen_tabssubctrl = 
+versioning_storagelocation = 0
+filestorage_identity_moddateisenough = False
+wiki_readonly = False
+trashcan_maxnoofbags = 200
+wikipagetitle_headinglevel = 2
+trashcan_askondelete = True
+wiki_lastactivetabno = 0
+further_wiki_words = 
+wikipagetitle_fromlinktitle = False
+wikipagetitle_creationmode = 1
+first_wiki_word = 
+wiki_wikilanguage = wikidpad_default_2_0
+wiki_name = WikidPadHelp
+last_wiki_word = WikidPadHelp
+tree_last_root_wiki_word = WikidPadHelp
+
+[wiki_db]
+data_dir = data
+db_filename = 
+

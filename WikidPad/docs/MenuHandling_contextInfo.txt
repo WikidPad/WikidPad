@@ -1,0 +1,58 @@
++ Context menu information
+
+This document collects information needed to write plugins of types
+"MenuModifier" and "MenuItemProvider".
+
+Each menu (mainly context menus) has its own context name and delivers a different
+set of entries in its context dictionary describing the circumstances under which
+it was called.
+
+At the moment there are only a few context menus supporting plugin extensibility.
+
+Be aware that some keys in context dictionary (especially boolean ones)
+aren't set if their value would be False or None.
+Use method dict.get() to retrieve them (maybe with a default value).
+
+A notation like e.g.
+
+inWikiWord == True: Context menu on a wiki word
+
+means if key string "inWikiWord" has value True then the context menu
+was opened on a wiki word. If "inWikiWord" would be False it probably
+doesn't exist.
+
+
+
+++ context name: "contextMenu/editor/foldMargin"
+
+Context menu for the fold margin of an editor control
+
++++ Context dictionary
+
+txtCtrl: Object of type "WikiTxtCtrl" in which context menu was opened
+mousePos: wx.Point object with mouse position when context menu was opened
+        (relative to client aka text control) or wx.DefaultPosition if
+        menu was opened by context menu key on keyboard
+
+
+
+++ context name: "contextMenu/editor/textArea"
+
+Context menu for the text area of an editor control
+
++++ Context dictionary
+
+txtCtrl: Object of type "WikiTxtCtrl" in which context menu was opened
+mousePos: wx.Point object with mouse position when context menu was opened
+        (relative to client aka text control) or wx.DefaultPosition if
+        menu was opened by context menu key on keyboard
+tokens: List of tokens (objects of subclass of WikiPyparsing.SyntaxNode) at
+        context menu position in document page
+inWikiWord == True: Context menu on a wiki word
+inFileUrl == True: on a "file:" or "rel:" URL
+inWikiUrl == True: on a "wiki:" or "wikirel:" URL
+inPageInsertion == True: on a "page" insertion
+inAnchorDef == True: on an anchor definition (starting with "anchor:")
+inUnknownSpelling == True: on a word not contained in spelling dictionary
+
+

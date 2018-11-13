@@ -1,0 +1,36 @@
+--- Layout ---
+
+lib - The core wikidPad source code.
+lib\pwiki - Actual wikidPad code
+lib\gadfly - Gadfly library
+docs - wikidPad documentation
+extensions - Default implementations of the extension classes.
+icons - wikidPad icons.
+WikidPadHelp - Help wiki distributed with wikidPad.
+bld.bat - Builds a wikidPad exe using py2exe.
+setup.py - The py2exe script.
+setup_macosx.py - A py2app script (untested by main author).
+
+sql_mar.py - The sql_mar files in the root are the gadfly grammar, and compiled grammar. The included
+gadfly has been modified to use these since py2exe doesn't seem to support adding the
+pyc to the exe. The sql_mar files are copied into the dist.
+
+sql_mar.pyc
+sql_mar.pyo
+
+--- Source Overview ---
+
+WikidPad.py (in root): Essentially the "main" method for PersonalWikiFrame.py.
+PersonalWikiFrame.py: This is the meat of wikidPad, it represents the main window. Start here.
+WikiData.py: 2nd most important class. All data access is mediated through these classes.
+             There is one for each database backend (Original Gadfly, Original Sqlite,
+             Compact Sqlite)
+WikiTxtCtrl.py: This is the code dealing with Scintilla (text editor component).
+WikiTreeCtrl.py: Tree control code.
+Exporters.py: html and multipage text export code.
+Enum.py: Snagged from somewhere, python enums.
+Configuration.py: Configuration manager.
+
+--- API ---
+
+See api.txt for some api docs (warning: heavily outdated).

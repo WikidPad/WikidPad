@@ -1,0 +1,5361 @@
+# Copyright (C) wikidPads COPYRIGHT HOLDER
+# This file is distributed under the same license as wikidPad.
+msgid ""
+msgstr ""
+"Project-Id-Version: WikidPad 2.2beta05\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2011-06-26 09:48+0100\n"
+"Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5mod\n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: WikidPad.xrc:0
+msgid "  Context characters"
+msgstr "  Angränsande tecken"
+
+#: WikidPad.xrc:0
+msgid "  Defaults"
+msgstr "  Standardinställningar"
+
+#: WikidPad.xrc:0
+msgid " &Delete "
+msgstr " Ra&dera"
+
+#: WikidPad.xrc:0
+msgid " &Find "
+msgstr " Sök "
+
+#: WikidPad.xrc:0
+msgid " &Replace "
+msgstr " E&rsätt "
+
+#: WikidPad.xrc:0
+msgid " &Test "
+msgstr "&Test"
+
+#: WikidPad.xrc:0
+msgid " Close "
+msgstr " Stäng"
+
+#: WikidPad.xrc:0
+msgid " Find &Next "
+msgstr " Sök &nästa "
+
+#: WikidPad.xrc:0
+msgid " Replace &All "
+msgstr " Ersätt &alla "
+
+#: WikidPad.xrc:0
+msgid "&Case sensitive"
+msgstr "Skifteslägeskänsligt"
+
+#: WikidPad.xrc:0
+msgid "&Create"
+msgstr "Skapa"
+
+#: WikidPad.xrc:0
+msgid "&Delete All"
+msgstr "Ra&dera allt"
+
+#: WikidPad.xrc:0
+msgid "&Delete Export(s)"
+msgstr "Ra&dera export(er)"
+
+#: WikidPad.xrc:0
+msgid "&Delete Search(es)"
+msgstr "Ra&dera sökning(ar)"
+
+#: WikidPad.xrc:0
+msgid "&Ignore"
+msgstr "Avbryt"
+
+#: WikidPad.xrc:0
+msgid "&Load Export"
+msgstr "&Ladda export"
+
+#: WikidPad.xrc:0
+msgid "&Load Search"
+msgstr "&Ladda sökning"
+
+#: WikidPad.xrc:0
+msgid "&New Tab"
+msgstr "&Ny flik"
+
+#: WikidPad.xrc:0
+msgid "&Options"
+msgstr "Alternativ"
+
+#: WikidPad.xrc:0
+msgid "&Page names"
+msgstr "Sidnamn"
+
+#: WikidPad.xrc:0
+msgid "&Replace"
+msgstr "E&rsätt"
+
+#: WikidPad.xrc:0
+msgid "&Replace by:"
+msgstr "E&rsätt med:"
+
+#: WikidPad.xrc:0
+msgid "&Restore"
+msgstr "Åte&rskapa"
+
+#: WikidPad.xrc:0
+msgid "&Save Export"
+msgstr "&Spara export"
+
+#: WikidPad.xrc:0
+msgid "&Save Search"
+msgstr "&Spara sökning"
+
+#: WikidPad.xrc:0
+msgid "&Search:"
+msgstr "&Sök:"
+
+#: WikidPad.xrc:0
+msgid "&Whole word"
+msgstr "Helt ord"
+
+#: WikidPad.xrc:0
+msgid "&beginning"
+msgstr "&början"
+
+#: WikidPad.xrc:0
+msgid "(0: worst, 100: best)"
+msgstr "(0: sämst, 100: bäst)"
+
+#: WikidPad.xrc:0
+msgid "(Use selected defaults if you are unsure)"
+msgstr "(Använd markerade standardvärden om du är osäker)"
+
+#: WikidPad.xrc:0
+msgid "* Needs WikidPad restart"
+msgstr "* Kräver omstart av WikidPad"
+
+#: WikidPad.xrc:0
+msgid "0"
+msgstr "0"
+
+#: WikidPad.xrc:0
+msgid ""
+"0: Never complete version; 1: Always complete v.;\n"
+"10: Every tenth v. is complete"
+msgstr ""
+"0: Aldrig komplett version; 1: Alltid komplett v.;\n"
+"10: Var tionde v. är komplett"
+
+#: WikidPad.xrc:0
+msgid "1 (since 1.9beta6)"
+msgstr "1 (sedan 1.9beta6)"
+
+#: WikidPad.xrc:0
+msgid "Above"
+msgstr "Upptill"
+
+#: WikidPad.xrc:0
+msgid "Absolute URL"
+msgstr "Absolut URL"
+
+#: WikidPad.xrc:0
+msgid "Active link color:"
+msgstr "Färg på aktiv länk:"
+
+#: WikidPad.xrc:0
+msgid "Add"
+msgstr "Lägg till"
+
+#: WikidPad.xrc:0
+msgid "Add &Globally"
+msgstr "Lägg till &globalt"
+
+#: WikidPad.xrc:0
+msgid "Add &Locally"
+msgstr "&Lägg till lokalt"
+
+#: WikidPad.xrc:0
+msgid "Add Wiki to Favorites"
+msgstr "Lägg till wiki i favoriter"
+
+#: WikidPad.xrc:0
+msgid "Add spaces"
+msgstr "Infoga mellanslag"
+
+#: WikidPad.xrc:0
+msgid "After:"
+msgstr "Efter:"
+
+#: WikidPad.xrc:0
+msgid "All Pages"
+msgstr "Alla sidor"
+
+#: WikidPad.xrc:0
+msgid "Allow everything"
+msgstr "Tillåt allt"
+
+#: WikidPad.xrc:0
+msgid "Allow index search"
+msgstr "Tillåt indexerad sökning"
+
+#: WikidPad.xrc:0
+msgid "Alphabetically"
+msgstr "Alfabetiskt"
+
+#: WikidPad.xrc:0
+msgid "Alphabetically reverse"
+msgstr "Alfabetiskt omvänt"
+
+#: WikidPad.xrc:0
+msgid "Also rename subpages"
+msgstr "Döp även om undersidor"
+
+#: WikidPad.xrc:0
+msgid "Always"
+msgstr "Alltid"
+
+#: WikidPad.xrc:0
+msgid "Always show import table"
+msgstr "Visa alltid importtabell"
+
+#: WikidPad.xrc:0
+msgid "App-bound hotkey:"
+msgstr "Kortkommando för program:"
+
+#: WikidPad.xrc:0
+msgid "Append after clipboard snippet:"
+msgstr "Lägg till efter urklipp:"
+
+#: WikidPad.xrc:0
+msgid "Append after links:"
+msgstr "Lägg till efter länkar:"
+
+#: WikidPad.xrc:0
+msgid "Append closing bracket on auto-complete"
+msgstr "Lägg till hakparentes vid automatisk utfyllnad"
+
+#: WikidPad.xrc:0
+msgid "Append wiki word"
+msgstr "Lägg till wikiord sist"
+
+#: WikidPad.xrc:0
+msgid "As &Tab"
+msgstr "Som flik"
+
+#: WikidPad.xrc:0
+msgid "As &is"
+msgstr "Som det skr&ivs"
+
+#: WikidPad.xrc:0
+msgid "As Res&ultlist"
+msgstr "Som res&ultatlista"
+
+#: WikidPad.xrc:0
+msgid "As Tree"
+msgstr "Som träd"
+
+#: WikidPad.xrc:0
+msgid "As is"
+msgstr "Som det skrivs"
+
+#: WikidPad.xrc:0
+msgid "As list"
+msgstr "Som lista"
+
+#: WikidPad.xrc:0
+msgid "As tree"
+msgstr "Som träd"
+
+#: WikidPad.xrc:0
+msgid "Ask"
+msgstr "Fråga"
+
+#: WikidPad.xrc:0
+msgid "Ask before deletion of wiki word"
+msgstr "Fråga innan radering av wikiord"
+
+#: WikidPad.xrc:0
+msgid "Ask settings on each paste"
+msgstr "Fråga efter inställningar vid varje inklistring"
+
+#: WikidPad.xrc:0
+msgid "At position:"
+msgstr "Vid postition:"
+
+#: WikidPad.xrc:0
+msgid "Attribute/script color:"
+msgstr "Attribut/skript-färg"
+
+#: WikidPad.xrc:0
+msgid "Attrs. to"
+msgstr "Attr. att"
+
+#: WikidPad.xrc:0
+msgid "Auto-hide"
+msgstr "Dölj automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Auto-hide log window"
+msgstr "Dölj loggfönstret automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Auto-hide structure window"
+msgstr "Dölj strukturfönstret automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Auto-show log window"
+msgstr "Visa loggfönstret automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Auto-unbullets"
+msgstr "Ingen automatisk punktlista om inget skrivs"
+
+#: WikidPad.xrc:0
+msgid "Autosave active"
+msgstr "Spara automatiskt är aktivt"
+
+#: WikidPad.xrc:0
+msgid "Avoid doubled snippets"
+msgstr "Undvik dubbletter i urklipp"
+
+#: WikidPad.xrc:0
+msgid "Background color:"
+msgstr "Bakgrundsfärg:"
+
+#: WikidPad.xrc:0
+msgid "Background image:"
+msgstr "Bakgrundsbild:"
+
+#: WikidPad.xrc:0
+msgid "Basic wiki settings"
+msgstr "Wikins grundinställningar"
+
+#: WikidPad.xrc:0
+msgid "Before:"
+msgstr "Före:"
+
+#: WikidPad.xrc:0
+msgid "Below"
+msgstr "Nertill"
+
+#: WikidPad.xrc:0
+msgid "Between links:"
+msgstr "Mellan länkar:"
+
+#: WikidPad.xrc:0
+msgid "Bookmark"
+msgstr "Bokmärke"
+
+#: WikidPad.xrc:0
+msgid "Bool&ean regex"
+msgstr "Bool&esk regex"
+
+#: WikidPad.xrc:0
+msgid "Bottom"
+msgstr "Nertill"
+
+#: WikidPad.xrc:0
+msgid "C"
+msgstr "C"
+
+#: WikidPad.xrc:0
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: WikidPad.xrc:0
+msgid "Change these only if you know what you are doing!"
+msgstr "Ändra detta endast om du vet vad du gör!"
+
+#: WikidPad.xrc:0
+msgid "Choose Wiki Word"
+msgstr "Välj wikiord"
+
+#: WikidPad.xrc:0
+msgid "Choose date format"
+msgstr "Välj datumformat"
+
+#: WikidPad.xrc:0
+msgid "Choose plain text font"
+msgstr "Välj typsnitt för oformaterad text"
+
+#: WikidPad.xrc:0
+msgid "Chronological View"
+msgstr "Tidsvy"
+
+#: WikidPad.xrc:0
+msgid "Clear"
+msgstr "Rensa"
+
+#: WikidPad.xrc:0
+msgid "Clear List"
+msgstr "Rensa lista"
+
+#: WikidPad.xrc:0
+msgid "Clone tab"
+msgstr "Klona flik"
+
+#: WikidPad.xrc:0
+msgid "Close tab"
+msgstr "Stäng flik"
+
+#: WikidPad.xrc:0
+msgid "Collapse whole tree"
+msgstr "Fäll in hela trädet"
+
+#: WikidPad.xrc:0
+msgid "Collector page:"
+msgstr "Samlingssida:"
+
+#: WikidPad.xrc:0
+msgid "Colorize search fragments of links separately"
+msgstr "Färglägg sökfragment separat i länkar"
+
+#: WikidPad.xrc:0
+msgid "Compatibility"
+msgstr "Kompatibilitet"
+
+#: WikidPad.xrc:0
+msgid "Compatible filenames"
+msgstr "Kompatibla filnamn"
+
+#: WikidPad.xrc:0
+msgid "Config. dir."
+msgstr "Konfig. kat."
+
+#: WikidPad.xrc:0
+msgid "Copy URL to clipboard"
+msgstr "Kopiera URL till urklipp"
+
+#: WikidPad.xrc:0
+msgid "Copy into file storage"
+msgstr "Kopiera till fillagringskatalog"
+
+#: WikidPad.xrc:0
+msgid "Copy to clipboard:"
+msgstr "Kopiera till urklipp:"
+
+#: WikidPad.xrc:0
+msgid "Count Occurrences up to max.:"
+msgstr "Räkna förekomster till max.:"
+
+#: WikidPad.xrc:0
+msgid "Create wiki lock file"
+msgstr "Skapa låsningsfil för wikin"
+
+#: WikidPad.xrc:0
+msgid "Current subtree"
+msgstr "Aktuellt underträd"
+
+#: WikidPad.xrc:0
+msgid "Current wiki page"
+msgstr "Aktuell wikisida"
+
+#: WikidPad.xrc:0
+msgid "Custom..."
+msgstr "Anpassa..."
+
+#: WikidPad.xrc:0
+msgid "DOCTYPE:"
+msgstr "DOCTYPE:"
+
+#: WikidPad.xrc:0
+msgid "Database"
+msgstr "Databas"
+
+#: WikidPad.xrc:0
+msgid "Database type:"
+msgstr "Databastyp:"
+
+#: WikidPad.xrc:0
+msgid "Date format:"
+msgstr "Datumformat:"
+
+#: WikidPad.xrc:0
+msgid "Default action:"
+msgstr "Standardåtgärd:"
+
+#: WikidPad.xrc:0
+msgid "Default export dir.:"
+msgstr "Standardexportkatalog:"
+
+#: WikidPad.xrc:0
+msgid "Default open/new dir.:"
+msgstr "Standardkatalog för öppna/ny:"
+
+#: WikidPad.xrc:0
+msgid "Defaults"
+msgstr "Standard"
+
+#: WikidPad.xrc:0
+msgid "Del"
+msgstr "Radera"
+
+#: WikidPad.xrc:0
+msgid "Delay after key pressed:"
+msgstr "Fördröjning efter nedtryckt tangent:"
+
+#: WikidPad.xrc:0
+msgid "Delay after page dirty:"
+msgstr "Fördröjning efter första ändring:"
+
+#: WikidPad.xrc:0
+msgid "Delay before auto-close:"
+msgstr "Fördröjning innan automatisk stängning"
+
+#: WikidPad.xrc:0
+msgid "Details"
+msgstr "Detaljer"
+
+#: WikidPad.xrc:0
+msgid "Done"
+msgstr "Klar"
+
+#: WikidPad.xrc:0
+msgid "Down"
+msgstr "Ner"
+
+#: WikidPad.xrc:0
+msgid "Dropping files with CTRL:"
+msgstr "Släpp filer med CTRL:"
+
+#: WikidPad.xrc:0
+msgid "Dropping files with SHIFT:"
+msgstr "Släpp filer med SHIFT:"
+
+#: WikidPad.xrc:0
+msgid "Dropping files:"
+msgstr "Släppa filer:"
+
+#: WikidPad.xrc:0
+msgid "Editor timing"
+msgstr "Redigerartider"
+
+#: WikidPad.xrc:0
+msgid "Encoding:"
+msgstr "Kodning:"
+
+#: WikidPad.xrc:0
+msgid "Export"
+msgstr "Exportera"
+
+#: WikidPad.xrc:0
+msgid "Export to:"
+msgstr "Exportera till:"
+
+#: WikidPad.xrc:0
+msgid "Fast search defaults"
+msgstr "Standardinställningar för snabbsökning"
+
+#: WikidPad.xrc:0
+msgid "File cleanup"
+msgstr "Filstädning"
+
+#: WikidPad.xrc:0
+msgid "File dropping"
+msgstr "Dra och släpp filer"
+
+#: WikidPad.xrc:0
+msgid "File storage identity check"
+msgstr "Fillagringskontroll"
+
+#: WikidPad.xrc:0
+msgid "File type:"
+msgstr "Filtyp:"
+
+#: WikidPad.xrc:0
+msgid "Filename must match"
+msgstr "Filnamnet måste matcha"
+
+#: WikidPad.xrc:0
+msgid "Filename prefix:"
+msgstr "Filnamnsprefix:"
+
+#: WikidPad.xrc:0
+msgid "First word at startup:"
+msgstr "Första ord vid uppstart:"
+
+#: WikidPad.xrc:0
+msgid "Font name for HTML preview:"
+msgstr "Typsnitt för HTML-visning:"
+
+#: WikidPad.xrc:0
+msgid "Font:"
+msgstr "Typsnitt:"
+
+#: WikidPad.xrc:0
+msgid "Forbid cancel on search"
+msgstr "Förhindra avbrott vid sökning"
+
+#: WikidPad.xrc:0
+msgid "Force ScratchPad visibility in tree"
+msgstr "Tvinga visning av ScratchPad i träd"
+
+#: WikidPad.xrc:0
+msgid "Format version"
+msgstr "Formatversion"
+
+#: WikidPad.xrc:0
+msgid "Given:"
+msgstr "Annat:"
+
+#: WikidPad.xrc:0
+msgid "Go to next page"
+msgstr "Gå till nästa sida"
+
+#: WikidPad.xrc:0
+msgid "Graceful handling of missing page files"
+msgstr "Mjuk hantering av saknade sidfiler"
+
+#: WikidPad.xrc:0
+msgid "HTML"
+msgstr "HTML"
+
+#: WikidPad.xrc:0
+msgid "Heading of new pages"
+msgstr "Titel på nya sidor"
+
+#: WikidPad.xrc:0
+msgid "Heading prefix:"
+msgstr "Rubrikprefix:"
+
+#: WikidPad.xrc:0
+msgid "Headings as aliases"
+msgstr "Rubriker som alias"
+
+#: WikidPad.xrc:0
+msgid "Height:"
+msgstr "Höjd:"
+
+#: WikidPad.xrc:0
+msgid "Hidden"
+msgstr "Dold"
+
+#: WikidPad.xrc:0
+msgid "Hide Log"
+msgstr "Dölj logg"
+
+#: WikidPad.xrc:0
+msgid "Hide undefined wiki words in Tree"
+msgstr "Dölj odefinierade wikiord i träd"
+
+#: WikidPad.xrc:0
+msgid "Highlight start delay:"
+msgstr "Fördröjning innan bakgrundsjobb startas:"
+
+#: WikidPad.xrc:0
+msgid "I&ndex"
+msgstr "I&ndex"
+
+#: WikidPad.xrc:0
+msgid "Icon:"
+msgstr "Ikon:"
+
+#: WikidPad.xrc:0
+msgid "Ig&nore All"
+msgstr "Ig&norera alla"
+
+#: WikidPad.xrc:0
+msgid "Ignore wiki lock file"
+msgstr "Ignorera låsningsfil för wikin"
+
+#: WikidPad.xrc:0
+msgid "Image pasting"
+msgstr "Bildinklistring"
+
+#: WikidPad.xrc:0
+msgid "Image preview tooltips for local URLs"
+msgstr "Verktygstips vid bildgranskning för lokala urler"
+
+#: WikidPad.xrc:0
+msgid "Import format:"
+msgstr "Importformat:"
+
+#: WikidPad.xrc:0
+msgid "Import questions"
+msgstr "Importfrågor"
+
+#: WikidPad.xrc:0
+msgid "Incremental search"
+msgstr "Inkrementell sökning"
+
+#: WikidPad.xrc:0
+msgid "Internal"
+msgstr "Intern"
+
+#: WikidPad.xrc:0
+msgid "Intersect"
+msgstr "Infoga"
+
+#: WikidPad.xrc:0
+msgid "JPEG"
+msgstr "JPEG"
+
+#: WikidPad.xrc:0
+msgid "Keeping directory in filestorage keeps everything in it"
+msgstr "Spara katalog i fillagring sparar allt i den"
+
+#: WikidPad.xrc:0
+msgid "Left"
+msgstr "Vänster"
+
+#: WikidPad.xrc:0
+msgid "Left double click in preview:"
+msgstr "Vänster dubbelklick i förhandsgranskning:"
+
+#: WikidPad.xrc:0
+msgid "Link color:"
+msgstr "Länkfärg:"
+
+#: WikidPad.xrc:0
+msgid "Links in brackets"
+msgstr "Länkar inom hakparenteser"
+
+#: WikidPad.xrc:0
+msgid "Load and R&un Export"
+msgstr "Ladda och kör export"
+
+#: WikidPad.xrc:0
+msgid "Load and R&un Search"
+msgstr "Ladda och genomför sökning"
+
+#: WikidPad.xrc:0
+msgid "Margin color:"
+msgstr "Marginalfärg:"
+
+#: WikidPad.xrc:0
+msgid "Max. characters on each tab:"
+msgstr "Max antal tecken på varje flik:"
+
+#: WikidPad.xrc:0
+msgid "Max. number of entries:"
+msgstr "Max antal poster:"
+
+#: WikidPad.xrc:0
+msgid "Middle button with CTRL:"
+msgstr "Mittenknapp med CTRL:"
+
+#: WikidPad.xrc:0
+msgid "Middle button without CTRL:"
+msgstr "Mittenknapp utan CTRL:"
+
+#: WikidPad.xrc:0
+msgid "Middle click on tab:"
+msgstr "Mittenklick på flik:"
+
+#: WikidPad.xrc:0
+msgid "Minimize on close button"
+msgstr "Minimera med stängningsknapp"
+
+#: WikidPad.xrc:0
+msgid "Minimize to Tray"
+msgstr "Minimera till aktivitetsfält"
+
+#: WikidPad.xrc:0
+msgid "Missing files"
+msgstr "Saknade filer"
+
+#: WikidPad.xrc:0
+msgid "Modif. date is enough"
+msgstr "Ändringsdatum räcker"
+
+#: WikidPad.xrc:0
+msgid "Modif. date must match"
+msgstr "Ändringsdatum måste matcha"
+
+#: WikidPad.xrc:0
+msgid "Modify all links to the wiki word"
+msgstr "Ändra alla länkar till wikiordet"
+
+#: WikidPad.xrc:0
+msgid "Move into file storage"
+msgstr "Flytta till fillagringskatalog"
+
+#: WikidPad.xrc:0
+msgid "N. T. &Backgr."
+msgstr "N.F. &Bakgr."
+
+#: WikidPad.xrc:0
+msgid "Name clash"
+msgstr "Namnkonflikt"
+
+#: WikidPad.xrc:0
+msgid "Name collision:"
+msgstr "Namnkonflikt:"
+
+#: WikidPad.xrc:0
+msgid "Natural"
+msgstr "Normalt"
+
+#: WikidPad.xrc:0
+msgid "New tab in background"
+msgstr "Ny flik i bakgrund"
+
+#: WikidPad.xrc:0
+msgid "New tab in foreground"
+msgstr "Ny flik i förgrund"
+
+#: WikidPad.xrc:0
+msgid "New tab with edit"
+msgstr "Ny flik med redigering"
+
+#: WikidPad.xrc:0
+msgid "New window on wiki URL"
+msgstr "Nytt fönster för wiki-URL"
+
+#: WikidPad.xrc:0
+msgid "Newest visited"
+msgstr "Senast besökt"
+
+#: WikidPad.xrc:0
+msgid "No cycles in tree"
+msgstr "Inga cirkelreferenser i träd"
+
+#: WikidPad.xrc:0
+msgid "No global.import_scripts"
+msgstr "Inga global.import_scripts"
+
+#: WikidPad.xrc:0
+msgid "No import_scripts"
+msgstr "Inga import_scripts"
+
+#: WikidPad.xrc:0
+msgid "No scripts"
+msgstr "Inga skript"
+
+#: WikidPad.xrc:0
+msgid "No title"
+msgstr "Ingen titel"
+
+#: WikidPad.xrc:0
+msgid "None"
+msgstr "Inget"
+
+#: WikidPad.xrc:0
+msgid "Not at all"
+msgstr "Aldrig"
+
+#: WikidPad.xrc:0
+msgid "Nothing"
+msgstr "Inget"
+
+#: WikidPad.xrc:0
+msgid "OK"
+msgstr "OK"
+
+#: WikidPad.xrc:0
+msgid "Oldest visited"
+msgstr "Tidigast besökt"
+
+#: WikidPad.xrc:0
+msgid "Open in ..."
+msgstr "Öppna i ..."
+
+#: WikidPad.xrc:0
+msgid "Open in new window"
+msgstr "Öppna i nytt fönster"
+
+#: WikidPad.xrc:0
+msgid "Options"
+msgstr "Alternativ"
+
+#: WikidPad.xrc:0
+msgid "Options for file cleanup"
+msgstr "Inställningar för filstädning"
+
+#: WikidPad.xrc:0
+msgid "Options page:"
+msgstr "Alternativsida:"
+
+#: WikidPad.xrc:0
+msgid "Order pages:"
+msgstr "Sortera sidor:"
+
+#: WikidPad.xrc:0
+msgid "Order:"
+msgstr "Sortering:"
+
+#: WikidPad.xrc:0
+msgid "Orphaned files"
+msgstr "Ursprungliga filer"
+
+#: WikidPad.xrc:0
+msgid "PNG"
+msgstr "PNG"
+
+#: WikidPad.xrc:0
+msgid "Page Setup"
+msgstr "Utskriftsformat"
+
+#: WikidPad.xrc:0
+msgid "Page file names ASCII only"
+msgstr "Sidors filnamn endast i ASCII-kodning"
+
+#: WikidPad.xrc:0
+msgid "Page names matching regular expression:"
+msgstr "Sidnamn som matchar reguljärt uttryck:"
+
+#: WikidPad.xrc:0
+msgid "Page separator:"
+msgstr "Sidbrytningstecken:"
+
+#: WikidPad.xrc:0
+msgid "Pages in list and "
+msgstr "Sidor i listan och "
+
+#: WikidPad.xrc:0
+msgid "Paste File"
+msgstr "Klistra in fil"
+
+#: WikidPad.xrc:0
+msgid "Paste Image"
+msgstr "Klistra in bild"
+
+#: WikidPad.xrc:0
+msgid "Paste from clipboard:"
+msgstr "Klistra in från urklipp:"
+
+#: WikidPad.xrc:0
+msgid "Path or URL:"
+msgstr "Sökväg eller URL:"
+
+#: WikidPad.xrc:0
+msgid "Path to file launcher:"
+msgstr "Sökväg till filstartare:"
+
+#: WikidPad.xrc:0
+msgid "Plain text"
+msgstr "Oformaterad text"
+
+#: WikidPad.xrc:0
+msgid "Plain text color:"
+msgstr "Färg på oformaterad text:"
+
+#: WikidPad.xrc:0
+msgid "Position main tree:"
+msgstr "Huvudträdets position:"
+
+#: WikidPad.xrc:0
+msgid "Position view tree:"
+msgstr "Vyträdets postion:"
+
+#: WikidPad.xrc:0
+msgid "Position:"
+msgstr "Position:"
+
+#: WikidPad.xrc:0
+msgid "Prefer memory where possible"
+msgstr "Använd minne om det är möjligt"
+
+#: WikidPad.xrc:0
+msgid "Prepend before clipboard snippet:"
+msgstr "Lägg till före urklipp:"
+
+#: WikidPad.xrc:0
+msgid "Prepend before links:"
+msgstr "Lägg till före länkar:"
+
+#: WikidPad.xrc:0
+msgid "Prepend wiki word"
+msgstr "Lägg till wikiord först"
+
+#: WikidPad.xrc:0
+msgid "Preview"
+msgstr "Förhandsgranskning"
+
+#: WikidPad.xrc:0
+msgid "Preview renderer*:"
+msgstr "Förhandsgranskningsrenderare*:"
+
+#: WikidPad.xrc:0
+msgid "Preview:"
+msgstr "Förhandsgranskning:"
+
+#: WikidPad.xrc:0
+msgid "Print"
+msgstr "Skriv ut"
+
+#: WikidPad.xrc:0
+msgid "Print as:"
+msgstr "Skriv ut som:"
+
+#: WikidPad.xrc:0
+msgid "Process auto-generated areas"
+msgstr "Kör automatiskt skapade ytor"
+
+#: WikidPad.xrc:0
+msgid "Process insertion scripts"
+msgstr "Kör infogningsskript"
+
+#: WikidPad.xrc:0
+msgid "Quality:"
+msgstr "Kvalitet:"
+
+#: WikidPad.xrc:0
+msgid "R&egular expression"
+msgstr "R&eguljärt uttryck"
+
+#: WikidPad.xrc:0
+msgid "Read-only wiki"
+msgstr "Skrivskyddad wiki"
+
+#: WikidPad.xrc:0
+msgid "Recent wikis list length:"
+msgstr "Listlängd i tidigare wikis:"
+
+#: WikidPad.xrc:0
+msgid "Referencing directory in filestorage keeps everything in it"
+msgstr "Referenser till katalog i fillagring sparar allt i den"
+
+#: WikidPad.xrc:0
+msgid "Relative URL"
+msgstr "Relativ URL"
+
+#: WikidPad.xrc:0
+msgid "Remember expanded tree nodes:"
+msgstr "Kom ihåg expanderade trädnoder:"
+
+#: WikidPad.xrc:0
+msgid "Rename"
+msgstr "Byt namn"
+
+#: WikidPad.xrc:0
+msgid "Rename Word:"
+msgstr "Byt namn på wikiord"
+
+#: WikidPad.xrc:0
+msgid "Rename dialog defaults"
+msgstr "Standardinställning för namnbyte"
+
+#: WikidPad.xrc:0
+msgid "Rename trashcan entry to:"
+msgstr "Byt namn på post i papperskorgen till:"
+
+#: WikidPad.xrc:0
+msgid "Rename wiki element to:"
+msgstr "Byt namn på wikielement till:"
+
+#: WikidPad.xrc:0
+msgid "Replace &All"
+msgstr "Ersätt &alla"
+
+#: WikidPad.xrc:0
+msgid "Replace By"
+msgstr "Ersätt med"
+
+#: WikidPad.xrc:0
+msgid "Replace with:"
+msgstr "Ersätt med:"
+
+#: WikidPad.xrc:0
+msgid "Result"
+msgstr "Resultat"
+
+#: WikidPad.xrc:0
+msgid "Reverse script search order (global imports first)"
+msgstr "Omvänd sökordning för skript (globala importer först)"
+
+#: WikidPad.xrc:0
+msgid "Right"
+msgstr "Höger"
+
+#: WikidPad.xrc:0
+msgid "Same Tab"
+msgstr "Samma flik"
+
+#: WikidPad.xrc:0
+msgid "Saved Exports:"
+msgstr "Sparade exporter:"
+
+#: WikidPad.xrc:0
+msgid "Saved Searches:"
+msgstr "Sparade sökningar:"
+
+#: WikidPad.xrc:0
+msgid "Script security:"
+msgstr "Skriptsäkerhet:"
+
+#: WikidPad.xrc:0
+msgid "Scroll under pointer (Windows only, exp.)"
+msgstr "Scrolla under pekare (endast Windows, exp.)"
+
+#: WikidPad.xrc:0
+msgid "Search Page"
+msgstr "Sök på sida"
+
+#: WikidPad.xrc:0
+msgid "Search Wiki"
+msgstr "Sök i wikin"
+
+#: WikidPad.xrc:0
+msgid "Search from"
+msgstr "Sök från"
+
+#: WikidPad.xrc:0
+msgid "Search text"
+msgstr "Sök text"
+
+#: WikidPad.xrc:0
+msgid "Select facename"
+msgstr "Välj typsnitt"
+
+#: WikidPad.xrc:0
+msgid "Selection bg. color:"
+msgstr "Bakgrundsfärg på markering:"
+
+#: WikidPad.xrc:0
+msgid "Selection fg. color:"
+msgstr "Förgrundsfärg på markering:"
+
+#: WikidPad.xrc:0
+msgid "Separate files"
+msgstr "Separata filer"
+
+#: WikidPad.xrc:0
+msgid "Set As Root"
+msgstr "Sätt som rot"
+
+#: WikidPad.xrc:0
+msgid "Short hint delay:"
+msgstr "Fördröjning innan länktips visas:"
+
+#: WikidPad.xrc:0
+msgid "Shortcut:"
+msgstr "Genväg:"
+
+#: WikidPad.xrc:0
+msgid "Show iframes inside IE preview"
+msgstr "Visa iframes vid IE-förhandsgranskning"
+
+#: WikidPad.xrc:0
+msgid "Show in toolbar"
+msgstr "Visa i verktygsfältet"
+
+#: WikidPad.xrc:0
+msgid "Show pics as links in export"
+msgstr "Visa bilder som länkar vid export"
+
+#: WikidPad.xrc:0
+msgid "Show pics as links in preview"
+msgstr "Visa bilder som länkar vid förhandsgranskning"
+
+#: WikidPad.xrc:0
+msgid "Show pictures as links"
+msgstr "Visa bilder som länkar"
+
+#: WikidPad.xrc:0
+msgid "Show splash screen"
+msgstr "Visa startbild"
+
+#: WikidPad.xrc:0
+msgid "Show word list on hovering"
+msgstr "Visa lista över ord när musen hålls över"
+
+#: WikidPad.xrc:0
+msgid "Show word list on select"
+msgstr "Visa lista över ord vid markering"
+
+#: WikidPad.xrc:0
+msgid "Si&mple regex"
+msgstr "Enkelt regex"
+
+#: WikidPad.xrc:0
+msgid "Single page separator lines:"
+msgstr "Antal rader mellan sidor:"
+
+#: WikidPad.xrc:0
+msgid "Single process per user*"
+msgstr "En process per användare*"
+
+#: WikidPad.xrc:0
+msgid "Skip"
+msgstr "Hoppa över"
+
+#: WikidPad.xrc:0
+msgid "Sort"
+msgstr "Sortera"
+
+#: WikidPad.xrc:0
+msgid "Sort alphabetically"
+msgstr "Sortera alfabetiskt"
+
+#: WikidPad.xrc:0
+msgid "Sort order:"
+msgstr "Sorteringsordning:"
+
+#: WikidPad.xrc:0
+msgid "Sound"
+msgstr "Ljud"
+
+#: WikidPad.xrc:0
+msgid "Sound file:"
+msgstr "Ljudfil:"
+
+#: WikidPad.xrc:0
+msgid "Spell Check"
+msgstr "Stavningskontroll"
+
+#: WikidPad.xrc:0
+msgid "Start browser after export"
+msgstr "Öppna webbläsare efter export"
+
+#: WikidPad.xrc:0
+msgid "Statusbar time format:"
+msgstr "Tidsformat i statuslist:"
+
+#: WikidPad.xrc:0
+msgid "Steps to complete version:"
+msgstr "Steg till komplett version:"
+
+#: WikidPad.xrc:0
+msgid "Store relative pathes to wikis"
+msgstr "Lagra relativa sökvägar till wikis"
+
+#: WikidPad.xrc:0
+msgid "Structure window heading depth:"
+msgstr "Strukturfönstrets rubrikdjup:"
+
+#: WikidPad.xrc:0
+msgid "Structure window position:"
+msgstr "Strukturfönstrets position:"
+
+#: WikidPad.xrc:0
+msgid "Structure window selection auto-follow"
+msgstr "Markera automatiskt i strukturfönster"
+
+#: WikidPad.xrc:0
+msgid "Swap From <-> To"
+msgstr "Växla från <-> till"
+
+#: WikidPad.xrc:0
+msgid "Switch Ed./Prev"
+msgstr "Växla Red./Förh."
+
+#: WikidPad.xrc:0
+msgid "Switch Tabs in MRU order"
+msgstr "Växla flikar i MRU-ordning"
+
+#: WikidPad.xrc:0
+msgid "Switch tab to edit"
+msgstr "Växla flik till redigerare"
+
+#: WikidPad.xrc:0
+msgid "Sync. highlighting limit:"
+msgstr "Gräns för samtidigt bakgrundsjobb:"
+
+#: WikidPad.xrc:0
+msgid "Synchronize editor by preview selection"
+msgstr "Synkronisera redigeraren med markering i förhandsgranskning"
+
+#: WikidPad.xrc:0
+msgid "System"
+msgstr "System"
+
+#: WikidPad.xrc:0
+msgid "Tab width:"
+msgstr "Flikbredd:"
+
+#: WikidPad.xrc:0
+msgid "Table of contents:"
+msgstr "Innehållsförteckning:"
+
+#: WikidPad.xrc:0
+msgid "Template page names reg. exp.:"
+msgstr "Regexp för namn på mallsidor:"
+
+#: WikidPad.xrc:0
+msgid "Temporary file directory:"
+msgstr "Temporär filkatalog:"
+
+#: WikidPad.xrc:0
+msgid "Temporary files"
+msgstr "Temporära filer"
+
+#: WikidPad.xrc:0
+msgid "Temporary path:"
+msgstr "Temporär sökväg:"
+
+#: WikidPad.xrc:0
+msgid "Test"
+msgstr "Test"
+
+#: WikidPad.xrc:0
+msgid "Text color:"
+msgstr "Textfärg:"
+
+#: WikidPad.xrc:0
+msgid "Text cursor color:"
+msgstr "Textmarkörens färg:"
+
+#: WikidPad.xrc:0
+msgid "Timeline"
+msgstr "Tidslinje"
+
+#: WikidPad.xrc:0
+msgid "Title of toc:"
+msgstr "Titel på inneh.fört:"
+
+#: WikidPad.xrc:0
+msgid "To Word:"
+msgstr "Till ord:"
+
+#: WikidPad.xrc:0
+msgid "To check"
+msgstr "Att kontrollera"
+
+#: WikidPad.xrc:0
+msgid "Top"
+msgstr "Upptill"
+
+#: WikidPad.xrc:0
+msgid "Translate menu accelerators for keyboard layout* (Windows)"
+msgstr "Översätt menyacceleratorer för tangentbordslayout* (Windows)"
+
+#: WikidPad.xrc:0
+msgid "Trashcan"
+msgstr "Papperskorg"
+
+#: WikidPad.xrc:0
+msgid "Tree auto-follow"
+msgstr "Trädet följer automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Tree auto-hide"
+msgstr "Dölj träd automatiskt"
+
+#: WikidPad.xrc:0
+msgid "Tree timing"
+msgstr "Trädtider"
+
+#: WikidPad.xrc:0
+msgid "Tree update after save"
+msgstr "Träduppdatering efter spara"
+
+#: WikidPad.xrc:0
+msgid "UI Language:"
+msgstr "Gränssnittsspråk:"
+
+#: WikidPad.xrc:0
+msgid "UTF-8 with BOM"
+msgstr "UTF-8 med BOM"
+
+#: WikidPad.xrc:0
+msgid "UTF-8 without BOM"
+msgstr "UTF-8 utan BOM"
+
+#: WikidPad.xrc:0
+msgid "Unordered"
+msgstr "Osorterad"
+
+#: WikidPad.xrc:0
+msgid "Up"
+msgstr "Upp"
+
+#: WikidPad.xrc:0
+msgid "Up to heading depth:"
+msgstr "Upp till rubrikdjup"
+
+#: WikidPad.xrc:0
+msgid "Update step min. delay:"
+msgstr "Uppdateringssteg min. fördröjning:"
+
+#: WikidPad.xrc:0
+msgid "Uppercase first"
+msgstr "Versaler först"
+
+#: WikidPad.xrc:0
+msgid "Use IME workaround for editor input*"
+msgstr "Använd IME workaround för indata till redigeraren*"
+
+#: WikidPad.xrc:0
+msgid "Use link title if present"
+msgstr "Använd länktitel när sådan finns"
+
+#: WikidPad.xrc:0
+msgid "Use vi keys in Webkit preview"
+msgstr "Använd vi-nycklar i webkit förhandsgranskning"
+
+#: WikidPad.xrc:0
+msgid "User notification:"
+msgstr "Användarmeddelande:"
+
+#: WikidPad.xrc:0
+msgid "Version Import"
+msgstr "Versionsimport"
+
+#: WikidPad.xrc:0
+msgid "Visited link color:"
+msgstr "Färg på besökt länk:"
+
+#: WikidPad.xrc:0
+msgid "Warn about other processes (Windows only)"
+msgstr "Varna om andra processer (endast Windows)"
+
+#: WikidPad.xrc:0
+msgid "What to export:"
+msgstr "Vad som ska exporteras:"
+
+#: WikidPad.xrc:0
+msgid "What to print:"
+msgstr "Vad som ska skrivas ut:"
+
+#: WikidPad.xrc:0
+msgid "Where to store:"
+msgstr "Var lagring ska ske:"
+
+#: WikidPad.xrc:0
+msgid "While wiki open"
+msgstr "När wikin är öppen"
+
+#: WikidPad.xrc:0
+msgid "Whole wiki"
+msgstr "Hela wikin"
+
+#: WikidPad.xrc:0
+msgid "Width:"
+msgstr "Bredd:"
+
+#: WikidPad.xrc:0
+msgid "Wiki Search"
+msgstr "Wikisökning"
+
+#: WikidPad.xrc:0
+msgid "Wiki Word"
+msgstr "Wikiord"
+
+#: WikidPad.xrc:0
+msgid "Wiki icon:"
+msgstr "Wikiikon:"
+
+#: WikidPad.xrc:0
+msgid "Wiki language:"
+msgstr "Gränssnittsspråk:"
+
+#: WikidPad.xrc:0
+msgid "Wiki word to heading:"
+msgstr "Wikiord som titel:"
+
+#: WikidPad.xrc:0
+msgid "Wiki-bound hotkey:"
+msgstr "Kortkommando för wiki:"
+
+#: WikidPad.xrc:0
+msgid "Wiki-wide search"
+msgstr "Sökning i hela wikin"
+
+#: WikidPad.xrc:0
+msgid "Write saved searches"
+msgstr "Skriv sparade sökningar"
+
+#: WikidPad.xrc:0
+msgid "Write version data of pages"
+msgstr "Skriv sidornas versionsdata"
+
+#: WikidPad.xrc:0
+msgid "Write wiki func. pages"
+msgstr "Skriv wikins funktionssidor"
+
+#: WikidPad.xrc:0
+msgid "bytes"
+msgstr "bytes"
+
+#: WikidPad.xrc:0
+msgid "cursor"
+msgstr "markör"
+
+#: WikidPad.xrc:0
+msgid "include in export:"
+msgstr "inkludera i export:"
+
+#: WikidPad.xrc:0
+msgid "include in preview:"
+msgstr "inkludera i förhandsgranskning:"
+
+#: WikidPad.xrc:0
+msgid "level(s) below"
+msgstr "nivå(er) under"
+
+#: WikidPad.xrc:0
+msgid "milliseconds"
+msgstr "millisekunder"
+
+#: WikidPad.xrc:0
+msgid "not  "
+msgstr "inte "
+
+#: WikidPad.xrc:0
+msgid "second(s)"
+msgstr "sekund(er)"
+
+#: WikidPad.xrc:0
+#: extensions\GraphvizStructureView.py:678
+#: extensions\GraphvizStructureView.py:702
+#: extensions\GraphvizStructureView.py:715
+#: extensions\GraphvizStructureView.py:728
+msgid "..."
+msgstr "..."
+
+#: WikidPad.xrc:0
+#: lib\pwiki\AdditionalDialogs.py:804
+msgid " OK "
+msgstr " OK "
+
+#: WikidPad.xrc:0
+#: lib\pwiki\AdditionalDialogs.py:808
+msgid " Cancel "
+msgstr "Avbryt"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\AdditionalDialogs.py:1195
+msgid "Destination directory:"
+msgstr "Målkatalog:"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\AdditionalDialogs.py:1389
+#: lib\pwiki\SearchAndReplaceDialogs.py:1485
+msgid "Title:"
+msgstr "Titel:"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\AdditionalDialogs.py:1671
+msgid "Source directory:"
+msgstr "Källkatalog:"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\DiffGui.py:436
+#: lib\pwiki\PersonalWikiFrame.py:1347
+#: lib\pwiki\WikiTxtCtrl.py:3690
+msgid "Copy"
+msgstr "Kopiera"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\DiffGui.py:437
+#: lib\pwiki\PersonalWikiFrame.py:1356
+#: lib\pwiki\WikiTxtCtrl.py:3693
+msgid "Select All"
+msgstr "Markera allt"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\DiffGui.py:439
+#: lib\pwiki\WikiTxtCtrl.py:3709
+msgid "Close Tab"
+msgstr "Stäng flik"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\FileCleanup.py:528
+#: lib\pwiki\FileCleanup.py:530
+#: lib\pwiki\FileCleanup.py:686
+#: lib\pwiki\FileCleanup.py:1264
+msgid "Keep"
+msgstr "Spara"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\FileCleanup.py:528
+#: lib\pwiki\FileCleanup.py:616
+#: lib\pwiki\FileCleanup.py:686
+#: lib\pwiki\FileCleanup.py:775
+#: lib\pwiki\MptImporterGui.py:172
+#: lib\pwiki\MptImporterGui.py:174
+#: lib\pwiki\OptionsDialog.py:139
+#: lib\pwiki\OptionsDialog.py:899
+msgid "Default"
+msgstr "Standard"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\FileCleanup.py:529
+#: lib\pwiki\FileCleanup.py:531
+#: lib\pwiki\FileCleanup.py:687
+#: lib\pwiki\FileCleanup.py:1265
+#: lib\pwiki\WikiTxtCtrl.py:3692
+msgid "Delete"
+msgstr "Radera"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\FileCleanup.py:529
+#: lib\pwiki\FileCleanup.py:531
+#: lib\pwiki\FileCleanup.py:1265
+msgid "Collect"
+msgstr "Samla"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\MptImporterGui.py:172
+#: lib\pwiki\MptImporterGui.py:174
+msgid "Yes"
+msgstr "Ja"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\MptImporterGui.py:173
+msgid "Overwrite"
+msgstr "Skriv över"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\MptImporterGui.py:173
+#: lib\pwiki\MptImporterGui.py:174
+msgid "No"
+msgstr "Nej"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\MptImporterGui.py:197
+msgid "Import"
+msgstr "Importera"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\OptionsDialog.py:694
+msgid "Versioning"
+msgstr "Versionshantering"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:1322
+#: lib\pwiki\WikiTxtCtrl.py:3687
+msgid "Undo"
+msgstr "Ångra"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:1326
+#: lib\pwiki\WikiTxtCtrl.py:3688
+msgid "Redo"
+msgstr "Gör om"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:1342
+#: lib\pwiki\WikiTxtCtrl.py:3689
+msgid "Cut"
+msgstr "Klipp ut"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:1351
+#: lib\pwiki\WikiTxtCtrl.py:3691
+msgid "Paste"
+msgstr "Klistra in"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:1644
+msgid "&Delete"
+msgstr "Ra&dera"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:2064
+#: lib\pwiki\PersonalWikiFrame.py:2065
+msgid "Open Wiki Word"
+msgstr "Öppna wikiord"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\PersonalWikiFrame.py:2095
+#: lib\pwiki\PersonalWikiFrame.py:2096
+msgid "Rename Wiki Word"
+msgstr "Byt namn på wikiord"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\SearchAndReplaceDialogs.py:855
+msgid "Close"
+msgstr "Stäng"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\SearchAndReplaceDialogs.py:1711
+msgid "Set page list"
+msgstr "Ange sidlista"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\SearchAndReplaceDialogs.py:1962
+msgid "As Resultlist"
+msgstr "Som resultatlista"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\SearchAndReplaceDialogs.py:1967
+#: lib\pwiki\SearchAndReplaceDialogs.py:2073
+msgid "As Full Search"
+msgstr "Som full sökning"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\SearchAndReplaceDialogs.py:2367
+#: lib\pwiki\WikiHtmlView.py:672
+msgid "Activate New Tab"
+msgstr "Aktivera ny flik"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\timeView\TimelinePanel.py:798
+msgid "Show empty days"
+msgstr "Visa tomma datum"
+
+#: WikidPad.xrc:0
+#: lib\pwiki\timeView\TimelinePanel.py:800
+msgid "Sort dates ascending"
+msgstr "Sortera datum stigande"
+
+#: WikidPadStarter.py:206
+msgid "Error starting WikidPad"
+msgstr "Fel vid uppstart av WikidPad"
+
+#: WikidPadStarter.py:207
+#: lib\pwiki\PersonalWikiFrame.py:5161
+#: lib\pwiki\SearchAndReplaceDialogs.py:724
+#: lib\pwiki\SearchAndReplaceDialogs.py:1008
+msgid "Error!"
+msgstr "Fel!"
+
+#: WikidPadStarter.py:214
+#: lib\pwiki\MptImporterGui.py:201
+msgid "Error"
+msgstr "Fel"
+
+#: extensions\GnuplotClBridge.py:91
+msgid "[Please set path to Gnuplot executable]"
+msgstr "[Ange sökvög till Gnuplots programfil]"
+
+#: extensions\GnuplotClBridge.py:140
+msgid "[Gnuplot error: %s]"
+msgstr "[Gnuplot-fel: %s]"
+
+#: extensions\GnuplotClBridge.py:191
+msgid "Path to Gnuplot:"
+msgstr "Sökväg till Gnuplot:"
+
+#: extensions\GraphvizClBridge.py:106
+msgid "[Please set path to GraphViz executables]"
+msgstr "[Ange sökväg till GraphViz programfiler]"
+
+#: extensions\GraphvizClBridge.py:148
+msgid "[%s Error: %s]"
+msgstr "[%s Fel: %s]"
+
+#: extensions\GraphvizClBridge.py:249
+msgid "Directory of executables:"
+msgstr "Katalog med programfiler:"
+
+#: extensions\GraphvizClBridge.py:253
+msgid "Name of dot executable:"
+msgstr "Namn på dot-filen:"
+
+#: extensions\GraphvizClBridge.py:257
+msgid "Name of neato executable:"
+msgstr "Namn på neato-filen:"
+
+#: extensions\GraphvizClBridge.py:261
+msgid "Name of twopi executable:"
+msgstr "Namn på twopi-filen:"
+
+#: extensions\GraphvizClBridge.py:265
+msgid "Name of circo executable:"
+msgstr "Namn på circo-filen:"
+
+#: extensions\GraphvizClBridge.py:269
+msgid "Name of fdp executable:"
+msgstr "Namn på fdp-filen:"
+
+#: extensions\GraphvizStructureView.py:366
+msgid "%s Error: %s"
+msgstr "%s Fel: %s"
+
+#: extensions\GraphvizStructureView.py:432
+#: extensions\GraphvizStructureView.py:433
+msgid "Show relation graph"
+msgstr "Visa relationsgraf"
+
+#: extensions\GraphvizStructureView.py:435
+msgid "Show rel. graph source"
+msgstr "Visa relationsgrafens källa"
+
+#: extensions\GraphvizStructureView.py:437
+msgid "Show relation graph source"
+msgstr "Visa relationsgrafens källa"
+
+#: extensions\GraphvizStructureView.py:439
+#: extensions\GraphvizStructureView.py:440
+msgid "Show child graph"
+msgstr "Visa barngraf"
+
+#: extensions\GraphvizStructureView.py:442
+#: extensions\GraphvizStructureView.py:444
+msgid "Show child graph source"
+msgstr "Visa barngrafens källa"
+
+#: extensions\GraphvizStructureView.py:661
+msgid "  GraphVizStructure"
+msgstr "  GraphViz-struktur"
+
+#: extensions\GraphvizStructureView.py:681
+msgid "Node font name:"
+msgstr "Typsnitt på noder:"
+
+#: extensions\GraphvizStructureView.py:693
+msgid "Node font size:"
+msgstr "Teckenstorlek på noder:"
+
+#: extensions\GraphvizStructureView.py:705
+msgid "Node border color:"
+msgstr "Ramfärg på noder:"
+
+#: extensions\GraphvizStructureView.py:718
+msgid "Node background color:"
+msgstr "Bakgrundsfärg på noder:"
+
+#: extensions\GraphvizStructureView.py:731
+msgid "Edge color:"
+msgstr "Trådfärg:"
+
+#: extensions\HtmlExporter.py:251
+msgid "One HTML page"
+msgstr "En HTML-sida"
+
+#: extensions\HtmlExporter.py:252
+msgid "Set of HTML pages"
+msgstr "Flera HTML-sidor"
+
+#: extensions\HtmlExporter.py:683
+#: extensions\HtmlExporter.py:772
+msgid "Exporting %s"
+msgstr "Exporterar %s"
+
+#: extensions\HtmlExporter.py:1604
+msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
+msgstr "<pre>[Tillåt evaluering av infogningsskript i \"Alternativ\", sidan \"Säkerhet\", alternativet \"Kör infogningsskript\"]</pre>"
+
+#: extensions\HtmlExporter.py:2252
+msgid "[Unknown parser node with name \"%s\" found]"
+msgstr "[Okänd tolkningsnod med namnet \"%s\" hittades]"
+
+#: extensions\MimeTexCGIBridge.py:92
+msgid "[Please set path to MimeTeX executable]"
+msgstr "[Ange sökväg till MimeTeX programfil]"
+
+#: extensions\MimeTexCGIBridge.py:124
+msgid "[Invalid response from MimeTeX]"
+msgstr "[Ogiltigt svar från MimeTeX]"
+
+#: extensions\MimeTexCGIBridge.py:185
+msgid "Path to MimeTeX:"
+msgstr "Sökväg till MimeTeX:"
+
+#: extensions\PloticusClBridge.py:108
+msgid "[Please set path to Ploticus executable]"
+msgstr "[Ange sökväg till Ploticus programfil]"
+
+#: extensions\PloticusClBridge.py:151
+msgid "[Ploticus error: %s]"
+msgstr "[Ploticus-fel: %s]"
+
+#: extensions\PloticusClBridge.py:211
+msgid "Path to Ploticus:"
+msgstr "Sökväg till Ploticus:"
+
+#: extensions\PloticusClBridge.py:217
+msgid "Output format:"
+msgstr "Visningsformat:"
+
+#: extensions\WikidPadParserStub.py:124
+msgid "Footnotes as wiki words"
+msgstr "Fotnoter som wikiord"
+
+#: extensions\autoNew.py:58
+#: extensions\autoNew.py:59
+msgid "Create new page"
+msgstr "Skapa ny sida"
+
+#: extensions\referrals.py:74
+#: extensions\referrals.py:75
+#: extensions\referrals.py:109
+#: extensions\referrals.py:129
+msgid "Insert referring pages"
+msgstr "Infoga hänvisande sidor"
+
+#: extensions\referrals.py:109
+#: extensions\referrals.py:129
+msgid "Referers"
+msgstr "Hänvisningar"
+
+#: extensions\referrals.py:147
+msgid "*%s page(s) referring to* %s\n"
+msgstr "*%s sidor hänvisar till* %s\n"
+
+#: extensions\referrals.py:156
+msgid "*%s page(s) referred to by* %s\n"
+msgstr "*%s sidor hänvisade till av * %s\n"
+
+#: extensions\wikidPadParser\WikidPadParser.py:1654
+#: extensions\wikidPadParser\WikidPadParser.py:1681
+msgid "This is a footnote"
+msgstr "Detta är en fotnot"
+
+#: extensions\wikidPadParser\WikidPadParser.py:1659
+#: extensions\wikidPadParser\WikidPadParser.py:1686
+msgid "This is syntactically not a wiki word"
+msgstr "Detta är syntaktiskt inte ett wikiord"
+
+#: extensions\wikidPadParser\WikidPadParser.py:2311
+msgid ""
+"++ Wiki Settings\n"
+"\n"
+"These are your default global settings.\n"
+"\n"
+"[global.importance.low.color: grey]\n"
+"[global.importance.high.bold: true]\n"
+"[global.contact.icon: contact]\n"
+"[global.wrap: 70]\n"
+"\n"
+"[icon: cog]\n"
+msgstr ""
+"++ Wiki Settings\n"
+"\n"
+"\n"
+"Detta är dina globala standardinställningar.\n"
+"\n"
+"[global.importance.low.color: grey]\n"
+"[global.importance.high.bold: true]\n"
+"[global.contact.icon: contact]\n"
+"[global.wrap: 70]\n"
+"\n"
+"[icon: cog]\n"
+
+#: lib\pwiki\AdditionalDialogs.py:144
+#: lib\pwiki\AdditionalDialogs.py:361
+msgid "Links to:"
+msgstr "Länkar till:"
+
+#: lib\pwiki\AdditionalDialogs.py:291
+#: lib\pwiki\AdditionalDialogs.py:411
+msgid "'%s' is an invalid WikiWord"
+msgstr "'%s' är ett ogiltigt wikiord"
+
+#: lib\pwiki\AdditionalDialogs.py:298
+msgid "'%s' is not an existing wikiword. Create?"
+msgstr "'%s' finns inte som wikiord. Skapa?"
+
+#: lib\pwiki\AdditionalDialogs.py:299
+msgid "Create"
+msgstr "Skapa"
+
+#: lib\pwiki\AdditionalDialogs.py:417
+msgid "'%s' exists already"
+msgstr "'%s' finns redan"
+
+#: lib\pwiki\AdditionalDialogs.py:433
+#: lib\pwiki\AdditionalDialogs.py:527
+msgid "Do you want to delete %i wiki page(s)?"
+msgstr "Vill du radera %i wikisidor?"
+
+#: lib\pwiki\AdditionalDialogs.py:686
+msgid ""
+"Can't process renaming:\n"
+"%s"
+msgstr ""
+"Kan inte genomföra namnbyte:\n"
+"%s"
+
+#: lib\pwiki\AdditionalDialogs.py:687
+msgid "Can't rename"
+msgstr "Kan inte byta namn"
+
+#: lib\pwiki\AdditionalDialogs.py:725
+msgid "Can't rename to itself"
+msgstr "Kan inte namnge till sitt eget namn"
+
+#: lib\pwiki\AdditionalDialogs.py:728
+#: lib\pwiki\TrashcanGui.py:379
+#: lib\pwiki\WikiExceptions.py:73
+msgid "Word already exists"
+msgstr "Ordet finns redan"
+
+#: lib\pwiki\AdditionalDialogs.py:777
+msgid "Select Icon"
+msgstr "Välj ikon"
+
+#: lib\pwiki\AdditionalDialogs.py:786
+msgid "Icon"
+msgstr "Ikon"
+
+#: lib\pwiki\AdditionalDialogs.py:852
+msgid ""
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"\n"
+"<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Directive</b></td>\n"
+"        <td align=\"left\"><b>Meaning</b></td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
+"        <td align=\"left\">Locale's abbreviated weekday name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%A</code></td>\n"
+"        <td align=\"left\">Locale's full weekday name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%b</code></td>\n"
+"        <td align=\"left\">Locale's abbreviated month name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%B</code></td>\n"
+"        <td align=\"left\">Locale's full month name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
+"        <td align=\"left\">Locale's appropriate date and time representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
+"        <td align=\"left\">Day of the month as a decimal number [01,31].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
+"        <td align=\"left\">Hour (24-hour clock) as a decimal number [00,23].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
+"        <td align=\"left\">Hour (12-hour clock) as a decimal number [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
+"        <td align=\"left\">Day of the year as a decimal number [001,366].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
+"        <td align=\"left\">Month as a decimal number [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
+"        <td align=\"left\">Minute as a decimal number [00,59].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
+"        <td align=\"left\">Locale's equivalent of either AM or PM.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
+"        <td align=\"left\">Second as a decimal number [00,61].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
+"        <td align=\"left\">Weekday as a decimal number [1(Monday),7].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
+"        <td align=\"left\">Week number of the year (Sunday as the first day of the\n"
+"                week) as a decimal number [00,53].  All days in a new year\n"
+"                preceding the first Sunday are considered to be in week 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
+"        <td align=\"left\">Weekday as a decimal number [0(Sunday),6].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
+"        <td align=\"left\">Week number of the year (Monday as the first day of the\n"
+"                week) as a decimal number [00,53].  All days in a new year\n"
+"                preceding the first Monday are considered to be in week 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
+"        <td align=\"left\">Locale's appropriate date representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
+"        <td align=\"left\">Locale's appropriate time representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
+"        <td align=\"left\">Year without century as a decimal number [00,99].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
+"        <td align=\"left\">Year with century as a decimal number.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
+"        <td align=\"left\">Time zone name (no characters if no time zone exists).</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
+"        <td align=\"left\">A literal \"<tt class=\"character\">%</tt>\" character.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\n"
+"</code></td>\n"
+"        <td align=\"left\">A newline.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\\\</code></td>\n"
+"        <td align=\"left\">A literal \"<tt class=\"character\">\\</tt>\" character.</td></tr>\n"
+"    </tbody>\n"
+"</table>\n"
+"</body>\n"
+"</html>\n"
+msgstr ""
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"\n"
+"<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Direktiv</b></td>\n"
+"        <td align=\"left\"><b>Betydelse</b></td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
+"        <td align=\"left\">Lokal förkortning på veckodagens namn.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%A</code></td>\n"
+"        <td align=\"left\">Lokalt namn på veckodag.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%b</code></td>\n"
+"        <td align=\"left\">Lokal förkortning på månadens namn.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%B</code></td>\n"
+"        <td align=\"left\">Lokalt namn på månaden.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
+"        <td align=\"left\">Lokalt anpassad dag, datum och klockslag.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
+"        <td align=\"left\">Dag i månaden som tal [01,31].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
+"        <td align=\"left\">Timme (24-timmarsklocka) som tal [00,23].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
+"        <td align=\"left\">Timme (12-timmarsklocka) som tal [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
+"        <td align=\"left\">Dag på året som tal [001,366].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
+"        <td align=\"left\">Månad som tal [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
+"        <td align=\"left\">Minuter som tal [00,59].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
+"        <td align=\"left\">Lokalt värde med antingen AM eller PM.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
+"        <td align=\"left\">Sekunder som tal [00,61].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
+"        <td align=\"left\">Veckodag som tal [1(måndag),7].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
+"        <td align=\"left\">Veckonummer under året (söndag som veckans första\n"
+"                dag) som tal [00,53].  Alla dagar på nytt år\n"
+"                före den första söndagen betraktas som veckonummer 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
+"        <td align=\"left\">Veckodag som tal [0(söndag),6].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
+"        <td align=\"left\">Veckonummer under året (måndag som veckans första\n"
+"                dag) som tal [00,53].  Alla dagar på nytt år\n"
+"                före den första måndagen betraktas som veckonummer 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
+"        <td align=\"left\">Lokalt anpassat datum.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
+"        <td align=\"left\">Lokalt anpassat klockslag.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
+"        <td align=\"left\">År utan århundrade som tal [00,99].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
+"        <td align=\"left\">År med århundrade som tal.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
+"        <td align=\"left\">Tidszon (inga tecken visas om det inte finns någon tidszon).</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
+"        <td align=\"left\">Ett \"<tt class=\"character\">%</tt>\"-tecken.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\n"
+"</code></td>\n"
+"        <td align=\"left\">En ny rad.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\\\</code></td>\n"
+"        <td align=\"left\">Ett \"<tt class=\"character\">\\</tt>\"-tecken.</td></tr>\n"
+"    </tbody>\n"
+"</table>\n"
+"</body>\n"
+"</html>\n"
+
+#: lib\pwiki\AdditionalDialogs.py:962
+msgid "<invalid>"
+msgstr "<ogiltig>"
+
+#: lib\pwiki\AdditionalDialogs.py:1095
+msgid "Continuous Export"
+msgstr "Kontinuerlig export"
+
+#: lib\pwiki\AdditionalDialogs.py:1198
+msgid "Destination file:"
+msgstr "Målfil:"
+
+#: lib\pwiki\AdditionalDialogs.py:1232
+msgid "Destination directory does not exist"
+msgstr "Målkatalog finns inte"
+
+#: lib\pwiki\AdditionalDialogs.py:1237
+msgid "Destination must be a directory"
+msgstr "Målet måste vara en katalog"
+
+#: lib\pwiki\AdditionalDialogs.py:1243
+msgid "Destination must be a file"
+msgstr "Målet måste vara en fil"
+
+#: lib\pwiki\AdditionalDialogs.py:1253
+#: lib\pwiki\PersonalWikiFrame.py:4747
+msgid "Exporting"
+msgstr "Exporterar"
+
+#: lib\pwiki\AdditionalDialogs.py:1255
+#: lib\pwiki\PersonalWikiFrame.py:4749
+msgid "Preparing"
+msgstr "Förbereder"
+
+#: lib\pwiki\AdditionalDialogs.py:1275
+msgid "Error while exporting"
+msgstr "Fel vid export"
+
+#: lib\pwiki\AdditionalDialogs.py:1291
+#: lib\pwiki\PersonalWikiFrame.py:4690
+msgid "Select Export Directory"
+msgstr "Välj exportkatalog"
+
+#: lib\pwiki\AdditionalDialogs.py:1305
+#: lib\pwiki\AdditionalDialogs.py:1744
+msgid "All files (*.*)"
+msgstr "Alla filer (*.*)"
+
+#: lib\pwiki\AdditionalDialogs.py:1310
+msgid "Select Export File"
+msgstr "Välj exportfil"
+
+#: lib\pwiki\AdditionalDialogs.py:1337
+#: lib\pwiki\PersonalWikiFrame.py:4714
+#: lib\pwiki\PersonalWikiFrame.py:4730
+#: lib\pwiki\Printing.py:183
+msgid "No real wiki word selected as root"
+msgstr "Inget riktigt wikiord har valts som rot"
+
+#: lib\pwiki\AdditionalDialogs.py:1390
+msgid "Choose export title"
+msgstr "Välj exporttitel"
+
+#: lib\pwiki\AdditionalDialogs.py:1399
+msgid "Do you want to overwrite existing export '%s'?"
+msgstr "Vill du skriva över befintlig export '%s'?"
+
+#: lib\pwiki\AdditionalDialogs.py:1400
+msgid "Overwrite export"
+msgstr "Skriv över export"
+
+#: lib\pwiki\AdditionalDialogs.py:1439
+msgid "Do you want to delete %i export(s)?"
+msgstr "Vill du radera %i export(er)?"
+
+#: lib\pwiki\AdditionalDialogs.py:1440
+msgid "Delete export"
+msgstr "Radera export"
+
+#: lib\pwiki\AdditionalDialogs.py:1477
+msgid "Selected export type does not support saving"
+msgstr "Vald export stöder inte att sparas"
+
+#: lib\pwiki\AdditionalDialogs.py:1518
+#: lib\pwiki\CmdLineAction.py:213
+msgid "Export type '%s' of saved export is not supported"
+msgstr "Exporttypen '%s' i sparad export stöds inte"
+
+#: lib\pwiki\AdditionalDialogs.py:1529
+#: lib\pwiki\CmdLineAction.py:224
+msgid ""
+"Saved export uses different version for additional options than current export\n"
+"Export type: '%s'\n"
+"Saved export version: %i\n"
+"Current export version: %i"
+msgstr ""
+"Sparade export använder en annan version för fler alternativ än aktuell export\n"
+"Exporttyp: '%s'\n"
+"Sparad exportversion: %i\n"
+"Aktuell exportversion: %i"
+
+#: lib\pwiki\AdditionalDialogs.py:1537
+#: lib\pwiki\CmdLineAction.py:233
+msgid "Type of additional option storage ('%s') is unknown"
+msgstr "Typ av ytterligare lagringsalternativ ('%s') är okänd"
+
+#: lib\pwiki\AdditionalDialogs.py:1561
+#: lib\pwiki\CmdLineAction.py:255
+msgid "Error during retrieving saved export: "
+msgstr "Ett fel uppstod vid hämtning av sparad export:"
+
+#: lib\pwiki\AdditionalDialogs.py:1674
+msgid "Source file:"
+msgstr "Källfil:"
+
+#: lib\pwiki\AdditionalDialogs.py:1690
+msgid "Source does not exist"
+msgstr "Källa finns inte"
+
+#: lib\pwiki\AdditionalDialogs.py:1700
+msgid "Source must be a directory"
+msgstr "Källa måste vara en katalog"
+
+#: lib\pwiki\AdditionalDialogs.py:1705
+msgid "Source must be a file"
+msgstr "Källa måste vara en fil"
+
+#: lib\pwiki\AdditionalDialogs.py:1716
+msgid "Error while importing"
+msgstr "Fel vid import"
+
+#: lib\pwiki\AdditionalDialogs.py:1730
+msgid "Select Import Directory"
+msgstr "Välj importkatalog"
+
+#: lib\pwiki\AdditionalDialogs.py:1745
+msgid "*"
+msgstr "*"
+
+#: lib\pwiki\AdditionalDialogs.py:1749
+msgid "Select Import File"
+msgstr "Välj importfil"
+
+#: lib\pwiki\AdditionalDialogs.py:1865
+msgid ""
+"\n"
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"    <center>\n"
+"        <table bgcolor=\"#CCCCCC\" width=\"100%%\" cellspacing=\"0\" cellpadding=\"0\" border=\"1\">\n"
+"            <tr>\n"
+"                <td align=\"center\"><h2>%s</h2></td>\n"
+"            </tr>\n"
+"        </table>\n"
+"\n"
+"        <p>\n"
+"wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down.\n"
+"What makes wikidPad different from other notepad applications is the ease with which you can cross-link your information.        </p>        \n"
+"        <br><br>\n"
+"\n"
+"        <table border=0 cellpadding=1 cellspacing=0>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Russian:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"        </table>\n"
+"    </center>\n"
+"    \n"
+"    \n"
+"\n"
+"    \n"
+"    <hr />\n"
+"    \n"
+"    <p>Your configuration directory is: <b>%s</b><br />\n"
+"    Sqlite version: <b>%s</b><br />\n"
+"    wxPython version: <b>%s</b>\n"
+"    </p>\n"
+"    \n"
+"</body>\n"
+"</html>\n"
+msgstr ""
+"\n"
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"    <center>\n"
+"        <table bgcolor=\"#CCCCCC\" width=\"100%%\" cellspacing=\"0\" cellpadding=\"0\" border=\"1\">\n"
+"            <tr>\n"
+"                <td align=\"center\"><h2>%s</h2></td>\n"
+"            </tr>\n"
+"        </table>\n"
+"\n"
+"        <p>\n"
+"wikidPad är en wikiliknande anteckningsbok för tankar, idéer, attgöra-listor eller vad som helst som behöver antecknas.\n"
+"Det som skiljer wikidPad från andra anteckningsprogram är enkelheten att korslänka information.         </p>        \n"
+"        <br><br>\n"
+"\n"
+"        <table border=0 cellpadding=1 cellspacing=0>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Upphovsman:</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Upphovsman:</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Upphovsman:</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Översättningar:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Kinesiska:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Ryska:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Svenska:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Ungerska:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"        </table>\n"
+"    </center>\n"
+"    \n"
+"    <hr />\n"
+"    \n"
+"    <p>Din konfigurationskatalog är: <b>%s</b><br />\n"
+"    Sqlite version: <b>%s</b><br />\n"
+"    wxPython version: <b>%s</b>\n"
+"    </p>\n"
+"    \n"
+"</body>\n"
+"</html>\n"
+
+#: lib\pwiki\AdditionalDialogs.py:1916
+#: lib\pwiki\PersonalWikiFrame.py:1982
+msgid "About WikidPad"
+msgstr "Om WikidPad"
+
+#: lib\pwiki\AdditionalDialogs.py:1920
+msgid "N/A"
+msgstr "N/A"
+
+#: lib\pwiki\AdditionalDialogs.py:1930
+msgid "Okay"
+msgstr "OK"
+
+#: lib\pwiki\AdditionalDialogs.py:2031
+msgid "Wiki Properties"
+msgstr "Wikiegenskaper"
+
+#: lib\pwiki\AdditionalDialogs.py:2038
+msgid "No wiki loaded"
+msgstr "Ingen wiki laddad"
+
+#: lib\pwiki\AdditionalDialogs.py:2042
+msgid "Wiki config. path:"
+msgstr "Wikins konfigurationssökväg:"
+
+#: lib\pwiki\AdditionalDialogs.py:2048
+msgid "Wiki database backend:"
+msgstr "Wikins databasstöd:"
+
+#: lib\pwiki\AdditionalDialogs.py:2056
+msgid "Number of wiki pages:"
+msgstr "Antal wikisidor:"
+
+#: lib\pwiki\AdditionalDialogs.py:2065
+msgid "Wiki is read-only. Reason:"
+msgstr "Wikin är skrivskyddad. Anledning:"
+
+#: lib\pwiki\AdditionalDialogs.py:2068
+msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
+msgstr "Skrivåtkomst till databasen förlorad. Försök med \"Wiki\"->\"Återanslut\""
+
+#: lib\pwiki\AdditionalDialogs.py:2070
+msgid "Wiki was set read-only in options dialog"
+msgstr "Wikin angavs som skrivskyddad i dialogrutan Alternativ"
+
+#: lib\pwiki\AdditionalDialogs.py:2075
+#: lib\pwiki\AdditionalDialogs.py:2077
+msgid "Can't write wiki config.:"
+msgstr "Kan inte skriva wikikonfiguration:"
+
+#: lib\pwiki\AdditionalDialogs.py:2075
+#: lib\pwiki\AdditionalDialogs.py:2079
+msgid "Unknown reason"
+msgstr "Okänd anledning"
+
+#: lib\pwiki\AdditionalDialogs.py:2092
+msgid "Jobs"
+msgstr "Jobb"
+
+#: lib\pwiki\AdditionalDialogs.py:2109
+msgid "Number of Jobs:"
+msgstr "Antal jobb:"
+
+#: lib\pwiki\AttributeHandling.py:32
+msgid "AQUAMARINE"
+msgstr "AKVAMARIN"
+
+#: lib\pwiki\AttributeHandling.py:33
+msgid "BLACK"
+msgstr "SVART"
+
+#: lib\pwiki\AttributeHandling.py:34
+msgid "BLUE VIOLET"
+msgstr "BLÅVIOLETT"
+
+#: lib\pwiki\AttributeHandling.py:35
+msgid "BLUE"
+msgstr "BLÅ"
+
+#: lib\pwiki\AttributeHandling.py:36
+msgid "BROWN"
+msgstr "BRUN"
+
+#: lib\pwiki\AttributeHandling.py:37
+msgid "CADET BLUE"
+msgstr "KADETTBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:38
+msgid "CORAL"
+msgstr "KORALL"
+
+#: lib\pwiki\AttributeHandling.py:39
+msgid "CORNFLOWER BLUE"
+msgstr "BLÅKLINT"
+
+#: lib\pwiki\AttributeHandling.py:40
+msgid "CYAN"
+msgstr "CYAN"
+
+#: lib\pwiki\AttributeHandling.py:41
+msgid "DARK GREEN"
+msgstr "MÖRKGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:42
+msgid "DARK GREY"
+msgstr "MÖRKGRÅ"
+
+#: lib\pwiki\AttributeHandling.py:43
+msgid "DARK OLIVE GREEN"
+msgstr "MÖRK OLIVGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:44
+msgid "DARK ORCHID"
+msgstr "MÖRK ORKIDÉ"
+
+#: lib\pwiki\AttributeHandling.py:45
+msgid "DARK SLATE BLUE"
+msgstr "MÖRK SKIFFERBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:46
+msgid "DARK SLATE GREY"
+msgstr "MÖRK SKIFFERGRÅ"
+
+#: lib\pwiki\AttributeHandling.py:47
+msgid "DARK TURQUOISE"
+msgstr "MÖRK TURKOS"
+
+#: lib\pwiki\AttributeHandling.py:48
+msgid "DIM GREY"
+msgstr "BLEKGRÅ"
+
+#: lib\pwiki\AttributeHandling.py:49
+msgid "FIREBRICK"
+msgstr "TEGEL"
+
+#: lib\pwiki\AttributeHandling.py:50
+msgid "FOREST GREEN"
+msgstr "SKOGSGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:51
+msgid "GOLD"
+msgstr "GULD"
+
+#: lib\pwiki\AttributeHandling.py:52
+msgid "GOLDENROD"
+msgstr "GULLRIS"
+
+#: lib\pwiki\AttributeHandling.py:53
+msgid "GREEN YELLOW"
+msgstr "GRÖNGUL"
+
+#: lib\pwiki\AttributeHandling.py:54
+msgid "GREEN"
+msgstr "GRÖN"
+
+#: lib\pwiki\AttributeHandling.py:55
+msgid "GREY"
+msgstr "GRÅ"
+
+#: lib\pwiki\AttributeHandling.py:56
+msgid "INDIAN RED"
+msgstr "KASTANJ"
+
+#: lib\pwiki\AttributeHandling.py:57
+msgid "KHAKI"
+msgstr "KHAKI"
+
+#: lib\pwiki\AttributeHandling.py:58
+msgid "LIGHT BLUE"
+msgstr "LJUSBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:59
+msgid "LIGHT GREY"
+msgstr "LJUSGRÅ"
+
+#: lib\pwiki\AttributeHandling.py:60
+msgid "LIGHT STEEL BLUE"
+msgstr "LJUST STÅLBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:61
+msgid "LIME GREEN"
+msgstr "LIMEGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:62
+msgid "MAGENTA"
+msgstr "MAGENTA"
+
+#: lib\pwiki\AttributeHandling.py:63
+msgid "MAROON"
+msgstr "RÖDBRUN"
+
+#: lib\pwiki\AttributeHandling.py:64
+msgid "MEDIUM AQUAMARINE"
+msgstr "MELLANAKVAMARIN"
+
+#: lib\pwiki\AttributeHandling.py:65
+msgid "MEDIUM BLUE"
+msgstr "MELLANBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:66
+msgid "MEDIUM FOREST GREEN"
+msgstr "MELLANSKOGSGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:67
+msgid "MEDIUM GOLDENROD"
+msgstr "MELLANGULLRIS"
+
+#: lib\pwiki\AttributeHandling.py:68
+msgid "MEDIUM ORCHID"
+msgstr "MELLANORKIDÉ"
+
+#: lib\pwiki\AttributeHandling.py:69
+msgid "MEDIUM SEA GREEN"
+msgstr "MELLANHAVSGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:70
+msgid "MEDIUM SLATE BLUE"
+msgstr "MELLANBLEKBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:71
+msgid "MEDIUM SPRING GREEN"
+msgstr "MELLANVÅRGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:72
+msgid "MEDIUM TURQUOISE"
+msgstr "MELLANTURKOS"
+
+#: lib\pwiki\AttributeHandling.py:73
+msgid "MEDIUM VIOLET RED"
+msgstr "MELLANVIOLETTRÖD"
+
+#: lib\pwiki\AttributeHandling.py:74
+msgid "MIDNIGHT BLUE"
+msgstr "MIDNATTSBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:75
+msgid "NAVY"
+msgstr "MARIN"
+
+#: lib\pwiki\AttributeHandling.py:76
+msgid "ORANGE RED"
+msgstr "ORANGERÖD"
+
+#: lib\pwiki\AttributeHandling.py:77
+msgid "ORANGE"
+msgstr "ORANGE"
+
+#: lib\pwiki\AttributeHandling.py:78
+msgid "ORCHID"
+msgstr "ORKIDÉ"
+
+#: lib\pwiki\AttributeHandling.py:79
+msgid "PALE GREEN"
+msgstr "BLEKGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:80
+msgid "PINK"
+msgstr "ROSA"
+
+#: lib\pwiki\AttributeHandling.py:81
+msgid "PLUM"
+msgstr "PLOMMON"
+
+#: lib\pwiki\AttributeHandling.py:82
+msgid "PURPLE"
+msgstr "MÖRKLILA"
+
+#: lib\pwiki\AttributeHandling.py:83
+msgid "RED"
+msgstr "RÖD"
+
+#: lib\pwiki\AttributeHandling.py:84
+msgid "SALMON"
+msgstr "LAXROSA"
+
+#: lib\pwiki\AttributeHandling.py:85
+msgid "SEA GREEN"
+msgstr "HAVSGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:86
+msgid "SIENNA"
+msgstr "SIENA"
+
+#: lib\pwiki\AttributeHandling.py:87
+msgid "SKY BLUE"
+msgstr "HIMMELSBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:88
+msgid "SLATE BLUE"
+msgstr "BLEKBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:89
+msgid "SPRING GREEN"
+msgstr "VÅRGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:90
+msgid "STEEL BLUE"
+msgstr "STÅLBLÅ"
+
+#: lib\pwiki\AttributeHandling.py:91
+msgid "TAN"
+msgstr "BARKBRUN"
+
+#: lib\pwiki\AttributeHandling.py:92
+msgid "THISTLE"
+msgstr "TISTEL"
+
+#: lib\pwiki\AttributeHandling.py:93
+msgid "TURQUOISE"
+msgstr "TURKOS"
+
+#: lib\pwiki\AttributeHandling.py:94
+msgid "VIOLET RED"
+msgstr "VIOLETTRÖD"
+
+#: lib\pwiki\AttributeHandling.py:95
+msgid "VIOLET"
+msgstr "VIOLETT"
+
+#: lib\pwiki\AttributeHandling.py:96
+msgid "WHEAT"
+msgstr "VETE"
+
+#: lib\pwiki\AttributeHandling.py:97
+msgid "WHITE"
+msgstr "VIT"
+
+#: lib\pwiki\AttributeHandling.py:98
+msgid "YELLOW GREEN"
+msgstr "GULGRÖN"
+
+#: lib\pwiki\AttributeHandling.py:99
+msgid "YELLOW"
+msgstr "GUL"
+
+#: lib\pwiki\AttributeHandling.py:353
+msgid "Alias value isn't a valid wikiword: [%s: %s], %s"
+msgstr "Alias är inte ett tillåtet wikiord: [%s: %s],  %s"
+
+#: lib\pwiki\AttributeHandling.py:364
+msgid "A real wikiword with the alias name exists already: [%s: %s]"
+msgstr "Ett riktigt wikiord med aliasnamnet finns redan: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:415
+msgid "Template value isn't a valid wikiword: [%s: %s], %s"
+msgstr "Mallvärdet är inte ett tillåtet wikiord: [%s: %s],  %s"
+
+#: lib\pwiki\AttributeHandling.py:426
+msgid "Template value isn't an existing wikiword: [%s: %s]"
+msgstr "Mallvärdet är inte ett existerande wikiord: [%s: %s],  %s"
+
+#: lib\pwiki\AttributeHandling.py:473
+msgid "The attribute %s was already set differently on this page"
+msgstr "Attributet %s är redan angivet annorlunda på denna sida"
+
+#: lib\pwiki\AttributeHandling.py:485
+msgid "Attribute '%s' is already defined on the wiki page(s): %s"
+msgstr "Attributet '%s' är redan definierat på wikisidorna: %s"
+
+#: lib\pwiki\AttributeHandling.py:494
+msgid "Icon name doesn't exist: [%s: %s]"
+msgstr "Namnet på ikonen finns inte: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:501
+msgid "Color name doesn't exist: [%s: %s]"
+msgstr "Namnet på färgen finns inte: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:548
+msgid "The attribute 'global.graph.relations.exclude' (e.g. on page '%s') overrides the '...include' attribute"
+msgstr "Attributet 'global.graph.relations.exclude' (t. ex. på sidan '%s') åsidosätter '...include'-egenskapen"
+
+#: lib\pwiki\AttributeHandling.py:674
+msgid "Same attribute twice: [%s: %s]"
+msgstr "Samma attribut två gånger: [%s: %s]"
+
+#: lib\pwiki\CmdLineAction.py:199
+msgid "Saved export '%s' is unknown."
+msgstr "Sparad export '%s' är okänd."
+
+#: lib\pwiki\CmdLineAction.py:286
+msgid "If saved export is given, 'what', 'type' and 'dest' aren't allowed."
+msgstr "Om sparad export anges, tillåts inte 'what', 'type' och 'dest'"
+
+#: lib\pwiki\CmdLineAction.py:297
+msgid "To export, all three export options ('what', 'type' and 'dest') must be set."
+msgstr "För att exportera måste alla tre alternativ ('what', 'type' och 'dest') anges."
+
+#: lib\pwiki\CmdLineAction.py:315
+msgid "Value for --export-what can be 'page', 'subtree' or 'wiki'."
+msgstr "Värdet för --export-what kan vara 'page', 'subtree' eller 'wiki'."
+
+#: lib\pwiki\CmdLineAction.py:339
+msgid ""
+"Value for --export-type can be one of:\n"
+"%s"
+msgstr ""
+"Värdet för --export-type kan vara något av:\n"
+"%s"
+
+#: lib\pwiki\CmdLineAction.py:360
+msgid "Combination of --exit and --continuous-export-saved isn't allowed"
+msgstr "Kombinationen --exit och --continuous-export-saved är inte tillåten"
+
+#: lib\pwiki\CmdLineAction.py:368
+msgid ""
+"Options:\n"
+"\n"
+"    -h, --help: Show this message box\n"
+"    -w, --wiki  <wiki path>: set the wiki to open on startup\n"
+"    -p, --page  <page name>: set the page to open on startup\n"
+"    -x, --exit: exit immediately after performing command line actions\n"
+"    --export-what <what>: choose if you want to export page, subtree or wiki\n"
+"    --export-type <type>: tag of the export type\n"
+"    --export-dest <destination path>: path of destination directory for export\n"
+"    --export-saved <name of saved export>: alternatively name of saved export to run\n"
+"    --export-compfn: Use compatible filenames on export\n"
+"    --continuous-export-saved <name of saved export>: continuous export to start with\n"
+"    --rebuild: rebuild the Wiki database\n"
+"    --no-recent: Do not record opened wikis in recently opened wikis list\n"
+"    --preview: If no pages are given, all opened pages from previous session\n"
+"               are opened in preview mode. Otherwise all pages given after that\n"
+"               option are opened in preview mode.\n"
+"    --editor: Same as --preview but opens in text editor mode.\n"
+"\n"
+msgstr ""
+"Alternativ:\n"
+"\n"
+"    -h, --help: Visa denna meddelanderuta\n"
+"    -w, --wiki  <sökväg till wiki>: Ange vilken wiki som ska öppnas vid start\n"
+"    -p, --page  <sidnamn>: Ange vilken sida som ska öppnas vid start\n"
+"    -x, --exit: Avsluta direkt efter att kommandon har körts\n"
+"    --export-what <page, subtree, wiki>: Välj om du vill exportera sida, underträd eller wiki\n"
+"    --export-type <type>: Exporttyp\n"
+"    --export-dest <sökväg>: Sökväg till målkatalogen för export\n"
+"    --export-saved <namn på sparad export>: namn på sparad export som ska köras\n"
+"    --export-compfn: Använd kompatibla filnamn vid export\n"
+"    --continuous-export-saved <namn på sparad export>: kontinuerlig export att starta med\n"
+"    --rebuild: Bygg om wikidatabasen\n"
+"    --no-recent: Visa inte öppnade wikis i listan över nyligen öppnade wikis\n"
+"    --preview: Om inga sidor anges kommer alla öppnade sidor i föregående session\n"
+"               öppnas i förhandsgranskningsläge. I annat fall kommer alla sidor som anges efter detta\n"
+"               alternativ att öppnas i förhandsgranskningsläge.\n"
+"    --editor: Samma som --preview men öppnas i texteditorläge.\n"
+"\n"
+
+#: lib\pwiki\CmdLineAction.py:393
+msgid "Usage information"
+msgstr "Information om användning"
+
+#: lib\pwiki\Configuration.py:149
+#: lib\pwiki\Configuration.py:196
+#: lib\pwiki\Configuration.py:314
+#: lib\pwiki\Configuration.py:320
+#: lib\pwiki\Configuration.py:365
+msgid "Unknown option %s:%s"
+msgstr "Okänt alternativ %s:%s"
+
+#: lib\pwiki\Configuration.py:223
+msgid "Config file not found"
+msgstr "Konfigurationsfilen hittades inte"
+
+#: lib\pwiki\Configuration.py:357
+msgid "Ambiguos option set %s:%s"
+msgstr "Otydligt alternativ %s:%s"
+
+#: lib\pwiki\DiffGui.py:168
+msgid "<Diff from %s to %s>"
+msgstr "<Diff från %s till %s>"
+
+#: lib\pwiki\DocPagePresenter.py:231
+msgid "'%s' is an invalid wiki word. %s."
+msgstr "'%s' är ett ogiltigt wikiord. %s."
+
+#: lib\pwiki\DocPagePresenter.py:265
+msgid "Wiki page not found, a new page will be created"
+msgstr "Wikisidan hittades inte, en ny sida skapas"
+
+#: lib\pwiki\DocPagePresenter.py:457
+#: lib\pwiki\DocPagePresenter.py:458
+msgid "History"
+msgstr "Historik"
+
+#: lib\pwiki\DocPages.py:2292
+msgid "Func. tag %s does not exist"
+msgstr "Funkt. taggen %s finns inte"
+
+#: lib\pwiki\DocPages.py:2561
+msgid "Global text blocks"
+msgstr "Globala textblock"
+
+#: lib\pwiki\DocPages.py:2562
+msgid "Wiki text blocks"
+msgstr "Wiki textblock"
+
+#: lib\pwiki\DocPages.py:2563
+msgid "Global spell list"
+msgstr "Global stavningslista"
+
+#: lib\pwiki\DocPages.py:2564
+msgid "Wiki spell list"
+msgstr "Wiki stavningslista"
+
+#: lib\pwiki\DocPages.py:2565
+msgid "Global cc. blacklist"
+msgstr "Global cc-svartlista"
+
+#: lib\pwiki\DocPages.py:2566
+msgid "Wiki cc. blacklist"
+msgstr "Wikins cc-svartlista"
+
+#: lib\pwiki\DocPages.py:2567
+msgid "Global ncc. blacklist"
+msgstr "Global ncc-svartlista"
+
+#: lib\pwiki\DocPages.py:2568
+msgid "Wiki ncc. blacklist"
+msgstr "Wikins ncc-svartlista"
+
+#: lib\pwiki\DocPages.py:2569
+msgid "Favorite wikis"
+msgstr "Favoritwikis"
+
+#: lib\pwiki\Exporters.py:242
+msgid "Set of *.wiki files"
+msgstr "Flera *.wiki-filer"
+
+#: lib\pwiki\Exporters.py:560
+#: lib\pwiki\Exporters.py:836
+msgid "No usable separator found"
+msgstr "Ingen användbar avdelare hittades"
+
+#: lib\pwiki\Exporters.py:592
+#: lib\pwiki\Importers.py:62
+msgid "Multipage text"
+msgstr "Multipage text"
+
+#: lib\pwiki\Exporters.py:626
+#: lib\pwiki\Importers.py:75
+msgid "Multipage files (*.mpt)"
+msgstr "Multipagefiler (*.mpt)"
+
+#: lib\pwiki\Exporters.py:627
+#: lib\pwiki\Importers.py:76
+msgid "Text file (*.txt)"
+msgstr "Textfil (*.txt)"
+
+#: lib\pwiki\FileCleanup.py:203
+msgid "Scan links in %s"
+msgstr "Skanna länkar i %s"
+
+#: lib\pwiki\FileCleanup.py:554
+#: lib\pwiki\FileCleanup.py:710
+msgid "Path"
+msgstr "Sökväg"
+
+#: lib\pwiki\FileCleanup.py:555
+#: lib\pwiki\MptImporterGui.py:195
+msgid "Type"
+msgstr "Typ"
+
+#: lib\pwiki\FileCleanup.py:556
+msgid "Action"
+msgstr "Åtgärd"
+
+#: lib\pwiki\FileCleanup.py:557
+msgid "Calc. action"
+msgstr "Ber. åtgärd"
+
+#: lib\pwiki\FileCleanup.py:617
+msgid "Directory"
+msgstr "Katalog"
+
+#: lib\pwiki\FileCleanup.py:617
+msgid "File"
+msgstr "Fil"
+
+#: lib\pwiki\GtkHacks.py:289
+#: lib\pwiki\WindowsHacks.py:891
+msgid "Only a real wiki page can be a clipboard catcher"
+msgstr "Endast en riktig wikisida kan vara urklippsfångare"
+
+#: lib\pwiki\Importers.py:178
+msgid "Opening import file failed"
+msgstr "Misslyckades att öppna importfilen"
+
+#: lib\pwiki\Importers.py:209
+#: lib\pwiki\Importers.py:224
+msgid "Bad file format, header not detected"
+msgstr "Felaktigt filformat, header hittas inte"
+
+#: lib\pwiki\Importers.py:217
+msgid "File format number %i is not supported"
+msgstr "Filformat nummer %i stöds inte"
+
+#: lib\pwiki\Importers.py:483
+msgid "Bad wiki word: %s, %s"
+msgstr "Felaktigt wikiord: %s, %s"
+
+#: lib\pwiki\LogWindow.py:80
+msgid "Message"
+msgstr "Meddelande"
+
+#: lib\pwiki\MainApp.py:137
+msgid "Error initializing environment, couldn't locate global config directory"
+msgstr "Fel vid initiering av miljön, kunde inte hitta den globala konfigurationskatalogen"
+
+#: lib\pwiki\MainApp.py:274
+msgid ""
+"Invalid AppLock.lock file.\n"
+"Ensure that WikidPad is not running,\n"
+"then delete file \"%s\" if present yet.\n"
+msgstr ""
+"Felaktig AppLock.lock-fil.\n"
+"Kontrollera att WikidPad inte körs,\n"
+"och radera sedan filen \"%s\" om den fortfarande finns kvar.\n"
+
+#: lib\pwiki\MainApp.py:332
+msgid ""
+"Other WikidPad process(es) seem(s) to run already\n"
+"Process identifier(s): %s\n"
+"Continue?"
+msgstr ""
+"Andra WikidPad-process(er) verkar redan köras\n"
+"Processidentifierare: %s\n"
+"Fortsätt?"
+
+#: lib\pwiki\MainApp.py:334
+#: lib\pwiki\MainApp.py:357
+#: lib\pwiki\MainApp.py:367
+#: lib\pwiki\PersonalWikiFrame.py:3114
+msgid "Continue?"
+msgstr "Fortsätt?"
+
+#: lib\pwiki\MainApp.py:355
+msgid ""
+"WikidPad couldn't detect if other processes are already running.\n"
+"Continue anyway?"
+msgstr ""
+"WikidPad kunde inte avgöra om andra processer redan körs.\n"
+"Fortsätt ändå?"
+
+#: lib\pwiki\MainApp.py:365
+msgid ""
+"WikidPad couldn't detect if other processes are already running.\n"
+"Socket error: %s\n"
+"Continue anyway?"
+msgstr ""
+"WikidPad kunde inte avgöra om andra processer redan körs.\n"
+"Socket error: %s\n"
+"Fortsätt ändå?"
+
+#: lib\pwiki\MainApp.py:631
+msgid ""
+"An error occurred during this session\n"
+"See file %s"
+msgstr ""
+"Ett fel uppstod under denna session\n"
+"Se filen %s"
+
+#: lib\pwiki\MainApp.py:796
+msgid "Plugin options"
+msgstr "Insticksprogram"
+
+#: lib\pwiki\MainApp.py:845
+#: lib\pwiki\OptionsDialog.py:695
+msgid "Wiki language"
+msgstr "Gränssnittsspråk"
+
+#: lib\pwiki\MainApp.py:868
+msgid "Plugins"
+msgstr "Insticksprogram"
+
+#: lib\pwiki\MainAreaPanel.py:665
+#: lib\pwiki\WikiTxtCtrl.py:2397
+msgid "This can only be done for the page of a wiki word"
+msgstr "Detta kan bara utföras på en sida i ett wikiord"
+
+#: lib\pwiki\MainAreaPanel.py:666
+#: lib\pwiki\WikiTxtCtrl.py:2398
+msgid "Not a wiki page"
+msgstr "Inte en wikisida"
+
+#: lib\pwiki\MptImporterGui.py:176
+msgid "Wiki page"
+msgstr "Wikisida"
+
+#: lib\pwiki\MptImporterGui.py:177
+msgid "Func. page"
+msgstr "Funktionssida"
+
+#: lib\pwiki\MptImporterGui.py:178
+msgid "Saved search"
+msgstr "Sparad sökning"
+
+#: lib\pwiki\MptImporterGui.py:196
+msgid "Name"
+msgstr "Namn"
+
+#: lib\pwiki\MptImporterGui.py:198
+msgid ""
+"Version\n"
+"Import"
+msgstr ""
+"Versions-\n"
+"import"
+
+#: lib\pwiki\MptImporterGui.py:199
+msgid ""
+"Rename\n"
+"imported"
+msgstr ""
+"Byt namn\n"
+"på importerat"
+
+#: lib\pwiki\MptImporterGui.py:200
+msgid ""
+"Rename\n"
+"present"
+msgstr ""
+"Byt namn\n"
+"på befintligt"
+
+#: lib\pwiki\MptImporterGui.py:385
+msgid "You can't rename imported and present item at the same time"
+msgstr "Du kan inte byta namn på importerad och befintlig post samtidigt"
+
+#: lib\pwiki\MptImporterGui.py:398
+msgid "Rename imported"
+msgstr "Byt namn på importerat"
+
+#: lib\pwiki\MptImporterGui.py:407
+msgid "Rename present"
+msgstr "Byt namn på befintligt"
+
+#: lib\pwiki\MptImporterGui.py:418
+#: lib\pwiki\MptImporterGui.py:442
+msgid "Name collision: Item '%s' will be imported already"
+msgstr "Namnkollision: Posten '%s' kommer att importeras"
+
+#: lib\pwiki\MptImporterGui.py:424
+#: lib\pwiki\MptImporterGui.py:453
+msgid "Name collision: Item '%s' will already be created by renaming '%s'"
+msgstr "Namnkonflikt: Posten '%s' kommer att skapas genom att döpa om '%s'"
+
+#: lib\pwiki\MptImporterGui.py:433
+#: lib\pwiki\MptImporterGui.py:447
+msgid "Name collision: Item '%s' exists already in database"
+msgstr "Namnkonflikt: : Posten '%s' finns redan i databasen"
+
+#: lib\pwiki\OptionsDialog.py:675
+msgid "Application"
+msgstr "Applikation"
+
+#: lib\pwiki\OptionsDialog.py:676
+msgid "User interface"
+msgstr "Användargränssnitt"
+
+#: lib\pwiki\OptionsDialog.py:677
+msgid "Security"
+msgstr "Säkerhet"
+
+#: lib\pwiki\OptionsDialog.py:678
+msgid "Tree"
+msgstr "Träd"
+
+#: lib\pwiki\OptionsDialog.py:679
+msgid "HTML preview/export"
+msgstr "HTML förhandsgranskning/export"
+
+#: lib\pwiki\OptionsDialog.py:680
+msgid "HTML header"
+msgstr "HTML header"
+
+#: lib\pwiki\OptionsDialog.py:681
+msgid "Editor"
+msgstr "Redigerare"
+
+#: lib\pwiki\OptionsDialog.py:682
+msgid "Editor Colors"
+msgstr "  Redigerarfärger"
+
+#: lib\pwiki\OptionsDialog.py:683
+msgid "Clipboard Catcher"
+msgstr "Urklippsfångare"
+
+#: lib\pwiki\OptionsDialog.py:684
+msgid "File Launcher"
+msgstr "Filstartare"
+
+#: lib\pwiki\OptionsDialog.py:685
+msgid "Mouse"
+msgstr "Mus"
+
+#: lib\pwiki\OptionsDialog.py:686
+msgid "Chron. view"
+msgstr "Tidsvy"
+
+#: lib\pwiki\OptionsDialog.py:687
+msgid "Searching"
+msgstr "Sökning"
+
+#: lib\pwiki\OptionsDialog.py:688
+#: lib\pwiki\OptionsDialog.py:697
+msgid "Advanced"
+msgstr "Avancerat"
+
+#: lib\pwiki\OptionsDialog.py:689
+msgid "Timing"
+msgstr "Tider"
+
+#: lib\pwiki\OptionsDialog.py:690
+msgid "Autosave"
+msgstr "Spara automatiskt"
+
+#: lib\pwiki\OptionsDialog.py:692
+msgid "Current Wiki"
+msgstr "Aktuell wiki"
+
+#: lib\pwiki\OptionsDialog.py:693
+msgid "Headings"
+msgstr "Rubriker"
+
+#: lib\pwiki\OptionsDialog.py:837
+msgid "IE"
+msgstr "IE"
+
+#: lib\pwiki\OptionsDialog.py:839
+msgid "Mozilla"
+msgstr "Mozilla"
+
+#: lib\pwiki\OptionsDialog.py:843
+msgid "Webkit"
+msgstr "Webkit"
+
+#: lib\pwiki\OptionsDialog.py:980
+msgid "Wave files (*.wav)|*.wav"
+msgstr "Wave-filer (*.wav)|*.wav"
+
+#: lib\pwiki\OptionsDialog.py:991
+#: lib\pwiki\OptionsDialog.py:1312
+msgid "All files (*.*)|*"
+msgstr "Alla filer (*.*)|*"
+
+#: lib\pwiki\OptionsDialog.py:1302
+msgid "Select Directory"
+msgstr "Välj katalog"
+
+#: lib\pwiki\OptionsDialog.py:1310
+msgid "Select File"
+msgstr "Välj fil"
+
+#: lib\pwiki\PWikiNonCore.py:44
+msgid "Choose a file to create URL for"
+msgstr "Välj en fil att skapa sökväg till"
+
+#: lib\pwiki\PWikiNonCore.py:73
+#: lib\pwiki\PWikiNonCore.py:74
+msgid "     Scanning     "
+msgstr "     Skanning"
+
+#: lib\pwiki\PWikiNonCore.py:138
+msgid "&File URL..."
+msgstr "Sökväg till &fil..."
+
+#: lib\pwiki\PWikiNonCore.py:138
+msgid "Use file dialog to add URL"
+msgstr "Använd fildialog för att lägga till sökväg"
+
+#: lib\pwiki\PWikiNonCore.py:142
+msgid "Current &Date"
+msgstr "Aktuell ti&dpunkt"
+
+#: lib\pwiki\PWikiNonCore.py:142
+msgid "Insert current date"
+msgstr "Infoga aktuellt datum"
+
+#: lib\pwiki\PWikiNonCore.py:148
+msgid "File cleanup..."
+msgstr "Filstädning..."
+
+#: lib\pwiki\PWikiNonCore.py:148
+msgid "Remove orphaned files and dead links"
+msgstr "Radera föräldralösa filer och döda länkar"
+
+#: lib\pwiki\PWikiNonCore.py:153
+msgid "Page read only"
+msgstr "Sida skrivskyddad"
+
+#: lib\pwiki\PWikiNonCore.py:153
+msgid "Set current page read only"
+msgstr "Sätt aktuell sida som skrivskyddad"
+
+#: lib\pwiki\PWikiNonCore.py:159
+#: lib\pwiki\PWikiNonCore.py:160
+msgid "Open trashcan"
+msgstr "Öppna papperskorg"
+
+#: lib\pwiki\PersonalWikiFrame.py:154
+msgid "Bad formatted command line."
+msgstr "Felaktigt formaterad kommandorad"
+
+#: lib\pwiki\PersonalWikiFrame.py:399
+#: lib\pwiki\PersonalWikiFrame.py:407
+#: lib\pwiki\PersonalWikiFrame.py:1217
+msgid "Wiki doesn't exist: %s"
+msgstr "Wikin finns inte: %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:769
+msgid "&New"
+msgstr "&Ny"
+
+#: lib\pwiki\PersonalWikiFrame.py:770
+msgid "Create new wiki"
+msgstr "Skapa ny wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:773
+msgid "&Open"
+msgstr "Öppna"
+
+#: lib\pwiki\PersonalWikiFrame.py:775
+msgid "In &This Window..."
+msgstr "I de&tta fönster..."
+
+#: lib\pwiki\PersonalWikiFrame.py:777
+msgid "Open wiki in this window"
+msgstr "Öppna wiki i detta fönster"
+
+#: lib\pwiki\PersonalWikiFrame.py:779
+msgid "In &New Window..."
+msgstr "I &nytt fönster..."
+
+#: lib\pwiki\PersonalWikiFrame.py:781
+msgid "Open wiki in a new window"
+msgstr "Öppna wiki i nytt fönster"
+
+#: lib\pwiki\PersonalWikiFrame.py:783
+msgid "&Current in New Window"
+msgstr "Aktuell i nytt fönster"
+
+#: lib\pwiki\PersonalWikiFrame.py:785
+msgid "Create new window for same wiki"
+msgstr "Skapa nytt fönster för samma wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:790
+msgid "&Recent"
+msgstr "Tidiga&re"
+
+#: lib\pwiki\PersonalWikiFrame.py:797
+msgid "F&avorites"
+msgstr "F&avoriter"
+
+#: lib\pwiki\PersonalWikiFrame.py:803
+msgid "&Search Wiki..."
+msgstr "&Sök i wikin..."
+
+#: lib\pwiki\PersonalWikiFrame.py:804
+msgid "Search whole wiki"
+msgstr "Sök i hela wikin"
+
+#: lib\pwiki\PersonalWikiFrame.py:812
+msgid "Publish as HTML"
+msgstr "Publicera som HTML"
+
+#: lib\pwiki\PersonalWikiFrame.py:815
+msgid "Wiki as Single HTML Page"
+msgstr "Wiki som en HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:816
+msgid "Publish Wiki as Single HTML Page"
+msgstr "Publicera wiki som en HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:820
+msgid "Wiki as Set of HTML Pages"
+msgstr "Wiki som flera HTML-sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:821
+msgid "Publish Wiki as Set of HTML Pages"
+msgstr "Publicera wiki som flera HTML-sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:825
+msgid "Current Wiki Word as HTML Page"
+msgstr "Aktuellt wikiord som HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:826
+msgid "Publish Current Wiki Word as HTML Page"
+msgstr "Publicera aktuellt wikiord som HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:830
+msgid "Sub-Tree as Single HTML Page"
+msgstr "Underträd som en HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:831
+msgid "Publish Sub-Tree as Single HTML Page"
+msgstr "Publicera underträd som en HTML-sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:835
+msgid "Sub-Tree as Set of HTML Pages"
+msgstr "Underträd som flera HTML-sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:836
+msgid "Publish Sub-Tree as Set of HTML Pages"
+msgstr "Publicera underträd som flera HTML-sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:844
+msgid "Other Export..."
+msgstr "Annan export..."
+
+#: lib\pwiki\PersonalWikiFrame.py:845
+#: lib\pwiki\PersonalWikiFrame.py:1889
+msgid "Open general export dialog"
+msgstr "Öppna huvudexportdialog"
+
+#: lib\pwiki\PersonalWikiFrame.py:849
+msgid "Print..."
+msgstr "Skriv ut..."
+
+#: lib\pwiki\PersonalWikiFrame.py:850
+msgid "Show the print dialog"
+msgstr "Visa utskriftsdialog"
+
+#: lib\pwiki\PersonalWikiFrame.py:860
+msgid "&Properties..."
+msgstr "Egenska&per..."
+
+#: lib\pwiki\PersonalWikiFrame.py:861
+msgid "Show general information about current wiki"
+msgstr "Visa allmän information om aktuell wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:865
+msgid "Maintenance"
+msgstr "Underhåll"
+
+#: lib\pwiki\PersonalWikiFrame.py:869
+msgid "&Rebuild Wiki..."
+msgstr "Bygg om wiki..."
+
+#: lib\pwiki\PersonalWikiFrame.py:870
+msgid "Rebuild this wiki and its cache completely"
+msgstr "Bygg om helt denna wiki och dess cache"
+
+#: lib\pwiki\PersonalWikiFrame.py:884
+msgid "&Update cache..."
+msgstr "Uppdatera cache..."
+
+#: lib\pwiki\PersonalWikiFrame.py:885
+msgid "Update cache where marked as not up to date"
+msgstr "Uppdatera cache där den är markerad som inaktuell"
+
+#: lib\pwiki\PersonalWikiFrame.py:890
+msgid "&Initiate update..."
+msgstr "&Initiera uppdatering..."
+
+#: lib\pwiki\PersonalWikiFrame.py:891
+msgid "Initiate full cache update which is done mainly in background"
+msgstr "Initiera full cacheuppdatering som huvudsakligen utförs i bakgrunden"
+
+#: lib\pwiki\PersonalWikiFrame.py:913
+msgid "Show job count..."
+msgstr "Visa antal jobb..."
+
+#: lib\pwiki\PersonalWikiFrame.py:914
+msgid "Show how many update jobs are waiting in background"
+msgstr "Visa hur många uppdateringsjobb som väntar i bakgrunden"
+
+#: lib\pwiki\PersonalWikiFrame.py:920
+msgid "Open as &Type..."
+msgstr "Öppna som &typ..."
+
+#: lib\pwiki\PersonalWikiFrame.py:921
+msgid "Open wiki with a specified wiki database type"
+msgstr "Öppna wiki med en specifik databastyp"
+
+#: lib\pwiki\PersonalWikiFrame.py:925
+msgid "Reconnect..."
+msgstr "Återanslut..."
+
+#: lib\pwiki\PersonalWikiFrame.py:926
+msgid "Reconnect to database after connection failure"
+msgstr "Återanslut till databasen efter misslyckad anslutning"
+
+#: lib\pwiki\PersonalWikiFrame.py:932
+msgid "&Optimise Database"
+msgstr "&Optimera databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:933
+msgid "Free unused space in database"
+msgstr "Ledigt oanvänt utrymme i databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:940
+msgid "&Copy .wiki files to database"
+msgstr "Kopiera .wiki-filer till databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:941
+msgid "Copy .wiki files to database"
+msgstr "Kopiera .wiki-filer till databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:951
+msgid "E&xit"
+msgstr "Avsluta"
+
+#: lib\pwiki\PersonalWikiFrame.py:951
+#: lib\pwiki\PersonalWikiFrame.py:5735
+msgid "Exit"
+msgstr "Avsluta"
+
+#: lib\pwiki\PersonalWikiFrame.py:1119
+msgid "Reread text blocks"
+msgstr "Läs om textblock"
+
+#: lib\pwiki\PersonalWikiFrame.py:1120
+msgid "Reread the text block file(s) and recreate menu"
+msgstr "Läs om textblocksfiler och återskapa meny"
+
+#: lib\pwiki\PersonalWikiFrame.py:1174
+msgid "Add wiki"
+msgstr "Lägg till wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:1175
+msgid "Add a wiki to the favorites"
+msgstr "Lägg till en wiki till favoriter"
+
+#: lib\pwiki\PersonalWikiFrame.py:1180
+#: lib\pwiki\PersonalWikiFrame.py:1181
+msgid "Manage favorites"
+msgstr "Hantera favoriter"
+
+#: lib\pwiki\PersonalWikiFrame.py:1203
+#: lib\pwiki\PersonalWikiFrame.py:1939
+#: lib\pwiki\PersonalWikiFrame.py:2458
+#: lib\pwiki\PersonalWikiFrame.py:3879
+#: lib\pwiki\PersonalWikiFrame.py:4967
+#: lib\pwiki\PersonalWikiFrame.py:5304
+msgid "Error while starting new WikidPad instance"
+msgstr "Fel när en ny instans av WikidPad skulle startas"
+
+#: lib\pwiki\PersonalWikiFrame.py:1310
+msgid "W&iki"
+msgstr "W&iki"
+
+#: lib\pwiki\PersonalWikiFrame.py:1321
+msgid "&Undo"
+msgstr "Ångra"
+
+#: lib\pwiki\PersonalWikiFrame.py:1325
+msgid "&Redo"
+msgstr "Gö&r om"
+
+#: lib\pwiki\PersonalWikiFrame.py:1333
+msgid "&Search and Replace..."
+msgstr "Sök och ersätt..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1335
+msgid "Search and replace inside current page"
+msgstr "Sök och ersätt på aktuell sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1341
+msgid "Cu&t"
+msgstr "Klipp u&t"
+
+#: lib\pwiki\PersonalWikiFrame.py:1346
+msgid "&Copy"
+msgstr "Kopiera"
+
+#: lib\pwiki\PersonalWikiFrame.py:1350
+msgid "&Paste"
+msgstr "Klistra in"
+
+#: lib\pwiki\PersonalWikiFrame.py:1355
+msgid "Select &All"
+msgstr "Markera &allt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1361
+msgid "Copy to Sc&ratchPad"
+msgstr "Kopiera till Sc&ratchPad"
+
+#: lib\pwiki\PersonalWikiFrame.py:1363
+msgid "Copy selected text to ScratchPad"
+msgstr "Kopiera markerad text till ScratchPad"
+
+#: lib\pwiki\PersonalWikiFrame.py:1369
+msgid "Paste T&extblock"
+msgstr "Lägg till t&extblock"
+
+#: lib\pwiki\PersonalWikiFrame.py:1377
+msgid "C&lipboard Catcher"
+msgstr "Urk&lippsfångare"
+
+#: lib\pwiki\PersonalWikiFrame.py:1380
+#: lib\pwiki\PersonalWikiFrame.py:4276
+msgid "Set at Page"
+msgstr "På sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1382
+msgid "Text copied to clipboard is also appended to this page"
+msgstr "Text kopierad till urklipp läggs även till på denna sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1388
+msgid "Set at Cursor"
+msgstr "Vid markör"
+
+#: lib\pwiki\PersonalWikiFrame.py:1390
+msgid "Text copied to clipboard is also added to cursor position"
+msgstr "Text kopierad till urklipp läggs även till vid markörens position"
+
+#: lib\pwiki\PersonalWikiFrame.py:1396
+msgid "Set Off"
+msgstr "Av"
+
+#: lib\pwiki\PersonalWikiFrame.py:1398
+msgid "Switch off clipboard catcher"
+msgstr "Stäng av urklippsfångaren"
+
+#: lib\pwiki\PersonalWikiFrame.py:1408
+msgid "Spell Check..."
+msgstr "Stavningskontroll..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1410
+msgid "Spell check current and possibly further pages"
+msgstr "Stavningskontrollera aktuell och eventuellt ytterligare sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:1414
+msgid "Spell Check While Type"
+msgstr "Stavningskontroll under skrivning"
+
+#: lib\pwiki\PersonalWikiFrame.py:1415
+msgid "Set if editor should do spell checking during typing"
+msgstr "Ånge om redigeraren ska stavningskontrollera under skrivning"
+
+#: lib\pwiki\PersonalWikiFrame.py:1420
+msgid "Clear Ignore List"
+msgstr "Rensa ignoreringslista"
+
+#: lib\pwiki\PersonalWikiFrame.py:1422
+msgid "Clear the list of words to ignore for spell check while type"
+msgstr "Rensa listan över ord som ska ignoreras vid stavningskontroll under skrivning"
+
+#: lib\pwiki\PersonalWikiFrame.py:1431
+msgid "&Insert"
+msgstr "&Infoga"
+
+#: lib\pwiki\PersonalWikiFrame.py:1455
+msgid "&Settings"
+msgstr "In&ställningar"
+
+#: lib\pwiki\PersonalWikiFrame.py:1458
+msgid "&Date Format..."
+msgstr "&Datumformat..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1459
+msgid "Set date format for inserting current date"
+msgstr "Ange datumformat för infogning av aktuellt datum"
+
+#: lib\pwiki\PersonalWikiFrame.py:1463
+msgid "Auto-&Wrap"
+msgstr "Automatisk radbrytning"
+
+#: lib\pwiki\PersonalWikiFrame.py:1464
+msgid "Set if editor should wrap long lines"
+msgstr "Ånge om redigeraren ska bryta långa rader"
+
+#: lib\pwiki\PersonalWikiFrame.py:1478
+msgid "Auto-&Indent"
+msgstr "Automatiskt &indrag"
+
+#: lib\pwiki\PersonalWikiFrame.py:1479
+msgid "Auto indentation"
+msgstr "Automatiskt indrag"
+
+#: lib\pwiki\PersonalWikiFrame.py:1485
+msgid "Auto-&Bullets"
+msgstr "Automatisk punktlista"
+
+#: lib\pwiki\PersonalWikiFrame.py:1486
+msgid "Show bullet on next line if current has one"
+msgstr "Visa punkt på nästa rad om den aktuella har en"
+
+#: lib\pwiki\PersonalWikiFrame.py:1492
+msgid "Tabs to spaces"
+msgstr "Tabbar till mellanslag"
+
+#: lib\pwiki\PersonalWikiFrame.py:1493
+msgid "Write spaces when hitting TAB key"
+msgstr "Skriv mellanslag när tab-tangenten används"
+
+#: lib\pwiki\PersonalWikiFrame.py:1501
+msgid "Show T&oolbar"
+msgstr "Visa verktygsfält"
+
+#: lib\pwiki\PersonalWikiFrame.py:1503
+msgid "Show toolbar"
+msgstr "Visa verktygsfält"
+
+#: lib\pwiki\PersonalWikiFrame.py:1510
+msgid "Show &Tree View"
+msgstr "Visa &trädvy"
+
+#: lib\pwiki\PersonalWikiFrame.py:1512
+msgid "Show Tree Control"
+msgstr "Visa trädfältet"
+
+#: lib\pwiki\PersonalWikiFrame.py:1519
+msgid "Show &Chron. View"
+msgstr "Visa tidsvy"
+
+#: lib\pwiki\PersonalWikiFrame.py:1521
+msgid "Show chronological view"
+msgstr "Visa tidsvy"
+
+#: lib\pwiki\PersonalWikiFrame.py:1528
+msgid "Show &Page Structure"
+msgstr "Visa sidstruktur"
+
+#: lib\pwiki\PersonalWikiFrame.py:1530
+msgid "Show structure (headings) of the page"
+msgstr "Visa sidans struktur (rubriker)"
+
+#: lib\pwiki\PersonalWikiFrame.py:1542
+msgid "Show &Indentation Guides"
+msgstr "Visa &indragsmarkeringar"
+
+#: lib\pwiki\PersonalWikiFrame.py:1543
+msgid "Show indentation guides in editor"
+msgstr "Visa indragsmarkeringar i redigeraren"
+
+#: lib\pwiki\PersonalWikiFrame.py:1548
+msgid "Show Line &Numbers"
+msgstr "Visa rad&nummer"
+
+#: lib\pwiki\PersonalWikiFrame.py:1549
+msgid "Show line numbers in editor"
+msgstr "Visa radnummer i redigeraren"
+
+#: lib\pwiki\PersonalWikiFrame.py:1556
+msgid "Stay on Top"
+msgstr "Alltid överst"
+
+#: lib\pwiki\PersonalWikiFrame.py:1558
+msgid "Stay on Top of all other windows"
+msgstr "Stanna överst av alla fönster"
+
+#: lib\pwiki\PersonalWikiFrame.py:1566
+msgid "&Zoom In"
+msgstr "&Zooma in"
+
+#: lib\pwiki\PersonalWikiFrame.py:1567
+#: lib\pwiki\PersonalWikiFrame.py:2134
+msgid "Zoom In"
+msgstr "Zooma in"
+
+#: lib\pwiki\PersonalWikiFrame.py:1570
+msgid "Zoo&m Out"
+msgstr "Zoo&ma ut"
+
+#: lib\pwiki\PersonalWikiFrame.py:1571
+#: lib\pwiki\PersonalWikiFrame.py:2139
+msgid "Zoom Out"
+msgstr "Zooma ut"
+
+#: lib\pwiki\PersonalWikiFrame.py:1593
+msgid "Toggle Ed./Prev"
+msgstr "Växla Red./Förh."
+
+#: lib\pwiki\PersonalWikiFrame.py:1595
+#: lib\pwiki\PersonalWikiFrame.py:2130
+msgid "Switch between editor and preview"
+msgstr "Växla mellan redigerare och förhandsgranskning"
+
+#: lib\pwiki\PersonalWikiFrame.py:1599
+msgid "Enter Edit Mode"
+msgstr "Gå till redigeringsläge"
+
+#: lib\pwiki\PersonalWikiFrame.py:1600
+msgid "Show editor in tab"
+msgstr "Visa redigerare i flik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1604
+msgid "Enter Preview Mode"
+msgstr "Gå till förhandsgranskning  "
+
+#: lib\pwiki\PersonalWikiFrame.py:1606
+msgid "Show preview in tab"
+msgstr "Visa förhandsgranskning i flik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1630
+msgid "&Save"
+msgstr "&Spara"
+
+#: lib\pwiki\PersonalWikiFrame.py:1631
+msgid "Save all open pages"
+msgstr "Spara alla öppna sidor"
+
+#: lib\pwiki\PersonalWikiFrame.py:1638
+msgid "&Rename"
+msgstr "Byt namn"
+
+#: lib\pwiki\PersonalWikiFrame.py:1639
+msgid "Rename current wiki word"
+msgstr "Byt namn på aktuellt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1645
+msgid "Delete current wiki word"
+msgstr "Radera aktuellt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1652
+msgid "Set as Roo&t"
+msgstr "Sätt som ro&t"
+
+#: lib\pwiki\PersonalWikiFrame.py:1653
+msgid "Set current wiki word as tree root"
+msgstr "Sätt aktuellt wikiord som trädrot"
+
+#: lib\pwiki\PersonalWikiFrame.py:1657
+msgid "R&eset Root"
+msgstr "Åt&erställ rot"
+
+#: lib\pwiki\PersonalWikiFrame.py:1658
+msgid "Set home wiki word as tree root"
+msgstr "Sätt wikins huvudsida som trädrot"
+
+#: lib\pwiki\PersonalWikiFrame.py:1662
+msgid "S&ynchronise Tree"
+msgstr "S&ynkronisera träd"
+
+#: lib\pwiki\PersonalWikiFrame.py:1663
+msgid "Find the current wiki word in the tree"
+msgstr "Hitta det aktuella wikiord i trädet"
+
+#: lib\pwiki\PersonalWikiFrame.py:1668
+msgid "&Follow Link"
+msgstr "Öppna länk"
+
+#: lib\pwiki\PersonalWikiFrame.py:1669
+msgid "Activate link/word"
+msgstr "Aktivera länk/ord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1674
+msgid "Follow Link in &New Tab"
+msgstr "Öppna länk i ny flik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1675
+msgid "Activate link/word in new tab"
+msgstr "Aktivera länk/ord i ny flik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1680
+msgid "Copy &URL to Clipboard"
+msgstr "Kopiera &URL till urklipp"
+
+#: lib\pwiki\PersonalWikiFrame.py:1682
+msgid "Copy full \"wiki:\" URL of the word to clipboard"
+msgstr "Kopiera ordets hela \"wiki:\" URL till urklipp"
+
+#: lib\pwiki\PersonalWikiFrame.py:1688
+msgid "&Add version"
+msgstr "Lägg till version"
+
+#: lib\pwiki\PersonalWikiFrame.py:1689
+msgid "Add new version"
+msgstr "Lägg till ny version"
+
+#: lib\pwiki\PersonalWikiFrame.py:1703
+msgid "&Bold"
+msgstr "Fet"
+
+#: lib\pwiki\PersonalWikiFrame.py:1704
+#: lib\pwiki\PersonalWikiFrame.py:2115
+msgid "Bold"
+msgstr "Fet"
+
+#: lib\pwiki\PersonalWikiFrame.py:1710
+msgid "&Italic"
+msgstr "Kurs&iv"
+
+#: lib\pwiki\PersonalWikiFrame.py:1711
+#: lib\pwiki\PersonalWikiFrame.py:2121
+msgid "Italic"
+msgstr "Kursiv"
+
+#: lib\pwiki\PersonalWikiFrame.py:1717
+msgid "&Heading"
+msgstr "Rubrik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1718
+msgid "Add Heading"
+msgstr "Lägg till rubrik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1726
+msgid "&Rewrap Text"
+msgstr "Sammanfoga text"
+
+#: lib\pwiki\PersonalWikiFrame.py:1728
+msgid "Rewrap Text"
+msgstr "Sammanfoga text"
+
+#: lib\pwiki\PersonalWikiFrame.py:1733
+msgid "&Convert"
+msgstr "Konvertera"
+
+#: lib\pwiki\PersonalWikiFrame.py:1736
+msgid "Selection to &Link"
+msgstr "Markering till &länk"
+
+#: lib\pwiki\PersonalWikiFrame.py:1737
+msgid "Remove non-allowed characters and make sel. a wiki word link"
+msgstr "Radera otillåtna tecken och gör markering till ett länkat wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1742
+msgid "Selection to &Wiki Word"
+msgstr "Markering till &wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1744
+msgid "Put selected text in a new or existing wiki word"
+msgstr "Lägg den markerade texten i ett nytt eller existerande wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1749
+msgid "Absolute/Relative &File URL"
+msgstr "Absolut/relativ sökväg till &fil"
+
+#: lib\pwiki\PersonalWikiFrame.py:1751
+msgid "Convert file URL from absolute to relative and vice versa"
+msgstr "Konvertera sökväg till fil från absolut till relativ eller tvärtom"
+
+#: lib\pwiki\PersonalWikiFrame.py:1765
+msgid "&Icon Name"
+msgstr "&Ikonnamn"
+
+#: lib\pwiki\PersonalWikiFrame.py:1777
+msgid "&Color Name"
+msgstr "Färgnamn"
+
+#: lib\pwiki\PersonalWikiFrame.py:1785
+msgid "&Add Attribute"
+msgstr "Lägg till &attribut"
+
+#: lib\pwiki\PersonalWikiFrame.py:1794
+msgid "&Icon Attribute"
+msgstr "&Ikonattribut"
+
+#: lib\pwiki\PersonalWikiFrame.py:1804
+msgid "&Color Attribute"
+msgstr "Färgattribut"
+
+#: lib\pwiki\PersonalWikiFrame.py:1813
+msgid "&Back"
+msgstr "&Bakåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1814
+msgid "Go backward"
+msgstr "Gå bakåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1819
+msgid "&Forward"
+msgstr "&Framåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1820
+msgid "Go forward"
+msgstr "Gå framåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1825
+msgid "&Wiki Home"
+msgstr "&Wikins startsida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1826
+msgid "Go to wiki homepage"
+msgstr "Gå till wikins startsida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1832
+msgid "Up&ward"
+msgstr "&Uppåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:1834
+#: lib\pwiki\PersonalWikiFrame.py:2082
+#: lib\pwiki\PersonalWikiFrame.py:2083
+msgid "Go upward from a subpage"
+msgstr "Gå uppåt från en undersida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1839
+msgid "Go to &Page..."
+msgstr "Gå till sida..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1840
+msgid "Open wiki word"
+msgstr "Öppna wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1845
+msgid "Go to P&arent..."
+msgstr "Lista föräldranoder..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1847
+msgid "List parents of current wiki word"
+msgstr "Visa föräldrar till aktuellt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1850
+msgid "List &Children..."
+msgstr "Lista barnnoder..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1852
+msgid "List children of current wiki word"
+msgstr "Visa barnnoder till aktuellt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1855
+msgid "List Pa&rentless Pages"
+msgstr "Lista föräldralösa sidor "
+
+#: lib\pwiki\PersonalWikiFrame.py:1857
+msgid "List nodes with no parent relations"
+msgstr "Visa noder som saknar förälderrelationer"
+
+#: lib\pwiki\PersonalWikiFrame.py:1862
+msgid "Show &History..."
+msgstr "Visa &historik..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1863
+msgid "View tab history"
+msgstr "Visa flikhistorik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1866
+msgid "&Up History..."
+msgstr "&Upp i historik..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1867
+msgid "Up in tab history"
+msgstr "Upp i flikhistorik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1870
+msgid "&Down History..."
+msgstr "Ner i historik..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1871
+msgid "Down in tab history"
+msgstr "Ner i flikhistorik"
+
+#: lib\pwiki\PersonalWikiFrame.py:1876
+msgid "Add B&ookmark"
+msgstr "Lägg till b&okmärke"
+
+#: lib\pwiki\PersonalWikiFrame.py:1877
+msgid "Add bookmark to page"
+msgstr "Lägg till bokmärke till sida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1881
+msgid "Go to &Bookmark..."
+msgstr "Gå till &bokmärke..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1882
+msgid "List bookmarks"
+msgstr "Lista bokmärken"
+
+#: lib\pwiki\PersonalWikiFrame.py:1888
+msgid "&Export..."
+msgstr "Exportera..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1892
+msgid "&Continuous Export..."
+msgstr "Kontinuerlig export..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1893
+msgid "Open export dialog for continuous export of changes"
+msgstr "Öppna exportdialog för kontinuerlig export av ändringar"
+
+#: lib\pwiki\PersonalWikiFrame.py:1899
+msgid "&Import..."
+msgstr "&Importera..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1900
+msgid "Import dialog"
+msgstr "Importdialog"
+
+#: lib\pwiki\PersonalWikiFrame.py:1906
+msgid "Scripts"
+msgstr "Skript"
+
+#: lib\pwiki\PersonalWikiFrame.py:1907
+msgid "Run scripts, evaluate expressions"
+msgstr "Kör skript, evaluera uttryck"
+
+#: lib\pwiki\PersonalWikiFrame.py:1909
+msgid "&Eval"
+msgstr "&Evaluera"
+
+#: lib\pwiki\PersonalWikiFrame.py:1910
+msgid "Evaluate script blocks"
+msgstr "Evaluera skriptblock"
+
+#: lib\pwiki\PersonalWikiFrame.py:1915
+msgid "Run Function &%i\tCtrl-%i"
+msgstr "Kör funktion &%i\tCtrl-%i"
+
+#: lib\pwiki\PersonalWikiFrame.py:1916
+msgid "Run script function %i"
+msgstr "Kör skriptfunktion %i"
+
+#: lib\pwiki\PersonalWikiFrame.py:1921
+msgid "O&ptions..."
+msgstr "Alternativ..."
+
+#: lib\pwiki\PersonalWikiFrame.py:1922
+msgid "Set options"
+msgstr "Ange alternativ"
+
+#: lib\pwiki\PersonalWikiFrame.py:1943
+msgid "&Open help wiki"
+msgstr "Öppna hjälpwiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:1944
+msgid "Open WikidPadHelp, the help wiki"
+msgstr "Öppna WikidPadHelp, hjälpwikin"
+
+#: lib\pwiki\PersonalWikiFrame.py:1953
+msgid "&Visit Homepage"
+msgstr "Besök webbplatsen"
+
+#: lib\pwiki\PersonalWikiFrame.py:1954
+msgid "Visit wikidPad homepage"
+msgstr "Besök wikidPads webbplats"
+
+#: lib\pwiki\PersonalWikiFrame.py:1964
+msgid "Show &License"
+msgstr "Visa &licens"
+
+#: lib\pwiki\PersonalWikiFrame.py:1965
+msgid "Show license of WikidPad and used components"
+msgstr "Visa wikidPads licens och komponenter som används"
+
+#: lib\pwiki\PersonalWikiFrame.py:1982
+msgid "&About"
+msgstr "Om"
+
+#: lib\pwiki\PersonalWikiFrame.py:1986
+msgid "&Wiki"
+msgstr "&Wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:1987
+msgid "&Edit"
+msgstr "R&edigera"
+
+#: lib\pwiki\PersonalWikiFrame.py:1988
+msgid "&View"
+msgstr "&Visa"
+
+#: lib\pwiki\PersonalWikiFrame.py:1989
+msgid "&Tabs"
+msgstr "Flikar"
+
+#: lib\pwiki\PersonalWikiFrame.py:1990
+msgid "Wiki &Page"
+msgstr "Wikisida"
+
+#: lib\pwiki\PersonalWikiFrame.py:1991
+msgid "&Format"
+msgstr "&Format"
+
+#: lib\pwiki\PersonalWikiFrame.py:1992
+msgid "&Navigate"
+msgstr "&Navigera"
+
+#: lib\pwiki\PersonalWikiFrame.py:1993
+msgid "E&xtra"
+msgstr "Tillbehör"
+
+#: lib\pwiki\PersonalWikiFrame.py:2009
+msgid "Pl&ugins"
+msgstr "Insticksprogram"
+
+#: lib\pwiki\PersonalWikiFrame.py:2015
+msgid "&Help"
+msgstr "&Hjälp"
+
+#: lib\pwiki\PersonalWikiFrame.py:2017
+msgid "He&lp"
+msgstr "Hjä&lp"
+
+#: lib\pwiki\PersonalWikiFrame.py:2043
+#: lib\pwiki\PersonalWikiFrame.py:2044
+msgid "Back"
+msgstr "Bakåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:2049
+#: lib\pwiki\PersonalWikiFrame.py:2050
+msgid "Forward"
+msgstr "Framåt"
+
+#: lib\pwiki\PersonalWikiFrame.py:2055
+#: lib\pwiki\PersonalWikiFrame.py:2056
+msgid "Wiki Home"
+msgstr "Wikins startsida"
+
+#: lib\pwiki\PersonalWikiFrame.py:2070
+#: lib\pwiki\PersonalWikiFrame.py:2071
+msgid "Search"
+msgstr "Sök"
+
+#: lib\pwiki\PersonalWikiFrame.py:2076
+#: lib\pwiki\PersonalWikiFrame.py:2077
+msgid "Find current word in tree"
+msgstr "Hitta aktuellt wikiord i träd"
+
+#: lib\pwiki\PersonalWikiFrame.py:2086
+#: lib\pwiki\PersonalWikiFrame.py:2105
+#: lib\pwiki\PersonalWikiFrame.py:2125
+msgid "Separator"
+msgstr "Fältavskiljare"
+
+#: lib\pwiki\PersonalWikiFrame.py:2090
+#: lib\pwiki\PersonalWikiFrame.py:2091
+msgid "Save Wiki Word"
+msgstr "Spara wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:2101
+#: lib\pwiki\PersonalWikiFrame.py:2102
+#: lib\pwiki\PersonalWikiFrame.py:4422
+msgid "Delete Wiki Word"
+msgstr "Radera wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:2109
+msgid "Heading"
+msgstr "Rubrik"
+
+#: lib\pwiki\PersonalWikiFrame.py:2129
+msgid "Switch Editor/Preview"
+msgstr "Växla redigerare/förhandsgranskning"
+
+#: lib\pwiki\PersonalWikiFrame.py:2150
+msgid "Wikize Selected Word "
+msgstr "Wikifiera markerat ord "
+
+#: lib\pwiki\PersonalWikiFrame.py:2151
+msgid "Wikize Selected Word"
+msgstr "Wikifiera markerat ord "
+
+#: lib\pwiki\PersonalWikiFrame.py:2223
+msgid "Line: 9999 Col: 9999 Pos: 9999999988888"
+msgstr "Rad: 9999 Kol: 9999 Pos: 9999999988888"
+
+#: lib\pwiki\PersonalWikiFrame.py:2395
+msgid "Regular expression error"
+msgstr "Fel i reguljärt uttryck"
+
+#: lib\pwiki\PersonalWikiFrame.py:2404
+msgid "Are you sure you want to reconnect? You may lose some data by this process."
+msgstr "Är du säker på att du vill återansluta? Du kan förlora data genom denna åtgärd."
+
+#: lib\pwiki\PersonalWikiFrame.py:2406
+msgid "Reconnect database"
+msgstr "Återanslut databas"
+
+#: lib\pwiki\PersonalWikiFrame.py:2420
+#: lib\pwiki\PersonalWikiFrame.py:3481
+msgid "Error while trying to reconnect:\n"
+msgstr "Fel vid försök att återansluta:\n"
+
+#: lib\pwiki\PersonalWikiFrame.py:2422
+msgid ""
+"There was an error while reconnecting the database\n"
+"\n"
+"Would you like to try it again?\n"
+"%s"
+msgstr ""
+"Det uppstod ett fel vid återanslutning till databasen.\n"
+"\n"
+"Vill du försöka igen?\n"
+"%s"
+
+#: lib\pwiki\PersonalWikiFrame.py:2425
+msgid "Error reconnecting!"
+msgstr "Fel vid återanslutning!"
+
+#: lib\pwiki\PersonalWikiFrame.py:2441
+#: lib\pwiki\PersonalWikiFrame.py:3528
+msgid "Error while trying to write:\n"
+msgstr "Fel vid försök att skriva:\n"
+
+#: lib\pwiki\PersonalWikiFrame.py:2443
+msgid ""
+"There was an error while writing to the database\n"
+"\n"
+"Would you like to try it again?\n"
+"%s"
+msgstr ""
+"Ett fel uppstod vid skrivning till databasen\n"
+"\n"
+"Vill du försöka igen?\n"
+"%s"
+
+#: lib\pwiki\PersonalWikiFrame.py:2446
+msgid "Error writing!"
+msgstr "Fel vid skrivning!"
+
+#: lib\pwiki\PersonalWikiFrame.py:2565
+msgid "There was an error loading the icons for the tree control."
+msgstr "Det uppstod ett fel när ikoner skulle laddas i trädfältet."
+
+#: lib\pwiki\PersonalWikiFrame.py:2831
+msgid "No data handler available to create database."
+msgstr "Ingen datahanterare finns tillgänglig för att skapa databasen."
+
+#: lib\pwiki\PersonalWikiFrame.py:2843
+msgid "A wiki already exists in '%s', overwrite? (This deletes everything in and below this directory!)"
+msgstr "En wiki finns redan i '%s', skriva över? (Detta raderar allt i och under denna katalog!)"
+
+#: lib\pwiki\PersonalWikiFrame.py:2845
+msgid "Warning"
+msgstr "Varning"
+
+#: lib\pwiki\PersonalWikiFrame.py:2886
+msgid "A wiki database already exists in this location, overwrite?"
+msgstr "En wikidatabas finns redan på denna plats, skriva över?"
+
+#: lib\pwiki\PersonalWikiFrame.py:2888
+msgid "Wiki DB Exists"
+msgstr "Wikidatabasen finns"
+
+#: lib\pwiki\PersonalWikiFrame.py:2899
+msgid "There was an error creating the wiki database."
+msgstr "Det uppstod ett fel då databasen skulle skapas."
+
+#: lib\pwiki\PersonalWikiFrame.py:2968
+#: lib\pwiki\PersonalWikiFrame.py:2969
+msgid "Choose database type"
+msgstr "Välj databastyp"
+
+#: lib\pwiki\PersonalWikiFrame.py:3006
+msgid "Inaccessible or missing file: %s"
+msgstr "Oåtkomlig eller saknad fil: '%s'"
+
+#: lib\pwiki\PersonalWikiFrame.py:3057
+#: lib\pwiki\PersonalWikiFrame.py:3142
+msgid "Error connecting to database in '%s'"
+msgstr "Fel vid anslutning till databasen i '%s'"
+
+#: lib\pwiki\PersonalWikiFrame.py:3062
+msgid "The wiki needs an update to work with this version of WikidPad. Older versions of WikidPad may be unable to read the wiki after an update."
+msgstr "Wikin behöver uppdateras för att fungera med denna version av WikidPad. Äldre versioner av WikidPad kan kanske inte läsa wikin efter en uppdatering."
+
+#: lib\pwiki\PersonalWikiFrame.py:3065
+msgid "Update database?"
+msgstr "Uppdatera databasen?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3100
+msgid ""
+"Wiki '%s' is probably in use by different\n"
+"instance of WikidPad. Connect anyway (dangerous!)?"
+msgstr ""
+"Wikin '%s' används troligen av en annan\n"
+"instans av WikidPad. Fortsätta ändå (riskabelt!)?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3102
+msgid "Wiki already in use"
+msgstr "Wikin används redan"
+
+#: lib\pwiki\PersonalWikiFrame.py:3111
+msgid ""
+"Configuration file '%s' is corrupted or missing.\n"
+"You may have to change some settings in configuration page \"Current Wiki\" and below which were lost."
+msgstr ""
+"Konfigurationsfilen '%s' är korrupt eller saknas.\n"
+"Du kan behöva ändra förlorade inställningar på konfigurationssidan \"Aktuell wiki\" och nedåt."
+
+#: lib\pwiki\PersonalWikiFrame.py:3149
+msgid "Can't write to database '%s'"
+msgstr "Kan inte skriva till databasen '%s'"
+
+#: lib\pwiki\PersonalWikiFrame.py:3358
+msgid ""
+"There is no (write-)access to underlying wiki\n"
+"Close anyway and loose possible changes?"
+msgstr ""
+"Det finns inte (skriv-)rättigheter till den underliggande wikin.\n"
+"Stänga ändå och förlora eventuella ändringar?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3360
+msgid "Close anyway"
+msgstr "Stäng ändå"
+
+#: lib\pwiki\PersonalWikiFrame.py:3451
+msgid "This operation requires an open database"
+msgstr "Denna åtgärd kräver en öppen databas"
+
+#: lib\pwiki\PersonalWikiFrame.py:3452
+msgid "No open database"
+msgstr "Ingen öppen databas"
+
+#: lib\pwiki\PersonalWikiFrame.py:3464
+msgid "No connection to database. Try to reconnect?"
+msgstr "Ingen anslutning till databasen. Försöka att återansluta?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3465
+msgid "Reconnect database?"
+msgstr "Återansluta databasen?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3472
+msgid "Trying to reconnect database..."
+msgstr "Försöker att återansluta till databasen..."
+
+#: lib\pwiki\PersonalWikiFrame.py:3484
+msgid "Error while reconnecting database"
+msgstr "Fel vid återanslutning till databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:3509
+msgid ""
+"This operation needs write access to database\n"
+"Try to write?"
+msgstr ""
+"Denna åtgärd kräver skrivrättigheter i databasen\n"
+"Försöka att skriva?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3510
+msgid "Try writing?"
+msgstr "Försöka att skriva?"
+
+#: lib\pwiki\PersonalWikiFrame.py:3517
+msgid "Trying to write to database..."
+msgstr "Försöker att skriva till databasen..."
+
+#: lib\pwiki\PersonalWikiFrame.py:3531
+msgid "Error while writing to database"
+msgstr "Fel vid försök att skriva till databasen"
+
+#: lib\pwiki\PersonalWikiFrame.py:3555
+msgid ""
+"Database connection error: %s.\n"
+"Try to re-establish, then run \"Wiki\"->\"Reconnect\""
+msgstr ""
+"Fel i förbindelsen med databasen: %s.\n"
+"Försök att återställa, kör sedan \"Wiki/Underhåll\"->\"Återanslut\""
+
+#: lib\pwiki\PersonalWikiFrame.py:3557
+#: lib\pwiki\PersonalWikiFrame.py:3574
+msgid "Connection lost"
+msgstr "Anslutning avbruten"
+
+#: lib\pwiki\PersonalWikiFrame.py:3572
+msgid ""
+"No write access to database: %s.\n"
+" Try to re-establish, then run \"Wiki\"->\"Reconnect\""
+msgstr ""
+"Inga skrivrättigheter till databas: %s.\n"
+" Försök att återställa och klicka sedan på \"Wiki/Underhåll\"->\"Återanslut\""
+
+#: lib\pwiki\PersonalWikiFrame.py:3591
+msgid "Trying to reconnect ..."
+msgstr "Försöker att återansluta..."
+
+#: lib\pwiki\PersonalWikiFrame.py:3600
+msgid "Error while trying to reconnect:"
+msgstr "Fel vid försök att återansluta:"
+
+#: lib\pwiki\PersonalWikiFrame.py:3851
+msgid "Couldn't start file"
+msgstr "Kunde inte starta fil"
+
+#: lib\pwiki\PersonalWikiFrame.py:3859
+msgid "Couldn't open wiki: %s"
+msgstr "Kunde inte öppna wiki: %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:3910
+msgid "Mod.: %s"
+msgstr "Ändrad: %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:3911
+msgid "; Crea.: %s"
+msgstr "; Skapad: %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:3948
+msgid "Parent nodes of '%s'"
+msgstr "Föräldranoder till '%s'"
+
+#: lib\pwiki\PersonalWikiFrame.py:3960
+msgid "Parentless nodes"
+msgstr "Föräldralösa noder"
+
+#: lib\pwiki\PersonalWikiFrame.py:3972
+msgid "Child nodes of '%s'"
+msgstr "Barnnoder till '%s'"
+
+#: lib\pwiki\PersonalWikiFrame.py:3985
+msgid "Bookmarks"
+msgstr "Bokmärken"
+
+#: lib\pwiki\PersonalWikiFrame.py:4132
+msgid "Wiki: %s"
+msgstr "Wiki: %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:4271
+msgid "Set at Page: %s\t%s"
+msgstr "Ange på sida: %s\t%s"
+
+#: lib\pwiki\PersonalWikiFrame.py:4287
+msgid "Error saving global configuration"
+msgstr "Fel då global konfiguration skulle sparas"
+
+#: lib\pwiki\PersonalWikiFrame.py:4298
+msgid "Error saving current configuration"
+msgstr "Fel då aktuell konfiguration skulle sparas"
+
+#: lib\pwiki\PersonalWikiFrame.py:4320
+msgid "No real wiki word selected to rename"
+msgstr "Inget riktigt wikiord har valts att döpas om"
+
+#: lib\pwiki\PersonalWikiFrame.py:4324
+msgid "The scratch pad cannot be renamed."
+msgstr "ScratchPad kan inte byta namn"
+
+#: lib\pwiki\PersonalWikiFrame.py:4348
+msgid "Description:"
+msgstr "Beskrivning:"
+
+#: lib\pwiki\PersonalWikiFrame.py:4349
+msgid "Store new version"
+msgstr "Spara ny version"
+
+#: lib\pwiki\PersonalWikiFrame.py:4363
+msgid "Do you want to delete all stored versions?"
+msgstr "Vill du radera alla sparade versioner?"
+
+#: lib\pwiki\PersonalWikiFrame.py:4364
+msgid "Delete All Versions"
+msgstr "Radera alla versioner"
+
+#: lib\pwiki\PersonalWikiFrame.py:4409
+msgid "The scratch pad cannot be deleted"
+msgstr "Scratchpad kan inte raderas"
+
+#: lib\pwiki\PersonalWikiFrame.py:4413
+msgid "No real wiki word to delete"
+msgstr "Inte ett riktigt wikiord att radera"
+
+#: lib\pwiki\PersonalWikiFrame.py:4421
+msgid "Are you sure you want to delete wiki word '%s'?"
+msgstr "Är du säker på att du vill radera wikiordet '%s'?"
+
+#: lib\pwiki\PersonalWikiFrame.py:4453
+msgid "No real wiki word to modify"
+msgstr "Inte att riktigt wikiord att ändra"
+
+#: lib\pwiki\PersonalWikiFrame.py:4469
+msgid "Replace text by WikiWord:"
+msgstr "Ersätt text med wikiord:"
+
+#: lib\pwiki\PersonalWikiFrame.py:4470
+msgid "Replace by Wiki Word"
+msgstr "Ersätt med wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:4479
+msgid "'%s' is an invalid wiki word."
+msgstr "'%s' är ett ogiltigt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:4494
+msgid ""
+"Wiki word %s exists already\n"
+"Would you like to append to the word?"
+msgstr ""
+"Wikiordet %s finns redan\n"
+"Vill du bifoga till det ordet?"
+
+#: lib\pwiki\PersonalWikiFrame.py:4497
+msgid "Word exists"
+msgstr "Ordet finns redan"
+
+#: lib\pwiki\PersonalWikiFrame.py:4755
+msgid "Error on export"
+msgstr "Fel vid export"
+
+#: lib\pwiki\PersonalWikiFrame.py:4827
+msgid "Are you sure you want to start a full rebuild of wiki in background?"
+msgstr "Är du säker på att du vill bygga om hela wikin i bakgrunden?"
+
+#: lib\pwiki\PersonalWikiFrame.py:4829
+msgid "Initiate update"
+msgstr "Initierar uppdatering"
+
+#: lib\pwiki\PersonalWikiFrame.py:4836
+#: lib\pwiki\PersonalWikiFrame.py:4837
+msgid "     Initiating update     "
+msgstr "     Initierar uppdatering"
+
+#: lib\pwiki\PersonalWikiFrame.py:4851
+msgid "Error initiating update"
+msgstr "Fel då uppdatering skulle påbörjas"
+
+#: lib\pwiki\PersonalWikiFrame.py:4860
+msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
+msgstr "Är du säker på att du vill bygga om wikin? Du bör ta backup på dina datafiler först!"
+
+#: lib\pwiki\PersonalWikiFrame.py:4862
+msgid "Rebuild wiki"
+msgstr "Bygg om wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:4869
+#: lib\pwiki\PersonalWikiFrame.py:4870
+msgid "     Rebuilding wiki     "
+msgstr "     Bygger om wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:4885
+msgid "Error rebuilding wiki"
+msgstr "Fel då wikin skulle byggas om"
+
+#: lib\pwiki\PersonalWikiFrame.py:4977
+msgid "This could overwrite pages in the database. Continue?"
+msgstr "Detta kan skriva över sidor i databasen. Fortsätta?"
+
+#: lib\pwiki\PersonalWikiFrame.py:4978
+msgid "Import pagefiles"
+msgstr "Importera sidfiler"
+
+#: lib\pwiki\PersonalWikiFrame.py:5080
+msgid "No list of strings passed to \"listmcstr\" dialog"
+msgstr "Ingen lista över strängar skickades till \"listmcstr\"-dialogen"
+
+#: lib\pwiki\PersonalWikiFrame.py:5103
+msgid "Unknown dialog type"
+msgstr "Okänd dialogtyp"
+
+#: lib\pwiki\PersonalWikiFrame.py:5272
+#: lib\pwiki\PersonalWikiFrame.py:5290
+#: lib\pwiki\PersonalWikiFrame.py:5315
+msgid "Choose a Wiki to open"
+msgstr "Välj wiki att öppna"
+
+#: lib\pwiki\PersonalWikiFrame.py:5329
+msgid "Name for new wiki (must be in the form of a WikiWord):"
+msgstr "Namn på ny wiki (måste vara i WikiOrd-format):"
+
+#: lib\pwiki\PersonalWikiFrame.py:5330
+msgid "Create New Wiki"
+msgstr "Skapa ny wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:5345
+msgid "Directory to store new wiki"
+msgstr "Katalog för att lagra ny wiki"
+
+#: lib\pwiki\PersonalWikiFrame.py:5356
+#: lib\pwiki\wikidata\WikiDataManager.py:1447
+#: lib\pwiki\wikidata\WikiDataManager.py:1503
+msgid "'%s' is an invalid wiki word. %s"
+msgstr "'%s' är ett ogiltigt wikiord. %s"
+
+#: lib\pwiki\PersonalWikiFrame.py:5668
+msgid "Clipboard Catcher at Cursor"
+msgstr "Urklippsfångare vid markör"
+
+#: lib\pwiki\PersonalWikiFrame.py:5672
+msgid "Clipboard Catcher off"
+msgstr "Urklippsfångare av"
+
+#: lib\pwiki\PersonalWikiFrame.py:5733
+msgid "Restore"
+msgstr "Återskapa"
+
+#: lib\pwiki\PersonalWikiFrame.py:5734
+msgid "Save"
+msgstr "Spara"
+
+#: lib\pwiki\Printing.py:328
+#: lib\pwiki\Printing.py:645
+msgid "Print Preview"
+msgstr "Förhandsgranska"
+
+#: lib\pwiki\Printing.py:341
+msgid "Printout"
+msgstr "Utskrift"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:158
+msgid "Searching... (click into field to abort)"
+msgstr "Söker... (klicka i fältet för att avbryta)"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:160
+msgid "Not found"
+msgstr "Hittades inte"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:745
+msgid "End of document reached. Continue at beginning?"
+msgstr "Slutet av dokumentet. Fortsätta från början?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:747
+msgid "Continue at beginning?"
+msgstr "Fortsätta från början?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:758
+#: lib\pwiki\SearchAndReplaceDialogs.py:759
+msgid "No matches found"
+msgstr "Sökord hittades inte"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:773
+#: lib\pwiki\SearchAndReplaceDialogs.py:786
+#: lib\pwiki\SearchAndReplaceDialogs.py:1029
+#: lib\pwiki\SearchAndReplaceDialogs.py:1249
+#: lib\pwiki\SearchAndReplaceDialogs.py:1275
+#: lib\pwiki\SearchAndReplaceDialogs.py:1332
+#: lib\pwiki\SearchAndReplaceDialogs.py:1346
+#: lib\pwiki\SearchAndReplaceDialogs.py:1425
+#: lib\pwiki\SearchAndReplaceDialogs.py:1474
+#: lib\pwiki\SearchAndReplaceDialogs.py:1635
+#: lib\pwiki\SearchAndReplaceDialogs.py:2259
+msgid "Error in regular expression"
+msgstr "Fel i reguljärt uttryck"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:814
+#: lib\pwiki\SearchAndReplaceDialogs.py:1419
+msgid "%i replacements done"
+msgstr "%i ersättningar gjorda"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:815
+#: lib\pwiki\SearchAndReplaceDialogs.py:1359
+#: lib\pwiki\SearchAndReplaceDialogs.py:1420
+msgid "Replace All"
+msgstr "Ersätt alla"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1028
+msgid ""
+"Bad regular expression '%s':\n"
+"%s"
+msgstr ""
+"Ogiltigt reguljärt uttryck '%s':\n"
+"%s"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1252
+#: lib\pwiki\SearchAndReplaceDialogs.py:1279
+#: lib\pwiki\SearchAndReplaceDialogs.py:1335
+#: lib\pwiki\SearchAndReplaceDialogs.py:1350
+#: lib\pwiki\SearchAndReplaceDialogs.py:1428
+#: lib\pwiki\SearchAndReplaceDialogs.py:1478
+#: lib\pwiki\SearchAndReplaceDialogs.py:1638
+#: lib\pwiki\SearchAndReplaceDialogs.py:2262
+msgid "Error in boolean expression"
+msgstr "Fel i booleskt uttryck"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1255
+#: lib\pwiki\SearchAndReplaceDialogs.py:1283
+#: lib\pwiki\SearchAndReplaceDialogs.py:1431
+#: lib\pwiki\SearchAndReplaceDialogs.py:1641
+#: lib\pwiki\SearchAndReplaceDialogs.py:2265
+msgid "Error. Maybe wiki rebuild is needed"
+msgstr "Fel: Wikin kan behöva byggas om"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1359
+msgid "Replace all occurrences?"
+msgstr "Ersätt alla förekomster"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1486
+msgid "Choose search title"
+msgstr "Välj söktitel"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1496
+msgid "Do you want to overwrite existing search '%s'?"
+msgstr "Vill du skriva över aktuell sökning '%s'?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1497
+msgid "Overwrite search"
+msgstr "Skriv över sökning"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1512
+msgid "Invalid search string, can't save as view"
+msgstr "Ogiltig söksträng, kan inte spara som vy"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1612
+msgid "Do you want to delete %i search(es)?"
+msgstr "Vill du radera %i sökning(ar)?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1613
+msgid "Delete search"
+msgstr "Radera sökning"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1713
+msgid "*Set page list*"
+msgstr "*Ange sidlista*"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2000
+msgid "<Search: %s>"
+msgstr "<Sök:  %s>"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2050
+msgid "Fast Search"
+msgstr "Snabbsökning"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2077
+msgid "As Tab"
+msgstr "Som flik"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2117
+msgid "Search: %s"
+msgstr "Sök: %s"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2366
+#: lib\pwiki\WikiHtmlView.py:671
+msgid "Activate"
+msgstr "Aktivera"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2368
+#: lib\pwiki\WikiHtmlView.py:673
+msgid "Activate New Tab Backgrd."
+msgstr "Aktivera ny flik i bakgrund"
+
+#: lib\pwiki\SpellChecker.py:117
+msgid "No wiki open or current page is a functional page"
+msgstr "Ingen wiki är öppen eller så är aktuell sida en funktionssida"
+
+#: lib\pwiki\SpellChecker.py:131
+msgid "Current page is not modified yet"
+msgstr "Den aktuella sidan är inte ändrad ännu"
+
+#: lib\pwiki\SpellChecker.py:138
+#: lib\pwiki\SpellChecker.py:172
+#: lib\pwiki\SpellChecker.py:180
+msgid "No (more) misspelled words found"
+msgstr "Inga (fler) felstavade ord hittades"
+
+#: lib\pwiki\SpellChecker.py:148
+msgid "No dictionary found for this page"
+msgstr "Ingen ordlista hittades för denna sida"
+
+#: lib\pwiki\StringOps.py:737
+msgid "Inval. timestamp"
+msgstr "Ogiltigt tidsformat"
+
+#: lib\pwiki\TextTree.py:205
+#: lib\pwiki\TextTree.py:240
+msgid "<No title>"
+msgstr "<Ingen titel>"
+
+#: lib\pwiki\TextTree.py:361
+msgid "Select wiki for favorites"
+msgstr "Välj wiki för favoriter"
+
+#: lib\pwiki\Trashcan.py:262
+msgid "Trashcan data damaged"
+msgstr "Data i papperskorgen skadat"
+
+#: lib\pwiki\TrashcanGui.py:201
+msgid "Delete %i elements from trashcan?"
+msgstr "Radera %i element från papperskorgen?"
+
+#: lib\pwiki\TrashcanGui.py:202
+#: lib\pwiki\TrashcanGui.py:228
+msgid "Delete from trashcan"
+msgstr "Radera från papperskorgen"
+
+#: lib\pwiki\TrashcanGui.py:227
+msgid "Delete all elements from trashcan?"
+msgstr "Radera alla element från papperskorgen?"
+
+#: lib\pwiki\ViHelper.py:464
+msgid "Follow Hint:"
+msgstr "Följ tips:"
+
+#: lib\pwiki\WikiExceptions.py:72
+msgid "Multiple words rename to same word"
+msgstr "Omdöpning av flera ord till samma namn"
+
+#: lib\pwiki\WikiHtmlView.py:558
+#: lib\pwiki\WikiTxtCtrl.py:2225
+msgid "Folder does not exist"
+msgstr "Katalogen finns inte"
+
+#: lib\pwiki\WikiHtmlView.py:650
+#: lib\pwiki\WikiHtmlViewIE.py:494
+#: lib\pwiki\WikiHtmlViewWK.py:999
+#: lib\pwiki\WikiTxtCtrl.py:3204
+msgid "Link to page: %s"
+msgstr "Länk till sida: %s"
+
+#: lib\pwiki\WikiHtmlViewWK.py:75
+#: lib\pwiki\WikiTxtDialogs.py:47
+msgid "Incremental search (ENTER/ESC to finish)"
+msgstr "Inkrementell sökning (ENTER/ESC för att avsluta)"
+
+#: lib\pwiki\WikiHtmlViewWK.py:773
+msgid "Open Link (External)"
+msgstr "Öppna länk (externt)"
+
+#: lib\pwiki\WikiHtmlViewWK.py:776
+msgid "Follow &Link"
+msgstr "Öppna &länk"
+
+#: lib\pwiki\WikiHtmlViewWK.py:788
+msgid "Follow Link in New &Tab"
+msgstr "Öppna länk i ny flik"
+
+#: lib\pwiki\WikiHtmlViewWK.py:795
+msgid "Follow Link in New Back&ground Tab"
+msgstr "Öppna länk i ny bakgrundsflik"
+
+#: lib\pwiki\WikiTreeCtrl.py:536
+msgid "Views"
+msgstr "Vyer"
+
+#: lib\pwiki\WikiTreeCtrl.py:946
+msgid "searches"
+msgstr "sökningar"
+
+#: lib\pwiki\WikiTreeCtrl.py:1028
+msgid "modified-within"
+msgstr "redigerad-inom"
+
+#: lib\pwiki\WikiTreeCtrl.py:1056
+msgid "1 day"
+msgstr "1 dag"
+
+#: lib\pwiki\WikiTreeCtrl.py:1058
+msgid "%i days"
+msgstr "%i dagar"
+
+#: lib\pwiki\WikiTreeCtrl.py:1096
+msgid "parentless-nodes"
+msgstr "föräldralösa-noder"
+
+#: lib\pwiki\WikiTreeCtrl.py:1127
+msgid "undefined-nodes"
+msgstr "odefinierade-noder"
+
+#: lib\pwiki\WikiTreeCtrl.py:1157
+msgid "Func. pages"
+msgstr "Funktionssidor"
+
+#: lib\pwiki\WikiTreeCtrl.py:1291
+msgid "Add icon attribute"
+msgstr "Lägg till ikonattribut"
+
+#: lib\pwiki\WikiTreeCtrl.py:1298
+msgid "Add color attribute"
+msgstr "Lägg till färgattribut"
+
+#: lib\pwiki\WikiTreeCtrl.py:1923
+msgid "Append Wiki Word"
+msgstr "Lägg till wikiord sist"
+
+#: lib\pwiki\WikiTreeCtrl.py:1938
+msgid "Prepend Wiki Word"
+msgstr "Lägg till wikiord först"
+
+#: lib\pwiki\WikiTxtCtrl.py:1310
+msgid "Select Template"
+msgstr "Välj mall"
+
+#: lib\pwiki\WikiTxtCtrl.py:1312
+msgid "Select Template (deletes current content!)"
+msgstr "Välj mall (raderar aktuellt innehåll!)"
+
+#: lib\pwiki\WikiTxtCtrl.py:1425
+msgid "Use Template"
+msgstr "Använd mall"
+
+#: lib\pwiki\WikiTxtCtrl.py:2255
+#: lib\pwiki\WikiTxtCtrl.py:2294
+msgid "File does not exist"
+msgstr "Filen finns inte"
+
+#: lib\pwiki\WikiTxtCtrl.py:2261
+msgid "Are you sure you want to delete the file: %s"
+msgstr "Är du säker på att du vill radera filen: %s"
+
+#: lib\pwiki\WikiTxtCtrl.py:2262
+msgid "Delete File"
+msgstr "Radera fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:2302
+msgid "Enter new name"
+msgstr "Ange nytt namn"
+
+#: lib\pwiki\WikiTxtCtrl.py:2303
+msgid "Rename File"
+msgstr "Byt namn på fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:2313
+msgid "Target is not a file"
+msgstr "Målet är inte en fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:2317
+msgid "Target file exists already. Overwrite?"
+msgstr "Målfilen finns redan. Skriva över?"
+
+#: lib\pwiki\WikiTxtCtrl.py:2318
+msgid "Overwrite File"
+msgstr "Skriv över fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:2419
+msgid ""
+"Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
+"item \"Script security\" an appropriate value to execute a script."
+msgstr ""
+"Ange i \"Tillbehör/Alternativ...\", inställningssidan \"Säkerhet\", \n"
+"vid \"Skriptsäkerhet\", ett lämpligt alternativ för att köra skriptet."
+
+#: lib\pwiki\WikiTxtCtrl.py:2422
+msgid "Script execution disabled"
+msgstr "Körning av skript avaktiverad"
+
+#: lib\pwiki\WikiTxtCtrl.py:2494
+msgid ""
+"\n"
+"Exception: %s"
+msgstr ""
+"\n"
+"Undantag: %s"
+
+#: lib\pwiki\WikiTxtCtrl.py:2986
+msgid "No more fields in this 'form' page"
+msgstr "Inge fler fält i denna formulärsida"
+
+#: lib\pwiki\WikiTxtCtrl.py:3155
+msgid "Line: %d Col: %d Pos: %d"
+msgstr "Rad: %d Kol: %d Pos: %d"
+
+#: lib\pwiki\WikiTxtCtrl.py:3260
+msgid "Not a valid image"
+msgstr "Inte en tillåten bild"
+
+#: lib\pwiki\WikiTxtCtrl.py:3405
+msgid "Couldn't copy file"
+msgstr "Kunde inte kopiera fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:3683
+msgid "Ignore"
+msgstr "Ignorera"
+
+#: lib\pwiki\WikiTxtCtrl.py:3684
+msgid "Add Globally"
+msgstr "Lägg till globalt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3685
+msgid "Add Locally"
+msgstr "Lägg till lokalt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3695
+msgid "Follow Link"
+msgstr "Öppna länk"
+
+#: lib\pwiki\WikiTxtCtrl.py:3696
+msgid "Follow Link New Tab"
+msgstr "Öppna länk i ny flik"
+
+#: lib\pwiki\WikiTxtCtrl.py:3697
+msgid "Follow Link New Tab Backgrd."
+msgstr "Öppna länk i ny fliks bakgrund"
+
+#: lib\pwiki\WikiTxtCtrl.py:3699
+msgid "Convert Absolute/Relative File URL"
+msgstr "Konvertera absolut/relativ sökväg till fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:3700
+msgid "Open Containing Folder"
+msgstr "Öppna aktuell katalog"
+
+#: lib\pwiki\WikiTxtCtrl.py:3701
+msgid "Rename file"
+msgstr "Byt namn på fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:3702
+msgid "Delete file"
+msgstr "Radera fil"
+
+#: lib\pwiki\WikiTxtCtrl.py:3704
+msgid "Copy anchor URL to clipboard"
+msgstr "Kopiera sökväg till urklipp"
+
+#: lib\pwiki\WikiTxtCtrl.py:3706
+msgid "Other..."
+msgstr "Annat..."
+
+#: lib\pwiki\WikiTxtCtrl.py:3707
+msgid "Use Template..."
+msgstr "Använd mall..."
+
+#: lib\pwiki\WikiTxtCtrl.py:3711
+msgid "Show folding"
+msgstr "Visa vikning"
+
+#: lib\pwiki\WikiTxtCtrl.py:3712
+msgid "Show folding marks and allow folding"
+msgstr "Visa vikningsmarkeringar och tillåt vikning"
+
+#: lib\pwiki\WikiTxtCtrl.py:3713
+msgid "&Toggle current folding"
+msgstr "Växla ak&tuell vikning"
+
+#: lib\pwiki\WikiTxtCtrl.py:3714
+msgid "Toggle folding of the current line"
+msgstr "Växla vikning av den aktuella raden"
+
+#: lib\pwiki\WikiTxtCtrl.py:3715
+msgid "&Unfold All"
+msgstr "Vik &ut allt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3716
+msgid "Unfold everything in current editor"
+msgstr "Vik ut allt i aktuell redigerare"
+
+#: lib\pwiki\WikiTxtCtrl.py:3717
+msgid "&Fold All"
+msgstr "Vik in allt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3718
+msgid "Fold everything in current editor"
+msgstr "Vik in allt i aktuell redigerare"
+
+#: lib\pwiki\WindowsHacks.py:317
+msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
+msgstr "Kopiering från %s till %s misslyckades. SHFileOperation resultat nr. %s"
+
+#: lib\pwiki\WindowsHacks.py:321
+msgid "Moving from %s to %s failed. SHFileOperation result no. %s"
+msgstr "Flyttning från %s till %s misslyckades. SHFileOperation resultat nr. %s"
+
+#: lib\pwiki\WindowsHacks.py:325
+msgid "Deleting %s failed. SHFileOperation result no. %s"
+msgstr "Radering av %s misslyckades. SHFileOperation resultat nr. %s"
+
+#: lib\pwiki\timeView\DatedWikiWordFilters.py:131
+msgid "Modified"
+msgstr "Ändrad"
+
+#: lib\pwiki\timeView\TimeViewCtrl.py:47
+msgid "Versions"
+msgstr "Versioner"
+
+#: lib\pwiki\timeView\TimelinePanel.py:799
+msgid "Show dates without associated wiki words"
+msgstr "Visa datum utan koppling till wikiord"
+
+#: lib\pwiki\timeView\TimelinePanel.py:801
+msgid "List dates ascending or descending"
+msgstr "Lista datum stigande eller fallande"
+
+#: lib\pwiki\timeView\Versioning.py:175
+#: lib\pwiki\timeView\Versioning.py:442
+#: lib\pwiki\timeView\Versioning.py:454
+msgid "Versioning data damaged"
+msgstr "Versionsdata skadat"
+
+#: lib\pwiki\timeView\VersioningGui.py:225
+msgid "Deleting in-between versions is not supported yet"
+msgstr "Radering av mellanliggande versioner stöds inte ännu"
+
+#: lib\pwiki\timeView\VersioningGui.py:228
+msgid "Do you want to delete this version?"
+msgstr "Vill du radera denna version?"
+
+#: lib\pwiki\timeView\VersioningGui.py:229
+#: lib\pwiki\timeView\VersioningGui.py:814
+msgid "Delete version"
+msgstr "Radera version"
+
+#: lib\pwiki\timeView\VersioningGui.py:241
+#: lib\pwiki\timeView\VersioningGui.py:273
+msgid "Do you want to delete all version data of this page?"
+msgstr "Vill du radera den här sidans alla versionsdata?"
+
+#: lib\pwiki\timeView\VersioningGui.py:242
+#: lib\pwiki\timeView\VersioningGui.py:274
+#: lib\pwiki\timeView\VersioningGui.py:819
+msgid "Delete all versions"
+msgstr "Radera alla versioner"
+
+#: lib\pwiki\timeView\VersioningGui.py:288
+#: lib\pwiki\timeView\VersioningGui.py:349
+#: lib\pwiki\timeView\VersioningGui.py:577
+msgid "Current"
+msgstr "Aktuell"
+
+#: lib\pwiki\timeView\VersioningGui.py:806
+msgid "Diff inline"
+msgstr "Diff i text"
+
+#: lib\pwiki\timeView\VersioningGui.py:807
+msgid "Show the difference between two versions inline"
+msgstr "Visa skillnaden mellan två versioner i texten"
+
+#: lib\pwiki\timeView\VersioningGui.py:809
+msgid "Set diff from"
+msgstr "Ange diff från"
+
+#: lib\pwiki\timeView\VersioningGui.py:810
+msgid "Set the \"from\" version in diff"
+msgstr "Ange \"från\" version i diff"
+
+#: lib\pwiki\timeView\VersioningGui.py:811
+msgid "Set diff to"
+msgstr "Ange diff till"
+
+#: lib\pwiki\timeView\VersioningGui.py:812
+msgid "Set the \"to\" version in diff"
+msgstr "Ange \"till\" version i diff"
+
+#: lib\pwiki\timeView\VersioningGui.py:815
+msgid "Delete selected version"
+msgstr "Radera vald version"
+
+#: lib\pwiki\timeView\VersioningGui.py:817
+msgid "Add version"
+msgstr "Lägg till version"
+
+#: lib\pwiki\timeView\VersioningGui.py:818
+msgid "Add a new version"
+msgstr "Lägg till ny version"
+
+#: lib\pwiki\timeView\VersioningGui.py:820
+msgid "Delete all versions of current page"
+msgstr "Radera den aktuella sidans alla versioner"
+
+#: lib\pwiki\wikidata\FileStorage.py:194
+msgid "File compare error, file not readable or changed during compare"
+msgstr "Fel vid jämförelse av fil, filen går inte att läsa eller så ändrades den under jämförelsen"
+
+#: lib\pwiki\wikidata\FileStorage.py:216
+msgid "Path '%s' must point to an existing file"
+msgstr "Sökvägen '%s' måste peka på en existerande fil"
+
+#: lib\pwiki\wikidata\FileStorage.py:233
+msgid "Internal error: Bad source file name"
+msgstr "Internt fel: Felaktigt namn på källfilen"
+
+#: lib\pwiki\wikidata\FileStorage.py:298
+msgid "Copy of file '%s' couldn't be created"
+msgstr "Kopia av filen '%s' kunde inte skapas"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:65
+msgid "Database exists already and is currently in use"
+msgstr "Databasen finns redan och används nu"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:70
+#: lib\pwiki\wikidata\WikiDataManager.py:2093
+msgid "Data handler %s not available"
+msgstr "Datahanteraren %s är inte tillgänglig"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:91
+msgid "Database is already in use with database handler \"%s\". Can't open with different handler."
+msgstr "Databasen används redan av databashanteraren \"%s\". Kan inte öppna med en annan hanterare."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:97
+msgid "Database is already in use with wiki language handler \"%s\". Can't open with different handler."
+msgstr "Databasen används redan av wikispråkhanteraren '%s'. Kan inte öppna med en annan hanterare."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:301
+msgid "Wiki is probably already in use by other instance"
+msgstr "Wikin används troligen redan av en annan instans"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:324
+#: lib\pwiki\wikidata\WikiDataManager.py:334
+msgid "Wiki configuration file is corrupted"
+msgstr "Wikins konfigurationsfil är korrupt"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:367
+msgid "No data handler information found, probably \"Original Gadfly\" is right."
+msgstr "Ingen information om datahanterare hittades, förmodligen är \"Original Gadfly\" den rätta. "
+
+#: lib\pwiki\wikidata\WikiDataManager.py:373
+msgid "Required data handler \"%s\" unknown to WikidPad"
+msgstr "Den begärda datahanteraren \"%s\" är okänd för WikidPad"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:379
+msgid "Error on initializing data handler \"%s\""
+msgstr "Fel vid anslutning till databasen \"%s\""
+
+#: lib\pwiki\wikidata\WikiDataManager.py:390
+msgid "Required wiki language handler \"%s\" not available"
+msgstr "Den begärda wikispråkhanteraren \"%s\" är inte tillgänglig"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:953
+msgid "Word '%s' not in wiki"
+msgstr "Ordet '%s' finns inte i wikin"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1258
+#: lib\pwiki\wikidata\WikiDataManager.py:1331
+msgid "Update basic link info"
+msgstr "Uppdaterar grundläggande länkinformation"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1274
+msgid "Starting update thread"
+msgstr "Startar uppdateringstråd"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1351
+msgid "Update attributes of %s"
+msgstr "Uppdatera %s attribut"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1373
+msgid "Update syntax of %s"
+msgstr "Uppdatera syntaxen för %s"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1394
+msgid "Update index of %s"
+msgstr "Uppdatera index för %s"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1414
+msgid "Final cleanup"
+msgstr "Städar upp"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1508
+msgid "Cannot rename '%s' to '%s', '%s' already exists"
+msgstr "Kan inte byta namn på '%s' till '%s', '%s' finns redan"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:726
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:724
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:696
+msgid "database already exists at location: %s"
+msgstr "databasen finns redan på platsen: %s"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:916
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:780
+msgid "Update needed"
+msgstr "Uppdatering behövs"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:919
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:783
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:826
+msgid "Database has unknown format branchtag='%s'"
+msgstr "Databasen har okänd formatförgrening='%s'"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:928
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:792
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:835
+msgid "Database has unknown format version='%i'"
+msgstr "Databasen har en okänd formatversion='%i'"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:932
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:796
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:839
+msgid "Update needed, current format version='%i'"
+msgstr "Uppdatering behövs, aktuell formatversion='%i'"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:935
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:799
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:842
+msgid "Database format is up to date"
+msgstr "Databasformatet är uppdaterat"
+
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:216
+msgid "Wiki page not found: %s"
+msgstr "Wikisidan hittades inte: %s"
+
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:528
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:512
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:565
+msgid "You cannot delete the root wiki node"
+msgstr "Du kan inte radera wikins rotnod"
+
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1113
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1212
+msgid "Wiki page not found (no path information) for word: %s"
+msgstr "Wikisida hittades inte (ingen sökvägsinformation) för ordet: %s"
+
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1131
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1145
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1230
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1244
+msgid "Wiki page not found (bad path information) for word: %s"
+msgstr "Wikisida hittades inte (felaktig sökvägsinformation) för ordet: %s"
+
+#~ msgid "Last wiki doesn't exist: %s"
+#~ msgstr "Senaste wikin finns inte: %s"
+
+#~ msgid "Update page %s"
+#~ msgstr "Uppdatera sidan %s"
+
+#~ msgid "Set page &list"
+#~ msgstr "Ange sid&lista"
+
+#~ msgid "'%s' is already alias for the wiki word(s): %s"
+#~ msgstr "'%s' är redan alias för wikiord(en): %s"
+
+#~ msgid "Errors"
+#~ msgstr "Fel"
+
+#~ msgid "Other data"
+#~ msgstr "Andra data"
+
+#~ msgid "Internal Error"
+#~ msgstr "Internt fel"
+
+#~ msgid "New Tab"
+#~ msgstr "Ny flik"
+
+#~ msgid "Opened wiki word '%s'"
+#~ msgstr "Öppnade wikiordet '%s'"
+
+#~ msgid "Rename links when renaming wiki word:"
+#~ msgstr "Byt namn på länkar vid namnbyte på wikiord:"
+
+#~ msgid "Cannot rename to '%s', word already exists"
+#~ msgstr "Kan inte byta namn till '%s', ordet finns redan"
+
+#~ msgid "\"And&ed\" regex"
+#~ msgstr "R&egex med \"and\""
+
+#~ msgid "C&ount Occurrences"
+#~ msgstr "Räkna förek&omster"
+
+#~ msgid "Context characters"
+#~ msgstr "Angränsande tecken"
+
+#~ msgid "Search Options"
+#~ msgstr "Sökalternativ"
+
+#~ msgid "Searching..."
+#~ msgstr "Söker..."
+
+#~ msgid "Time view auto-hide"
+#~ msgstr "Dölj tidsvy automatiskt"
+
+#~ msgid "Time view pos.:"
+#~ msgstr "Tidsvyns position:"
+
+#~ msgid "Time view"
+#~ msgstr "Tidsvy"
+
+#~ msgid "Invalid AppLock.lock file\n"
+#~ msgstr "Ogiltig AppLock.lock-fil\n"
+
+#~ msgid "Calling PropertyChecker.appendLogMessage while outside of checkPage"
+#~ msgstr "Calling PropertyChecker.appendLogMessage while outside of checkPage"
+
+#~ msgid "Sample"
+#~ msgstr "Exempel"
+
+#~ msgid "    Clipboard Catcher"
+#~ msgstr "    Urklippsfångare"
+
+#~ msgid "  Headings"
+#~ msgstr "  Rubriker"

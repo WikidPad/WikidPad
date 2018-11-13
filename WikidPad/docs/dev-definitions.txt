@@ -1,0 +1,53 @@
++ Definitions
+
+++ Wiki page
+A real page in the wiki written in wiki syntax.
+Represented by: DocPages.WikiPage
+
+++ Wiki page name
+Full name of a wiki page. It may contain slashes.
+
+
+++ Func(tional) page
+A page controlling functionality of WikidPad, stored in wiki or user settings
+("global" pages). There are func. pages containing blacklists for camelcase and
+non-camelcase words, for words to ignore during spellcheck and more.
+Represented by: DocPages.FunctionalPage
+
+
+
+++ Alias page
+A page object which only delegates most things to its underlying wiki page.
+Needed to support the "alias" attribute.
+Represented by: DocPages.AliasWikiPage
+
+
+++ Doc(ument) page
+Abstraction of wiki, func, and alias page.
+Represented by: DocPages.DocPage
+
+
+++ (Wiki) match terms
+List of strings which can be resolved to a wiki page name. These include
+the page names itself, aliases and maybe other things like e.g. headings
+(dependent on user settings).
+
+They are stored in table "wikiwordmatchterms" in the database. For each term
+there is also stored the real wiki page name it points to and a type information.
+
+The type information (see Consts.WIKIWORDMATCHTERMS_TYPE_* constants) tells:
+- If the term is an explicit alias (by "alias" attribute)
+- If the term should be used for resolution of a wiki link on a wiki page (e.g.
+  headings are never used for link resolution, only for searching in
+  "Open Wiki Word" dialog)
+- Which information was taken into account to produce the term (only page name,
+  attributes, whole content)
+- If term was generated during synchronous update. Normally this is only the
+  wiki page name itself, everything else is generated asychronously which means
+  that there can be a delay after saving the page until it shows up in the
+  terms.
+
+
+++ Wiki link terms
+Subset of match terms which should be used for link resolution
+

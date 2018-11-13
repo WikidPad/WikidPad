@@ -1,0 +1,5702 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Török Árpád <torar@freemail.hu>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: WikidPad.xrc:0
+msgid "  Context characters"
+msgstr "  Szövegkörnyezet karakterek"
+
+#: WikidPad.xrc:0
+msgid "  Defaults"
+msgstr "  Alapbeállítások"
+
+#: WikidPad.xrc:0
+msgid " &Delete "
+msgstr "Törlés"
+
+#: WikidPad.xrc:0
+msgid " &Find "
+msgstr "Keres"
+
+#: WikidPad.xrc:0
+msgid " &Replace "
+msgstr "Csere"
+
+#: WikidPad.xrc:0
+msgid " &Test "
+msgstr "Tesz"
+
+#: WikidPad.xrc:0
+msgid " Close "
+msgstr "Bezár"
+
+#: WikidPad.xrc:0
+msgid " Find &Next "
+msgstr "Következő találat"
+
+#: WikidPad.xrc:0
+msgid " Replace &All "
+msgstr "Cseréli mindet"
+
+#: WikidPad.xrc:0
+msgid "&Case sensitive"
+msgstr "Nagybetűérzékeny"
+
+#: WikidPad.xrc:0
+msgid "&Create"
+msgstr "Létrehoz"
+
+#: WikidPad.xrc:0
+msgid "&Delete All"
+msgstr "Mindent töröl"
+
+#: WikidPad.xrc:0
+msgid "&Delete Export(s)"
+msgstr "Export törlése"
+
+#: WikidPad.xrc:0
+msgid "&Delete Search(es)"
+msgstr "Keresés törlése"
+
+#: WikidPad.xrc:0
+msgid "&Ignore"
+msgstr "Elvet"
+
+#: WikidPad.xrc:0
+msgid "&Load Export"
+msgstr "Export betöltése"
+
+#: WikidPad.xrc:0
+msgid "&Load Search"
+msgstr "Keresési eredmény betöltése"
+
+#: WikidPad.xrc:0
+msgid "&New Tab"
+msgstr "Új fül"
+
+#: WikidPad.xrc:0
+msgid "&Options"
+msgstr "Opciók"
+
+#: WikidPad.xrc:0
+msgid "&Page names"
+msgstr "Oldalaknevek"
+
+#: WikidPad.xrc:0
+msgid "&Replace"
+msgstr "Cserél"
+
+#: WikidPad.xrc:0
+msgid "&Restore"
+msgstr "Helyreállít"
+
+#: WikidPad.xrc:0
+msgid "&Save Export"
+msgstr "Export mentése"
+
+#: WikidPad.xrc:0
+msgid "&Save Search"
+msgstr "Keresési eredmény mentése"
+
+#: WikidPad.xrc:0
+msgid "&Search:"
+msgstr "Keres"
+
+#: WikidPad.xrc:0
+msgid "&Strip leading/trailing spaces"
+msgstr "Kezdő és záró szóközök kihagyása"
+
+#: WikidPad.xrc:0
+msgid "&Whole word"
+msgstr "Teljes szó"
+
+#: WikidPad.xrc:0
+msgid "&beginning"
+msgstr "előről"
+
+#: WikidPad.xrc:0
+msgid "(0: worst, 100: best)"
+msgstr "(0: legrosszabb, 100: legjobb)"
+
+#: WikidPad.xrc:0
+msgid "(Use selected defaults if you are unsure)"
+msgstr "(Az alapbeállításokat használd, ha nem vagy biztos)"
+
+#: WikidPad.xrc:0
+msgid "* Needs WikidPad restart"
+msgstr "* WikidPad újraindítását igényeli"
+
+#: WikidPad.xrc:0
+msgid "0"
+msgstr "0"
+
+#: WikidPad.xrc:0
+msgid ""
+"0: Never complete version; 1: Always complete v.;\n"
+"10: Every tenth v. is complete"
+msgstr ""
+"0: Sosem teljes verzió; 1: Mindig teljes v;\n"
+"10: Minden tizedik verz. teljes"
+
+#: WikidPad.xrc:0
+msgid "1 (since 1.9beta6)"
+msgstr "1 (1.9beta6 óta)"
+
+#: WikidPad.xrc:0
+msgid "Above"
+msgstr "Fölött"
+
+#: WikidPad.xrc:0
+msgid "Absolute URL"
+msgstr "Abszolut URL-cím"
+
+#: WikidPad.xrc:0
+msgid "Active link color:"
+msgstr "Aktív link színe"
+
+#: WikidPad.xrc:0
+msgid "Add"
+msgstr "Hozzáad"
+
+#: WikidPad.xrc:0
+msgid "Add &Globally"
+msgstr "Hozzáad globálisan"
+
+#: WikidPad.xrc:0
+msgid "Add &Locally"
+msgstr "Hozzáad helyben"
+
+#: WikidPad.xrc:0
+msgid "Add Wiki to Favorites"
+msgstr "Wiki hozzáadása Kedvencekhez"
+
+#: WikidPad.xrc:0
+msgid "Add spaces"
+msgstr "Szóközök hozzáadása"
+
+#: WikidPad.xrc:0
+msgid "After:"
+msgstr "Utána:"
+
+#: WikidPad.xrc:0
+msgid "All Pages"
+msgstr "Osszes lap"
+
+#: WikidPad.xrc:0
+msgid "Allow everything"
+msgstr "Mindent engedélyez"
+
+#: WikidPad.xrc:0
+msgid "Allow index search"
+msgstr "Indexelt keresés engedélyezése"
+
+#: WikidPad.xrc:0
+msgid "Alphabetically"
+msgstr "Ábécérendben"
+
+#: WikidPad.xrc:0
+msgid "Alphabetically reverse"
+msgstr "Fordított ábécérendben"
+
+#: WikidPad.xrc:0
+msgid "Also rename subpages"
+msgstr "Alárendelt lapokat is átnevezi"
+
+#: WikidPad.xrc:0
+msgid "Always"
+msgstr "Mindig"
+
+#: WikidPad.xrc:0
+msgid "Always show import table"
+msgstr "Mindig mutassa az importtáblát"
+
+#: WikidPad.xrc:0
+msgid "App-bound hotkey:"
+msgstr "Alkamazást elrejtő gyorsillentyű"
+
+#: WikidPad.xrc:0
+msgid "Append after clipboard snippet:"
+msgstr "A vágólaprészlet végéhez fűz:"
+
+#: WikidPad.xrc:0
+msgid "Append after links:"
+msgstr "A linkek végéhez fűz:"
+
+#: WikidPad.xrc:0
+msgid "Append closing bracket on auto-complete"
+msgstr "Csukó zárójel hozzáfűzése automatikus kiegészítéskor"
+
+#: WikidPad.xrc:0
+msgid "Append wiki word"
+msgstr "Wikiszó hozzáfűzése"
+
+#: WikidPad.xrc:0
+msgid "As &Tab"
+msgstr "Fülként"
+
+#: WikidPad.xrc:0
+msgid "As &is"
+msgstr "Ahogy van"
+
+#: WikidPad.xrc:0
+msgid "As Res&ultlist"
+msgstr "Eredménylistaként"
+
+#: WikidPad.xrc:0
+msgid "As Tree"
+msgstr "Faként"
+
+#: WikidPad.xrc:0
+msgid "As is"
+msgstr "Ahogy van"
+
+#: WikidPad.xrc:0
+msgid "As list"
+msgstr "Listaként"
+
+#: WikidPad.xrc:0
+msgid "As tree"
+msgstr "Faként"
+
+#: WikidPad.xrc:0
+msgid "Ask"
+msgstr "Kérdez"
+
+#: WikidPad.xrc:0
+msgid "Ask before deletion of wiki word"
+msgstr "Wiki szó törlése előtt kérdezzen"
+
+#: WikidPad.xrc:0
+msgid "Ask for creation when opening non-existing word"
+msgstr "Nem létező wikiszó megnyitásakor kérdezzen a létrhozásra"
+
+#: WikidPad.xrc:0
+msgid "Ask settings on each paste"
+msgstr "Beállításokat bekéri beillesztéskor"
+
+#: WikidPad.xrc:0
+msgid "At position:"
+msgstr "Pozíciónál:"
+
+#: WikidPad.xrc:0
+msgid "Attribute/script color:"
+msgstr "Attribútum/szkript színe"
+
+#: WikidPad.xrc:0
+msgid "Attrs. to"
+msgstr "Attribútumok amiket   "
+
+#: WikidPad.xrc:0
+msgid "Auto-hide"
+msgstr "Automatikus elrejtés"
+
+#: WikidPad.xrc:0
+msgid "Auto-hide log window"
+msgstr "Logablak automatikus elrejtése"
+
+#: WikidPad.xrc:0
+msgid "Auto-hide structure window"
+msgstr "Struktúraablak automatikus elrejtése"
+
+#: WikidPad.xrc:0
+msgid "Auto-show log window"
+msgstr "Logablak automatikus megjelenítése"
+
+#: WikidPad.xrc:0
+msgid "Auto-unbullets"
+msgstr "Felsorolás automatikus kiszedése"
+
+#: WikidPad.xrc:0
+msgid "Autosave active"
+msgstr "Automatikus mentés aktív"
+
+#: WikidPad.xrc:0
+msgid "Avoid doubled snippets"
+msgstr "Töredékismétlés elkerülése"
+
+#: WikidPad.xrc:0
+msgid "Background color:"
+msgstr "Háttérszín:"
+
+#: WikidPad.xrc:0
+msgid "Background image:"
+msgstr "Háttérkép:"
+
+#: WikidPad.xrc:0
+msgid "Basic wiki settings"
+msgstr "Alap wikibeállítások"
+
+#: WikidPad.xrc:0
+msgid "Before:"
+msgstr "Előtte:"
+
+#: WikidPad.xrc:0
+msgid "Below"
+msgstr "Alatta"
+
+#: WikidPad.xrc:0
+msgid "Between links:"
+msgstr "Linkek közé:"
+
+#: WikidPad.xrc:0
+msgid "Bookmark"
+msgstr "Könyvjelző"
+
+#: WikidPad.xrc:0
+msgid "Bool&ean regex"
+msgstr "Boolean regex."
+
+#: WikidPad.xrc:0
+msgid "Bottom"
+msgstr "Lent"
+
+#: WikidPad.xrc:0
+msgid "C"
+msgstr "C"
+
+#: WikidPad.xrc:0
+msgid "Cancel"
+msgstr "Elvet"
+
+#: WikidPad.xrc:0
+msgid "Change these only if you know what you are doing!"
+msgstr "Csak akkor változtassa meg, ha tudja mit csinál!"
+
+#: WikidPad.xrc:0
+msgid "Choose Wiki Word"
+msgstr "Wikiszó kiválasztása"
+
+#: WikidPad.xrc:0
+msgid "Choose date format"
+msgstr "Dátumformátum kiválasztása"
+
+#: WikidPad.xrc:0
+msgid "Choose plain text font"
+msgstr "Sima szöveg betűtípusának kiválasztása"
+
+#: WikidPad.xrc:0
+msgid "Chronological View"
+msgstr "Időrendi nézet"
+
+#: WikidPad.xrc:0
+msgid "Clear"
+msgstr "Törlés"
+
+#: WikidPad.xrc:0
+msgid "Clear List"
+msgstr "Lista törlése"
+
+#: WikidPad.xrc:0
+msgid "Clone tab"
+msgstr "Fül klónozása"
+
+#: WikidPad.xrc:0
+msgid "Close tab"
+msgstr "Fül bezárása"
+
+#: WikidPad.xrc:0
+msgid "Collapse whole tree"
+msgstr "A teljes fa összecsukása"
+
+#: WikidPad.xrc:0
+msgid "Collector page:"
+msgstr "Gyűjtőlap"
+
+#: WikidPad.xrc:0
+msgid "Colorize search fragments of links separately"
+msgstr "Hivatkozás keresési töredékeinek színezése"
+
+#: WikidPad.xrc:0
+msgid "Compatibility"
+msgstr "Kompatibilitás"
+
+#: WikidPad.xrc:0
+msgid "Compatible filenames"
+msgstr "Kompatibilis fájlnevek"
+
+#: WikidPad.xrc:0
+msgid "Config. dir."
+msgstr "Konfig. könyvt."
+
+#: WikidPad.xrc:0
+msgid "Copy URL to clipboard"
+msgstr "URL másolása vágólapra"
+
+#: WikidPad.xrc:0
+msgid "Copy into file storage"
+msgstr "Másolja a fájltárolóba"
+
+#: WikidPad.xrc:0
+msgid "Copy to clipboard:"
+msgstr "Másolás vágólapra"
+
+#: WikidPad.xrc:0
+msgid "Count Occurrences up to max.:"
+msgstr "Előfordulások számolása max.:"
+
+#: WikidPad.xrc:0
+msgid "Create wiki lock file"
+msgstr "Wiki zárolásfájl létrehozása"
+
+#: WikidPad.xrc:0
+msgid "Current subtree"
+msgstr "Jelenlegi alárendelt fa"
+
+#: WikidPad.xrc:0
+msgid "Current wiki page"
+msgstr "Jelenlegi wiki lap"
+
+#: WikidPad.xrc:0
+msgid "Custom..."
+msgstr "Igény szerinti..."
+
+#: WikidPad.xrc:0
+msgid "DOCTYPE:"
+msgstr "Dok. típus:"
+
+#: WikidPad.xrc:0
+msgid "Database"
+msgstr "Adatbázisban"
+
+#: WikidPad.xrc:0
+msgid "Database type:"
+msgstr "Adatbázis típusa:"
+
+#: WikidPad.xrc:0
+msgid "Date format:"
+msgstr "Dátumformátum"
+
+#: WikidPad.xrc:0
+msgid "Default action:"
+msgstr "Alabeállítás szerinti művelet"
+
+#: WikidPad.xrc:0
+msgid "Default export dir.:"
+msgstr "Export alapértelmezett könyvtára:"
+
+#: WikidPad.xrc:0
+msgid "Default open/new dir.:"
+msgstr "Megnyitás/új alapértelmezett könyvtára"
+
+#: WikidPad.xrc:0
+msgid "Defaults"
+msgstr "Alapértelmezett értékek"
+
+#: WikidPad.xrc:0
+msgid "Del"
+msgstr "Töröl"
+
+#: WikidPad.xrc:0
+msgid "Delay after key pressed:"
+msgstr "Billentyűnyomás után várjon:"
+
+#: WikidPad.xrc:0
+msgid "Delay after page dirty:"
+msgstr "Lap változtatása után várjon:"
+
+#: WikidPad.xrc:0
+msgid "Delay before auto-close:"
+msgstr "Automatikus bezárás előtt várjon"
+
+#: WikidPad.xrc:0
+msgid "Details"
+msgstr "Részletek"
+
+#: WikidPad.xrc:0
+msgid "Done"
+msgstr "Kész"
+
+#: WikidPad.xrc:0
+msgid "Down"
+msgstr "Le"
+
+#: WikidPad.xrc:0
+msgid "Dropping files with CTRL:"
+msgstr "Fájlok ejtése CTRL-lel:"
+
+#: WikidPad.xrc:0
+msgid "Dropping files with SHIFT:"
+msgstr "Fájlok ejtése SHIFT-tel:"
+
+#: WikidPad.xrc:0
+msgid "Dropping files:"
+msgstr "Fájlok ejtése:"
+
+#: WikidPad.xrc:0
+msgid "Editor timing"
+msgstr "Szerkesztő időzítése"
+
+#: WikidPad.xrc:0
+msgid "Encoding:"
+msgstr "Kódolás:"
+
+#: WikidPad.xrc:0
+msgid "Export"
+msgstr "Export"
+
+#: WikidPad.xrc:0
+msgid "Export to:"
+msgstr "Exportálás ebbe:"
+
+#: WikidPad.xrc:0
+msgid "Fast search defaults"
+msgstr "Gyorskeresés alapbeállításai"
+
+#: WikidPad.xrc:0
+msgid "File cleanup"
+msgstr "Fájltisztítás"
+
+#: WikidPad.xrc:0
+msgid "File dropping"
+msgstr "Fájl elvetése"
+
+#: WikidPad.xrc:0
+msgid "File signature"
+msgstr "Fájl aláírása"
+
+#: WikidPad.xrc:0
+msgid "File storage identity check"
+msgstr "Fájltároló azonosításának ellenőrzése"
+
+#: WikidPad.xrc:0
+msgid "File type:"
+msgstr "Fájltípus:"
+
+#: WikidPad.xrc:0
+msgid "Filename must match"
+msgstr "A fájlnévnek egyeznie kell!"
+
+#: WikidPad.xrc:0
+msgid "Filename prefix:"
+msgstr "Fájlnév előtagja"
+
+#: WikidPad.xrc:0
+msgid "First word at startup:"
+msgstr "Wikiszó indításkor"
+
+#: WikidPad.xrc:0
+msgid "Font name for HTML preview:"
+msgstr "HTML-előnézet betűtípusa:"
+
+#: WikidPad.xrc:0
+msgid "Font:"
+msgstr "Font:"
+
+#: WikidPad.xrc:0
+msgid "Forbid cancel on search"
+msgstr "Megszakítás tiltása kereséskor"
+
+#: WikidPad.xrc:0
+msgid "Force ScratchPad visibility in tree"
+msgstr "A vázlatfüzet mindenképpen jelenjen meg a fában"
+
+#: WikidPad.xrc:0
+msgid "Format version"
+msgstr "Formátum verziója"
+
+#: WikidPad.xrc:0
+msgid "Fully (not recommended)"
+msgstr "Teljes (nem ajánlott)"
+
+#: WikidPad.xrc:0
+msgid "General"
+msgstr "Általános"
+
+#: WikidPad.xrc:0
+msgid "Given:"
+msgstr "Adott:"
+
+#: WikidPad.xrc:0
+msgid "Go to next page"
+msgstr "Ugrás a következő lapra"
+
+#: WikidPad.xrc:0
+msgid "Graceful handling of missing page files"
+msgstr "A lapofájlok óvatos kezelése"
+
+#: WikidPad.xrc:0
+msgid "Heading of new pages"
+msgstr "Új lapok fejléce"
+
+#: WikidPad.xrc:0
+msgid "Heading prefix:"
+msgstr "Fejléc előtag"
+
+#: WikidPad.xrc:0
+msgid "Headings as aliases"
+msgstr "Kezelés álnévként"
+
+#: WikidPad.xrc:0
+msgid "Height:"
+msgstr "Magasság:"
+
+#: WikidPad.xrc:0
+msgid "Hidden"
+msgstr "Rejtett"
+
+#: WikidPad.xrc:0
+msgid "Hide Log"
+msgstr "Log rejtése"
+
+#: WikidPad.xrc:0
+msgid "Hide undefined wiki words in Tree"
+msgstr "A nem definiált wikiszavak rejtse el a fában"
+
+#: WikidPad.xrc:0
+msgid "Highlight start delay:"
+msgstr "Kiemelés indításának késleltetése:"
+
+#: WikidPad.xrc:0
+msgid "I&ndex"
+msgstr "Index"
+
+#: WikidPad.xrc:0
+msgid "Icon:"
+msgstr "Ikon:"
+
+#: WikidPad.xrc:0
+msgid "Ig&nore All"
+msgstr "Mindet elvet"
+
+#: WikidPad.xrc:0
+msgid "Ignore wiki lock file"
+msgstr "Wiki zárolásfájl mellőzése"
+
+#: WikidPad.xrc:0
+msgid "Image pasting"
+msgstr "Kép beillesztése"
+
+#: WikidPad.xrc:0
+msgid "Image preview tooltips for local URLs"
+msgstr "Helyi hivatkozások előnézeti mutatása buborékban"
+
+#: WikidPad.xrc:0
+msgid "Import format:"
+msgstr "Importálás formátuma:"
+
+#: WikidPad.xrc:0
+msgid "Import questions"
+msgstr "Importálási kérdések"
+
+#: WikidPad.xrc:0
+msgid "Incremental search"
+msgstr "Részletkeresés"
+
+#: WikidPad.xrc:0
+msgid "Internal"
+msgstr "Belső"
+
+#: WikidPad.xrc:0
+msgid "Intersect"
+msgstr "Összevet"
+
+#: WikidPad.xrc:0
+msgid "JPEG"
+msgstr "JPEG"
+
+#: WikidPad.xrc:0
+msgid "Just bring to front if open already"
+msgstr "Ha nyitva, csak hozza előtérbe"
+
+#: WikidPad.xrc:0
+msgid "Keeping directory in filestorage keeps everything in it"
+msgstr "KÖnyvtár tárolása a fájltárolóban mindnet tárol"
+
+#: WikidPad.xrc:0
+msgid "Left"
+msgstr "Bal"
+
+#: WikidPad.xrc:0
+msgid "Left double click in preview:"
+msgstr "Bal duplakattintás előnézetben:"
+
+#: WikidPad.xrc:0
+msgid "Link color:"
+msgstr "Hivatkozás színe:"
+
+#: WikidPad.xrc:0
+msgid "Links in brackets"
+msgstr "Hivatkozások zárójelben"
+
+#: WikidPad.xrc:0
+msgid "Load and R&un Export"
+msgstr "Export betöltése és futtatása"
+
+#: WikidPad.xrc:0
+msgid "Load and R&un Search"
+msgstr "Keresés betöltése és futtatása"
+
+#: WikidPad.xrc:0
+msgid "Margin color:"
+msgstr "Szegélyszín"
+
+#: WikidPad.xrc:0
+msgid "Max. characters on each tab:"
+msgstr "Fülenként a max. betűszám:"
+
+#: WikidPad.xrc:0
+msgid "Max. entries:"
+msgstr "Max. beírás:"
+
+#: WikidPad.xrc:0
+msgid "Max. number of entries:"
+msgstr "Beírások max. száma:"
+
+#: WikidPad.xrc:0
+msgid "Middle button with CTRL:"
+msgstr "Középső kattinás CTRL-lel:"
+
+#: WikidPad.xrc:0
+msgid "Middle button without CTRL:"
+msgstr "Középső kattintás CTRL nélkül:"
+
+#: WikidPad.xrc:0
+msgid "Middle click on tab:"
+msgstr "Középső kattintás a fülon"
+
+#: WikidPad.xrc:0
+msgid "Minimize on close button"
+msgstr "Bezárás gombra összecsuk"
+
+#: WikidPad.xrc:0
+msgid "Minimize to Tray"
+msgstr "Csukja össze a tálcára"
+
+#: WikidPad.xrc:0
+msgid "Missing files"
+msgstr "Hiányzó fájl"
+
+#: WikidPad.xrc:0
+msgid "Modif. date is enough"
+msgstr "Módosítás dátuma elegendő"
+
+#: WikidPad.xrc:0
+msgid "Modif. date must match"
+msgstr "Mód. dátumnak egyeznie kell"
+
+#: WikidPad.xrc:0
+msgid "Modify all links to the wiki word"
+msgstr "A wikiszó minden hivatkozását lecseréli"
+
+#: WikidPad.xrc:0
+msgid "Move into file storage"
+msgstr "Helyezze a fájltárolóba"
+
+#: WikidPad.xrc:0
+msgid "N. T. &Backgr."
+msgstr "N. T. Háttér"
+
+#: WikidPad.xrc:0
+msgid "Name clash"
+msgstr "Névütközés"
+
+#: WikidPad.xrc:0
+msgid "Name collision:"
+msgstr "Névütközés:"
+
+#: WikidPad.xrc:0
+msgid "Natural"
+msgstr "Természetes"
+
+#: WikidPad.xrc:0
+msgid "New Window"
+msgstr "Új ablak"
+
+#: WikidPad.xrc:0
+msgid "New tab in background"
+msgstr "Új fül háttérben"
+
+#: WikidPad.xrc:0
+msgid "New tab in foreground"
+msgstr "Új fül az előtérben"
+
+#: WikidPad.xrc:0
+msgid "New tab with edit"
+msgstr "Előnézet: új fülön szerkeszt"
+
+#: WikidPad.xrc:0
+msgid "New window on wiki URL"
+msgstr "Wiki URL nyitása új ablakban"
+
+#: WikidPad.xrc:0
+msgid "Newest visited"
+msgstr "Legfrisebb megtekintett"
+
+#: WikidPad.xrc:0
+msgid "No change"
+msgstr "Változatlan"
+
+#: WikidPad.xrc:0
+msgid "No cycles in tree"
+msgstr "Ciklus tiltása a Fában"
+
+#: WikidPad.xrc:0
+msgid "No global.import_scripts"
+msgstr "Globális importszkriptek nem engedélyezettek"
+
+#: WikidPad.xrc:0
+msgid "No import_scripts"
+msgstr "Importszkriptek nem engedélyezettek"
+
+#: WikidPad.xrc:0
+msgid "No scripts"
+msgstr "Szkriptek nem engedélyezettek"
+
+#: WikidPad.xrc:0
+msgid "No title"
+msgstr "Nincs cím"
+
+#: WikidPad.xrc:0
+msgid "None"
+msgstr "Nincs"
+
+#: WikidPad.xrc:0
+msgid "Not at all"
+msgstr "Egyáltalán ne"
+
+#: WikidPad.xrc:0
+msgid "Nothing"
+msgstr "Semmi"
+
+#: WikidPad.xrc:0
+msgid "OK"
+msgstr "Rendben"
+
+#: WikidPad.xrc:0
+msgid "Oldest visited"
+msgstr "Legrégebbi látogatott"
+
+#: WikidPad.xrc:0
+msgid "Open in ..."
+msgstr "Nyissa meg itt..."
+
+#: WikidPad.xrc:0
+msgid "Open in new window"
+msgstr "Nyissa meg új ablakban"
+
+#: WikidPad.xrc:0
+msgid "Options"
+msgstr "Opciók"
+
+#: WikidPad.xrc:0
+msgid "Options for file cleanup"
+msgstr "Fájltisztítási opciók"
+
+#: WikidPad.xrc:0
+msgid "Options page:"
+msgstr "Opciók lap:"
+
+#: WikidPad.xrc:0
+msgid "Order pages:"
+msgstr "Parancslapok:"
+
+#: WikidPad.xrc:0
+msgid "Order:"
+msgstr "Sorrend:"
+
+#: WikidPad.xrc:0
+msgid "Orphaned files"
+msgstr "Árva fájlok:"
+
+#: WikidPad.xrc:0
+msgid "PNG"
+msgstr "PNG"
+
+#: WikidPad.xrc:0
+msgid "Page Setup"
+msgstr "Oldalbeállítás"
+
+#: WikidPad.xrc:0
+msgid "Page file names ASCII only"
+msgstr "Csak ASCII oldalfájl-nevek"
+
+#: WikidPad.xrc:0
+msgid "Page names matching regular expression:"
+msgstr "Szabályos kifejezéssel egyező lapok neve"
+
+#: WikidPad.xrc:0
+msgid "Page separator:"
+msgstr "Lapelválasztó:"
+
+#: WikidPad.xrc:0
+msgid "Pages in list and "
+msgstr "Lapok a listában és "
+
+#: WikidPad.xrc:0
+msgid "Paste File"
+msgstr "Fájl beillesztése"
+
+#: WikidPad.xrc:0
+msgid "Paste Image"
+msgstr "Kép beillesztése"
+
+#: WikidPad.xrc:0
+msgid "Paste from clipboard:"
+msgstr "Beillesztés vágólapról:"
+
+#: WikidPad.xrc:0
+msgid "Path or URL:"
+msgstr "Elérési út vagy URL:"
+
+#: WikidPad.xrc:0
+msgid "Path to file launcher:"
+msgstr "Fájlindító útvonala:"
+
+#: WikidPad.xrc:0
+msgid "Plain text color:"
+msgstr "Sima szöveg színe"
+
+#: WikidPad.xrc:0
+msgid "Position main tree:"
+msgstr "Fa pozíció"
+
+#: WikidPad.xrc:0
+msgid "Position view tree:"
+msgstr "Pozíció fanézetben"
+
+#: WikidPad.xrc:0
+msgid "Position:"
+msgstr "Pozíció:"
+
+#: WikidPad.xrc:0
+msgid "Prefer memory where possible"
+msgstr "Ahol lehet memóriát használja"
+
+#: WikidPad.xrc:0
+msgid "Prepend before clipboard snippet:"
+msgstr "Vágolaprészlet elé illeszt"
+
+#: WikidPad.xrc:0
+msgid "Prepend before links:"
+msgstr "Linkek elé illeszt"
+
+#: WikidPad.xrc:0
+msgid "Prepend wiki word"
+msgstr "Wikiszó elévetés"
+
+#: WikidPad.xrc:0
+msgid "Preview"
+msgstr "Előnézet"
+
+#: WikidPad.xrc:0
+msgid "Preview renderer*:"
+msgstr "Előnézet megjelenítő:"
+
+#: WikidPad.xrc:0
+msgid "Preview:"
+msgstr "Előnézet:"
+
+#: WikidPad.xrc:0
+msgid "Print"
+msgstr "Nyomtatás"
+
+#: WikidPad.xrc:0
+msgid "Print as:"
+msgstr "Nyomtat mint:"
+
+#: WikidPad.xrc:0
+msgid "Process auto-generated areas"
+msgstr "Automatikusan létrehozott területek feldolgozása"
+
+#: WikidPad.xrc:0
+msgid "Process insertion scripts"
+msgstr "Beillesztett szkriptek feldolgozása"
+
+#: WikidPad.xrc:0
+msgid "Quality:"
+msgstr "Minőség:"
+
+#: WikidPad.xrc:0
+msgid "R&egular expression"
+msgstr "Szabályos kifejezés"
+
+#: WikidPad.xrc:0
+msgid "Re&place by:"
+msgstr "Lecsrél evvel:"
+
+#: WikidPad.xrc:0
+msgid "Read-only wiki"
+msgstr "Csak olvasható wiki"
+
+#: WikidPad.xrc:0
+msgid "Rebuild:"
+msgstr "Rebuild:"
+
+#: WikidPad.xrc:0
+msgid "Recent wikis list length:"
+msgstr "Wiki előzménylista hossza:"
+
+#: WikidPad.xrc:0
+msgid "Reduce update handling in HTML preview"
+msgstr "HTML-előnézetben a frissítéskezelés csökkentése"
+
+#: WikidPad.xrc:0
+msgid "Referencing directory in filestorage keeps everything in it"
+msgstr "A fájltárolóban hivatkozás könyvtárra mindennel együtt "
+
+#: WikidPad.xrc:0
+msgid "Relative URL"
+msgstr "Releatív URL"
+
+#: WikidPad.xrc:0
+msgid "Remember expanded tree nodes:"
+msgstr "Megnyitott facsomópontok megjegyzése:"
+
+#: WikidPad.xrc:0
+msgid "Rename"
+msgstr "Átnevez"
+
+#: WikidPad.xrc:0
+msgid "Rename Word:"
+msgstr "Wikiszó átnevezése"
+
+#: WikidPad.xrc:0
+msgid "Rename dialog defaults"
+msgstr "Alapbeállított párbeszédek átnevezése"
+
+#: WikidPad.xrc:0
+msgid "Rename trashcan entry to:"
+msgstr "A kuka elemének átnevezése erre:"
+
+#: WikidPad.xrc:0
+msgid "Rename wiki element to:"
+msgstr "Wiki-elem átnevezése erre:"
+
+#: WikidPad.xrc:0
+msgid "Replace &All"
+msgstr "Mindet cserél"
+
+#: WikidPad.xrc:0
+msgid "Replace By"
+msgstr "Cseréli erre:"
+
+#: WikidPad.xrc:0
+msgid "Replace with:"
+msgstr "Cseréli evvel:"
+
+#: WikidPad.xrc:0
+msgid "Result"
+msgstr "Eredmény"
+
+#: WikidPad.xrc:0
+msgid "Reverse script search order (global imports first)"
+msgstr "Fordított szkriptkeresési sorrend (globális importáltak elől)"
+
+#: WikidPad.xrc:0
+msgid "Right"
+msgstr "Jobb"
+
+#: WikidPad.xrc:0
+msgid "Same Tab"
+msgstr "Azonos fül"
+
+#: WikidPad.xrc:0
+msgid "Saved Exports:"
+msgstr "Mentett exportok"
+
+#: WikidPad.xrc:0
+msgid "Saved Searches:"
+msgstr "Mentett keresések:"
+
+#: WikidPad.xrc:0
+msgid "Script security:"
+msgstr "Szkript-biztonság:"
+
+#: WikidPad.xrc:0
+msgid "Scroll under pointer (Windows only, exp.)"
+msgstr "A mutató alatti görgetése (csak Windows)"
+
+#: WikidPad.xrc:0
+msgid "Search Page"
+msgstr "Lapon keres"
+
+#: WikidPad.xrc:0
+msgid "Search Wiki"
+msgstr "Wikiben keres"
+
+#: WikidPad.xrc:0
+msgid "Search from"
+msgstr "Keresés ettől"
+
+#: WikidPad.xrc:0
+msgid "Search text"
+msgstr "Keresett szöveg"
+
+#: WikidPad.xrc:0
+msgid "Select facename"
+msgstr "Facename kiválasztása"
+
+#: WikidPad.xrc:0
+msgid "Selection bg. color:"
+msgstr "Kiválasztás háttérszine"
+
+#: WikidPad.xrc:0
+msgid "Selection fg. color:"
+msgstr "Kiválasztás előtérszíne"
+
+#: WikidPad.xrc:0
+msgid "Separate files"
+msgstr "Önálló fáljloban"
+
+#: WikidPad.xrc:0
+msgid "Set As Root"
+msgstr "Beállítás gyökérnek"
+
+#: WikidPad.xrc:0
+msgid "Short hint delay:"
+msgstr "Rövidtipp késleltetése"
+
+#: WikidPad.xrc:0
+msgid "Shortcut:"
+msgstr "Billentyűparancs:"
+
+#: WikidPad.xrc:0
+msgid "Show iframes inside IE preview"
+msgstr "Keretek mutatása IE előnézetben"
+
+#: WikidPad.xrc:0
+msgid "Show in toolbar"
+msgstr "Eszköztárban mutat"
+
+#: WikidPad.xrc:0
+msgid "Show pics as links in export"
+msgstr "Exportban a képeket linkként mutassa"
+
+#: WikidPad.xrc:0
+msgid "Show pics as links in preview"
+msgstr "Előnézetben a képeket linkként mutassa"
+
+#: WikidPad.xrc:0
+msgid "Show pictures as links"
+msgstr "Képek megjelenítése hivatkozásként"
+
+#: WikidPad.xrc:0
+msgid "Show splash screen"
+msgstr "Nyitókép mutatása"
+
+#: WikidPad.xrc:0
+msgid "Show word list on hovering"
+msgstr "Rámutatáskor a szavak listáját mutassa"
+
+#: WikidPad.xrc:0
+msgid "Show word list on select"
+msgstr "Kiválasztáskor mutassa a szavak listáját"
+
+#: WikidPad.xrc:0
+msgid "Si&mple regex"
+msgstr "Egyszerű regex"
+
+#: WikidPad.xrc:0
+msgid "Single page separator lines:"
+msgstr "Önálló oldalakat elválasztó vonal:"
+
+#: WikidPad.xrc:0
+msgid "Single process per user*"
+msgstr "Felhsználónként egy processz*"
+
+#: WikidPad.xrc:0
+msgid "Skip"
+msgstr "Átugrik"
+
+#: WikidPad.xrc:0
+msgid "Sort"
+msgstr "Rendez"
+
+#: WikidPad.xrc:0
+msgid "Sort alphabetically"
+msgstr "Betűrendbe rendez"
+
+#: WikidPad.xrc:0
+msgid "Sort order:"
+msgstr "Rendezési sorrend:"
+
+#: WikidPad.xrc:0
+msgid "Sound"
+msgstr "Hang"
+
+#: WikidPad.xrc:0
+msgid "Sound file:"
+msgstr "Hangfájl:"
+
+#: WikidPad.xrc:0
+msgid "Spell Check"
+msgstr "Helyesírásellenőrző"
+
+#: WikidPad.xrc:0
+msgid "Start browser after export"
+msgstr "Böngésző indítása export után"
+
+#: WikidPad.xrc:0
+msgid "Statusbar time format:"
+msgstr "Státuszsáv időformátuma"
+
+#: WikidPad.xrc:0
+msgid "Steps to complete version:"
+msgstr "Változatok a teljes verzióig:"
+
+#: WikidPad.xrc:0
+msgid "Store relative pathes to wikis"
+msgstr "Wikikben relatív útvonalak tárolása"
+
+#: WikidPad.xrc:0
+msgid "Structure window heading depth:"
+msgstr "Struktúraablak fejlécmélysége"
+
+#: WikidPad.xrc:0
+msgid "Structure window position:"
+msgstr "Struktúraablak pozíciója:"
+
+#: WikidPad.xrc:0
+msgid "Structure window selection auto-follow"
+msgstr "Struktúraablak kiválasztás automatikus követése"
+
+#: WikidPad.xrc:0
+msgid "Swap From <-> To"
+msgstr "Cserélje erről <-> erre"
+
+#: WikidPad.xrc:0
+msgid "Switch Ed./Prev"
+msgstr "Szerk./Előnéz. vált."
+
+#: WikidPad.xrc:0
+msgid "Switch Tabs in MRU order"
+msgstr "Fülek váltása időrenben"
+
+#: WikidPad.xrc:0
+msgid "Switch tab to edit"
+msgstr "Előnézet: fülön szerkeszt"
+
+#: WikidPad.xrc:0
+msgid "Sync. highlighting limit:"
+msgstr "Szinkr. kiemelési határérték:"
+
+#: WikidPad.xrc:0
+msgid "Synchronize editor by preview selection"
+msgstr "Szerkesztő szinkronizálása az előnézeti kiválasztáshoz"
+
+#: WikidPad.xrc:0
+msgid "System"
+msgstr "Rendszer"
+
+#: WikidPad.xrc:0
+msgid "Tab history"
+msgstr "Fül-előzmények"
+
+#: WikidPad.xrc:0
+msgid "Tab mode:"
+msgstr "Fül mód:"
+
+#: WikidPad.xrc:0
+msgid "Tab width:"
+msgstr "Fül szélessége"
+
+#: WikidPad.xrc:0
+msgid "Table of contents:"
+msgstr "Tartalomjegyzék:"
+
+#: WikidPad.xrc:0
+msgid "Template page names reg. exp.:"
+msgstr "Sablonlapok reg.ex.:"
+
+#: WikidPad.xrc:0
+msgid "Temporary file directory:"
+msgstr "Időszakos fájlok könyvtára:"
+
+#: WikidPad.xrc:0
+msgid "Temporary files"
+msgstr "Időszakos fájlok"
+
+#: WikidPad.xrc:0
+msgid "Temporary path:"
+msgstr "Időszakos útvonala:"
+
+#: WikidPad.xrc:0
+msgid "Test"
+msgstr "Teszt"
+
+#: WikidPad.xrc:0
+msgid "Text color:"
+msgstr "Szövegszin:"
+
+#: WikidPad.xrc:0
+msgid "Text cursor color:"
+msgstr "Szövegkurzor színe:"
+
+#: WikidPad.xrc:0
+msgid "Time coarsening:"
+msgstr "Idő bővítése:"
+
+#: WikidPad.xrc:0
+msgid "Timeline"
+msgstr "Időrend"
+
+#: WikidPad.xrc:0
+msgid "Title of toc:"
+msgstr "Tartalomjegyzék elnevezése:"
+
+#: WikidPad.xrc:0
+msgid "To Word:"
+msgstr "Szóra:"
+
+#: WikidPad.xrc:0
+msgid "To check"
+msgstr "Ellenőrzendő"
+
+#: WikidPad.xrc:0
+msgid "Top"
+msgstr "Tető"
+
+#: WikidPad.xrc:0
+msgid "Translate menu accelerators for keyboard layout* (Windows)"
+msgstr "Bilentyűzet kiosztás gyorsítók lefordítása* (Windows)"
+
+#: WikidPad.xrc:0
+msgid "Trashcan"
+msgstr "Kuka"
+
+#: WikidPad.xrc:0
+msgid "Tree auto-follow"
+msgstr "Fa - automatikus követés"
+
+#: WikidPad.xrc:0
+msgid "Tree auto-hide"
+msgstr "Fa automatikus rejtése"
+
+#: WikidPad.xrc:0
+msgid "Tree timing"
+msgstr "Fa időzítése"
+
+#: WikidPad.xrc:0
+msgid "Tree update after save"
+msgstr "Fa frissítése mentés után"
+
+#: WikidPad.xrc:0
+msgid "UI Language:"
+msgstr "Kezelői felület nyelve"
+
+#: WikidPad.xrc:0
+msgid "UTF-8 with BOM"
+msgstr "UTF-8 BOM-mal"
+
+#: WikidPad.xrc:0
+msgid "UTF-8 without BOM"
+msgstr "UTF-8 BOM-nélkül"
+
+#: WikidPad.xrc:0
+msgid "Unordered"
+msgstr "Rendezetlen"
+
+#: WikidPad.xrc:0
+msgid "Up"
+msgstr "Fel"
+
+#: WikidPad.xrc:0
+msgid "Up to heading depth:"
+msgstr "Fejléc mélység:"
+
+#: WikidPad.xrc:0
+msgid "Update ext. mod. files"
+msgstr "Ext. mod. fájlok frissítése"
+
+#: WikidPad.xrc:0
+msgid "Update step min. delay:"
+msgstr "Frissítési lépések késleltetése min."
+
+#: WikidPad.xrc:0
+msgid "Uppercase first"
+msgstr "Nagybetűsek előre"
+
+#: WikidPad.xrc:0
+msgid "Use IME workaround for editor input*"
+msgstr "IME munkakörnyezet használata a szerkesztő bemeneteként*"
+
+#: WikidPad.xrc:0
+msgid "Use link title if present"
+msgstr "Hivatkozási címek használata, ha vannak"
+
+#: WikidPad.xrc:0
+msgid "Use vi keys in Webkit preview"
+msgstr "Webkit nézetben vi billentyűk használata"
+
+#: WikidPad.xrc:0
+msgid "Use vi keys in editor"
+msgstr "SZerkesztőben vi billentyűk használata"
+
+#: WikidPad.xrc:0
+msgid "User notification:"
+msgstr "Felhasználó értesítése:"
+
+#: WikidPad.xrc:0
+msgid "Version Import"
+msgstr "Verzió impotrálása"
+
+#: WikidPad.xrc:0
+msgid "Versioning"
+msgstr "Verziózás"
+
+#: WikidPad.xrc:0
+msgid "Visited link color:"
+msgstr "Meglátogatott hivatkozások színe:"
+
+#: WikidPad.xrc:0
+msgid "Warn about other processes (Windows only)"
+msgstr "Más folyamatokra figyelmeztet (csak Windows)"
+
+#: WikidPad.xrc:0
+msgid "What to export:"
+msgstr "Exportálandó:"
+
+#: WikidPad.xrc:0
+msgid "What to print:"
+msgstr "Nyomtatandó:"
+
+#: WikidPad.xrc:0
+msgid "Where to store:"
+msgstr "Tárolás helye:"
+
+#: WikidPad.xrc:0
+msgid "While wiki open"
+msgstr "Amíg a wiki nyitva:"
+
+#: WikidPad.xrc:0
+msgid "Width:"
+msgstr "Szélesség:"
+
+#: WikidPad.xrc:0
+msgid "Wiki Search"
+msgstr "Wiki keresés"
+
+#: WikidPad.xrc:0
+msgid "Wiki Word"
+msgstr "Wikiszó"
+
+#: WikidPad.xrc:0
+msgid "Wiki icon:"
+msgstr "Wiki ikon:"
+
+#: WikidPad.xrc:0
+msgid "Wiki language:"
+msgstr "Wiki nyelve"
+
+#: WikidPad.xrc:0
+msgid "Wiki word to heading:"
+msgstr "Wikiszó fejlécbe"
+
+#: WikidPad.xrc:0
+msgid "Wiki-bound hotkey:"
+msgstr "Wikit elrejtő gyorsbillentyű:"
+
+#: WikidPad.xrc:0
+msgid "Wiki-wide search"
+msgstr "Wiki-szintű keresés:"
+
+#: WikidPad.xrc:0
+msgid "Write saved searches"
+msgstr "Mentett keresések kiírása"
+
+#: WikidPad.xrc:0
+msgid "Write version data of pages"
+msgstr "A lapok verzióadatai írja ki"
+
+#: WikidPad.xrc:0
+msgid "Write wiki func. pages"
+msgstr "Wiki funkciólapok írása"
+
+#: WikidPad.xrc:0
+msgid "bytes"
+msgstr "bájt"
+
+#: WikidPad.xrc:0
+msgid "cursor"
+msgstr "kurzor"
+
+#: WikidPad.xrc:0
+msgid "include in export:"
+msgstr "ellenőriz exportban:"
+
+#: WikidPad.xrc:0
+msgid "include in preview:"
+msgstr "ellenőriz előnézetben:"
+
+#: WikidPad.xrc:0
+msgid "level(s) below"
+msgstr "szinttel alatta"
+
+#: WikidPad.xrc:0
+msgid "milliseconds"
+msgstr "ezredmásodperc"
+
+#: WikidPad.xrc:0
+msgid "not  "
+msgstr "nem   "
+
+#: WikidPad.xrc:0
+msgid "second(s)"
+msgstr "másodperc"
+
+#: WikidPad.xrc:0 extensions\GraphvizStructureView.py:678
+#: extensions\GraphvizStructureView.py:702
+#: extensions\GraphvizStructureView.py:715
+#: extensions\GraphvizStructureView.py:728
+msgid "..."
+msgstr "..."
+
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:823
+msgid " OK "
+msgstr " OK "
+
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:827
+msgid " Cancel "
+msgstr " Elvet "
+
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1215
+msgid "Destination directory:"
+msgstr "Célkönyvtár:"
+
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1409
+#: lib\pwiki\SearchAndReplaceDialogs.py:892
+#: lib\pwiki\SearchAndReplaceDialogs.py:1697
+msgid "Title:"
+msgstr "Cím:"
+
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1691
+msgid "Source directory:"
+msgstr "Forráskönyvtár:"
+
+#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:509
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1389
+#: lib\pwiki\PersonalWikiFrame.py:1368 lib\pwiki\WikiTxtCtrl.py:3732
+msgid "Copy"
+msgstr "Másol"
+
+#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:510
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1398
+#: lib\pwiki\PersonalWikiFrame.py:1377 lib\pwiki\WikiTxtCtrl.py:3735
+msgid "Select All"
+msgstr "Kiválaszt mind"
+
+#: WikidPad.xrc:0 lib\pwiki\DiffGui.py:512 lib\pwiki\WikiTxtCtrl.py:3752
+msgid "Close Tab"
+msgstr "Fül bezárása"
+
+#: WikidPad.xrc:0 lib\pwiki\FileCleanup.py:528 lib\pwiki\FileCleanup.py:530
+#: lib\pwiki\FileCleanup.py:686 lib\pwiki\FileCleanup.py:1264
+msgid "Keep"
+msgstr "Megtart"
+
+#: WikidPad.xrc:0 lib\pwiki\FileCleanup.py:528 lib\pwiki\FileCleanup.py:616
+#: lib\pwiki\FileCleanup.py:686 lib\pwiki\FileCleanup.py:775
+#: lib\pwiki\MptImporterGui.py:173 lib\pwiki\MptImporterGui.py:175
+#: lib\pwiki\OptionsDialog.py:139 lib\pwiki\OptionsDialog.py:916
+msgid "Default"
+msgstr "Alapbeállítás"
+
+#: WikidPad.xrc:0 lib\pwiki\FileCleanup.py:529 lib\pwiki\FileCleanup.py:531
+#: lib\pwiki\FileCleanup.py:687 lib\pwiki\FileCleanup.py:1265
+#: lib\pwiki\WikiTxtCtrl.py:3734
+msgid "Delete"
+msgstr "Töröl"
+
+#: WikidPad.xrc:0 lib\pwiki\FileCleanup.py:529 lib\pwiki\FileCleanup.py:531
+#: lib\pwiki\FileCleanup.py:1265
+msgid "Collect"
+msgstr "Összegyűjt"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1364
+#: lib\pwiki\PersonalWikiFrame.py:1343 lib\pwiki\WikiTxtCtrl.py:3729
+msgid "Undo"
+msgstr "Visszavon"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1368
+#: lib\pwiki\PersonalWikiFrame.py:1347 lib\pwiki\WikiTxtCtrl.py:3730
+msgid "Redo"
+msgstr "Ismét"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1384
+#: lib\pwiki\PersonalWikiFrame.py:1363 lib\pwiki\WikiTxtCtrl.py:3731
+msgid "Cut"
+msgstr "Kivág"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1393
+#: lib\pwiki\PersonalWikiFrame.py:1372 lib\pwiki\WikiTxtCtrl.py:3733
+msgid "Paste"
+msgstr "Beilleszt"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:1686
+#: lib\pwiki\PersonalWikiFrame.py:1665
+msgid "&Delete"
+msgstr "Töröl"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:2115
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2116
+#: lib\pwiki\PersonalWikiFrame.py:2100 lib\pwiki\PersonalWikiFrame.py:2101
+msgid "Open Wiki Word"
+msgstr "Wikiszó megnyitása"
+
+#: WikidPad.xrc:0 lib\pwiki\Kopie von PersonalWikiFrame.py:2146
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2147
+#: lib\pwiki\PersonalWikiFrame.py:2131 lib\pwiki\PersonalWikiFrame.py:2132
+msgid "Rename Wiki Word"
+msgstr "Wiki-szó átnevezése"
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:173
+#: lib\pwiki\MptImporterGui.py:175
+msgid "Yes"
+msgstr "Igen"
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:174
+msgid "Overwrite"
+msgstr "Felülír"
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:174
+#: lib\pwiki\MptImporterGui.py:175
+msgid "No"
+msgstr "Nem"
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:199
+msgid "Import"
+msgstr "Importál"
+
+#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:697
+msgid "Editor"
+msgstr "Szerkesztő"
+
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1066
+msgid "Close"
+msgstr "Bezár"
+
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1923
+msgid "Set page list"
+msgstr "Oldallista beállítása"
+
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2174
+msgid "As Resultlist"
+msgstr "Eredménylistaként"
+
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2179
+#: lib\pwiki\SearchAndReplaceDialogs.py:2285
+msgid "As Full Search"
+msgstr "Teljes keresésként"
+
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2579
+#: lib\pwiki\WikiHtmlView.py:708
+msgid "Activate New Tab"
+msgstr "Új Fül Aktiválása"
+
+#: WikidPad.xrc:0 lib\pwiki\timeView\TimeViewCtrl.py:58
+msgid "Wiki-wide history"
+msgstr "Wiki-szintű előzmények"
+
+#: WikidPad.xrc:0 lib\pwiki\timeView\TimelinePanel.py:798
+msgid "Show empty days"
+msgstr "Üres napok megjelenítése"
+
+#: WikidPad.xrc:0 lib\pwiki\timeView\TimelinePanel.py:800
+msgid "Sort dates ascending"
+msgstr "Dátumokat emelkedő sorrendben"
+
+#: WikidPadStarter.py:212
+msgid "Error starting WikidPad"
+msgstr "Hiba WikidPad indításakor"
+
+#: WikidPadStarter.py:213 lib\pwiki\Kopie von PersonalWikiFrame.py:5344
+#: lib\pwiki\PersonalWikiFrame.py:5337
+#: lib\pwiki\SearchAndReplaceDialogs.py:935
+#: lib\pwiki\SearchAndReplaceDialogs.py:1219
+msgid "Error!"
+msgstr "Hiba!"
+
+#: WikidPadStarter.py:220 extensions\PrintDefault.py:761
+#: lib\pwiki\MptImporterGui.py:203
+msgid "Error"
+msgstr "Hiba"
+
+#: extensions\GnuplotClBridge.py:91
+msgid "[Please set path to Gnuplot executable]"
+msgstr "[Állítsa be a futtatható Gnuplot útvonalát]"
+
+#: extensions\GnuplotClBridge.py:140
+msgid "[Gnuplot error: %s]"
+msgstr "[Gnuplot hiba: %s]"
+
+#: extensions\GnuplotClBridge.py:191
+msgid "Path to Gnuplot:"
+msgstr "Gnuplot útvonala:"
+
+#: extensions\GraphvizClBridge.py:106
+msgid "[Please set path to GraphViz executables]"
+msgstr "[Állítsa be a futtatható GraphViz útvonalát]"
+
+#: extensions\GraphvizClBridge.py:148
+msgid "[%s Error: %s]"
+msgstr "[%s Hiba: %s]"
+
+#: extensions\GraphvizClBridge.py:249
+msgid "Directory of executables:"
+msgstr "Parancskönyvtár:"
+
+#: extensions\GraphvizClBridge.py:253
+msgid "Name of dot executable:"
+msgstr "Dot parancs neve:"
+
+#: extensions\GraphvizClBridge.py:257
+msgid "Name of neato executable:"
+msgstr "Neato parancsok neve:"
+
+#: extensions\GraphvizClBridge.py:261
+msgid "Name of twopi executable:"
+msgstr "Twopi parancsok neve:"
+
+#: extensions\GraphvizClBridge.py:265
+msgid "Name of circo executable:"
+msgstr "Circo parancsok neve:"
+
+#: extensions\GraphvizClBridge.py:269
+msgid "Name of fdp executable:"
+msgstr "Fdp parancsok neve:"
+
+#: extensions\GraphvizStructureView.py:366
+msgid "%s Error: %s"
+msgstr "%s Hiba: %s"
+
+#: extensions\GraphvizStructureView.py:432
+#: extensions\GraphvizStructureView.py:433
+msgid "Show relation graph"
+msgstr "Mutassa a relációs ábrát"
+
+#: extensions\GraphvizStructureView.py:435
+msgid "Show rel. graph source"
+msgstr "Mutassa a relációs ábra forrását"
+
+#: extensions\GraphvizStructureView.py:437
+msgid "Show relation graph source"
+msgstr "Mutassa a relációs ábra forrását"
+
+#: extensions\GraphvizStructureView.py:439
+#: extensions\GraphvizStructureView.py:440
+msgid "Show child graph"
+msgstr "Mutassa a leszármazott ábrát"
+
+#: extensions\GraphvizStructureView.py:442
+#: extensions\GraphvizStructureView.py:444
+msgid "Show child graph source"
+msgstr "Mutassa a leszármaott ábra forrását"
+
+#: extensions\GraphvizStructureView.py:661
+msgid "  GraphVizStructure"
+msgstr "  GraphVizStruktúra"
+
+#: extensions\GraphvizStructureView.py:681
+msgid "Node font name:"
+msgstr "Csomópont betűtípusa:"
+
+#: extensions\GraphvizStructureView.py:693
+msgid "Node font size:"
+msgstr "Csomópont betűmérete"
+
+#: extensions\GraphvizStructureView.py:705
+msgid "Node border color:"
+msgstr "Csomópont határoló szín:"
+
+#: extensions\GraphvizStructureView.py:718
+msgid "Node background color:"
+msgstr "Csomópont háttérszín:"
+
+#: extensions\GraphvizStructureView.py:731
+msgid "Edge color:"
+msgstr "Mutató színe:"
+
+#: extensions\HtmlExporter.py:454
+msgid "One HTML page"
+msgstr "Egy HTML lap"
+
+#: extensions\HtmlExporter.py:455
+msgid "Set of HTML pages"
+msgstr "HTML lapsorozat"
+
+#: extensions\HtmlExporter.py:893 extensions\HtmlExporter.py:990
+msgid "Exporting %s"
+msgstr "Exportálás %s"
+
+#: extensions\HtmlExporter.py:1892
+msgid "<pre class=\"wikidpad\">[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
+msgstr "<pre class=\"wikidpad\">[Beillesztés ellenőrzése engedélyezhető \"Opciók\", lap \"Biztonság\", opció \"Művelet beillesztése szkript\"]</pre>"
+
+#: extensions\HtmlExporter.py:2546
+msgid "[Unknown parser node with name \"%s\" found]"
+msgstr "[Ismeretlen értelmező csomópont \%s\" néven]"
+
+#: extensions\MimeTexCGIBridge.py:92
+msgid "[Please set path to MimeTeX executable]"
+msgstr "[Állítsa be a parancs Mimetex elérési útját]"
+
+#: extensions\MimeTexCGIBridge.py:124
+msgid "[Invalid response from MimeTeX]"
+msgstr "[Érvénytelen válasz a MimeTeX-től]"
+
+#: extensions\MimeTexCGIBridge.py:185
+msgid "Path to MimeTeX:"
+msgstr "MimeTex-útvonal:"
+
+#: extensions\PloticusClBridge.py:108
+msgid "[Please set path to Ploticus executable]"
+msgstr "[Állítsa be a Ploticus parancs elérési útját]"
+
+#: extensions\PloticusClBridge.py:151
+msgid "[Ploticus error: %s]"
+msgstr "[Ploticus hiba: %s]"
+
+#: extensions\PloticusClBridge.py:211
+msgid "Path to Ploticus:"
+msgstr "Ploticus-útvonal"
+
+#: extensions\PloticusClBridge.py:217
+msgid "Output format:"
+msgstr "Kimeneti formátum:"
+
+#: extensions\PrintDefault.py:245 extensions\PrintDefault.py:628
+msgid "Print Preview"
+msgstr "Nyomtatási előnézet"
+
+#: extensions\PrintDefault.py:258
+msgid "Printout"
+msgstr "Nyomtatvány"
+
+#: extensions\PrintDefault.py:760
+msgid "Error loading Webkit: try a different export format)"
+msgstr "Webkit-betöltési hiba: próbáljon másik export formátumot"
+
+#: extensions\WikidPadParserStub.py:121
+#: extensions\WikidPadParserStub.py:124
+msgid "Footnotes as wiki words"
+msgstr "Lábjegyzetek wikiszóként"
+
+#: extensions\autoNew.py:58 extensions\autoNew.py:59
+msgid "Create new page"
+msgstr "Új lap"
+
+#: extensions\referrals.py:74 extensions\referrals.py:75
+#: extensions\referrals.py:109 extensions\referrals.py:129
+msgid "Insert referring pages"
+msgstr "Hivatkozó lapok beillesztése"
+
+#: extensions\referrals.py:109 extensions\referrals.py:129
+msgid "Referers"
+msgstr "Hivatkozók"
+
+#: extensions\referrals.py:147
+msgid "*%s page(s) referring to* %s\n"
+msgstr "*%s lap(ok) hivatkozi(na)k a* %s-ra\n"
+
+#: extensions\referrals.py:156
+msgid "*%s page(s) referred to by* %s\n"
+msgstr "*%s lap(ok)ra a *%s hivatkozi(na)k \n"
+
+#: extensions\wikidPadParser\WikidPadParser.py:1752
+#: extensions\wikidPadParser\WikidPadParser.py:1779
+msgid "This is a footnote"
+msgstr "Lábjegyzet"
+
+#: extensions\wikidPadParser\WikidPadParser.py:1757
+#: extensions\wikidPadParser\WikidPadParser.py:1784
+msgid "This is syntactically not a wiki word"
+msgstr "Szintaktikailag nem wikiszó"
+
+#: extensions\wikidPadParser\WikidPadParser.py:2429
+msgid ""
+"++ Wiki Settings\n"
+"\n"
+"These are your default global settings.\n"
+"\n"
+"[global.importance.low.color: grey]\n"
+"[global.importance.high.bold: true]\n"
+"[global.contact.icon: contact]\n"
+"[global.wrap: 70]\n"
+"\n"
+"[icon: cog]\n"
+msgstr ""
+"++ Wiki beállítások\n"
+"\n"
+"Az Ön glogális wiki alapbeállításai.\n"
+"\n"
+"[global.importance.low.color: grey]\n"
+"[global.importance.high.bold: true]\n"
+"[global.contact.icon: contact]\n"
+"[global.wrap: 70]\n"
+"\n"
+"[icon: cog]\n"
+
+#: lib\pwiki\AdditionalDialogs.py:145 lib\pwiki\AdditionalDialogs.py:366
+msgid "Links to:"
+msgstr "Link ehhez:"
+
+#: lib\pwiki\AdditionalDialogs.py:293 lib\pwiki\AdditionalDialogs.py:416
+msgid "'%s' is an invalid WikiWord"
+msgstr "'%s' szabálytalan Wikiszó"
+
+#: lib\pwiki\AdditionalDialogs.py:303
+msgid "'%s' is not an existing wikiword. Create?"
+msgstr "'%s' nem létező wikiszó. Létrehozzam?"
+
+#: lib\pwiki\AdditionalDialogs.py:304
+msgid "Create"
+msgstr "Létrehoz"
+
+#: lib\pwiki\AdditionalDialogs.py:422
+msgid "'%s' exists already"
+msgstr "'%s' már létezik"
+
+#: lib\pwiki\AdditionalDialogs.py:438 lib\pwiki\AdditionalDialogs.py:545
+msgid "Do you want to delete %i wiki page(s)?"
+msgstr "Törölni akarja %i wikilap(oka)t?"
+
+#: lib\pwiki\AdditionalDialogs.py:705
+msgid ""
+"Can't process renaming:\n"
+"%s"
+msgstr ""
+"Az átnevezés nem folytatható:\n"
+"%s"
+
+#: lib\pwiki\AdditionalDialogs.py:706
+msgid "Can't rename"
+msgstr "Nem átnevezhető"
+
+#: lib\pwiki\AdditionalDialogs.py:744
+msgid "Can't rename to itself"
+msgstr "Önmagára nem átnevezhető"
+
+#: lib\pwiki\AdditionalDialogs.py:747 lib\pwiki\TrashcanGui.py:379
+#: lib\pwiki\WikiExceptions.py:73
+msgid "Word already exists"
+msgstr "Szó már létezik"
+
+#: lib\pwiki\AdditionalDialogs.py:796
+msgid "Select Icon"
+msgstr "Ikon kiválasztás"
+
+#: lib\pwiki\AdditionalDialogs.py:805
+msgid "Icon"
+msgstr "Ikon"
+
+#: lib\pwiki\AdditionalDialogs.py:871
+msgid ""
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"\n"
+"<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Directive</b></td>\n"
+"        <td align=\"left\"><b>Meaning</b></td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
+"        <td align=\"left\">Locale's abbreviated weekday name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%A</code></td>\n"
+"        <td align=\"left\">Locale's full weekday name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%b</code></td>\n"
+"        <td align=\"left\">Locale's abbreviated month name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%B</code></td>\n"
+"        <td align=\"left\">Locale's full month name.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
+"        <td align=\"left\">Locale's appropriate date and time representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
+"        <td align=\"left\">Day of the month as a decimal number [01,31].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
+"        <td align=\"left\">Hour (24-hour clock) as a decimal number [00,23].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
+"        <td align=\"left\">Hour (12-hour clock) as a decimal number [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
+"        <td align=\"left\">Day of the year as a decimal number [001,366].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
+"        <td align=\"left\">Month as a decimal number [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
+"        <td align=\"left\">Minute as a decimal number [00,59].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
+"        <td align=\"left\">Locale's equivalent of either AM or PM.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
+"        <td align=\"left\">Second as a decimal number [00,61].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
+"        <td align=\"left\">Weekday as a decimal number [1(Monday),7].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
+"        <td align=\"left\">Week number of the year (Sunday as the first day of the\n"
+"                week) as a decimal number [00,53].  All days in a new year\n"
+"                preceding the first Sunday are considered to be in week 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
+"        <td align=\"left\">Weekday as a decimal number [0(Sunday),6].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
+"        <td align=\"left\">Week number of the year (Monday as the first day of the\n"
+"                week) as a decimal number [00,53].  All days in a new year\n"
+"                preceding the first Monday are considered to be in week 0.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
+"        <td align=\"left\">Locale's appropriate date representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
+"        <td align=\"left\">Locale's appropriate time representation.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
+"        <td align=\"left\">Year without century as a decimal number [00,99].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
+"        <td align=\"left\">Year with century as a decimal number.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
+"        <td align=\"left\">Time zone name (no characters if no time zone exists).</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
+"        <td align=\"left\">A literal \"<tt class=\"character\">%</tt>\" character.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\n"
+"</code></td>\n"
+"        <td align=\"left\">A newline.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\\\</code></td>\n"
+"        <td align=\"left\">A literal \"<tt class=\"character\">\\</tt>\" character.</td></tr>\n"
+"    </tbody>\n"
+"</table>\n"
+"</body>\n"
+"</html>\n"
+msgstr ""
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"\n"
+"<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Utasítás</b></td>\n"
+"        <td align=\"left\"><b>Jelentés</b></td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
+"        <td align=\"left\">A hét napjai rövidítve helyi nyelven</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%A</code></td>\n"
+"        <td align=\"left\">A hét napjai helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%b</code></td>\n"
+"        <td align=\"left\">A hónapok rövidítve helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%B</code></td>\n"
+"        <td align=\"left\">A hónapok neve helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
+"        <td align=\"left\">Dátum és idő szabályos megjelenítése helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
+"        <td align=\"left\">A hónap napjai számokkal. [01,31].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
+"        <td align=\"left\">Óra (24 órás megjelenítés) számokkal [00,23].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
+"        <td align=\"left\">Óra (12 órás megjelenítés) számokkal. [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
+"        <td align=\"left\">Év napja számokkal [001,366].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
+"        <td align=\"left\">Hónapok számokkal. [01,12].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
+"        <td align=\"left\">Percek, számokkal. [00,59].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
+"        <td align=\"left\">DE DU megfelelője helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
+"        <td align=\"left\">Másodperc számokkal [00,61].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
+"        <td align=\"left\">Hét napja számokkal [1(Hétfő),7].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
+"        <td align=\"left\">Az év hetének sorszáma (vasárnap az első nap\n"
+"                a héten) [00,53].  Az új évet következő napok\n"
+"                számítanak és az első vasárnap a 0. hétre esik.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
+"        <td align=\"left\">A hét napja számokkal [0(vasárnap),6].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
+"        <td align=\"left\">Az év hetének sorszáma (hétfő az első nap a\n"
+"                héten)  [00,53].  Az új évet következő napok\n"
+"                számítanak és az első hétfő a 0. hétre esik.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
+"        <td align=\"left\">A dátum szabályos megjelenítése helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
+"        <td align=\"left\">Az idő szabályos megjelenítése helyi nyelven.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
+"        <td align=\"left\">Évszám arabszámmal évszázad nélkül  [00,99].</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
+"        <td align=\"left\">Évszám arabszámmal évszázaddal .</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
+"        <td align=\"left\">Az időzóna elnevezése (nincs betű nemlétező időzónánál).</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
+"        <td align=\"left\">Betű \"<tt class=\"character\">%</tt>\" karakter.</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\n"
+"</code></td>\n"
+"        <td align=\"left\">Új sor</td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><code>\\\\</code></td>\n"
+"        <td align=\"left\">Betű \"<tt class=\"character\">\\</tt>\" Karakter.</td></tr>\n"
+"    </tbody>\n"
+"</table>\n"
+"</body>\n"
+"</html>\n"
+
+#: lib\pwiki\AdditionalDialogs.py:981
+msgid "<invalid>"
+msgstr "<érvénytelen>"
+
+#: lib\pwiki\AdditionalDialogs.py:1111
+msgid "Continuous Export"
+msgstr "Folyamatos export"
+
+#: lib\pwiki\AdditionalDialogs.py:1218
+msgid "Destination file:"
+msgstr "Célfájl:"
+
+#: lib\pwiki\AdditionalDialogs.py:1252
+msgid "Destination directory does not exist"
+msgstr "Célkönyvtár nem létezik"
+
+#: lib\pwiki\AdditionalDialogs.py:1257
+msgid "Destination must be a directory"
+msgstr "A cél, könyvtár kell legyen"
+
+#: lib\pwiki\AdditionalDialogs.py:1263
+msgid "Destination must be a file"
+msgstr "A cél, fálj kell legyen"
+
+#: lib\pwiki\AdditionalDialogs.py:1273
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4863
+#: lib\pwiki\PersonalWikiFrame.py:4856
+msgid "Exporting"
+msgstr "Exportál"
+
+#: lib\pwiki\AdditionalDialogs.py:1275
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4865
+#: lib\pwiki\PersonalWikiFrame.py:4858
+msgid "Preparing"
+msgstr "Előkészítés"
+
+#: lib\pwiki\AdditionalDialogs.py:1295
+msgid "Error while exporting"
+msgstr "Hiba exportáláskor"
+
+#: lib\pwiki\AdditionalDialogs.py:1311
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4806
+#: lib\pwiki\PersonalWikiFrame.py:4799
+msgid "Select Export Directory"
+msgstr "Válassza ki ez exportkönyvtárat"
+
+#: lib\pwiki\AdditionalDialogs.py:1325 lib\pwiki\AdditionalDialogs.py:1764
+msgid "All files (*.*)"
+msgstr "Összes fájl (*.*)"
+
+#: lib\pwiki\AdditionalDialogs.py:1330
+msgid "Select Export File"
+msgstr "Exportfájl Kiválasztása"
+
+#: lib\pwiki\AdditionalDialogs.py:1357
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4830
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4846
+#: lib\pwiki\PersonalWikiFrame.py:4823 lib\pwiki\PersonalWikiFrame.py:4839
+#: lib\pwiki\Printing.py:264
+msgid "No real wiki word selected as root"
+msgstr "A gyökérnek választott nem wikiszó"
+
+#: lib\pwiki\AdditionalDialogs.py:1410
+msgid "Choose export title"
+msgstr "Export-cím kiválasztása"
+
+#: lib\pwiki\AdditionalDialogs.py:1419
+msgid "Do you want to overwrite existing export '%s'?"
+msgstr "Felül akarja írni a létező exportot '%s'?"
+
+#: lib\pwiki\AdditionalDialogs.py:1420
+msgid "Overwrite export"
+msgstr "Export felülírása"
+
+#: lib\pwiki\AdditionalDialogs.py:1459
+msgid "Do you want to delete %i export(s)?"
+msgstr "Törölni akarja az %i exporto(ka)t?"
+
+#: lib\pwiki\AdditionalDialogs.py:1460
+msgid "Delete export"
+msgstr "Export törlése"
+
+#: lib\pwiki\AdditionalDialogs.py:1497
+msgid "Selected export type does not support saving"
+msgstr "A választot exporttípus nem támogatja a mentést"
+
+#: lib\pwiki\AdditionalDialogs.py:1538 lib\pwiki\CmdLineAction.py:222
+msgid "Export type '%s' of saved export is not supported"
+msgstr "A(z) '%s' mentett export típusa nem támogatott "
+
+#: lib\pwiki\AdditionalDialogs.py:1549 lib\pwiki\CmdLineAction.py:233
+msgid ""
+"Saved export uses different version for additional options than current export\n"
+"Export type: '%s'\n"
+"Saved export version: %i\n"
+"Current export version: %i"
+msgstr ""
+"A mentett export a kiegészítő opciókra eltérő verziót használ mint a jelenlegi export\n"
+"Exportport típusa: '%n'\n"
+"Mentett export verziója: %i\n"
+"Aktuális export verziója: %i"
+
+#: lib\pwiki\AdditionalDialogs.py:1557 lib\pwiki\CmdLineAction.py:242
+msgid "Type of additional option storage ('%s') is unknown"
+msgstr "A további opciók tárolásának típusa ('%s') ismeretlen"
+
+#: lib\pwiki\AdditionalDialogs.py:1581 lib\pwiki\CmdLineAction.py:264
+msgid "Error during retrieving saved export: "
+msgstr "Hiba a mentett export beolvasásakor:"
+
+#: lib\pwiki\AdditionalDialogs.py:1694
+msgid "Source file:"
+msgstr "Forrásfájl:"
+
+#: lib\pwiki\AdditionalDialogs.py:1710
+msgid "Source does not exist"
+msgstr "Forrás nem létezik"
+
+#: lib\pwiki\AdditionalDialogs.py:1720
+msgid "Source must be a directory"
+msgstr "A forrás, könyvtár kell legyen"
+
+#: lib\pwiki\AdditionalDialogs.py:1725
+msgid "Source must be a file"
+msgstr "A forrás, fálj kell legyen"
+
+#: lib\pwiki\AdditionalDialogs.py:1736
+msgid "Error while importing"
+msgstr "Hiba importáláskor"
+
+#: lib\pwiki\AdditionalDialogs.py:1750
+msgid "Select Import Directory"
+msgstr "Import könyvtár kiválasztás"
+
+#: lib\pwiki\AdditionalDialogs.py:1765
+msgid "*"
+msgstr "*"
+
+#: lib\pwiki\AdditionalDialogs.py:1769
+msgid "Select Import File"
+msgstr "Importfájlt kiválasztás"
+
+#: lib\pwiki\AdditionalDialogs.py:1885
+msgid ""
+"\n"
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"    <center>\n"
+"        <table bgcolor=\"#CCCCCC\" width=\"100%%\" cellspacing=\"0\" cellpadding=\"0\" border=\"1\">\n"
+"            <tr>\n"
+"                <td align=\"center\"><h2>%s</h2></td>\n"
+"            </tr>\n"
+"        </table>\n"
+"\n"
+"        <p>\n"
+"wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down.\n"
+"What makes wikidPad different from other notepad applications is the ease with which you can cross-link your information.        </p>        \n"
+"        <br><br>\n"
+"\n"
+"        <table border=0 cellpadding=1 cellspacing=0>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Russian:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"        </table>\n"
+"    </center>\n"
+"    \n"
+"    \n"
+"\n"
+"    \n"
+"    <hr />\n"
+"    \n"
+"    <p>Your configuration directory is: <b>%s</b><br />\n"
+"    Sqlite version: <b>%s</b><br />\n"
+"    wxPython version: <b>%s</b>\n"
+"    </p>\n"
+"    \n"
+"</body>\n"
+"</html>\n"
+msgstr ""
+"\n"
+"<html>\n"
+"<body bgcolor=\"#FFFFFF\">\n"
+"    <center>\n"
+"        <table bgcolor=\"#CCCCCC\" width=\"100%%\" cellspacing=\"0\" cellpadding=\"0\" border=\"1\">\n"
+"            <tr>\n"
+"                <td align=\"center\"><h2>%s</h2></td>\n"
+"            </tr>\n"
+"        </table>\n"
+"\n"
+"        <p>\n"
+"A WikidPad egy Wikiszerű jegyzettömb, gondolatok, ötletek, tennivalók, kapcsolatok, vagy bármi más feljegyzésére, amit fontosnak gondol leírni.\n"
+"Ami a WikidPad-ot megkülönbözteti más jegyzettömb alkalmazásoktól, az a könnyedség, amivel információhoz  kereszthivatkozásokat készíthe.        </p>        \n"
+"        <br><br>\n"
+"\n"
+"        <table border=0 cellpadding=1 cellspacing=0>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Author:</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Fordítás:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Magyar:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"        </table>\n"
+"    </center>\n"
+"    \n"
+"    \n"
+"\n"
+"     \n"
+"    <hr />\n"
+"    \n"
+"    <p>Az ön konfigurációs könyvtára: <b>%s</b><br />\n"
+"    Sqlite verzió: <b>%s</b><br />\n"
+"    wxPython verzió: <b>%s</b>\n"
+"    </p>\n"
+"    \n"
+"</body>\n"
+"</html>\n"
+
+#: lib\pwiki\AdditionalDialogs.py:1936
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2033
+#: lib\pwiki\PersonalWikiFrame.py:2018
+msgid "About WikidPad"
+msgstr "WikidPad névjegye"
+
+#: lib\pwiki\AdditionalDialogs.py:1940
+msgid "N/A"
+msgstr "Nincs adat"
+
+#: lib\pwiki\AdditionalDialogs.py:1950
+msgid "Okay"
+msgstr "Rendben"
+
+#: lib\pwiki\AdditionalDialogs.py:2056
+msgid "Wiki Properties"
+msgstr "Wiki tulajdonságok"
+
+#: lib\pwiki\AdditionalDialogs.py:2132
+#: lib\pwiki\AdditionalDialogs.py:2063
+msgid "No wiki loaded"
+msgstr "Nincs betöltött Wikilap"
+
+#: lib\pwiki\AdditionalDialogs.py:2067
+msgid "Wiki config. path:"
+msgstr "Wiki konfig. útvonal"
+
+#: lib\pwiki\AdditionalDialogs.py:2073
+msgid "Wiki database backend:"
+msgstr "Wiki adatbázisfeldolgozó"
+
+#: lib\pwiki\AdditionalDialogs.py:2081
+msgid "Number of wiki pages:"
+msgstr "Wiki lapok száma:"
+
+#: lib\pwiki\AdditionalDialogs.py:2090
+msgid "Wiki is read-only. Reason:"
+msgstr "A wiki csak olvasható, mert:"
+
+#: lib\pwiki\AdditionalDialogs.py:2093
+msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
+msgstr "Az adatbázis írási elérése megszűnt. Próbálja a \"Wik\"->\"Újracsatlakozi\""
+
+#: lib\pwiki\AdditionalDialogs.py:2095
+msgid "Wiki was set read-only in options dialog"
+msgstr "A wiki az opcióknál csak olvashatóra lett állítva"
+
+#: lib\pwiki\AdditionalDialogs.py:2100 lib\pwiki\AdditionalDialogs.py:2102
+msgid "Can't write wiki config.:"
+msgstr "Nem tudja írni a wiki konfig.-ot "
+
+#: lib\pwiki\AdditionalDialogs.py:2100 lib\pwiki\AdditionalDialogs.py:2104
+msgid "Unknown reason"
+msgstr "Ismeretlen_ok"
+
+#: lib\pwiki\AdditionalDialogs.py:2117
+msgid "Jobs"
+msgstr "Feladatok"
+
+#: lib\pwiki\AdditionalDialogs.py:2141
+msgid "Number of Jobs:"
+msgstr "Feladatszám:"
+
+#: lib\pwiki\AdditionalDialogs.py:2142
+msgid "Number of Done Jobs:"
+msgstr "Elvégzett faladatok száma:"
+
+#: lib\pwiki\AttributeHandling.py:32
+msgid "AQUAMARINE"
+msgstr "KÉKESZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:33
+msgid "BLACK"
+msgstr "FEKETE"
+
+#: lib\pwiki\AttributeHandling.py:34
+msgid "BLUE VIOLET"
+msgstr "IBOLYAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:35
+msgid "BLUE"
+msgstr "KÉK"
+
+#: lib\pwiki\AttributeHandling.py:36
+msgid "BROWN"
+msgstr "BARNA"
+
+#: lib\pwiki\AttributeHandling.py:37
+msgid "CADET BLUE"
+msgstr "ISKOLAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:38
+msgid "CORAL"
+msgstr "KORALL"
+
+#: lib\pwiki\AttributeHandling.py:39
+msgid "CORNFLOWER BLUE"
+msgstr "BÚZAVIRÁGKÉK"
+
+#: lib\pwiki\AttributeHandling.py:40
+msgid "CYAN"
+msgstr "CIÁN"
+
+#: lib\pwiki\AttributeHandling.py:41
+msgid "DARK GREEN"
+msgstr "SÖTÉTZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:42
+msgid "DARK GREY"
+msgstr "SÖTÉTSZÜRKE"
+
+#: lib\pwiki\AttributeHandling.py:43
+msgid "DARK OLIVE GREEN"
+msgstr "SÖTÉT OLIVAZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:44
+msgid "DARK ORCHID"
+msgstr "SÖTÉR ORCHIDEA"
+
+#: lib\pwiki\AttributeHandling.py:45
+msgid "DARK SLATE BLUE"
+msgstr "SÖTÉT PALAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:46
+msgid "DARK SLATE GREY"
+msgstr "SÖTÉT PALASZÜRKE"
+
+#: lib\pwiki\AttributeHandling.py:47
+msgid "DARK TURQUOISE"
+msgstr "SÖTÉT TÜRKIZ"
+
+#: lib\pwiki\AttributeHandling.py:48
+msgid "DIM GREY"
+msgstr "HALVÁNY SZÜRKE"
+
+#: lib\pwiki\AttributeHandling.py:49
+msgid "FIREBRICK"
+msgstr "TÉGLAVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:50
+msgid "FOREST GREEN"
+msgstr "ERDEI ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:51
+msgid "GOLD"
+msgstr "ARANY"
+
+#: lib\pwiki\AttributeHandling.py:52
+msgid "GOLDENROD"
+msgstr "ARANYRÚD"
+
+#: lib\pwiki\AttributeHandling.py:53
+msgid "GREEN YELLOW"
+msgstr "ZÖLDESSÁRGA"
+
+#: lib\pwiki\AttributeHandling.py:54
+msgid "GREEN"
+msgstr "ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:55
+msgid "GREY"
+msgstr "SZÜRKE"
+
+#: lib\pwiki\AttributeHandling.py:56
+msgid "INDIAN RED"
+msgstr "INDIÁNVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:57
+msgid "KHAKI"
+msgstr "KEKI"
+
+#: lib\pwiki\AttributeHandling.py:58
+msgid "LIGHT BLUE"
+msgstr "VILÁGOSKÉK"
+
+#: lib\pwiki\AttributeHandling.py:59
+msgid "LIGHT GREY"
+msgstr "VILÁGOSSZÜRKE"
+
+#: lib\pwiki\AttributeHandling.py:60
+msgid "LIGHT STEEL BLUE"
+msgstr "VILÁGOS ACÉLKÉK"
+
+#: lib\pwiki\AttributeHandling.py:61
+msgid "LIME GREEN"
+msgstr "LIME ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:62
+msgid "MAGENTA"
+msgstr "BÍBORVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:63
+msgid "MAROON"
+msgstr "GESZTENYE"
+
+#: lib\pwiki\AttributeHandling.py:64
+msgid "MEDIUM AQUAMARINE"
+msgstr "KÖZÉP KÉKESZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:65
+msgid "MEDIUM BLUE"
+msgstr "KÖZÉPKÉK"
+
+#: lib\pwiki\AttributeHandling.py:66
+msgid "MEDIUM FOREST GREEN"
+msgstr "KÖZÉP ERDEI ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:67
+msgid "MEDIUM GOLDENROD"
+msgstr "KŐZÉP ARANYRÚD"
+
+#: lib\pwiki\AttributeHandling.py:68
+msgid "MEDIUM ORCHID"
+msgstr "KÖZÉP ORCHIDEA"
+
+#: lib\pwiki\AttributeHandling.py:69
+msgid "MEDIUM SEA GREEN"
+msgstr "KÖZÉP TENGERÉSKÉK"
+
+#: lib\pwiki\AttributeHandling.py:70
+msgid "MEDIUM SLATE BLUE"
+msgstr "KÖZÉP PALAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:71
+msgid "MEDIUM SPRING GREEN"
+msgstr "KÖZÉP TAVASZI ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:72
+msgid "MEDIUM TURQUOISE"
+msgstr "KÖZÉP TÜRKIZ"
+
+#: lib\pwiki\AttributeHandling.py:73
+msgid "MEDIUM VIOLET RED"
+msgstr "KÖZÉP VIOLAVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:74
+msgid "MIDNIGHT BLUE"
+msgstr "ÉJKÉK"
+
+#: lib\pwiki\AttributeHandling.py:75
+msgid "NAVY"
+msgstr "TENGERÉSZKÉK"
+
+#: lib\pwiki\AttributeHandling.py:76
+msgid "ORANGE RED"
+msgstr "NARANCSVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:77
+msgid "ORANGE"
+msgstr "NARANCSSÁRGA"
+
+#: lib\pwiki\AttributeHandling.py:78
+msgid "ORCHID"
+msgstr "ORCHIDEA"
+
+#: lib\pwiki\AttributeHandling.py:79
+msgid "PALE GREEN"
+msgstr "HALVÁNYZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:80
+msgid "PINK"
+msgstr "RÓZSSZÍN"
+
+#: lib\pwiki\AttributeHandling.py:81
+msgid "PLUM"
+msgstr "SZILVAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:82
+msgid "PURPLE"
+msgstr "BORDÓ"
+
+#: lib\pwiki\AttributeHandling.py:83
+msgid "RED"
+msgstr "VÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:84
+msgid "SALMON"
+msgstr "LAZACVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:85
+msgid "SEA GREEN"
+msgstr "TENGERZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:86
+msgid "SIENNA"
+msgstr "SZIENNA"
+
+#: lib\pwiki\AttributeHandling.py:87
+msgid "SKY BLUE"
+msgstr "ÉGKÉK"
+
+#: lib\pwiki\AttributeHandling.py:88
+msgid "SLATE BLUE"
+msgstr "PALAKÉK"
+
+#: lib\pwiki\AttributeHandling.py:89
+msgid "SPRING GREEN"
+msgstr "TAVASZI ZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:90
+msgid "STEEL BLUE"
+msgstr "ACÉLKÉK"
+
+#: lib\pwiki\AttributeHandling.py:91
+msgid "TAN"
+msgstr "KREOL"
+
+#: lib\pwiki\AttributeHandling.py:92
+msgid "THISTLE"
+msgstr "BOGÁNCS"
+
+#: lib\pwiki\AttributeHandling.py:93
+msgid "TURQUOISE"
+msgstr "TÜRKIZ"
+
+#: lib\pwiki\AttributeHandling.py:94
+msgid "VIOLET RED"
+msgstr "VIOLAVÖRÖS"
+
+#: lib\pwiki\AttributeHandling.py:95
+msgid "VIOLET"
+msgstr "VIOLA"
+
+#: lib\pwiki\AttributeHandling.py:96
+msgid "WHEAT"
+msgstr "BÚZA"
+
+#: lib\pwiki\AttributeHandling.py:97
+msgid "WHITE"
+msgstr "FEHÉR"
+
+#: lib\pwiki\AttributeHandling.py:98
+msgid "YELLOW GREEN"
+msgstr "SÁRGÁSZÖLD"
+
+#: lib\pwiki\AttributeHandling.py:99
+msgid "YELLOW"
+msgstr "SÁRGA"
+
+#: lib\pwiki\AttributeHandling.py:366
+msgid "Parent wikiword does not exist: [%s: %s]"
+msgstr "Szülő wikiszó nem létezik: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:377
+msgid "Multiple parent attributes found on page: [%s: %s]"
+msgstr "Töbsszörözött szülői jellemzők a lapon: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:413
+msgid "Alias value isn't a valid wikiword: [%s: %s], %s"
+msgstr "Az álnév nem valós wikiszó: [%s: %s], %s"
+
+#: lib\pwiki\AttributeHandling.py:424
+msgid "A real wikiword with the alias name exists already: [%s: %s]"
+msgstr "Wikiszó ezzel az álnévvel már létezik: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:476
+msgid "Template value isn't a valid wikiword: [%s: %s], %s"
+msgstr "A sablonérték nem valós wikiszó: [%s: %s], %s"
+
+#: lib\pwiki\AttributeHandling.py:487
+msgid "Template value isn't an existing wikiword: [%s: %s]"
+msgstr "A sablonérték nemlétező wikiszó: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:534
+msgid "The attribute %s was already set differently on this page"
+msgstr "A(z) %s attribútumot már beállították másként a lapon"
+
+#: lib\pwiki\AttributeHandling.py:546
+msgid "Attribute '%s' is already defined on the wiki page(s): %s"
+msgstr "A(z) %s attribútumot már beállították a wikilap(ok)on: %s"
+
+#: lib\pwiki\AttributeHandling.py:555
+msgid "Icon name doesn't exist: [%s: %s]"
+msgstr "Nemlétező ikonnév: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:562
+msgid "Color name doesn't exist: [%s: %s]"
+msgstr "Nemlétező szín: [%s: %s]"
+
+#: lib\pwiki\AttributeHandling.py:609
+msgid "The attribute 'global.graph.relations.exclude' (e.g. on page '%s') overrides the '...include' attribute"
+msgstr "A 'global.graph.relations.exclude' attribútum (pl. a '%s' lapon) felülírja a(z) '...include' attribútumot"
+
+#: lib\pwiki\AttributeHandling.py:732
+msgid "Same attribute twice: [%s: %s]"
+msgstr "Ugyan  az a Jellemző duplázva: [%s: %s]"
+
+#: lib\pwiki\CmdLineAction.py:208
+msgid "Saved export '%s' is unknown."
+msgstr "A mentett export '%s' ismeretlen"
+
+#: lib\pwiki\CmdLineAction.py:295
+msgid "If saved export is given, 'what', 'type' and 'dest' aren't allowed."
+msgstr "Ha a mentett export létezik, akkor a 'mit', 'típus' és 'cél' nem engedélyezett"
+
+#: lib\pwiki\CmdLineAction.py:306
+msgid "To export, all three export options ('what', 'type' and 'dest') must be set."
+msgstr "Az exportáláshoz mindhárom opció ('mit, 'típus' és 'cél) beállítása szükséges."
+
+#: lib\pwiki\CmdLineAction.py:324
+msgid "Value for --export-what can be 'page', 'subtree' or 'wiki'."
+msgstr "A --export-what (mit) értéke lehet 'lap', 'alárendelt fa', vagy 'wiki'."
+
+#: lib\pwiki\CmdLineAction.py:348
+msgid ""
+"Value for --export-type can be one of:\n"
+"%s"
+msgstr ""
+"Az --export-type értéke lehet a(z) \n"
+"%s egyike"
+
+#: lib\pwiki\CmdLineAction.py:369
+msgid "Combination of --exit and --continuous-export-saved isn't allowed"
+msgstr "A kilpés és a folyamatos export mentése együttesen nem engedélyezett"
+
+#: lib\pwiki\CmdLineAction.py:377
+msgid ""
+"Options:\n"
+"\n"
+"    -h, --help: Show this message box\n"
+"    -w, --wiki  <wiki path>: set the wiki to open on startup\n"
+"    -p, --page  <page name>: set the page to open on startup\n"
+"    -x, --exit: exit immediately after performing command line actions\n"
+"    --export-what <what>: choose if you want to export page, subtree or wiki\n"
+"    --export-type <type>: tag of the export type\n"
+"    --export-dest <destination path>: path of destination directory for export\n"
+"    --export-saved <name of saved export>: alternatively name of saved export to run\n"
+"    --export-compfn: Use compatible filenames on export\n"
+"    --continuous-export-saved <name of saved export>: continuous export to start with\n"
+"    --rebuild: rebuild the Wiki database\n"
+"    --update-ext: update externally modified wiki files\n"
+"    --no-recent: Do not record opened wikis in recently opened wikis list\n"
+"    --preview: If no pages are given, all opened pages from previous session\n"
+"               are opened in preview mode. Otherwise all pages given after that\n"
+"               option are opened in preview mode.\n"
+"    --editor: Same as --preview but opens in text editor mode.\n"
+"\n"
+msgstr ""
+"Opciók:\n"
+"\n"
+"    -h, --help: Ezen üzenetdoboz megjelenítése \n"
+"    -w, --wiki  <wikiútvonal>: indításkor megnyitandó wiki beállítása\n"
+"    -p, --page  <lapnév>: indításkor megnyitandó lap beállítása\n"
+"    -x, --exit: a parancssor végrehajtását követően azonnal kilép\n"
+"    --export-what <mit>: válassza, ha exportálni szeretne lapot, alárendelt fát, vagy wikit \n"
+"    --export-type <típus>: az export típus kiterjesztése\n"
+"    --export-dest <cél útvonala>: az exportálás célkönyvtára\n"
+"    --export-compfn: exportáláskor kompatibilis fájlnév alkalmazása\n"
+"    --rebuild: Wiki adatbázis újraépítése\n"
+"    --no-recent: Ne jegyezze meg a megnyitott wikiket az \"Előzményekben\"\n"
+"    --preview: Ha nincsenek lapok megadva, akkor az előző mentben megnyitott valamennyit\n"
+"               megnyitja előnézetben. Ellenkező esetben az opció után meghatározott lapokat\n"
+"               nyitja meg előnézetben.\n"
+"    --editor: Mint a --preview, de szerkesztő módban nyitja meg.\n"
+"\n"
+
+#: lib\pwiki\CmdLineAction.py:403
+msgid "Usage information"
+msgstr "Alkalmazási információ"
+
+#: lib\pwiki\Configuration.py:149 lib\pwiki\Configuration.py:196
+#: lib\pwiki\Configuration.py:314 lib\pwiki\Configuration.py:320
+#: lib\pwiki\Configuration.py:365
+msgid "Unknown option %s:%s"
+msgstr "Ismeretlen opció %s:%s"
+
+#: lib\pwiki\Configuration.py:223
+msgid "Config file not found"
+msgstr "Konfigurációs fájl nem található"
+
+#: lib\pwiki\Configuration.py:357
+msgid "Ambiguos option set %s:%s"
+msgstr "Ambíciózus opciók beállítva %s:%s"
+
+#: lib\pwiki\DiffGui.py:171
+msgid "<Diff from %s to %s>"
+msgstr "<Dif %s-től %s-ig>"
+
+#: lib\pwiki\DocPagePresenter.py:235
+msgid "'%s' is an invalid wiki word. %s."
+msgstr "'%s' érvénytelen wikiszó. %s."
+
+#: lib\pwiki\DocPagePresenter.py:269
+msgid "Wiki page not found, a new page will be created"
+msgstr "Wiki lap nem található, új lap készül"
+
+#: lib\pwiki\DocPagePresenter.py:461 lib\pwiki\DocPagePresenter.py:462
+msgid "History"
+msgstr "Előzmények"
+
+#: lib\pwiki\DocPages.py:2307
+msgid "Func. tag %s does not exist"
+msgstr "Parancstoldat %s nem létezik"
+
+#: lib\pwiki\DocPages.py:2576
+msgid "Global text blocks"
+msgstr "Globális szövegblokkok"
+
+#: lib\pwiki\DocPages.py:2577
+msgid "Wiki text blocks"
+msgstr "Wiki szövegblokkok"
+
+#: lib\pwiki\DocPages.py:2578
+msgid "Global spell list"
+msgstr "Globális helyesírási lista"
+
+#: lib\pwiki\DocPages.py:2579
+msgid "Wiki spell list"
+msgstr "Wiki helyesírási lista"
+
+#: lib\pwiki\DocPages.py:2580
+msgid "Global cc. blacklist"
+msgstr "Globális cc. feketelista"
+
+#: lib\pwiki\DocPages.py:2581
+msgid "Wiki cc. blacklist"
+msgstr "Wiki cc. feketelista"
+
+#: lib\pwiki\DocPages.py:2582
+msgid "Global ncc. blacklist"
+msgstr "Globális ncc. feketelista"
+
+#: lib\pwiki\DocPages.py:2583
+msgid "Wiki ncc. blacklist"
+msgstr "Wiki ncc. feketelista"
+
+#: lib\pwiki\DocPages.py:2584
+msgid "Favorite wikis"
+msgstr "Kedvenc wikik"
+
+#: lib\pwiki\Exporters.py:242
+msgid "Set of *.wiki files"
+msgstr "Sorozat *.wiki fáájl"
+
+#: lib\pwiki\Exporters.py:560 lib\pwiki\Exporters.py:845
+#: lib\pwiki\Exporters.py:1097
+msgid "No usable separator found"
+msgstr "Nem található értelmezhető elválasztó"
+
+#: lib\pwiki\Exporters.py:592 lib\pwiki\Importers.py:62
+msgid "Multipage text"
+msgstr "Többlapos szöveg"
+
+#: lib\pwiki\Exporters.py:626 lib\pwiki\Importers.py:75
+msgid "Multipage files (*.mpt)"
+msgstr "Többlapos fájlok (*.mpt)"
+
+#: lib\pwiki\Exporters.py:627 lib\pwiki\Importers.py:76
+msgid "Text file (*.txt)"
+msgstr "Szövegfájl (*.txt)"
+
+#: lib\pwiki\FileCleanup.py:203
+msgid "Scan links in %s"
+msgstr "Szkennelje a %s hivatkozásait "
+
+#: lib\pwiki\FileCleanup.py:554 lib\pwiki\FileCleanup.py:710
+msgid "Path"
+msgstr "Útvonal"
+
+#: lib\pwiki\FileCleanup.py:555 lib\pwiki\MptImporterGui.py:197
+msgid "Type"
+msgstr "Típus"
+
+#: lib\pwiki\FileCleanup.py:556
+msgid "Action"
+msgstr "Művelet"
+
+#: lib\pwiki\FileCleanup.py:557
+msgid "Calc. action"
+msgstr "Számítási művelet"
+
+#: lib\pwiki\FileCleanup.py:617
+msgid "Directory"
+msgstr "Könyvtár"
+
+#: lib\pwiki\FileCleanup.py:617
+msgid "File"
+msgstr "Fájl"
+
+#: lib\pwiki\GtkHacks.py:289 lib\pwiki\WindowsHacks.py:891
+msgid "Only a real wiki page can be a clipboard catcher"
+msgstr "Csak egy valós wiki lap fogadhat a vágólapról"
+
+#: lib\pwiki\Importers.py:178
+msgid "Opening import file failed"
+msgstr "Import fájl megnyitása nem sikerült"
+
+#: lib\pwiki\Importers.py:209 lib\pwiki\Importers.py:224
+msgid "Bad file format, header not detected"
+msgstr "Rossz fájlformátum, fejléc nem található"
+
+#: lib\pwiki\Importers.py:217
+msgid "File format number %i is not supported"
+msgstr "A %i fájlformátum nem támogatott"
+
+#: lib\pwiki\Importers.py:483
+msgid "Bad wiki word: %s, %s"
+msgstr "Rossz wiki szó: %s: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:157
+#: lib\pwiki\PersonalWikiFrame.py:157
+msgid "Bad formatted command line."
+msgstr "Rossz formátumú parancssor."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:409
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:417
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1259
+#: lib\pwiki\PersonalWikiFrame.py:397 lib\pwiki\PersonalWikiFrame.py:405
+#: lib\pwiki\PersonalWikiFrame.py:1238
+msgid "Wiki doesn't exist: %s"
+msgstr "Nemlétező Wiki: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:796
+#: lib\pwiki\PersonalWikiFrame.py:775
+msgid "&New"
+msgstr "Új"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:797
+#: lib\pwiki\PersonalWikiFrame.py:776
+msgid "Create new wiki"
+msgstr "Új wiki létrehozása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:800
+#: lib\pwiki\PersonalWikiFrame.py:779
+msgid "&Open"
+msgstr "Megnyitás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:802
+#: lib\pwiki\PersonalWikiFrame.py:781
+msgid "In &This Window..."
+msgstr "Ebben az ablakban..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:804
+#: lib\pwiki\PersonalWikiFrame.py:783
+msgid "Open wiki in this window"
+msgstr "Wiki nyitása ebben az ablakban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:806
+#: lib\pwiki\PersonalWikiFrame.py:785
+msgid "In &New Window..."
+msgstr "Új ablakban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:808
+#: lib\pwiki\PersonalWikiFrame.py:787
+msgid "Open wiki in a new window"
+msgstr "Wiki megnyitása új ablakban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:810
+#: lib\pwiki\PersonalWikiFrame.py:789
+msgid "&Current in New Window"
+msgstr "Aktuális új ablakba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:812
+#: lib\pwiki\PersonalWikiFrame.py:791
+msgid "Create new window for same wiki"
+msgstr "Új ablak ugyanennek a wikinek"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:817
+#: lib\pwiki\PersonalWikiFrame.py:796
+msgid "&Recent"
+msgstr "Előzmények"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:824
+#: lib\pwiki\PersonalWikiFrame.py:803
+msgid "F&avorites"
+msgstr "Kedvencek"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:830
+#: lib\pwiki\PersonalWikiFrame.py:809
+msgid "&Search Wiki..."
+msgstr "keresés Wikiben..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:831
+#: lib\pwiki\PersonalWikiFrame.py:810
+msgid "Search whole wiki"
+msgstr "Keresés teljes wikiben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:839
+#: lib\pwiki\PersonalWikiFrame.py:818
+msgid "Publish as HTML"
+msgstr "Közzététel HTML-ként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:842
+#: lib\pwiki\PersonalWikiFrame.py:821
+msgid "Wiki as Single HTML Page"
+msgstr "Wiki egyetlen HTML-lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:843
+#: lib\pwiki\PersonalWikiFrame.py:822
+msgid "Publish Wiki as Single HTML Page"
+msgstr "Wiki közzététele egyetlen HTML lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:847
+#: lib\pwiki\PersonalWikiFrame.py:826
+msgid "Wiki as Set of HTML Pages"
+msgstr "Wiki HTML-lapsorozatként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:848
+#: lib\pwiki\PersonalWikiFrame.py:827
+msgid "Publish Wiki as Set of HTML Pages"
+msgstr "Wiki közzététele HTML-lapsorozatként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:852
+#: lib\pwiki\PersonalWikiFrame.py:831
+msgid "Current Wiki Word as HTML Page"
+msgstr "Aktuális wikiszó HTML-lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:853
+#: lib\pwiki\PersonalWikiFrame.py:832
+msgid "Publish Current Wiki Word as HTML Page"
+msgstr "Aktuális Wikiszó közzététele HTML-lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:857
+#: lib\pwiki\PersonalWikiFrame.py:836
+msgid "Sub-Tree as Single HTML Page"
+msgstr "Alárendelt fa egyetlen HTML-lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:858
+#: lib\pwiki\PersonalWikiFrame.py:837
+msgid "Publish Sub-Tree as Single HTML Page"
+msgstr "Alárendelt fa közzététele egyetlen HTML-lapként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:862
+#: lib\pwiki\PersonalWikiFrame.py:841
+msgid "Sub-Tree as Set of HTML Pages"
+msgstr "Alárendelt fa HTML-lapsorozatként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:863
+#: lib\pwiki\PersonalWikiFrame.py:842
+msgid "Publish Sub-Tree as Set of HTML Pages"
+msgstr "Alárendelt fa közzététele HTML-lapsorozatként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:871
+#: lib\pwiki\PersonalWikiFrame.py:850
+msgid "Other Export..."
+msgstr "Export másként..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:872
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1940
+#: lib\pwiki\PersonalWikiFrame.py:851 lib\pwiki\PersonalWikiFrame.py:1925
+msgid "Open general export dialog"
+msgstr "Általános export párbeszédablak nyitása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:876
+#: lib\pwiki\PersonalWikiFrame.py:855
+msgid "Print..."
+msgstr "Nyomtat..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:877
+#: lib\pwiki\PersonalWikiFrame.py:856
+msgid "Show the print dialog"
+msgstr "Nyomtatás párbeszédablak megnyitása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:887
+#: lib\pwiki\PersonalWikiFrame.py:866
+msgid "&Properties..."
+msgstr "Tulajdonságok......"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:888
+#: lib\pwiki\PersonalWikiFrame.py:867
+msgid "Show general information about current wiki"
+msgstr "Általános információk megjelenítése az aktuális wikiről"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:892
+#: lib\pwiki\PersonalWikiFrame.py:871
+msgid "Maintenance"
+msgstr "Karbantartás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:898
+#: lib\pwiki\PersonalWikiFrame.py:877
+msgid "Update ext. modif. wiki files"
+msgstr "Külsőleg módosított wiki fájlok frissítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:899
+#: lib\pwiki\PersonalWikiFrame.py:878
+msgid "Check for externally modified files and update cache in background"
+msgstr "Külsőleg módosított wiki fájlok keresése és cache frissítés háttérben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:905
+#: lib\pwiki\PersonalWikiFrame.py:884
+msgid "&Rebuild Wiki..."
+msgstr "Wiki újraépítése..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:906
+#: lib\pwiki\PersonalWikiFrame.py:885
+msgid "Rebuild this wiki and its cache completely"
+msgstr "Aktuális wiki és caché teljes újraépítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:911
+#: lib\pwiki\PersonalWikiFrame.py:890
+msgid "&Update cache..."
+msgstr "Cache frissítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:912
+#: lib\pwiki\PersonalWikiFrame.py:891
+msgid "Update cache where marked as not up to date"
+msgstr "Elavultként jelőlt caché frissítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:917
+#: lib\pwiki\PersonalWikiFrame.py:896
+msgid "&Initiate update..."
+msgstr "Frissítés indítása..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:918
+#: lib\pwiki\PersonalWikiFrame.py:897
+msgid "Initiate full cache update which is done mainly in background"
+msgstr "Alapvetően a háttérben történő cachéfrissítés indítása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:938
+#: lib\pwiki\PersonalWikiFrame.py:917
+msgid "Show job count..."
+msgstr "Munkafolyamat-számláló megjelenítése..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:939
+#: lib\pwiki\PersonalWikiFrame.py:918
+msgid "Show how many update jobs are waiting in background"
+msgstr "Mutassa a háttérben várakozó frissítési faladatok számát"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:945
+#: lib\pwiki\PersonalWikiFrame.py:924
+msgid "Open as &Type..."
+msgstr "Nyissa meg ... típusként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:946
+#: lib\pwiki\PersonalWikiFrame.py:925
+msgid "Open wiki with a specified wiki database type"
+msgstr "Wiki megnyitása meghatározott wiki adatbázistípusként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:950
+#: lib\pwiki\PersonalWikiFrame.py:929
+msgid "Reconnect..."
+msgstr "Újracsatol..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:951
+#: lib\pwiki\PersonalWikiFrame.py:930
+msgid "Reconnect to database after connection failure"
+msgstr "Sikertelen kapcsolódás után az adatbázis újracsatolása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:957
+#: lib\pwiki\PersonalWikiFrame.py:936
+msgid "&Optimise Database"
+msgstr "Adatbázis optimalizálása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:958
+#: lib\pwiki\PersonalWikiFrame.py:937
+msgid "Free unused space in database"
+msgstr "Szabadítsa fel a használatonkívüli helyeket az adatbázisban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:965
+#: lib\pwiki\PersonalWikiFrame.py:944
+msgid "&Copy .wiki files to database"
+msgstr ".wiki fájlok másolása adatbázisba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:966
+#: lib\pwiki\PersonalWikiFrame.py:945
+msgid "Copy .wiki files to database"
+msgstr "Wiki fájlok másolá sa az adatbázisba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:983
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5942
+#: lib\pwiki\PersonalWikiFrame.py:962 lib\pwiki\PersonalWikiFrame.py:5935
+msgid "Exit"
+msgstr "Kilép"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:983
+#: lib\pwiki\PersonalWikiFrame.py:962
+msgid "E&xit"
+msgstr "Kilép"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1151
+#: lib\pwiki\PersonalWikiFrame.py:1130
+msgid "Reread text blocks"
+msgstr "Szövegblokkok újraolvasása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1152
+#: lib\pwiki\PersonalWikiFrame.py:1131
+msgid "Reread the text block file(s) and recreate menu"
+msgstr "Szövegblokkfájlok újraolvasása és a menű újraépítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1206
+#: lib\pwiki\PersonalWikiFrame.py:1185
+msgid "Add wiki"
+msgstr "Wiki hozzáadás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1207
+#: lib\pwiki\PersonalWikiFrame.py:1186
+msgid "Add a wiki to the favorites"
+msgstr "Wiki a kedevencekhez"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1212
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1213
+#: lib\pwiki\PersonalWikiFrame.py:1191 lib\pwiki\PersonalWikiFrame.py:1192
+msgid "Manage favorites"
+msgstr "Kedvencek kezelése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1245
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1990
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2511
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3983
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5081
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5504
+#: lib\pwiki\PersonalWikiFrame.py:1224 lib\pwiki\PersonalWikiFrame.py:1975
+#: lib\pwiki\PersonalWikiFrame.py:2496 lib\pwiki\PersonalWikiFrame.py:3972
+#: lib\pwiki\PersonalWikiFrame.py:5074 lib\pwiki\PersonalWikiFrame.py:5497
+msgid "Error while starting new WikidPad instance"
+msgstr "Hiba új wiki példány indítása során"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1352
+#: lib\pwiki\PersonalWikiFrame.py:1331
+msgid "W&iki"
+msgstr "Wiki"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1363
+#: lib\pwiki\PersonalWikiFrame.py:1342
+msgid "&Undo"
+msgstr "Visszavon"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1367
+#: lib\pwiki\PersonalWikiFrame.py:1346
+msgid "&Redo"
+msgstr "Ismét"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1375
+#: lib\pwiki\PersonalWikiFrame.py:1354
+msgid "&Search and Replace..."
+msgstr "Keresés és csere..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1377
+#: lib\pwiki\PersonalWikiFrame.py:1356
+msgid "Search and replace inside current page"
+msgstr "Keresés és csere az aktuális lapon"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1383
+#: lib\pwiki\PersonalWikiFrame.py:1362
+msgid "Cu&t"
+msgstr "Kivág"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1388
+#: lib\pwiki\PersonalWikiFrame.py:1367
+msgid "&Copy"
+msgstr "Másol"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1392
+#: lib\pwiki\PersonalWikiFrame.py:1371
+msgid "&Paste"
+msgstr "Beilleszt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1397
+#: lib\pwiki\PersonalWikiFrame.py:1376
+msgid "Select &All"
+msgstr "Mindent kiválaszt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1403
+#: lib\pwiki\PersonalWikiFrame.py:1382
+msgid "Copy to Sc&ratchPad"
+msgstr "Másolás a Vázlatfüzetbe"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1405
+#: lib\pwiki\PersonalWikiFrame.py:1384
+msgid "Copy selected text to ScratchPad"
+msgstr "Kiválasztott szöveg másolása a Vázlatfüzetbe"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1411
+#: lib\pwiki\PersonalWikiFrame.py:1390
+msgid "Paste T&extblock"
+msgstr "Szövegblokkok"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1419
+#: lib\pwiki\PersonalWikiFrame.py:1398
+msgid "C&lipboard Catcher"
+msgstr "Vágólapbeolvasó"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1422
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4392
+#: lib\pwiki\PersonalWikiFrame.py:1401 lib\pwiki\PersonalWikiFrame.py:4381
+msgid "Set at Page"
+msgstr "Elhelyezés lapon"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1424
+#: lib\pwiki\PersonalWikiFrame.py:1403
+msgid "Text copied to clipboard is also appended to this page"
+msgstr "A szöveg vágólapra másolva és a laphoz is hozzáfűzve"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1430
+#: lib\pwiki\PersonalWikiFrame.py:1409
+msgid "Set at Cursor"
+msgstr "Elhelyez a kurzornál"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1432
+#: lib\pwiki\PersonalWikiFrame.py:1411
+msgid "Text copied to clipboard is also added to cursor position"
+msgstr "A vágólapra másolt szöveg ehhez a kurzorpozícióhoz is hozzáfűzve"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1438
+#: lib\pwiki\PersonalWikiFrame.py:1417
+msgid "Set Off"
+msgstr "Kikapcsol"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1440
+#: lib\pwiki\PersonalWikiFrame.py:1419
+msgid "Switch off clipboard catcher"
+msgstr "Vágólapbeolvasó kikapcsolása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1450
+#: lib\pwiki\PersonalWikiFrame.py:1429
+msgid "Spell Check..."
+msgstr "Helyesírásellenőrzés..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1452
+#: lib\pwiki\PersonalWikiFrame.py:1431
+msgid "Spell check current and possibly further pages"
+msgstr "Helyesírásellenőrzés az aktuális és további lapokon"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1456
+#: lib\pwiki\PersonalWikiFrame.py:1435
+msgid "Spell Check While Type"
+msgstr "Helyesírás ellenőrzése gépelés közben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1457
+#: lib\pwiki\PersonalWikiFrame.py:1436
+msgid "Set if editor should do spell checking during typing"
+msgstr "Állítsa be, ha a szerkesztő gépelés közben ellenőrizze a nyelvhelyességet"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1462
+#: lib\pwiki\PersonalWikiFrame.py:1441
+msgid "Clear Ignore List"
+msgstr "Kivételek lista törlése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1464
+#: lib\pwiki\PersonalWikiFrame.py:1443
+msgid "Clear the list of words to ignore for spell check while type"
+msgstr "Gépelés közben a helyesírás-ellenőrzésből kizártak listáját törölje"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1473
+#: lib\pwiki\PersonalWikiFrame.py:1452
+msgid "&Insert"
+msgstr "Beszúr"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1497
+#: lib\pwiki\PersonalWikiFrame.py:1476
+msgid "&Settings"
+msgstr "Beállítások"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1500
+#: lib\pwiki\PersonalWikiFrame.py:1479
+msgid "&Date Format..."
+msgstr "Dátumformátum..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1501
+#: lib\pwiki\PersonalWikiFrame.py:1480
+msgid "Set date format for inserting current date"
+msgstr "Dátumformátum beállítása az aktuális dátum beszúrásához"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1505
+#: lib\pwiki\PersonalWikiFrame.py:1484
+msgid "Auto-&Wrap"
+msgstr "Automatikus tördelés"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1506
+#: lib\pwiki\PersonalWikiFrame.py:1485
+msgid "Set if editor should wrap long lines"
+msgstr "Állítsa be, hogy a szerkesztő tördelje-e a hosszú sorokat"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1520
+#: lib\pwiki\PersonalWikiFrame.py:1499
+msgid "Auto-&Indent"
+msgstr "Automatikus behúzás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1521
+#: lib\pwiki\PersonalWikiFrame.py:1500
+msgid "Auto indentation"
+msgstr "Automatikus behúzás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1527
+#: lib\pwiki\PersonalWikiFrame.py:1506
+msgid "Auto-&Bullets"
+msgstr "Automatikus felsorolás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1528
+#: lib\pwiki\PersonalWikiFrame.py:1507
+msgid "Show bullet on next line if current has one"
+msgstr "Következő sorban mutassa a felsorolásjelet, ha az aktuálisnak van"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1534
+#: lib\pwiki\PersonalWikiFrame.py:1513
+msgid "Tabs to spaces"
+msgstr "Tabulátorokat szóközökre"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1535
+#: lib\pwiki\PersonalWikiFrame.py:1514
+msgid "Write spaces when hitting TAB key"
+msgstr "TAB lenyomásakor szóközöket ír"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1543
+#: lib\pwiki\PersonalWikiFrame.py:1522
+msgid "Show T&oolbar"
+msgstr "Eszköztár megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1545
+#: lib\pwiki\PersonalWikiFrame.py:1524
+msgid "Show toolbar"
+msgstr "Eszköztár megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1552
+#: lib\pwiki\PersonalWikiFrame.py:1531
+msgid "Show &Tree View"
+msgstr "Fanézet megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1554
+#: lib\pwiki\PersonalWikiFrame.py:1533
+msgid "Show Tree Control"
+msgstr "Favezérlők megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1561
+#: lib\pwiki\PersonalWikiFrame.py:1540
+msgid "Show &Chron. View"
+msgstr "Időrendi nézet megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1563
+#: lib\pwiki\PersonalWikiFrame.py:1542
+msgid "Show chronological view"
+msgstr "Időrendi nézet megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1570
+#: lib\pwiki\PersonalWikiFrame.py:1549
+msgid "Show &Page Structure"
+msgstr "Lapszerkezet megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1572
+#: lib\pwiki\PersonalWikiFrame.py:1551
+msgid "Show structure (headings) of the page"
+msgstr "Lapszerkezet (fejlécek) megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1584
+#: lib\pwiki\PersonalWikiFrame.py:1563
+msgid "Show &Indentation Guides"
+msgstr "Behúzásjelölők megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1585
+#: lib\pwiki\PersonalWikiFrame.py:1564
+msgid "Show indentation guides in editor"
+msgstr "Behúzásjelölők megjelenítése a szerkesztőben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1590
+#: lib\pwiki\PersonalWikiFrame.py:1569
+msgid "Show Line &Numbers"
+msgstr "Sorok számát mutatja"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1591
+#: lib\pwiki\PersonalWikiFrame.py:1570
+msgid "Show line numbers in editor"
+msgstr "Sorok számát mutatja a szerkesztőben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1598
+#: lib\pwiki\PersonalWikiFrame.py:1577
+msgid "Stay on Top"
+msgstr "Maradjon felül"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1600
+#: lib\pwiki\PersonalWikiFrame.py:1579
+msgid "Stay on Top of all other windows"
+msgstr "Maradjon az összes többi ablak fölött"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1608
+#: lib\pwiki\PersonalWikiFrame.py:1587
+msgid "&Zoom In"
+msgstr "Nagyít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1609
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2185
+#: lib\pwiki\PersonalWikiFrame.py:1588 lib\pwiki\PersonalWikiFrame.py:2170
+msgid "Zoom In"
+msgstr "Nagyít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1612
+#: lib\pwiki\PersonalWikiFrame.py:1591
+msgid "Zoo&m Out"
+msgstr "Kicsinyít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1613
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2190
+#: lib\pwiki\PersonalWikiFrame.py:1592 lib\pwiki\PersonalWikiFrame.py:2175
+msgid "Zoom Out"
+msgstr "Kicsinyít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1635
+#: lib\pwiki\PersonalWikiFrame.py:1614
+msgid "Toggle Ed./Prev"
+msgstr "Váltás Szerk./előnéz."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1637
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2181
+#: lib\pwiki\PersonalWikiFrame.py:1616 lib\pwiki\PersonalWikiFrame.py:2166
+msgid "Switch between editor and preview"
+msgstr "Váltás szerkesztő- és előnézeti mód között"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1641
+#: lib\pwiki\PersonalWikiFrame.py:1620
+msgid "Enter Edit Mode"
+msgstr "Szerkesztőmódba ugrás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1642
+#: lib\pwiki\PersonalWikiFrame.py:1621
+msgid "Show editor in tab"
+msgstr "Szerkesztő megjelenítése a fülön"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1646
+#: lib\pwiki\PersonalWikiFrame.py:1625
+msgid "Enter Preview Mode"
+msgstr "Váltás előnézeti módba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1648
+#: lib\pwiki\PersonalWikiFrame.py:1627
+msgid "Show preview in tab"
+msgstr "Előnézet mutatása fülön"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1672
+#: lib\pwiki\PersonalWikiFrame.py:1651
+msgid "&Save"
+msgstr "Ment"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1673
+#: lib\pwiki\PersonalWikiFrame.py:1652
+msgid "Save all open pages"
+msgstr "Összes nyitott lap mentése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1680
+#: lib\pwiki\PersonalWikiFrame.py:1659
+msgid "&Rename"
+msgstr "Átnevez"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1681
+#: lib\pwiki\PersonalWikiFrame.py:1660
+msgid "Rename current wiki word"
+msgstr "Aktuális wikiszó átnevezése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1687
+#: lib\pwiki\PersonalWikiFrame.py:1666
+msgid "Delete current wiki word"
+msgstr "Aktuális wikiszó törlése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1694
+#: lib\pwiki\PersonalWikiFrame.py:1673
+msgid "Set as Roo&t"
+msgstr "Gyökérnek beállít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1696
+#: lib\pwiki\PersonalWikiFrame.py:1675
+msgid "Set current wiki word as tree root"
+msgstr "Aktuális wikiszó beállítása fa gyökereként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1700
+#: lib\pwiki\PersonalWikiFrame.py:1679
+msgid "R&eset Root"
+msgstr "Gyökér alaphelyzetbe"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1701
+#: lib\pwiki\PersonalWikiFrame.py:1680
+msgid "Set home wiki word as tree root"
+msgstr "Alap wikiszó beállítása fa gyökereként"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1705
+#: lib\pwiki\PersonalWikiFrame.py:1684
+msgid "S&ynchronise Tree"
+msgstr "Fa szinkronizálása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1706
+#: lib\pwiki\PersonalWikiFrame.py:1685
+msgid "Find the current wiki word in the tree"
+msgstr "Aktuális wikiszó megkeresése a fában"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1712
+#: lib\pwiki\PersonalWikiFrame.py:1691
+msgid "&Follow Link"
+msgstr "Link követése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1713
+#: lib\pwiki\PersonalWikiFrame.py:1692
+msgid "Activate link/word"
+msgstr "Szó/link érvényesítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1718
+#: lib\pwiki\PersonalWikiFrame.py:1697
+msgid "Follow Link in &New Tab"
+msgstr "Link követése új fülön"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1720
+#: lib\pwiki\PersonalWikiFrame.py:1699
+msgid "Activate link/word in new tab"
+msgstr "Hivatkozás, vagy szó aktiválásaaa új fülön"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1725
+#: lib\pwiki\PersonalWikiFrame.py:1704
+msgid "Follow Link in New &Window"
+msgstr "Kövesse a hivatkozást új ablakban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1727
+#: lib\pwiki\PersonalWikiFrame.py:1706
+msgid "Activate link/word in new window"
+msgstr "Hivatkozás, vagy szó aktiválása új ablakban"
+
+#: lib\pwiki\PersonalWikiFrame.py:1587
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1732
+#: lib\pwiki\PersonalWikiFrame.py:1711
+msgid "Copy &URL to Clipboard"
+msgstr "URL másolása vágólapra"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1734
+#: lib\pwiki\PersonalWikiFrame.py:1713
+msgid "Copy full \"wiki:\" URL of the word to clipboard"
+msgstr "A szó teljes \"wiki:\" URL-jének másolása a vágólapra"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1740
+#: lib\pwiki\PersonalWikiFrame.py:1719
+msgid "&Add version"
+msgstr "Verzió hozzáadása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1741
+#: lib\pwiki\PersonalWikiFrame.py:1720
+msgid "Add new version"
+msgstr "Új verzió hozzáadása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1755
+#: lib\pwiki\PersonalWikiFrame.py:1734
+msgid "&Bold"
+msgstr "Vastag"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1756
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2166
+#: lib\pwiki\PersonalWikiFrame.py:1735 lib\pwiki\PersonalWikiFrame.py:2151
+msgid "Bold"
+msgstr "Vastag"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1762
+#: lib\pwiki\PersonalWikiFrame.py:1741
+msgid "&Italic"
+msgstr "Dőlt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1763
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2172
+#: lib\pwiki\PersonalWikiFrame.py:1742 lib\pwiki\PersonalWikiFrame.py:2157
+msgid "Italic"
+msgstr "Dőlt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1769
+#: lib\pwiki\PersonalWikiFrame.py:1748
+msgid "&Heading"
+msgstr "Fejléc"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1770
+#: lib\pwiki\PersonalWikiFrame.py:1749
+msgid "Add Heading"
+msgstr "Fejléc hozzáadása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1778
+#: lib\pwiki\PersonalWikiFrame.py:1757
+msgid "&Rewrap Text"
+msgstr "Szöveg újratördelése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1780
+#: lib\pwiki\PersonalWikiFrame.py:1759
+msgid "Rewrap Text"
+msgstr "Szöveg újratördelése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1785
+#: lib\pwiki\PersonalWikiFrame.py:1764
+msgid "&Convert"
+msgstr "Átalakítás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1788 lib\pwiki\PWikiNonCore.py:223
+msgid "Selection to &Link"
+msgstr "Kijelölést link-ké"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1789 lib\pwiki\PWikiNonCore.py:224
+msgid "Remove non-allowed characters and make sel. a wiki word link"
+msgstr "Érvénytelen karakterek eltávolítása és kijelölésből wikiszóhivatkozást készítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1794
+#: lib\pwiki\PersonalWikiFrame.py:1779
+msgid "Selection to &Wiki Word"
+msgstr "Kijelölést Wikiszóra"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1796
+#: lib\pwiki\PersonalWikiFrame.py:1781
+msgid "Put selected text in a new or existing wiki word"
+msgstr "A kijelölt szöveget helyezze új, vagy meglévő wikiszóba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1801
+#: lib\pwiki\PersonalWikiFrame.py:1786
+msgid "Absolute/Relative &File URL"
+msgstr "Abszolút/relatív fájl URL"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1803
+#: lib\pwiki\PersonalWikiFrame.py:1788
+msgid "Convert file URL from absolute to relative and vice versa"
+msgstr "Fájl URL átalakítása abszolútból relatívba és vissza"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1817
+#: lib\pwiki\PersonalWikiFrame.py:1802
+msgid "&Icon Name"
+msgstr "Ikon neve"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1829
+#: lib\pwiki\PersonalWikiFrame.py:1814
+msgid "&Color Name"
+msgstr "Szín neve"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1837
+#: lib\pwiki\PersonalWikiFrame.py:1822
+msgid "&Add Attribute"
+msgstr "Attribútum hozzáadása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1846
+#: lib\pwiki\PersonalWikiFrame.py:1831
+msgid "&Icon Attribute"
+msgstr "Ikonjellemző"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1856
+#: lib\pwiki\PersonalWikiFrame.py:1841
+msgid "&Color Attribute"
+msgstr "Színjellemző"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1865
+#: lib\pwiki\PersonalWikiFrame.py:1850
+msgid "&Back"
+msgstr "Vissza"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1866
+#: lib\pwiki\PersonalWikiFrame.py:1851
+msgid "Go backward"
+msgstr "Visszalép"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1871
+#: lib\pwiki\PersonalWikiFrame.py:1856
+msgid "&Forward"
+msgstr "Előre"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1872
+#: lib\pwiki\PersonalWikiFrame.py:1857
+msgid "Go forward"
+msgstr "Előrelép"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1877
+#: lib\pwiki\PersonalWikiFrame.py:1862
+msgid "&Wiki Home"
+msgstr "Wiki indulólap"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1878
+#: lib\pwiki\PersonalWikiFrame.py:1863
+msgid "Go to wiki homepage"
+msgstr "Ugrás a wiki indulólaphoz"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1883
+#: lib\pwiki\PersonalWikiFrame.py:1868
+msgid "Up&ward"
+msgstr "Felfelé"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1885
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2133
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2134
+#: lib\pwiki\PersonalWikiFrame.py:1870 lib\pwiki\PersonalWikiFrame.py:2118
+#: lib\pwiki\PersonalWikiFrame.py:2119
+msgid "Go upward from a subpage"
+msgstr "Lépjen fel az alárendelt lapból"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1890
+#: lib\pwiki\PersonalWikiFrame.py:1875
+msgid "Go to &Page..."
+msgstr "Ugrás lapra..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1891
+#: lib\pwiki\PersonalWikiFrame.py:1876
+msgid "Open wiki word"
+msgstr "Wikiszó megnyitása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1896
+#: lib\pwiki\PersonalWikiFrame.py:1881
+msgid "Go to P&arent..."
+msgstr "Ugrás a felmenőhöz..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1898
+#: lib\pwiki\PersonalWikiFrame.py:1883
+msgid "List parents of current wiki word"
+msgstr "Aktuális wikiszó felmenőinek listázása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1901
+#: lib\pwiki\PersonalWikiFrame.py:1886
+msgid "List &Children..."
+msgstr "Leszármazottak listázása..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1903
+#: lib\pwiki\PersonalWikiFrame.py:1888
+msgid "List children of current wiki word"
+msgstr "Aktuális wikiszó leszármazottainak listázása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1906
+#: lib\pwiki\PersonalWikiFrame.py:1891
+msgid "List Pa&rentless Pages"
+msgstr "Felmenő nélküli lapok listázása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1908
+#: lib\pwiki\PersonalWikiFrame.py:1893
+msgid "List nodes with no parent relations"
+msgstr "Felmenői kapcsolat nélküli csomópontok listázása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1913
+#: lib\pwiki\PersonalWikiFrame.py:1898
+msgid "Show &History..."
+msgstr "Előzmények megjelenítése..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1914
+#: lib\pwiki\PersonalWikiFrame.py:1899
+msgid "View tab history"
+msgstr "Fül előzményeinek megjelenítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1917
+#: lib\pwiki\PersonalWikiFrame.py:1902
+msgid "&Up History..."
+msgstr "Előzményekben fel..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1918
+#: lib\pwiki\PersonalWikiFrame.py:1903
+msgid "Up in tab history"
+msgstr "Fel a fül előzményeiben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1921
+#: lib\pwiki\PersonalWikiFrame.py:1906
+msgid "&Down History..."
+msgstr "Előzményekben le..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1922
+#: lib\pwiki\PersonalWikiFrame.py:1907
+msgid "Down in tab history"
+msgstr "A fül előzményeiben le"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1927
+#: lib\pwiki\PersonalWikiFrame.py:1912
+msgid "Add B&ookmark"
+msgstr "Könyvjelző hozzáadása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1928
+#: lib\pwiki\PersonalWikiFrame.py:1913
+msgid "Add bookmark to page"
+msgstr "Könyvjelző a laphoz"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1932
+#: lib\pwiki\PersonalWikiFrame.py:1917
+msgid "Go to &Bookmark..."
+msgstr "Ugrás a könyvjelzőhöz..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1933
+#: lib\pwiki\PersonalWikiFrame.py:1918
+msgid "List bookmarks"
+msgstr "Könyvjelzők listázása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1939
+#: lib\pwiki\PersonalWikiFrame.py:1924
+msgid "&Export..."
+msgstr "Export..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1943
+#: lib\pwiki\PersonalWikiFrame.py:1928
+msgid "&Continuous Export..."
+msgstr "Folyamatos export..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1944
+#: lib\pwiki\PersonalWikiFrame.py:1929
+msgid "Open export dialog for continuous export of changes"
+msgstr "Exportpárbeszéd nyitása a változások folyamatos exportjához"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1950
+#: lib\pwiki\PersonalWikiFrame.py:1935
+msgid "&Import..."
+msgstr "Import..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1951
+#: lib\pwiki\PersonalWikiFrame.py:1936
+msgid "Import dialog"
+msgstr "Importpárbeszéd"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1957
+#: lib\pwiki\PersonalWikiFrame.py:1942
+msgid "Scripts"
+msgstr "Szkriptek"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1958
+#: lib\pwiki\PersonalWikiFrame.py:1943
+msgid "Run scripts, evaluate expressions"
+msgstr "Szkriptek futtatása, kifejezések kiértékelése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1960
+#: lib\pwiki\PersonalWikiFrame.py:1945
+msgid "&Eval"
+msgstr "Kiértékelés"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1961
+#: lib\pwiki\PersonalWikiFrame.py:1946
+msgid "Evaluate script blocks"
+msgstr "Szkriptblokkok kiértékelése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1966
+#: lib\pwiki\PersonalWikiFrame.py:1951
+msgid "Run Function &%i\tCtrl-%i"
+msgstr "Futtasa a &%i\tCtrl-%i függvényt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1967
+#: lib\pwiki\PersonalWikiFrame.py:1952
+msgid "Run script function %i"
+msgstr "%i szkriptfüggvény futtatása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1972
+#: lib\pwiki\PersonalWikiFrame.py:1957
+msgid "O&ptions..."
+msgstr "Opciók..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1973
+#: lib\pwiki\PersonalWikiFrame.py:1958
+msgid "Set options"
+msgstr "Opciók beállítása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1994
+#: lib\pwiki\PersonalWikiFrame.py:1979
+msgid "&Open help wiki"
+msgstr "Wikihelp megnyitása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:1995
+#: lib\pwiki\PersonalWikiFrame.py:1980
+msgid "Open WikidPadHelp, the help wiki"
+msgstr "WikidPadHelp megnyitása, a wiki segítség"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2004
+#: lib\pwiki\PersonalWikiFrame.py:1989
+msgid "&Visit Homepage"
+msgstr "Honlap felkeresése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2005
+#: lib\pwiki\PersonalWikiFrame.py:1990
+msgid "Visit wikidPad homepage"
+msgstr "WikidPad honlap felkeresése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2015
+#: lib\pwiki\PersonalWikiFrame.py:2000
+msgid "Show &License"
+msgstr "Licensz mutatása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2016
+#: lib\pwiki\PersonalWikiFrame.py:2001
+msgid "Show license of WikidPad and used components"
+msgstr "WikidPad és komponenseinek licensze"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2033
+#: lib\pwiki\PersonalWikiFrame.py:2018
+msgid "&About"
+msgstr "Névjegy"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2037
+#: lib\pwiki\PersonalWikiFrame.py:2022
+msgid "&Wiki"
+msgstr "Wiki"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2038
+#: lib\pwiki\PersonalWikiFrame.py:2023
+msgid "&Edit"
+msgstr "Szerkeszt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2039
+#: lib\pwiki\PersonalWikiFrame.py:2024
+msgid "&View"
+msgstr "Nézet"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2040
+#: lib\pwiki\PersonalWikiFrame.py:2025
+msgid "&Tabs"
+msgstr "Fülek"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2041
+#: lib\pwiki\PersonalWikiFrame.py:2026
+msgid "Wiki &Page"
+msgstr "Wikilap"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2042
+#: lib\pwiki\PersonalWikiFrame.py:2027
+msgid "&Format"
+msgstr "Formázás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2043
+#: lib\pwiki\PersonalWikiFrame.py:2028
+msgid "&Navigate"
+msgstr "Navigál"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2044
+#: lib\pwiki\PersonalWikiFrame.py:2029
+msgid "E&xtra"
+msgstr "Extra"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2060
+#: lib\pwiki\PersonalWikiFrame.py:2045
+msgid "Pl&ugins"
+msgstr "Beépülők"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2066
+#: lib\pwiki\PersonalWikiFrame.py:2051
+msgid "&Help"
+msgstr "Segítség"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2068
+#: lib\pwiki\PersonalWikiFrame.py:2053
+msgid "He&lp"
+msgstr "Segítség"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2094
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2095
+#: lib\pwiki\PersonalWikiFrame.py:2079 lib\pwiki\PersonalWikiFrame.py:2080
+msgid "Back"
+msgstr "Vissza"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2100
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2101
+#: lib\pwiki\PersonalWikiFrame.py:2085 lib\pwiki\PersonalWikiFrame.py:2086
+msgid "Forward"
+msgstr "Előre"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2106
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2107
+#: lib\pwiki\PersonalWikiFrame.py:2091 lib\pwiki\PersonalWikiFrame.py:2092
+msgid "Wiki Home"
+msgstr "Wiki indulólap"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2121
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2122
+#: lib\pwiki\PersonalWikiFrame.py:2106 lib\pwiki\PersonalWikiFrame.py:2107
+msgid "Search"
+msgstr "Keres"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2127
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2128
+#: lib\pwiki\PersonalWikiFrame.py:2112 lib\pwiki\PersonalWikiFrame.py:2113
+msgid "Find current word in tree"
+msgstr "Aktuális szó megkeresése a fában"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2137
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2156
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2176
+#: lib\pwiki\PersonalWikiFrame.py:2122 lib\pwiki\PersonalWikiFrame.py:2141
+#: lib\pwiki\PersonalWikiFrame.py:2161
+msgid "Separator"
+msgstr "Elválasztó"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2141
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2142
+#: lib\pwiki\PersonalWikiFrame.py:2126 lib\pwiki\PersonalWikiFrame.py:2127
+msgid "Save Wiki Word"
+msgstr "Wikiszó mentése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2152
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2153
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4538
+#: lib\pwiki\PersonalWikiFrame.py:2137 lib\pwiki\PersonalWikiFrame.py:2138
+#: lib\pwiki\PersonalWikiFrame.py:4527
+msgid "Delete Wiki Word"
+msgstr "Wikiszó törlése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2160
+#: lib\pwiki\PersonalWikiFrame.py:2145
+msgid "Heading"
+msgstr "Fejléc"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2180
+#: lib\pwiki\PersonalWikiFrame.py:2165
+msgid "Switch Editor/Preview"
+msgstr "Szerkesztés/Előnézet váltás"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2201
+#: lib\pwiki\PersonalWikiFrame.py:2186
+msgid "Wikize Selected Word "
+msgstr "Kijelőlést Wikiszóvá"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2202
+#: lib\pwiki\PersonalWikiFrame.py:2187
+msgid "Wikize Selected Word"
+msgstr "Kijelőlést Wikiszóvá"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2274
+#: lib\pwiki\PersonalWikiFrame.py:2259
+msgid "Line: 9999 Col: 9999 Pos: 9999999988888"
+msgstr "Sor: 9999 Oszl: 9999 Poz: 9999999988888"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2448
+#: lib\pwiki\PersonalWikiFrame.py:2433
+msgid "Regular expression error"
+msgstr "Szabályos kifejezés hibája"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2457
+#: lib\pwiki\PersonalWikiFrame.py:2442
+msgid "Are you sure you want to reconnect? You may lose some data by this process."
+msgstr "Biztosan újracsatlakozik? Bizonyos adatok elveszthetnek a művelet során."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2459
+#: lib\pwiki\PersonalWikiFrame.py:2444
+msgid "Reconnect database"
+msgstr "Adatbázis újracsatolása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2473
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3580
+#: lib\pwiki\PersonalWikiFrame.py:2458 lib\pwiki\PersonalWikiFrame.py:3569
+msgid "Error while trying to reconnect:\n"
+msgstr "Hiba újracsatolás közben:\n"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2475
+#: lib\pwiki\PersonalWikiFrame.py:2460
+msgid ""
+"There was an error while reconnecting the database\n"
+"\n"
+"Would you like to try it again?\n"
+"%s"
+msgstr ""
+"Hiba történt az adatbázis újracsatolása közben\n"
+"\n"
+"Ismét megpróbálja?\n"
+"%s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2478
+#: lib\pwiki\PersonalWikiFrame.py:2463
+msgid "Error reconnecting!"
+msgstr "Újracstolási hiba!"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2494
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3627
+#: lib\pwiki\PersonalWikiFrame.py:2479 lib\pwiki\PersonalWikiFrame.py:3616
+msgid "Error while trying to write:\n"
+msgstr "Hiba írási kisérlet közben:\n"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2496
+#: lib\pwiki\PersonalWikiFrame.py:2481
+msgid ""
+"There was an error while writing to the database\n"
+"\n"
+"Would you like to try it again?\n"
+"%s"
+msgstr ""
+"Hiba lépett fel az adatbáziba írás közben\n"
+"\n"
+"Ismét megpróbálja?\n"
+"%s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2499
+#: lib\pwiki\PersonalWikiFrame.py:2484
+msgid "Error writing!"
+msgstr "Íráshiba"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2618
+#: lib\pwiki\PersonalWikiFrame.py:2603
+msgid "There was an error loading the icons for the tree control."
+msgstr "Hiba lépett fel fa vezérlő ikonjainak betöltésekor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2912
+#: lib\pwiki\PersonalWikiFrame.py:2901
+msgid "No data handler available to create database."
+msgstr "Nincs elérhető adatbáziskezelő az adatbázis létrehozásához"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2924
+#: lib\pwiki\PersonalWikiFrame.py:2913
+msgid "A wiki already exists in '%s', overwrite? (This deletes everything in and below this directory!)"
+msgstr "A wiki már létezik ebben: '%s'. Felülírja? (A művelet itt és az alatta lévő könyvtárakban mindent töröl)"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2926
+#: lib\pwiki\PersonalWikiFrame.py:2915
+msgid "Warning"
+msgstr "Vigyázat"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2967
+#: lib\pwiki\PersonalWikiFrame.py:2956
+msgid "A wiki database already exists in this location, overwrite?"
+msgstr "A wikiadatbázis itt már létezik. Felülírja?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2969
+#: lib\pwiki\PersonalWikiFrame.py:2958
+msgid "Wiki DB Exists"
+msgstr "A wiki adatbázis létezik"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:2980
+#: lib\pwiki\PersonalWikiFrame.py:2969
+msgid "There was an error creating the wiki database."
+msgstr "Hiba lépett fel a wikiadatbázis létrehozásakor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3049
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3050
+#: lib\pwiki\PersonalWikiFrame.py:3038 lib\pwiki\PersonalWikiFrame.py:3039
+msgid "Choose database type"
+msgstr "Válasszon adatbázistípust"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3087
+#: lib\pwiki\PersonalWikiFrame.py:3076
+msgid "Inaccessible or missing file: %s"
+msgstr "Elérhetelen, vag yhiányzó fájl: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3138
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3223
+#: lib\pwiki\PersonalWikiFrame.py:3127 lib\pwiki\PersonalWikiFrame.py:3212
+msgid "Error connecting to database in '%s'"
+msgstr "Hiba az adatbázishoz csatlakozás közben itt: '%s'"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3143
+#: lib\pwiki\PersonalWikiFrame.py:3132
+msgid "The wiki needs an update to work with this version of WikidPad. Older versions of WikidPad may be unable to read the wiki after an update."
+msgstr "A WikidPad e verziójával történő munkához a wiki frissítése Szükséges. A WikidPad régebbi verziói a frissítés után esetleg képtelenek lesznek az olvasására."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3146
+#: lib\pwiki\PersonalWikiFrame.py:3135
+msgid "Update database?"
+msgstr "Adatbázis frissítése?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3181
+#: lib\pwiki\PersonalWikiFrame.py:3170
+msgid ""
+"Wiki '%s' is probably in use by different\n"
+"instance of WikidPad. Connect anyway (dangerous!)?"
+msgstr ""
+"'%s' wikit valószínűleg a WikidPad másik példánya\n"
+" használja. Mindenképp csatlakozzon? (Veszélyes!)"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3183
+#: lib\pwiki\PersonalWikiFrame.py:3172
+msgid "Wiki already in use"
+msgstr "Wiki már használatban van"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3192
+#: lib\pwiki\PersonalWikiFrame.py:3181
+msgid ""
+"Configuration file '%s' is corrupted or missing.\n"
+"You may have to change some settings in configuration page \"Current Wiki\" and below which were lost."
+msgstr ""
+"Konfigurációs fájl '%s' megsérült, vagy hiányzik.\n"
+"Lehet, hogy meg kell változtatnia néhány beállítást a \"Current Wiki\" konfigurációs lapon és alatta, amelyek elvesztek."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3195 lib\pwiki\MainApp.py:332
+#: lib\pwiki\MainApp.py:355 lib\pwiki\MainApp.py:365
+#: lib\pwiki\PersonalWikiFrame.py:3184
+msgid "Continue?"
+msgstr "Folytatja?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3230
+#: lib\pwiki\PersonalWikiFrame.py:3219
+msgid "Can't write to database '%s'"
+msgstr "Nem tud írni az adatbázisba '%s'"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3243
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5424
+#: lib\pwiki\PersonalWikiFrame.py:3232 lib\pwiki\PersonalWikiFrame.py:5417
+msgid "Performing background jobs..."
+msgstr "Háttébeli feladatok végrehajtása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3451
+#: lib\pwiki\PersonalWikiFrame.py:3440
+msgid ""
+"There is no (write-)access to underlying wiki\n"
+"Close anyway and loose possible changes?"
+msgstr ""
+"Nincs hozzáférés írásra az alanti wikire\n"
+"Bezárja mindenképpen és elveszti a változásokat?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3453
+#: lib\pwiki\PersonalWikiFrame.py:3442
+msgid "Close anyway"
+msgstr "Bezárja mindenképpen"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3550
+#: lib\pwiki\PersonalWikiFrame.py:3539
+msgid "This operation requires an open database"
+msgstr "A művelet nyitott adatbázist igényel"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3551
+#: lib\pwiki\PersonalWikiFrame.py:3540
+msgid "No open database"
+msgstr "Nincs nyitott adatbázis"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3563
+#: lib\pwiki\PersonalWikiFrame.py:3552
+msgid "No connection to database. Try to reconnect?"
+msgstr "Nincs kapcsolat az adatbázishoz. Probálja újracsatolni?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3564
+#: lib\pwiki\PersonalWikiFrame.py:3553
+msgid "Reconnect database?"
+msgstr "Újracsatolja az adatbázishoz?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3570
+#: lib\pwiki\PersonalWikiFrame.py:3559
+msgid "Trying to reconnect database..."
+msgstr "Próbálja újracsatolni az adatbázist..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3583
+#: lib\pwiki\PersonalWikiFrame.py:3572
+msgid "Error while reconnecting database"
+msgstr "Hiba az adatbázis újracsatolása közben"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3608
+#: lib\pwiki\PersonalWikiFrame.py:3597
+msgid ""
+"This operation needs write access to database\n"
+"Try to write?"
+msgstr ""
+"Ez a művelet írási hozzáférést igényel az adatbázishoz\n"
+"Megpróbál írni?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3609
+#: lib\pwiki\PersonalWikiFrame.py:3598
+msgid "Try writing?"
+msgstr "Megpróbál írni?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3615
+#: lib\pwiki\PersonalWikiFrame.py:3604
+msgid "Trying to write to database..."
+msgstr "Megpróbál az adatbázisba írni..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3630
+#: lib\pwiki\PersonalWikiFrame.py:3619
+msgid "Error while writing to database"
+msgstr "Hiba az adatbázisba íráskor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3654
+#: lib\pwiki\PersonalWikiFrame.py:3643
+msgid ""
+"Database connection error: %s.\n"
+"Try to re-establish, then run \"Wiki\"->\"Reconnect\""
+msgstr ""
+"Adatbáziskapcsolati hiba: %s.\n"
+"Próbálja újra létrehozni a kapcsolatot, majd futtassa \"Wiki\"->\"Reconnect\""
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3656
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3673
+#: lib\pwiki\PersonalWikiFrame.py:3645 lib\pwiki\PersonalWikiFrame.py:3662
+msgid "Connection lost"
+msgstr "Kapcsolat elveszett"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3671
+#: lib\pwiki\PersonalWikiFrame.py:3660
+msgid ""
+"No write access to database: %s.\n"
+" Try to re-establish, then run \"Wiki\"->\"Reconnect\""
+msgstr ""
+"Az adatbázishoz nincs hozzáférés írásra: %s.\n"
+"Próbáljon újracsatlakozni, majd futtassa \"Wiki\"->\"Reconnect\""
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3690
+#: lib\pwiki\PersonalWikiFrame.py:3679
+msgid "Trying to reconnect ..."
+msgstr "Megpróbál újracsatlakozni..."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3699
+#: lib\pwiki\PersonalWikiFrame.py:3688
+msgid "Error while trying to reconnect:"
+msgstr "Hiba az újracsatolási kísérlet közben:"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3808
+#: lib\pwiki\PersonalWikiFrame.py:3797
+msgid "Saving page"
+msgstr "Lap mentése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3955
+#: lib\pwiki\PersonalWikiFrame.py:3944
+msgid "Couldn't start file"
+msgstr "Nem tudja elindítani a fájlt"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:3963
+#: lib\pwiki\PersonalWikiFrame.py:3952
+msgid "Couldn't open wiki: %s"
+msgstr "Nem tudja a wikit megnyitni: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4014
+#: lib\pwiki\PersonalWikiFrame.py:4003
+msgid "Mod.: %s"
+msgstr "Mod.: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4015
+#: lib\pwiki\PersonalWikiFrame.py:4004
+msgid "; Crea.: %s"
+msgstr "; Készít: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4064
+#: lib\pwiki\PersonalWikiFrame.py:4053
+msgid "Parent nodes of '%s'"
+msgstr "'%s' felmenő csomópontjai"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4076
+#: lib\pwiki\PersonalWikiFrame.py:4065
+msgid "Parentless nodes"
+msgstr "Felmenő nélküli csomópontok"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4088
+#: lib\pwiki\PersonalWikiFrame.py:4077
+msgid "Child nodes of '%s'"
+msgstr "'%s' leszármazott csomóponjai"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4101
+#: lib\pwiki\PersonalWikiFrame.py:4090
+msgid "Bookmarks"
+msgstr "Könyvjelzők"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4248
+#: lib\pwiki\PersonalWikiFrame.py:4237
+msgid "Wiki: %s"
+msgstr "Wiki: %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4387
+#: lib\pwiki\PersonalWikiFrame.py:4376
+msgid "Set at Page: %s\t%s"
+msgstr "Beállítva erre a lapra: %s\t%s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4403
+#: lib\pwiki\PersonalWikiFrame.py:4392
+msgid "Error saving global configuration"
+msgstr "Hiba a globális beállítások mentésekor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4414
+#: lib\pwiki\PersonalWikiFrame.py:4403
+msgid "Error saving current configuration"
+msgstr "Hiba az aktuális beállítások mentésekor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4436
+#: lib\pwiki\PersonalWikiFrame.py:4425
+msgid "No real wiki word selected to rename"
+msgstr "Nincs igazi wikiszó kiválasztva átnevezésre"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4440
+#: lib\pwiki\PersonalWikiFrame.py:4429
+msgid "The scratch pad cannot be renamed."
+msgstr "A Vázlatfüzetet nem lehet átnevezni"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4464
+#: lib\pwiki\PersonalWikiFrame.py:4453
+msgid "Description:"
+msgstr "Leírás:"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4465
+#: lib\pwiki\PersonalWikiFrame.py:4454
+msgid "Store new version"
+msgstr "Új verzió mentése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4479
+#: lib\pwiki\PersonalWikiFrame.py:4468
+msgid "Do you want to delete all stored versions?"
+msgstr "Mindegyik tárolt verziót törli?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4480
+#: lib\pwiki\PersonalWikiFrame.py:4469
+msgid "Delete All Versions"
+msgstr "Minden verzió törlése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4525
+#: lib\pwiki\PersonalWikiFrame.py:4514
+msgid "The scratch pad cannot be deleted"
+msgstr "A Vázlatfüzetet nem lehet törölni"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4529
+#: lib\pwiki\PersonalWikiFrame.py:4518
+msgid "No real wiki word to delete"
+msgstr "Nincs törölhető valós wikiszó"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4537
+#: lib\pwiki\PersonalWikiFrame.py:4526
+msgid "Are you sure you want to delete wiki word '%s'?"
+msgstr "Biztosan törölni akarja a '%s' wikiszót?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4569
+#: lib\pwiki\PersonalWikiFrame.py:4558
+msgid "No real wiki word to modify"
+msgstr "Nincs módosítható valós wikiszó"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4585
+#: lib\pwiki\PersonalWikiFrame.py:4579
+msgid "Replace text by WikiWord:"
+msgstr "Szöveg lecserélése wikiszóval:"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4586
+#: lib\pwiki\PersonalWikiFrame.py:4580
+msgid "Replace by Wiki Word"
+msgstr "Lecserélés wikiszóval"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4595
+#: lib\pwiki\PersonalWikiFrame.py:4589
+msgid "'%s' is an invalid wiki word."
+msgstr "'%s' érvénytelen wikiszó."
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4610
+#: lib\pwiki\PersonalWikiFrame.py:4604
+msgid ""
+"Wiki word %s exists already\n"
+"Would you like to append to the word?"
+msgstr ""
+"%s wikiszó már létezik\n"
+"Hozzáfűzi a szóhoz?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4613
+#: lib\pwiki\PersonalWikiFrame.py:4607
+msgid "Word exists"
+msgstr "Szó létezik"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4871
+#: lib\pwiki\PersonalWikiFrame.py:4864
+msgid "Error on export"
+msgstr "Hiba az exportban"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4943
+#: lib\pwiki\PersonalWikiFrame.py:4936
+msgid "Are you sure you want to start a full rebuild of wiki in background?"
+msgstr "Biztosan elindítja a wiki teljes újraépítését a háttérben?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4945
+#: lib\pwiki\PersonalWikiFrame.py:4938
+msgid "Initiate update"
+msgstr "Frissítés indítása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4952
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4953
+#: lib\pwiki\PersonalWikiFrame.py:4945 lib\pwiki\PersonalWikiFrame.py:4946
+msgid "     Initiating update     "
+msgstr "     Frissítés indítása    "
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4967
+#: lib\pwiki\PersonalWikiFrame.py:4960
+msgid "Error initiating update"
+msgstr "Hiba a frissítés elindításában"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4976
+#: lib\pwiki\PersonalWikiFrame.py:4969
+msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
+msgstr "Biztosan újraépítené ezt a wikit? Előbb talán menthetné az adatait!"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4978
+#: lib\pwiki\PersonalWikiFrame.py:4971
+msgid "Rebuild wiki"
+msgstr "Wiki újraépítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4985
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:4986
+#: lib\pwiki\PersonalWikiFrame.py:4978 lib\pwiki\PersonalWikiFrame.py:4979
+msgid "     Rebuilding wiki     "
+msgstr "     Wiki újraépítése    "
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5001
+#: lib\pwiki\PersonalWikiFrame.py:4994
+msgid "Error rebuilding wiki"
+msgstr "Hiba a wiki újraépítésekor"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5091
+#: lib\pwiki\PersonalWikiFrame.py:5084
+msgid "This could overwrite pages in the database. Continue?"
+msgstr "Ez felülírhat lapokat az adatbázisban. Folytatja?"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5092
+#: lib\pwiki\PersonalWikiFrame.py:5085
+msgid "Import pagefiles"
+msgstr "Lapfájl importálása"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5194
+#: lib\pwiki\PersonalWikiFrame.py:5187
+msgid "No list of strings passed to \"listmcstr\" dialog"
+msgstr "Sztringlistát a \"listmcstr\" párbeszéd nem kapott"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5217
+#: lib\pwiki\PersonalWikiFrame.py:5210
+msgid "Unknown dialog type"
+msgstr "Ismeretlen párbeszédtípus"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5472
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5490
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5515
+#: lib\pwiki\PersonalWikiFrame.py:5465
+#: lib\pwiki\PersonalWikiFrame.py:5483
+#: lib\pwiki\PersonalWikiFrame.py:5508
+msgid "Choose a Wiki to open"
+msgstr "Válassz egy wikit megnyitásra"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5529
+#: lib\pwiki\PersonalWikiFrame.py:5522
+msgid "Name for new wiki (must be in the form of a WikiWord):"
+msgstr "Az új wiki neve (wikiszó fromátumú legyen):"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5530
+#: lib\pwiki\PersonalWikiFrame.py:5523
+msgid "Create New Wiki"
+msgstr "Új wiki készítése"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5545
+#: lib\pwiki\PersonalWikiFrame.py:5538
+msgid "Directory to store new wiki"
+msgstr "Könyvtár az új wiki tárolására"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5556
+#: lib\pwiki\PersonalWikiFrame.py:5549
+#: lib\pwiki\wikidata\WikiDataManager.py:1531
+#: lib\pwiki\wikidata\WikiDataManager.py:1587
+msgid "'%s' is an invalid wiki word. %s"
+msgstr "'%s' szabálytalan wikiszó. %s"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5875
+#: lib\pwiki\PersonalWikiFrame.py:5868
+msgid "Clipboard Catcher at Cursor"
+msgstr "Vágólapbeolvasó a kurzornál"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5879
+#: lib\pwiki\PersonalWikiFrame.py:5872
+msgid "Clipboard Catcher off"
+msgstr "Vágólapbeolvasó ki"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5940
+#: lib\pwiki\PersonalWikiFrame.py:5933
+msgid "Restore"
+msgstr "Helyreállít"
+
+#: lib\pwiki\Kopie von PersonalWikiFrame.py:5941
+#: lib\pwiki\PersonalWikiFrame.py:5934
+msgid "Save"
+msgstr "Mentés"
+
+#: lib\pwiki\LogWindow.py:80
+msgid "Message"
+msgstr "Üzenet"
+
+#: lib\pwiki\MainApp.py:137
+msgid "Error initializing environment, couldn't locate global config directory"
+msgstr "Hiba a környezet indításában, a globális beállítások könyvtár nem található"
+
+#: lib\pwiki\MainApp.py:272
+msgid ""
+"Invalid AppLock.lock file.\n"
+"Ensure that WikidPad is not running,\n"
+"then delete file \"%s\" if present yet.\n"
+msgstr ""
+"Érvénytelen App.lock fájl.\n"
+" Gondoskodjon arról, hogy a Wikidpad nem fut,\ majd törölje a fájlt \"%s\" ha még létezik.\n"
+
+#: lib\pwiki\MainApp.py:330
+msgid ""
+"Other WikidPad process(es) seem(s) to run already\n"
+"Process identifier(s): %s\n"
+"Continue?"
+msgstr ""
+"Úgy tűnik már más Wiki(k) fut(nak)\n"
+" FolyamatazonosÍtó(k): %s\n"
+" Folytatja?"
+
+#: lib\pwiki\MainApp.py:353
+msgid ""
+"WikidPad couldn't detect if other processes are already running.\n"
+"Continue anyway?"
+msgstr ""
+"Wikidpad nem tudja megállapítani, hogy fut-e már más folyamat.\n"
+" Folytatja mindenképp?"
+
+#: lib\pwiki\MainApp.py:363
+msgid ""
+"WikidPad couldn't detect if other processes are already running.\n"
+"Socket error: %s\n"
+"Continue anyway?"
+msgstr ""
+"Wikidpad nem tudja megállapítani, hogy fut-e már más folyamat.\n"
+" Csatornahiba: %s\n"
+" Folytatja mindenképp?"
+
+#: lib\pwiki\MainApp.py:668
+msgid ""
+"An error occurred during this session\n"
+"See file %s"
+msgstr ""
+"Hiba jelenkezett a munkamenetben.\n"
+" Lásd a %s fájlt!"
+
+#: lib\pwiki\MainApp.py:857
+msgid "Plugin options"
+msgstr "Bővítmény  opciók"
+
+#: lib\pwiki\MainApp.py:906 lib\pwiki\OptionsDialog.py:712
+msgid "Wiki language"
+msgstr "Wiki-nyelv"
+
+#: lib\pwiki\MainApp.py:929
+msgid "Plugins"
+msgstr "Bővítmények"
+
+#: lib\pwiki\MainAreaPanel.py:670 lib\pwiki\WikiTxtCtrl.py:2407
+msgid "This can only be done for the page of a wiki word"
+msgstr "Ezt csak egy wikiszó lapjával tehető meg."
+
+#: lib\pwiki\MainAreaPanel.py:671 lib\pwiki\WikiTxtCtrl.py:2408
+msgid "Not a wiki page"
+msgstr "Nem wiki lap."
+
+#: lib\pwiki\MptImporterGui.py:177
+msgid "Wiki page"
+msgstr "Wiki lap."
+
+#: lib\pwiki\MptImporterGui.py:178
+msgid "Func. page"
+msgstr "Függvény lap."
+
+#: lib\pwiki\MptImporterGui.py:179
+msgid "Saved search"
+msgstr "Mentett keresés"
+
+#: lib\pwiki\MptImporterGui.py:180
+msgid "Saved page search"
+msgstr "Mentett lapkeresés"
+
+#: lib\pwiki\MptImporterGui.py:198
+msgid "Name"
+msgstr "Név"
+
+#: lib\pwiki\MptImporterGui.py:200
+msgid ""
+"Version\n"
+"Import"
+msgstr ""
+"Verzió\n"
+" Import"
+
+#: lib\pwiki\MptImporterGui.py:201
+msgid ""
+"Rename\n"
+"imported"
+msgstr ""
+"Átnevezés\n"
+" Importálva"
+
+#: lib\pwiki\MptImporterGui.py:202
+msgid ""
+"Rename\n"
+"present"
+msgstr ""
+"Átnevezés\n"
+" jelen"
+
+#: lib\pwiki\MptImporterGui.py:390
+msgid "You can't rename imported and present item at the same time"
+msgstr "Nem nevezhet át importált és egyidőben jelen lévő lapot"
+
+#: lib\pwiki\MptImporterGui.py:403
+msgid "Rename imported"
+msgstr "Átnevezés importálva"
+
+#: lib\pwiki\MptImporterGui.py:412
+msgid "Rename present"
+msgstr "Átnevezés jelen"
+
+#: lib\pwiki\MptImporterGui.py:423 lib\pwiki\MptImporterGui.py:447
+msgid "Name collision: Item '%s' will be imported already"
+msgstr "Névütközés: '%s' már importálva lesz"
+
+#: lib\pwiki\MptImporterGui.py:429 lib\pwiki\MptImporterGui.py:458
+msgid "Name collision: Item '%s' will already be created by renaming '%s'"
+msgstr "Névütközés: '%s' már készítés alatt '%s' átnevezésével"
+
+#: lib\pwiki\MptImporterGui.py:438 lib\pwiki\MptImporterGui.py:452
+msgid "Name collision: Item '%s' exists already in database"
+msgstr "Névütközés: '%s' már létezik az adatbázisban"
+
+#: lib\pwiki\OptionsDialog.py:691
+msgid "Application"
+msgstr "Alkalmazás"
+
+#: lib\pwiki\OptionsDialog.py:692
+msgid "User interface"
+msgstr "Alkalmazói felület"
+
+#: lib\pwiki\OptionsDialog.py:693
+msgid "Security"
+msgstr "Biztonság"
+
+#: lib\pwiki\OptionsDialog.py:694
+msgid "Tree"
+msgstr "Fa"
+
+#: lib\pwiki\OptionsDialog.py:695
+msgid "HTML preview/export"
+msgstr "HTML előnézet/export"
+
+#: lib\pwiki\OptionsDialog.py:696
+msgid "HTML header"
+msgstr "HTML fejléc"
+
+#: lib\pwiki\OptionsDialog.py:698
+msgid "Editor Colors"
+msgstr "Színszerkesztés"
+
+#: lib\pwiki\OptionsDialog.py:699
+msgid "Clipboard Catcher"
+msgstr "Vágólap elfogó"
+
+#: lib\pwiki\OptionsDialog.py:700
+msgid "File Launcher"
+msgstr "Fájlindító"
+
+#: lib\pwiki\OptionsDialog.py:701
+msgid "Mouse"
+msgstr "Egér"
+
+#: lib\pwiki\OptionsDialog.py:702
+msgid "Chron. view"
+msgstr "Időr. nézet"
+
+#: lib\pwiki\OptionsDialog.py:703
+msgid "Searching"
+msgstr "Keresés"
+
+#: lib\pwiki\OptionsDialog.py:704 lib\pwiki\OptionsDialog.py:714
+msgid "Advanced"
+msgstr "Haladó"
+
+#: lib\pwiki\OptionsDialog.py:705
+msgid "Timing"
+msgstr "Időzítés"
+
+#: lib\pwiki\OptionsDialog.py:706
+msgid "Autosave"
+msgstr "Automatikus mentés"
+
+#: lib\pwiki\OptionsDialog.py:708
+msgid "Current Wiki"
+msgstr "Jelenlegi Wiki"
+
+#: lib\pwiki\OptionsDialog.py:709
+msgid "On Open"
+msgstr "Megnyitáskor"
+
+#: lib\pwiki\OptionsDialog.py:710
+msgid "Headings"
+msgstr "Fejlécek"
+
+#: lib\pwiki\OptionsDialog.py:711
+msgid "Chronological"
+msgstr "Időrendi"
+
+#: lib\pwiki\OptionsDialog.py:854
+msgid "IE"
+msgstr "IE"
+
+#: lib\pwiki\OptionsDialog.py:856
+msgid "Mozilla"
+msgstr "Mozilla"
+
+#: lib\pwiki\OptionsDialog.py:860
+msgid "Webkit"
+msgstr "Webkit"
+
+#: lib\pwiki\OptionsDialog.py:997
+msgid "Wave files (*.wav)|*.wav"
+msgstr "Wav fájlok (*.wav)|*.wav"
+
+#: lib\pwiki\OptionsDialog.py:1008 lib\pwiki\OptionsDialog.py:1329
+msgid "All files (*.*)|*"
+msgstr "Minden fájl (*.*)|*.*"
+
+#: lib\pwiki\OptionsDialog.py:1319
+msgid "Select Directory"
+msgstr "Könyvtárválasztás"
+
+#: lib\pwiki\OptionsDialog.py:1327
+msgid "Select File"
+msgstr "Fájl kiválasztás"
+
+#: lib\pwiki\PWikiNonCore.py:47
+msgid "Choose a file to create URL for"
+msgstr "A hivatkozáshoz válasszon fájlt"
+
+#: lib\pwiki\PWikiNonCore.py:76 lib\pwiki\PWikiNonCore.py:77
+msgid "     Scanning     "
+msgstr "     Keresés"
+
+#: lib\pwiki\PWikiNonCore.py:119
+msgid "Wiki file"
+msgstr "Wiki-fájl"
+
+#: lib\pwiki\PWikiNonCore.py:126
+msgid "MPT export target file"
+msgstr "MPT export célfájl"
+
+#: lib\pwiki\PWikiNonCore.py:194
+msgid "&File URL..."
+msgstr "Fájl URL"
+
+#: lib\pwiki\PWikiNonCore.py:194
+msgid "Use file dialog to add URL"
+msgstr "Fájl-párbeszédet használja URL hozzáadásához"
+
+#: lib\pwiki\PWikiNonCore.py:198
+msgid "Current &Date"
+msgstr "Jelenlegi dátum"
+
+#: lib\pwiki\PWikiNonCore.py:198
+msgid "Insert current date"
+msgstr "Illessze be a mai dátumot"
+
+#: lib\pwiki\PWikiNonCore.py:204
+msgid "File cleanup..."
+msgstr "Fájltisztítás..."
+
+#: lib\pwiki\PWikiNonCore.py:204
+msgid "Remove orphaned files and dead links"
+msgstr "Árva fájlok és érvénytelen hivatkozások eltávolítása"
+
+#: lib\pwiki\PWikiNonCore.py:209
+msgid "Page read only"
+msgstr "Csak olvasható lap"
+
+#: lib\pwiki\PWikiNonCore.py:209
+msgid "Set current page read only"
+msgstr "A jelelegi lapot csak olvashatóra állítsa"
+
+#: lib\pwiki\PWikiNonCore.py:215 lib\pwiki\PWikiNonCore.py:216
+msgid "Open trashcan"
+msgstr "Kuka megnyitása"
+
+#: lib\pwiki\PWikiNonCore.py:220
+msgid "Recover DB"
+msgstr "DB helyreállítása"
+
+#: lib\pwiki\PWikiNonCore.py:221
+msgid "Recover wiki database"
+msgstr "Wiki adatbázis helyreállítása"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:161
+msgid "Searching... (click into field to abort)"
+msgstr "Keresés... (mezőre kattintva megáll)"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:163
+msgid "Not found"
+msgstr "Nem taláható"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:676
+msgid "More >>"
+msgstr "Továbbiak >>"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:683
+msgid "<< Less"
+msgstr "<< Kevesebb"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:827
+#: lib\pwiki\SearchAndReplaceDialogs.py:1824
+msgid "Do you want to delete %i search(es)?"
+msgstr "Akarja törölni a %i keresé(seke)t"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:828
+#: lib\pwiki\SearchAndReplaceDialogs.py:1825
+msgid "Delete search"
+msgstr "Keresés törlése"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:881
+#: lib\pwiki\SearchAndReplaceDialogs.py:984
+#: lib\pwiki\SearchAndReplaceDialogs.py:997
+#: lib\pwiki\SearchAndReplaceDialogs.py:1240
+#: lib\pwiki\SearchAndReplaceDialogs.py:1461
+#: lib\pwiki\SearchAndReplaceDialogs.py:1487
+#: lib\pwiki\SearchAndReplaceDialogs.py:1544
+#: lib\pwiki\SearchAndReplaceDialogs.py:1558
+#: lib\pwiki\SearchAndReplaceDialogs.py:1637
+#: lib\pwiki\SearchAndReplaceDialogs.py:1686
+#: lib\pwiki\SearchAndReplaceDialogs.py:1847
+#: lib\pwiki\SearchAndReplaceDialogs.py:2471
+msgid "Error in regular expression"
+msgstr "Hiba a szályos kifejezésben"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:885
+#: lib\pwiki\SearchAndReplaceDialogs.py:1464
+#: lib\pwiki\SearchAndReplaceDialogs.py:1491
+#: lib\pwiki\SearchAndReplaceDialogs.py:1547
+#: lib\pwiki\SearchAndReplaceDialogs.py:1562
+#: lib\pwiki\SearchAndReplaceDialogs.py:1640
+#: lib\pwiki\SearchAndReplaceDialogs.py:1690
+#: lib\pwiki\SearchAndReplaceDialogs.py:1850
+#: lib\pwiki\SearchAndReplaceDialogs.py:2474
+msgid "Error in boolean expression"
+msgstr "Hiba a bolean kifejezésben"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:893
+#: lib\pwiki\SearchAndReplaceDialogs.py:1698
+msgid "Choose search title"
+msgstr "Válasszon keresési címet"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:903
+#: lib\pwiki\SearchAndReplaceDialogs.py:1708
+msgid "Do you want to overwrite existing search '%s'?"
+msgstr "Felülírja a meglévő '%s' keresést?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:904
+#: lib\pwiki\SearchAndReplaceDialogs.py:1709
+msgid "Overwrite search"
+msgstr "Keresés felülírása"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:928
+#: lib\pwiki\SearchAndReplaceDialogs.py:1724
+msgid "Invalid search string, can't save as view"
+msgstr "Érvénytelen keresési sztring, nem menthető nézetként"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:956
+msgid "End of document reached. Continue at beginning?"
+msgstr "Dokument vége. Kívánja folytatni az elejéről?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:958
+msgid "Continue at beginning?"
+msgstr "Folytatja az elején?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:969
+#: lib\pwiki\SearchAndReplaceDialogs.py:970
+msgid "No matches found"
+msgstr "Nincs egyezés"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1025
+#: lib\pwiki\SearchAndReplaceDialogs.py:1631
+msgid "%i replacements done"
+msgstr "%i számú csere történt"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1026
+#: lib\pwiki\SearchAndReplaceDialogs.py:1571
+#: lib\pwiki\SearchAndReplaceDialogs.py:1632
+msgid "Replace All"
+msgstr "Cseréli mindet"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1239
+msgid ""
+"Bad regular expression '%s':\n"
+"%s"
+msgstr ""
+"Hibás szabályos kifejezés '%s'\n"
+"%s"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1467
+#: lib\pwiki\SearchAndReplaceDialogs.py:1495
+#: lib\pwiki\SearchAndReplaceDialogs.py:1643
+#: lib\pwiki\SearchAndReplaceDialogs.py:1853
+#: lib\pwiki\SearchAndReplaceDialogs.py:2477
+msgid "Error. Maybe wiki rebuild is needed"
+msgstr "Hiba. Lehet, hogy a wiki-t újra kell építeni"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1571
+msgid "Replace all occurrences?"
+msgstr "CSerél minden előfordulást?"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:1925
+msgid "*Set page list*"
+msgstr "Laplita beállítása"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2212
+msgid "<Search: %s>"
+msgstr "<Keres: %s>"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2262
+msgid "Fast Search"
+msgstr "Gyorskeresés"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2289
+msgid "As Tab"
+msgstr "Fülként"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2329
+msgid "Search: %s"
+msgstr "Keres: %s"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2578 lib\pwiki\WikiHtmlView.py:707
+msgid "Activate"
+msgstr "Aktivál"
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:2580 lib\pwiki\WikiHtmlView.py:709
+msgid "Activate New Tab Backgrd."
+msgstr "Új fülháttér aktiválása"
+
+#: lib\pwiki\SpellChecker.py:117
+msgid "No wiki open or current page is a functional page"
+msgstr "Nincs nyititt wiki, vagy jelenlegi függvénylap"
+
+#: lib\pwiki\SpellChecker.py:131
+msgid "Current page is not modified yet"
+msgstr "Jelenlegi lap még nincs módosítva"
+
+#: lib\pwiki\SpellChecker.py:138 lib\pwiki\SpellChecker.py:172
+#: lib\pwiki\SpellChecker.py:180
+msgid "No (more) misspelled words found"
+msgstr "További gépelési hibát nem talált"
+
+#: lib\pwiki\SpellChecker.py:148
+msgid "No dictionary found for this page"
+msgstr "Nem talált szótárat ehhez a laphoz"
+
+#: lib\pwiki\StringOps.py:726
+msgid "Inval. timestamp"
+msgstr "Érvénytelen dátumbélyegző"
+
+#: lib\pwiki\TextTree.py:205 lib\pwiki\TextTree.py:240
+msgid "<No title>"
+msgstr "<cím nélkül>"
+
+#: lib\pwiki\TextTree.py:361
+msgid "Select wiki for favorites"
+msgstr "Wiki-t a kedvencek közés"
+
+#: lib\pwiki\Trashcan.py:262
+msgid "Trashcan data damaged"
+msgstr "Kuka adatai sérültek"
+
+#: lib\pwiki\TrashcanGui.py:201
+msgid "Delete %i elements from trashcan?"
+msgstr "Töröljön %i elemt a kukából?"
+
+#: lib\pwiki\TrashcanGui.py:202 lib\pwiki\TrashcanGui.py:228
+msgid "Delete from trashcan"
+msgstr "Törlés a kukából."
+
+#: lib\pwiki\TrashcanGui.py:227
+msgid "Delete all elements from trashcan?"
+msgstr "A kuka minden elemét törölje?"
+
+#: lib\pwiki\ViHelper.py:1005
+msgid "Follow Hint:"
+msgstr "Következő javaslat:"
+
+#: lib\pwiki\ViHelper.py:1731 lib\pwiki\ViHelper.py:1750
+#: lib\pwiki\ViHelper.py:1753
+msgid "Enter wikiword..."
+msgstr "Wikiszó bevitele..."
+
+#: lib\pwiki\WikiExceptions.py:72
+msgid "Multiple words rename to same word"
+msgstr "Több szó átnevezése ugyanarra a szóra"
+
+#: lib\pwiki\WikiHtmlView.py:593 lib\pwiki\WikiTxtCtrl.py:2247
+msgid "Folder does not exist"
+msgstr "Könyvtár nem létezik"
+
+#: lib\pwiki\WikiHtmlView.py:685 lib\pwiki\WikiHtmlViewIE.py:536
+#: lib\pwiki\WikiHtmlViewWK.py:1026 lib\pwiki\WikiTxtCtrl.py:3218
+msgid "Link to page: %s"
+msgstr "Laphivatkozás: %s"
+
+#: lib\pwiki\WikiHtmlView.py:710
+msgid "Activate New Window"
+msgstr "Új ablak aktiválása"
+
+#: lib\pwiki\WikiHtmlViewWK.py:75 lib\pwiki\WikiTxtDialogs.py:48
+msgid "Incremental search (ENTER/ESC to finish)"
+msgstr "Részletkeresés (ENTER/ESC a befejezéshez)"
+
+#: lib\pwiki\WikiHtmlViewWK.py:802
+msgid "Open Link (External)"
+msgstr "HIvatkozás megnyitésa (külső)"
+
+#: lib\pwiki\WikiHtmlViewWK.py:805
+msgid "Follow &Link"
+msgstr "Hivatkozás követése"
+
+#: lib\pwiki\WikiHtmlViewWK.py:817
+msgid "Follow Link in New &Tab"
+msgstr "Hivatkozás követése új fülön"
+
+#: lib\pwiki\WikiHtmlViewWK.py:824
+msgid "Follow Link in New Back&ground Tab"
+msgstr "Hivatkozás követése háttérben lévő fülön"
+
+#: lib\pwiki\WikiTreeCtrl.py:536
+msgid "Views"
+msgstr "Nézet"
+
+#: lib\pwiki\WikiTreeCtrl.py:946
+msgid "searches"
+msgstr "Keresések"
+
+#: lib\pwiki\WikiTreeCtrl.py:1028
+msgid "modified-within"
+msgstr "Módosítva ...belül"
+
+#: lib\pwiki\WikiTreeCtrl.py:1056
+msgid "1 day"
+msgstr "1 nap"
+
+#: lib\pwiki\WikiTreeCtrl.py:1058
+msgid "%i days"
+msgstr "%i napja"
+
+#: lib\pwiki\WikiTreeCtrl.py:1096
+msgid "parentless-nodes"
+msgstr "Felmenő nélküli csomópontok"
+
+#: lib\pwiki\WikiTreeCtrl.py:1127
+msgid "undefined-nodes"
+msgstr "nem deffiniált csomópontok"
+
+#: lib\pwiki\WikiTreeCtrl.py:1157
+msgid "Func. pages"
+msgstr "Funkc.lapok"
+
+#: lib\pwiki\WikiTreeCtrl.py:1291
+msgid "Add icon attribute"
+msgstr "Ikonattribútum hozzáadása"
+
+#: lib\pwiki\WikiTreeCtrl.py:1298
+msgid "Add color attribute"
+msgstr "Színattribútum hozzáadása"
+
+#: lib\pwiki\WikiTreeCtrl.py:1923
+msgid "Append Wiki Word"
+msgstr "Wikiszó hozzáfűzése"
+
+#: lib\pwiki\WikiTreeCtrl.py:1938
+msgid "Prepend Wiki Word"
+msgstr "Wikiszó beszúrása előre"
+
+#: lib\pwiki\WikiTxtCtrl.py:1300
+msgid "Select Template"
+msgstr "Sablon kiválasztása"
+
+#: lib\pwiki\WikiTxtCtrl.py:1302
+msgid "Select Template (deletes current content!)"
+msgstr "Válassza ki a sablon (törli az aktuális tartalmat)"
+
+#: lib\pwiki\WikiTxtCtrl.py:1426
+msgid "Use Template"
+msgstr "Sablon használata"
+
+#: lib\pwiki\WikiTxtCtrl.py:2277 lib\pwiki\WikiTxtCtrl.py:2316
+msgid "File does not exist"
+msgstr "Nem létező fájl"
+
+#: lib\pwiki\WikiTxtCtrl.py:2283
+msgid "Are you sure you want to delete the file: %s"
+msgstr "Biztosan törölné a fájlt: %s"
+
+#: lib\pwiki\WikiTxtCtrl.py:2284
+msgid "Delete File"
+msgstr "Fájltörlés"
+
+#: lib\pwiki\WikiTxtCtrl.py:2324
+msgid "Enter new name"
+msgstr "Írjon be új nevet"
+
+#: lib\pwiki\WikiTxtCtrl.py:2325
+msgid "Rename File"
+msgstr "Fájlátnevezés"
+
+#: lib\pwiki\WikiTxtCtrl.py:2335
+msgid "Target is not a file"
+msgstr "A cél nem fájl"
+
+#: lib\pwiki\WikiTxtCtrl.py:2339
+msgid "Target file exists already. Overwrite?"
+msgstr "A célfájl már létezik. Felülírja?"
+
+#: lib\pwiki\WikiTxtCtrl.py:2340
+msgid "Overwrite File"
+msgstr "Fájlfelülírás"
+
+#: lib\pwiki\WikiTxtCtrl.py:2429
+msgid ""
+"Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
+"item \"Script security\" an appropriate value to execute a script."
+msgstr ""
+"Szkriptfuttatáshoz a \"Wiki\" menü, \"Opciók\" lap \"Biztonság\"\n"
+"részben a \"Szkript biztonság\"-ot állítsa a megfelelő értékre! "
+
+#: lib\pwiki\WikiTxtCtrl.py:2432
+msgid "Script execution disabled"
+msgstr "Szkriptfuttatás letiltva"
+
+#: lib\pwiki\WikiTxtCtrl.py:2504
+msgid ""
+"\n"
+"Exception: %s"
+msgstr ""
+"\n"
+"Kivétel: %s"
+
+#: lib\pwiki\WikiTxtCtrl.py:2999 lib\pwiki\WikiTxtCtrl.py:4669
+msgid "No more fields in this 'form' page"
+msgstr "Nincs további mező ezen a 'űrlapon'"
+
+#: lib\pwiki\WikiTxtCtrl.py:3168
+msgid "Line: %d Col: %d Pos: %d"
+msgstr "Sor: %d Oszlop: %d Hely: %d"
+
+#: lib\pwiki\WikiTxtCtrl.py:3274
+msgid "Not a valid image"
+msgstr "Nem valós kép"
+
+#: lib\pwiki\WikiTxtCtrl.py:3452
+msgid "Couldn't copy file"
+msgstr "Nem tudta másolni a fájlt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3725
+msgid "Ignore"
+msgstr "Elvet"
+
+#: lib\pwiki\WikiTxtCtrl.py:3726
+msgid "Add Globally"
+msgstr "Hozzáad globálisan"
+
+#: lib\pwiki\WikiTxtCtrl.py:3727
+msgid "Add Locally"
+msgstr "Hozzáad helyileg"
+
+#: lib\pwiki\WikiTxtCtrl.py:3737
+msgid "Follow Link"
+msgstr "Link követése"
+
+#: lib\pwiki\WikiTxtCtrl.py:3738
+msgid "Follow Link New Tab"
+msgstr "Hivatkozás követése új fülön"
+
+#: lib\pwiki\WikiTxtCtrl.py:3739
+msgid "Follow Link New Tab Backgrd."
+msgstr "Hivatkozás követése új fülön háttérben"
+
+#: lib\pwiki\WikiTxtCtrl.py:3740
+msgid "Follow Link New Window"
+msgstr "HIvatkozáskövetés új ablak"
+
+#: lib\pwiki\WikiTxtCtrl.py:3742
+msgid "Convert Absolute/Relative File URL"
+msgstr "Abszolút/relatív fájl URL konvertálása"
+
+#: lib\pwiki\WikiTxtCtrl.py:3743
+msgid "Open Containing Folder"
+msgstr "Tartalmazó könyvtás megnyitása"
+
+#: lib\pwiki\WikiTxtCtrl.py:3744
+msgid "Rename file"
+msgstr "Fájlátnevezés"
+
+#: lib\pwiki\WikiTxtCtrl.py:3745
+msgid "Delete file"
+msgstr "Fájltörlés"
+
+#: lib\pwiki\WikiTxtCtrl.py:3747
+msgid "Copy anchor URL to clipboard"
+msgstr "Horgony URL másolása vágólapra"
+
+#: lib\pwiki\WikiTxtCtrl.py:3749
+msgid "Other..."
+msgstr "Más..."
+
+#: lib\pwiki\WikiTxtCtrl.py:3750
+msgid "Use Template..."
+msgstr "Használja a sablont ..."
+
+#: lib\pwiki\WikiTxtCtrl.py:3754
+msgid "Show folding"
+msgstr "Összecsukásjelek megjelenítése"
+
+#: lib\pwiki\WikiTxtCtrl.py:3755
+msgid "Show folding marks and allow folding"
+msgstr "Összecsukásjelek megjelenítése és az összecsukás engedélyezése"
+
+#: lib\pwiki\WikiTxtCtrl.py:3756
+msgid "&Toggle current folding"
+msgstr "Aktuális összecsukások váltása"
+
+#: lib\pwiki\WikiTxtCtrl.py:3757
+msgid "Toggle folding of the current line"
+msgstr "Az összecsukás átállítása az aktuális sorban"
+
+#: lib\pwiki\WikiTxtCtrl.py:3758
+msgid "&Unfold All"
+msgstr "Kibont mind"
+
+#: lib\pwiki\WikiTxtCtrl.py:3759
+msgid "Unfold everything in current editor"
+msgstr "Aktuális szerkesztőben mindent kibont"
+
+#: lib\pwiki\WikiTxtCtrl.py:3760
+msgid "&Fold All"
+msgstr "Összecsukja mindet"
+
+#: lib\pwiki\WikiTxtCtrl.py:3761
+msgid "Fold everything in current editor"
+msgstr "Összecsuk mindent az aktuális szerkesztőben"
+
+#: lib\pwiki\WindowsHacks.py:317
+msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
+msgstr "Másolás %s-ből %s-be nem sikerült. SHFileOperation eredménye %s"
+
+#: lib\pwiki\WindowsHacks.py:321
+msgid "Moving from %s to %s failed. SHFileOperation result no. %s"
+msgstr "%s mozgatása %s-ba/be sikertelen. SHFleOperation result no. %s"
+
+#: lib\pwiki\WindowsHacks.py:325
+msgid "Deleting %s failed. SHFileOperation result no. %s"
+msgstr "%s törlése sikertelen SHFileOperation result no. %s"
+
+#: lib\pwiki\timeView\DatedWikiWordFilters.py:131
+msgid "Modified"
+msgstr "Módosítva"
+
+#: lib\pwiki\timeView\TimeViewCtrl.py:50
+msgid "Versions"
+msgstr "Verzió"
+
+#: lib\pwiki\timeView\TimelinePanel.py:799
+msgid "Show dates without associated wiki words"
+msgstr "Mutassa a dátumakat a kapcsolódó wikiszavak nélkül"
+
+#: lib\pwiki\timeView\TimelinePanel.py:801
+msgid "List dates ascending or descending"
+msgstr "A dátumokat emelkedő, vagy csökkenő rendben sorolja"
+
+#: lib\pwiki\timeView\Versioning.py:176 lib\pwiki\timeView\Versioning.py:443
+#: lib\pwiki\timeView\Versioning.py:455
+msgid "Versioning data damaged"
+msgstr "A verzió dátuma megsérült"
+
+#: lib\pwiki\timeView\VersioningGui.py:225
+msgid "Deleting in-between versions is not supported yet"
+msgstr "Verziók közötti törlés még nem támogatott"
+
+#: lib\pwiki\timeView\VersioningGui.py:228
+msgid "Do you want to delete this version?"
+msgstr "Törli ezt a verziót?"
+
+#: lib\pwiki\timeView\VersioningGui.py:229
+#: lib\pwiki\timeView\VersioningGui.py:814
+msgid "Delete version"
+msgstr "Verzió törlése"
+
+#: lib\pwiki\timeView\VersioningGui.py:241
+#: lib\pwiki\timeView\VersioningGui.py:273
+msgid "Do you want to delete all version data of this page?"
+msgstr "Törli az összes verzióadatot ezen a lapon?"
+
+#: lib\pwiki\timeView\VersioningGui.py:242
+#: lib\pwiki\timeView\VersioningGui.py:274
+#: lib\pwiki\timeView\VersioningGui.py:819
+msgid "Delete all versions"
+msgstr "Összes verzió törlése"
+
+#: lib\pwiki\timeView\VersioningGui.py:288
+#: lib\pwiki\timeView\VersioningGui.py:349
+#: lib\pwiki\timeView\VersioningGui.py:577
+msgid "Current"
+msgstr "Aktuális"
+
+#: lib\pwiki\timeView\VersioningGui.py:806
+msgid "Diff inline"
+msgstr "Jav. megjelen."
+
+#: lib\pwiki\timeView\VersioningGui.py:807
+msgid "Show the difference between two versions inline"
+msgstr "Mutassa a két verzió közötti különbséget megnyitott állapotban"
+
+#: lib\pwiki\timeView\VersioningGui.py:809
+msgid "Set diff from"
+msgstr "Dif.-et vegye innen"
+
+#: lib\pwiki\timeView\VersioningGui.py:810
+msgid "Set the \"from\" version in diff"
+msgstr "Helyezze a \"ból\ verziót a dif.-be"
+
+#: lib\pwiki\timeView\VersioningGui.py:811
+msgid "Set diff to"
+msgstr "Dif.-et tegye ide"
+
+#: lib\pwiki\timeView\VersioningGui.py:812
+msgid "Set the \"to\" version in diff"
+msgstr "Helyezze a \"ba\" verziót a dif.-be"
+
+#: lib\pwiki\timeView\VersioningGui.py:815
+msgid "Delete selected version"
+msgstr "Kiválasztott verziók törlése"
+
+#: lib\pwiki\timeView\VersioningGui.py:817
+msgid "Add version"
+msgstr "Verzió hozzáadása"
+
+#: lib\pwiki\timeView\VersioningGui.py:818
+msgid "Add a new version"
+msgstr "Új verzió hozzáadása"
+
+#: lib\pwiki\timeView\VersioningGui.py:820
+msgid "Delete all versions of current page"
+msgstr "Az aktuális lap valamennyi verziójának törlése"
+
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:20
+msgid "Page Name"
+msgstr "Lapnév"
+
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:21
+msgid "Visited"
+msgstr "Megtekintett"
+
+#: lib\pwiki\timeView\WikiWideHistoryGui.py:380
+msgid "Clear history"
+msgstr "Előzmények törlése"
+
+#: lib\pwiki\wikidata\FileStorage.py:194
+msgid "File compare error, file not readable or changed during compare"
+msgstr "Fájl összehasonlítási hiba, a fájl nem olvasható, vagy összevetés közben megváltozott"
+
+#: lib\pwiki\wikidata\FileStorage.py:216
+msgid "Path '%s' must point to an existing file"
+msgstr "'%s' útvonalnak létező fájlra kell mutatnia"
+
+#: lib\pwiki\wikidata\FileStorage.py:233
+msgid "Internal error: Bad source file name"
+msgstr "Belső hiba. Rossz forrásfájlnév"
+
+#: lib\pwiki\wikidata\FileStorage.py:298
+msgid "Copy of file '%s' couldn't be created"
+msgstr "'%s' fájl másolatát nem lehetett létrehozni "
+
+#: lib\pwiki\wikidata\WikiDataManager.py:67
+msgid "Database exists already and is currently in use"
+msgstr "Az adatbázis már létezik és jelenleg használatban van"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:72
+#: lib\pwiki\wikidata\WikiDataManager.py:2207
+msgid "Data handler %s not available"
+msgstr "Adatkezelő %s elérhetetlen"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:93
+msgid "Database is already in use with database handler \"%s\". Can't open with different handler."
+msgstr "Adatbázist \"%s\" adatbáziskezelő már használja. Másik kezelővel nem nyitható meg."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:99
+msgid "Database is already in use with wiki language handler \"%s\". Can't open with different handler."
+msgstr "Adatbázist a wiki \"%s\" nyelvi kezelője már használja. Eltérő kezelővel nem nyitható meg."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:303
+msgid "Wiki is probably already in use by other instance"
+msgstr "A wikit egy másik példány már valószínűleg használja."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:327
+#: lib\pwiki\wikidata\WikiDataManager.py:337
+msgid "Wiki configuration file is corrupted"
+msgstr "Sérült a wiki konfigurációs fájlja"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:370
+msgid "No data handler information found, probably \"Original Gadfly\" is right."
+msgstr "Nics információ az adatkezelőről, valószínűleg az \"Original Gadfly\" megfelel."
+
+#: lib\pwiki\wikidata\WikiDataManager.py:376
+msgid "Required data handler \"%s\" unknown to WikidPad"
+msgstr "A szükséges adatkezelőt \"%s\" a WikidPad nem ismeri"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:382
+msgid "Error on initializing data handler \"%s\""
+msgstr "Hiba az adatkezelő indításakor \"%s\""
+
+#: lib\pwiki\wikidata\WikiDataManager.py:393
+msgid "Required wiki language handler \"%s\" not available"
+msgstr "A szükséges nyelvkezelő \"%s\" nem áll rendelkezésre"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:417
+msgid "Recovery mode not supported"
+msgstr "Helyreáéllítási mód nem támogatott"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1017
+msgid "Word '%s' not in wiki"
+msgstr "'%s' szó nincs a wikiben"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1323
+#: lib\pwiki\wikidata\WikiDataManager.py:1412
+msgid "Update basic link info"
+msgstr "Alap hivatkozási információk frissítése"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1339
+msgid "Starting update thread"
+msgstr "Frissítési folyamat indítása"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1432
+msgid "Update attributes of %s"
+msgstr "%s jellemzőinek frissítésa"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1456
+msgid "Update syntax of %s"
+msgstr "%s szintaxisának frissítése"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1477
+msgid "Update index of %s"
+msgstr "%s indexének frissítése"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1497
+msgid "Final cleanup"
+msgstr "Végső tisztítás"
+
+#: lib\pwiki\wikidata\WikiDataManager.py:1592
+msgid "Cannot rename '%s' to '%s', '%s' already exists"
+msgstr "'%s'-t to '%s'-ra nem tudja átnevezni, '%s' már létezik"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:725
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:724
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:696
+msgid "database already exists at location: %s"
+msgstr "adatbázis %s helyen már létezik."
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:915
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:780
+msgid "Update needed"
+msgstr "Frissítés szükséges"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:918
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:783
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:826
+msgid "Database has unknown format branchtag='%s'"
+msgstr "Az adatbázis '%s' kiterjesztése ismeretlen"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:927
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:792
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:835
+msgid "Database has unknown format version='%i'"
+msgstr "Adatbázis formátuma='%i', ismeretlen verzió"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:931
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:796
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:839
+msgid "Update needed, current format version='%i'"
+msgstr "Frissítés kell, a formátum jelenlegi verziója='%i'"
+
+#: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:934
+#: lib\pwiki\wikidata\original_gadfly\DbStructure.py:799
+#: lib\pwiki\wikidata\original_sqlite\DbStructure.py:842
+msgid "Database format is up to date"
+msgstr "Az adatbázis formátuma friss"
+
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:221
+msgid "Wiki page not found: %s"
+msgstr "%s wikilap nem taláható"
+
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:544
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:512
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:565
+msgid "You cannot delete the root wiki node"
+msgstr "Nem törölheti a gyökér wiki csomópontot"
+
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1132
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1235
+msgid "Wiki page not found (no path information) for word: %s"
+msgstr "%s szóhoz wikilap nem található (nincs útvonalinformáció)"
+
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1150
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1164
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1253
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1267
+msgid "Wiki page not found (bad path information) for word: %s"
+msgstr "Nem található wiki lap (rossz útvonalinformáció) a szóhoz"
+
