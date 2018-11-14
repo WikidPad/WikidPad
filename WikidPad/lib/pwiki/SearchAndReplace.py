@@ -1603,8 +1603,7 @@ class SearchReplaceOperation:
         self.listWikiPagesOp = ListWikiPagesOperation()
         self.listWikiPagesOp.serializeFromXml(subNode)
 
-        self.indexSearch = serFromXmlUnicode(xmlNode, "indexSearch", "no")\
-                .encode("ascii")
+        self.indexSearch = serFromXmlUnicode(xmlNode, "indexSearch", "no")
 
 
     def getPackedSettings(self):
