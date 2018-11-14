@@ -156,8 +156,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.SetMarginWidth(self.FOLD_MARGIN, 16)
         else:
             self.SetMarginWidth(self.FOLD_MARGIN, 0)
-        self.SetMarginWidth(self.SELECT_MARGIN, 16)
-        self.SetMarginWidth(self.NUMBER_MARGIN, 0)
+        # self.SetMarginWidth(self.SELECT_MARGIN, 16)
+        # self.SetMarginWidth(self.NUMBER_MARGIN, 0)
 
         self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
         self.SetMarginType(self.SELECT_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
