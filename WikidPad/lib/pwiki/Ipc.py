@@ -91,21 +91,21 @@ class RemoteCmdHandler(socketserver.StreamRequestHandler):
 
     def handle(self):
         # Send initial greeting
-        self.wfile.write("WikidPad_command_server 1.0\n")
+        self.wfile.write(b"WikidPad_command_server 1.0\n")
         try:
             basecmd = self._readLine()
             if basecmd == "cmdline":
                 # a commandline will be transmitted
                 cookie = self._readLine()
                 if cookie == self.server.getAppCookie():
-                    self.wfile.write("+App cookie ok\n")
+                    self.wfile.write(b"+App cookie ok\n")
                     # Authentication passed
                     sst = SerializeStream(fileObj=self.rfile, readMode=True)
                     cmdline = sst.serArrUniUtf8(())
                     evt = RemoteCommandEvent(cmdline)
                     wx.GetApp().GetTopWindow().AddPendingEvent(evt)
                 else:
-                    self.wfile.write("-Bad app cookie\n")
+                    self.wfile.write(b"-Bad app cookie\n")
         except:
             pass
 #             traceback.print_exc()
