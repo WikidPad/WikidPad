@@ -369,14 +369,14 @@ def preActEscapedNewLine(s, l, st, pe):
 
 
 def preActUlPrepareStack(s, l, st, pe):
-    oldIdInfo = st.dictStack.getSubTopDict().get("indentInfo")
+#     oldIdInfo = st.dictStack.getSubTopDict().get("indentInfo")
     newIdInfo = IndentInfo("ul")
 
     newIdInfo.level = st.dictStack.get("lastIdentation", 0)
     st.dictStack["indentInfo"] = newIdInfo
 
 def preActOlPrepareStack(s, l, st, pe):
-    oldIdInfo = st.dictStack.getSubTopDict().get("indentInfo")
+#     oldIdInfo = st.dictStack.getSubTopDict().get("indentInfo")
     newIdInfo = IndentInfo("ol")
 
     newIdInfo.level = st.dictStack.get("lastIdentation", 0)

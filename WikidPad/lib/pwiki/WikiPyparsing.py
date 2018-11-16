@@ -947,9 +947,7 @@ class ParserElement:
     def setResultsNameNoCopy( self, name, listAllMatches=False ):
         """Define name for referencing matching tokens as a nested attribute
            of the returned parse results.
-           NOTE: this returns a *copy* of the original ParserElement object;
-           this is so that the client can define a basic element, such as an
-           integer, and reference it in multiple places with different names.
+           NOTE: this returns no *copy* of the original ParserElement object
         """
         self.resultsName = name
 #         newself.modalResults = not listAllMatches
