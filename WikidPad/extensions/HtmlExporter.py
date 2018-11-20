@@ -2567,13 +2567,18 @@ class HtmlExporter(AbstractExporter):
             self.outEndIndentation("ol-alpha")
 
         elif tname == "bullet":
-            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
-        elif tname == "number":
-            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
-        elif tname == "roman":
-            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
-        elif tname == "alpha":
-            self.outAppend('\n<li class="wikidpad" />', eatPreBreak=True)
+            pass
+        elif tname == "bulletEntry":
+            self.outAppend('\n<li class="wikidpad">', eatPreBreak=True)
+            self.processAst(content, node)
+            self.outAppend('</li>', eatPreBreak=True)
+        elif tname in ("number", "roman", "alpha"):
+            pass
+        elif tname == "numberEntry":
+            self.outAppend('\n<li class="wikidpad">', eatPreBreak=True)
+            self.processAst(content, node)
+            self.outAppend('</li>', eatPreBreak=True)
+            
 
         elif tname == "italics":
             self.outAppend('<i class="wikidpad">')

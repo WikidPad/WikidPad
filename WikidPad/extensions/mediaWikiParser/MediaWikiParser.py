@@ -414,9 +414,9 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
         prevCombNorm = prevCombNorm[1:]
         newCombNorm = newCombNorm[1:]
 
+    lastBulletIsNew = newCombNorm != ""
 
     while prevCombNorm != "":
-        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = prevCombNorm[-1]
         endTag = {
                 "*": "ul",
@@ -426,14 +426,19 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
                 "!": "dl",
             }[bulletChar]
 
-        n.htmlContent = HtmlEndTag(endTag)
+        if bulletChar in "*#":
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlEndTag("li")
+            result.append(n)
 
+        n = TerminalNode("", l, "htmlEquivalent")
+        n.htmlContent = HtmlEndTag(endTag)
         result.append(n)
+        
         prevCombNorm = prevCombNorm[:-1]
 
     startTag = ""
     while newCombNorm != "":
-        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = newCombNorm[0]
         startTag = {
                 "*": "ul",
@@ -443,13 +448,24 @@ def actionBulletCombinationStartOrContinuation(s, l, st, t):
                 "!": "dl",
             }[bulletChar]
         
+        n = TerminalNode("", l, "htmlEquivalent")
         n.htmlContent = HtmlStartTag(startTag)
         result.append(n)
+        
+        if bulletChar in "*#":
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlStartTag("li")
+            result.append(n)
+        
         newCombNorm = newCombNorm[1:]
 
-    if lastBulletChar in "*#":
+    if lastBulletChar in "*#" and not lastBulletIsNew:
         n = TerminalNode("", l, "htmlEquivalent")
-        n.htmlContent = HtmlEmptyTag("li")
+        n.htmlContent = HtmlEndTag("li")
+        result.append(n)
+
+        n = TerminalNode("", l, "htmlEquivalent")
+        n.htmlContent = HtmlStartTag("li")
         result.append(n)
     elif lastBulletChar == ":":
         if startTag != "dd":
@@ -486,7 +502,6 @@ def actionBulletCombinationEnd(s, l, st, t):
     result = [t[0]]
 
     while prevCombNorm != "":
-        n = TerminalNode("", l, "htmlEquivalent")
         bulletChar = prevCombNorm[-1]
         endTag = {
                 "*": "ul",
@@ -496,11 +511,17 @@ def actionBulletCombinationEnd(s, l, st, t):
                 "!": "dl",
             }[bulletChar]
 
-        n.htmlContent = HtmlEndTag(endTag)
+        if bulletChar in "*#":
+            n = TerminalNode("", l, "htmlEquivalent")
+            n.htmlContent = HtmlEndTag("li")
+            result.append(n)
 
+        n = TerminalNode("", l, "htmlEquivalent")
+        n.htmlContent = HtmlEndTag(endTag)
         result.append(n)
+        
         prevCombNorm = prevCombNorm[:-1]
-    
+
     return result
 
 
