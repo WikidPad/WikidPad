@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2018-03-13 23:54\n"
+"POT-Creation-Date: 2018-11-26 03:08\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2953,13 +2953,11 @@ msgstr ""
 msgid "Plugins"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:748 lib\pwiki\MainAreaPanelImplPlain.py:678
-#: lib\pwiki\WikiTxtCtrl.py:2802
+#: lib\pwiki\MainAreaPanel.py:748 lib\pwiki\WikiTxtCtrl.py:2802
 msgid "This can only be done for the page of a wiki word"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:749 lib\pwiki\MainAreaPanelImplPlain.py:679
-#: lib\pwiki\WikiTxtCtrl.py:2803
+#: lib\pwiki\MainAreaPanel.py:749 lib\pwiki\WikiTxtCtrl.py:2803
 msgid "Not a wiki page"
 msgstr ""
 
@@ -4790,8 +4788,7 @@ msgid "Folder does not exist"
 msgstr ""
 
 #: lib\pwiki\WikiHtmlView.py:712 lib\pwiki\WikiHtmlViewIE.py:536
-#: lib\pwiki\WikiHtmlViewWK.py:1032 lib\pwiki\WikiHtmlViewWKNew.py:1036
-#: lib\pwiki\WikiTxtCtrl.py:3687
+#: lib\pwiki\WikiHtmlViewWK.py:1032 lib\pwiki\WikiTxtCtrl.py:3687
 msgid "Link to page: %s"
 msgstr ""
 
@@ -4800,23 +4797,23 @@ msgid "Activate New Window"
 msgstr ""
 
 #: lib\pwiki\WikiHtmlView2.py:84 lib\pwiki\WikiHtmlViewWK.py:75
-#: lib\pwiki\WikiHtmlViewWKNew.py:75 lib\pwiki\WikiTxtDialogs.py:48
+#: lib\pwiki\WikiTxtDialogs.py:48
 msgid "Incremental search (ENTER/ESC to finish)"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlViewWK.py:802 lib\pwiki\WikiHtmlViewWKNew.py:806
+#: lib\pwiki\WikiHtmlViewWK.py:802
 msgid "Open Link (External)"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlViewWK.py:805 lib\pwiki\WikiHtmlViewWKNew.py:809
+#: lib\pwiki\WikiHtmlViewWK.py:805
 msgid "Follow &Link"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlViewWK.py:817 lib\pwiki\WikiHtmlViewWKNew.py:821
+#: lib\pwiki\WikiHtmlViewWK.py:817
 msgid "Follow Link in New &Tab"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlViewWK.py:824 lib\pwiki\WikiHtmlViewWKNew.py:828
+#: lib\pwiki\WikiHtmlViewWK.py:824
 msgid "Follow Link in New Back&ground Tab"
 msgstr ""
 

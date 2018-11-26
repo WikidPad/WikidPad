@@ -1,6 +1,17 @@
 ﻿++ Change Log
 
 
+Nov. 26, 2018 (2.3rc02)
+
+    * Bug fixed: Setting "Show line numbers" wasn't restored from
+      configuration (https://github.com/WikidPad/WikidPad/issues/38)
+    * Bug fixed: Annoying error message "Cannot set locale to
+      language Konkani" on startup
+      (https://github.com/WikidPad/WikidPad/issues/41)
+    * Doc fixed: Changed GraphViz URLs in help wiki (thanks to The Inscrutable)
+
+
+
 Mar. 14, 2018 (2.3rc01)
 
     * Option to let left double click on editor tab either close tab,
