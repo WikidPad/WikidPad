@@ -2651,7 +2651,7 @@ These are your default global settings.
     
     _RECURSIVE_STYLING_NODE_NAMES = frozenset(("table", "tableRow", "tableCell",
                         "orderedList", "unorderedList", "indentedText",
-                        "noExport"))
+                        "noExport", "bulletEntry", "numberEntry"))
                         
     @staticmethod
     def getRecursiveStylingNodeNames():
