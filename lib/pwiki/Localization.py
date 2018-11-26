@@ -177,9 +177,12 @@ class _PythonCollator(AbstractCollator):
         self.locStr = locStr
         self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
 
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        if locStr == u"":
+            wx.Locale(wx.LANGUAGE_DEFAULT)
+        else:
+            langInfo = wx.Locale.FindLanguageInfo(locStr)
+            if langInfo is not None:
+                wx.Locale(langInfo.Language)
 
     def strcoll(self, left, right):
         return locale.strcoll(left, right)
@@ -201,9 +204,12 @@ class _PythonCollatorUppercaseFirst(AbstractCollator):
         self.locStr = locStr
         self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
 
-        langInfo = wx.Locale.FindLanguageInfo(locStr)
-        if langInfo is not None:
-            wx.Locale(langInfo.Language)
+        if locStr == u"":
+            wx.Locale(wx.LANGUAGE_DEFAULT)
+        else:
+            langInfo = wx.Locale.FindLanguageInfo(locStr)
+            if langInfo is not None:
+                wx.Locale(langInfo.Language)
 
     def strcoll(self, left, right):
         ml = min(len(left), len(right))
