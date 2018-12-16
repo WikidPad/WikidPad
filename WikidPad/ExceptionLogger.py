@@ -25,7 +25,10 @@ class StdErrReplacement:
                     # Only write for first occurrence in session
                     f.write(EL._exceptionSessionTimeStamp)
                     EL._timestampPrinted = True
-                EL._previousStdOut.write(data)
+                    
+                if EL._previousStdOut is not None:
+                    EL._previousStdOut.write(data)
+
                 f.write(data)
             finally:
                 f.close()
