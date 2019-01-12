@@ -3504,8 +3504,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         if evt.ControlDown() and not self.presenter.getConfig().getboolean(
                 "main", "mouse_reverseWheelZoom", False):
-            evt.m_wheelRotation = -evt.m_wheelRotation
-
+            try:                                            # HACK changed here !
+                evt.m_wheelRotation = -evt.m_wheelRotation
+            except AttributeError:
+                pass
         evt.Skip()
 
 
