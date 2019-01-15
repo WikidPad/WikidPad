@@ -7,12 +7,9 @@
 
 
 
-# Backup files
-*~
-
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized
 __pycache__/
-*.py[cod]
+*.py[co]
 
 # Distribution / packaging
 .Python
@@ -22,7 +19,6 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
 lib64/
 parts/
 sdist/
