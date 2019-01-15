@@ -77,6 +77,10 @@ except:
 CO_FUTURE_DIVISION = 0x2000
 
 
+# Disable setting of wx.MouseEvent.m_wheelRotation in OnMouseWheel in case
+# of AttributeError
+disableMouseWheelSetting = False
+
 
 
 class WikiTxtCtrl(SearchableScintillaControl):
@@ -3502,12 +3506,23 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # So the sign of rotation value must be changed if wheel zoom is NOT
         # reversed by option
 
+        global disableMouseWheelSetting
+
+        if disableMouseWheelSetting:
+            # Previously an error occurred.
+            evt.Skip()
+            return
+
         if evt.ControlDown() and not self.presenter.getConfig().getboolean(
                 "main", "mouse_reverseWheelZoom", False):
             try:                                            # HACK changed here !
                 evt.m_wheelRotation = -evt.m_wheelRotation
             except AttributeError:
-                pass
+                import ExceptionLogger
+                ExceptionLogger.logOptionalComponentException(
+                        "Set mouse wheel rotation (m_wheelRotation)")
+                disableMouseWheelSetting = True
+
         evt.Skip()
 
 
