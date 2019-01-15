@@ -1,0 +1,34 @@
+package:
+  name: wikidpad
+  version: "2.4.0"
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  entry_points:
+    - wikidpad = WikidPad.WikidPadStarter:main
+
+source:
+  path: .
+
+requirements:
+  build:
+    - python {{ python }}
+    - wxpython >=4.0.3
+
+  run:
+    - python {{ python }}
+    - wxpython >=4.0.3
+
+test:
+  imports:
+    - WikidPad
+  source_files:
+    - WikidPad
+
+app:
+  entry: wikidpad
+  icon: WikidPad/Wikidpad_128x128x32.png
+  summary: WikidPad is a single user desktop wiki. http://wikidpad.sourceforge.net/
+  type: desk
+  own_environment: True

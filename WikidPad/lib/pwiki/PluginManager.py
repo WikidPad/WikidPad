@@ -337,7 +337,7 @@ class PluginManager:
                         continue
                     if os.path.isfile(fullname):
                         if ext == '.py':
-                            with open(fullname) as f:
+                            with open(fullname, "rb") as f:
                                 module = imp.load_module(packageName + "." + moduleName, f,
                                         fullname, (".py", "r", imp.PY_SOURCE))
                         elif ext == '.zip':
