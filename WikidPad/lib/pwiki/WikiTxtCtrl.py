@@ -3516,11 +3516,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if evt.ControlDown() and not self.presenter.getConfig().getboolean(
                 "main", "mouse_reverseWheelZoom", False):
             try:                                            # HACK changed here !
-                evt.m_wheelRotation = -evt.m_wheelRotation
+                evt.WheelRotation = -evt.WheelRotation
             except AttributeError:
                 import ExceptionLogger
                 ExceptionLogger.logOptionalComponentException(
-                        "Set mouse wheel rotation (m_wheelRotation)")
+                        "Error when setting mouse wheel rotation (WheelRotation). "
+                        "You need wxPython version > 4.0.4")
                 disableMouseWheelSetting = True
 
         evt.Skip()
