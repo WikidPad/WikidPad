@@ -5,14 +5,16 @@ from glob import glob
 
 from WikidPad import Consts
 
+DESCRIPTION = 'Single user wiki notepad'
+
 try:
     from py2exe.runtime import Target
     wikidpadWinBin = Target(
         # used for the versioninfo resource
-        version = ".".join(str(v) for v in Consts.VERSION_TUPLE[1:]),  # '2.4',
+        version = ".".join(str(v) for v in Consts.VERSION_TUPLE[1:]),
         name = 'WikidPad',
-        copyright = '(C) 2005-2018 Michael Butscher, Jason Horman, Gerhard Reitmayr',
-        description = 'Single user wiki notepad',
+        copyright = '(C) 2005-2019 Michael Butscher, Jason Horman, Gerhard Reitmayr',
+        description = DESCRIPTION,
         comments='',
     
         # what to build
@@ -29,16 +31,17 @@ excludes = ["win32api", "win32con", "win32pipe", "gadfly"]
 
 setup(
     options = {"py2exe": {"compressed": 1,
-                         "exeoptimize": 1, # Opt.mode of the exe stub
+                          "exeoptimize": 1, # Opt.mode of the exe stub
                           "optimize": 2,  # Opt.mode for compiling library.zip
                           "excludes": excludes,
                           "dll_excludes": ["msvcp90.dll"]}},
 
     name='WikidPad',
-    version = Consts.VERSION_STRING.split(" ")[1],
+    version = Consts.VERSION_STRING.split(" ")[1] + "",
     author = 'Michael Butscher',
     author_email = 'mbutscher@gmx.de',
-    url = 'http://www.mbutscher.de/software.html',
+    description = DESCRIPTION,
+    url = 'http://wikidpad.sourceforge.net/',
     zip_safe = False,
     keywords = "Personal Wiki",
     entry_points = { 'gui_scripts' : [ 'wikidpad = WikidPad.WikidPadStarter:main' ]},
@@ -60,7 +63,7 @@ setup(
             "WikidPad.WikidPadHelp.files",
         ],
     
-    install_requires =["wxpython"],
+    install_requires =["wxpython>=4.0"],
     
     include_package_data=False,
     package_data={
