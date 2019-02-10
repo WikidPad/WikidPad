@@ -23,7 +23,7 @@ import re as _re # import pwiki.srePersistent as reimport pwiki.srePersistent as
 from .WikiExceptions import *
 from Consts import BYTETYPES
 
-from . import Utilities
+from . import Utilities, MyersUkkonenDiff
 
 from .SystemInfo import isOSX, isLinux, isWindows
 
@@ -1987,16 +1987,49 @@ def applyBinCompact(a, bops):
     return applyCompact(a, binCompactToCompact(bops))
 
 
-def getBinCompactForDiff(a, b):
+# The "mu*" functions relate to the Myers-Ukkonen algorithm and provided module
+# MyersUkkonenDiff which is much faster than internal difflib
+
+
+def muDiffToCompact(b, diff):
+    result = []
+    for (i, ilen, j, jlen) in diff:
+        assert ilen > 0 or jlen > 0
+        
+        if ilen == 0:
+            # insert
+            result.append((2, i, b[j:(j + jlen)]))
+        elif jlen == 0:
+            # delete
+            result.append((1, i, i + ilen))
+        else:
+            #replace
+            result.append((0, i, i + ilen, b[j:(j + jlen)]))
+    
+    return result
+        
+
+
+def muCompactDiff(a, b):
+    return muDiffToCompact(b, MyersUkkonenDiff.diff(a, b))
+
+
+def getBinCompactForDiff(a, b, mode=1):
     """
     Return the binary compact codes to change bytes a to b.
     For bytes a and b (NOT strings) it is always true that
         applyBinCompact(a, getBinCompactForDiff(a, b)) == b
+    
+    mode -- 0: Use standard library's difflib (yet default)
+            1: Use Myers-Ukkonen algorithm (much faster on larger data with
+               small changes)
     """
-
-    sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
-    ops = sm.get_opcodes()
-    return compactToBinCompact(difflibToCompact(ops, b))
+    if mode == 1:
+        return compactToBinCompact(muCompactDiff(a, b))
+    else:
+        sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
+        ops = sm.get_opcodes()
+        return compactToBinCompact(difflibToCompact(ops, b))
 
 
 # ---------- Unicode constants ----------

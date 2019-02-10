@@ -178,7 +178,7 @@ class InlineDiffControl(SearchableScintillaControl):
 
 
 
-    def _calcProcTokensCharWise(self, fromText, toText):
+    def _calcProcTokensCharWiseDifflib(self, fromText, toText):
         sm = difflib.SequenceMatcher(None, fromText, toText, autojunk=False)
         ops = sm.get_opcodes()
 
@@ -211,6 +211,56 @@ class InlineDiffControl(SearchableScintillaControl):
                 charPos += i2 - i1
 
         self.procTokens = NonTerminalNode(procList, 2, "diff")
+
+
+    def _calcProcTokensCharWiseMyersUkkonen(self, fromText, toText):
+        from .StringOps import muCompactDiff
+        
+        cops = muCompactDiff(fromText, toText)
+        
+        procList = []
+        charPos = 0
+        fromPos = 0
+        
+        for op in cops:
+            if fromPos < op[1]:    # there was equal text before charPos
+                node = TerminalNode(fromText[fromPos:op[1]], charPos, "equal")
+                procList.append(node)
+                charPos += op[1] - fromPos
+    
+            if op[0] == 0:  # replace
+                procText = fromText[op[1]:op[2]].replace("\n", "\n ")
+                node = TerminalNode(procText, charPos, "delete")
+                procList.append(node)
+                charPos += len(procText)
+
+                procText = op[3].replace("\n", "\n ")
+                node = TerminalNode(procText, charPos, "insert")
+                procList.append(node)
+                charPos += len(procText)
+            elif op[0] == 1:  # delete
+                procText = fromText[op[1]:op[2]].replace("\n", "\n ")
+                node = TerminalNode(procText, charPos, "delete")
+                procList.append(node)
+                charPos += len(procText)
+            elif op[0] == 2:  # insert
+                procText = op[2].replace("\n", "\n ")
+                node = TerminalNode(procText, charPos, "insert")
+                procList.append(node)
+                charPos += len(procText)
+
+            fromPos = op[1]
+    
+        if fromPos < len(fromText):
+            node = TerminalNode(fromText[fromPos:], charPos, "equal")
+            procList.append(node)
+            charPos += len(fromText) - fromPos
+
+        self.procTokens = NonTerminalNode(procList, 2, "diff")
+
+
+    _calcProcTokensCharWise = _calcProcTokensCharWiseDifflib   #   _calcProcTokensCharWiseMyersUkkonen
+
 
     @staticmethod
     def _divideToWords(text):
