@@ -519,6 +519,7 @@ class VersionOverview(MiscEventSourceMixin):
                     self.wikiDocument.storeDataBlock(unifName, diffPacket,
                             storeHint=self.getStorageHint())
 
+        self.wikiDocument.getWikiData().commit()
         self.fireMiscEventKeys(("appended version", "changed version overview"))
 
 
@@ -537,6 +538,7 @@ class VersionOverview(MiscEventSourceMixin):
 
             self.wikiDocument.deleteDataBlock(unifName)
             del self.versionEntries[0]
+            self.wikiDocument.getWikiData().commit()
             self.fireMiscEventKeys(("deleted version", "changed version overview"))
 
             return
@@ -560,6 +562,7 @@ class VersionOverview(MiscEventSourceMixin):
                     self.unifiedBasePageName)
             self.wikiDocument.deleteDataBlock(unifName)
             del self.versionEntries[-1]
+            self.wikiDocument.getWikiData().commit()
             self.fireMiscEventKeys(("deleted version", "changed version overview"))
 
             return
