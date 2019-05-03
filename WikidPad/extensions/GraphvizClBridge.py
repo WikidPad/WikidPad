@@ -55,7 +55,7 @@ class GraphVizBaseHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find GraphViz executable by configuration setting
+        # Find executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 self.EXECONFIGKEY, "")
 
@@ -101,7 +101,7 @@ class GraphVizBaseHandler:
             return ""
 
         if not self.extAppExe:
-            # No path to GraphViz executable -> show message
+            # No path to executable -> show message
             return '<pre>' + _('[Please set path to GraphViz executables]') + \
                     '</pre>'
 

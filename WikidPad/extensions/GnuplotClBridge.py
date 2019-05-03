@@ -47,7 +47,7 @@ class GptHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find Gnuplot executable by configuration setting
+        # Find executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_gnuplot_exePath", "")
 
@@ -88,7 +88,7 @@ class GptHandler:
             return ""
 
         if not self.extAppExe:
-            # No path to Gnuplot executable -> show message
+            # No path to executable -> show message
             return '<pre>' + _('[Please set path to Gnuplot executable]') +\
                     '</pre>'
 

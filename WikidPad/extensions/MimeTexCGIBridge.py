@@ -46,7 +46,7 @@ class EqnHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find MimeTeX executable by configuration setting
+        # Find executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_mimeTex_exePath", "")
 
@@ -87,7 +87,7 @@ class EqnHandler:
             return ""
 
         if not self.extAppExe:
-            # No path to MimeTeX executable -> show message
+            # No path to executable -> show message
             return '<pre>' + _('[Please set path to MimeTeX executable]') + \
                     '</pre>'
 

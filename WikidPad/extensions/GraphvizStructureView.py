@@ -232,7 +232,7 @@ class GraphVizBaseHandler:
         self.extAppExe = None
 
     def findExe(self):
-        # Find GraphViz executable by configuration setting
+        # Find executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 self.EXECONFIGKEY, "")
 
@@ -544,8 +544,7 @@ class GraphView(wx.html.HtmlWindow):
             else:  # self.mode.endswith("/dot/source"):
                 if self.graphDotHandler.extAppExe == "":
                     # No path to executable -> show message
-                    warning = "To see the graph, you must install GraphViz executable\n"\
-                            "and set the path to it in options\n\n"
+                    warning = _('[Please set path to GraphViz executables]')
                 else:
                     warning = ""
 

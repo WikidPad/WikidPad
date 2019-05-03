@@ -52,11 +52,11 @@ class PltHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find Ploticus executable by configuration setting
+        # Find executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_ploticus_exePath", "")
 
-        if self.extAppExe and self.exeAppExe != os.path.basename(self.extAppExe):
+        if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
             self.extAppExe = os.path.join(self.app.getWikiAppDir(),
                     self.extAppExe)
 
@@ -101,8 +101,8 @@ class PltHandler:
             return ""
 
         if not self.extAppExe:
-            # No path to MimeTeX executable -> show message
-            return '<pre>' + _('[Please set path to Ploticus executable]') +\
+            # No path to executable -> show message
+            return '<pre>' + _('[Please set path to Ploticus executable]') + \
                     '</pre>'
 
         baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
