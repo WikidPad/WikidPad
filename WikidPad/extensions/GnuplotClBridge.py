@@ -8,6 +8,7 @@ from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
+
 def describeInsertionKeys(ver, app):
     """
     API function for "InsertionByKey" plugins
@@ -55,14 +56,12 @@ class GptHandler:
             self.extAppExe = os.path.join(self.app.getWikiAppDir(),
                     self.extAppExe)
 
-
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
         createContent().
         """
         pass
-
 
     def createContent(self, exporter, exportType, insToken):
         """
@@ -112,7 +111,7 @@ class GptHandler:
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".gpt")
 
-        # Run external application (shell will internally handle missing executable error)
+        # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, srcfilepath))
 
         try:
@@ -134,7 +133,6 @@ class GptHandler:
         else:
             return '<img src="%s" border="0" align="bottom" alt="gnuplot" />' \
                     % url
-
 
     def getExtraFeatures(self):
         """

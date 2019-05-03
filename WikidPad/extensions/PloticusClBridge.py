@@ -68,14 +68,12 @@ class PltHandler:
             self.outputSuffix = ".png"
             self.outputParameter = "-png"
 
-
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
         createContent().
         """
         pass
-
 
     def createContent(self, exporter, exportType, insToken):
         """
@@ -146,14 +144,12 @@ class PltHandler:
             return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
-
     def getExtraFeatures(self):
         """
         Returns a list of bytestrings describing additional features supported
         by the plugin. Currently not specified further.
         """
         return ()
-
 
 
 def registerOptions(ver, app):

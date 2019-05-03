@@ -27,7 +27,6 @@ from pwiki.OptionsDialog import PluginOptionsPanel
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("MenuFunctions", 1), ("Options", 1))
 
 
-
 def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
     currWord = wikiDocument.getWikiPageNameForLinkTerm(currWord)
     firstDef = ""
@@ -71,9 +70,7 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
 #                 continue
 #             graph.append(u'"%s" [fillcolor="%s"]' % (word, DEFAULT_NODE_BG_COLOR))
 
-
     return [firstDef] + graph
-
 
 
 def _buildGraphStyle(config):
@@ -106,7 +103,6 @@ def _buildGraphStyle(config):
     edgeStyle = "edge [" + ", ".join(edgeStyle) + "]"
 
     return nodeStyle + "; " + edgeStyle
-
 
 
 def buildRelationGraphSource(wikiDocument, currWord, config):
@@ -169,7 +165,6 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
             _buildNodeDefs(wikiDocument, currWord, wordSet) + graph)
 
 
-
 def buildChildGraphSource(wikiDocument, currWord, config):
     wikiData = wikiDocument.getWikiData()
 
@@ -193,10 +188,6 @@ def buildChildGraphSource(wikiDocument, currWord, config):
 
     graph.append('}')
     return '\n'.join(graph)
-
-
-
-
 
 
 def describeInsertionKeys(ver, app):
@@ -245,7 +236,6 @@ class GraphVizBaseHandler:
         if dirPath:
             self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
 
-
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -260,14 +250,12 @@ class GraphVizBaseHandler:
         """
         self.findExe()
 
-
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
         createContent().
         """
         pass
-
 
     def createContent(self, exporter, exportType, insToken):
         """
@@ -316,8 +304,6 @@ class GraphVizBaseHandler:
             return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
-
-
     def createImage(self, tempFileSet, exportType, source, insParams):
         """
         """
@@ -337,7 +323,7 @@ class GraphVizBaseHandler:
         # Store token content in a temporary file
         srcfilepath = createTempFile(source, ".dot")
 
-        # Run external application (shell will internally handle missing executable error)
+        # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng",
                 "-o", dstFullPath, srcfilepath))
 
@@ -354,8 +340,6 @@ class GraphVizBaseHandler:
 
         return None, url
 
-
-
     def getExtraFeatures(self):
         """
         Returns a list of bytestrings describing additional features supported
@@ -364,31 +348,32 @@ class GraphVizBaseHandler:
         return ()
 
 
-
 class DotHandler(GraphVizBaseHandler):
     EXAPPNAME = "Dot"
     EXECONFIGKEY = "plugin_graphViz_exeDot"
+
 
 class NeatoHandler(GraphVizBaseHandler):
     EXAPPNAME = "Neato"
     EXECONFIGKEY = "plugin_graphViz_exeNeato"
 
+
 class TwopiHandler(GraphVizBaseHandler):
     EXAPPNAME = "Twopi"
     EXECONFIGKEY = "plugin_graphViz_exeTwopi"
 
+
 class CircoHandler(GraphVizBaseHandler):
     EXAPPNAME = "Circo"
     EXECONFIGKEY = "plugin_graphViz_exeCirco"
+
 
 class FdpHandler(GraphVizBaseHandler):
     EXAPPNAME = "Fdp"
     EXECONFIGKEY = "plugin_graphViz_exeFdp"
 
 
-
 # -------- Menu function implementation starts here --------
-
 
 def describeMenuItems(wiki):
     """
@@ -449,7 +434,6 @@ class GraphView(wx.html.HtmlWindow):
 
         self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
 
-
     def _updateTempFilePrefPath(self):
 #         wikiDoc = self.presenter.getWikiDocument()
 #
@@ -457,7 +441,6 @@ class GraphView(wx.html.HtmlWindow):
 #             self.tempFileSet.setPreferredPath(wikiDoc.getWikiTempDir())
 #         else:
         self.tempFileSet.setPreferredPath(None)
-
 
     def close(self):
         self.tempFileSet.clear()
@@ -467,7 +450,6 @@ class GraphView(wx.html.HtmlWindow):
 #         self.presenterListener.disconnect()
 #         self.__sinkApp.disconnect()
 #         self.__sinkDocPage.disconnect()
-
 
     def setLayerVisible(self, vis, scName=""):
         """
@@ -482,7 +464,6 @@ class GraphView(wx.html.HtmlWindow):
 
         self.visible = vis
 
-
     def setMode(self, mode):
         if self.mode == mode:
             return
@@ -490,7 +471,6 @@ class GraphView(wx.html.HtmlWindow):
         self.mode = mode
         self.outOfSync = True   # Just to be sure
         self.refresh()
-
 
     def refresh(self):
         if self.outOfSync:
@@ -539,13 +519,8 @@ class GraphView(wx.html.HtmlWindow):
 
         self.outOfSync = False
 
-
     def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())
-
-
-
-
 
 
 def showGraphViz(wiki, evt):
@@ -567,7 +542,6 @@ def showGraphViz(wiki, evt):
     presenter.switchSubControl("graph view")
 
 
-
 def showGraphSource(wiki, evt):
 #     wikiWord = wiki.getCurrentWikiWord()
 #     if wikiWord is None:
@@ -585,7 +559,6 @@ def showGraphSource(wiki, evt):
         rc.setMode("relation graph/dot/source")
 
     presenter.switchSubControl("graph view")
-
 
 
 def showChildGraph(wiki, evt):
@@ -607,7 +580,6 @@ def showChildGraph(wiki, evt):
     presenter.switchSubControl("graph view")
 
 
-
 def showChildGraphSource(wiki, evt):
     wikiWord = wiki.getCurrentWikiWord()
     if wikiWord is None:
@@ -627,7 +599,6 @@ def showChildGraphSource(wiki, evt):
     presenter.switchSubControl("graph view")
 
 
-
 def registerOptions(ver, app):
     """
     API function for "Options" plugins
@@ -645,7 +616,6 @@ def registerOptions(ver, app):
 
     # Register panel in options dialog
     app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _("  GraphVizStructure"))
-
 
 
 class GraphVizStructOptionsPanel(PluginOptionsPanel):
@@ -674,7 +644,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
         self.Bind(wx.EVT_BUTTON, self.OnSelectFaceNode, id=facenameButton.GetId())
 
-
         ctl = wx.TextCtrl(self, -1)
         mainsizer.Add(wx.StaticText(self, -1, _("Node font size:")), 0,
                 wx.ALL | wx.EXPAND, 5)
@@ -682,7 +651,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         mainsizer.Add((0, 0), 1)
 
         self.addOptionEntry("plugin_graphVizStructure_nodeFontsize", ctl, "i0+")
-
 
         ctl = wx.TextCtrl(self, -1)
         colorButton = wx.Button(self, -1, _("..."))
@@ -696,7 +664,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         self.addOptionEntry("plugin_graphVizStructure_nodeBorderColor", ctl,
                 "color0", colorButton)
 
-
         ctl = wx.TextCtrl(self, -1)
         colorButton = wx.Button(self, -1, _("..."))
         colorButton.SetMinSize((20, -1))
@@ -708,7 +675,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
         self.addOptionEntry("plugin_graphVizStructure_nodeBgColor", ctl,
                 "color0", colorButton)
-
 
         ctl = wx.TextCtrl(self, -1)
         colorButton = wx.Button(self, -1, _("..."))
@@ -728,7 +694,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         self.mainControl = optionsDlg.getMainControl()
         self.transferOptionsToDialog(self.mainControl.getConfig())
 
-
     def setVisible(self, vis):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
@@ -747,7 +712,6 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         file.
         """
         self.transferDialogToOptions(self.mainControl.getConfig())
-
 
     def OnSelectFaceNode(self, evt):
         dlg = FontFaceDialog(self, -1, self.mainControl,

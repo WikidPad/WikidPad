@@ -8,6 +8,7 @@ from pwiki.StringOps import mbcsDec, utf8Enc, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
+
 def describeInsertionKeys(ver, app):
     """
     API function for "InsertionByKey" plugins
@@ -68,14 +69,12 @@ class GraphVizBaseHandler:
         if dirPath:
             self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
 
-
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
         createContent().
         """
         pass
-
 
     def createContent(self, exporter, exportType, insToken):
         """
@@ -119,7 +118,7 @@ class GraphVizBaseHandler:
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".dot")
 
-         # Run external application (shell will internally handle missing executable error)
+        # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng",
                 "-o", dstFullPath, srcfilepath))
 
@@ -144,7 +143,6 @@ class GraphVizBaseHandler:
             return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
-
     def getExtraFeatures(self):
         """
         Returns a list of bytestrings describing additional features supported
@@ -153,22 +151,25 @@ class GraphVizBaseHandler:
         return ()
 
 
-
 class DotHandler(GraphVizBaseHandler):
     EXAPPNAME = "Dot"
     EXECONFIGKEY = "plugin_graphViz_exeDot"
+
 
 class NeatoHandler(GraphVizBaseHandler):
     EXAPPNAME = "Neato"
     EXECONFIGKEY = "plugin_graphViz_exeNeato"
 
+
 class TwopiHandler(GraphVizBaseHandler):
     EXAPPNAME = "Twopi"
     EXECONFIGKEY = "plugin_graphViz_exeTwopi"
 
+
 class CircoHandler(GraphVizBaseHandler):
     EXAPPNAME = "Circo"
     EXECONFIGKEY = "plugin_graphViz_exeCirco"
+
 
 class FdpHandler(GraphVizBaseHandler):
     EXAPPNAME = "Fdp"
