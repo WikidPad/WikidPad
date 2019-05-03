@@ -121,32 +121,18 @@ class PltHandler:
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".plt")
+
+        # Run external application (shell will internally handle missing executable error)
+        cmdline = subprocess.list2cmdline((self.extAppExe, "-dir", baseDir,
+                srcfilepath, self.outputParameter, "-o", dstFullPath))
+
         try:
-            cmdline = subprocess.list2cmdline((self.extAppExe, "-dir", baseDir,
-                    srcfilepath, self.outputParameter, "-o", dstFullPath))
-
-            # Run external application
-            popenObject = subprocess.Popen(cmdline, shell=True,
-                    stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                    stdin=subprocess.PIPE)
-            childErr = popenObject.stderr
-
-            # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
-            # why this is necessary
-            popenObject.stdin.close()
-            popenObject.stdout.close()
-
-            if "noerror" in [a.strip() for a in insToken.appendices]:
-                childErr.read()
-                errResponse = b""
-            else:
-                errResponse = childErr.read()
-
-            childErr.close()
+            popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
+            errResponse = popenObject.communicate()[1]
         finally:
             os.remove(srcfilepath)
 
-        if errResponse != b"":
+        if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
 #             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Ploticus error: %s]') % repr(errResponse) + \
                     '</pre>'

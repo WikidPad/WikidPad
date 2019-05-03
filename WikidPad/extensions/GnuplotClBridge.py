@@ -111,33 +111,19 @@ class GptHandler:
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".gpt")
+
+        # Run external application (shell will internally handle missing executable error)
+        cmdline = subprocess.list2cmdline((self.extAppExe, srcfilepath))
+
         try:
-            cmdline = subprocess.list2cmdline((self.extAppExe, srcfilepath))
-
-            # Run external application
-            popenObject = subprocess.Popen(cmdline, shell=True,
-                    stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                    stdin=subprocess.PIPE)
-            childErr = popenObject.stderr
-
-            # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
-            # why this is necessary
-            popenObject.stdin.close()
-            popenObject.stdout.close()
-
-            if "noerror" in [a.strip() for a in insToken.appendices]:
-                childErr.read()
-                errResponse = b""
-            else:
-                errResponse = childErr.read()
-
-            childErr.close()
+            popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
+            errResponse = popenObject.communicate()[1]
         finally:
             os.remove(srcfilepath)
 
-        if errResponse != b"":
+        if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return '<pre>' + _('[Gnuplot error: %s]') % errResponse +\
+            return '<pre>' + _('[Gnuplot error: %s]') % errResponse + \
                     '</pre>'
 
         # Return appropriate HTML code for the image

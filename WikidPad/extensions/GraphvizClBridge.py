@@ -118,37 +118,22 @@ class GraphVizBaseHandler:
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".dot")
+
+         # Run external application (shell will internally handle missing executable error)
+        cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng",
+                "-o", dstFullPath, srcfilepath))
+
         try:
-            cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng", "-o" + dstFullPath,
-                    srcfilepath))
-
-            # Run external application
-            popenObject = subprocess.Popen(cmdline, shell=True,
-                    stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                    stdin=subprocess.PIPE)
-            childErr = popenObject.stderr
-
-            # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
-            # why this is necessary
-            popenObject.stdin.close()
-            popenObject.stdout.close()
-
-            if "noerror" in [a.strip() for a in insToken.appendices]:
-                childErr.read()
-                errResponse = ""
-            else:
-                errResponse = childErr.read()
-
-            childErr.close()
+            popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
+            errResponse = popenObject.communicate()[1]
         finally:
             os.remove(srcfilepath)
 
-        if errResponse != "":
+        if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return '<pre>' + _('[%s Error: %s]') % (appname, errResponse) +\
+            return '<pre>' + _('[%s error: %s]') % (appname, errResponse) + \
                     '</pre>'
-
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":

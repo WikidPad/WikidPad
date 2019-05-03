@@ -4,7 +4,7 @@ import urllib.parse
 
 import wx
 
-from pwiki.StringOps import mbcsEnc
+from pwiki.StringOps import mbcsEnc, mbcsDec
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
@@ -97,24 +97,17 @@ class EqnHandler:
         # variable
         os.environ["QUERY_STRING"] = bstr
 
+        # Run external application (shell will internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe,))
 
-        # Run MimeTeX process
-        popenObject = subprocess.Popen(cmdline, shell=True,
-                 stdout=subprocess.PIPE, stdin=subprocess.PIPE,
-                 stderr=subprocess.PIPE)
+        popenObject = subprocess.Popen(cmdline, shell=True, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+        response, errResponse = popenObject.communicate()
 
-        childOut = popenObject.stdout
-
-        # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
-        # why this is necessary
-        popenObject.stdin.close()
-        popenObject.stderr.close()
-
-        # Read stdout of process entirely
-        response = childOut.read()
-
-        childOut.close()
+        if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
+            errResponse = mbcsDec(errResponse, "replace")[0]
+            return '<pre>' + _('[MimeTeX error: %s]') % errResponse + \
+                    '</pre>'
 
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
