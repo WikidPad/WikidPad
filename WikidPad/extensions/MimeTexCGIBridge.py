@@ -1,5 +1,6 @@
-import os, urllib.request, urllib.parse, urllib.error, os.path
+import os
 import subprocess
+import urllib.parse
 
 import wx
 
@@ -32,7 +33,7 @@ class EqnHandler:
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -41,19 +42,19 @@ class EqnHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
         # Find MimeTeX executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_mimeTex_exePath", "")
-        
-        if self.extAppExe:
+
+        if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
             self.extAppExe = os.path.join(self.app.getWikiAppDir(),
                     self.extAppExe)
 
-        
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
@@ -77,20 +78,20 @@ class EqnHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
-        For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
-        """
-        bstr = urllib.parse.quote(mbcsEnc(insToken.value, "replace")[0])
 
-        if not bstr:
+        For HtmlExporter a unistring is returned with the HTML code
+        to insert instead of the insertion.
+        """
+        if not insToken.value:
             # Nothing in, nothing out
             return ""
-        
-        if self.extAppExe == "":
+
+        if not self.extAppExe:
             # No path to MimeTeX executable -> show message
             return '<pre>' + _('[Please set path to MimeTeX executable]') + \
                     '</pre>'
+
+        bstr = urllib.parse.quote(mbcsEnc(insToken.value, "replace")[0])
 
         # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
         # variable
@@ -98,15 +99,13 @@ class EqnHandler:
 
         cmdline = subprocess.list2cmdline((self.extAppExe,))
 
-#         childIn, childOut = os.popen2(cmdline, "b")
-
         # Run MimeTeX process
         popenObject = subprocess.Popen(cmdline, shell=True,
                  stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                  stderr=subprocess.PIPE)
 
         childOut = popenObject.stdout
-        
+
         # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
         # why this is necessary
         popenObject.stdin.close()
@@ -114,9 +113,9 @@ class EqnHandler:
 
         # Read stdout of process entirely
         response = childOut.read()
-        
+
         childOut.close()
-        
+
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
             response = response[(response.index(b"\n\n") + 2):]
@@ -127,7 +126,7 @@ class EqnHandler:
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
-        
+
         # Create .gif file out of returned data and retrieve URL for the file
         pythonUrl = (exportType != "html_previewWX")
         url = tfs.createTempUrl(response, ".gif", pythonUrl=pythonUrl)
@@ -174,9 +173,9 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.app = app
-        
+
         pt = self.app.getGlobalConfig().get("main", "plugin_mimeTex_exePath", "")
-        
+
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
@@ -186,7 +185,7 @@ class MimeTexOptionsPanel(wx.Panel):
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
-        
+
         self.SetSizer(mainsizer)
         self.Fit()
 
@@ -194,7 +193,7 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.
@@ -206,7 +205,7 @@ class MimeTexOptionsPanel(wx.Panel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -220,7 +219,5 @@ class MimeTexOptionsPanel(wx.Panel):
         file.
         """
         pt = self.tfPath.GetValue()
-        
+
         self.app.getGlobalConfig().set("main", "plugin_mimeTex_exePath", pt)
-
-

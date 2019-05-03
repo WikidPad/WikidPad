@@ -1,10 +1,11 @@
 # Create a graph using Graphviz which shows relations of wiki words
 # which are defined by attributes (aka properties).
-# 
+#
 # Based on code written by josip_ine
 
 
-import os, os.path, re
+import os
+import re
 import subprocess
 
 import wx
@@ -41,12 +42,12 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
             continue
 
         c = wx.Colour(colored_node[2].strip())
-        
+
         color_code = rgbToHtmlColor(c.Red(), c.Green(), c.Blue())
         fontColor = ""
         if c.Green() < 128:
             fontColor = " [fontcolor=white]"
-        
+
         coloredSet.add(colored_node[0])
 
         if colored_node[0] == currWord:
@@ -55,7 +56,7 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
         else:
             graph.append('"%s" [fillcolor="%s"]%s' %
                     (colored_node[0], color_code, fontColor))
-    
+
     if currWord is not None and firstDef == "":
         firstDef = '"%s"' % currWord
 #         firstDef = u'"%s" [fillcolor="%s"]' % (currWord, DEFAULT_NODE_BG_COLOR)
@@ -81,7 +82,7 @@ def _buildGraphStyle(config):
     val = config.get("main", "plugin_graphVizStructure_nodeFacename", "")
     if val != "":
         nodeStyle.append('fontname="%s"' % val)
-    
+
     val = config.getint("main", "plugin_graphVizStructure_nodeFontsize", 0)
     if val != 0:
         nodeStyle.append('fontsize=%s' % val)
@@ -93,17 +94,17 @@ def _buildGraphStyle(config):
     val = config.get("main", "plugin_graphVizStructure_nodeBgColor", "")
     if val != "":
         nodeStyle.append('fillcolor="%s"' % val)
-    
+
     nodeStyle = "node [" + ", ".join(nodeStyle) + "]"
- 
+
     edgeStyle = ['style=solid']
-    
+
     val = config.get("main", "plugin_graphVizStructure_edgeColor", "")
     if val != "":
         edgeStyle.append('color="%s"' % val)
 
     edgeStyle = "edge [" + ", ".join(edgeStyle) + "]"
-    
+
     return nodeStyle + "; " + edgeStyle
 
 
@@ -125,15 +126,15 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
     else:
         global_include_attributes = [re.escape(p[2].strip()) for p in wikiDocument.getAttributeTriples(
                     None, 'global.graph.relation.include', None)]
-        
+
         if len(global_include_attributes) > 0:
             global_includeRe = re.compile(
-                    r"^" + joinRegexes(global_include_attributes)+ r"(?:\.|$)",
+                    r"^" + joinRegexes(global_include_attributes) + r"(?:\.|$)",
                     re.DOTALL | re.UNICODE | re.MULTILINE)
 
     graph = []
 #     graph = [u'', u'digraph {','node [style=filled]']
-#     
+#
 #     graph += _buildNodeDefs(wikiDocument, currWord)
 
     # construct edges
@@ -161,7 +162,7 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
 
     graph.append('}')
 
-    if not currWord in wordSet:
+    if currWord not in wordSet:
         currWord = None
 
     return '\n'.join(['\ndigraph {', _buildGraphStyle(config)] +
@@ -225,23 +226,26 @@ class GraphVizBaseHandler:
     # Filled in by derived classes
     EXAPPNAME = ""
     EXECONFIGKEY = ""
-    
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def findExe(self):
-        # Find MimeTeX executable by configuration setting
+        # Find GraphViz executable by configuration setting
+        self.extAppExe = self.app.getGlobalConfig().get("main",
+                self.EXECONFIGKEY, "")
+
+        if not self.extAppExe:
+            return
+
         dirPath = self.app.getGlobalConfig().get("main",
                 "plugin_graphViz_dirExe", "")
-        if not dirPath:
-            self.extAppExe = ""
-            return
-            
-        exeName = self.app.getGlobalConfig().get("main", self.EXECONFIGKEY, "")
-        self.extAppExe = os.path.join(dirPath, exeName)
-        
-        
+
+        if dirPath:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
+
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -250,13 +254,13 @@ class GraphVizBaseHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
         self.findExe()
 
-        
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
@@ -280,11 +284,11 @@ class GraphVizBaseHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
+
         For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
+        to insert instead of the insertion.
         """
-        
+
         if insToken.key == "graph.relation":
             source = buildRelationGraphSource(exporter.getWikiDocument(),
                     insToken.value, exporter.getMainControl().getConfig())
@@ -300,7 +304,7 @@ class GraphVizBaseHandler:
                 source, insToken.appendices)
 
         if response is not None:
-            return '<pre>' + ('[%s]' % response)+ \
+            return '<pre>' + ('[%s]' % response) + \
                     '</pre>'
 
         # Return appropriate HTML code for the image
@@ -317,11 +321,9 @@ class GraphVizBaseHandler:
     def createImage(self, tempFileSet, exportType, source, insParams):
         """
         """
-        # Retrieve quoted content of the insertion
-        
-        if self.extAppExe == "":
+        if not self.extAppExe:
             # No path to executable -> show message
-            return "Please set path to GraphViz executables in options", None
+            return "Please set path to GraphViz executables", None
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -339,7 +341,6 @@ class GraphVizBaseHandler:
                     srcfilepath))
 
             # Run external application
-#             childIn, childOut, childErr = os.popen3(cmdline, "b")
             popenObject = subprocess.Popen(cmdline, shell=True,
                     stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                     stdin=subprocess.PIPE)
@@ -355,10 +356,10 @@ class GraphVizBaseHandler:
                 errResponse = None
             else:
                 errResponse = childErr.read()
-            
+
             childErr.close()
         finally:
-            os.unlink(srcfilepath)
+            os.remove(srcfilepath)
 
         if errResponse is not None and errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
@@ -375,7 +376,7 @@ class GraphVizBaseHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-        
+
 
 
 class DotHandler(GraphVizBaseHandler):
@@ -425,13 +426,13 @@ def describeMenuItems(wiki):
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
     """
-    
+
     kb = wiki.getKeyBindings()
-    
+
     return (
             (showGraphViz, _("Show relation graph") + "\t" +
             kb.Plugin_GraphVizStructure_ShowRelationGraph, _("Show relation graph")),
-           
+
             (showGraphSource, _("Show rel. graph source") + "\t" +
             kb.Plugin_GraphVizStructure_ShowRelationGraphSource,
             _("Show relation graph source")),
@@ -457,15 +458,15 @@ class GraphView(wx.html.HtmlWindow):
 
         self.tempFileSet = TempFileSet()
         self._updateTempFilePrefPath()
-        
+
         self.mode = mode
-        
+
         self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
 
 
     def _updateTempFilePrefPath(self):
 #         wikiDoc = self.presenter.getWikiDocument()
-# 
+#
 #         if wikiDoc is not None:
 #             self.tempFileSet.setPreferredPath(wikiDoc.getWikiTempDir())
 #         else:
@@ -489,7 +490,7 @@ class GraphView(wx.html.HtmlWindow):
         if not self.visible and vis:
             self.outOfSync = True   # Just to be sure
             self.refresh()
-            
+
         if not vis:
             self.tempFileSet.clear()
 
@@ -511,7 +512,7 @@ class GraphView(wx.html.HtmlWindow):
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
                 return  # TODO Do anything else here?
-                
+
             word = wikiPage.getWikiWord()
             if word is None:
                 return  # TODO Do anything else here?
@@ -566,7 +567,7 @@ def showGraphViz(wiki, evt):
 #     wikiWord = wiki.getCurrentWikiWord()
 #     if wikiWord is None:
 #         return
-    
+
     presenter = wiki.getCurrentDocPagePresenter()
     if presenter is None:
         return
@@ -577,7 +578,7 @@ def showGraphViz(wiki, evt):
                 presenter, -1, "relation graph/dot"))
     else:
         rc.setMode("relation graph/dot")
-    
+
     presenter.switchSubControl("graph view")
 
 
@@ -586,7 +587,7 @@ def showGraphSource(wiki, evt):
 #     wikiWord = wiki.getCurrentWikiWord()
 #     if wikiWord is None:
 #         return
-    
+
     presenter = wiki.getCurrentDocPagePresenter()
     if presenter is None:
         return
@@ -597,7 +598,7 @@ def showGraphSource(wiki, evt):
                 presenter, -1, "relation graph/dot/source"))
     else:
         rc.setMode("relation graph/dot/source")
-    
+
     presenter.switchSubControl("graph view")
 
 
@@ -606,7 +607,7 @@ def showChildGraph(wiki, evt):
     wikiWord = wiki.getCurrentWikiWord()
     if wikiWord is None:
         return
-    
+
     presenter = wiki.getCurrentDocPagePresenter()
     if presenter is None:
         return
@@ -626,7 +627,7 @@ def showChildGraphSource(wiki, evt):
     wikiWord = wiki.getCurrentWikiWord()
     if wikiWord is None:
         return
-    
+
     presenter = wiki.getCurrentDocPagePresenter()
     if presenter is None:
         return
@@ -637,7 +638,7 @@ def showChildGraphSource(wiki, evt):
                 presenter, -1, "child graph/dot/source"))
     else:
         rc.setMode("child graph/dot/source")
-    
+
     presenter.switchSubControl("graph view")
 
 
@@ -685,7 +686,7 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
         self.addOptionEntry("plugin_graphVizStructure_nodeFacename",
                 self.tfFacename, "t")
-        
+
         self.Bind(wx.EVT_BUTTON, self.OnSelectFaceNode, id=facenameButton.GetId())
 
 
@@ -738,7 +739,7 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
 
         self.SetSizer(mainsizer)
         self.Fit()
-        
+
         self.mainControl = optionsDlg.getMainControl()
         self.transferOptionsToDialog(self.mainControl.getConfig())
 
@@ -747,7 +748,7 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.

@@ -1,4 +1,4 @@
-import os, os.path
+import os
 import subprocess
 
 import wx
@@ -39,7 +39,7 @@ class PltHandler:
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -48,18 +48,18 @@ class PltHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
         # Find Ploticus executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_ploticus_exePath", "")
-        
-        if self.extAppExe:
+
+        if self.extAppExe and self.exeAppExe != os.path.basename(self.extAppExe):
             self.extAppExe = os.path.join(self.app.getWikiAppDir(),
                     self.extAppExe)
-        
+
         if self.app.getGlobalConfig().getint("main",
                 "plugin_ploticus_outputFormat", OUTPUT_FORMAT_GIF) == OUTPUT_FORMAT_GIF:
             self.outputSuffix = ".gif"
@@ -92,31 +92,32 @@ class PltHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
-        For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
-        """
-        # Retrieve quoted content of the insertion
-        bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
 
-        if not bstr:
+        For HtmlExporter a unistring is returned with the HTML code
+        to insert instead of the insertion.
+        """
+        if not insToken.value:
             # Nothing in, nothing out
             return ""
-        
-        if self.extAppExe == "":
+
+        if not self.extAppExe:
             # No path to MimeTeX executable -> show message
             return '<pre>' + _('[Please set path to Ploticus executable]') +\
                     '</pre>'
+
+        baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
+
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
 
         pythonUrl = (exportType != "html_previewWX")
-        
+
         dstFullPath = tfs.createTempFile("", self.outputSuffix, relativeTo="")
         url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
-        
-        baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
+
+        # Retrieve quoted content of the insertion
+        bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".plt")
@@ -125,7 +126,6 @@ class PltHandler:
                     srcfilepath, self.outputParameter, "-o", dstFullPath))
 
             # Run external application
-#             childIn, childOut, childErr = os.popen3(cmdline, "b")
             popenObject = subprocess.Popen(cmdline, shell=True,
                     stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                     stdin=subprocess.PIPE)
@@ -141,11 +141,11 @@ class PltHandler:
                 errResponse = b""
             else:
                 errResponse = childErr.read()
-            
+
             childErr.close()
         finally:
-            os.unlink(srcfilepath)
-            
+            os.remove(srcfilepath)
+
         if errResponse != b"":
 #             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Ploticus error: %s]') % repr(errResponse) + \
@@ -226,7 +226,7 @@ class PloticusOptionsPanel(wx.Panel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.
@@ -238,7 +238,7 @@ class PloticusOptionsPanel(wx.Panel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -252,14 +252,11 @@ class PloticusOptionsPanel(wx.Panel):
         file.
         """
         pt = self.tfPath.GetValue()
-        
+
         self.app.getGlobalConfig().set("main", "plugin_ploticus_exePath", pt)
-        
+
         outputFormat = self.chOutputFormat.GetSelection()
         outputFormat = min(1, max(0, outputFormat))
-        
+
         self.app.getGlobalConfig().set("main", "plugin_ploticus_outputFormat",
                 str(outputFormat))
-
-
-

@@ -1,4 +1,4 @@
-import os, os.path
+import os
 import subprocess
 
 import wx
@@ -34,7 +34,7 @@ class GptHandler:
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -43,17 +43,18 @@ class GptHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
         # Find Gnuplot executable by configuration setting
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_gnuplot_exePath", "")
 
-        if self.extAppExe:
+        if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
             self.extAppExe = os.path.join(self.app.getWikiAppDir(),
                     self.extAppExe)
+
 
     def taskEnd(self):
         """
@@ -78,15 +79,15 @@ class GptHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
+
         For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
+        to insert instead of the insertion.
         """
         if not insToken.value:
             # Nothing in, nothing out
             return ""
-        
-        if self.extAppExe == "":
+
+        if not self.extAppExe:
             # No path to Gnuplot executable -> show message
             return '<pre>' + _('[Please set path to Gnuplot executable]') +\
                     '</pre>'
@@ -98,7 +99,7 @@ class GptHandler:
         pythonUrl = (exportType != "html_previewWX")
         dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
         url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
-        
+
         baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
 
         # Prepend source code with appropriate settings for PNG output
@@ -112,14 +113,13 @@ class GptHandler:
         srcfilepath = createTempFile(bstr, ".gpt")
         try:
             cmdline = subprocess.list2cmdline((self.extAppExe, srcfilepath))
-            
+
             # Run external application
-#             childIn, childOut, childErr = os.popen3(cmdline, "b")
             popenObject = subprocess.Popen(cmdline, shell=True,
                     stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                     stdin=subprocess.PIPE)
             childErr = popenObject.stderr
-            
+
             # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
             # why this is necessary
             popenObject.stdin.close()
@@ -130,11 +130,11 @@ class GptHandler:
                 errResponse = b""
             else:
                 errResponse = childErr.read()
-            
+
             childErr.close()
         finally:
-            os.unlink(srcfilepath)
-            
+            os.remove(srcfilepath)
+
         if errResponse != b"":
             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Gnuplot error: %s]') % errResponse +\
@@ -156,7 +156,7 @@ class GptHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-        
+
 
 def registerOptions(ver, app):
     """
@@ -180,9 +180,9 @@ class GnuplotOptionsPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.app = app
-        
+
         pt = self.app.getGlobalConfig().get("main", "plugin_gnuplot_exePath", "")
-        
+
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
@@ -192,7 +192,7 @@ class GnuplotOptionsPanel(wx.Panel):
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
-        
+
         self.SetSizer(mainsizer)
         self.Fit()
 
@@ -200,7 +200,7 @@ class GnuplotOptionsPanel(wx.Panel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.
@@ -212,7 +212,7 @@ class GnuplotOptionsPanel(wx.Panel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -226,7 +226,5 @@ class GnuplotOptionsPanel(wx.Panel):
         file.
         """
         pt = self.tfPath.GetValue()
-        
+
         self.app.getGlobalConfig().set("main", "plugin_gnuplot_exePath", pt)
-
-

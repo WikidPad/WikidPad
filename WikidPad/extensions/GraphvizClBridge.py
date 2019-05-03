@@ -1,4 +1,4 @@
-import os, os.path, traceback
+import os
 import subprocess
 
 import wx
@@ -38,11 +38,11 @@ class GraphVizBaseHandler:
     # Filled in by derived classes
     EXAPPNAME = ""
     EXECONFIGKEY = ""
-    
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -51,22 +51,24 @@ class GraphVizBaseHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find MimeTeX executable by configuration setting
+        # Find GraphViz executable by configuration setting
+        self.extAppExe = self.app.getGlobalConfig().get("main",
+                self.EXECONFIGKEY, "")
+
+        if not self.extAppExe:
+            return
+
         dirPath = self.app.getGlobalConfig().get("main",
                 "plugin_graphViz_dirExe", "")
-        if not dirPath:
-            self.extAppExe = ""
-            return
-            
-        exeName = self.app.getGlobalConfig().get("main", self.EXECONFIGKEY, "")
-        self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, exeName)
+
+        if dirPath:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
 
 
-        
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
@@ -90,19 +92,16 @@ class GraphVizBaseHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
-        For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
-        """
-        # Retrieve quoted content of the insertion
-        bstr = lineendToOs(utf8Enc(insToken.value, "replace")[0])
 
-        if not bstr:
+        For HtmlExporter a unistring is returned with the HTML code
+        to insert instead of the insertion.
+        """
+        if not insToken.value:
             # Nothing in, nothing out
             return ""
-        
-        if self.extAppExe == "":
-            # No path to MimeTeX executable -> show message
+
+        if not self.extAppExe:
+            # No path to GraphViz executable -> show message
             return '<pre>' + _('[Please set path to GraphViz executables]') + \
                     '</pre>'
 
@@ -114,6 +113,9 @@ class GraphVizBaseHandler:
         dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
         url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
 
+        # Retrieve quoted content of the insertion
+        bstr = lineendToOs(utf8Enc(insToken.value, "replace")[0])
+
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".dot")
         try:
@@ -121,7 +123,6 @@ class GraphVizBaseHandler:
                     srcfilepath))
 
             # Run external application
-#             childIn, childOut, childErr = os.popen3(cmdline, "b")
             popenObject = subprocess.Popen(cmdline, shell=True,
                     stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                     stdin=subprocess.PIPE)
@@ -137,16 +138,16 @@ class GraphVizBaseHandler:
                 errResponse = ""
             else:
                 errResponse = childErr.read()
-            
+
             childErr.close()
         finally:
-            os.unlink(srcfilepath)
-            
+            os.remove(srcfilepath)
+
         if errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[%s Error: %s]') % (appname, errResponse) +\
-                     '</pre>'
+                    '</pre>'
 
 
         # Return appropriate HTML code for the image
@@ -165,7 +166,7 @@ class GraphVizBaseHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-        
+
 
 
 class DotHandler(GraphVizBaseHandler):
@@ -199,11 +200,11 @@ def registerOptions(ver, app):
     # Register options
     app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_dirExe")] = ""
 
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeDot")] = "dot.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeNeato")] = "neato.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeTwopi")] = "twopi.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeCirco")] = "circo.exe"
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = "fdp.exe"
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeDot")] = ""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeNeato")] = ""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeTwopi")] = ""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeCirco")] = ""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = ""
 
     # Register panel in options dialog
     app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, "GraphViz")
@@ -218,29 +219,29 @@ class GraphVizOptionsPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.app = wx.GetApp()
-        
+
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_dirExe",
                 "")
         self.tfDir = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeDot",
-                "dot.exe")
+                "")
         self.tfDot = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeNeato",
-                "neato.exe")
+                "")
         self.tfNeato = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeTwopi",
-                "twopi.exe")
+                "")
         self.tfTwopi = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeCirco",
-                "circo.exe")
+                "")
         self.tfCirco = wx.TextCtrl(self, -1, pt)
 
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeFdp",
-                "fdp.exe")
+                "")
         self.tfFdp = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
@@ -277,7 +278,7 @@ class GraphVizOptionsPanel(wx.Panel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.
@@ -289,7 +290,7 @@ class GraphVizOptionsPanel(wx.Panel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -319,6 +320,3 @@ class GraphVizOptionsPanel(wx.Panel):
 
         pt = self.tfFdp.GetValue()
         self.app.getGlobalConfig().set("main", "plugin_graphViz_exeFdp", pt)
-
-
-
