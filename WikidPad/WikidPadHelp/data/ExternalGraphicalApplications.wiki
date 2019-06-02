@@ -8,6 +8,7 @@ The supported applications are:
     * GraphViz which is a set of applications to generate directed and nondirected graphs
     * Ploticus to generate plots and charts (as you might have seen in your favorite spreadsheet program)
     * Gnuplot to generate mathematical plots
+    * PlantUML to generate UML and other diagrams (depends on GraphViz)
 
 
 +++ Download and installation
@@ -20,6 +21,7 @@ The mentioned applications are not part of the WikidPad release itself, you must
     GraphViz| http://graphviz.org/download/ | http://graphviz.org/documentation/
     Ploticus| http://ploticus.sourceforge.net/doc/download.html | http://prdownloads.sourceforge.net/ploticus/pl233site.tar.gz?download
     Gnuplot| http://www.gnuplot.info/download.html | http://www.gnuplot.info/documentation.html
+    PlantUML| http://plantuml.com/download | http://plantuml.com/sitemap-language-specification
 >>
 
 
@@ -32,6 +34,7 @@ Put the binaries in an arbitrary folder on your computer. If you do not plan to 
 Now start WikidPad and open the "Options" dialog. Below the "Plugin options" entry in the list on the left you see four entries, each for one of the programs. Clicking on them leads to the appropriate options page.
 
 For MimeTeX, Ploticus and Gnuplot just enter the full path to the executable, for GraphViz only set the path to the directory containing the executables in the first text field. You can change the names of the executables itself in the fields below the first.
+For PlantUML enter paths to a Java executable and PlantUML JAR file. If directory containing GraphViz executables is set then path to dot will be passed to PlantUML.
 
 
 +++ Special details about Gnuplot
@@ -56,6 +59,7 @@ The programs are called using [Insertions]. The keys for the insertions are:
     * dot, neato, twopi, circo, fdp: GraphViz
     * ploticus: Ploticus
     * gnuplot: Gnuplot
+    * plantuml: PlantUML
 
 
 The values must follow the syntax of the respective program, please see the documentation of the applications for details.
@@ -126,6 +130,14 @@ set key right nobox
 set samples 100
 plot [-pi/2:pi] cos(x),-(sin(x) > sin(x+1) ? sin(x) : sin(x+1))
 "]
+
+
+*PlantUML*
+[:plantuml:'''
+@startuml
+base <|-- derived
+@enduml
+''']
 
 +++ For programmers
 
