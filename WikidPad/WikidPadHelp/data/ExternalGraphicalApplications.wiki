@@ -8,7 +8,7 @@ The supported applications are:
     * GraphViz which is a set of applications to generate directed and nondirected graphs
     * Ploticus to generate plots and charts (as you might have seen in your favorite spreadsheet program)
     * Gnuplot to generate mathematical plots
-    * PlantUML to generate UML and other diagrams (depends on GraphViz)
+    * PlantUML to generate UML and other diagrams (depends on Java virtual machine and GraphViz dot utility)
 
 
 +++ Download and installation
@@ -34,7 +34,7 @@ Put the binaries in an arbitrary folder on your computer. If you do not plan to 
 Now start WikidPad and open the "Options" dialog. Below the "Plugin options" entry in the list on the left you see four entries, each for one of the programs. Clicking on them leads to the appropriate options page.
 
 For MimeTeX, Ploticus and Gnuplot just enter the full path to the executable, for GraphViz only set the path to the directory containing the executables in the first text field. You can change the names of the executables itself in the fields below the first.
-For PlantUML enter paths to a Java executable and PlantUML JAR file. If directory containing GraphViz executables is set then path to dot will be passed to PlantUML.
+For PlantUML enter paths to a Java executable and PlantUML JAR file. If directory containing GraphViz executables is set then path to dot utility will be passed to PlantUML.
 
 
 +++ Special details about Gnuplot
