@@ -29,7 +29,9 @@ Put the binaries in an arbitrary folder on your computer. If you do not plan to 
 
 Now start WikidPad and open the "Options" dialog. Below the "Plugin options" entry in the list on the left there is an entry for each of the programs. Clicking on them leads to the appropriate options page.
 
-For MimeTeX, Ploticus and Gnuplot enter a full path to the executable, for GraphViz enter a path to the directory containing the executables in the first text field and names of all the executables in the following fields. Paths may be absolute, relative to WikidPad application directory, or consist only of executable name (or empty in case of GraphViz directory) in which case the executable must be available in one of the directories in PATH environment variable.
+For MimeTeX, Ploticus and Gnuplot enter a path to the executable.
+For GraphViz enter a path to the directory containing the executables in the first text field and names of all the executables in the following fields.
+Paths may be absolute, relative to WikidPad application directory, or consist only of executable name (or be empty in case of GraphViz executables directory) in which case the executable must be available in one of the directories in PATH environment variable.
 
 
 +++ Special details about Gnuplot
