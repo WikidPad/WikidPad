@@ -24,14 +24,16 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            ("gnuplot", ("html_single", "html_previewWX", "html_preview", "html_multi"), GptHandler),
+            ("gnuplot", ("html_single", "html_previewWX", "html_preview", "html_multi"), GnuplotHandler),
             )
 
 
-class GptHandler:
+class GnuplotHandler:
     """
-    Base class fulfilling the "insertion by key" protocol.
+    Class fulfilling the "insertion by key" protocol.
     """
+    EXE_PATH_CONFIG_KEY = "plugin_gnuplot_exePath"
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
@@ -49,12 +51,10 @@ class GptHandler:
         call to taskStart() and before the call to taskEnd()
         """
         # Find executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                "plugin_gnuplot_exePath", "")
+        self.extAppExe = self.app.getGlobalConfig().get("main", self.EXE_PATH_CONFIG_KEY, "")
 
         if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
-            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
-                    self.extAppExe)
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), self.extAppExe)
 
     def taskEnd(self):
         """
@@ -88,42 +88,42 @@ class GptHandler:
 
         if not self.extAppExe:
             # No path to executable -> show message
-            return '<pre>' + _('[Please set path to Gnuplot executable]') +\
+            return '<pre>' + _('[Please set path to Gnuplot executable]') + \
                     '</pre>'
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
 
-        pythonUrl = (exportType != "html_previewWX")
-        dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
-
-        baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
+        # Create destination file in the set
+        dstFilePath = tfs.createTempFile("", ".png", relativeTo="")
 
         # Prepend source code with appropriate settings for PNG output
-        srcCode = ("set terminal png\nset output '%s'\n" % dstFullPath) + \
+        srcCode = ("set terminal png\nset output '%s'\n" % dstFilePath) + \
                 insToken.value
 
         # Retrieve quoted content of the insertion
         bstr = lineendToOs(mbcsEnc(srcCode, "replace")[0])
 
-        # Store token content in a temporary file
-        srcfilepath = createTempFile(bstr, ".gpt")
+        # Store token content in a temporary source file
+        srcFilePath = createTempFile(bstr, ".gpt")
 
         # Run external application (shell is used to internally handle missing executable error)
-        cmdline = subprocess.list2cmdline((self.extAppExe, srcfilepath))
+        cmdline = subprocess.list2cmdline((self.extAppExe, srcFilePath))
 
         try:
             popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
             errResponse = popenObject.communicate()[1]
         finally:
-            os.remove(srcfilepath)
+            os.remove(srcFilePath)
 
         if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Gnuplot error: %s]') % errResponse + \
                     '</pre>'
+
+        # Get URL for the destination file
+        url = tfs.getRelativeUrl(None, dstFilePath, pythonUrl=(exportType != "html_previewWX"))
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -150,9 +150,10 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_gnuplot_exePath")] = ""
+    app.getDefaultGlobalConfigDict()[("main", GnuplotHandler.EXE_PATH_CONFIG_KEY)] = ""
+
     # Register panel in options dialog
-    app.addOptionsDlgPanel(GnuplotOptionsPanel, "  Gnuplot")
+    app.addOptionsDlgPanel(GnuplotOptionsPanel, "Gnuplot")
 
 
 class GnuplotOptionsPanel(wx.Panel):
@@ -165,7 +166,7 @@ class GnuplotOptionsPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.app = app
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_gnuplot_exePath", "")
+        pt = self.app.getGlobalConfig().get("main", GnuplotHandler.EXE_PATH_CONFIG_KEY, "")
 
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
@@ -211,4 +212,4 @@ class GnuplotOptionsPanel(wx.Panel):
         """
         pt = self.tfPath.GetValue()
 
-        self.app.getGlobalConfig().set("main", "plugin_gnuplot_exePath", pt)
+        self.app.getGlobalConfig().set("main", GnuplotHandler.EXE_PATH_CONFIG_KEY, pt)

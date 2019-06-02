@@ -9,10 +9,6 @@ from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
 
-OUTPUT_FORMAT_GIF = 0
-OUTPUT_FORMAT_PNG = 1
-
-
 def describeInsertionKeys(ver, app):
     """
     API function for "InsertionByKey" plugins
@@ -28,14 +24,19 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            ("ploticus", ("html_single", "html_previewWX", "html_preview", "html_multi"), PltHandler),
+            ("ploticus", ("html_single", "html_previewWX", "html_preview", "html_multi"), PloticusHandler),
             )
 
 
-class PltHandler:
+class PloticusHandler:
     """
     Base class fulfilling the "insertion by key" protocol.
     """
+    EXE_PATH_CONFIG_KEY = "plugin_ploticus_exePath"
+    OUTPUT_FORMAT_CONFIG_KEY = "plugin_ploticus_outputFormat"
+    OUTPUT_FORMAT_GIF = 0
+    OUTPUT_FORMAT_PNG = 1
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
@@ -52,16 +53,16 @@ class PltHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
+        globalConfig = self.app.getGlobalConfig()
+
         # Find executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                "plugin_ploticus_exePath", "")
+        self.extAppExe = globalConfig.get("main", self.EXE_PATH_CONFIG_KEY, "")
 
         if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
-            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
-                    self.extAppExe)
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), self.extAppExe)
 
-        if self.app.getGlobalConfig().getint("main",
-                "plugin_ploticus_outputFormat", OUTPUT_FORMAT_GIF) == OUTPUT_FORMAT_GIF:
+        if globalConfig.getint("main",
+                self.OUTPUT_FORMAT_CONFIG_KEY, self.OUTPUT_FORMAT_GIF) == self.OUTPUT_FORMAT_GIF:
             self.outputSuffix = ".gif"
             self.outputParameter = "-gif"
         else:
@@ -109,31 +110,32 @@ class PltHandler:
         # temporary files)
         tfs = exporter.getTempFileSet()
 
-        pythonUrl = (exportType != "html_previewWX")
-
-        dstFullPath = tfs.createTempFile("", self.outputSuffix, relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
+        # Create destination file in the set
+        dstFilePath = tfs.createTempFile("", self.outputSuffix, relativeTo="")
 
         # Retrieve quoted content of the insertion
         bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
 
-        # Store token content in a temporary file
-        srcfilepath = createTempFile(bstr, ".plt")
+        # Store token content in a temporary source file
+        srcFilePath = createTempFile(bstr, ".plt")
 
         # Run external application (shell will internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, "-dir", baseDir,
-                srcfilepath, self.outputParameter, "-o", dstFullPath))
+                srcFilePath, self.outputParameter, "-o", dstFilePath))
 
         try:
             popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
             errResponse = popenObject.communicate()[1]
         finally:
-            os.remove(srcfilepath)
+            os.remove(srcFilePath)
 
         if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
 #             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[Ploticus error: %s]') % repr(errResponse) + \
                     '</pre>'
+
+        # Get URL for the destination file
+        url = tfs.getRelativeUrl(None, dstFilePath, pythonUrl=(exportType != "html_previewWX"))
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -160,10 +162,12 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_exePath")] = ""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_outputFormat")] = "0"
+    defaultGlobalConfigDict = app.getDefaultGlobalConfigDict()
+    defaultGlobalConfigDict[("main", PloticusHandler.EXE_PATH_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", PloticusHandler.OUTPUT_FORMAT_CONFIG_KEY)] = "0"
+
     # Register panel in options dialog
-    app.addOptionsDlgPanel(PloticusOptionsPanel, "  Ploticus")
+    app.addOptionsDlgPanel(PloticusOptionsPanel, "Ploticus")
 
 
 class PloticusOptionsPanel(wx.Panel):
@@ -176,8 +180,8 @@ class PloticusOptionsPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.app = app
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_ploticus_exePath", "")
-        outputFormat = self.app.getGlobalConfig().getint("main", "plugin_ploticus_outputFormat", 0)
+        pt = self.app.getGlobalConfig().get("main", PloticusHandler.EXE_PATH_CONFIG_KEY, "")
+        outputFormat = self.app.getGlobalConfig().getint("main", PloticusHandler.OUTPUT_FORMAT_CONFIG_KEY, 0)
         outputFormat = min(1, max(0, outputFormat))
 
         self.tfPath = wx.TextCtrl(self, -1, pt)
@@ -233,12 +237,13 @@ class PloticusOptionsPanel(wx.Panel):
         all values from text fields, checkboxes, ... into the configuration
         file.
         """
-        pt = self.tfPath.GetValue()
+        globalConfig = self.app.getGlobalConfig()
 
-        self.app.getGlobalConfig().set("main", "plugin_ploticus_exePath", pt)
+        pt = self.tfPath.GetValue()
+        globalConfig.set("main", PloticusHandler.EXE_PATH_CONFIG_KEY, pt)
 
         outputFormat = self.chOutputFormat.GetSelection()
         outputFormat = min(1, max(0, outputFormat))
 
-        self.app.getGlobalConfig().set("main", "plugin_ploticus_outputFormat",
+        globalConfig.set("main", PloticusHandler.OUTPUT_FORMAT_CONFIG_KEY,
                 str(outputFormat))

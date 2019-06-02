@@ -36,9 +36,11 @@ class GraphVizBaseHandler:
     """
     Base class fulfilling the "insertion by key" protocol.
     """
+    DIR_CONFIG_KEY = "plugin_graphViz_dirExe"
+
     # Filled in by derived classes
-    EXAPPNAME = ""
-    EXECONFIGKEY = ""
+    EXT_APP_NAME = ""
+    EXE_CONFIG_KEY = ""
 
     def __init__(self, app):
         self.app = app
@@ -56,15 +58,15 @@ class GraphVizBaseHandler:
         Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
+        globalConfig = self.app.getGlobalConfig()
+
         # Find executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                self.EXECONFIGKEY, "")
+        self.extAppExe = globalConfig.get("main", self.EXE_CONFIG_KEY, "")
 
         if not self.extAppExe:
             return
 
-        dirPath = self.app.getGlobalConfig().get("main",
-                "plugin_graphViz_dirExe", "")
+        dirPath = globalConfig.get("main", self.DIR_CONFIG_KEY, "")
 
         if dirPath:
             self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
@@ -108,31 +110,33 @@ class GraphVizBaseHandler:
         # temporary files)
         tfs = exporter.getTempFileSet()
 
-        pythonUrl = (exportType != "html_previewWX")
-        dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
+        # Create destination file in the set
+        dstFilePath = tfs.createTempFile("", ".png", relativeTo="")
 
         # Retrieve quoted content of the insertion
         bstr = lineendToOs(utf8Enc(insToken.value, "replace")[0])
 
-        # Store token content in a temporary file
-        srcfilepath = createTempFile(bstr, ".dot")
+        # Store token content in a temporary source file
+        srcFilePath = createTempFile(bstr, ".dot")
 
         # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng",
-                "-o", dstFullPath, srcfilepath))
+                "-o", dstFilePath, srcFilePath))
 
         try:
             popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
             errResponse = popenObject.communicate()[1]
         finally:
-            os.remove(srcfilepath)
+            os.remove(srcFilePath)
 
         if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
-            appname = mbcsDec(self.EXAPPNAME, "replace")[0]
+            appname = mbcsDec(self.EXT_APP_NAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
             return '<pre>' + _('[%s error: %s]') % (appname, errResponse) + \
                     '</pre>'
+
+        # Get URL for the destination file
+        url = tfs.getRelativeUrl(None, dstFilePath, pythonUrl=(exportType != "html_previewWX"))
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -152,28 +156,28 @@ class GraphVizBaseHandler:
 
 
 class DotHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Dot"
-    EXECONFIGKEY = "plugin_graphViz_exeDot"
+    EXT_APP_NAME = "Dot"
+    EXE_CONFIG_KEY = "plugin_graphViz_exeDot"
 
 
 class NeatoHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Neato"
-    EXECONFIGKEY = "plugin_graphViz_exeNeato"
+    EXT_APP_NAME = "Neato"
+    EXE_CONFIG_KEY = "plugin_graphViz_exeNeato"
 
 
 class TwopiHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Twopi"
-    EXECONFIGKEY = "plugin_graphViz_exeTwopi"
+    EXT_APP_NAME = "Twopi"
+    EXE_CONFIG_KEY = "plugin_graphViz_exeTwopi"
 
 
 class CircoHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Circo"
-    EXECONFIGKEY = "plugin_graphViz_exeCirco"
+    EXT_APP_NAME = "Circo"
+    EXE_CONFIG_KEY = "plugin_graphViz_exeCirco"
 
 
 class FdpHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Fdp"
-    EXECONFIGKEY = "plugin_graphViz_exeFdp"
+    EXT_APP_NAME = "Fdp"
+    EXE_CONFIG_KEY = "plugin_graphViz_exeFdp"
 
 
 def registerOptions(ver, app):
@@ -184,50 +188,47 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register options
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_dirExe")] = ""
+    defaultGlobalConfigDict = app.getDefaultGlobalConfigDict()
+    defaultGlobalConfigDict[("main", GraphVizBaseHandler.DIR_CONFIG_KEY)] = ""
 
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeDot")] = ""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeNeato")] = ""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeTwopi")] = ""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeCirco")] = ""
-    app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = ""
+    defaultGlobalConfigDict[("main", DotHandler.EXE_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", NeatoHandler.EXE_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", TwopiHandler.EXE_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", CircoHandler.EXE_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", FdpHandler.EXE_CONFIG_KEY)] = ""
 
     # Register panel in options dialog
     app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, "GraphViz")
 
 
 class GraphVizOptionsPanel(wx.Panel):
-    def __init__(self, parent, optionsDlg, mainControl):
+    def __init__(self, parent, optionsDlg, app):
         """
         Called when "Options" dialog is opened to show the panel.
         Transfer here all options from the configuration file into the
         text fields, check boxes, ...
         """
         wx.Panel.__init__(self, parent)
-        self.app = wx.GetApp()
+        self.app = app
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_dirExe",
-                "")
+        globalConfig = self.app.getGlobalConfig()
+
+        pt = globalConfig.get("main", GraphVizBaseHandler.DIR_CONFIG_KEY, "")
         self.tfDir = wx.TextCtrl(self, -1, pt)
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeDot",
-                "")
+        pt = globalConfig.get("main", DotHandler.EXE_CONFIG_KEY, "")
         self.tfDot = wx.TextCtrl(self, -1, pt)
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeNeato",
-                "")
+        pt = globalConfig.get("main", NeatoHandler.EXE_CONFIG_KEY, "")
         self.tfNeato = wx.TextCtrl(self, -1, pt)
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeTwopi",
-                "")
+        pt = globalConfig.get("main", TwopiHandler.EXE_CONFIG_KEY, "")
         self.tfTwopi = wx.TextCtrl(self, -1, pt)
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeCirco",
-                "")
+        pt = globalConfig.get("main", CircoHandler.EXE_CONFIG_KEY, "")
         self.tfCirco = wx.TextCtrl(self, -1, pt)
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeFdp",
-                "")
+        pt = globalConfig.get("main", FdpHandler.EXE_CONFIG_KEY, "")
         self.tfFdp = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
@@ -289,20 +290,22 @@ class GraphVizOptionsPanel(wx.Panel):
         all values from text fields, checkboxes, ... into the configuration
         file.
         """
+        globalConfig = self.app.getGlobalConfig()
+
         pt = self.tfDir.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_dirExe", pt)
+        globalConfig.set("main", GraphVizBaseHandler.DIR_CONFIG_KEY, pt)
 
         pt = self.tfDot.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_exeDot", pt)
+        globalConfig.set("main", DotHandler.EXE_CONFIG_KEY, pt)
 
         pt = self.tfNeato.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_exeNeato", pt)
+        globalConfig.set("main", NeatoHandler.EXE_CONFIG_KEY, pt)
 
         pt = self.tfTwopi.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_exeTwopi", pt)
+        globalConfig.set("main", TwopiHandler.EXE_CONFIG_KEY, pt)
 
         pt = self.tfCirco.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_exeCirco", pt)
+        globalConfig.set("main", CircoHandler.EXE_CONFIG_KEY, pt)
 
         pt = self.tfFdp.GetValue()
-        self.app.getGlobalConfig().set("main", "plugin_graphViz_exeFdp", pt)
+        globalConfig.set("main", FdpHandler.EXE_CONFIG_KEY, pt)

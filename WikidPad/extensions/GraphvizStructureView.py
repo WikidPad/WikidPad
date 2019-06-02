@@ -210,28 +210,24 @@ def describeInsertionKeys(ver, app):
             )
 
 
-class GraphVizBaseHandler:
+class DotHandler:
     """
-    Base class fulfilling the "insertion by key" protocol.
+    Class fulfilling the "insertion by key" protocol.
     """
-    # Filled in by derived classes
-    EXAPPNAME = ""
-    EXECONFIGKEY = ""
-
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
 
     def findExe(self):
+        globalConfig = self.app.getGlobalConfig()
+
         # Find executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                self.EXECONFIGKEY, "")
+        self.extAppExe = globalConfig.get("main", "plugin_graphViz_exeDot", "")
 
         if not self.extAppExe:
             return
 
-        dirPath = self.app.getGlobalConfig().get("main",
-                "plugin_graphViz_dirExe", "")
+        dirPath = globalConfig.get("main", "plugin_graphViz_dirExe", "")
 
         if dirPath:
             self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, self.extAppExe)
@@ -280,9 +276,11 @@ class GraphVizBaseHandler:
         if insToken.key == "graph.relation":
             source = buildRelationGraphSource(exporter.getWikiDocument(),
                     insToken.value, exporter.getMainControl().getConfig())
-        else:    # insToken.key == u"graph.child"
+        elif insToken.key == "graph.child":
             source = buildChildGraphSource(exporter.getWikiDocument(),
                     insToken.value, exporter.getMainControl().getConfig())
+        else:
+            assert False
 
         if not source:
             # Nothing in, nothing out
@@ -314,29 +312,32 @@ class GraphVizBaseHandler:
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = tempFileSet
-        source = lineendToOs(utf8Enc(source, "replace")[0])
 
-        pythonUrl = (exportType != "html_previewWX")
-        dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
+        # Create destination file in the set
+        dstFilePath = tfs.createTempFile("", ".png", relativeTo="")
 
-        # Store token content in a temporary file
-        srcfilepath = createTempFile(source, ".dot")
+        # Retrieve quoted content of the insertion
+        bstr = lineendToOs(utf8Enc(source, "replace")[0])
+
+        # Store token content in a temporary source file
+        srcFilePath = createTempFile(bstr, ".dot")
 
         # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng",
-                "-o", dstFullPath, srcfilepath))
+                "-o", dstFilePath, srcFilePath))
 
         try:
             popenObject = subprocess.Popen(cmdline, shell=True, stderr=subprocess.PIPE)
             errResponse = popenObject.communicate()[1]
         finally:
-            os.remove(srcfilepath)
+            os.remove(srcFilePath)
 
         if errResponse and "noerror" not in [a.strip() for a in insParams]:
-            appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return (_("%s Error: %s") % (appname, errResponse)), None
+            return (_("%s error: %s") % ("Dot", errResponse)), None
+
+        # Get URL for the destination file
+        url = tfs.getRelativeUrl(None, dstFilePath, pythonUrl=(exportType != "html_previewWX"))
 
         return None, url
 
@@ -346,31 +347,6 @@ class GraphVizBaseHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-
-
-class DotHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Dot"
-    EXECONFIGKEY = "plugin_graphViz_exeDot"
-
-
-class NeatoHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Neato"
-    EXECONFIGKEY = "plugin_graphViz_exeNeato"
-
-
-class TwopiHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Twopi"
-    EXECONFIGKEY = "plugin_graphViz_exeTwopi"
-
-
-class CircoHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Circo"
-    EXECONFIGKEY = "plugin_graphViz_exeCirco"
-
-
-class FdpHandler(GraphVizBaseHandler):
-    EXAPPNAME = "Fdp"
-    EXECONFIGKEY = "plugin_graphViz_exeFdp"
 
 
 # -------- Menu function implementation starts here --------
@@ -615,7 +591,7 @@ def registerOptions(ver, app):
     dgcd[("main", "plugin_graphVizStructure_edgeColor")] = ""
 
     # Register panel in options dialog
-    app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _("  GraphVizStructure"))
+    app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _("GraphVizStructure"))
 
 
 class GraphVizStructOptionsPanel(PluginOptionsPanel):

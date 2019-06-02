@@ -23,14 +23,17 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return (("eqn", ("html_single", "html_previewWX", "html_preview",
-            "html_multi"), EqnHandler),)
+    return (
+            ("eqn", ("html_single", "html_previewWX", "html_preview", "html_multi"), EqnHandler),
+            )
 
 
 class EqnHandler:
     """
     Class fulfilling the "insertion by key" protocol.
     """
+    EXE_PATH_CONFIG_KEY = "plugin_mimeTex_exePath"
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
@@ -48,12 +51,10 @@ class EqnHandler:
         call to taskStart() and before the call to taskEnd()
         """
         # Find executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                "plugin_mimeTex_exePath", "")
+        self.extAppExe = self.app.getGlobalConfig().get("main", self.EXE_PATH_CONFIG_KEY, "")
 
         if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
-            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
-                    self.extAppExe)
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), self.extAppExe)
 
     def taskEnd(self):
         """
@@ -121,7 +122,7 @@ class EqnHandler:
 
         # Create .gif file out of returned data and retrieve URL for the file
         pythonUrl = (exportType != "html_previewWX")
-        url = tfs.createTempUrl(response, ".gif", pythonUrl=pythonUrl)
+        url = tfs.createTempUrl(response, ".gif", pythonUrl=(exportType != "html_previewWX"))
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -148,9 +149,10 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_mimeTex_exePath")] = ""
+    app.getDefaultGlobalConfigDict()[("main", EqnHandler.EXE_PATH_CONFIG_KEY)] = ""
+
     # Register panel in options dialog
-    app.addOptionsDlgPanel(MimeTexOptionsPanel, "  MimeTeX")
+    app.addOptionsDlgPanel(MimeTexOptionsPanel, "MimeTeX")
 
 
 class MimeTexOptionsPanel(wx.Panel):
@@ -163,7 +165,7 @@ class MimeTexOptionsPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.app = app
 
-        pt = self.app.getGlobalConfig().get("main", "plugin_mimeTex_exePath", "")
+        pt = self.app.getGlobalConfig().get("main", EqnHandler.EXE_PATH_CONFIG_KEY, "")
 
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
@@ -209,4 +211,4 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         pt = self.tfPath.GetValue()
 
-        self.app.getGlobalConfig().set("main", "plugin_mimeTex_exePath", pt)
+        self.app.getGlobalConfig().set("main", EqnHandler.EXE_PATH_CONFIG_KEY, pt)
