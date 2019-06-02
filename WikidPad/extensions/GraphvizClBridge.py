@@ -191,11 +191,11 @@ def registerOptions(ver, app):
     defaultGlobalConfigDict = app.getDefaultGlobalConfigDict()
     defaultGlobalConfigDict[("main", GraphVizBaseHandler.DIR_CONFIG_KEY)] = ""
 
-    defaultGlobalConfigDict[("main", DotHandler.EXE_CONFIG_KEY)] = ""
-    defaultGlobalConfigDict[("main", NeatoHandler.EXE_CONFIG_KEY)] = ""
-    defaultGlobalConfigDict[("main", TwopiHandler.EXE_CONFIG_KEY)] = ""
-    defaultGlobalConfigDict[("main", CircoHandler.EXE_CONFIG_KEY)] = ""
-    defaultGlobalConfigDict[("main", FdpHandler.EXE_CONFIG_KEY)] = ""
+    defaultGlobalConfigDict[("main", DotHandler.EXE_CONFIG_KEY)] = "dot"
+    defaultGlobalConfigDict[("main", NeatoHandler.EXE_CONFIG_KEY)] = "neato"
+    defaultGlobalConfigDict[("main", TwopiHandler.EXE_CONFIG_KEY)] = "twopi"
+    defaultGlobalConfigDict[("main", CircoHandler.EXE_CONFIG_KEY)] = "circo"
+    defaultGlobalConfigDict[("main", FdpHandler.EXE_CONFIG_KEY)] = "fdp"
 
     # Register panel in options dialog
     app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, "GraphViz")
