@@ -681,6 +681,8 @@ def setCpuAffinity(cpuIndexSeq):
     
     cpuIndexSeq -- Sequence of integer index numbers of cpu cores (first is 0).
     """
+    if cpuIndexSeq is None: # Something went wrong (probably with getCpuAffinity())
+        return False
 
     procIntMask = _getAffMaskIntegerByIndexes(cpuIndexSeq)
 
