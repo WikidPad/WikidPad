@@ -198,7 +198,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         def OnOpeningURL(self, typ, url):
             if url.startswith("file:"):
                 if self._RE_RIGHT_FILE_URL.match(url):
-                    return wx.html.HTML_OPEN
+                    return wx.html.HTML_OPEN, ""
                 # At least under Windows, wxWidgets has another
                 # opinion how a local file URL should look like
                 # than Python.
@@ -206,9 +206,9 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 # for WikidPad URL but not for URLs in HTML tags. 
                 p = pathnameFromUrl(url)
                 url = wx.FileSystem.FileNameToURL(p)
-                return url
+                return wx.html.HTML_REDIRECT, url
     
-            return wx.html.HTML_OPEN
+            return wx.html.HTML_OPEN, ""
 
 
     def close(self):
