@@ -24,7 +24,7 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-           ("plantuml", ("html_single", "html_previewWX", "html_preview", "html_multi"), PlantUmlHandler),
+            ("plantuml", ("html_single", "html_previewWX", "html_preview", "html_multi"), PlantUmlHandler),
             )
 
 
@@ -63,7 +63,7 @@ class PlantUmlHandler:
 
         if self.javaExe and self.javaExe != os.path.basename(self.javaExe):
             self.javaExe = os.path.join(wikiAppDir, self.javaExe)
-        if self.plantumlJar and self.plantumlJar != os.path.basename(self.plantumlJar):
+        if self.plantumlJar:
             self.plantumlJar = os.path.join(wikiAppDir, self.plantumlJar)
 
         # Pass dot path to PlantUML only if it's not available in PATH environment variable
@@ -104,7 +104,7 @@ class PlantUmlHandler:
 
         if not self.javaExe or not self.plantumlJar:
             # No paths -> show message
-            return '<pre>' + _('[Please set path to Java executable and/or PlantUML JAR file]') + \
+            return '<pre>' + _('[Please set path to Java executable and PlantUML JAR file]') + \
                     '</pre>'
 
         # Retrieve quoted content of the insertion
