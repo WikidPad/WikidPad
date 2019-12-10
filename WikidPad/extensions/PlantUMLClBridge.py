@@ -3,7 +3,6 @@ import subprocess
 
 import wx
 
-from pwiki.TempFileSet import createTempFile
 from pwiki.StringOps import mbcsDec, utf8Enc, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
@@ -110,15 +109,15 @@ class PlantUmlHandler:
         # Retrieve quoted content of the insertion
         bstr = lineendToOs(utf8Enc(insToken.value, "replace")[0])
 
-        # Store token content in a temporary source file
-        srcFilePath = createTempFile(bstr, ".puml")
-
-        # Determine destination file path based on source file path
-        dstFilePath = os.path.splitext(srcFilePath)[0] + ".png"
-
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
+
+        # Store token content in a temporary source file in the set
+        srcFilePath = tfs.createTempFile(bstr, ".puml")
+
+        # Determine destination file path based on source file path
+        dstFilePath = os.path.splitext(srcFilePath)[0] + ".png"
 
         # Add the destination file to be created to the set
         tfs.addFile(dstFilePath)
@@ -129,11 +128,8 @@ class PlantUmlHandler:
                 (("-graphvizdot", self.dotExe) if self.dotExe else ()) +
                 (srcFilePath,))
 
-        try:
-            popenObject = subprocess.Popen(cmdline, stderr=subprocess.PIPE, shell=True)
-            errResponse = popenObject.communicate()[1]
-        finally:
-            os.remove(srcFilePath)
+        popenObject = subprocess.Popen(cmdline, stderr=subprocess.PIPE, shell=True)
+        errResponse = popenObject.communicate()[1]
 
         if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
             errResponse = mbcsDec(errResponse, "replace")[0]

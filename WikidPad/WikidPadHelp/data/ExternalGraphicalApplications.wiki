@@ -74,7 +74,7 @@ The values should be quoted (enclosed by quotation symbols) if they contain spec
 
 When exporting HTML, the rendered image files are put in a subdirectory "volatile" in the same directory where the HTML files are. If "volatile" is already present in the destination directory, *all of its contents (including subfolders) are deleted* to avoid filling it up with old versions of the files!
 
-If the GraphViz or Ploticus applications return errors or warnings, you see these instead of the rendered images. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
+If the GraphViz, Ploticus, or PlantUML applications return errors or warnings, you see these instead of the rendered images. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
 
 
 +++ Examples
@@ -137,7 +137,7 @@ plot [-pi/2:pi] cos(x),-(sin(x) > sin(x+1) ? sin(x) : sin(x+1))
 @startuml
 base <|-- derived
 @enduml
-''']
+''';noerror]
 
 +++ For programmers
 
