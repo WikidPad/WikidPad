@@ -1720,8 +1720,8 @@ msgid "[Please set path to GraphViz executables]"
 msgstr "[Ange sökväg till GraphViz programfiler]"
 
 #: extensions\GraphvizClBridge.py:148
-msgid "[%s Error: %s]"
-msgstr "[%s Fel: %s]"
+msgid "[%s error: %s]"
+msgstr "[%s-fel: %s]"
 
 #: extensions\GraphvizClBridge.py:249
 msgid "Directory of executables:"
@@ -1748,8 +1748,8 @@ msgid "Name of fdp executable:"
 msgstr "Namn på fdp-filen:"
 
 #: extensions\GraphvizStructureView.py:366
-msgid "%s Error: %s"
-msgstr "%s Fel: %s"
+msgid "%s error: %s"
+msgstr "%s-fel: %s"
 
 #: extensions\GraphvizStructureView.py:432
 #: extensions\GraphvizStructureView.py:433
@@ -1822,6 +1822,10 @@ msgstr "[Okänd tolkningsnod med namnet \"%s\" hittades]"
 #: extensions\MimeTexCGIBridge.py:92
 msgid "[Please set path to MimeTeX executable]"
 msgstr "[Ange sökväg till MimeTeX programfil]"
+
+#: extensions\MimeTexCGIBridge.py:124
+msgid "[MimeTeX error: %s]"
+msgstr "[MimeTeX-fel: %s]"
 
 #: extensions\MimeTexCGIBridge.py:124
 msgid "[Invalid response from MimeTeX]"

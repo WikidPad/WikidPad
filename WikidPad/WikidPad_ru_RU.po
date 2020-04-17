@@ -1768,8 +1768,8 @@ msgid "[Please set path to GraphViz executables]"
 msgstr "[Пожалуйста, укажите путь к программам GraphViz]"
 
 #: extensions\GraphvizClBridge.py:148
-msgid "[%s Error: %s]"
-msgstr "[%s Ошибка: %s]"
+msgid "[%s error: %s]"
+msgstr "[Ошибка %s: %s]"
 
 #: extensions\GraphvizClBridge.py:249
 msgid "Directory of executables:"
@@ -1796,8 +1796,8 @@ msgid "Name of fdp executable:"
 msgstr "Имя программы fdp:"
 
 #: extensions\GraphvizStructureView.py:366
-msgid "%s Error: %s"
-msgstr "%s Ошибка: %s"
+msgid "%s error: %s"
+msgstr "Ошибка %s: %s"
 
 #: extensions\GraphvizStructureView.py:432
 #: extensions\GraphvizStructureView.py:433
@@ -1873,6 +1873,10 @@ msgstr "[Найден неизвестный узел с именем \"%s\" ]"
 #: extensions\MimeTexCGIBridge.py:92
 msgid "[Please set path to MimeTeX executable]"
 msgstr "[Пожалуйста, укажите путь к программам MimeTeX]"
+
+#: extensions\MimeTexCGIBridge.py:124
+msgid "[MimeTeX error: %s]"
+msgstr "[Ошибка MimeTeX: %s]"
 
 #: extensions\MimeTexCGIBridge.py:124
 msgid "[Invalid response from MimeTeX]"
