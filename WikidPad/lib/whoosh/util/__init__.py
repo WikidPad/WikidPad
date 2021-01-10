@@ -40,7 +40,7 @@ IDCHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
 if hasattr(time, "perf_counter"):
     now = time.perf_counter
 elif sys.platform == 'win32':
-    now = time.clock
+    now = time.perf_counter
 else:
     now = time.time
 

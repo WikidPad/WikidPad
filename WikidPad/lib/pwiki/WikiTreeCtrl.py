@@ -1317,7 +1317,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetSpacing(0)
         self.refreshGenerator = None  # Generator called in OnIdle
-        self.refreshGeneratorLastCallTime = time.clock()  # Initial value
+        self.refreshGeneratorLastCallTime = time.perf_counter()  # Initial value
         self.refreshGeneratorLastCallMinDelay = 0.1
         self.refreshExecutor = Utilities.SingleThreadExecutor(1)
         self.refreshStartLock = False  # Disallows starting of refresh (mainly
@@ -2602,7 +2602,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def OnIdle(self, event):
         gen = self.refreshGenerator
         if gen is not None:
-            cl = time.clock()
+            cl = time.perf_counter()
             if cl < self.refreshGeneratorLastCallTime:
                 # May happen under special circumstances (e.g. after hibernation)
                 self.refreshGeneratorLastCallTime = cl
@@ -2614,7 +2614,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 next(gen)
                 # Set time after generator run, so time needed by generator
                 # itself doesn't count
-                self.refreshGeneratorLastCallTime = time.clock()
+                self.refreshGeneratorLastCallTime = time.perf_counter()
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
