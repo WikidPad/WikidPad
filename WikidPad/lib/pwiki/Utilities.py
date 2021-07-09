@@ -148,7 +148,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
         debuglog("SingleThreadExecutor starting")
         with self.dequeCondition:
             self.paused = False
-            if self.thread is not None and self.thread.isAlive():
+            if self.thread is not None and self.thread.is_alive():
                 return
 
             self.prepare()
@@ -233,7 +233,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
     def _fireStateChange(self, running=None):
         if running is None:
             # Detect self
-            running = self.thread is not None and self.thread.isAlive()
+            running = self.thread is not None and self.thread.is_alive()
 
         callInMainThreadAsync(self.fireMiscEventProps, {"changed state": True,
             "isRunning": running, "jobCount": self.getJobCount()})
@@ -377,7 +377,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
 
         If the queues are empty, executor stops in each case.
         """
-        if self.thread is None or not self.thread.isAlive():
+        if self.thread is None or not self.thread.is_alive():
             return
 
         with self.dequeCondition:
@@ -394,7 +394,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
 
         self.thread.join(120)  # TODO: Replace by constant
 
-        if self.thread.isAlive():
+        if self.thread.is_alive():
             raise DeadBlockPreventionTimeOutError()
 
         debuglog("SingleThreadExecutor ending, thread terminated",
@@ -414,7 +414,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
         with self.dequeCondition:
             thread = self.thread
             
-            if thread is None or not thread.isAlive():
+            if thread is None or not thread.is_alive():
                 return False
 
             self.paused = True
@@ -423,7 +423,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
         if wait:
             thread.join(120)  # TODO: Replace by constant
     
-            if thread.isAlive():
+            if thread.is_alive():
                 raise DeadBlockPreventionTimeOutError()
 
             self.thread = None
