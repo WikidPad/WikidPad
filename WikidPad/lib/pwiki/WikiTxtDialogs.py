@@ -349,7 +349,7 @@ class ImagePasteSaver:
         if self.formatNo < 1 or self.formatNo > 2:
             return None
 
-        img.SetOptionInt("quality", self.quality)
+        img.SetOption("quality", self.quality)
 
         tempFileSet = TempFileSet()
 
