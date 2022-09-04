@@ -472,7 +472,7 @@ class AuiDefaultTabArt:
             dc.DrawPoint(r.x+r.width-2, r.y+1)
 
             # set rectangle down a bit for gradient drawing
-            r.SetHeight(r.GetHeight()/2)
+            r.SetHeight(int(r.GetHeight()/2))
             r.x += 2
             r.width -= 2
             r.y += r.height
@@ -566,7 +566,7 @@ class AuiDefaultTabArt:
 
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1
+        ypos = int(drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1)
 
         offset_focus = text_offset
         if control:
@@ -607,11 +607,11 @@ class AuiDefaultTabArt:
             shift = (agwFlags & AUI_NB_BOTTOM and [1] or [0])[0]
 
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
-                rect = wx.Rect(tab_x + 4, tab_y + (tab_height - bmp.GetHeight())/2 - shift,
+                rect = wx.Rect(tab_x + 4, tab_y + int((tab_height - bmp.GetHeight())/2) - shift,
                                close_button_width, tab_height)
             else:
                 rect = wx.Rect(tab_x + tab_width - close_button_width - 1,
-                               tab_y + (tab_height - bmp.GetHeight())/2 - shift,
+                               tab_y + int((tab_height - bmp.GetHeight())/2) - shift,
                                close_button_width, tab_height)
 
             rect = IndentPressedBitmap(rect, close_button_state)
@@ -1307,7 +1307,7 @@ class AuiSimpleTabArt:
         # draw focus rectangle
         if page.active and wx.Window.FindFocus() == wnd and (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
 
-            focusRect = wx.Rect(text_offset, ((tab_y + tab_height)/2 - (texty/2) + 1),
+            focusRect = wx.Rect(text_offset, ((tab_y + int(tab_height)/2 - (texty/2)) + 1),
                                 selected_textx, selected_texty)
 
             focusRect.Inflate(2, 2)
