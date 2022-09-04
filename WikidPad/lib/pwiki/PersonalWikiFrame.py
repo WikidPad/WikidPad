@@ -1102,7 +1102,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _("Reread text blocks"),
                 _("Reread the text block file(s) and recreate menu"))
         self.Bind(wx.EVT_MENU, self.OnRereadTextBlocks,
-                id=GUI_ID.CMD_REREAD_TEXT_BLOCKS)
+                source=GUI_ID.CMD_REREAD_TEXT_BLOCKS)
 
 
     def OnTextBlockUsed(self, evt):
@@ -1158,13 +1158,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _("Add wiki"),
                 _("Add a wiki to the favorites"))
         self.Bind(wx.EVT_MENU, self.OnAddToFavoriteWikis,
-                id=GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES)
+                source=GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES)
 
         menu.Append(GUI_ID.CMD_MANAGE_FAVORITE_WIKIS,
                 _("Manage favorites"),
                 _("Manage favorites"))
         self.Bind(wx.EVT_MENU, self.OnManageFavoriteWikis,
-                id=GUI_ID.CMD_MANAGE_FAVORITE_WIKIS)
+                source=GUI_ID.CMD_MANAGE_FAVORITE_WIKIS)
 
 
     def OnFavoriteWikiUsed(self, evt):
@@ -1370,7 +1370,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         editMenu.AppendSubMenu(self.textBlocksMenu, _('Paste T&extblock'))
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
-                id=GUI_ID.MENU_TEXT_BLOCKS)
+                source=GUI_ID.MENU_TEXT_BLOCKS)
 
 
         if self.clipboardInterceptor is not None:
@@ -1630,17 +1630,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wxHelper.appendToMenuByMenuDesc(tabsMenu, FOLD_MENU, self.keyBindings)
 
         self.Bind(wx.EVT_MENU, self.OnCmdCheckShowFolding,
-                id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
+                source=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateShowFolding,
-                id=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
+                source=GUI_ID.CMD_CHECKBOX_SHOW_FOLDING)
 
         self.Bind(wx.EVT_MENU,
                 lambda evt: self.getActiveEditor().toggleCurrentFolding(),
-                id=GUI_ID.CMD_TOGGLE_CURRENT_FOLDING)
+                source=GUI_ID.CMD_TOGGLE_CURRENT_FOLDING)
         self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().unfoldAll(),
-                id=GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT)
+                source=GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT)
         self.Bind(wx.EVT_MENU, lambda evt: self.getActiveEditor().foldAll(),
-                id=GUI_ID.CMD_FOLD_ALL_IN_CURRENT)
+                source=GUI_ID.CMD_FOLD_ALL_IN_CURRENT)
         
 
 
@@ -1806,7 +1806,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('&Icon Name'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
-                id=GUI_ID.MENU_ADD_ICON_NAME)
+                source=GUI_ID.MENU_ADD_ICON_NAME)
 
         self.cmdIdToInsertString = cmdIdToIconName
         
@@ -1819,7 +1819,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('&Color Name'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
-                id=GUI_ID.MENU_ADD_STRING_NAME)
+                source=GUI_ID.MENU_ADD_STRING_NAME)
 
         self.cmdIdToInsertString.update(cmdIdToColorName)
 
@@ -1848,7 +1848,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('&Color Attribute'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
-                id=GUI_ID.MENU_ADD_COLOR_ATTRIBUTE)
+                source=GUI_ID.MENU_ADD_COLOR_ATTRIBUTE)
 
         # TODO: Bold attribute
 
@@ -2099,13 +2099,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_BACK
         addSimpleTool(tbID, icon, _("Back") + " " + self.keyBindings.GoBack,
                 _("Back"))
-        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
         icon = self.lookupSystemIcon("tb_forward")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD
         addSimpleTool(tbID, icon, _("Forward") + " " + self.keyBindings.GoForward,
                 _("Forward"))
-        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
         icon = self.lookupSystemIcon("tb_home")
         tbID = wx.NewId()
@@ -2139,7 +2139,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tbID = GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE
         addSimpleTool(tbID, icon, _("Go upward from a subpage"),
                 _("Go upward from a subpage"))
-        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, id=tbID)
+        self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
         addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
@@ -2190,12 +2190,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupSystemIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
         addSimpleTool(tbID, icon, _("Zoom In"), _("Zoom In"))
-        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
+        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, source=tbID)
 
         icon = self.lookupSystemIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
         addSimpleTool(tbID, icon, _("Zoom Out"), _("Zoom Out"))
-        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, id=tbID)
+        self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, source=tbID)
 
 
         self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH,
@@ -2301,7 +2301,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.getConfig().getboolean("main", "toolbar_show", True):
             self.setShowToolbar(True)
 
-        self.Bind(wx.EVT_MENU, self.OnSwitchFocus, id=GUI_ID.CMD_SWITCH_FOCUS)
+        self.Bind(wx.EVT_MENU, self.OnSwitchFocus, source=GUI_ID.CMD_SWITCH_FOCUS)
 
         # Table with additional possible accelerators
         ADD_ACCS = (
@@ -2334,7 +2334,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY)
                     for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)]
     
-            self.Bind(wx.EVT_MENU, lambda evt: None, id=GUI_ID.SPECIAL_EAT_KEY)
+            self.Bind(wx.EVT_MENU, lambda evt: None, source=GUI_ID.SPECIAL_EAT_KEY)
 
         self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
@@ -2375,10 +2375,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.Bind(wx.EVT_ICONIZE, self.OnIconize)
         self.Bind(wx.EVT_MAXIMIZE, self.OnMaximize)
         
-        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_CLOSE_CURRENT_TAB)
-        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_GO_NEXT_TAB)
-        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, id=GUI_ID.CMD_GO_PREVIOUS_TAB)
-        self.Bind(wx.EVT_MENU, self.OnCmdFocusFastSearchField, id=GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, source=GUI_ID.CMD_CLOSE_CURRENT_TAB)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, source=GUI_ID.CMD_GO_NEXT_TAB)
+        self.Bind(wx.EVT_MENU, self._OnRoundtripEvent, source=GUI_ID.CMD_GO_PREVIOUS_TAB)
+        self.Bind(wx.EVT_MENU, self.OnCmdFocusFastSearchField, source=GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):

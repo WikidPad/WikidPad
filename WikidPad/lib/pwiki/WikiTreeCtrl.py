@@ -1384,25 +1384,25 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # TODO Let PersonalWikiFrame handle this 
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordRenameDialog(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
+                source=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordDeleteDialog(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
+                source=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.insertAttribute(
                 "bookmarked", "true",
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD)
+                source=GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.setWikiWordAsRoot(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
+                source=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.collapseAll(),
-                id=GUI_ID.CMD_COLLAPSE_TREE)
+                source=GUI_ID.CMD_COLLAPSE_TREE)
 
-        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, id=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
-        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, id=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, source=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, source=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, source=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
                 
 
 

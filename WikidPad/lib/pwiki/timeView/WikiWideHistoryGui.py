@@ -59,7 +59,7 @@ class WikiWideHistoryPanel(EnhancedListControl):
 #         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
         
-        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAll, id=GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAll, source=GUI_ID.CMD_WIKI_WIDE_HISTORY_DELETE_ALL)
 
         self.onWikiStateChanged(None)
 
