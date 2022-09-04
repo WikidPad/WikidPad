@@ -1840,7 +1840,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('&Icon Attribute'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
-                id=GUI_ID.MENU_ADD_ICON_ATTRIBUTE)
+                source=GUI_ID.MENU_ADD_ICON_ATTRIBUTE)
 
         # Build submenu for color attributes
         colorsMenu, self.cmdIdToColorNameForAttribute = AttributeHandling.buildColorsSubmenu()
