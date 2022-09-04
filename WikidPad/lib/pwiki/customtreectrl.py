@@ -4269,7 +4269,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             x += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             y_pos = self.GetScrollPos(wx.VERTICAL)
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, y_pos)
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, y_pos)
         
         else:
         
@@ -4573,7 +4573,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
 
             imglist.Draw(image, dc,
                          item.GetX() + wcheck,
-                         item.GetY() + ((total_h > image_h) and [(total_h-image_h)/2] or [0])[0],
+                         int(item.GetY() + ((total_h > image_h) and [(total_h-image_h)/2] or [0])[0]),
                          wx.IMAGELIST_DRAW_TRANSPARENT)
             
             dc.DestroyClippingRegion()
@@ -4592,7 +4592,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
         dc.SetBackgroundMode(wx.TRANSPARENT)
         extraH = ((total_h > text_h) and [(total_h - text_h)/2] or [0])[0]
 
-        textrect = wx.Rect(wcheck + image_w + item.GetX(), item.GetY() + extraH, text_w, text_h)
+        textrect = wx.Rect(wcheck + image_w + item.GetX(), int(item.GetY() + extraH), text_w, text_h)
         
         if not item.IsEnabled():
             foreground = dc.GetTextForeground()
@@ -4856,7 +4856,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                     if item == self._underMouse:
                         flag |= _CONTROL_CURRENT
 
-                    self._drawingfunction(self, dc, wx.Rect(x_start - wImage/2, y_mid - hImage/2,wImage, hImage), flag)
+                    self._drawingfunction(self, dc, wx.Rect(x_start - int(wImage/2), y_mid - int(hImage/2),wImage, hImage), flag)
                 
 
 
