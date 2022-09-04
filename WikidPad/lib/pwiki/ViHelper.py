@@ -2684,7 +2684,7 @@ class ViInputDialog(wx.Panel):
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD)
+        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD.GetId())
         #wx.EVT_TIMER(self, GUI_ID.TIMER_VI_UPDATE_CMD, self.CheckViInput)
         self.Bind(wx.EVT_TIMER, self.CheckViInput, 
                 source=GUI_ID.TIMER_VI_UPDATE_CMD)

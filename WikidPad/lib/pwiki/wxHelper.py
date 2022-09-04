@@ -802,6 +802,8 @@ def appendItemToMenuByDescComponents(menu, namePath, idStr, longHelp="",
         menuID = getattr(GUI_ID, idStr, -1)
         if menuID == -1:
             return None
+        if (isinstance(menuID, wxSourceId)):
+            menuID = menuID.GetId()
         longHelp = _unescapeWithRe(longHelp)
 
         return menu.Append(menuID, _(title), _(longHelp), kind)

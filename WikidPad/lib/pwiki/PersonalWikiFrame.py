@@ -691,7 +691,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             menuID=None, updatefct=None, kind=wx.ITEM_NORMAL):
         if menuID is None:
             menuID = wx.NewId()
-            
+
+        if (isinstance(menuID,wxHelper.wxSourceId)):
+            menuID = menuID.GetId()
+
         if kind is None:
             kind = wx.ITEM_NORMAL
 
@@ -1098,7 +1101,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnTextBlockUsed)
 
         menu.AppendSeparator()
-        menu.Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS,
+        menu.Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS.GetId(),
                 _("Reread text blocks"),
                 _("Reread the text block file(s) and recreate menu"))
         self.Bind(wx.EVT_MENU, self.OnRereadTextBlocks,
@@ -1154,13 +1157,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnFavoriteWikiUsed)
 
         menu.AppendSeparator()
-        menu.Append(GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES,
+        menu.Append(GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES.GetId(),
                 _("Add wiki"),
                 _("Add a wiki to the favorites"))
         self.Bind(wx.EVT_MENU, self.OnAddToFavoriteWikis,
                 source=GUI_ID.CMD_ADD_CURRENT_WIKI_TO_FAVORITES)
 
-        menu.Append(GUI_ID.CMD_MANAGE_FAVORITE_WIKIS,
+        menu.Append(GUI_ID.CMD_MANAGE_FAVORITE_WIKIS.GetId(),
                 _("Manage favorites"),
                 _("Manage favorites"))
         self.Bind(wx.EVT_MENU, self.OnManageFavoriteWikis,
@@ -1313,11 +1316,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         editMenu = wx.Menu()
         
         self.addMenuItem(editMenu, _('&Undo') + '\t' + self.keyBindings.Undo,
-                _('Undo'), self._OnRoundtripEvent, menuID=GUI_ID.CMD_UNDO,
+                _('Undo'), self._OnRoundtripEvent, menuID=GUI_ID.CMD_UNDO.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
         self.addMenuItem(editMenu, _('&Redo') + '\t' + self.keyBindings.Redo,
-                _('Redo'), self._OnRoundtripEvent, menuID=GUI_ID.CMD_REDO,
+                _('Redo'), self._OnRoundtripEvent, menuID=GUI_ID.CMD_REDO.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
  
         editMenu.AppendSeparator()
@@ -1334,28 +1337,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(editMenu, _('Cu&t') + '\t' + self.keyBindings.Cut,
                 _('Cut'), self._OnRoundtripEvent,
-                "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT,
+                "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
         self.addMenuItem(editMenu, _('&Copy') + '\t' + self.keyBindings.Copy,
                 _('Copy'), self._OnRoundtripEvent,
-                "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
+                "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY.GetId())
 
         self.addMenuItem(editMenu, _('&Paste') + '\t' + self.keyBindings.Paste,
                 _('Paste'), self._OnRoundtripEvent,
-                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE,
+                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
         self.addMenuItem(editMenu, _('&Paste Raw HTML') + '\t' +
                 self.keyBindings.PasteRawHtml,
                 _('Paste HTML data as is if available'), self._OnRoundtripEvent,
-                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML,
+                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage,
                     self.OnUpdateDisNotTextedit,self.OnUpdateDisNotHtmlOnClipboard))
 
         self.addMenuItem(editMenu, _('Select &All') + '\t' + self.keyBindings.SelectAll,
                 _('Select All'), self._OnRoundtripEvent,
-                 menuID=GUI_ID.CMD_SELECT_ALL)
+                 menuID=GUI_ID.CMD_SELECT_ALL.GetId())
 
         editMenu.AppendSeparator()
 
@@ -1381,7 +1384,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.keyBindings.CatchClipboardAtPage, 
                     _("Text copied to clipboard is also appended to this page"),
                     self.OnClipboardCatcherAtPage, 
-                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE.GetId(),
                     updatefct=self.OnUpdateClipboardCatcher,
                     kind=wx.ITEM_RADIO)
 
@@ -1389,7 +1392,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.keyBindings.CatchClipboardAtCursor, 
                     _("Text copied to clipboard is also added to cursor position"),
                     self.OnClipboardCatcherAtCursor, 
-                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR.GetId(),
                     updatefct=self.OnUpdateClipboardCatcher,
                     kind=wx.ITEM_RADIO)
 
@@ -1397,7 +1400,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.keyBindings.CatchClipboardOff, 
                     _("Switch off clipboard catcher"),
                     self.OnClipboardCatcherOff, 
-                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    menuID=GUI_ID.CMD_CLIPBOARD_CATCHER_OFF.GetId(),
                     updatefct=self.OnUpdateClipboardCatcher,
                     kind=wx.ITEM_RADIO)
 
@@ -1408,24 +1411,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(logLineMoveMenu, _('&Up') +
                 '\t' + self.keyBindings.LogLineUp,
                 _("Move line upward"), self._OnRoundtripEvent,
-                menuID=GUI_ID.CMD_LOGICAL_LINE_UP,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_UP.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
         self.addMenuItem(logLineMoveMenu, _('Up with indented') +
                 '\t' + self.keyBindings.LogLineUpWithIndented,
                 _("Move line with more indented lines below upward"),
                 self._OnRoundtripEvent,
-                menuID=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
         self.addMenuItem(logLineMoveMenu, _('&Down') +
                 '\t' + self.keyBindings.LogLineDown,
                 _("Move line downward"), self._OnRoundtripEvent,
-                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
         self.addMenuItem(logLineMoveMenu, _('Down with indented') +
                 '\t' + self.keyBindings.LogLineDownWithIndented,
                 _("Move line with more indented lines below downward"),
                 self._OnRoundtripEvent,
-                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT,
+                menuID=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
         if SpellChecker.isSpellCheckSupported():
@@ -1521,7 +1524,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _("Show toolbar"),
                 lambda evt: self.setShowToolbar(
                 not self.getConfig().getboolean("main", "toolbar_show", True)), 
-                menuID=GUI_ID.CMD_SHOW_TOOLBAR,
+                menuID=GUI_ID.CMD_SHOW_TOOLBAR.GetId(),
                 updatefct=self.OnUpdateToolbarMenuItem,
                 kind=wx.ITEM_CHECK)
 
@@ -1575,7 +1578,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.StayOnTop, 
                 _("Stay on Top of all other windows"),
                 lambda evt: self.setStayOnTop(not self.getStayOnTop()), 
-                menuID=GUI_ID.CMD_STAY_ON_TOP,
+                menuID=GUI_ID.CMD_STAY_ON_TOP.GetId(),
                 updatefct=self.OnUpdateStayOnTopMenuItem,
                 kind=wx.ITEM_CHECK)
         
@@ -1583,11 +1586,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
        
         self.addMenuItem(viewMenu, _('&Zoom In') + '\t' + self.keyBindings.ZoomIn,
                 _('Zoom In'), self._OnRoundtripEvent, "tb_zoomin",
-                menuID=GUI_ID.CMD_ZOOM_IN)
+                menuID=GUI_ID.CMD_ZOOM_IN.GetId())
 
         self.addMenuItem(viewMenu, _('Zoo&m Out') + '\t' + self.keyBindings.ZoomOut,
                 _('Zoom Out'), self._OnRoundtripEvent, "tb_zoomout",
-                menuID=GUI_ID.CMD_ZOOM_OUT)
+                menuID=GUI_ID.CMD_ZOOM_OUT.GetId())
 
 
 #         menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_SHOW_TOOLBAR,
@@ -1612,18 +1615,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.ShowSwitchEditorPreview,
                 _('Switch between editor and preview'),
                 lambda evt: self.setDocPagePresenterSubControl(None),  "tb_switch ed prev",
-                    menuID=GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
+                    menuID=GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW.GetId())
 
         self.addMenuItem(tabsMenu, _('Enter Edit Mode') + '\t' + self.keyBindings.ShowEditor,
                 _('Show editor in tab'),
                 lambda evt: self.setDocPagePresenterSubControl("textedit"),  #  "tb_editor",
-                    menuID=GUI_ID.CMD_TAB_SHOW_EDITOR)
+                    menuID=GUI_ID.CMD_TAB_SHOW_EDITOR.GetId())
 
         self.addMenuItem(tabsMenu, _('Enter Preview Mode') + '\t' +
                 self.keyBindings.ShowPreview,
                 _('Show preview in tab'),
                 lambda evt: self.setDocPagePresenterSubControl("preview"),  #   "tb_preview",
-                    menuID=GUI_ID.CMD_TAB_SHOW_PREVIEW)
+                    menuID=GUI_ID.CMD_TAB_SHOW_PREVIEW.GetId())
 
         tabsMenu.AppendSeparator()
 
@@ -1650,20 +1653,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _('Save all open pages'),
                 lambda evt: (self.saveAllDocPages(),
                 self.getWikiData().commit()), "tb_save",
-                menuID=GUI_ID.CMD_SAVE_WIKI,
+                menuID=GUI_ID.CMD_SAVE_WIKI.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyWiki,))
 
         # TODO: More fine grained check for en-/disabling of rename and delete?
         self.addMenuItem(wikiPageMenu, _('&Rename') + '\t' + self.keyBindings.Rename,
                 _('Rename current wiki word'), lambda evt: self.showWikiWordRenameDialog(),
                 "tb_rename",
-                menuID=GUI_ID.CMD_RENAME_PAGE,
+                menuID=GUI_ID.CMD_RENAME_PAGE.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyWiki, self.OnUpdateDisNotWikiPage))
 
         self.addMenuItem(wikiPageMenu, _('&Delete') + '\t' + self.keyBindings.Delete,
                 _('Delete current wiki word'), lambda evt: self.showWikiWordDeleteDialog(),
                 "tb_delete",
-                menuID=GUI_ID.CMD_DELETE_PAGE,
+                menuID=GUI_ID.CMD_DELETE_PAGE.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyWiki, self.OnUpdateDisNotWikiPage))
 
         wikiPageMenu.AppendSeparator()
@@ -1738,21 +1741,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(formatMenu, _('&Bold') + '\t' + self.keyBindings.Bold,
                 _('Bold'), lambda evt: self.getActiveEditor().formatSelection("bold"),
                 "tb_bold",
-                menuID=GUI_ID.CMD_FORMAT_BOLD,
+                menuID=GUI_ID.CMD_FORMAT_BOLD.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
                     self.OnUpdateDisNotWikiPage))
 
         self.addMenuItem(formatMenu, _('&Italic') + '\t' + self.keyBindings.Italic,
                 _('Italic'), lambda evt: self.getActiveEditor().formatSelection("italics"),
                 "tb_italic",
-                menuID=GUI_ID.CMD_FORMAT_ITALIC,
+                menuID=GUI_ID.CMD_FORMAT_ITALIC.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
                     self.OnUpdateDisNotWikiPage))
 
         self.addMenuItem(formatMenu, _('&Heading') + '\t' + self.keyBindings.Heading,
                 _('Add Heading'), lambda evt: self.getActiveEditor().formatSelection("plusHeading"),
                 "tb_heading",
-                menuID=GUI_ID.CMD_FORMAT_HEADING_PLUS,
+                menuID=GUI_ID.CMD_FORMAT_HEADING_PLUS.GetId(),
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
                     self.OnUpdateDisNotWikiPage))
 
@@ -1802,7 +1805,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(cmdIdToIconName.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
-        formatMenu.Append(GUI_ID.MENU_ADD_ICON_NAME,
+        formatMenu.Append(GUI_ID.MENU_ADD_ICON_NAME.GetId(),
                 _('&Icon Name'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
@@ -1815,7 +1818,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(cmdIdToColorName.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertStringFromDict, id=cmi)
 
-        formatMenu.Append(GUI_ID.MENU_ADD_STRING_NAME,
+        formatMenu.Append(GUI_ID.MENU_ADD_STRING_NAME.GetId(),
                 _('&Color Name'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
@@ -1833,7 +1836,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(self.cmdIdToIconNameForAttribute.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertIconAttribute, id=cmi)
 
-        addAttributeMenu.Append(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
+        addAttributeMenu.Append(GUI_ID.MENU_ADD_ICON_ATTRIBUTE.GetId(),
                 _('&Icon Attribute'), iconsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
@@ -1844,7 +1847,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for cmi in list(self.cmdIdToColorNameForAttribute.keys()):
             self.Bind(wx.EVT_MENU, self.OnInsertColorAttribute, id=cmi)
 
-        addAttributeMenu.Append(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
+        addAttributeMenu.Append(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE.GetId(),
                 _('&Color Attribute'), colorsMenu)
         self.Bind(wx.EVT_UPDATE_UI,
                 buildChainedUpdateEventFct(self.OnUpdateDisReadOnlyPage),
@@ -2097,13 +2100,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_back")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_BACK
-        addSimpleTool(tbID, icon, _("Back") + " " + self.keyBindings.GoBack,
+        addSimpleTool(tbID.GetId(), icon, _("Back") + " " + self.keyBindings.GoBack,
                 _("Back"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
         icon = self.lookupSystemIcon("tb_forward")
         tbID = GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD
-        addSimpleTool(tbID, icon, _("Forward") + " " + self.keyBindings.GoForward,
+        addSimpleTool(tbID.GetId(), icon, _("Forward") + " " + self.keyBindings.GoForward,
                 _("Forward"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
@@ -2137,25 +2140,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_up")
         tbID = GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE
-        addSimpleTool(tbID, icon, _("Go upward from a subpage"),
+        addSimpleTool(tbID.GetId(), icon, _("Go upward from a subpage"),
                 _("Go upward from a subpage"))
         self.Bind(wx.EVT_TOOL, self._OnEventToCurrentDocPPresenter, source=tbID)
 
         addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
         icon = self.lookupSystemIcon("tb_save")
-        addSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon,
+        addSimpleTool(GUI_ID.CMD_SAVE_WIKI.GetId(), icon,
                 _("Save Wiki Word") + " " + self.keyBindings.Save,
                 _("Save Wiki Word"))
 
         icon = self.lookupSystemIcon("tb_rename")
-        addSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
+        addSimpleTool(GUI_ID.CMD_RENAME_PAGE.GetId(), icon,
                 _("Rename Wiki Word") + " " + self.keyBindings.Rename,
                 _("Rename Wiki Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordRenameDialog(), id=tbID)
 
         icon = self.lookupSystemIcon("tb_delete")
-        addSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
+        addSimpleTool(GUI_ID.CMD_DELETE_PAGE.GetId(), icon,
                 _("Delete Wiki Word") + " " + self.keyBindings.Delete,
                 _("Delete Wiki Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.showWikiWordDeleteDialog(), id=tbID)
@@ -2163,19 +2166,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         addSimpleTool(wx.NewId(), seperator, _("Separator"), _("Separator"))
 
         icon = self.lookupSystemIcon("tb_heading")
-        addSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS.GetId(), icon,
                 _("Heading") + " " + self.keyBindings.Heading, _("Heading"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(
 #                 self.getActiveEditor()))
 
         icon = self.lookupSystemIcon("tb_bold")
-        addSimpleTool(GUI_ID.CMD_FORMAT_BOLD, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_BOLD.GetId(), icon,
                 _("Bold") + " " + self.keyBindings.Bold, _("Bold"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(
 #                 self.getActiveEditor()))
 
         icon = self.lookupSystemIcon("tb_italic")
-        addSimpleTool(GUI_ID.CMD_FORMAT_ITALIC, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_ITALIC.GetId(), icon,
                 _("Italic") + " " + self.keyBindings.Italic, _("Italic"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(
 #                 self.getActiveEditor()))
@@ -2184,27 +2187,27 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_switch ed prev")
         tbID = GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW
-        addSimpleTool(tbID, icon, _("Switch Editor/Preview"),
+        addSimpleTool(tbID.GetId(), icon, _("Switch Editor/Preview"),
                 _("Switch between editor and preview"))
 
         icon = self.lookupSystemIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
-        addSimpleTool(tbID, icon, _("Zoom In"), _("Zoom In"))
+        addSimpleTool(tbID.GetId(), icon, _("Zoom In"), _("Zoom In"))
         self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, source=tbID)
 
         icon = self.lookupSystemIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
-        addSimpleTool(tbID, icon, _("Zoom Out"), _("Zoom Out"))
+        addSimpleTool(tbID.GetId(), icon, _("Zoom Out"), _("Zoom Out"))
         self.Bind(wx.EVT_TOOL, self._OnRoundtripEvent, source=tbID)
 
 
-        self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH,
+        self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH.GetId(),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
         tb.AddControl(self.fastSearchField)
         self.fastSearchField.Bind(wx.EVT_KEY_DOWN, self.OnFastSearchKeyDown)
 
         icon = self.lookupSystemIcon("tb_wikize")
-        addSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
+        addSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED.GetId(), icon,
                 _("Wikize Selected Word ") + self.keyBindings.MakeWikiWord,
                 _("Wikize Selected Word"))
 #         self.Bind(wx.EVT_TOOL, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()), id=tbID)
@@ -2589,7 +2592,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.hotKeyDummyWindow.Destroy()
 
         self.hotKeyDummyWindow = wxHelper.DummyWindow(self,
-                id=GUI_ID.WND_HOTKEY_DUMMY)
+                id=GUI_ID.WND_HOTKEY_DUMMY.GetId())
         if self.configuration.getboolean("main",
                 "hotKey_showHide_byApp_isActive"):
             wxHelper.setHotKeyByString(self.hotKeyDummyWindow,
