@@ -2307,6 +2307,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.Bind(wx.EVT_MENU, self.OnSwitchFocus, source=GUI_ID.CMD_SWITCH_FOCUS)
 
         # Table with additional possible accelerators
+        # accelerators are keyboard shortcuts linked to menu or button commands in window
+        # for each window https://docs.wxpython.org/wx.Window.html#wx.Window.SetAcceleratorTable
+        # set a table https://docs.wxpython.org/wx.AcceleratorTable.html
+        # mode of entries https://docs.wxpython.org/wx.AcceleratorEntry.html
         ADD_ACCS = (
                 ("CloseCurrentTab", GUI_ID.CMD_CLOSE_CURRENT_TAB),
                 ("SwitchFocus", GUI_ID.CMD_SWITCH_FOCUS),
@@ -2319,9 +2323,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Add alternative accelerators for clipboard operations
         accs = [
-                (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
-                (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-                (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
+                (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY.GetId()),
+                (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE.GetId()),
+                (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT.GetId())
                 ]
 
 
@@ -2329,12 +2333,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         for keyName, menuId in ADD_ACCS:
             accP = self.keyBindings.getAccelPair(keyName)
             if accP != (None, None):
-                accs.append((accP[0], accP[1], menuId))
+                accs.append((accP[0], accP[1], menuId.GetId()))
 
         if SystemInfo.isLinux():   # Actually if wxGTK
-            accs += [(wx.ACCEL_NORMAL, fkey, GUI_ID.SPECIAL_EAT_KEY)
+            accs += [(wx.ACCEL_NORMAL, fkey, GUI_ID.SPECIAL_EAT_KEY.GetId())
                     for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)] + \
-                    [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY)
+                    [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY.GetId())
                     for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)]
     
             self.Bind(wx.EVT_MENU, lambda evt: None, source=GUI_ID.SPECIAL_EAT_KEY)
