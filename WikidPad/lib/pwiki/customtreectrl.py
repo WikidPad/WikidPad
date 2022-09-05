@@ -3978,7 +3978,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             x += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             # Item should appear at top
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, item_y/_PIXELS_PER_UNIT)
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, int(item_y/_PIXELS_PER_UNIT))
         
         elif item_y+self.GetLineHeight(item) > start_y+client_h:
         
@@ -3989,7 +3989,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             item_y += _PIXELS_PER_UNIT+2
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             # Item should appear at bottom
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, (item_y+self.GetLineHeight(item)-client_h)/_PIXELS_PER_UNIT )
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, int((item_y+self.GetLineHeight(item)-client_h)/_PIXELS_PER_UNIT) )
 
 
     def ScrollToMiddle(self, item):
