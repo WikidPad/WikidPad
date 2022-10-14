@@ -20,7 +20,7 @@ WikidPad is nearly completely written in Python, only some external libraries
 
 * [Main website](http://wikidpad.sourceforge.net/)
 * [Downloads (Windows binary and source)](http://sourceforge.net/projects/wikidpad/files/?source=navbar)
-* Installation hints for [Windows from source](http://trac.wikidpad2.webfactional.com/wiki/InstallWindows),
+* Installation hints for [Windows from source](http://trac.wikidpad2.webfactional.com/wiki/InstallWindows) *BROKEN*,
   [Linux](http://trac.wikidpad2.webfactional.com/wiki/InstallLinux),
   [MacOS](http://trac.wikidpad2.webfactional.com/wiki/InstallMacosxNew)
 * [WikidPad's own wiki](http://trac.wikidpad2.webfactional.com/)
