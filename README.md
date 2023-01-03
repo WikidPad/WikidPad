@@ -28,7 +28,7 @@ WikidPad is nearly completely written in Python, only some external libraries
 
 # Installation with pip or conda
 
-If you would like to run wikidpad from source a version of wikidpad called wikidpadmp has been prepared. This version has been updated to run on python 3.8 and wxpython 4.1.1. In all other respects the two versions are similar. See this repository [here](https://github.com/BjornFJohansson/WikidPad#setuptools-pip-package-for-wikidpad-wikidpadmp)
+If you would like to run wikidpad from source a version of wikidpad called wikidpadmp has been prepared. This version has been updated to run on python 3.8 and wxpython 4.1.1. In all other respects the two versions are similar. See this [repository](https://github.com/BjornFJohansson/WikidPad#setuptools-pip-package-for-wikidpad-wikidpadmp).
 
 
 # License
