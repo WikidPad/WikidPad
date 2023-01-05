@@ -111,13 +111,13 @@ class VersionExplorerPanel(EnhancedListControl):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        self.Bind(wx.EVT_MENU, self.OnCmdDiffInline, id=GUI_ID.CMD_VERSIONING_DIFF_INLINE)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffInline, source=GUI_ID.CMD_VERSIONING_DIFF_INLINE)
 
-        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetFrom, id=GUI_ID.CMD_VERSIONING_DIFF_SET_FROM)
-        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetTo, id=GUI_ID.CMD_VERSIONING_DIFF_SET_TO)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetFrom, source=GUI_ID.CMD_VERSIONING_DIFF_SET_FROM)
+        self.Bind(wx.EVT_MENU, self.OnCmdDiffSetTo, source=GUI_ID.CMD_VERSIONING_DIFF_SET_TO)
 
-        self.Bind(wx.EVT_MENU, self.OnCmdDeleteVersion, id=GUI_ID.CMD_VERSIONING_DELETE_VERSION)
-        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAllVersionData, id=GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteVersion, source=GUI_ID.CMD_VERSIONING_DELETE_VERSION)
+        self.Bind(wx.EVT_MENU, self.OnCmdDeleteAllVersionData, source=GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA)
 
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
 #                 self.OnCmdCheckUpdateDateAscending)

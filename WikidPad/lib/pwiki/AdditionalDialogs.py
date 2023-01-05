@@ -208,13 +208,13 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
         self.ctrls.lb.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownListBox)
         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, source=GUI_ID.lb)
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate)
-        self.Bind(wx.EVT_CHOICE, self.OnChoiceSort, id=GUI_ID.chSort)
-        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground)
+        self.Bind(wx.EVT_BUTTON, self.OnCreate, source=GUI_ID.btnCreate)
+        self.Bind(wx.EVT_CHOICE, self.OnChoiceSort, source=GUI_ID.chSort)
+        self.Bind(wx.EVT_BUTTON, self.OnDelete, source=GUI_ID.btnDelete)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, source=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, source=GUI_ID.btnNewTabBackground)
 
     def OnOk(self, evt):
         if self.activateSelectedWikiWords(0):

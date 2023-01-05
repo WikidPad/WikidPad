@@ -83,9 +83,9 @@ class LogWindow(wx.Panel):
         self.messages = []
         self.sizeVisible = True
         
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnEntryActivated, id=GUI_ID.lcEntries) 
-        self.Bind(wx.EVT_BUTTON, self.OnClearLog, id=GUI_ID.btnClearLog)
-        self.Bind(wx.EVT_BUTTON, self.OnHideLogWindow, id=GUI_ID.btnHideLogWindow)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnEntryActivated, source=GUI_ID.lcEntries)
+        self.Bind(wx.EVT_BUTTON, self.OnClearLog, source=GUI_ID.btnClearLog)
+        self.Bind(wx.EVT_BUTTON, self.OnHideLogWindow, source=GUI_ID.btnHideLogWindow)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
     def close(self):

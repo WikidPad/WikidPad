@@ -307,96 +307,96 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.contextMenuSpellCheckSuggestions = None
 
         # Connect context menu events to functions
-        self.Bind(wx.EVT_MENU, lambda evt: self.Undo(), id=GUI_ID.CMD_UNDO)
-        self.Bind(wx.EVT_MENU, lambda evt: self.Redo(), id=GUI_ID.CMD_REDO)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Undo(), source=GUI_ID.CMD_UNDO)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Redo(), source=GUI_ID.CMD_REDO)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.Cut(), id=GUI_ID.CMD_CLIPBOARD_CUT)
-        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), id=GUI_ID.CMD_CLIPBOARD_COPY)
-        self.Bind(wx.EVT_MENU, lambda evt: self.Paste(), id=GUI_ID.CMD_CLIPBOARD_PASTE)
-        self.Bind(wx.EVT_MENU, lambda evt: self.pasteRawHtml(), id=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML)
-        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Cut(), source=GUI_ID.CMD_CLIPBOARD_CUT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), source=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Paste(), source=GUI_ID.CMD_CLIPBOARD_PASTE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.pasteRawHtml(), source=GUI_ID.CMD_CLIPBOARD_PASTE_RAW_HTML)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), source=GUI_ID.CMD_SELECT_ALL)
 
-        self.Bind(wx.EVT_MENU, lambda evt: self.ReplaceSelection(""), id=GUI_ID.CMD_TEXT_DELETE)
-        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN), id=GUI_ID.CMD_ZOOM_IN)
-        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT), id=GUI_ID.CMD_ZOOM_OUT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.ReplaceSelection(""), source=GUI_ID.CMD_TEXT_DELETE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN), source=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT), source=GUI_ID.CMD_ZOOM_OUT)
 
 
         for sps in self.SUGGESTION_CMD_IDS:
-            self.Bind(wx.EVT_MENU, self.OnReplaceThisSpellingWithSuggestion, id=sps)
+            self.Bind(wx.EVT_MENU, self.OnReplaceThisSpellingWithSuggestion, source=sps)
 
-        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreSession, id=GUI_ID.CMD_ADD_THIS_SPELLING_SESSION)
-        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreGlobal, id=GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL)
-        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreLocal, id=GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreSession, source=GUI_ID.CMD_ADD_THIS_SPELLING_SESSION)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreGlobal, source=GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL)
+        self.Bind(wx.EVT_MENU, self.OnAddThisSpellingToIgnoreLocal, source=GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL)
 
-        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_UP)
-        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT)
-        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_DOWN)
-        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, id=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, source=GUI_ID.CMD_LOGICAL_LINE_UP)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, source=GUI_ID.CMD_LOGICAL_LINE_UP_WITH_INDENT)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, source=GUI_ID.CMD_LOGICAL_LINE_DOWN)
+        self.Bind(wx.EVT_MENU, self.OnLogicalLineMove, source=GUI_ID.CMD_LOGICAL_LINE_DOWN_WITH_INDENT)
 
-        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, source=GUI_ID.CMD_ACTIVATE_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis, source=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         # Passing the evt here is not strictly necessary, but it may be
         # used in the future
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "left"),
-                id=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
+                source=GUI_ID.CMD_ACTIVATE_THIS_LEFT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "left"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_LEFT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "left"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
+                evt, "left"), source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_LEFT)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "right"),
-                id=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
+                source=GUI_ID.CMD_ACTIVATE_THIS_RIGHT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "right"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_RIGHT)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "right"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
+                evt, "right"), source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_RIGHT)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"),
-                id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
+                source=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "above"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
+                evt, "above"), source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"),
-                id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
+                source=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"),
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(
-                evt, "below"), id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
+                evt, "below"), source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "above"), 
-                id=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
+                source=GUI_ID.CMD_ACTIVATE_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "above"), 
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_ABOVE)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, "above"), 
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_ABOVE)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateThis(evt, "below"), 
-                id=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
+                source=GUI_ID.CMD_ACTIVATE_THIS_BELOW)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabThis(evt, "below"), 
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS_BELOW)
         self.Bind(wx.EVT_MENU, lambda evt: self.OnActivateNewTabBackgroundThis(evt, "below"), 
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS_BELOW)
 
 
         self.Bind(wx.EVT_MENU, self.OnConvertUrlAbsoluteRelativeThis, 
-                id=GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS)
+                source=GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS)
 
         self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis, 
-                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
+                source=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
 
-        self.Bind(wx.EVT_MENU, self.OnDeleteFile, id=GUI_ID.CMD_DELETE_FILE)
+        self.Bind(wx.EVT_MENU, self.OnDeleteFile, source=GUI_ID.CMD_DELETE_FILE)
 
-        self.Bind(wx.EVT_MENU, self.OnRenameFile, id=GUI_ID.CMD_RENAME_FILE)
+        self.Bind(wx.EVT_MENU, self.OnRenameFile, source=GUI_ID.CMD_RENAME_FILE)
 
         self.Bind(wx.EVT_MENU, self.OnClipboardCopyUrlToThisAnchor,
-                id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR)
+                source=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR)
 
-        self.Bind(wx.EVT_MENU, self.OnSelectTemplate, id=GUI_ID.CMD_SELECT_TEMPLATE)
+        self.Bind(wx.EVT_MENU, self.OnSelectTemplate, source=GUI_ID.CMD_SELECT_TEMPLATE)
 
     # 2.8 does not support SetEditable - Define a dummy function for now
     if wx.version().startswith("2.8"):

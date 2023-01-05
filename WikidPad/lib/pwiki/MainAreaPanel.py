@@ -98,17 +98,17 @@ class MainAreaPanel(aui.AuiNotebook, MiscEventSourceMixin, StorablePerspective):
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
         self.Bind(wx.EVT_MENU, self.OnCloseThisTab,
-                id=GUI_ID.CMD_CLOSE_THIS_TAB)
+                source=GUI_ID.CMD_CLOSE_THIS_TAB)
         self.Bind(wx.EVT_MENU, self.OnCloseCurrentTab,
-                id=GUI_ID.CMD_CLOSE_CURRENT_TAB)
+                source=GUI_ID.CMD_CLOSE_CURRENT_TAB)
         self.Bind(wx.EVT_MENU, self.OnCmdSwitchThisEditorPreview,
-                id=GUI_ID.CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
+                source=GUI_ID.CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
         self.Bind(wx.EVT_MENU, self.OnGoTab,
-                id=GUI_ID.CMD_GO_NEXT_TAB)
+                source=GUI_ID.CMD_GO_NEXT_TAB)
         self.Bind(wx.EVT_MENU, self.OnGoTab,
-                id=GUI_ID.CMD_GO_PREVIOUS_TAB)
+                source=GUI_ID.CMD_GO_PREVIOUS_TAB)
         self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord,
-                id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
+                source=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
 
     def close(self):
         for p in self.getPresenters():

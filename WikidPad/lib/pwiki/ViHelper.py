@@ -2684,10 +2684,10 @@ class ViInputDialog(wx.Panel):
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD)
+        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD.GetId())
         #wx.EVT_TIMER(self, GUI_ID.TIMER_VI_UPDATE_CMD, self.CheckViInput)
         self.Bind(wx.EVT_TIMER, self.CheckViInput, 
-                id=GUI_ID.TIMER_VI_UPDATE_CMD)
+                source=GUI_ID.TIMER_VI_UPDATE_CMD)
 
         self.ctrls.viInputTextField.SetBackgroundColour(
                 ViInputDialog.COLOR_YELLOW)
@@ -2696,14 +2696,14 @@ class ViInputDialog(wx.Panel):
 
         #wx.EVT_SET_FOCUS(self.ctrls.viInputListBox, self.FocusInputField)
 
-        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.viInputTextField)
+        self.Bind(wx.EVT_TEXT, self.OnText, source=GUI_ID.viInputTextField)
         self.ctrls.viInputTextField.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
 
         #wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
         #        self.OnTimerIncViInputClose)
         if self.closeDelay:
             self.Bind(wx.EVT_TIMER, self.OnTimerIncViInputClose,
-                    id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+                    source=GUI_ID.TIMER_INC_SEARCH_CLOSE)
 
         self.ctrls.viInputTextField.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
