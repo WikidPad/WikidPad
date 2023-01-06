@@ -1052,54 +1052,54 @@ class OptionsDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_LISTBOX, self.OnLbPages, id=GUI_ID.lbPages)
+        self.Bind(wx.EVT_LISTBOX, self.OnLbPages, id=GUI_ID.lbPages.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
 
 
         self.Bind(wx.EVT_BUTTON, self.OnSelectFaceHtmlPrev,
-                id=GUI_ID.btnSelectFaceHtmlPrev)
+                id=GUI_ID.btnSelectFaceHtmlPrev.GetId())
 
         self.Bind(wx.EVT_BUTTON, lambda evt: self.selectFile(
                 self.ctrls.tfClipCatchSoundFile, _("Wave files (*.wav)|*.wav")),
-                id=GUI_ID.btnSelectClipCatchSoundFile)
+                id=GUI_ID.btnSelectClipCatchSoundFile.GetId())
 
         self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(
                 self.ctrls.tfExportDefaultDir),
-                id=GUI_ID.btnSelectExportDefaultDir)
+                id=GUI_ID.btnSelectExportDefaultDir.GetId())
 
         self.Bind(wx.EVT_BUTTON, lambda evt: self.selectDirectory(
                 self.ctrls.tfWikiOpenNewDefaultDir),
-                id=GUI_ID.btnSelectWikiOpenNewDefaultDir)
+                id=GUI_ID.btnSelectWikiOpenNewDefaultDir.GetId())
 
         self.Bind(wx.EVT_BUTTON, lambda evt: self.selectFile(
                 self.ctrls.tfFileLauncherPath, _("All files (*.*)|*")),
-                id=GUI_ID.btnSelectFileLauncherPath)
+                id=GUI_ID.btnSelectFileLauncherPath.GetId())
 
         self.Bind(wx.EVT_BUTTON,
                 lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedUp(),
-                id=GUI_ID.btnPasteTypeOrderUp)
+                id=GUI_ID.btnPasteTypeOrderUp.GetId())
 
         self.Bind(wx.EVT_BUTTON,
                 lambda evt: self.ctrls.rlPasteTypeOrder.MoveSelectedDown(),
-                id=GUI_ID.btnPasteTypeOrderDown)
+                id=GUI_ID.btnPasteTypeOrderDown.GetId())
 
 
         self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
-                id=GUI_ID.chTempHandlingTempMode)
+                id=GUI_ID.chTempHandlingTempMode.GetId())
 
         self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
-                id=GUI_ID.cbEditorImageTooltipsLocalUrls)
+                id=GUI_ID.cbEditorImageTooltipsLocalUrls.GetId())
         self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
-                id=GUI_ID.chEditorImagePasteFileType)
+                id=GUI_ID.chEditorImagePasteFileType.GetId())
 
         self.Bind(wx.EVT_CHOICE, self.OnUpdateUiAfterChange,
-                id=GUI_ID.chHtmlPreviewRenderer)
+                id=GUI_ID.chHtmlPreviewRenderer.GetId())
 
         self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
-                id=GUI_ID.cbWwSearchCountOccurrences)
+                id=GUI_ID.cbWwSearchCountOccurrences.GetId())
 
         self.Bind(wx.EVT_CHECKBOX, self.OnUpdateUiAfterChange,
-                id=GUI_ID.cbSingleProcess)
+                id=GUI_ID.cbSingleProcess.GetId())
 
 
     def _refreshForPage(self):

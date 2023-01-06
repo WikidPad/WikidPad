@@ -304,8 +304,8 @@ class AuiDefaultTabArt:
         if self._fixed_tab_width < 100:
             self._fixed_tab_width = 100
 
-        if self._fixed_tab_width > tot_width/2:
-            self._fixed_tab_width = tot_width/2
+        if self._fixed_tab_width > tot_width//2:
+            self._fixed_tab_width = tot_width//2
 
         if self._fixed_tab_width > 220:
             self._fixed_tab_width = 220
@@ -472,7 +472,7 @@ class AuiDefaultTabArt:
             dc.DrawPoint(r.x+r.width-2, r.y+1)
 
             # set rectangle down a bit for gradient drawing
-            r.SetHeight(int(r.GetHeight()/2))
+            r.SetHeight(int(r.GetHeight()//2))
             r.x += 2
             r.width -= 2
             r.y += r.height
@@ -553,7 +553,7 @@ class AuiDefaultTabArt:
             # draw bitmap
             dc.DrawBitmap(pagebitmap,
                           bitmap_offset,
-                          drawn_tab_yoff + (drawn_tab_height/2) - (pagebitmap.GetHeight()/2),
+                          drawn_tab_yoff + (drawn_tab_height//2) - (pagebitmap.GetHeight()//2),
                           True)
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
@@ -566,7 +566,7 @@ class AuiDefaultTabArt:
 
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = int(drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1)
+        ypos = int(drawn_tab_yoff + (drawn_tab_height)//2 - (texty//2) - 1)
 
         offset_focus = text_offset
         if control:
@@ -607,11 +607,11 @@ class AuiDefaultTabArt:
             shift = (agwFlags & AUI_NB_BOTTOM and [1] or [0])[0]
 
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
-                rect = wx.Rect(tab_x + 4, tab_y + int((tab_height - bmp.GetHeight())/2) - shift,
+                rect = wx.Rect(tab_x + 4, tab_y + int((tab_height - bmp.GetHeight())//2) - shift,
                                close_button_width, tab_height)
             else:
                 rect = wx.Rect(tab_x + tab_width - close_button_width - 1,
-                               tab_y + int((tab_height - bmp.GetHeight())/2) - shift,
+                               tab_y + int((tab_height - bmp.GetHeight())//2) - shift,
                                close_button_width, tab_height)
 
             rect = IndentPressedBitmap(rect, close_button_state)
@@ -775,14 +775,14 @@ class AuiDefaultTabArt:
         if orientation == wx.LEFT:
 
             rect.SetX(in_rect.x)
-            rect.SetY(((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2))
+            rect.SetY(((in_rect.y + in_rect.height)//2) - (bmp.GetHeight()//2))
             rect.SetWidth(bmp.GetWidth())
             rect.SetHeight(bmp.GetHeight())
 
         else:
 
             rect = wx.Rect(in_rect.x + in_rect.width - bmp.GetWidth(),
-                           ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
+                           ((in_rect.y + in_rect.height)//2) - (bmp.GetHeight()//2),
                            bmp.GetWidth(), bmp.GetHeight())
 
         rect = IndentPressedBitmap(rect, button_state)
@@ -817,11 +817,11 @@ class AuiDefaultTabArt:
 
         if page.active and wx.Window.FindFocus() == wnd:
 
-            focusRectText = wx.Rect(text_offset, (drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2)),
+            focusRectText = wx.Rect(text_offset, (drawn_tab_yoff + (drawn_tab_height)//2 - (texty//2)),
                                     textx, texty)
 
             if page.bitmap.IsOk():
-                focusRectBitmap = wx.Rect(bitmap_offset, drawn_tab_yoff + (drawn_tab_height/2) - (page.bitmap.GetHeight()/2),
+                focusRectBitmap = wx.Rect(bitmap_offset, drawn_tab_yoff + (drawn_tab_height//2) - (page.bitmap.GetHeight()//2),
                                           page.bitmap.GetWidth(), page.bitmap.GetHeight())
 
             if page.bitmap.IsOk() and draw_text == "":
@@ -1132,8 +1132,8 @@ class AuiSimpleTabArt:
         if self._fixed_tab_width < 100:
             self._fixed_tab_width = 100
 
-        if self._fixed_tab_width > tot_width/2:
-            self._fixed_tab_width = tot_width/2
+        if self._fixed_tab_width > tot_width//2:
+            self._fixed_tab_width = tot_width//2
 
         if self._fixed_tab_width > 220:
             self._fixed_tab_width = 220
@@ -1255,23 +1255,23 @@ class AuiSimpleTabArt:
             close_button_width = self._active_close_bmp.GetWidth()
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
                 if control:
-                    text_offset = tab_x + (tab_height/2) + close_button_width - (textx/2) - 2
+                    text_offset = tab_x + (tab_height//2) + close_button_width - (textx//2) - 2
                 else:
-                    text_offset = tab_x + (tab_height/2) + ((tab_width+close_button_width)/2) - (textx/2) - 2
+                    text_offset = tab_x + (tab_height//2) + ((tab_width+close_button_width)//2) - (textx//2) - 2
             else:
                 if control:
-                    text_offset = tab_x + (tab_height/2) + close_button_width - (textx/2)
+                    text_offset = tab_x + (tab_height//2) + close_button_width - (textx//2)
                 else:
-                    text_offset = tab_x + (tab_height/2) + ((tab_width-close_button_width)/2) - (textx/2)
+                    text_offset = tab_x + (tab_height//2) + ((tab_width-close_button_width)//2) - (textx//2)
 
         else:
 
-            text_offset = tab_x + (tab_height/3) + (tab_width/2) - (textx/2)
+            text_offset = tab_x + (tab_height/3) + (tab_width//2) - (textx//2)
             if control:
                 if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
-                    text_offset = tab_x + (tab_height/3) - (textx/2) + close_button_width + 2
+                    text_offset = tab_x + (tab_height/3) - (textx//2) + close_button_width + 2
                 else:
-                    text_offset = tab_x + (tab_height/3) - (textx/2)
+                    text_offset = tab_x + (tab_height/3) - (textx//2)
 
         # set minimum text offset
         if text_offset < tab_x + tab_height:
@@ -1284,7 +1284,7 @@ class AuiSimpleTabArt:
             draw_text = ChopText(dc, caption,
                                  tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = (tab_y + tab_height)/2 - (texty/2) + 1
+        ypos = (tab_y + tab_height)//2 - (texty//2) + 1
 
         if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):
@@ -1307,7 +1307,7 @@ class AuiSimpleTabArt:
         # draw focus rectangle
         if page.active and wx.Window.FindFocus() == wnd and (agwFlags & AUI_NB_NO_TAB_FOCUS) == 0:
 
-            focusRect = wx.Rect(text_offset, ((tab_y + int(tab_height)/2 - (texty/2)) + 1),
+            focusRect = wx.Rect(text_offset, ((tab_y + int(tab_height)//2 - (texty//2)) + 1),
                                 selected_textx, selected_texty)
 
             focusRect.Inflate(2, 2)
@@ -1327,11 +1327,11 @@ class AuiSimpleTabArt:
 
             if agwFlags & AUI_NB_CLOSE_ON_TAB_LEFT:
                 rect = wx.Rect(tab_x + tab_height - 2,
-                               tab_y + (tab_height/2) - (bmp.GetHeight()/2) + 1,
+                               tab_y + (tab_height//2) - (bmp.GetHeight()//2) + 1,
                                close_button_width, tab_height - 1)
             else:
                 rect = wx.Rect(tab_x + tab_width - close_button_width - 1,
-                               tab_y + (tab_height/2) - (bmp.GetHeight()/2) + 1,
+                               tab_y + (tab_height//2) - (bmp.GetHeight()//2) + 1,
                                close_button_width, tab_height - 1)
 
             self.DrawButtons(dc, rect, bmp, wx.WHITE, close_button_state)
@@ -1406,7 +1406,7 @@ class AuiSimpleTabArt:
             controlW, controlH = control.GetSize()
             tab_width += controlW + 4
 
-        x_extent = tab_width - (tab_height/2) - 1
+        x_extent = tab_width - (tab_height//2) - 1
 
         return (tab_width, tab_height), x_extent
 
@@ -1462,14 +1462,14 @@ class AuiSimpleTabArt:
         if orientation == wx.LEFT:
 
             rect.SetX(in_rect.x)
-            rect.SetY(((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2))
+            rect.SetY(((in_rect.y + in_rect.height)//2) - (bmp.GetHeight()//2))
             rect.SetWidth(bmp.GetWidth())
             rect.SetHeight(bmp.GetHeight())
 
         else:
 
             rect = wx.Rect(in_rect.x + in_rect.width - bmp.GetWidth(),
-                           ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
+                           ((in_rect.y + in_rect.height)//2) - (bmp.GetHeight()//2),
                            bmp.GetWidth(), bmp.GetHeight())
 
         self.DrawButtons(dc, rect, bmp, wx.WHITE, button_state)
@@ -1785,7 +1785,7 @@ class VC71TabArt(AuiDefaultTabArt):
 
             # draw bitmap
             dc.DrawBitmap(pagebitmap, bitmap_offset,
-                          drawn_tab_yoff + (drawn_tab_height/2) - (pagebitmap.GetHeight()/2) + shift,
+                          drawn_tab_yoff + (drawn_tab_height//2) - (pagebitmap.GetHeight()//2) + shift,
                           True)
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
@@ -1810,7 +1810,7 @@ class VC71TabArt(AuiDefaultTabArt):
 
         draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1 + shift
+        ypos = drawn_tab_yoff + (drawn_tab_height)//2 - (texty//2) - 1 + shift
 
         offset_focus = text_offset
 
@@ -2020,7 +2020,7 @@ class FF2TabArt(AuiDefaultTabArt):
 
             # draw bitmap
             dc.DrawBitmap(pagebitmap, bitmap_offset,
-                          drawn_tab_yoff + (drawn_tab_height/2) - (pagebitmap.GetHeight()/2) + shift,
+                          drawn_tab_yoff + (drawn_tab_height//2) - (pagebitmap.GetHeight()//2) + shift,
                           True)
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
@@ -2048,7 +2048,7 @@ class FF2TabArt(AuiDefaultTabArt):
         else:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1 + shift
+        ypos = drawn_tab_yoff + drawn_tab_height//2 - texty//2 - 1 + shift
 
         offset_focus = text_offset
 
@@ -2356,7 +2356,7 @@ class VC8TabArt(AuiDefaultTabArt):
 
             # draw bitmap
             dc.DrawBitmap(pagebitmap, bitmap_offset,
-                          drawn_tab_yoff + (drawn_tab_height/2) - (pagebitmap.GetHeight()/2) + shift,
+                          drawn_tab_yoff + (drawn_tab_height//2) - (pagebitmap.GetHeight()//2) + shift,
                           True)
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
@@ -2383,7 +2383,7 @@ class VC8TabArt(AuiDefaultTabArt):
         else:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width)
 
-        ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1 + shift
+        ypos = drawn_tab_yoff + drawn_tab_height//2 - texty//2 - 1 + shift
 
         offset_focus = text_offset
 
@@ -2718,7 +2718,7 @@ class ChromeTabArt(AuiDefaultTabArt):
 
             # draw bitmap
             dc.DrawBitmap(pagebitmap, bitmap_offset,
-                          drawn_tab_yoff + (drawn_tab_height/2) - (pagebitmap.GetHeight()/2),
+                          drawn_tab_yoff + (drawn_tab_height//2) - (pagebitmap.GetHeight()//2),
                           True)
 
             text_offset = bitmap_offset + pagebitmap.GetWidth()
@@ -2746,7 +2746,7 @@ class ChromeTabArt(AuiDefaultTabArt):
         else:
             draw_text = ChopText(dc, caption, tab_width - (text_offset-tab_x) - close_button_width - leftw)
 
-        ypos = drawn_tab_yoff + drawn_tab_height/2 - texty/2 - 1
+        ypos = drawn_tab_yoff + drawn_tab_height//2 - texty//2 - 1
 
         if control:
             if control.GetPosition() != wx.Point(text_offset+1, ypos):

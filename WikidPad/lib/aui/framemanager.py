@@ -2629,7 +2629,7 @@ class AuiCenterDockingGuide(AuiDockingGuide):
         size = self.GetSize()
 
         leftRect, topRect, rightRect, bottomRect, centerRect = self._aeroRects
-        thePos = pos + wx.Point((size.x-sizeY)/2, (size.y-sizeX)/2)
+        thePos = pos + wx.Point((size.x-sizeY)//2, (size.y-sizeX)//2)
 
         centerRect.SetTopLeft(thePos)
 
@@ -2675,7 +2675,7 @@ class AuiCenterDockingGuide(AuiDockingGuide):
             if not self._valid:
                 diff = (self._useAero == 2 and [1] or [0])[0]
                 bmpX, bmpY = self._deniedBitmap.GetWidth(), self._deniedBitmap.GetHeight()
-                xPos, yPos = (rect.x + (rect.width)/2 - bmpX/2), (rect.y + (rect.height)/2 - bmpY/2)
+                xPos, yPos = int(rect.x + (rect.width)/2 - bmpX/2), int(rect.y + (rect.height)/2 - bmpY/2)
                 dc.DrawBitmap(self._deniedBitmap, xPos+1, yPos+diff, True)
 
             return
@@ -10524,14 +10524,14 @@ class AuiManager(wx.EvtHandler):
         if hAlign == wx.LEFT:
             pos.x = area.x
         elif hAlign == wx.CENTER:
-            pos.x = area.x + (area.width - size.x)/2
+            pos.x = area.x + (area.width - size.x)//2
         else:
             pos.x = area.x + area.width - size.x
 
         if vAlign == wx.TOP:
             pos.y = area.y
         elif vAlign == wx.CENTER:
-            pos.y = area.y + (area.height - size.y)/2
+            pos.y = area.y + (area.height - size.y)//2
         else:
             pos.y = area.y + area.height - size.y
 
