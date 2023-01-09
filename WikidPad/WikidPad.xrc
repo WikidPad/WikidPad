@@ -4219,9 +4219,9 @@
           <object class="sizeritem">
             <object class="wxChoice" name="chModifyLinks">
               <content>
+                <item>No</item>
                 <item>Advanced (rather reliable)</item>
                 <item>Simple (unreliable)</item>
-                <item>No</item>
               </content>
               <selection>0</selection>
             </object>
