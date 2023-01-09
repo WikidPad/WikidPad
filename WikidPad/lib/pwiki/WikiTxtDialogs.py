@@ -44,7 +44,7 @@ class IncrementalSearchDialog(wx.Frame):
 
         self.txtCtrl = txtCtrl
         self.mainControl = mainControl
-        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
+        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD.GetId(),
                 _("Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
@@ -63,11 +63,11 @@ class IncrementalSearchDialog(wx.Frame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD)
+        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.INC_SEARCH_TEXT_FIELD.GetId())
         self.tfInput.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
         self.tfInput.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.Bind(wx.EVT_TIMER, self.OnTimerIncSearchClose, 
-                id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+                id=GUI_ID.TIMER_INC_SEARCH_CLOSE.GetId())
         self.tfInput.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 
         if searchInit:
@@ -75,7 +75,7 @@ class IncrementalSearchDialog(wx.Frame):
             self.tfInput.SetSelection(-1, -1)
 
         if self.closeDelay:
-            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
+            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE.GetId())
             self.closeTimer.Start(self.closeDelay, True)
 
 #     def Close(self):
@@ -468,7 +468,7 @@ class ImagePasteDialog(wx.Dialog):
 
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
         self.Bind(wx.EVT_CHOICE, self.OnFileTypeChoice,
-                id=GUI_ID.chEditorImagePasteFileType)
+                id=GUI_ID.chEditorImagePasteFileType.GetId())
 
         self.ctrls.pnImagePreviewContainer.Bind(wx.EVT_SIZE,
                 self.OnSizePreviewBitmapContainer)

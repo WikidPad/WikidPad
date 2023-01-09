@@ -2532,7 +2532,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             self.SelectItem(item)
             self._bindSelection()
 
-            self.PopupMenuXY(menu, event.GetX(), event.GetY())
+            self.PopupMenu(menu, event.GetX(), event.GetY())   # was: PopupMenuXY
 
             selnode = self.selectedNodeWhileContext
 
