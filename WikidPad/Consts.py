@@ -163,4 +163,4 @@ TEXTEDITOP_DELETE = 2
 # Methods available to update wiki word references (modify text)
 # when renaming wiki words (see PersonalWikiFrame.renameWikiWord
 # and WikiDataManager.renameWikiWords):
-ModifyText = Enumeration('ModifyText', ['off', 'advanced', 'simple'])
+ModifyText = Enumeration('ModifyText', ['advanced', 'simple', 'off'])

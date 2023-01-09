@@ -810,7 +810,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         toWikiWord = self.ctrls.tfToWikiWord.GetValue()
         
         try:
-            modifyText = (ModifyText.off, ModifyText.advanced, ModifyText.simple)[
+            modifyText = (ModifyText.advanced, ModifyText.simple, ModifyText.off)[
                     self.ctrls.chModifyLinks.GetSelection()]
         except IndexError:
             modifyText = ModifyText.off
