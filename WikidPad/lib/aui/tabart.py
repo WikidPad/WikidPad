@@ -495,7 +495,7 @@ class AuiDefaultTabArt:
             r.x += 3
             r.y += 1
             r.width -= 4
-            r.height /= 2
+            r.height //= 2
             r.height -= 1
 
             # -- draw top gradient fill for glossy look
