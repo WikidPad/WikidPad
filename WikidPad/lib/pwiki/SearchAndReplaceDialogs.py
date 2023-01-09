@@ -130,7 +130,7 @@ class _SearchResultItemInfo:
 
 class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
     def __init__(self, parent, pWiki, ID):
-        wx.html.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
+        wx.html.HtmlListBox.__init__(self, parent, ID.GetId(), style = wx.SUNKEN_BORDER)
 
         self.pWiki = pWiki
         self.searchWikiDialog = parent
@@ -145,13 +145,13 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
         self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleButtonDown)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnDClick, id=ID)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnDClick, id=ID.GetId())
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
 
-        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS.GetId())
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS.GetId())
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS.GetId())
 
 
     def OnGetItem(self, i):
@@ -655,19 +655,19 @@ class SearchPageDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_BUTTON, self.OnFindNext, id=GUI_ID.btnFindNext)        
-        self.Bind(wx.EVT_BUTTON, self.OnReplace, id=GUI_ID.btnReplace)
-        self.Bind(wx.EVT_BUTTON, self.OnReplaceAll, id=GUI_ID.btnReplaceAll)
+        self.Bind(wx.EVT_BUTTON, self.OnFindNext, id=GUI_ID.btnFindNext.GetId())        
+        self.Bind(wx.EVT_BUTTON, self.OnReplace, id=GUI_ID.btnReplace.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnReplaceAll, id=GUI_ID.btnReplaceAll.GetId())
 
-        self.Bind(wx.EVT_BUTTON, self.OnToggleExtended, id=GUI_ID.btnToggleExtended)
-        self.Bind(wx.EVT_BUTTON, self.OnSaveSearch, id=GUI_ID.btnSaveSearch)
-        self.Bind(wx.EVT_BUTTON, self.OnDeleteSearches, id=GUI_ID.btnDeleteSearches)
-        self.Bind(wx.EVT_BUTTON, self.OnLoadSearch, id=GUI_ID.btnLoadSearch)
-#         self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunSearch, id=GUI_ID.btnLoadAndRunSearch)
+        self.Bind(wx.EVT_BUTTON, self.OnToggleExtended, id=GUI_ID.btnToggleExtended.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnSaveSearch, id=GUI_ID.btnSaveSearch.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteSearches, id=GUI_ID.btnDeleteSearches.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnLoadSearch, id=GUI_ID.btnLoadSearch.GetId())
+#         self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunSearch, id=GUI_ID.btnLoadAndRunSearch.GetId())
 
         self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CANCEL)
-        self.Bind(wx.EVT_COMBOBOX, self.OnSearchComboSelected, id=GUI_ID.cbSearch) 
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadSearch, id=GUI_ID.lbSavedSearches)
+        self.Bind(wx.EVT_COMBOBOX, self.OnSearchComboSelected, id=GUI_ID.cbSearch.GetId()) 
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadSearch, id=GUI_ID.lbSavedSearches.GetId())
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         
 
@@ -1135,59 +1135,59 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         self.ctrls.cbSearch.SetFocus()
 
         # Events from text search tab
-        self.Bind(wx.EVT_BUTTON, self.OnSearchWiki, id=GUI_ID.btnFindPages)
-        self.Bind(wx.EVT_BUTTON, self.OnFindNext, id=GUI_ID.btnFindNext)        
-        self.Bind(wx.EVT_BUTTON, self.OnReplace, id=GUI_ID.btnReplace)
-        self.Bind(wx.EVT_BUTTON, self.OnReplaceAll, id=GUI_ID.btnReplaceAll)
-        self.Bind(wx.EVT_BUTTON, self.OnSaveSearch, id=GUI_ID.btnSaveSearch)
-        self.Bind(wx.EVT_BUTTON, self.OnDeleteSearches, id=GUI_ID.btnDeleteSearches)
-        self.Bind(wx.EVT_BUTTON, self.OnLoadSearch, id=GUI_ID.btnLoadSearch)
-        self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunSearch, id=GUI_ID.btnLoadAndRunSearch)
-        self.Bind(wx.EVT_BUTTON, self.OnOptions, id=GUI_ID.btnOptions)
-        self.Bind(wx.EVT_BUTTON, self.OnCopyPageNamesToClipboard, id=GUI_ID.btnCopyPageNamesToClipboard)
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsResultlist, id=GUI_ID.btnAsResultlist)
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsTab, id=GUI_ID.btnAsTab)
+        self.Bind(wx.EVT_BUTTON, self.OnSearchWiki, id=GUI_ID.btnFindPages.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnFindNext, id=GUI_ID.btnFindNext.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnReplace, id=GUI_ID.btnReplace.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnReplaceAll, id=GUI_ID.btnReplaceAll.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnSaveSearch, id=GUI_ID.btnSaveSearch.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteSearches, id=GUI_ID.btnDeleteSearches.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnLoadSearch, id=GUI_ID.btnLoadSearch.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunSearch, id=GUI_ID.btnLoadAndRunSearch.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnOptions, id=GUI_ID.btnOptions.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCopyPageNamesToClipboard, id=GUI_ID.btnCopyPageNamesToClipboard.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsResultlist, id=GUI_ID.btnAsResultlist.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsTab, id=GUI_ID.btnAsTab.GetId())
 
         self.ctrls.cbSearch.Bind(wx.EVT_CHAR, self.OnCharToFind)
         self.ctrls.rboxSearchType.Bind(wx.EVT_CHAR, self.OnCharToFind)
         self.ctrls.cbCaseSensitive.Bind(wx.EVT_CHAR, self.OnCharToFind)
         self.ctrls.cbWholeWord.Bind(wx.EVT_CHAR, self.OnCharToFind)
 
-        self.Bind(wx.EVT_COMBOBOX, self.OnSearchComboSelected, id=GUI_ID.cbSearch) 
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadAndRunSearch, id=GUI_ID.lbSavedSearches)
-        self.Bind(wx.EVT_RADIOBOX, self.OnRadioBox, id=GUI_ID.rboxSearchType)
+        self.Bind(wx.EVT_COMBOBOX, self.OnSearchComboSelected, id=GUI_ID.cbSearch.GetId()) 
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadAndRunSearch, id=GUI_ID.lbSavedSearches.GetId())
+        self.Bind(wx.EVT_RADIOBOX, self.OnRadioBox, id=GUI_ID.rboxSearchType.GetId())
 
-        self.Bind(wx.EVT_TEXT, self.OnListRefreshNeeded, id=GUI_ID.cbSearch)
-        self.Bind(wx.EVT_CHECKBOX, self.OnListRefreshNeeded, id=GUI_ID.cbCaseSensitive)
-        self.Bind(wx.EVT_CHECKBOX, self.OnListRefreshNeeded, id=GUI_ID.cbWholeWord)
+        self.Bind(wx.EVT_TEXT, self.OnListRefreshNeeded, id=GUI_ID.cbSearch.GetId())
+        self.Bind(wx.EVT_CHECKBOX, self.OnListRefreshNeeded, id=GUI_ID.cbCaseSensitive.GetId())
+        self.Bind(wx.EVT_CHECKBOX, self.OnListRefreshNeeded, id=GUI_ID.cbWholeWord.GetId())
 
 
         # Events from page list construction tab
 
-        self.Bind(wx.EVT_TEXT, self.OnTextSubtreeLevels, id=GUI_ID.tfSubtreeLevels)
-        self.Bind(wx.EVT_TEXT, self.OnTextPageNameMatchRe, id=GUI_ID.tfMatchRe)
+        self.Bind(wx.EVT_TEXT, self.OnTextSubtreeLevels, id=GUI_ID.tfSubtreeLevels.GetId())
+        self.Bind(wx.EVT_TEXT, self.OnTextPageNameMatchRe, id=GUI_ID.tfMatchRe.GetId())
 
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesAll)
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesMatchRe)
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesInList)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesAll.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesMatchRe.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnPageListRadioButtons, id=GUI_ID.rbPagesInList.GetId())
 
-        self.Bind(wx.EVT_TEXT_ENTER, self.OnPageListAdd, id=GUI_ID.tfPageListToAdd)
-        self.Bind(wx.EVT_BUTTON, self.OnPageListUp, id=GUI_ID.btnPageListUp) 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListDown, id=GUI_ID.btnPageListDown) 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListSort, id=GUI_ID.btnPageListSort) 
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnPageListAdd, id=GUI_ID.tfPageListToAdd.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnPageListUp, id=GUI_ID.btnPageListUp.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnPageListDown, id=GUI_ID.btnPageListDown.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnPageListSort, id=GUI_ID.btnPageListSort.GetId())
 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListAdd, id=GUI_ID.btnPageListAdd) 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListDelete, id=GUI_ID.btnPageListDelete) 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListClearList, id=GUI_ID.btnPageListClearList) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListAdd, id=GUI_ID.btnPageListAdd.GetId()) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListDelete, id=GUI_ID.btnPageListDelete.GetId()) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListClearList, id=GUI_ID.btnPageListClearList.GetId()) 
 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListCopyToClipboard, id=GUI_ID.btnPageListCopyToClipboard) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListCopyToClipboard, id=GUI_ID.btnPageListCopyToClipboard.GetId()) 
 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListAddFromClipboard, id=GUI_ID.btnPageListAddFromClipboard) 
-        self.Bind(wx.EVT_BUTTON, self.OnPageListOverwriteFromClipboard, id=GUI_ID.btnPageListOverwriteFromClipboard)
-        self.Bind(wx.EVT_BUTTON, self.OnPageListIntersectWithClipboard, id=GUI_ID.btnPageListIntersectWithClipboard) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListAddFromClipboard, id=GUI_ID.btnPageListAddFromClipboard.GetId()) 
+        self.Bind(wx.EVT_BUTTON, self.OnPageListOverwriteFromClipboard, id=GUI_ID.btnPageListOverwriteFromClipboard.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnPageListIntersectWithClipboard, id=GUI_ID.btnPageListIntersectWithClipboard.GetId()) 
 
-        self.Bind(wx.EVT_BUTTON, self.OnResultListPreview, id=GUI_ID.btnResultListPreview) 
-        self.Bind(wx.EVT_BUTTON, self.OnResultCopyToClipboard, id=GUI_ID.btnResultCopyToClipboard) 
+        self.Bind(wx.EVT_BUTTON, self.OnResultListPreview, id=GUI_ID.btnResultListPreview.GetId()) 
+        self.Bind(wx.EVT_BUTTON, self.OnResultCopyToClipboard, id=GUI_ID.btnResultCopyToClipboard.GetId()) 
 
 
 #         self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CANCEL)        
@@ -2220,11 +2220,11 @@ class SearchResultPresenterControl(wx.Panel):
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.btnAsResultlist = wx.Button(self,
-                GUI_ID.CMD_SEARCH_AS_RESULTLIST, label=_("As Resultlist"))
+                GUI_ID.CMD_SEARCH_AS_RESULTLIST.GetId(), label=_("As Resultlist"))
                 # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsResultlist, 0, wx.EXPAND)
 
-        self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH,
+        self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH.GetId(),
                 label=_("As Full Search"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsWwSearch, 0, wx.EXPAND)
 
@@ -2239,11 +2239,11 @@ class SearchResultPresenterControl(wx.Panel):
 
         self.SetSizer(sizer)
 
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsResultlist, id=GUI_ID.CMD_SEARCH_AS_RESULTLIST)
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsResultlist, id=GUI_ID.CMD_SEARCH_AS_RESULTLIST.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH.GetId())
 
-        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdAsResultlist, id=GUI_ID.CMD_SEARCH_AS_RESULTLIST)
-        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH)
+        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdAsResultlist, id=GUI_ID.CMD_SEARCH_AS_RESULTLIST.GetId())
+        self.tabContextMenu.Bind(wx.EVT_MENU, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH.GetId())
 
 
     # Next two to fulfill presenter subcontrol protocol
@@ -2329,11 +2329,11 @@ class FastSearchPopup(wx.Frame):
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH,
+        self.btnAsWwSearch = wx.Button(self, GUI_ID.CMD_SEARCH_AS_WWSEARCH.GetId(),
                 label=_("As Full Search"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsWwSearch, 0, wx.EXPAND)
 
-        self.btnAsTab = wx.Button(self, GUI_ID.CMD_SEARCH_AS_TAB,
+        self.btnAsTab = wx.Button(self, GUI_ID.CMD_SEARCH_AS_TAB.GetId(),
                 label=_("As Tab"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsTab, 0, wx.EXPAND)
 #         buttonSizer.AddStretchSpacer()
@@ -2362,8 +2362,8 @@ class FastSearchPopup(wx.Frame):
         self.btnAsTab.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 #         self.resultBox.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH)
-        self.Bind(wx.EVT_BUTTON, self.OnCmdAsTab, id=GUI_ID.CMD_SEARCH_AS_TAB)
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsWwSearch, id=GUI_ID.CMD_SEARCH_AS_WWSEARCH.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCmdAsTab, id=GUI_ID.CMD_SEARCH_AS_TAB.GetId())
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.resultBox.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 #         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
