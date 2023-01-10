@@ -1689,20 +1689,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
             appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BOTTOM)
 
             # Enable/Disable appropriate menu items
-            item = menu.FindItemById(GUI_ID.CMD_UNDO)
+            item = menu.FindItemById(GUI_ID.CMD_UNDO.GetId())
             if item: item.Enable(self.CanUndo())
-            item = menu.FindItemById(GUI_ID.CMD_REDO)
+            item = menu.FindItemById(GUI_ID.CMD_REDO.GetId())
             if item: item.Enable(self.CanRedo())
 
             cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
 
-            item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
+            item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE.GetId())
             if item: item.Enable(cancopy and not self.GetReadOnly())
-            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT.GetId())
             if item: item.Enable(cancopy and not self.GetReadOnly())
-            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY.GetId())
             if item: item.Enable(cancopy)
-            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE.GetId())
             if item: item.Enable(self.CanPaste())
 
         contextInfo = contextInfo.getDict()

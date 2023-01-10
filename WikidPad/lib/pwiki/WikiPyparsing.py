@@ -3059,7 +3059,7 @@ class And(ParseExpression, NecessaryRegexProvider):
                     # be appended to the and-regex
                     break
                 
-            if len(result) is 0:
+            if len(result) == 0:
                 return None
             
             self.reFlagsMask = flagsMask
