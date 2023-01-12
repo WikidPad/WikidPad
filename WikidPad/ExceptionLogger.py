@@ -1,3 +1,8 @@
+'''
+Logging. 
+TODO: switch to std logging module
+'''
+
 import sys, traceback, time, os, os.path
 
 EL = None
@@ -32,8 +37,9 @@ class StdErrReplacement:
                 f.write(data)
             finally:
                 f.close()
-        except:
-            pass # TODO
+        except Exception as e:
+            # cannot write to log file: ignore (and beware of recursive exceptions)
+            pass
 
     def writelines(self, it):
         for l in it:
@@ -107,6 +113,15 @@ def startLogger(versionstring):
     
     EL = EL2
     
+    try:
+        testme = EL._logger_is_started
+        # already initialized: do nothing
+        print("WARNING: startLogger called twice")
+        traceback.print_stack()    # where did this call come from
+        return
+    except:
+        EL._logger_is_started = True
+
     EL._exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
     EL._exceptionLogFileName = "WikidPad_Init_Error.log"
     EL._exceptionSessionTimeStamp = \
