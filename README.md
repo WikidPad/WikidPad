@@ -20,10 +20,11 @@ WikidPad is nearly completely written in Python, only some external libraries
 
 * [Main website](http://wikidpad.sourceforge.net/)
 * [Downloads (Windows binary and source)](http://sourceforge.net/projects/wikidpad/files/?source=navbar)
-* Installation hints for [Windows from source](http://trac.wikidpad2.webfactional.com/wiki/InstallWindows) *BROKEN*,
+* Installation hints for [Windows from source](http://trac.wikidpad2.webfactional.com/wiki/InstallWindows),
   [Linux](http://trac.wikidpad2.webfactional.com/wiki/InstallLinux),
-  [MacOS](http://trac.wikidpad2.webfactional.com/wiki/InstallMacosxNew)
-* [WikidPad's own wiki](http://trac.wikidpad2.webfactional.com/)
+  [MacOS](http://trac.wikidpad2.webfactional.com/wiki/InstallMacosxNew)  *BROKEN*, see next item
+* [WikidPad's own wiki](http://trac.wikidpad2.webfactional.com/)  *BROKEN*,
+  but a snapshot as of May, 2020 is available in the [WayBackMachine](https://web.archive.org/web/20200502083222/https://trac.wikidpad2.webfactional.com/wiki/WikiStart)
 * [Source repository on Github](https://github.com/WikidPad/WikidPad/)
 
 # Installation with pip or conda
