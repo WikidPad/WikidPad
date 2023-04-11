@@ -7193,7 +7193,7 @@
               <label>Clear</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -7201,7 +7201,7 @@
               <label>Hide Log</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
