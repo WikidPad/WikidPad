@@ -1768,19 +1768,19 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         Stops further styling requests from Scintilla until text is modified
         """
-        self.StartStyling(self.GetLength(), 0xff)
+        self.StartStyling(self.GetLength())
         self.SetStyling(0, 0)
 
 
 
-    def storeStylingAndAst(self, stylebytes, foldingseq, styleMask=0xff):
+    def storeStylingAndAst(self, stylebytes, foldingseq):
         self.stylebytes = stylebytes
 #         self.pageAst = pageAst
         self.foldingseq = foldingseq
 
         def putStyle():
             if stylebytes:
-                self.applyStyling(stylebytes, styleMask)
+                self.applyStyling(stylebytes)
 
             if foldingseq:
                 self.applyFolding(foldingseq)
@@ -1827,7 +1827,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 # Show intermediate syntax highlighting results before spell check
                 # if we are in asynchronous mode
                 if not threadstop is DUMBTHREADSTOP:
-                    self.storeStylingAndAst(stylebytes, foldingseq, styleMask=0x1f)
+                    self.storeStylingAndAst(stylebytes, foldingseq)
 
                 scTokens = docPage.getSpellCheckerUnknownWords(threadstop=threadstop)
 
@@ -1844,11 +1844,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             for a, b in zip(stylebytes, spellStyleBytes)]
                             ).encode("raw_unicode_escape")
 
-                    self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
+                    self.storeStylingAndAst(stylebytes, None)
                 else:
-                    self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
+                    self.storeStylingAndAst(stylebytes, None)
             else:
-                self.storeStylingAndAst(stylebytes, foldingseq, styleMask=0xff)
+                self.storeStylingAndAst(stylebytes, foldingseq)
 
         except NotCurrentThreadException:
             return
@@ -2108,9 +2108,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return foldingseq
 
 
-    def applyStyling(self, stylebytes, styleMask=0xff):
+    def applyStyling(self, stylebytes):
         if len(stylebytes) == self.GetLength():
-            self.StartStyling(0, styleMask)
+            self.StartStyling(0)
             self.SetStyleBytes(len(stylebytes), stylebytes)
 
     def applyFolding(self, foldingseq):
