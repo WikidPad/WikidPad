@@ -3844,13 +3844,13 @@
           <label>Wiki Word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxTextCtrl" name="text"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3859,7 +3859,7 @@
           <style>wxLB_EXTENDED</style>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <minsize>200,200</minsize>
       </object>
@@ -3867,12 +3867,12 @@
         <object class="wxStaticText" name="stLinkTo">
           <label></label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3974,7 +3974,7 @@
           <growablecols>1</growablecols>
           <growablecols>2</growablecols>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
@@ -7212,7 +7212,7 @@
           <style>wxLC_REPORT|wxLC_NO_HEADER</style>
         </object>
         <option>1</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
       </object>
     </object>
     <size>0,0</size>
@@ -7225,7 +7225,7 @@
           <content/>
         </object>
         <option>1</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
         <option>1</option>
       </object>
       <object class="sizeritem">
@@ -7233,7 +7233,7 @@
           <style>wxTE_PROCESS_ENTER|wxTE_RICH</style>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
       </object>
     </object>
     <size>0,0</size>
