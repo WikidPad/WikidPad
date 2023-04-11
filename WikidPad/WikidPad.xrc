@@ -3912,7 +3912,7 @@
                 <object class="wxStaticText">
                   <label>Order:</label>
                 </object>
-                <flag>wxALL|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+                <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
                 <border>5</border>
                 <cellpos>2,0</cellpos>
               </object>
