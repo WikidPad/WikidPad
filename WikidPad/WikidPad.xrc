@@ -11,7 +11,7 @@
           <style>wxCB_DROPDOWN</style>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -40,7 +40,7 @@
           <label>Preview:</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -50,13 +50,13 @@
           <style>wxST_NO_AUTORESIZE|wxSUNKEN_BORDER</style>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="unknown" name="htmlExplain"/>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <minsize>400,400</minsize>
       </object>
@@ -78,7 +78,7 @@
                 <object class="wxStaticText">
                   <label>Options page:</label>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
               </object>
               <object class="sizeritem">
@@ -86,7 +86,7 @@
                   <content/>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
               </object>
             </object>
@@ -122,7 +122,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -135,7 +135,7 @@
           <label>New window on wiki URL</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -143,7 +143,7 @@
           <label>Store relative pathes to wikis</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -171,12 +171,12 @@
             <minsize>20,-1</minsize>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -186,7 +186,7 @@
             <object class="wxStaticText">
               <label>Sort order:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -199,7 +199,7 @@
               <style></style>
             </object>
             <option>0</option>
-            <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -207,12 +207,12 @@
               <label>Uppercase first</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="spacer">
         <size>0,5</size>
@@ -225,7 +225,7 @@
               <label>App-bound hotkey:</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -235,12 +235,12 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -252,7 +252,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -263,7 +263,7 @@
               <label>Modify links to wiki words:</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <cellpos>3,0</cellpos>
           </object>
@@ -282,20 +282,20 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbRenameDefaultRenameSubPages">
           <label>Also rename subpages</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -307,7 +307,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -315,7 +315,7 @@
           <label>Prefer memory where possible</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -325,7 +325,7 @@
             <object class="wxStaticText">
               <label>Temporary file directory:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -337,12 +337,12 @@
               </content>
             </object>
             <option>0</option>
-            <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxTOP|wxLEFT|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
@@ -369,7 +369,7 @@
             <minsize>20,-1</minsize>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -412,14 +412,14 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbOpenWordDialogAskForCreateWhenNonexistingWord">
           <label>Ask for creation when opening non-existing word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -488,12 +488,12 @@
             <size>0,0</size>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -501,7 +501,7 @@
           <label>Auto-show log window</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -509,13 +509,13 @@
           <label>Auto-hide log window</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -561,14 +561,14 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbDocStructureAutoHide">
           <label>Auto-hide structure window</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -576,7 +576,7 @@
           <label>Structure window selection auto-follow</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -589,7 +589,7 @@
           <label>Process insertion scripts</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="spacer">
@@ -602,7 +602,7 @@
             <object class="wxStaticText">
               <label>Script security:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -618,14 +618,14 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbScriptSearchReverse">
           <label>Reverse script search order (global imports first)</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -637,28 +637,28 @@
         <object class="wxCheckBox" name="cbTreeAutoFollow">
           <label>Tree auto-follow</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeUpdateAfterSave">
           <label>Tree update after save</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbHideUndefinedWords">
           <label>Hide undefined wiki words in Tree</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeAutoHide">
           <label>Tree auto-hide</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -757,7 +757,7 @@
           <growablecols>1</growablecols>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -769,7 +769,7 @@
           <label>Start browser after export</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -779,7 +779,7 @@
             <object class="wxStaticText">
               <label>Font name for HTML preview:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -792,13 +792,13 @@
             <object class="wxButton" name="btnSelectFaceHtmlPrev">
               <label>...</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <minsize>20,-1</minsize>
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
@@ -866,14 +866,14 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbHtmlPreviewPicsAsLinks">
           <label>Show pics as links in preview</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -881,7 +881,7 @@
           <label>Show pics as links in export</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -893,7 +893,7 @@
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -906,7 +906,7 @@
               <selection>0</selection>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -918,7 +918,7 @@
             <object class="wxStaticText">
               <label>Title of toc:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -929,7 +929,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -938,7 +938,7 @@
             <object class="wxStaticText">
               <label>Single page separator lines:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -949,7 +949,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
@@ -965,7 +965,7 @@
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -976,7 +976,7 @@
               <selection>0</selection>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -1001,7 +1001,7 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="spacer">
         <size>5,5</size>
@@ -1011,7 +1011,7 @@
           <label>* Needs WikidPad restart</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -1163,7 +1163,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -1175,7 +1175,7 @@
           <label>Auto-unbullets</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1183,7 +1183,7 @@
           <label>Append closing bracket on auto-complete</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1191,7 +1191,7 @@
           <label>Synchronize editor by preview selection</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1199,7 +1199,7 @@
           <label>Colorize search fragments of links separately</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1241,12 +1241,12 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1254,7 +1254,7 @@
           <label>Image preview tooltips for local URLs</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1264,7 +1264,7 @@
             <object class="wxStaticText">
               <label>Width:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -1273,14 +1273,14 @@
               <min>1</min>
               <max>10000</max>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText">
               <label>Height:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -1289,7 +1289,7 @@
               <min>1</min>
               <max>10000</max>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -1309,7 +1309,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1378,20 +1378,20 @@
           <growablecols>1</growablecols>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbEditorImagePasteAskOnEachPaste">
           <label>Ask settings on each paste</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1403,7 +1403,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1470,20 +1470,20 @@
           <growablecols>1</growablecols>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbEditorFilePasteBracketedUrl">
           <label>Links in brackets</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1495,7 +1495,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1517,7 +1517,7 @@
                   <style>wxBU_EXACTFIT</style>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
                 <cellpos>0,0</cellpos>
               </object>
@@ -1527,7 +1527,7 @@
                   <style>wxBU_EXACTFIT</style>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
               </object>
               <object class="sizeritem">
@@ -1537,7 +1537,7 @@
                   <hidden>1</hidden>
                 </object>
                 <option>0</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
               </object>
               <orient>wxVERTICAL</orient>
@@ -1731,7 +1731,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -1768,14 +1768,14 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbClipboardCatcherFilterDouble">
           <label>Avoid doubled snippets</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -1826,7 +1826,7 @@
           <growablecols>1</growablecols>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -1860,7 +1860,7 @@
           <growablecols>1</growablecols>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -1872,7 +1872,7 @@
           <label>Reverse wheel zoom</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2048,7 +2048,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -2063,7 +2063,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2092,7 +2092,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -2101,7 +2101,7 @@
             <object class="wxStaticText">
               <label>Date format:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2121,32 +2121,32 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimeViewAutoHide">
           <label>Auto-hide</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimeViewShowWordListOnHovering">
           <label>Show word list on hovering</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimeViewShowWordListOnSelect">
           <label>Show word list on select</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2157,26 +2157,26 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimelineShowEmptyDays">
           <label>Show empty days</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimelineSortDateAscending">
           <label>Sort dates ascending</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2187,7 +2187,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2197,7 +2197,7 @@
             <object class="wxStaticText">
               <label>Date format:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2217,11 +2217,11 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2232,7 +2232,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2242,7 +2242,7 @@
             <object class="wxStaticText">
               <label>Date format:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2262,7 +2262,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -2277,7 +2277,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2285,7 +2285,7 @@
           <label>&amp;Strip leading/trailing spaces</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2296,7 +2296,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2307,7 +2307,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2323,7 +2323,7 @@
           <style>wxRA_SPECIFY_COLS|wxNO_BORDER</style>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2331,7 +2331,7 @@
           <label>&amp;Case sensitive</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2339,7 +2339,7 @@
           <label>&amp;Whole word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="spacer">
@@ -2353,7 +2353,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2401,7 +2401,7 @@
               <label>Count Occurrences up to max.:</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2415,7 +2415,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2473,7 +2473,7 @@
           <style>wxRA_SPECIFY_COLS</style>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2481,7 +2481,7 @@
           <label>&amp;Case sensitive</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2489,12 +2489,12 @@
           <label>&amp;Whole word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2505,7 +2505,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2515,7 +2515,7 @@
             <object class="wxStaticText">
               <label>Delay before auto-close:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2525,7 +2525,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -2538,14 +2538,14 @@
           <hidden>1</hidden>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbNewWikiDefaultEditorForceTextMode">
           <label>Force editor to write platform dependent files</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2553,7 +2553,7 @@
           <label>Page file names ASCII only</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -2574,7 +2574,7 @@
               </font>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2582,7 +2582,7 @@
               <label>Use IME workaround for editor input*</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2590,7 +2590,7 @@
               <label>Translate menu accelerators for keyboard layout* (Windows)</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2598,7 +2598,7 @@
               <label>Use vi keys in editor</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2606,7 +2606,7 @@
               <label>Forbid cancel on search</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -2622,7 +2622,7 @@
           <label>Single process per user*</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2636,7 +2636,7 @@
               <label>Warn about other processes (Windows only)</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -2649,7 +2649,7 @@
             <object class="wxStaticText">
               <label>Run on CPU no.:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2659,7 +2659,7 @@
               </content>
               <selection>0</selection>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -2669,21 +2669,21 @@
         <object class="wxCheckBox" name="cbTreeNoCycles">
           <label>No cycles in tree</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbMouseScrollUnderPointer">
           <label>Scroll under pointer (Windows only, exp.)</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbHtmlPreviewReduceUpdateHandling">
           <label>Reduce update handling in HTML preview</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2692,7 +2692,7 @@
           <hidden>1</hidden>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="spacer">
@@ -2703,7 +2703,7 @@
           <label>* Needs WikidPad restart</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="spacer">
@@ -2722,7 +2722,7 @@
               </font>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2730,7 +2730,7 @@
               <label>Ignore wiki lock file</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2738,7 +2738,7 @@
               <label>Create wiki lock file</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <label></label>
@@ -2765,7 +2765,7 @@
               </font>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2831,7 +2831,7 @@
               <growablecols>1</growablecols>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
         </object>
         <option>0</option>
@@ -2851,7 +2851,7 @@
               </font>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -2879,7 +2879,7 @@
               <growablecols>1</growablecols>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
         </object>
         <option>0</option>
@@ -2896,7 +2896,7 @@
           <label>Autosave active</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -2942,7 +2942,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -2974,7 +2974,7 @@
             <minsize>20,-1</minsize>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
@@ -3024,14 +3024,14 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbIndexSearchEnabled">
           <label>Allow index search</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3039,7 +3039,7 @@
           <label>Force ScratchPad visibility in tree</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3047,7 +3047,7 @@
           <label>Read-only wiki</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3056,7 +3056,7 @@
           <style>wxCHK_3STATE|wxCHK_ALLOW_3RD_STATE_FOR_USER</style>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3064,7 +3064,7 @@
           <label>Graceful handling of missing page files</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="spacer">
@@ -3073,7 +3073,7 @@
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
@@ -3104,12 +3104,12 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxLEFT|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3121,7 +3121,7 @@
             <underlined>0</underlined>
           </font>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3161,14 +3161,14 @@
             <cellpos>0,1</cellpos>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTrashcanAskOnDelete">
           <label>Ask before deletion of wiki word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -3231,7 +3231,7 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -3248,7 +3248,7 @@
           </font>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3303,20 +3303,20 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbWikiPageTitleFromLinkTitle">
           <label>Use link title if present</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="spacer">
         <size>0,5</size>
@@ -3331,7 +3331,7 @@
           </font>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3341,7 +3341,7 @@
             <object class="wxStaticText">
               <label>Up to heading depth:</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -3350,11 +3350,11 @@
               <min>0</min>
               <max>15</max>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
-        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -3431,7 +3431,7 @@
           <object class="sizeritem">
             <object class="wxStaticLine"/>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <cellpos>4,0</cellpos>
             <cellspan>1,2</cellspan>
@@ -3485,7 +3485,7 @@
           <object class="sizeritem">
             <object class="wxStaticLine"/>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <cellpos>4,0</cellpos>
             <cellspan>1,2</cellspan>
@@ -3552,7 +3552,7 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -3569,7 +3569,7 @@
           </font>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3577,7 +3577,7 @@
           <label>Modif. date must match</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3585,7 +3585,7 @@
           <label>Filename must match</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3593,7 +3593,7 @@
           <label>Modif. date is enough</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3606,7 +3606,7 @@
           </font>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3633,7 +3633,7 @@
             <border>5</border>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="">
@@ -3645,14 +3645,14 @@
           </font>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbEditorForceTextMode">
           <label>Force editor to write platform dependent files</label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3660,7 +3660,7 @@
           <label>Page file names ASCII only</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3708,7 +3708,7 @@
             <size>0,0</size>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -3844,13 +3844,13 @@
           <label>Wiki Word</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxTextCtrl" name="text"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3859,7 +3859,7 @@
           <style>wxLB_EXTENDED</style>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <minsize>200,200</minsize>
       </object>
@@ -3867,12 +3867,12 @@
         <object class="wxStaticText" name="stLinkTo">
           <label></label>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -3912,7 +3912,7 @@
                 <object class="wxStaticText">
                   <label>Order:</label>
                 </object>
-                <flag>wxALL|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+                <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
                 <border>5</border>
                 <cellpos>2,0</cellpos>
               </object>
@@ -3974,7 +3974,7 @@
           <growablecols>1</growablecols>
           <growablecols>2</growablecols>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
@@ -4489,7 +4489,7 @@
                     <label>Wiki Search</label>
                   </object>
                   <option>0</option>
-                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <flag>wxALL|wxEXPAND</flag>
                   <border>5</border>
                 </object>
                 <object class="sizeritem">
@@ -4497,7 +4497,7 @@
                     <content/>
                     <style></style>
                   </object>
-                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                  <flag>wxALL|wxEXPAND</flag>
                   <border>5</border>
                 </object>
                 <object class="sizeritem">
@@ -4519,7 +4519,7 @@
                             <style>wxRA_SPECIFY_COLS|wxWANTS_CHARS</style>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4534,7 +4534,7 @@
                                     <style>wxWANTS_CHARS</style>
                                   </object>
                                   <option>0</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                 </object>
                                 <object class="sizeritem">
@@ -4543,7 +4543,7 @@
                                     <style>wxWANTS_CHARS</style>
                                   </object>
                                   <option>0</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                 </object>
                               </object>
@@ -4561,7 +4561,7 @@
                                     <label> &amp;Find </label>
                                   </object>
                                   <option>0</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                 </object>
                               </object>
@@ -4574,7 +4574,7 @@
                             <label>Replace By</label>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4582,7 +4582,7 @@
                             <style>wxTE_PROCESS_ENTER</style>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4593,7 +4593,7 @@
                                 <label> Find &amp;Next </label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4601,7 +4601,7 @@
                                 <label> &amp;Replace </label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4609,7 +4609,7 @@
                                 <label> Replace &amp;All </label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                           </object>
@@ -4617,7 +4617,7 @@
                         <object class="sizeritem">
                           <object class="wxStaticLine"/>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4625,7 +4625,7 @@
                             <label>Saved Searches:</label>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4634,7 +4634,7 @@
                             <style>wxLB_EXTENDED</style>
                           </object>
                           <option>1</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                           <minsize>-1,80</minsize>
                         </object>
@@ -4646,7 +4646,7 @@
                                 <label>&amp;Save Search</label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4693,7 +4693,7 @@
                         <object class="sizeritem">
                           <object class="unknown" name="htmllbPages"/>
                           <option>1</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                           <minsize>200,200</minsize>
                         </object>
@@ -4705,7 +4705,7 @@
                                 <label>Copy to clipboard:</label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4713,7 +4713,7 @@
                                 <label>&amp;Page names</label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                           </object>
@@ -4722,7 +4722,7 @@
                         <object class="sizeritem">
                           <object class="wxStaticLine"/>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4780,7 +4780,7 @@
                         <style>wxRB_SINGLE</style>
                       </object>
                       <option>0</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>
                     </object>
                     <object class="sizeritem">
@@ -4789,7 +4789,7 @@
                         <style>wxRB_SINGLE</style>
                       </object>
                       <option>0</option>
-                      <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                      <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
                       <border>5</border>
                     </object>
                     <object class="sizeritem">
@@ -4801,7 +4801,7 @@
                         <object class="sizeritem">
                           <object class="wxTextCtrl" name="tfMatchRe"/>
                           <option>1</option>
-                          <flag>wxTOP|wxBOTTOM|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxTOP|wxBOTTOM|wxRIGHT|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                       </object>
@@ -4820,7 +4820,7 @@
                                 <style>wxRB_SINGLE</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4828,7 +4828,7 @@
                                 <value>0</value>
                               </object>
                               <option>1</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                               <minsize>40,-1</minsize>
                             </object>
@@ -4837,7 +4837,7 @@
                                 <label>level(s) below</label>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                           </object>
@@ -4866,7 +4866,7 @@
                                     <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>1</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                   <cellpos>0,0</cellpos>
                                 </object>
@@ -4876,7 +4876,7 @@
                                     <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>1</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                 </object>
                                 <object class="sizeritem">
@@ -4885,7 +4885,7 @@
                                     <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>0</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                                  <flag>wxALL|wxEXPAND</flag>
                                   <border>5</border>
                                 </object>
                                 <orient>wxVERTICAL</orient>
@@ -4927,7 +4927,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4936,7 +4936,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4945,7 +4945,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                           </object>
@@ -4957,7 +4957,7 @@
                             <label>Paste from clipboard:</label>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -4969,7 +4969,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4978,7 +4978,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                             <object class="sizeritem">
@@ -4987,7 +4987,7 @@
                                 <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                               <border>5</border>
                             </object>
                           </object>
@@ -5022,7 +5022,7 @@
                         <label>Result</label>
                       </object>
                       <option>0</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>
                     </object>
                     <object class="sizeritem">
@@ -5033,7 +5033,7 @@
                             <label>Preview</label>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                         <object class="sizeritem">
@@ -5042,7 +5042,7 @@
                             <style>wxBU_EXACTFIT</style>
                           </object>
                           <option>0</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                           <border>5</border>
                         </object>
                       </object>
@@ -5054,7 +5054,7 @@
                         <content/>
                       </object>
                       <option>1</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>
                     </object>
                   </object>
@@ -5066,7 +5066,7 @@
           </object>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -5077,7 +5077,7 @@
               <label>Order pages:</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5091,7 +5091,7 @@
               <selection>0</selection>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -5118,7 +5118,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -5697,7 +5697,7 @@
           <style>wxALIGN_RIGHT</style>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -5710,7 +5710,7 @@
           <selection>0</selection>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
     </object>
@@ -5807,7 +5807,7 @@
       <object class="spacer">
         <size>10,10</size>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -5819,7 +5819,7 @@
                 <object class="wxStaticText">
                   <label>Format version</label>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <border>5</border>
               </object>
               <object class="sizeritem">
@@ -5831,12 +5831,12 @@
                   <selection>1</selection>
                 </object>
                 <option>0</option>
-                <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxTOP|wxLEFT|wxEXPAND</flag>
                 <border>5</border>
               </object>
             </object>
             <option>0</option>
-            <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxTOP|wxLEFT|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxCheckBox" name="cbWriteVersionData">
@@ -5844,7 +5844,7 @@
               <checked>1</checked>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5853,7 +5853,7 @@
               <checked>1</checked>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5862,7 +5862,7 @@
               <checked>1</checked>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -5885,7 +5885,7 @@
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5899,12 +5899,12 @@
               <selection>0</selection>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -5915,7 +5915,7 @@
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5923,12 +5923,12 @@
               <content/>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -5939,7 +5939,7 @@
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -5948,28 +5948,28 @@
               <checked>0</checked>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxPanel" name="additOptions"/>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>2</border>
       </object>
       <object class="sizeritem">
@@ -5977,7 +5977,7 @@
           <label>Destination directory:</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -5986,7 +5986,7 @@
           <object class="sizeritem">
             <object class="wxTextCtrl" name="tfDestination"/>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <minsize>350,-1</minsize>
           </object>
@@ -5994,18 +5994,18 @@
             <object class="wxButton" name="btnSelectDestination">
               <label>...</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
             <minsize>20,-1</minsize>
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -6013,7 +6013,7 @@
           <label>Saved Exports:</label>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
@@ -6022,7 +6022,7 @@
           <style>wxLB_EXTENDED</style>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
         <minsize>-1,80</minsize>
       </object>
@@ -6066,7 +6066,7 @@
       <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>2</border>
       </object>
       <object class="sizeritem">
@@ -6090,7 +6090,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
   </object>
@@ -7193,7 +7193,7 @@
               <label>Clear</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
           <object class="sizeritem">
@@ -7201,7 +7201,7 @@
               <label>Hide Log</label>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
         </object>
@@ -7212,7 +7212,7 @@
           <style>wxLC_REPORT|wxLC_NO_HEADER</style>
         </object>
         <option>1</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
       </object>
     </object>
     <size>0,0</size>
@@ -7225,7 +7225,7 @@
           <content/>
         </object>
         <option>1</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
         <option>1</option>
       </object>
       <object class="sizeritem">
@@ -7233,7 +7233,7 @@
           <style>wxTE_PROCESS_ENTER|wxTE_RICH</style>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxTOP|wxEXPAND</flag>
       </object>
     </object>
     <size>0,0</size>
