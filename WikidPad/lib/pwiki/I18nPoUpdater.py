@@ -13,7 +13,7 @@ def loadEntireTxtFile(filename):
     """
     Load entire file (text mode) and return its content.
     """
-    rf = open(filename, "rU")
+    rf = open(filename, "r")
     try:
         result = rf.read()
         return result
