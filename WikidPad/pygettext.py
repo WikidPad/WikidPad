@@ -888,7 +888,7 @@ def main(argv):
     for updfile in options.updatefiles:
         utfMode = False
         try:
-            f = open(updfile, "rU")
+            f = open(updfile, "r")
 #             bom = f.read(len(BOM_UTF8))
 #             utfMode = bom == BOM_UTF8  # TODO seek 0 on not UTF
             utfMode = True

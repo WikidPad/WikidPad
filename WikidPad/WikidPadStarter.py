@@ -77,7 +77,7 @@ def _putPathPrepends():
     parser = configparser.RawConfigParser()
     try:
         f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                "binInst.ini"), "rU")
+                "binInst.ini"), "r")
         parser.readfp(f)
         f.close()
 
