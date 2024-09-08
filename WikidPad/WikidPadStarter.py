@@ -7,8 +7,12 @@
 #     traceback.print_exc()
 
 
-
-import sys, os, traceback, os.path, glob, shutil, imp, warnings, configparser
+import configparser
+import os
+import os.path
+import shutil
+import sys
+import traceback
 
 if not hasattr(sys, 'frozen'):
     origin = __spec__.origin
