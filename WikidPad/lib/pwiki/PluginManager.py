@@ -377,14 +377,13 @@ class PluginManager:
             del sys.path[-1]
             
     def loadPluginsPackageManaged(self):
-        import pkg_resources
-        
-        for entry_point in pkg_resources.iter_entry_points('WikidPad.plugins'):
+        from importlib.metadata import entry_points
+
+        for entry_point in entry_points(group='WikidPad.plugins'):
             module = entry_point.load()
             if hasattr(module, "WIKIDPAD_PLUGIN"):
                 self.registerPlugin(module)
 
-          
     def importDirectory(self, name, add_to_sys_modules = False): 
         name = mbcsEnc(name, "replace")[0]
         try:
