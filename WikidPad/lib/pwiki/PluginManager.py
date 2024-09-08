@@ -5,10 +5,11 @@ import sys, traceback, os.path
 
 import wx
 
+import importlib
+import importlib.util
+
 from .StringOps import mbcsEnc
 from functools import reduce
-
-
 
 
 """The PluginManager and PluginAPI classes implement a generic plugin framework.
@@ -314,8 +315,6 @@ class PluginManager:
         """
         self.loadPluginsFixed(excludeFiles)
         self.loadPluginsPackageManaged()
-        
-           
 
     def loadPluginsFixed(self, excludeFiles):
         """load and register plugins with apis. The directories in the list
@@ -327,55 +326,54 @@ class PluginManager:
            Files and directories given in exludeFiles are not loaded at all. Also 
            directories are searched in order for plugins. Therefore plugins
            appearing in earlier directories are not loaded from later ones."""
-        import imp
         exclusions = excludeFiles[:]
-        
+
         for dirNum, directory in enumerate(self.directories):
-            sys.path.append(os.path.dirname(directory))
-            if not os.access(mbcsEnc(directory, "replace")[0], os.F_OK):
+            if not os.path.exists(directory):
                 continue
             files = os.listdir(directory)
 
             if dirNum == self.systemDirIdx:
                 packageName = "wikidpadSystemPlugins"
             else:
-                packageName = "cruelimportExtensionsPackage%i_%i" % \
-                        (id(self), dirNum)
+                packageName = f"cruelimportExtensionsPackage{id(self)}_{dirNum}"
 
-            package = imp.new_module(packageName)
-            package.__path__ = [directory]
+            package = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(packageName, None))
             sys.modules[packageName] = package
 
             for name in files:
                 try:
                     module = None
                     fullname = os.path.join(directory, name)
-                    ( moduleName, ext ) = os.path.splitext(name)
+                    moduleName, ext = os.path.splitext(name)
+
                     if name in exclusions:
                         continue
+
                     if os.path.isfile(fullname):
                         if ext == '.py':
-                            with open(fullname, "rb") as f:
-                                module = imp.load_module(packageName + "." + moduleName, f,
-                                        fullname, (".py", "r", imp.PY_SOURCE))
+                            spec = importlib.util.spec_from_file_location(packageName + "." + moduleName, fullname)
+                            if spec is not None:
+                                module = importlib.util.module_from_spec(spec)
+                                sys.modules[packageName + "." + moduleName] = module
+                                spec.loader.exec_module(module)
                         elif ext == '.zip':
-                            module = imp.new_module(
-                                    packageName + "." + moduleName)
-                            module.__path__ = [fullname]
-                            module.__zippath__ = fullname
-                            sys.modules[packageName + "." + moduleName] = module
-                            zi = zipimporter(fullname)
-                            co = zi.get_code("__init__")
-                            exec(co, module.__dict__)
+                            if zipfile.is_zipfile(fullname):
+                                module = importlib.util.module_from_spec(
+                                    importlib.machinery.ModuleSpec(packageName + "." + moduleName, None))
+                                module.__path__ = [fullname]
+                                sys.modules[packageName + "." + moduleName] = module
+                                zi = zipimporter(fullname)
+                                co = zi.get_code("__init__")
+                                exec(co, module.__dict__)
 
                     if module:
                         setattr(package, moduleName, module)
                         if hasattr(module, "WIKIDPAD_PLUGIN"):
                             self.registerPlugin(module)
-                except:
+                except Exception as e:
                     traceback.print_exc()
-            del sys.path[-1]
-            
+
     def loadPluginsPackageManaged(self):
         from importlib.metadata import entry_points
 
@@ -630,7 +628,6 @@ class InsertionPluginManager:
                 traceback.print_exc()
             
         self.startedHandlers.clear()
-
 
 
 def getExporterClasses(mainControl):
