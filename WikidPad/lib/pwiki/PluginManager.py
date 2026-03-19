@@ -2,6 +2,8 @@
 
 from zipimport import zipimporter
 import sys, traceback, os.path
+import importlib.util
+import types
 
 import wx
 
@@ -327,7 +329,6 @@ class PluginManager:
            Files and directories given in exludeFiles are not loaded at all. Also 
            directories are searched in order for plugins. Therefore plugins
            appearing in earlier directories are not loaded from later ones."""
-        import imp
         exclusions = excludeFiles[:]
         
         for dirNum, directory in enumerate(self.directories):
@@ -342,7 +343,7 @@ class PluginManager:
                 packageName = "cruelimportExtensionsPackage%i_%i" % \
                         (id(self), dirNum)
 
-            package = imp.new_module(packageName)
+            package = types.ModuleType(packageName)
             package.__path__ = [directory]
             sys.modules[packageName] = package
 
@@ -355,11 +356,15 @@ class PluginManager:
                         continue
                     if os.path.isfile(fullname):
                         if ext == '.py':
-                            with open(fullname, "rb") as f:
-                                module = imp.load_module(packageName + "." + moduleName, f,
-                                        fullname, (".py", "r", imp.PY_SOURCE))
+                            fullModuleName = packageName + "." + moduleName
+                            spec = importlib.util.spec_from_file_location(
+                                    fullModuleName, fullname)
+                            if spec and spec.loader:
+                                module = importlib.util.module_from_spec(spec)
+                                sys.modules[fullModuleName] = module
+                                spec.loader.exec_module(module)
                         elif ext == '.zip':
-                            module = imp.new_module(
+                            module = types.ModuleType(
                                     packageName + "." + moduleName)
                             module.__path__ = [fullname]
                             module.__zippath__ = fullname

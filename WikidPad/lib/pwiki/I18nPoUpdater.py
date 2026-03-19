@@ -13,7 +13,7 @@ def loadEntireTxtFile(filename):
     """
     Load entire file (text mode) and return its content.
     """
-    rf = open(filename, "rU")
+    rf = open(filename, "r", newline=None)
     try:
         result = rf.read()
         return result
@@ -100,7 +100,8 @@ def refreshPot(potFilename, presetMessages):
 
     try:
         content = loadEntireTxtFile(infile)
-        content = content.decode("utf-8")
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
         lines = content.split("\n")
 
 #         lines = codecs.open(infile, "rt", "utf-8").readlines()
@@ -158,7 +159,7 @@ def refreshPot(potFilename, presetMessages):
         # XXX: Does this always follow Python escape semantics?
 #         print "eval", repr(l)
         l = eval(l)
-        if type(l) is str:
+        if isinstance(l, bytes):
             l = l.decode("utf-8")
 
         if section == ID:
@@ -187,5 +188,4 @@ def main(args):
     newContent = refreshPot(args[1], presetMessages)
     newContent = newContent.encode("utf-8")
     writeEntireTxtFile(args[0], newContent)
-
 

@@ -5,7 +5,7 @@
 *.pyc
 /user_extensions
 
-
+venv/
 
 
 # Byte-compiled / optimized

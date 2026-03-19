@@ -184,7 +184,7 @@ class TabTextCtrl(ExpandoTextCtrl):
         x += image_w
         w -= image_w + 4
 
-        y = (self._tabEdited.rect.height - h)/2 + 1
+        y = (self._tabEdited.rect.height - h)//2 + 1
 
         expandoStyle = wx.WANTS_CHARS
         if wx.Platform in ["__WXGTK__", "__WXMAC__"]:
@@ -845,7 +845,7 @@ class TabNavigatorWindow(wx.Dialog):
         # Draw the caption title and place the bitmap
         # get the bitmap optimal position, and draw it
         bmpPt, txtPt = wx.Point(), wx.Point()
-        bmpPt.y = (rect.height - self._props.Icon.GetHeight())/2
+        bmpPt.y = (rect.height - self._props.Icon.GetHeight())//2
         bmpPt.x = 3
         mem_dc.DrawBitmap(self._props.Icon, bmpPt.x, bmpPt.y, True)
 
@@ -856,7 +856,7 @@ class TabNavigatorWindow(wx.Dialog):
         fontHeight = mem_dc.GetCharHeight()
 
         txtPt.x = bmpPt.x + self._props.Icon.GetWidth() + 4
-        txtPt.y = (rect.height - fontHeight)/2
+        txtPt.y = (rect.height - fontHeight)//2
         mem_dc.SetTextForeground(wx.WHITE)
         mem_dc.DrawText("Opened tabs:", txtPt.x, txtPt.y)
         mem_dc.SelectObject(wx.NullBitmap)
@@ -2900,23 +2900,25 @@ class TabFrame(wx.Window):
         hideOnSingle = ((self._tabs.GetAGWFlags() & AUI_NB_HIDE_ON_SINGLE_TAB) and \
                         self._tabs.GetPageCount() <= 1)
 
-        if not hideOnSingle and not self._parent._hide_tabs:
-            tab_height = self._tab_ctrl_height
+        rect_width = max(0, int(self._rect.width))
+        rect_height = max(0, int(self._rect.height))
 
-            self._tab_rect = wx.Rect(self._rect.x, self._rect.y, self._rect.width, self._tab_ctrl_height)
+        if not hideOnSingle and not self._parent._hide_tabs:
+            tab_height = max(0, int(self._tab_ctrl_height))
+
+            self._tab_rect = wx.Rect(self._rect.x, self._rect.y, rect_width, tab_height)
 
             if self._tabs.GetAGWFlags() & AUI_NB_BOTTOM:
-                self._tab_rect = wx.Rect(self._rect.x, self._rect.y + self._rect.height - tab_height,
-                                         self._rect.width, tab_height)
-                self._tabs.SetSize(self._rect.x, self._rect.y + self._rect.height - tab_height,
-                                   self._rect.width, tab_height)
-                self._tabs.SetTabRect(wx.Rect(0, 0, self._rect.width, tab_height))
+                tab_y = self._rect.y + max(0, rect_height - tab_height)
+                self._tab_rect = wx.Rect(self._rect.x, tab_y, rect_width, tab_height)
+                self._tabs.SetSize(self._rect.x, tab_y, rect_width, tab_height)
+                self._tabs.SetTabRect(wx.Rect(0, 0, rect_width, tab_height))
 
             else:
 
-                self._tab_rect = wx.Rect(self._rect.x, self._rect.y, self._rect.width, tab_height)
-                self._tabs.SetSize(self._rect.x, self._rect.y, self._rect.width, tab_height)
-                self._tabs.SetTabRect(wx.Rect(0, 0, self._rect.width, tab_height))
+                self._tab_rect = wx.Rect(self._rect.x, self._rect.y, rect_width, tab_height)
+                self._tabs.SetSize(self._rect.x, self._rect.y, rect_width, tab_height)
+                self._tabs.SetTabRect(wx.Rect(0, 0, rect_width, tab_height))
 
             # TODO: elif (GetAGWFlags() & AUI_NB_LEFT)
             # TODO: elif (GetAGWFlags() & AUI_NB_RIGHT)
@@ -2927,14 +2929,14 @@ class TabFrame(wx.Window):
         else:
 
             tab_height = 0
-            self._tabs.SetSize(self._rect.x, self._rect.y, self._rect.width, tab_height)
-            self._tabs.SetTabRect(wx.Rect(0, 0, self._rect.width, tab_height))
+            self._tabs.SetSize(self._rect.x, self._rect.y, rect_width, tab_height)
+            self._tabs.SetTabRect(wx.Rect(0, 0, rect_width, tab_height))
 
         pages = self._tabs.GetPages()
 
         for page in pages:
 
-            height = self._rect.height - tab_height
+            height = rect_height - tab_height
 
             if height < 0:
                 # avoid passing negative height to wx.Window.SetSize(), this
@@ -2942,11 +2944,11 @@ class TabFrame(wx.Window):
                 height = 0
 
             if self._tabs.GetAGWFlags() & AUI_NB_BOTTOM:
-                page.window.SetSize(self._rect.x, self._rect.y, self._rect.width, height)
+                page.window.SetSize(self._rect.x, self._rect.y, rect_width, height)
 
             else:
                 page.window.SetSize(self._rect.x, self._rect.y + tab_height,
-                                          self._rect.width, height)
+                                          rect_width, height)
 
             # TODO: elif (GetAGWFlags() & AUI_NB_LEFT)
             # TODO: elif (GetAGWFlags() & AUI_NB_RIGHT)
@@ -3467,8 +3469,8 @@ class AuiNotebook(wx.Panel):
         # should happen around the middle
         if tab_ctrl_count < 2:
             new_split_size = self.GetClientSize()
-            new_split_size.x /= 2
-            new_split_size.y /= 2
+            new_split_size.x //= 2
+            new_split_size.y //= 2
 
         else:
 
@@ -4610,8 +4612,8 @@ class AuiNotebook(wx.Panel):
             # because there are two panes, always split them
             # equally
             split_size = self.GetClientSize()
-            split_size.x /= 2
-            split_size.y /= 2
+            split_size.x //= 2
+            split_size.y //= 2
 
         # create a new tab frame
         new_tabs = TabFrame(self)
@@ -4638,22 +4640,22 @@ class AuiNotebook(wx.Panel):
         if direction == wx.LEFT:
 
             pane_info.Left()
-            mouse_pt = wx.Point(0, cli_size.y/2)
+            mouse_pt = wx.Point(0, cli_size.y//2)
 
         elif direction == wx.RIGHT:
 
             pane_info.Right()
-            mouse_pt = wx.Point(cli_size.x, cli_size.y/2)
+            mouse_pt = wx.Point(cli_size.x, cli_size.y//2)
 
         elif direction == wx.TOP:
 
             pane_info.Top()
-            mouse_pt = wx.Point(cli_size.x/2, 0)
+            mouse_pt = wx.Point(cli_size.x//2, 0)
 
         elif direction == wx.BOTTOM:
 
             pane_info.Bottom()
-            mouse_pt = wx.Point(cli_size.x/2, cli_size.y)
+            mouse_pt = wx.Point(cli_size.x//2, cli_size.y)
 
         self._mgr.AddPane(new_tabs, pane_info, mouse_pt)
         self._mgr.Update()

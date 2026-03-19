@@ -219,6 +219,8 @@ SASH_NONE = 100
 
 
 class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
+    _MIN_LAYOUT_SASH_POS = 2
+
     def __init__(self, *args, **kwargs):
         wx.adv.SashLayoutWindow.__init__(self, *args, **kwargs)
         
@@ -288,6 +290,7 @@ class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
 
 
     def setSashPosition(self, pos):
+        pos = max(self._MIN_LAYOUT_SASH_POS, int(pos))
         parent = self.GetParent()
         if isinstance(parent, SmartSashLayoutWindow):
             ws = parent.layoutWorkSize
@@ -345,11 +348,11 @@ class SmartSashLayoutWindow(wx.adv.SashLayoutWindow):
         if flag and self.isCollapsed():
             self.setSashPosition(self.effectiveSashPos)
         elif not flag and not self.isCollapsed():
-            self.setSashPosition(1)
+            self.setSashPosition(self._MIN_LAYOUT_SASH_POS)
 
     def collapseWindow(self):
         if not self.isCollapsed():
-            self.setSashPosition(1)
+            self.setSashPosition(self._MIN_LAYOUT_SASH_POS)
 
 
     def OnSashDragged(self, evt):
@@ -1049,5 +1052,4 @@ class StorablePerspective:
 #         need to be created from perspective data.
 #         """
 #         raise NotImplementedError
-
 

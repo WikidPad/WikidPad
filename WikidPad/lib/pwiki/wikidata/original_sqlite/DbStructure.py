@@ -186,7 +186,7 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
         try:
             if not self.commitNeeded:
                 return
-            if self.commitTimer is not None and self.commitTimer.isAlive():
+            if self.commitTimer is not None and self.commitTimer.is_alive():
                 return
             t = threading.Timer(0.6, self._timerCommit)
             self.commitTimer = t
@@ -215,7 +215,7 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
         """
         self.accessLock.acquire()
         try:
-            if self.commitTimer is not None and self.commitTimer.isAlive():
+            if self.commitTimer is not None and self.commitTimer.is_alive():
                 self.commitTimer.cancel()
             self.dbConn.commit()
             self.commitNeeded = False
@@ -226,7 +226,7 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
     def rollback(self):
         self.accessLock.acquire()
         try:    
-            if self.commitTimer is not None and self.commitTimer.isAlive():
+            if self.commitTimer is not None and self.commitTimer.is_alive():
                 self.commitTimer.cancel()
             self.dbConn.rollback()
             self.commitNeeded = False
@@ -240,7 +240,7 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
         This function is not secured by a lock as it is only called
         by other functions.
         """
-        if self.commitTimer is not None and self.commitTimer.isAlive():
+        if self.commitTimer is not None and self.commitTimer.is_alive():
             self.commitTimer.cancel()
 
             if not self.commitNeeded:

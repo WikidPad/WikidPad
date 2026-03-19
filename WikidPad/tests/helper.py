@@ -11,11 +11,12 @@ WikidPad directory:
 import builtins
 from collections import Counter
 import io
+import importlib.util
+import importlib.machinery
 from itertools import chain
 import os
 import re
 import sys
-import imp
 import wx
 
 # Create a dummy app.
@@ -45,8 +46,15 @@ from pwiki.StringOps import LOWERCASE, UPPERCASE
 from wikidPadParser import WikidPadParser
 from mediaWikiParser import MediaWikiParser
 
-OverlayParser = imp.load_source('OverlayParser', os.path.join(EXTENSIONDIR,
-        "OverlayParser.pyf"))
+overlay_parser_path = os.path.join(EXTENSIONDIR, "OverlayParser.pyf")
+overlay_parser_loader = importlib.machinery.SourceFileLoader(
+    "OverlayParser", overlay_parser_path
+)
+overlay_parser_spec = importlib.util.spec_from_loader(
+    "OverlayParser", overlay_parser_loader
+)
+OverlayParser = importlib.util.module_from_spec(overlay_parser_spec)
+overlay_parser_spec.loader.exec_module(OverlayParser)
 
 # import OverlayParser
 

@@ -8,7 +8,7 @@
 
 
 
-import sys, os, traceback, os.path, glob, shutil, imp, warnings, configparser
+import sys, os, traceback, os.path, glob, shutil, warnings, configparser
 
 if not hasattr(sys, 'frozen'):
     origin = __spec__.origin
@@ -42,7 +42,7 @@ builtins.N_ = N_
 del N_
 
 
-builtins._ = N_
+builtins._ = builtins.N_
 
 
 #? del __builtin__
@@ -76,10 +76,9 @@ def _putPathPrepends():
     """
     parser = configparser.RawConfigParser()
     try:
-        f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                "binInst.ini"), "rU")
-        parser.readfp(f)
-        f.close()
+        with open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                "binInst.ini"), "r", newline=None) as f:
+            parser.read_file(f)
 
         try:
             for opt, val in parser.items("sysPathPrepend"):
@@ -252,4 +251,3 @@ def main():
     
     gc.collect()
     gc.disable()
-

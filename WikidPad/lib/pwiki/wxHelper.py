@@ -28,25 +28,15 @@ def _unescapeWithRe(text):
 
 
 
-class wxSourceId:
+class wxSourceId(int):
     """
     Can be used either as id number or as source in wx.EvtHandler.Bind() calls
     """
-    __slots__ = ("_value",)
+    def __new__(cls, value):
+        return int.__new__(cls, int(value))
 
-    def __init__(self, value):
-        self._value = value
-    
-    def __int__(self):
-        return self._value
-    
-    def __eq__(self, other):
-        return self._value == int(other)
-        
-    def __hash__(self):
-        return hash(self._value)
-    
-    GetId = __int__
+    def GetId(self):
+        return int(self)
 
 
 class wxIdPool:
@@ -1198,15 +1188,18 @@ class LayerSizer(wx.Sizer):
         pos = self.GetPosition()
         size = self.GetSize()
         size = wx.Size(size.GetWidth(), size.GetHeight())
+        # GTK asserts if size request dimensions are less than -1.
+        width = max(-1, int(size.GetWidth()))
+        height = max(-1, int(size.GetHeight()))
         for item in self.GetChildren():
             win = item.GetWindow()
             if win is None:
-                item.SetSize(pos.x, pos.y, size.GetWidth(), size.GetHeight())
+                item.SetSize(pos.x, pos.y, width, height)
             else:
                 # Bad hack
                 # Needed because some ctrls like e.g. ListCtrl do not support
                 # to overwrite virtual methods like DoSetSize
-                win.SetSize(pos.x, pos.y, size.GetWidth(), size.GetHeight())
+                win.SetSize(pos.x, pos.y, width, height)
 
 
 

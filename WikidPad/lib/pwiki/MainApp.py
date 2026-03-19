@@ -110,6 +110,95 @@ def findDirs():
 _defRedirect = (wx.Platform == '__WXMSW__' or wx.Platform == '__WXMAC__')
 
 
+def _clamp_size_component(value):
+    try:
+        ivalue = int(value)
+    except (TypeError, ValueError):
+        return value
+
+    if ivalue < -1:
+        return -1
+    return ivalue
+
+
+def _clamp_wh_pair(first, second):
+    return _clamp_size_component(first), _clamp_size_component(second)
+
+
+def _clamp_size_like_obj(size_like):
+    if isinstance(size_like, wx.Size):
+        return wx.Size(*_clamp_wh_pair(size_like.x, size_like.y))
+    if isinstance(size_like, wx.Rect):
+        width, height = _clamp_wh_pair(size_like.width, size_like.height)
+        return wx.Rect(size_like.x, size_like.y, width, height)
+    if isinstance(size_like, (tuple, list)) and len(size_like) >= 2:
+        width, height = _clamp_wh_pair(size_like[0], size_like[1])
+        return (width, height)
+
+    return size_like
+
+
+def _install_wx_gtk_size_guards():
+    """
+    Clamp wx size requests on GTK so invalid (< -1) dimensions don't reach
+    gtk_widget_set_size_request().
+    """
+    if wx.Platform != "__WXGTK__":
+        return
+
+    if getattr(wx.Window, "_wikidpad_size_guard_installed", False):
+        return
+
+    orig_set_size = wx.Window.SetSize
+    orig_set_client_size = wx.Window.SetClientSize
+    orig_set_min_size = wx.Window.SetMinSize
+    orig_set_max_size = wx.Window.SetMaxSize
+
+    def guarded_set_size(self, *args, **kwargs):
+        args = list(args)
+        if len(args) >= 4:
+            args[2], args[3] = _clamp_wh_pair(args[2], args[3])
+        elif len(args) == 2 and isinstance(args[1], (wx.Size, tuple, list)):
+            args[1] = _clamp_size_like_obj(args[1])
+        elif len(args) == 1:
+            args[0] = _clamp_size_like_obj(args[0])
+
+        return orig_set_size(self, *args, **kwargs)
+
+    def guarded_set_client_size(self, *args, **kwargs):
+        args = list(args)
+        if len(args) >= 2:
+            args[0], args[1] = _clamp_wh_pair(args[0], args[1])
+        elif len(args) == 1:
+            args[0] = _clamp_size_like_obj(args[0])
+
+        return orig_set_client_size(self, *args, **kwargs)
+
+    def guarded_set_min_size(self, *args, **kwargs):
+        args = list(args)
+        if len(args) == 1:
+            args[0] = _clamp_size_like_obj(args[0])
+        elif len(args) >= 2:
+            args[0], args[1] = _clamp_wh_pair(args[0], args[1])
+
+        return orig_set_min_size(self, *args, **kwargs)
+
+    def guarded_set_max_size(self, *args, **kwargs):
+        args = list(args)
+        if len(args) == 1:
+            args[0] = _clamp_size_like_obj(args[0])
+        elif len(args) >= 2:
+            args[0], args[1] = _clamp_wh_pair(args[0], args[1])
+
+        return orig_set_max_size(self, *args, **kwargs)
+
+    wx.Window.SetSize = guarded_set_size
+    wx.Window.SetClientSize = guarded_set_client_size
+    wx.Window.SetMinSize = guarded_set_min_size
+    wx.Window.SetMaxSize = guarded_set_max_size
+    wx.Window._wikidpad_size_guard_installed = True
+
+
 class App(wx.App, MiscEventSourceMixin): 
     def __init__(self, *args, **kwargs):
         global app
@@ -130,6 +219,7 @@ class App(wx.App, MiscEventSourceMixin):
 #         global PREVIEW_CSS
 
         self.SetAppName("WikidPad")
+        _install_wx_gtk_size_guards()
 
 #         self._CallAfterId = wx.NewEventType()
 #         self.Connect(-1, -1, self._CallAfterId,

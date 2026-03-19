@@ -3020,6 +3020,7 @@ class AuiFloatingFrame(wx.MiniFrame):
                       4*art_provider.GetMetric(AUI_DOCKART_PANE_BORDER_SIZE)
 
         min_size = pane.window.GetMinSize()
+        min_size = wx.Size(max(-1, int(min_size.x)), max(-1, int(min_size.y)))
 
         if min_size.y < caption_size or min_size.x < button_size:
             new_x, new_y = min_size.x, min_size.y
@@ -3028,7 +3029,7 @@ class AuiFloatingFrame(wx.MiniFrame):
             if min_size.x < button_size:
                 new_x = (pane.IsResizeable() and [2*wx.SystemSettings.GetMetric(wx.SYS_EDGE_X)+button_size] or [1])[0]
 
-            self.SetMinSize((new_x, new_y))
+            self.SetMinSize((max(-1, int(new_x)), max(-1, int(new_y))))
         else:
             self.SetMinSize(min_size)
 
@@ -3064,6 +3065,7 @@ class AuiFloatingFrame(wx.MiniFrame):
 
             pane.floating_size = size
 
+            size = wx.Size(max(-1, int(size.x)), max(-1, int(size.y)))
             self.SetClientSize(size)
 
         self._owner_mgr._panes[indx] = pane
@@ -3393,6 +3395,8 @@ class AuiFloatingFrame(wx.MiniFrame):
 
         current_size = self.GetClientSize()
         floating_size = wx.Size(*self._owner_mgr.GetPane(self._pane_window).floating_size)
+        floating_size = wx.Size(max(-1, int(floating_size.x)),
+                                max(-1, int(floating_size.y)))
 
         if floating_size.y == -1:
             floating_size = self._floating_size
@@ -4766,7 +4770,7 @@ class AuiManager(wx.EvtHandler):
         # if the pane's name identifier is blank, create a random string
         if pinfo.name == "" or already_exists:
             pinfo.name = ("%s%08x%08x%08x") % (pinfo.window.GetName(), int(time.time()),
-                                               int(time.clock()), len(self._panes))
+                                               int(time.perf_counter()), len(self._panes))
 
         # set initial proportion (if not already set)
         if pinfo.dock_proportion == 0:
@@ -10752,5 +10756,3 @@ class AuiManager_DCP(AuiManager):
             # if we get here, there's no center pane, create our dummy
             if not self.hasDummyPane:
                 self._createDummyPane()
-
-
