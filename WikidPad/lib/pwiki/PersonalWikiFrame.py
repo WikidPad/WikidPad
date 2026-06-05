@@ -5975,9 +5975,9 @@ def importCode(code, usercode, userUserCode, name, add_to_sys_modules=False):
 
     Returns a newly generated module.
     """
-    import sys,imp
+    import sys,types
 
-    module = imp.new_module(name)
+    module = types.ModuleType(name)
 
     exec(code, module.__dict__)
     if usercode is not None:
