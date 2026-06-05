@@ -46,7 +46,7 @@ from . import AdditionalDialogs
 from . import WikiTxtDialogs
 
 # image stuff
-import imghdr
+import filetype
 
 
 # import WikiFormatting
@@ -3757,7 +3757,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                 .makeFileUrlAbsPath(astNode.url)
 
                         if path is not None and isfile(path):
-                            if imghdr.what(path):
+                            if filetype.is_image(path):
                                 config = self.presenter.getConfig()
                                 maxWidth = config.getint("main",
                                         "editor_imageTooltips_maxWidth", 200)
