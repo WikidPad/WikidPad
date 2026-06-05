@@ -6961,7 +6961,7 @@ class ViHandler(ViHelper):
         text = self.ctrl.GetSelectedText()
 
         # \V is used as we want a direct text replace
-        self.StartCmdInput("%s/\V{0}/".format(text))
+        self.StartCmdInput(r"%s/\V{0}/".format(text))
 
     def ReplaceChar(self, keycode):
         """
