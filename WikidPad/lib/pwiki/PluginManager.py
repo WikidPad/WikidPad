@@ -339,6 +339,7 @@ class PluginManager:
                 packageName = f"cruelimportExtensionsPackage{id(self)}_{dirNum}"
 
             package = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(packageName, None))
+            package.__path__ = [directory]
             sys.modules[packageName] = package
 
             for name in files:
