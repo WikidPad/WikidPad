@@ -82,7 +82,7 @@ def _putPathPrepends():
     try:
         f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                 "binInst.ini"), "r")
-        parser.readfp(f)
+        parser.read_file(f)
         f.close()
 
         try:

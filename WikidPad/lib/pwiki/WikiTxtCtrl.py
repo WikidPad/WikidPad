@@ -1476,7 +1476,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     "main", "async_highlight_delay")
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
             sth.setThread(t)
-            t.setDaemon(True)
+            t.daemon = True
             t.start()
 
 
@@ -3843,7 +3843,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 kwargs={"threadstop": self.calltipThreadHolder})
 
         self.calltipThreadHolder.setThread(thread)
-        thread.setDaemon(True)
+        thread.daemon = True
         thread.start()
 
 

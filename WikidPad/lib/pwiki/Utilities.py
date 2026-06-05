@@ -154,7 +154,7 @@ class SingleThreadExecutor(BasicThreadStop, MiscEvent.MiscEventSourceMixin):
             self.prepare()
 
             self.thread = threading.Thread(target=self._runQueue)
-            self.thread.setDaemon(self.daemon)
+            self.thread.daemon = self.daemon
             self.thread.start()
             debuglog("SingleThreadExecutor thread created",
                     self.thread, self.daemon)

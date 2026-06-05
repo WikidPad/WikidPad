@@ -222,7 +222,7 @@ class DocStructureCtrl(EnhancedListControl):
         t = threading.Thread(None, self.buildTocList,
                 args = (text, docPage, depth, uth))
         uth.setThread(t)
-        t.setDaemon(True)
+        t.daemon = True
         t.start()
 
 

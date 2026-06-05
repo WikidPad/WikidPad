@@ -639,7 +639,7 @@ def getAccelPairFromString(s):
 
 def setHotKeyByString(win, hotKeyId, keyString):
     # Search for Windows key
-    winMatch = re.search("(?<![^\+\-])win[\+\-]", keyString, re.IGNORECASE)
+    winMatch = re.search(r"(?<![^+\-])win[+\-]", keyString, re.IGNORECASE)
     winKey = False
     if winMatch:
         winKey = True
