@@ -13,7 +13,7 @@ import difflib, codecs, os.path, random, base64, locale, hashlib, tempfile, \
         math, time
 
 # import urllib_red as urllib
-import urllib.request, urllib.parse, urllib.error, urllib.parse, cgi
+import urllib.request, urllib.parse, urllib.error, urllib.parse
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
@@ -1745,7 +1745,7 @@ def wikiUrlToPathWordAndAnchor(url):
     linkHt = "http:" + url[5:]
     parsed = urllib.parse.urlparse(linkHt)
     # Parse query string into dictionary
-    queryDict = cgi.parse_qs(parsed[4])
+    queryDict = urllib.parse.parse_qs(parsed[4])
     # Retrieve wikiword to open if existing
     # queryDict values are lists of values therefore this expression
     wikiWordToOpen = flexibleUrlUnquote(queryDict.get("page", (None,))[0])
