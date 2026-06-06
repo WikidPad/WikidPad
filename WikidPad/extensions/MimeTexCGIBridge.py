@@ -1,11 +1,13 @@
-import os, urllib.request, urllib.parse, urllib.error, os.path
+import os
 import subprocess
+import urllib.parse
 
 import wx
 
-from pwiki.StringOps import mbcsEnc
+from pwiki.StringOps import mbcsEnc, mbcsDec
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
+
 
 def describeInsertionKeys(ver, app):
     """
@@ -21,18 +23,21 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return (("eqn", ("html_single", "html_previewWX", "html_preview",
-            "html_multi"), EqnHandler),)
+    return (
+            ("eqn", ("html_single", "html_previewWX", "html_preview", "html_multi"), EqnHandler),
+            )
 
 
 class EqnHandler:
     """
     Class fulfilling the "insertion by key" protocol.
     """
+    EXE_PATH_CONFIG_KEY = "plugin_mimeTex_exePath"
+
     def __init__(self, app):
         self.app = app
         self.extAppExe = None
-        
+
     def taskStart(self, exporter, exportType):
         """
         This is called before any call to createContent() during an
@@ -41,26 +46,22 @@ class EqnHandler:
         preview or a single page or a set of pages for export.
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
-        
-        Calls to createContent() will only happen after a 
+
+        Calls to createContent() will only happen after a
         call to taskStart() and before the call to taskEnd()
         """
-        # Find MimeTeX executable by configuration setting
-        self.extAppExe = self.app.getGlobalConfig().get("main",
-                "plugin_mimeTex_exePath", "")
-        
-        if self.extAppExe:
-            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
-                    self.extAppExe)
+        # Find executable by configuration setting
+        self.extAppExe = self.app.getGlobalConfig().get("main", self.EXE_PATH_CONFIG_KEY, "")
 
-        
+        if self.extAppExe and self.extAppExe != os.path.basename(self.extAppExe):
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(), self.extAppExe)
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
         createContent().
         """
         pass
-
 
     def createContent(self, exporter, exportType, insToken):
         """
@@ -77,46 +78,37 @@ class EqnHandler:
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
-        
-        For HtmlExporter a unistring is returned with the HTML code
-        to insert instead of the insertion.        
-        """
-        bstr = urllib.parse.quote(mbcsEnc(insToken.value, "replace")[0])
 
-        if not bstr:
+        For HtmlExporter a unistring is returned with the HTML code
+        to insert instead of the insertion.
+        """
+        if not insToken.value:
             # Nothing in, nothing out
             return ""
-        
-        if self.extAppExe == "":
-            # No path to MimeTeX executable -> show message
+
+        if not self.extAppExe:
+            # No path to executable -> show message
             return '<pre>' + _('[Please set path to MimeTeX executable]') + \
                     '</pre>'
+
+        bstr = urllib.parse.quote(mbcsEnc(insToken.value, "replace")[0])
 
         # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
         # variable
         os.environ["QUERY_STRING"] = bstr
 
+        # Run external application (shell is used to internally handle missing executable error)
         cmdline = subprocess.list2cmdline((self.extAppExe,))
 
-#         childIn, childOut = os.popen2(cmdline, "b")
+        popenObject = subprocess.Popen(cmdline, shell=True, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+        response, errResponse = popenObject.communicate()
 
-        # Run MimeTeX process
-        popenObject = subprocess.Popen(cmdline, shell=True,
-                 stdout=subprocess.PIPE, stdin=subprocess.PIPE,
-                 stderr=subprocess.PIPE)
+        if errResponse and "noerror" not in [a.strip() for a in insToken.appendices]:
+            errResponse = mbcsDec(errResponse, "replace")[0]
+            return '<pre>' + _('[MimeTeX error: %s]') % errResponse + \
+                    '</pre>'
 
-        childOut = popenObject.stdout
-        
-        # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
-        # why this is necessary
-        popenObject.stdin.close()
-        popenObject.stderr.close()
-
-        # Read stdout of process entirely
-        response = childOut.read()
-        
-        childOut.close()
-        
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
             response = response[(response.index(b"\n\n") + 2):]
@@ -127,10 +119,10 @@ class EqnHandler:
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
-        
+
         # Create .gif file out of returned data and retrieve URL for the file
         pythonUrl = (exportType != "html_previewWX")
-        url = tfs.createTempUrl(response, ".gif", pythonUrl=pythonUrl)
+        url = tfs.createTempUrl(response, ".gif", pythonUrl=(exportType != "html_previewWX"))
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -141,15 +133,12 @@ class EqnHandler:
             return '<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
-
     def getExtraFeatures(self):
         """
         Returns a list of bytestrings describing additional features supported
         by the plugin. Currently not specified further.
         """
         return ()
-
-
 
 
 def registerOptions(ver, app):
@@ -160,9 +149,10 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_mimeTex_exePath")] = ""
+    app.getDefaultGlobalConfigDict()[("main", EqnHandler.EXE_PATH_CONFIG_KEY)] = ""
+
     # Register panel in options dialog
-    app.addOptionsDlgPanel(MimeTexOptionsPanel, "  MimeTeX")
+    app.addOptionsDlgPanel(MimeTexOptionsPanel, "MimeTeX")
 
 
 class MimeTexOptionsPanel(wx.Panel):
@@ -174,9 +164,9 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.app = app
-        
-        pt = self.app.getGlobalConfig().get("main", "plugin_mimeTex_exePath", "")
-        
+
+        pt = self.app.getGlobalConfig().get("main", EqnHandler.EXE_PATH_CONFIG_KEY, "")
+
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
@@ -186,7 +176,7 @@ class MimeTexOptionsPanel(wx.Panel):
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
-        
+
         self.SetSizer(mainsizer)
         self.Fit()
 
@@ -194,7 +184,7 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         Called when panel is shown or hidden. The actual wxWindow.Show()
         function is called automatically.
-        
+
         If a panel is visible and becomes invisible because another panel is
         selected, the plugin can veto by returning False.
         When becoming visible, the return value is ignored.
@@ -206,7 +196,7 @@ class MimeTexOptionsPanel(wx.Panel):
         Called when "OK" is pressed in dialog. The plugin should check here if
         all input values are valid. If not, it should return False, then the
         Options dialog automatically shows this panel.
-        
+
         There should be a visual indication about what is wrong (e.g. red
         background in text field). Be sure to reset the visual indication
         if field is valid again.
@@ -220,7 +210,5 @@ class MimeTexOptionsPanel(wx.Panel):
         file.
         """
         pt = self.tfPath.GetValue()
-        
-        self.app.getGlobalConfig().set("main", "plugin_mimeTex_exePath", pt)
 
-
+        self.app.getGlobalConfig().set("main", EqnHandler.EXE_PATH_CONFIG_KEY, pt)
