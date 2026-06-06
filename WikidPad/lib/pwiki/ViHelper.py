@@ -1878,7 +1878,7 @@ class CmdParser():
                           }
         # TODO: :s repeats last command
 
-        self.range_regex = "(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
+        self.range_regex = r"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
                                             "|".join(list(self.range_cmds.keys())))
 
     def StartPDBDebug(self, args=None):
@@ -1944,7 +1944,7 @@ class CmdParser():
         # characters
         delims = "/;$|^%,"
         if pattern[0] in delims:
-            delim = "\{0}".format(pattern[0])
+            delim = r"\{0}".format(pattern[0])
         else:
             self.ctrl.vi.viError(
                     _("Error: {0} is not a valid delimiter".format(
@@ -1963,7 +1963,7 @@ class CmdParser():
         #
         # Currently we only check for \V
         # if it exists we escape the search pattern (so it acts as a literal string)
-        if search.startswith("\V"):
+        if search.startswith(r"\V"):
             search = re.escape(search[2:])
 
 
@@ -2050,14 +2050,14 @@ class CmdParser():
         # TODO: improve cmd checking
         if re.match(self.range_regex, text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
+        elif re.match(r"(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
                                 "|".join(list(self.range_cmds.keys()))), text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)", text_input):
+        elif re.match(r"(\d+|%|\.|\$)?,?(\d+|%|\.|\$)", text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,", text_input):
+        elif re.match(r"(\d+|%|\.|\$)?,", text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)", text_input):
+        elif re.match(r"(\d+|%|\.|\$)", text_input):
             return True
         else:
             return False
