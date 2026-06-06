@@ -38,8 +38,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
     Called for "Append/Prepend wiki word" in tree node context menu
     """
     def __init__(self, pWiki, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -175,8 +174,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
 class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, pWiki, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -746,8 +744,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
 class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, mainControl, fromWikiWord, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -886,7 +883,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
 class SelectIconDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+                 style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
         wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
 
         self.iconCache = iconCache
@@ -1039,7 +1036,7 @@ class DateformatDialog(wx.Dialog):
 
     def __init__(self, parent, ID, mainControl, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D, deffmt=""):
+                 deffmt=""):
         """
         deffmt -- Initial value for format string
         """
@@ -1123,8 +1120,7 @@ class FontFaceDialog(wx.Dialog):
     string with currently selected face.
     """
     def __init__(self, parent, ID, mainControl, value="",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
         """
         value -- Current value of a text field containing a face name (used to
                  choose default item in the shown list box)

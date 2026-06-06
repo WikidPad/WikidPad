@@ -23,8 +23,6 @@ dummyApp = wx.App(0)
 dummyApp.SetAppName("WikidPad")
 
 builtins._ = builtins.N_ = lambda s: s  # see WikidPadStarter
-if not hasattr(wx, "NO_3D"):  # cmore addition
-    wx.NO_3D = 0
 
 # run test from WikidPad directory, fix path
 # todo (pvh): ? fix imports in WikidPad, turn it into a package

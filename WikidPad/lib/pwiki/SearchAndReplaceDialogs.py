@@ -627,7 +627,7 @@ class SearchResultListBox(wx.html.HtmlListBox, MiscEventSourceMixin):
 class SearchPageDialog(wx.Dialog):
     def __init__(self, mainControl, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+                 style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
         
         wx.Dialog.__init__(self)
 
@@ -1049,7 +1049,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     def __init__(self, parent, mainControl, ID, srListBox=None,
             allowOrdering=True, allowOkCancel=True, value=None,
             title="Search Wiki", pos=wx.DefaultPosition, size=wx.DefaultSize,
-            style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+            style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
 
 #         _prof.start()
         wx.Dialog.__init__(self)

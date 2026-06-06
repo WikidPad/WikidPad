@@ -774,8 +774,7 @@ class OptionsDialog(wx.Dialog):
     )
 
     def __init__(self, pWiki, ID, startPanelName=None, title="Options",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 #         d = wx.PreDialog()
 #         self.PostCreate(d)
 
