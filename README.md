@@ -26,17 +26,6 @@ WikidPad is nearly completely written in Python, only some external libraries
 * [WikidPad's own wiki](https://web.archive.org/web/20200701125153/https://trac.wikidpad2.webfactional.com/wiki/WikiStart),
 * [Source repository on Github](https://github.com/WikidPad/WikidPad/)
 
-# Installation with pip or conda
-
-If you would like to run wikidpad from source, a version of wikidpad called wikidpadmp has been prepared. This version has been updated to run on python 3.8 and wxpython 4.2.0. In all other respects the two versions are similar.
-
-Some plugins are distributed with this version (MEC plugins, hence the name). These can easily be removed from the `WikidPad/WikidPad/user_extensions` directory after
-installation.
-
-See this [repository](https://github.com/BjornFJohansson/WikidPad#setuptools-pip-package-for-wikidpad-wikidpadmp).
-
-Note that installation of wxpython is not trivial on linux.
-
 
 # License
 
