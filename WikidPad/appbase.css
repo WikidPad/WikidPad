@@ -162,5 +162,21 @@ img.wikidpad {
 .heading-level15 {
 }
 
+/* Smooth transitions for collapsible elements */
+table.collapsable tbody,
+table.collapsable thead,
+div.collapsable {
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    max-height: 10000px;
+    opacity: 1;
+    overflow: hidden;
+}
 
+table.collapsable tbody.collapsed,
+table.collapsable thead.collapsed,
+div.collapsable.collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
 
