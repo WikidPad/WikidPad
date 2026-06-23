@@ -2,7 +2,7 @@ console.log("JQUERY LOADED");
 
 function toggleTable(caption) {
     table = $(caption).parent()
-    table.find("tbody, thead").slideToggle();
+    table.find("tbody, thead").toggleClass("collapsed");
     }
 
 $("table.collapsable").each(function (index, table) {
@@ -23,9 +23,8 @@ function collapseElement(elem) {
         target_name = $(this).attr("data-target");
         target = $('[name="'+target_name+'"]');
         
-        target.slideToggle();
-        })).slideToggle();
-
+        target.toggleClass("collapsed");
+        })).toggleClass("collapsed");
 }
 
 $("div.collapsable").each(function (index, div) {

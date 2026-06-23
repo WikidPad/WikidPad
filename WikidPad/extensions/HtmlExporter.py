@@ -1116,7 +1116,7 @@ class HtmlExporter(AbstractExporter):
         javascriptHeader = ""
 
         if self.exportType == "html_previewWK":
-            javascriptHeader = '\n<script type="text/javascript" src="{0}"></script>'.format(os.path.join(self.mainControl.wikiAppDir, "lib", "js", "jquery", "jquery-2.0.2.min.js"))
+            javascriptHeader = '\n<script type="text/javascript" src="{0}"></script>'.format(os.path.join(self.mainControl.wikiAppDir, "lib", "js", "jquery", "jquery-3.7.1.slim.min.js"))
 
         styleSheets = "\n".join(styleSheets)
 
