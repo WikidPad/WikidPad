@@ -1062,7 +1062,7 @@ if ((typeof jQuery !== 'undefined')) {
             t = threading.Thread(None, self.generateExportHtml, args =  (wikiPage, eth))
 
             eth.setThread(t)
-            t.setDaemon(True)
+            t.daemon = True
             t.start()
 
         else:  # Not outOfSync

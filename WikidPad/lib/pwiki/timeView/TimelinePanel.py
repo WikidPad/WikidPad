@@ -82,11 +82,11 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit, id=self.GetId())
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnEndLabelEdit, id=self.GetId())
         
-        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateEmptyDays, id=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckShowEmptyDays, source=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateEmptyDays, source=GUI_ID.CMD_CHECKBOX_TIMELINE_SHOW_EMPTY_DAYS)
 
-        self.Bind(wx.EVT_MENU, self.OnCmdCheckDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateDateAscending, id=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
+        self.Bind(wx.EVT_MENU, self.OnCmdCheckDateAscending, source=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnCmdCheckUpdateDateAscending, source=GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING)
 
 
 

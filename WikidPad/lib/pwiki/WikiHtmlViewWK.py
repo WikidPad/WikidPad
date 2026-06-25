@@ -1757,7 +1757,7 @@ class ViFunctions(ViHelper):
         adj = self.ctrl.scrolled_window.get_vadjustment()
         y = adj.get_value()
 
-        jump = self.count*adj.get_page_size()/2
+        jump = self.count*adj.get_page_size()//2
 
         if y+jump < adj.get_upper():
             adj.set_value(y+jump)
@@ -1768,7 +1768,7 @@ class ViFunctions(ViHelper):
         adj = self.ctrl.scrolled_window.get_vadjustment()
         y = adj.get_value()
 
-        jump = self.count*adj.get_page_size()/2
+        jump = self.count*adj.get_page_size()//2
 
         if y-jump > adj.get_lower():
             adj.set_value(y-jump)

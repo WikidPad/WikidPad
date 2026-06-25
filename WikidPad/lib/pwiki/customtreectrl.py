@@ -497,11 +497,11 @@ def DrawTreeItemButton(win, dc, rect, flags):
     dc.DrawRectangle(rect)
 
     # black lines
-    xMiddle = rect.x + rect.width/2
-    yMiddle = rect.y + rect.height/2
+    xMiddle = rect.x + rect.width//2
+    yMiddle = rect.y + rect.height//2
 
     # half of the length of the horz lines in "-" and "+"
-    halfWidth = rect.width/2 - 2
+    halfWidth = rect.width//2 - 2
     dc.SetPen(wx.BLACK_PEN)
     dc.DrawLine(xMiddle - halfWidth, yMiddle,
                 xMiddle + halfWidth + 1, yMiddle)
@@ -509,7 +509,7 @@ def DrawTreeItemButton(win, dc, rect, flags):
     if not flags & _CONTROL_EXPANDED:
     
         # turn "-" into "+"
-        halfHeight = rect.height/2 - 2
+        halfHeight = rect.height//2 - 2
         dc.DrawLine(xMiddle, yMiddle - halfHeight,
                     xMiddle, yMiddle + halfHeight + 1)
 
@@ -580,13 +580,13 @@ class DragImage(wx.DragImage):
                 
         if image_w:
             ximagepos = wcheck
-            yimagepos = ((total_h > image_h) and [(total_h-image_h)/2] or [0])[0]
+            yimagepos = ((total_h > image_h) and [(total_h-image_h)//2] or [0])[0]
 
         if checkimage is not None:
             xcheckpos = 2
-            ycheckpos = ((total_h > image_h) and [(total_h-image_h)/2] or [0])[0] + 2
+            ycheckpos = ((total_h > image_h) and [(total_h-image_h)//2] or [0])[0] + 2
 
-        extraH = ((total_h > height) and [(total_h - height)/2] or [0])[0]
+        extraH = ((total_h > height) and [(total_h - height)//2] or [0])[0]
         
         xtextpos = wcheck + image_w
         ytextpos = extraH
@@ -1652,7 +1652,7 @@ class GenericTreeItem:
             
             if point.y > self._y and point.y < self._y + h:
             
-                y_mid = self._y + h/2
+                y_mid = self._y + h//2
 
                 if point.y < y_mid:
                     flags |= TREE_HITTEST_ONITEMUPPERPART
@@ -3978,7 +3978,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             x += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             # Item should appear at top
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, item_y/_PIXELS_PER_UNIT)
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, int(item_y/_PIXELS_PER_UNIT))
         
         elif item_y+self.GetLineHeight(item) > start_y+client_h:
         
@@ -3989,7 +3989,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             item_y += _PIXELS_PER_UNIT+2
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             # Item should appear at bottom
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, (item_y+self.GetLineHeight(item)-client_h)/_PIXELS_PER_UNIT )
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, int((item_y+self.GetLineHeight(item)-client_h)/_PIXELS_PER_UNIT) )
 
 
     def ScrollToMiddle(self, item):
@@ -4269,7 +4269,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             x += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             y_pos = self.GetScrollPos(wx.VERTICAL)
-            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, y_pos)
+            self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, int(x/_PIXELS_PER_UNIT), int(y/_PIXELS_PER_UNIT), x_pos, y_pos)
         
         else:
         
@@ -4573,7 +4573,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
 
             imglist.Draw(image, dc,
                          item.GetX() + wcheck,
-                         item.GetY() + ((total_h > image_h) and [(total_h-image_h)/2] or [0])[0],
+                         int(item.GetY() + ((total_h > image_h) and [(total_h-image_h)//2] or [0])[0]),
                          wx.IMAGELIST_DRAW_TRANSPARENT)
             
             dc.DestroyClippingRegion()
@@ -4586,13 +4586,13 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                 
             imglist.Draw(checkimage, dc,
                          item.GetX(),
-                         item.GetY() + ((total_h > hcheck) and [(total_h-hcheck)/2] or [0])[0],
+                         item.GetY() + ((total_h > hcheck) and [(total_h-hcheck)//2] or [0])[0],
                          wx.IMAGELIST_DRAW_TRANSPARENT)
 
         dc.SetBackgroundMode(wx.TRANSPARENT)
-        extraH = ((total_h > text_h) and [(total_h - text_h)/2] or [0])[0]
+        extraH = ((total_h > text_h) and [(total_h - text_h)//2] or [0])[0]
 
-        textrect = wx.Rect(wcheck + image_w + item.GetX(), item.GetY() + extraH, text_w, text_h)
+        textrect = wx.Rect(wcheck + image_w + item.GetX(), int(item.GetY() + extraH), text_w, text_h)
         
         if not item.IsEnabled():
             foreground = dc.GetTextForeground()
@@ -4610,7 +4610,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             xa, ya = self.CalcScrolledPosition((0, item.GetY()))
             wndx += xa
             if item.GetHeight() > item.GetWindowSize()[1]:
-                ya += (item.GetHeight() - item.GetWindowSize()[1])/2
+                ya += (item.GetHeight() - item.GetWindowSize()[1])//2
                 
             if not wnd.IsShown():
                 wnd.Show()
@@ -4808,9 +4808,9 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                     image += TreeItemIcon_Selected - TreeItemIcon_Normal
 
                 image_w, image_h = self._imageListButtons.GetSize(image)
-#                     xx = x - image_w/2
-                xx = x_start - image_w/2
-                yy = y_mid - image_h/2
+#                     xx = x - image_w//2
+                xx = x_start - image_w//2
+                yy = y_mid - image_h//2
 
                 dc.SetClippingRegion(xx, yy, image_w, image_h)
                 self._imageListButtons.Draw(image, dc, xx, yy,
@@ -4856,7 +4856,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
                     if item == self._underMouse:
                         flag |= _CONTROL_CURRENT
 
-                    self._drawingfunction(self, dc, wx.Rect(x_start - wImage/2, y_mid - hImage/2,wImage, hImage), flag)
+                    self._drawingfunction(self, dc, wx.Rect(x_start - int(wImage/2), y_mid - int(hImage/2),wImage, hImage), flag)
                 
 
 
@@ -5013,7 +5013,7 @@ class CustomTreeCtrl(wx.ScrolledWindow):
             event = TreeEvent(wxEVT_TREE_ITEM_MENU, self.GetId())
             event._item = self._current
             # Use the left edge, vertical middle
-            event._pointDrag = wx.Point(itemRect.GetX(), itemRect.GetY() + itemRect.GetHeight()/2)
+            event._pointDrag = wx.Point(itemRect.GetX(), itemRect.GetY() + itemRect.GetHeight()//2)
             event.SetEventObject(self)
             self.GetEventHandler().ProcessEvent(event)
                 

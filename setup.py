@@ -63,7 +63,7 @@ setup(
             "WikidPad.WikidPadHelp.files",
         ],
     
-    install_requires =["wxpython>=4.0"],
+    install_requires =["wxpython>=4.2"],
     
     include_package_data=False,
     package_data={

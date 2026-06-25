@@ -1317,7 +1317,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetSpacing(0)
         self.refreshGenerator = None  # Generator called in OnIdle
-        self.refreshGeneratorLastCallTime = time.clock()  # Initial value
+        self.refreshGeneratorLastCallTime = time.perf_counter()  # Initial value
         self.refreshGeneratorLastCallMinDelay = 0.1
         self.refreshExecutor = Utilities.SingleThreadExecutor(1)
         self.refreshStartLock = False  # Disallows starting of refresh (mainly
@@ -1384,25 +1384,25 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # TODO Let PersonalWikiFrame handle this 
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordRenameDialog(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
+                source=GUI_ID.CMD_RENAME_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.showWikiWordDeleteDialog(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
+                source=GUI_ID.CMD_DELETE_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.insertAttribute(
                 "bookmarked", "true",
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD)
+                source=GUI_ID.CMD_BOOKMARK_THIS_WIKIWORD)
         self.Bind(wx.EVT_MENU, lambda evt: self.pWiki.setWikiWordAsRoot(
                 self.GetItemData(self.contextMenuNode).getWikiWord()),
-                id=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
+                source=GUI_ID.CMD_SETASROOT_THIS_WIKIWORD)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.collapseAll(),
-                id=GUI_ID.CMD_COLLAPSE_TREE)
+                source=GUI_ID.CMD_COLLAPSE_TREE)
 
-        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, id=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
-        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, id=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
-        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
-        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, id=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
+        self.Bind(wx.EVT_MENU, self.OnAppendWikiWord, source=GUI_ID.CMD_APPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnPrependWikiWord, source=GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS)
+        self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis, source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+        self.Bind(wx.EVT_MENU, self.OnCmdClipboardCopyUrlToThisWikiWord, source=GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD)
                 
 
 
@@ -2532,7 +2532,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             self.SelectItem(item)
             self._bindSelection()
 
-            self.PopupMenuXY(menu, event.GetX(), event.GetY())
+            self.PopupMenu(menu, event.GetX(), event.GetY())   # was: PopupMenuXY
 
             selnode = self.selectedNodeWhileContext
 
@@ -2602,7 +2602,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def OnIdle(self, event):
         gen = self.refreshGenerator
         if gen is not None:
-            cl = time.clock()
+            cl = time.perf_counter()
             if cl < self.refreshGeneratorLastCallTime:
                 # May happen under special circumstances (e.g. after hibernation)
                 self.refreshGeneratorLastCallTime = cl
@@ -2614,7 +2614,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 next(gen)
                 # Set time after generator run, so time needed by generator
                 # itself doesn't count
-                self.refreshGeneratorLastCallTime = time.clock()
+                self.refreshGeneratorLastCallTime = time.perf_counter()
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None

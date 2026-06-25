@@ -1878,7 +1878,7 @@ class CmdParser():
                           }
         # TODO: :s repeats last command
 
-        self.range_regex = "(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
+        self.range_regex = r"(\d+|%|\.|\$|'.)?,?(\d+|%|\.|\$|'.)({0})(.*$)".format(
                                             "|".join(list(self.range_cmds.keys())))
 
     def StartPDBDebug(self, args=None):
@@ -1944,7 +1944,7 @@ class CmdParser():
         # characters
         delims = "/;$|^%,"
         if pattern[0] in delims:
-            delim = "\{0}".format(pattern[0])
+            delim = r"\{0}".format(pattern[0])
         else:
             self.ctrl.vi.viError(
                     _("Error: {0} is not a valid delimiter".format(
@@ -1963,7 +1963,7 @@ class CmdParser():
         #
         # Currently we only check for \V
         # if it exists we escape the search pattern (so it acts as a literal string)
-        if search.startswith("\V"):
+        if search.startswith(r"\V"):
             search = re.escape(search[2:])
 
 
@@ -2050,14 +2050,14 @@ class CmdParser():
         # TODO: improve cmd checking
         if re.match(self.range_regex, text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
+        elif re.match(r"(\d+|%|\.|\$)?,?(\d+|%|\.|\$)({0})".format(
                                 "|".join(list(self.range_cmds.keys()))), text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,?(\d+|%|\.|\$)", text_input):
+        elif re.match(r"(\d+|%|\.|\$)?,?(\d+|%|\.|\$)", text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)?,", text_input):
+        elif re.match(r"(\d+|%|\.|\$)?,", text_input):
             return True
-        elif re.match("(\d+|%|\.|\$)", text_input):
+        elif re.match(r"(\d+|%|\.|\$)", text_input):
             return True
         else:
             return False
@@ -2684,10 +2684,10 @@ class ViInputDialog(wx.Panel):
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD)
+        self.run_cmd_timer = wx.Timer(self, GUI_ID.TIMER_VI_UPDATE_CMD.GetId())
         #wx.EVT_TIMER(self, GUI_ID.TIMER_VI_UPDATE_CMD, self.CheckViInput)
         self.Bind(wx.EVT_TIMER, self.CheckViInput, 
-                id=GUI_ID.TIMER_VI_UPDATE_CMD)
+                source=GUI_ID.TIMER_VI_UPDATE_CMD)
 
         self.ctrls.viInputTextField.SetBackgroundColour(
                 ViInputDialog.COLOR_YELLOW)
@@ -2696,14 +2696,14 @@ class ViInputDialog(wx.Panel):
 
         #wx.EVT_SET_FOCUS(self.ctrls.viInputListBox, self.FocusInputField)
 
-        self.Bind(wx.EVT_TEXT, self.OnText, id=GUI_ID.viInputTextField)
+        self.Bind(wx.EVT_TEXT, self.OnText, source=GUI_ID.viInputTextField)
         self.ctrls.viInputTextField.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownInput)
 
         #wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
         #        self.OnTimerIncViInputClose)
         if self.closeDelay:
             self.Bind(wx.EVT_TIMER, self.OnTimerIncViInputClose,
-                    id=GUI_ID.TIMER_INC_SEARCH_CLOSE)
+                    source=GUI_ID.TIMER_INC_SEARCH_CLOSE)
 
         self.ctrls.viInputTextField.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseAnyInput)
 

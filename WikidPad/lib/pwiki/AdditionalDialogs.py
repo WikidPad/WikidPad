@@ -1,4 +1,3 @@
-# -*- coding: iso8859-1 -*-
 import sys, traceback
 # from time import strftime
 import re
@@ -39,8 +38,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
     Called for "Append/Prepend wiki word" in tree node context menu
     """
     def __init__(self, pWiki, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -69,7 +67,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb.GetId())
 
 
     def _fillListContent(self, searchTxt):
@@ -176,8 +174,7 @@ class SelectWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
 class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, pWiki, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -208,13 +205,13 @@ class OpenWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
         self.ctrls.lb.Bind(wx.EVT_KEY_DOWN, self.OnKeyDownListBox)
         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, source=GUI_ID.lb)
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate)
-        self.Bind(wx.EVT_CHOICE, self.OnChoiceSort, id=GUI_ID.chSort)
-        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground)
+        self.Bind(wx.EVT_BUTTON, self.OnCreate, source=GUI_ID.btnCreate)
+        self.Bind(wx.EVT_CHOICE, self.OnChoiceSort, source=GUI_ID.chSort)
+        self.Bind(wx.EVT_BUTTON, self.OnDelete, source=GUI_ID.btnDelete)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, source=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, source=GUI_ID.btnNewTabBackground)
 
     def OnOk(self, evt):
         if self.activateSelectedWikiWords(0):
@@ -524,11 +521,11 @@ class ChooseWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
-        self.Bind(wx.EVT_CHECKBOX, self.OnCbSortAlphabetically, id=GUI_ID.cbSortAlphabetically)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb.GetId())
+        self.Bind(wx.EVT_CHECKBOX, self.OnCbSortAlphabetically, id=GUI_ID.cbSortAlphabetically.GetId())
 
 
     def OnDelete(self, evt):
@@ -671,10 +668,10 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_BUTTON, self.OnAddAlias, id=GUI_ID.btnAddAlias)
-        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
+        self.Bind(wx.EVT_BUTTON, self.OnAddAlias, id=GUI_ID.btnAddAlias.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb.GetId())
 
 
     def OnAddAlias(self, evt):
@@ -747,8 +744,7 @@ class FindSimilarNamedWikiWordDialog(wx.Dialog, ModalDialogMixin):
 
 class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, mainControl, fromWikiWord, parent, ID, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
 
         wx.Dialog.__init__(self)
 
@@ -786,7 +782,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
         self.SetFocus()
 
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_TEXT, self.OnTextToWikiWord, id=GUI_ID.tfToWikiWord)
+        self.Bind(wx.EVT_TEXT, self.OnTextToWikiWord, id=GUI_ID.tfToWikiWord.GetId())
 
 
 
@@ -795,11 +791,11 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
 #         self.ctrls.text.Bind(wx.EVT_CHAR, self.OnCharText)
 #         self.ctrls.lb.Bind(wx.EVT_CHAR, self.OnCharListBox)
 #         self.Bind(wx.EVT_LISTBOX, self.OnListBox, id=ID)
-#         self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb)
-#         self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate)
-#         self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete)
-#         self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab)
-#         self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground)
+#         self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lb.GetId())
+#         self.Bind(wx.EVT_BUTTON, self.OnCreate, id=GUI_ID.btnCreate.GetId())
+#         self.Bind(wx.EVT_BUTTON, self.OnDelete, id=GUI_ID.btnDelete.GetId())
+#         self.Bind(wx.EVT_BUTTON, self.OnNewTab, id=GUI_ID.btnNewTab.GetId())
+#         self.Bind(wx.EVT_BUTTON, self.OnNewTabBackground, id=GUI_ID.btnNewTabBackground.GetId())
 
 
 
@@ -887,7 +883,7 @@ class RenameWikiWordDialog(wx.Dialog, ModalDialogMixin):
 class SelectIconDialog(wx.Dialog, ModalDialogMixin):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+                 style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
         wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
 
         self.iconCache = iconCache
@@ -1040,7 +1036,7 @@ class DateformatDialog(wx.Dialog):
 
     def __init__(self, parent, ID, mainControl, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D, deffmt=""):
+                 deffmt=""):
         """
         deffmt -- Initial value for format string
         """
@@ -1124,8 +1120,7 @@ class FontFaceDialog(wx.Dialog):
     string with currently selected face.
     """
     def __init__(self, parent, ID, mainControl, value="",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
         """
         value -- Current value of a text field containing a face name (used to
                  choose default item in the shown list box)
@@ -1168,8 +1163,8 @@ class FontFaceDialog(wx.Dialog):
         self.SetFocus()
             
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_LISTBOX, self.OnFaceSelected, id=GUI_ID.lbFacenames)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lbFacenames)
+        self.Bind(wx.EVT_LISTBOX, self.OnFaceSelected, id=GUI_ID.lbFacenames.GetId())
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnOk, id=GUI_ID.lbFacenames.GetId())
 
 
     def OnOk(self, evt):
@@ -1296,17 +1291,17 @@ class ExportDialog(wx.Dialog, ModalDialogMixin):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_CHOICE, self.OnExportTo, id=GUI_ID.chExportTo)
-        self.Bind(wx.EVT_CHOICE, self.OnChSelectedSet, id=GUI_ID.chSelectedSet)
+        self.Bind(wx.EVT_CHOICE, self.OnExportTo, id=GUI_ID.chExportTo.GetId())
+        self.Bind(wx.EVT_CHOICE, self.OnChSelectedSet, id=GUI_ID.chSelectedSet.GetId())
 
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadAndRunExport, id=GUI_ID.lbSavedExports)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnLoadAndRunExport, id=GUI_ID.lbSavedExports.GetId())
 
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_BUTTON, self.OnSelectDest, id=GUI_ID.btnSelectDestination)
-        self.Bind(wx.EVT_BUTTON, self.OnSaveExport, id=GUI_ID.btnSaveExport)
-        self.Bind(wx.EVT_BUTTON, self.OnLoadExport, id=GUI_ID.btnLoadExport)
-        self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunExport, id=GUI_ID.btnLoadAndRunExport)
-        self.Bind(wx.EVT_BUTTON, self.OnDeleteExports, id=GUI_ID.btnDeleteExports)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectDest, id=GUI_ID.btnSelectDestination.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnSaveExport, id=GUI_ID.btnSaveExport.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnLoadExport, id=GUI_ID.btnLoadExport.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnLoadAndRunExport, id=GUI_ID.btnLoadAndRunExport.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnDeleteExports, id=GUI_ID.btnDeleteExports.GetId())
 
 
     def _refreshForEtype(self):
@@ -1773,10 +1768,10 @@ class ImportDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
 
-        self.Bind(wx.EVT_CHOICE, self.OnImportFormat, id=GUI_ID.chImportFormat)
+        self.Bind(wx.EVT_CHOICE, self.OnImportFormat, id=GUI_ID.chImportFormat.GetId())
 
         self.Bind(wx.EVT_BUTTON, self.OnOk, id=wx.ID_OK)
-        self.Bind(wx.EVT_BUTTON, self.OnSelectSrc, id=GUI_ID.btnSelectSource)
+        self.Bind(wx.EVT_BUTTON, self.OnSelectSrc, id=GUI_ID.btnSelectSource.GetId())
 
 
     def _refreshForItype(self):
@@ -2073,7 +2068,7 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%%" align="right">&nbsp;</td></tr>
             <tr><td width="30%%" align="left" colspan="2" nowrap><font size="3"><b>Translations:</b></font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Chinese:</b></font></td><td nowrap><font size="3">yuxiaoxu@msn.com</font></td></tr>
-            <tr><td width="30%%" align="right"><font size="3"><b>Hungarian:</b></font></td><td nowrap><font size="3">Tˆrˆk ¡rp·d</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Hungarian:</b></font></td><td nowrap><font size="3">T√∂r√∂k √Årp√°d</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Russian:</b></font></td><td nowrap><font size="3">Oleg Domanov</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Swedish:</b></font></td><td nowrap><font size="3">Stefan Berg</font></td></tr>
         </table>

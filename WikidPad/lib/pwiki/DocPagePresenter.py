@@ -376,17 +376,17 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter, StorablePerspective):
         wx.GetApp().getMiscEvent().addListener(self)
 
         self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(),
-                id=GUI_ID.CMD_PAGE_HISTORY_LIST)
+                source=GUI_ID.CMD_PAGE_HISTORY_LIST)
         self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(-1),
-                id=GUI_ID.CMD_PAGE_HISTORY_LIST_UP)
+                source=GUI_ID.CMD_PAGE_HISTORY_LIST_UP)
         self.Bind(wx.EVT_MENU, lambda evt: self.viewPageHistory(1),
-                id=GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN)
+                source=GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN)
         self.Bind(wx.EVT_MENU, lambda evt: self.pageHistory.goInHistory(-1),
-                id=GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
+                source=GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
         self.Bind(wx.EVT_MENU, lambda evt: self.pageHistory.goInHistory(1),
-                id=GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
+                source=GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
         self.Bind(wx.EVT_MENU, lambda evt: self.goUpwardFromSubpage(),
-                id=GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE)
+                source=GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE)
 
 
     def close(self):

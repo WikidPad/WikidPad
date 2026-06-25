@@ -16,6 +16,18 @@ if Platform == '__WXMSW__':
               'heading2': 12,
               'heading1': 12
              }
+elif Platform == '__WXGTK__':
+    # Linux: use generic fonts names
+    faces = { 'times': 'times',
+              'mono' : 'mono',
+              'helv' : 'helvetica',
+              'other': 'new century schoolbook',
+              'size' : 12,
+              'heading4': 12,
+              'heading3': 14,
+              'heading2': 16,
+              'heading1': 16
+             }
 else:
     faces = { 'times': 'Times',
               'mono' : 'Courier',
@@ -29,14 +41,17 @@ else:
              }
 
 
-if Platform == '__WXMSW__':
-    INTHTML_FONTSIZES = (7, 8, 10, 12, 16, 22, 30)
+# Font sizes for the Preview(?)
+# Why should these be system dependant?
+INTHTML_FONTSIZES = (7, 8, 10, 12, 16, 22, 30)
+# if Platform == '__WXMSW__':
+#     INTHTML_FONTSIZES = (7, 8, 10, 12, 16, 22, 30)
 
-elif Platform == '__WXMAC__':
-    INTHTML_FONTSIZES = (9, 12, 14, 18, 24, 30, 36)
+# elif Platform == '__WXMAC__':
+#     INTHTML_FONTSIZES = (9, 12, 14, 18, 24, 30, 36)
 
-else:
-    INTHTML_FONTSIZES = (10, 12, 14, 16, 19, 24, 32)
+# else:
+#     INTHTML_FONTSIZES = (10, 12, 14, 16, 19, 24, 32)
 
 
 

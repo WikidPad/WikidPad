@@ -7,8 +7,12 @@
 #     traceback.print_exc()
 
 
-
-import sys, os, traceback, os.path, glob, shutil, imp, warnings, configparser
+import configparser
+import os
+import os.path
+import shutil
+import sys
+import traceback
 
 if not hasattr(sys, 'frozen'):
     origin = __spec__.origin
@@ -77,8 +81,8 @@ def _putPathPrepends():
     parser = configparser.RawConfigParser()
     try:
         f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                "binInst.ini"), "rU")
-        parser.readfp(f)
+                "binInst.ini"), "r")
+        parser.read_file(f)
         f.close()
 
         try:
@@ -103,10 +107,6 @@ _putPathPrepends()
 
 
 import wx
-
-# cmore addition
-if (not hasattr(wx, "NO_3D")):
-    wx.NO_3D=0
 
 
 from pwiki.MainApp import App, findDirs

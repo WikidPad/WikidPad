@@ -15,7 +15,7 @@ from itertools import chain
 import os
 import re
 import sys
-import imp
+import importlib.util
 import wx
 
 # Create a dummy app.
@@ -23,8 +23,6 @@ dummyApp = wx.App(0)
 dummyApp.SetAppName("WikidPad")
 
 builtins._ = builtins.N_ = lambda s: s  # see WikidPadStarter
-if not hasattr(wx, "NO_3D"):  # cmore addition
-    wx.NO_3D = 0
 
 # run test from WikidPad directory, fix path
 # todo (pvh): ? fix imports in WikidPad, turn it into a package
@@ -45,8 +43,11 @@ from pwiki.StringOps import LOWERCASE, UPPERCASE
 from wikidPadParser import WikidPadParser
 from mediaWikiParser import MediaWikiParser
 
-OverlayParser = imp.load_source('OverlayParser', os.path.join(EXTENSIONDIR,
-        "OverlayParser.pyf"))
+_overlay_parser_path = os.path.join(EXTENSIONDIR, "OverlayParser.pyf")
+_overlay_parser_spec = importlib.util.spec_from_file_location(
+        'OverlayParser', _overlay_parser_path)
+OverlayParser = importlib.util.module_from_spec(_overlay_parser_spec)
+_overlay_parser_spec.loader.exec_module(OverlayParser)
 
 # import OverlayParser
 

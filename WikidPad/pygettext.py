@@ -168,7 +168,8 @@ If `inputfile' is -, standard input is read.
 """)
 
 import os
-import imp
+import importlib.util
+import importlib.machinery
 import sys
 import glob
 import time
@@ -325,8 +326,7 @@ def containsAny(str, set):
 #     # get extension for python source files
 #     if '_py_ext' not in globals():
 #         global _py_ext
-#         _py_ext = [triple[0] for triple in imp.get_suffixes()
-#                    if triple[2] == imp.PY_SOURCE][0]
+#         _py_ext = importlib.machinery.SOURCE_SUFFIXES[0]
 # 
 #     print("--_visit_pyfiles11", repr(_py_ext))
 # 
@@ -341,6 +341,22 @@ def containsAny(str, set):
 #         )
 
 
+def _is_source_or_package(spec):
+    if spec is None:
+        return False
+    if spec.submodule_search_locations is not None:
+        return True
+    if spec.origin in (None, 'built-in', 'frozen'):
+        return False
+    return spec.origin.endswith(tuple(importlib.machinery.SOURCE_SUFFIXES))
+
+
+def _spec_pathname(spec):
+    if spec.submodule_search_locations:
+        return spec.submodule_search_locations[0]
+    return spec.origin
+
+
 def _get_modpkg_path(dotted_name, pathlist=None):
     """Get the filesystem path for a module or a package.
 
@@ -348,36 +364,13 @@ def _get_modpkg_path(dotted_name, pathlist=None):
     a package. Return None if the name is not found, or is a builtin or
     extension module.
     """
-    # split off top-most name
-    parts = dotted_name.split('.', 1)
-
-    if len(parts) > 1:
-        # we have a dotted path, import top-level package
-        try:
-            file, pathname, description = imp.find_module(parts[0], pathlist)
-            if file: file.close()
-        except ImportError:
-            return None
-
-        # check if it's indeed a package
-        if description[2] == imp.PKG_DIRECTORY:
-            # recursively handle the remaining name parts
-            pathname = _get_modpkg_path(parts[1], [pathname])
-        else:
-            pathname = None
-    else:
-        # plain name
-        try:
-            file, pathname, description = imp.find_module(
-                dotted_name, pathlist)
-            if file:
-                file.close()
-            if description[2] not in [imp.PY_SOURCE, imp.PKG_DIRECTORY]:
-                pathname = None
-        except ImportError:
-            pathname = None
-
-    return pathname
+    try:
+        spec = importlib.util.find_spec(dotted_name, pathlist)
+    except (ImportError, ModuleNotFoundError, ValueError):
+        return None
+    if not _is_source_or_package(spec):
+        return None
+    return _spec_pathname(spec)
 
 
 def getFilesForName(name):
@@ -401,8 +394,7 @@ def getFilesForName(name):
     if os.path.isdir(name):
         if '_py_ext' not in globals():
             global _py_ext
-            _py_ext = [triple[0] for triple in imp.get_suffixes()
-                       if triple[2] == imp.PY_SOURCE][0]
+            _py_ext = importlib.machinery.SOURCE_SUFFIXES[0]
 
         # find all python files in directory
         list = []
@@ -888,7 +880,7 @@ def main(argv):
     for updfile in options.updatefiles:
         utfMode = False
         try:
-            f = open(updfile, "rU")
+            f = open(updfile, "r")
 #             bom = f.read(len(BOM_UTF8))
 #             utfMode = bom == BOM_UTF8  # TODO seek 0 on not UTF
             utfMode = True

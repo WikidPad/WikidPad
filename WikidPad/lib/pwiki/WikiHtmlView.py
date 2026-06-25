@@ -155,20 +155,20 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, id=GUI_ID.CMD_CLIPBOARD_COPY)
-        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=GUI_ID.CMD_SELECT_ALL)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), id=GUI_ID.CMD_ZOOM_IN)
-        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), id=GUI_ID.CMD_ZOOM_OUT)
-        self.Bind(wx.EVT_MENU, self.OnActivateThis, id=GUI_ID.CMD_ACTIVATE_THIS)        
+        self.Bind(wx.EVT_MENU, self.OnClipboardCopy, source=GUI_ID.CMD_CLIPBOARD_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), source=GUI_ID.CMD_SELECT_ALL)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(1), source=GUI_ID.CMD_ZOOM_IN)
+        self.Bind(wx.EVT_MENU, lambda evt: self.addZoom(-1), source=GUI_ID.CMD_ZOOM_OUT)
+        self.Bind(wx.EVT_MENU, self.OnActivateThis, source=GUI_ID.CMD_ACTIVATE_THIS)
         self.Bind(wx.EVT_MENU, self.OnActivateNewTabThis,
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS)
         self.Bind(wx.EVT_MENU, self.OnActivateNewTabBackgroundThis,
-                id=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
+                source=GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS)
         self.Bind(wx.EVT_MENU, self.OnActivateNewWindowThis,
-                id=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
+                source=GUI_ID.CMD_ACTIVATE_NEW_WINDOW_THIS)
 
         self.Bind(wx.EVT_MENU, self.OnOpenContainingFolderThis,
-                id=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
+                source=GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS)
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)

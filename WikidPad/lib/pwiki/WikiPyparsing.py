@@ -1338,7 +1338,7 @@ class ParserElement:
                     retTokens = retTokens.asList()
 
             state.threadstop.testValidThread()
-#             print "--Clock" , time.clock()
+#             print "--Clock" , time.perf_counter()
 #             elif isinstance(retTokens, list) and len(retTokens) > 0 and self.resultsName:
 #                 retTokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
             return loc, retTokens
@@ -1446,7 +1446,7 @@ class ParserElement:
 #                 retTokens = retTokens.asList()
 
             state.threadstop.testValidThread()
-#             print "--Clock" , time.clock()
+#             print "--Clock" , time.perf_counter()
 #             elif isinstance(retTokens, list) and len(retTokens) > 0 and self.resultsName:
 #                 retTokens = [buildSyntaxNode(tokens, tokensStart, self.resultsName)]
             return loc, retTokens
@@ -3059,7 +3059,7 @@ class And(ParseExpression, NecessaryRegexProvider):
                     # be appended to the and-regex
                     break
                 
-            if len(result) is 0:
+            if len(result) == 0:
                 return None
             
             self.reFlagsMask = flagsMask

@@ -36,8 +36,7 @@ from .DocPages import AliasWikiPage, WikiPage
 
 class SpellCheckerDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title=None,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
         wx.Dialog.__init__(self)
 
         self.mainControl = mainControl

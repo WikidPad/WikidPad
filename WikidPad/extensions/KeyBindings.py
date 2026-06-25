@@ -34,7 +34,11 @@ else:
     ActivateLinkBackground="Alt-Shift-Ctrl-L"
     # to test: What about Mac OSX?   wx.Platform == "__WXMAC__"
 
-ViewParents="Ctrl-Up"
+if wx.Platform == "__WXGTK__":
+    ViewParents="Alt-Up"
+else:
+    ViewParents="Ctrl-Up"
+
 ViewParentless="Ctrl-Shift-Up"
 ViewChildren="Ctrl-Down"
 ViewHistory="Ctrl-H"
