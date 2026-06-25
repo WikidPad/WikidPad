@@ -11,6 +11,7 @@ project's development and direction.
 **Sustainability**: The project's primary focus is ensuring long-term
   viability and maintenance. Decisions are made by active contributors
   and maintainers to keep WikidPad stable, performant, and relevant.
+
 **Effective Use of Contributor Ressources**: Given limited maintainer
   and contributor capacity, we prioritize efficient decision-making by
   those actively contributing code and effort.
